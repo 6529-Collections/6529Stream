@@ -120,7 +120,7 @@ contract StreamAuctions is ReentrancyGuard {
     }
 
     // function to add a minter contract
-    function updateDropsContract(address _dropsContract) public FunctionAdminRequired(this.updateMinterContract.selector) { 
+    function updateDropsContract(address _dropsContract) public FunctionAdminRequired(this.updateDropsContract.selector) { 
         dropsContract = IStreamDrops(_dropsContract);
     }
 

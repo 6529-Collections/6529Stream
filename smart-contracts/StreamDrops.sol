@@ -131,7 +131,7 @@ contract StreamDrops is Ownable {
     }
 
     // function to update admin contract
-    function updateMinterContract(address _newContract) public FunctionAdminRequired(this.updateAdminContract.selector) {
+    function updateMinterContract(address _newContract) public FunctionAdminRequired(this.updateMinterContract.selector) {
         require(IStreamMinter(_newContract).isMinterContract() == true, "Contract is not Admin");
         minterContract = IStreamMinter(_newContract);
     }
