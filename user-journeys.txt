@@ -1,0 +1,251 @@
+================================================================================
+6529 STREAM — USER JOURNEYS (SIMPLE)
+================================================================================
+Plain-language workflows based on current on-chain behavior. For deep rules,
+see specification.txt.
+
+--------------------------------------------------------------------------------
+WHO USES STREAM (HIGH LEVEL)
+--------------------------------------------------------------------------------
+
+  1. Admin registrar (StreamAdmins "tdhSigner" address)
+  2. Global admin (granted via StreamAdmins)
+  3. Function admin (per specific contract function, via StreamAdmins)
+  4. Drop signer (StreamDrops "tdhSigner" — only party that can run a drop)
+  5. Poster / creator (address paid in fixed-price and auction splits)
+  6. Protocol addresses (payout wallet, curators pool — receive ETH splits)
+  7. Collector — fixed-price path (today: NFT goes to drop signer, not buyer)
+  8. Auction bidder (any address bidding ETH on a token)
+  9. Auction settler (usually same as bidder; anyone can call finalize)
+ 10. Curator reward earner (Merkle-eligible address)
+ 11. Delegated helper (claims curator reward for another wallet with proof + delegation)
+ 12. Contract owner (Ownable on some contracts — separate from admin matrix)
+ 13. Operator / engineer (deploys wiring; configures minter, core, drops, auction)
+
+================================================================================
+CATEGORY A — PERMISSIONS & GOVERNANCE (StreamAdmins)
+================================================================================
+
+A1. Register a new global admin
+  Who: StreamAdmins tdhSigner address (must call the contract).
+  Steps:
+    1. Call registerAdmin(newAdminAddress, true) on StreamAdmins.
+  Result: newAdminAddress can pass "global admin" checks on downstream contracts.
+
+A2. Remove a global admin
+  Who: StreamAdmins tdhSigner.
+  Steps:
+    1. Call registerAdmin(address, false).
+
+A3. Let an address run one specific privileged function
+  Who: StreamAdmins tdhSigner.
+  Steps:
+    1. Call registerFunctionAdmin(address, functionSelector, true).
+  Notes: selector is the first 4 bytes of calldata for that function.
+
+A4. Batch grant function permissions
+  Who: StreamAdmins tdhSigner.
+  Steps:
+    1. Call registerBatchFunctionAdmin(address, arrayOfSelectors, true).
+
+================================================================================
+CATEGORY B — COLLECTION & MINT WINDOW (Admins on Core + Minter)
+================================================================================
+
+B1. Create a new collection (metadata shell)
+  Who: Function admin allowed for StreamCore.createCollection (or global admin).
+  Steps:
+    1. Call createCollection(...) on StreamCore with names, URIs, script blobs, etc.
+  Result: New collection id; index advances.
+
+B2. Set collection supply and artist wallet
+  Who: Function admin allowed for StreamCore.setCollectionData (same selector gate
+        as changeMetadataView in code).
+  Steps:
+    1. Call setCollectionData with collection id, artist address, caps, total supply,
+       final-supply timing knob.
+  Result: Token id range reserved; wereDataAdded true for minter setup.
+
+B3. Attach a randomizer to a collection (optional)
+  Who: Function admin for StreamCore.addRandomizer.
+  Steps:
+    1. Call addRandomizer(collectionId, randomizerAddress) with a contract that
+       returns true for isRandomizerContract().
+
+B4. Open the mint window for that collection
+  Who: Function admin for StreamMinter.setCollectionPhases.
+  Steps:
+    1. Call setCollectionPhases(collectionId, startTimestamp, endTimestamp).
+  Preconditions: Core must report data was added for that collection id.
+  Result: Between start and end, StreamDrops (only) can mint via StreamMinter.
+
+B5. Point StreamCore at the minter contract
+  Who: Function admin for StreamCore.updateContracts (opt = minter).
+  Steps:
+    1. Call updateContracts with the minter option and the StreamMinter address.
+
+================================================================================
+CATEGORY C — DROP EXECUTION (StreamDrops signer only)
+================================================================================
+
+C1. Run a fixed-price drop (buy now style)
+  Who: StreamDrops tdhSigner only.
+  Steps:
+    1. Ensure mint window is open (StreamMinter phases).
+    2. Call mintDrop{value: price} with opt = 1, poster, tokenData, collectionId,
+       price matching msg.value, endDate as encoded in drop id.
+  What happens:
+    • ETH split: half to poster, quarter to payout, quarter to curators pool.
+    • One NFT is minted through StreamMinter; recipient is the signer address
+      (msg.sender on the drop call), not the poster.
+  Result: Token exists on StreamCore; drop id recorded; duplicate same payload reverts.
+
+C2. Run an auction drop (mint then sell to highest bidder later)
+  Who: StreamDrops tdhSigner only.
+  Steps:
+    1. Ensure mint window is open.
+    2. Call mintDrop with opt = 2 and _endDate at least ~10 minutes after "now"
+       (minter enforces block.timestamp + 600 for mintAndAuction).
+  What happens:
+    • NFT is minted to payout address first (custody until auction resolves).
+    • Poster and reserve price stored for the auction contract to read.
+  Result: Auction can run on that token id via StreamAuctions.
+
+C3. Change who is allowed to call mintDrop
+  Who: Function admin on StreamDrops for updateTDHsigner.
+  Steps:
+    1. Call updateTDHsigner(newSignerAddress).
+
+C4. Update payout or curators destination for future drops
+  Who: Function admin on StreamDrops.
+  Steps:
+    1. updatePayOutAddress or updateCuratorsPoolAddress.
+
+C5. Point Drops at a new minter or admin contract
+  Who: Function admin on StreamDrops.
+  Steps:
+    1. updateMinterContract / updateAdminContract with addresses that pass
+       isMinterContract / isAdminContract checks.
+
+================================================================================
+CATEGORY D — POSTER / CREATOR (ECONOMIC ROLE)
+================================================================================
+
+D1. Receive share of a fixed-price drop
+  Who: Address passed as _poster in mintDrop (opt 1).
+  Journey:
+    1. Drop signer executes mintDrop; poster does not need to transact first.
+    2. Poster receives half of msg.value (integer division).
+
+D2. Receive share after a successful auction
+  Who: Same poster stored for that token id.
+  Journey:
+    1. Auction resolves with at least one bid.
+    2. When claimAuction runs, poster gets half of the highest bid.
+
+D3. Artist signature (collection-level, StreamCore)
+  Who: Address set as collection artist on Core.
+  Steps:
+    1. Call artistSignature(collectionId, signatureString) on StreamCore once.
+  Result: Locks some metadata edits per collection rules.
+
+================================================================================
+CATEGORY E — COLLECTOR (FIXED PRICE — CURRENT BEHAVIOR)
+================================================================================
+
+E1. Receive the NFT from a fixed-price drop
+  Current chain behavior:
+    • The NFT is minted to the StreamDrops signer address (the caller of mintDrop),
+      not to the poster and not to a separate "buyer" parameter.
+  Implication:
+    • If product intent is "collector pays and receives NFT", that flow is not
+      encoded as a separate wallet today; off-chain or contract changes would be needed.
+
+================================================================================
+CATEGORY F — AUCTION (BIDDER & SETTLEMENT)
+================================================================================
+
+F1. Place the first bid
+  Who: Any address.
+  Preconditions: mintDrop opt 2 completed; auction flag set; within end time.
+  Steps:
+    1. Call participateToAuction(tokenId) with ETH >= reserve from StreamDrops.
+
+F2. Outbid someone
+  Who: Any address.
+  Steps:
+    1. Send ETH meeting "previous bid + increment %" (default 5%).
+  What happens:
+    • Prior high bidder is refunded their bid via ETH transfer.
+
+F3. Trigger anti-snipe extension
+  Who: Happens automatically when a bid arrives in the last N seconds (default 300).
+  Effect:
+    • StreamAuctions extends end time on StreamMinter by the same N seconds
+      (requires auction contract to be allowed to call updateAuctionEndTime).
+
+F4. Finalize the auction
+  Who: Any address (typically a bot or winner).
+  Steps:
+    1. Wait until block time is past auction end.
+    2. Call claimAuction(tokenId) on StreamAuctions.
+  Branches:
+    • No bids: NFT goes to execution address recorded on the drop.
+    • With bids: ETH split 50/25/25 (poster / payout / curators), NFT to high bidder.
+
+================================================================================
+CATEGORY G — CURATOR REWARDS (StreamCuratorsPool)
+================================================================================
+
+G1. Admin publishes who can claim what
+  Who: Function admin for setMerkleRoot on StreamCuratorsPool.
+  Steps:
+    1. Build Merkle tree off-chain for (address, collectionId, amount) leaves.
+    2. Call setMerkleRoot(collectionId, root) or setMultipleMerkleRoots.
+
+G2. Curator claims their ETH
+  Who: Eligible address with proof.
+  Steps:
+    1. Call claimRewards(collectionId, amount, proof, address(0)).
+  Result: If proof valid and not claimed before, amount wei is sent to msg.sender.
+
+G3. Fund the pool
+  Who: Anyone / treasury.
+  Steps:
+    1. Send ETH to StreamCuratorsPool (receive accepts deposits).
+
+================================================================================
+CATEGORY H — DELEGATION (HELPER CLAIMING)
+================================================================================
+
+H1. Claim reward for the real owner using delegation
+  Who: Wallet that is globally delegated for use case 1 on ALL_COLLECTIONS placeholder.
+  Steps:
+    1. Call claimRewards(collectionId, amount, proof, delegatorAddress) with
+       delegator != zero.
+  Preconditions:
+    • DelegationManagementContract must report delegation is allowed for this pair.
+
+================================================================================
+CATEGORY I — OPS, DEPENDENCIES, EMERGENCY
+================================================================================
+
+I1. Register a dependency script bundle (for on-chain art)
+  Who: Function admin on DependencyRegistry.
+  Steps:
+    1. addDependency(bytes32 key, string[] scripts).
+
+I2. Sweep stranded ETH from minter / auction / curators pool
+  Who: Function admin for emergencyWithdraw on that contract.
+  Steps:
+    1. Call emergencyWithdraw; funds go to adminsContract.owner() per implementation.
+
+I3. Freeze a collection after sale (StreamCore)
+  Who: Function admin for freezeCollection.
+  Steps:
+    1. Wait until minter end time passed and data was added, then freezeCollection.
+  Result: Many metadata edits blocked permanently for that collection.
+
+================================================================================
+END OF USER JOURNEYS
+================================================================================
