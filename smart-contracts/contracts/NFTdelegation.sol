@@ -10,17 +10,26 @@
 //  / /_/ / /___/ /___/ /___/ /_/ / ___ |/ / _/ // /_/ / /|  /  
 // /_____/_____/_____/_____/\____/_/  |_/_/ /___/\____/_/ |_/   
                                                              
-
-/**
- *
- *  @title: NFTDelegation.com Management Contract
- *  @date: 20-Apr-2023 - 16:27
- *  @version: 5.20.15
- *  @notes: An advanced open-source trustless delegation and consolidation management contract.
- *  @author: 6529 team
- *  @contributors: https://github.com/6529-Collections/nftdelegation/graphs/contributors
- *
- */
+//
+// =============================================================================
+// DelegationManagementContract — ELI5 summary
+// =============================================================================
+// What it does:
+//   Lets an NFT holder delegate "power" to another wallet for specific
+//   collections, tokens, use-cases, and time ranges — so apps can trustlessly
+//   check "wallet B may act for wallet A". Includes sub-delegation, batch ops,
+//   locks, and many read helpers to query who delegated what.
+//
+// Function groups (not every name listed — file is large):
+//   - registerDelegationAddress / ...UsingSubDelegation: create delegations.
+//   - revokeDelegationAddress / ...UsingSubdelegation / batchRevocations: undo.
+//   - updateDelegationAddress / batchDelegations: maintain many delegations.
+//   - setGlobalLock / setCollectionLock / setCollectionUsecaseLock: freeze ops.
+//   - updateUseCaseCounter: admin counter bump for use-case ids.
+//   - retrieve* / check*: long list of views — locks, hashes, active delegations,
+//     token scope, consolidations, "most recent" helpers, etc.
+// Original project: NFTDelegation.com — see upstream repo for full spec.
+// =============================================================================
 
 pragma solidity ^0.8.18;
 

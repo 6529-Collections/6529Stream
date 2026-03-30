@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.9.0) (utils/cryptography/MerkleProof.sol)
+//
+// =============================================================================
+// MerkleProof — ELI5
+// =============================================================================
+// Proves "this leaf is in this Merkle tree with this root" using a proof path.
+// Functions: verify / verifyCalldata / processProof variants + multi-proof helpers.
+// =============================================================================
 
 pragma solidity ^0.8.18;
 

@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.0) (token/ERC721/IERC721.sol)
+//
+// =============================================================================
+// IERC721 — ELI5
+// =============================================================================
+// Standard NFT API: balance, owner, transfer, approve, approvals — see EIP-721.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

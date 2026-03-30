@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.0) (utils/math/SignedMath.sol)
+//
+// =============================================================================
+// SignedMath — ELI5
+// =============================================================================
+// int256 min/max/average helpers (used by Strings and others).
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

@@ -1,4 +1,12 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// VRFConsumerBaseV2 — ELI5 (Chainlink)
+// =============================================================================
+// Base contract for Chainlink VRF: stores coordinator, validates fulfill callbacks,
+// routes random words to your fulfillRandomWords implementation.
+// =============================================================================
+
 pragma solidity ^0.8.4;
 
 /** ****************************************************************************

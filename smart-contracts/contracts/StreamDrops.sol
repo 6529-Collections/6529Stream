@@ -1,12 +1,28 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: Drops Contract for 6529 stream
- *  @date: 28-June-2024
- *  @version: 0.9
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// StreamDrops — ELI5 summary
+// =============================================================================
+// What it does:
+//   When the trusted signer says "this drop is go", this contract splits ETH,
+//   calls the minter to create the NFT, and records what happened (fixed price
+//   or mint-to-auction). Only the TDH signer address may call the main drop
+//   function.
+//
+// Functions:
+//   - constructor(...): saves signer, minter, admin, payout, curators addresses.
+//   - mintDrop(poster, tokenData, collectionId, opt, price, endDate): THE drop.
+//     opt 1 = pay exact price, split ETH, mint. opt 2 = mint into auction path.
+//   - updateTDHsigner / updatePayOutAddress / updateCuratorsPoolAddress: admin
+//     updates those addresses.
+//   - updateAdminContract / updateMinterContract: point to new admin/minter contracts.
+//   - retrieveDrops(): list of drop ids.
+//   - retrieveAuctionPoster / retrieveAuctionPrice(tokenId): auction metadata.
+//   - retrieveDropInfo(dropId): token id, signer, poster, execution address.
+//   - retrieveTokenID / retrieveDropID / retrieveExecutionAddress: lookups.
+//   - retrieveMessageAndDropID(...): helper to rebuild the drop id off-chain.
+// Inherits Ownable (from utils) for any Ownable hooks on this contract.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

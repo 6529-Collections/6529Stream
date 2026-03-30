@@ -1,4 +1,11 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// IStreamCore — ELI5
+// =============================================================================
+// What minter/randomizers need from the NFT core: mint, set token hash, read supply
+// bounds, circulation, and a few other collection/token views.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

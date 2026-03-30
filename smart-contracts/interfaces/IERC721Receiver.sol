@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.6.0) (token/ERC721/IERC721Receiver.sol)
+//
+// =============================================================================
+// IERC721Receiver — ELI5
+// =============================================================================
+// Contracts that accept safeTransfer must implement onERC721Received callback.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

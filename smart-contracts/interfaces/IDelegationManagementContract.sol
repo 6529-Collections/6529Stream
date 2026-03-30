@@ -1,4 +1,12 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// IDelegationManagementContract — ELI5
+// =============================================================================
+// Subset of NFTDelegation.com views StreamCuratorsPool needs: list delegations,
+// check active status, "most recent" helpers, consolidation checks, etc.
+// (Full contract has many more functions.)
+// =============================================================================
 
 pragma solidity ^0.8.18;
 

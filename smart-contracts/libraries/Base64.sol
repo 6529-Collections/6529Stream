@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.7.0) (utils/Base64.sol)
+//
+// =============================================================================
+// Base64 — ELI5
+// =============================================================================
+// Encodes bytes to a Base64 string (for data: URIs and on-chain HTML/JSON).
+// Function: encode(bytes).
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

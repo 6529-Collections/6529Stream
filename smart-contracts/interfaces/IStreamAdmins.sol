@@ -1,4 +1,11 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// IStreamAdmins — ELI5
+// =============================================================================
+// The "face" of StreamAdmins for other contracts: ask "is this address allowed?"
+// and get owner(). Functions mirror admin getters + isAdminContract + owner.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

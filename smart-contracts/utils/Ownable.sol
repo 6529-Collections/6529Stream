@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
+//
+// =============================================================================
+// Ownable — ELI5
+// =============================================================================
+// One special "owner" address; only they can call functions marked onlyOwner.
+// Functions: owner(), renounceOwnership(), transferOwnership(newOwner).
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

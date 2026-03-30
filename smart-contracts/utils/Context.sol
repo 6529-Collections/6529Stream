@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
+//
+// =============================================================================
+// Context — ELI5
+// =============================================================================
+// Thin wrapper: _msgSender() and _msgData() for future meta-tx compatibility.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

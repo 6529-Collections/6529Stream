@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- * @title ArrngConsumer.sol. Use arrng
- *
- * @author arrng https://arrng.io/
- *
- */
+//
+// =============================================================================
+// ArrngConsumer — ELI5
+// =============================================================================
+// Base class for contracts that request random numbers from the Arrng service.
+// You implement fulfillRandomWords internally; the controller calls back when
+// randomness arrives. Constructor stores the Arrng controller address.
+// =============================================================================
 
 import {IArrngConsumer} from "../interfaces/IArrngConsumer.sol";
 import {IArrngController} from "../interfaces/IArrngController.sol";

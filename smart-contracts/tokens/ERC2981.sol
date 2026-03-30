@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (token/common/ERC2981.sol)
+//
+// =============================================================================
+// ERC2981 — ELI5
+// =============================================================================
+// NFT royalty hints for marketplaces: who gets paid and what % on secondary sales.
+// Functions: royaltyInfo(tokenId, salePrice), supportsInterface; internals set default
+// or per-token royalty receivers and basis points.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

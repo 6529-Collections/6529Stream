@@ -1,12 +1,22 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: Stream 6529 Curators Pool
- *  @date: 27-June-2024
- *  @version: 0.3
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// StreamCuratorsPool — ELI5 summary
+// =============================================================================
+// What it does:
+//   Holds ETH for curator rewards. Each collection has a merkle root; if your
+//   address is in the tree with an amount, you prove it and get paid once.
+//   Optional: claim on behalf of a delegator if delegation contract says OK.
+//
+// Functions:
+//   - constructor(admins, delegationContract): wires permissions + delegation.
+//   - setMerkleRoot(collectionId, root): admin sets the reward tree for a collection.
+//   - setMultipleMerkleRoots(...): batch version of setMerkleRoot.
+//   - claimRewards(collectionId, amount, proof, delegator): verify proof, send ETH.
+//   - updateAdminContracts: point to a new StreamAdmins.
+//   - emergencyWithdraw(): admin pulls leftover ETH to admin owner.
+//   - receive(): accepts ETH deposits.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

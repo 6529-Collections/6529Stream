@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- * @title IArrngConsumer.sol. Use arrng
- *
- * @author arrng https://arrng.io/
- *
- */
+//
+// =============================================================================
+// IArrngConsumer — ELI5
+// =============================================================================
+// Callback Arrng invokes on your contract when random numbers are ready.
+// Function: receiveRandomness(requestId, numbers).
+// =============================================================================
 
 pragma solidity 0.8.19;
 

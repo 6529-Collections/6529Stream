@@ -1,12 +1,19 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: NextGen 6529 - Dependency Registry Contract
- *  @date: 29-January-2023
- *  @version: 1.1
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// DependencyRegistry — ELI5 summary
+// =============================================================================
+// What it does:
+//   Stores reusable script chunks (like libraries) keyed by a bytes32 name.
+//   StreamCore can pull these when building on-chain generative metadata.
+//
+// Functions:
+//   - constructor(admins): wires StreamAdmins for permissions.
+//   - addDependency(name, scripts): admin registers a dependency script bundle.
+//   - addDependencyScriptIndex(name, index, script): admin patches one line.
+//   - updateAdminContract: switch admin contract.
+//   - getDependencyScriptCount / getDependencyScript: read scripts for a name.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

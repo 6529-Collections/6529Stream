@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: NextGen 6529 - VRF Randomizer Contract
- *  @date: 20-December-2023
- *  @version: 1.9
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// NextGenRandomizerVRF — ELI5
+// =============================================================================
+// Uses Chainlink VRF v2: requests random words, fulfills on callback, sets token
+// hash on core. Admins tune gas, subscription, key hash; core-only calculateTokenHash.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

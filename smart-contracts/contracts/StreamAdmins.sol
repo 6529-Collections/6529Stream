@@ -1,12 +1,24 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: Modified version of NextGen 6529 - Admin Contract to support 6529 Stream
- *  @date: 27-June-2024
- *  @version: 1.1
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// StreamAdmins — ELI5 summary
+// =============================================================================
+// What it does:
+//   The permission list for Stream. Think "who is allowed to press which admin
+//   buttons" — either everywhere (global admin) or on one specific function.
+//   The TDH signer contract can add/remove those permissions.
+//
+// Functions:
+//   - constructor(tdhSigner): wires the signer; signer starts as global admin.
+//   - registerAdmin(addr, on/off): turn global admin on or off (signer only).
+//   - registerFunctionAdmin(addr, selector, on/off): allow addr to call one
+//     function (identified by its 4-byte selector).
+//   - registerBatchFunctionAdmin(...): same as above but many selectors at once.
+//   - retrieveGlobalAdmin(addr): read if addr is a global admin.
+//   - retrieveFunctionAdmin(addr, selector): read if addr may call that function.
+//   - isAdminContract(): returns true so other contracts know this is the admin hub.
+// Inherits Ownable: owner() etc. from OpenZeppelin-style Ownable.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

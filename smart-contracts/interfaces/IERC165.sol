@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
+//
+// =============================================================================
+// IERC165 — ELI5
+// =============================================================================
+// Standard hook: supportsInterface(bytes4) — "do you implement this interface?"
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

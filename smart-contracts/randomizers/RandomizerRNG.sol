@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: NextGen 6529 - RNG Randomizer Contract
- *  @date: 20-December-2023
- *  @version: 1.8
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// NextGenRandomizerRNG — ELI5
+// =============================================================================
+// Asks Arrng for random words, then writes a token hash back to "core" when done.
+// Core-only entry: calculateTokenHash; admin can update links, RNG cost, withdraw ETH.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 // Created By: Art Blocks Inc.
 // Inspired by: https://ethereum.stackexchange.com/a/123950/103422
+//
+// =============================================================================
+// Bytes32Strings — ELI5
+// =============================================================================
+// Turns a short fixed bytes32 string (null-padded) into a Solidity string.
+// Function: toString(bytes32).
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

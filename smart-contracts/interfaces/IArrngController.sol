@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- * @title IArrngController.sol. Interface for the arrngController.
- *
- * @author arrng https://arrng.io/
- *
- */
+//
+// =============================================================================
+// IArrngController — ELI5
+// =============================================================================
+// Arrng service API: request random words (paying native token), events, admin
+// knobs — see interface body for full method list.
+// =============================================================================
 
 pragma solidity 0.8.19;
 

@@ -1,12 +1,28 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: Modified version of NextGen 6529 - Minter Contract to support 6529 Stream
- *  @date: 27-June-2024
- *  @version: 1.12
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// StreamMinter — ELI5 summary
+// =============================================================================
+// What it does:
+//   The minting window and the bridge to StreamCore. StreamDrops is the only
+//   caller allowed to actually mint (or mint-to-auction). Admins set when each
+//   collection is "open" and can tweak links to core/admin/drops.
+//
+// Functions:
+//   - constructor(core, admins, streamDrops): wires the three addresses.
+//   - setCollectionPhases(collectionId, start, end): admin sets sale window
+//     (requires collection data already on core).
+//   - mint(...): ONLY StreamDrops — mints NFTs to listed recipients in-window.
+//   - mintAndAuction(...): ONLY StreamDrops — mints one NFT and starts auction
+//     timer on that token id.
+//   - updateAuctionEndTime(tokenId, time): admin can extend auction end (used
+//     by auction contract during sniping extension).
+//   - updateContracts(opt, addr): switch core, admin, or streamDrops address.
+//   - emergencyWithdraw(): admin pulls stray ETH to admin owner.
+//   - retrieveCollectionPhases: read start/end times.
+//   - isMinterContract / getEndTime / getAuctionEndTime / getAuctionStatus:
+//     small getters other contracts use.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

@@ -1,4 +1,12 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// VRFCoordinatorV2Interface — ELI5
+// =============================================================================
+// Chainlink's VRF coordinator API: request random words, check subscription state.
+// (Interface only — implementation is on-chain at Chainlink addresses per network.)
+// =============================================================================
+
 pragma solidity ^0.8.0;
 
 interface VRFCoordinatorV2Interface {

@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.0) (utils/Address.sol)
+//
+// =============================================================================
+// Address — ELI5
+// =============================================================================
+// Low-level helpers: is this a contract?, safe sendValue, functionCall with return data.
+// Used by ERC721 for safe transfers.
+// =============================================================================
 
 pragma solidity ^0.8.1;
 

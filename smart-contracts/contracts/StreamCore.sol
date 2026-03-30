@@ -1,12 +1,30 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: Modified version of NextGen 6529 - Core Contract to support 6529 Stream
- *  @date: 27-June-2024
- *  @version: 10.31
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// StreamCore — ELI5 summary
+// =============================================================================
+// What it does:
+//   The actual ERC-721 NFT + collection brain. Each "collection" has metadata,
+//   supply, optional on-chain generative script, royalties, and links to a
+//   randomizer. Only the minter contract may mint; admins configure everything.
+//
+// Functions (high level):
+//   - createCollection(...): admin defines name, artist, URIs, scripts, etc.
+//   - setCollectionData(...): admin sets supply, artist wallet, mint timing knobs.
+//   - addRandomizer(collectionId, addr): hook a randomizer for token hashes.
+//   - mint(...): ONLY StreamMinter — creates a token and asks randomizer for hash.
+//   - burn(collectionId, tokenId): holder burns inside collection id range.
+//   - updateCollectionInfo(...): admin edits collection fields / script slices.
+//   - artistSignature(collectionId, sig): artist signs their collection once.
+//   - changeMetadataView: toggle off-chain URI vs on-chain HTML metadata.
+//   - changeTokenData / updateImagesAndAttributes: admin edits token-level data.
+//   - freezeCollection: lock a collection after sale ended (immutable-ish).
+//   - setTokenHash: ONLY randomizer — writes the generative hash for a token.
+//   - setFinalSupply: shrink total supply to what actually minted (admin, timed).
+//   - updateContracts: swap admin, minter, or dependency registry addresses.
+//   - tokenURI / supportsInterface: standard ERC-721 + royalty introspection.
+//   Plus many view helpers: circulation, indexes, artist, hashes, scripts, etc.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

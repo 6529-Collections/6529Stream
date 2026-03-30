@@ -142,3 +142,75 @@ The following issues are currently known and should be treated as high-priority 
    - Impact: less precise failure diagnostics and higher gas than custom errors.
 
 These notes are intentionally brief and non-exhaustive; they document current known risk areas pending a full remediation pass.
+
+---
+
+## Alignment With Proposed Stream Notes
+
+This section compares the current contracts against the proposed approach shared in governance notes.
+
+### What Is The Same
+
+1. **NextGen-style architecture is present**
+   - The contracts are derived from a NextGen-style system and support optional on-chain metadata/generative script composition in `StreamCore`.
+
+2. **Auction path exists**
+   - There is a mint-to-auction flow (`StreamDrops` -> `StreamMinter.mintAndAuction` -> `StreamAuctions`) with anti-sniping-style extension logic.
+
+3. **Primary proceeds are split with creator/poster participation**
+   - Both fixed-price and auction claim flows include a 50% share to poster/creator address.
+
+### What Is Different / Contradictory
+
+1. **Who can trigger minting**
+   - Notes: "Anyone can pay gas + initial auction amount to mint."
+   - Current contracts: only `tdhSigner` can call `StreamDrops.mintDrop` (`authorized` modifier).
+
+2. **Auction starting price policy**
+   - Notes: start at `0.06529 ETH`.
+   - Current contracts: starting price is arbitrary per drop (`_price`), no global minimum/default hardcoded to `0.06529 ETH`.
+
+3. **Auction extension end condition**
+   - Notes: extensions for 24h after initial 24h, then hard stop at 48h.
+   - Current contracts: extension triggers whenever bid is near end time; no explicit 48h hard cap is enforced.
+
+4. **Revenue split target**
+   - Notes: "as with Meme Cards, primary and secondary proceeds are 50:50 to creator."
+   - Current contracts:
+     - Primary flow is `50% poster + 25% payout + 25% curators`.
+     - Secondary royalties are configured in `StreamCore` as a fixed `6.9%` default royalty to a fixed address, not an on-chain 50:50 split to creator.
+
+5. **1/1 positioning vs collection design**
+   - Notes emphasize 1/1 Stream NFTs.
+   - Current contracts support multi-token collections and multi-quantity mint calls; 1/1 is possible by configuration but not enforced as a protocol rule.
+
+### What Exists In Contracts But Is Not In The Notes
+
+1. **Fixed-price (non-auction) mint path**
+   - `StreamDrops` supports direct fixed-price minting (`_opt == 1`) in addition to auctions.
+
+2. **Curators pool claim mechanism**
+   - `StreamCuratorsPool` has merkle-proof reward claims and explicit curators share wiring in mint/auction proceeds.
+
+3. **Function-level admin matrix**
+   - `StreamAdmins` supports both global admin permissions and per-function selector permissions.
+
+4. **Dependency registry + on-chain script assembly**
+   - `StreamCore` integrates dependency script retrieval/composition for on-chain generative metadata paths.
+
+### What Is Missing From Contracts Relative To Notes
+
+1. **No on-chain Main Stage submission model**
+   - The "single place for submissions" process is not represented in current contracts.
+
+2. **No on-chain TDH vote threshold gates (Track 1 / Track 2)**
+   - There is no contract logic checking global TDH % thresholds, average voting windows, or spot voting windows.
+
+3. **No explicit "10% for 2 hours" time-sensitive gate**
+   - The described time-sensitive path is not encoded on-chain.
+
+4. **No TDH accrual cap engine**
+   - The proposed monthly cap/gradient logic tied to The Memes TDH issuance is not implemented in these contracts.
+
+5. **No explicit recipient parameter/signature-binding flow in drop execution**
+   - Current implementation does not encode an EIP-712 style signed payload that binds recipient/terms as described in a trust-minimized "anyone can execute" model.

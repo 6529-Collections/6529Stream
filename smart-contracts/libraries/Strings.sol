@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.0) (utils/Strings.sol)
+//
+// =============================================================================
+// Strings — ELI5
+// =============================================================================
+// Helpers to turn numbers and addresses into text (decimal, hex) for URIs and JSON.
+// Main: toString(uint256), toHexString (with/without length), toString(address).
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.0) (utils/math/Math.sol)
+//
+// =============================================================================
+// Math — ELI5
+// =============================================================================
+// Safe-ish uint math helpers: min/max, ceil/floor divide, log2/log10, muldiv, etc.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

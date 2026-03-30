@@ -1,4 +1,11 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// IStreamMinter — ELI5
+// =============================================================================
+// What StreamDrops and StreamAuctions call: mint batches, mint-to-auction, read
+// phase end time, and auction timer/status per token.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: NextGen 6529 - Word Pool
- *  @date: 20-December-2023 
- *  @version: 1.3
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// randomPool (XRandoms) — ELI5
+// =============================================================================
+// Tiny word list + weak randomness helpers from block fields (for NXT randomizer).
+// Functions: randomNumber(), randomWord(), returnIndex(id).
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (interfaces/IERC2981.sol)
+//
+// =============================================================================
+// IERC2981 — ELI5
+// =============================================================================
+// Royalty hint: royaltyInfo(tokenId, salePrice) -> receiver + amount owed.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/ReentrancyGuard.sol)
+//
+// =============================================================================
+// ReentrancyGuard — ELI5
+// =============================================================================
+// Stops a function from being called again before it finishes (reentrancy attacks).
+// Use modifier: nonReentrant on sensitive external calls.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

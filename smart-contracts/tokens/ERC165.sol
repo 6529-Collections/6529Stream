@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
+//
+// =============================================================================
+// ERC165 — ELI5
+// =============================================================================
+// Tiny helper: answers "do you support interface X?" for ERC-165 introspection.
+// Function: supportsInterface(interfaceId) — returns true for IERC165 id; subclasses add more.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: NextGen 6529 - NXT Randomizer Contract
- *  @date: 20-December-2023
- *  @version: 1.5
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// NextGenRandomizerNXT — ELI5
+// =============================================================================
+// On-chain "cheap" randomness: mixes block info + XRandoms pool, writes hash to core.
+// Only core may call calculateTokenHash; admins can swap randoms/core/admin addresses.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

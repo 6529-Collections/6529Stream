@@ -1,4 +1,11 @@
 // SPDX-License-Identifier: MIT
+//
+// =============================================================================
+// IStreamDrops — ELI5
+// =============================================================================
+// What the auction contract needs from drops: poster, reserve price, drop id lookups,
+// and who "executed" the drop for settlement edge cases.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

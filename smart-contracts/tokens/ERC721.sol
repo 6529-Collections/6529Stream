@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.2) (token/ERC721/ERC721.sol)
+//
+// =============================================================================
+// ERC721 — ELI5
+// =============================================================================
+// Standard NFT contract: own, transfer, approve, safeTransfer, mint/burn internals.
+// Public API (typical): name, symbol, tokenURI, balanceOf, ownerOf, approve,
+// getApproved, setApprovalForAll, isApprovedForAll, transferFrom, safeTransferFrom.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 

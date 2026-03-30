@@ -1,12 +1,23 @@
 // SPDX-License-Identifier: MIT
-
-/**
- *
- *  @title: Auction Contract for 6529 Stream (Not final)
- *  @date: 22-June-2024
- *  @version: 1.7
- *  @author: 6529 team
- */
+//
+// =============================================================================
+// StreamAuctions — ELI5 summary (file: AuctionContract.sol)
+// =============================================================================
+// What it does:
+//   English auction in ETH: people bid on a token id, outbids refund the last
+//   bidder, near the end the timer can extend a bit. After end, anyone can
+//   settle: ETH is split and the NFT goes to the winner (or back per rules).
+//
+// Functions:
+//   - constructor(minter, core721, admins, drops, payout, curators): wiring.
+//   - participateToAuction(tokenId): send ETH as your bid (first bid uses drop
+//     starting price from StreamDrops; later bids must beat prior by %).
+//   - claimAuction(tokenId): after auction ended, finalize payout + transfer.
+//   - updateMinterContract / updateAdminContract / updateDropsContract: admin.
+//   - updatePercentAndExtensionTime: tweak bid step % and extension seconds.
+//   - updatePayOutAddress / updateCuratorsPoolAddress: admin updates addresses.
+//   - emergencyWithdraw(): admin sweeps stuck ETH to admin owner.
+// =============================================================================
 
 pragma solidity ^0.8.19;
 

@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC721/extensions/IERC721Enumerable.sol)
+//
+// =============================================================================
+// IERC721Enumerable — ELI5
+// =============================================================================
+// Adds totalSupply + token enumeration by owner and global index.
+// =============================================================================
 
 pragma solidity ^0.8.0;
 
