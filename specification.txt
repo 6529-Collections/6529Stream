@@ -1,0 +1,207 @@
+================================================================================
+6529 STREAM — PRODUCT SUMMARY & TECHNICAL SPECIFICATION
+================================================================================
+Derived from the Solidity contracts in this repository as of the last edits.
+Scope: behavior actually enforced on-chain. Product or governance rules that
+live only off-chain are out of scope unless the contracts explicitly encode them.
+
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+
+Stream (as implemented) is a modular Ethereum protocol for:
+
+  • ERC-721 collections with per-collection supply, metadata, optional on-chain
+    generative scripting, and EIP-2981-style royalties (StreamCore).
+
+  • Time-windowed minting controlled by an admin matrix (StreamMinter), where
+    only the configured StreamDrops contract may call mint paths.
+
+  • Single-step "drops" initiated only by a designated TDH signer address
+    (StreamDrops): fixed-price mint with ETH revenue split, or mint-into-auction
+    for a later English auction.
+
+  • ETH auctions with minimum bid increments and time extensions (StreamAuctions).
+
+  • Curator rewards distributed via per-collection Merkle roots, with optional
+    claims through NFT delegation (StreamCuratorsPool).
+
+  • Shared script dependencies for on-chain rendering (DependencyRegistry).
+
+Supporting contracts include OpenZeppelin-derived ERC-721 / royalties / guards,
+plus optional randomizer implementations (VRF, Arrng, or on-chain entropy) that
+write token hashes back into StreamCore.
+
+--------------------------------------------------------------------------------
+2. SYSTEM ACTORS
+--------------------------------------------------------------------------------
+
+  • Global admin: address with adminPermissions[addr] == true in StreamAdmins
+    (includes the initial tdhSigner; more can be granted by tdhSigner).
+
+  • Function admin: address allowed for a specific function selector on a
+    downstream contract (checked per-call via StreamAdmins).
+
+  • StreamAdmins "tdhSigner" address: ONLY this address may call registerAdmin,
+    registerFunctionAdmin, registerBatchFunctionAdmin on StreamAdmins.
+
+  • StreamDrops "tdhSigner" address: independent config on a different contract;
+    ONLY this address may call mintDrop on StreamDrops. It need not equal the
+    StreamAdmins tdhSigner unless deployments choose to align them.
+
+  • StreamDrops contract: sole address allowed to call StreamMinter.mint and
+    mintAndAuction (enforced by streamDropRequired).
+
+  • Marketplace / bidders: any address may call StreamAuctions.participateToAuction
+    and claimAuction (subject to auction state).
+
+  • Curators: any address with a valid Merkle proof (and delegation rules if
+    claiming for another wallet) may claim from StreamCuratorsPool.
+
+  • Contract owner (Ownable): StreamAdmins and StreamDrops inherit Ownable;
+    owner() is separate from the admin matrix (used by OZ pattern).
+
+--------------------------------------------------------------------------------
+3. CONTRACT MAP & PURPOSE
+--------------------------------------------------------------------------------
+
+StreamAdmins
+  Single source of boolean permissions: global admin map and per-selector
+  function admin map. Special address tdhSigner may grant/revoke admins.
+  registerAdmin / registerFunctionAdmin / registerBatchFunctionAdmin require
+  msg.sender == tdhSigner (not "onlyOwner").
+
+StreamCore
+  ERC721Enumerable + ERC2981 + Ownable. Holds collections, token ids, per-token
+  data, collection freeze, randomizer pointer, dependency registry pointer,
+  minter address. Only minterContract may mint. Mints call the collection's
+  IRandomizer.calculateTokenHash after _safeMint. Constructor sets default
+  royalty to a fixed address at 690 basis points (6.9%). Token id space is
+  partitioned per collection: min index = collectionId * 10_000_000_000,
+  max = min + totalSupply - 1 (when supply is first set).
+
+StreamMinter
+  Holds per-collection publicStartTime and publicEndTime. mint and mintAndAuction
+  require block.timestamp within [start, end] and positive start/end. Only
+  streamDrops may mint. mintAndAuction requires auction end time at least
+  block.timestamp + 600 seconds. Stores per-token-id auction end timestamp and
+  bool auction active. updateAuctionEndTime requires function admin + auction
+  flag set (used by auction contract).
+
+StreamDrops
+  mintDrop is payable, only StreamDrops.tdhSigner. Drop id =
+  keccak256(abi.encodePacked(keccak256(abi.encodePacked(...))) from poster hex,
+  tokenData, collectionId, opt, price, endDate string concatenation). Duplicate
+  ids revert "Drop Executed".
+  opt == 1 (fixed): msg.value must equal _price. Splits: poster gets msg.value/2,
+  payOut and curatorsPool each get msg.value/4 (integer division). Mints one token
+  to receiver[0] = msg.sender (the signer). Then calls minter.mint.
+  opt == 2 (auction): calls minter.mintAndAuction(payOutAddress, ..., colId,
+  _endDate). Stores poster and _price as auction metadata for that token id.
+  Records executionAddress = msg.sender.
+  Constructor rejects zero signer, minter, admin, payout, curators.
+  Public state tdhThreshold and activeTime exist but are not read in current code.
+
+StreamAuctions
+  participateToAuction: while auction active and before minter auction end time.
+  First bid must be >= StreamDrops.retrieveAuctionPrice(tokenId). Later bids must
+  be >= previous highest + (previous * incPercent / 100). Default incPercent = 5,
+  extensionTime = 300 seconds. Refunds previous highest bidder via call when
+  outbid. If remaining time <= extensionTime, calls minter.updateAuctionEndTime
+  to add extensionTime to end.
+  claimAuction (nonReentrant): after end time, one-shot. If no bids (highest == 0),
+  NFT safeTransferFrom current owner to drops.retrieveExecutionAddress(tokenId).
+  If bids: pay poster half, payout quarter, curators quarter (integer division),
+  transfer NFT to highest bidder.
+
+StreamCuratorsPool
+  Admin sets Merkle root per collection (or batch). claimRewards: leaf is
+  double-keccak of (claimer, collectionId, amount) or with delegator path +
+  delegation check vs ALL_COLLECTIONS (0x888...888) use case 1. One claim per
+  (collectionId, reward address). Pays exact _amount wei to claimer on success.
+
+DependencyRegistry
+  Admin-keyed storage of string script arrays per dependency key; StreamCore
+  reads slices for on-chain HTML/JSON assembly.
+
+DelegationManagementContract (NFTdelegation.sol)
+  Third-party delegation registry; not Stream-specific but used by
+  StreamCuratorsPool for delegated claims.
+
+Randomizers (optional, per collection on StreamCore)
+  Implement IRandomizer: calculateTokenHash only callable from core, fulfill path
+  writes setTokenHash on core. Implementations: NextGenRandomizerNXT (block + pool),
+  NextGenRandomizerRNG (Arrng), NextGenRandomizerVRF (Chainlink), plus XRandoms
+  word pool.
+
+--------------------------------------------------------------------------------
+4. END-TO-END FLOWS (TECHNICAL)
+--------------------------------------------------------------------------------
+
+4.1 Collection lifecycle (admin)
+  1) createCollection on StreamCore (function admin for createCollection).
+  2) setCollectionData on StreamCore (uses changeMetadataView admin selector)
+     to set supply, artist, caps, final-supply delay — sets wereDataAdded.
+  3) addRandomizer on StreamCore if generative hashes needed.
+  4) setCollectionPhases on StreamMinter (function admin) — requires wereDataAdded.
+  5) updateContracts on StreamCore (function admin) to set minter to deployed
+     StreamMinter if not already aligned at deploy time.
+
+4.2 Fixed-price drop
+  1) Signer calls StreamDrops.mintDrop with opt=1 and msg.value = _price.
+  2) ETH split 50% / 25% / 25% as above; minter mints to msg.sender (signer).
+  3) StreamCore assigns token id = reservedMin + circulation before mint.
+
+4.3 Auction drop
+  1) Signer calls mintDrop opt=2 with _endDate passed to mintAndAuction.
+  2) Token minted to payOutAddress; auction price and poster stored on Drops.
+  3) Bidders call StreamAuctions.participateToAuction; extensions may apply.
+  4) Anyone calls claimAuction after end; settlement and transfer as above.
+
+--------------------------------------------------------------------------------
+5. SECURITY & TRUST PROPERTIES (AS CODED)
+--------------------------------------------------------------------------------
+
+  • Strong centralization on StreamDrops.tdhSigner for all drops.
+  • StreamMinter mint authority is single streamDrops address (mutable by admin).
+  • Admin matrix is powerful: function-level permissions on many privileged ops.
+  • Fixed-price path mints to msg.sender (signer), not buyer — product mismatch
+    risk if signers pay on behalf of collectors.
+  • Revenue splits use integer division; remainder wei can remain undistributed
+    on odd amounts.
+  • Auction contract must hold admin rights on minter for updateAuctionEndTime
+    (same admin pattern as other privileged calls).
+  • ERC-2981 royalties are informational for marketplaces; primary splits are
+    separate in Drops/Auctions.
+  • Reentrancy: claimAuction uses nonReentrant; participate sends ETH to prior
+    bidder before updating state (pattern worth external review).
+
+--------------------------------------------------------------------------------
+6. OUT OF SCOPE / NOT ENCODED ON-CHAIN
+--------------------------------------------------------------------------------
+
+The following are NOT implemented in these contracts:
+
+  • Main Stage submission, TDH vote thresholds, or time-track gates.
+  • Fixed auction start price (e.g. 0.06529 ETH) — start is per-drop _price.
+  • 48h cap on auction extensions — only rolling extension while near end.
+  • Per-meme TDH accrual caps or monthly aggregates.
+  • Automatic 50:50 secondary to creator — secondary is default royalty to one
+    address in StreamCore constructor unless changed by privileged functions.
+
+StreamDrops.tdhThreshold and activeTime are stored but unused in logic.
+
+--------------------------------------------------------------------------------
+7. FILE REFERENCE
+--------------------------------------------------------------------------------
+
+Primary protocol (smart-contracts/contracts/):
+  StreamAdmins.sol, StreamCore.sol, StreamMinter.sol, StreamDrops.sol,
+  AuctionContract.sol (contract StreamAuctions), StreamCuratorsPool.sol,
+  DependencyRegistry.sol
+
+Supporting: smart-contracts/tokens/, utils/, libraries/, randomizers/, interfaces/
+
+================================================================================
+END OF SPECIFICATION
+================================================================================
