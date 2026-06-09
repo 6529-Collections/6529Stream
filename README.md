@@ -37,7 +37,8 @@ forge build
 forge test -vvv
 ```
 
-On Windows, bootstrap and verify with:
+On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
+with:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1

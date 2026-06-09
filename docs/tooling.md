@@ -49,6 +49,10 @@ Windows PowerShell:
 powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
 ```
 
+Windows bootstrap requires Python 3.8+ or the `py` launcher for the local
+Slither and `solc-select` tool environment. Foundry itself is downloaded from
+the pinned release asset and verified with SHA256 before extraction.
+
 ## Non-Gating Diagnostics
 
 These commands are intentionally not part of `make check` yet:

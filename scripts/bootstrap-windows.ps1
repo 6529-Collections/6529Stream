@@ -20,12 +20,49 @@ $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "6529stream-foundry-$Vers
 $archivePath = Join-Path $tempDir $assetName
 $checksumPath = Join-Path $tempDir $checksumName
 
+function Invoke-Native {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+        [string[]]$Arguments = @()
+    )
+
+    & $FilePath @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "$FilePath failed with exit code $LASTEXITCODE."
+    }
+}
+
+function Resolve-Python {
+    $pythonCommand = Get-Command python -CommandType Application -ErrorAction SilentlyContinue |
+        Where-Object { $_.Source -notmatch "\\WindowsApps\\" } |
+        Select-Object -First 1
+
+    if ($pythonCommand) {
+        return @{
+            FilePath = $pythonCommand.Source
+            Arguments = @()
+        }
+    }
+
+    $pyLauncher = Get-Command py -CommandType Application -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($pyLauncher) {
+        return @{
+            FilePath = $pyLauncher.Source
+            Arguments = @("-3")
+        }
+    }
+
+    throw "Python 3.8+ is required. Install Python from python.org or install the py launcher, then re-run this script."
+}
+
 New-Item -ItemType Directory -Force $tempDir | Out-Null
 New-Item -ItemType Directory -Force $InstallDir | Out-Null
 
 Write-Host "Downloading Foundry $Version..."
-Invoke-WebRequest -Uri "$releaseBase/$assetName" -OutFile $archivePath
-Invoke-WebRequest -Uri "$releaseBase/$checksumName" -OutFile $checksumPath
+Invoke-WebRequest -UseBasicParsing -Uri "$releaseBase/$assetName" -OutFile $archivePath
+Invoke-WebRequest -UseBasicParsing -Uri "$releaseBase/$checksumName" -OutFile $checksumPath
 
 $expectedHash = ((Get-Content $checksumPath | Select-Object -First 1) -split "\s+")[0].Trim().ToLowerInvariant()
 $actualHash = (Get-FileHash $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -51,15 +88,19 @@ if (-not $SkipPathUpdate) {
 }
 
 $env:Path = "$InstallDir;$env:Path"
-& (Join-Path $InstallDir "forge.exe") --version
+Invoke-Native -FilePath (Join-Path $InstallDir "forge.exe") -Arguments @("--version")
 
 Set-Location $repoRoot
-python -m venv .venv-tools
+$python = Resolve-Python
+Invoke-Native -FilePath $python.FilePath -Arguments ($python.Arguments + @("-m", "venv", ".venv-tools"))
 $toolPython = Join-Path $repoRoot ".venv-tools\Scripts\python.exe"
-& $toolPython -m pip install --upgrade pip
-& $toolPython -m pip install -r requirements-tools.txt
-& (Join-Path $repoRoot ".venv-tools\Scripts\solc-select.exe") install 0.8.19
-& (Join-Path $repoRoot ".venv-tools\Scripts\solc-select.exe") use 0.8.19
+if (-not (Test-Path $toolPython)) {
+    throw "Python virtual environment was not created at $toolPython."
+}
+Invoke-Native -FilePath $toolPython -Arguments @("-m", "pip", "install", "--upgrade", "pip")
+Invoke-Native -FilePath $toolPython -Arguments @("-m", "pip", "install", "-r", "requirements-tools.txt")
+Invoke-Native -FilePath (Join-Path $repoRoot ".venv-tools\Scripts\solc-select.exe") -Arguments @("install", "0.8.19")
+Invoke-Native -FilePath (Join-Path $repoRoot ".venv-tools\Scripts\solc-select.exe") -Arguments @("use", "0.8.19")
 
 Write-Host ""
 Write-Host "Bootstrap complete. This shell can now run:"

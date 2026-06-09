@@ -15,6 +15,9 @@ broadcast/
 # Local environments and secrets
 .env
 .env.*
+!.env.example
+!.env.sample
+!.env.template
 .venv-tools/
 
 # Editors and OS files

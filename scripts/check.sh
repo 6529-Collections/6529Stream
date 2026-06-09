@@ -6,5 +6,10 @@ cd "$repo_root"
 
 export PATH="$HOME/.foundry/bin:$PATH"
 
+if ! command -v forge >/dev/null 2>&1; then
+  echo "forge was not found. Run bash scripts/bootstrap-ec2.sh, then retry this command." >&2
+  exit 1
+fi
+
 forge build
 forge test -vvv

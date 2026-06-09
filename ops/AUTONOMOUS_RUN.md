@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/3` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 23:02 UTC` |
+| Last updated | `2026-06-09 23:18 UTC` |
 
 ## Packaging Notes
 
@@ -61,7 +61,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR 2: Reproducible baseline tooling
 
-Status: Open for CI and bot review.
+Status: Claude review fixes implemented locally; pending commit, push, CI, and bot re-review.
 Branch: `codex/gate-a-reproducible-baseline`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/4`.
 
@@ -98,13 +98,15 @@ Validation:
 - `make check` passed.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
 - `git check-ignore -v out/ cache/ broadcast/ .venv-tools/ .env.local` confirmed generated/local artifacts are ignored.
+- Claude fix pass validation: `bash -n scripts/bootstrap-ec2.sh`, `bash -n scripts/check.sh`, PowerShell parser check for `scripts\bootstrap-windows.ps1`, `make -n slither`, and env-template ignore checks passed.
 
 Next steps:
 
-1. Monitor CI and bot comments.
-2. Resolve any actionable review.
-3. Explicitly request Claude review again after material fix commits.
-4. Merge when clean.
+1. Commit and push Claude fix pass.
+2. Explicitly request Claude re-review.
+3. Monitor CI and bot comments.
+4. Resolve any actionable review.
+5. Merge when clean.
 
 ## Decision Log
 
@@ -120,6 +122,7 @@ Next steps:
 | 2026-06-09 22:55 | Allow compile-surface import fixes in PR 2 | Honest `forge build` requires the randomizer contracts to import existing Stream interfaces |
 | 2026-06-09 23:00 | Local validation passed for PR 2 | `make check` and Windows `scripts/check.ps1` pass; generated Foundry artifacts are ignored |
 | 2026-06-09 23:02 | Open PR #4 | Explicit Claude review requested because bot review may not run automatically |
+| 2026-06-09 23:18 | Implement Claude PR #4 review fixes | Harden Windows/Linux bootstrap, Makefile PATH handling, bash missing-tool UX, and env template ignores |
 
 ## Resume Instructions
 
