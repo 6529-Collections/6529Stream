@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/3` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 23:00 UTC` |
+| Last updated | `2026-06-09 23:02 UTC` |
 
 ## Packaging Notes
 
@@ -52,7 +52,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | Order | Candidate PR | Gate | Scope | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | Merged in PR #3 |
-| 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | In progress |
+| 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Open in PR #4 |
 | 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Planned |
 | 4 | Characterization test skeleton | Gate A | Test directory, fixtures, compile-only or characterization scaffolding | Planned |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Planned |
@@ -61,9 +61,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR 2: Reproducible baseline tooling
 
-Status: Local validation passed; PR not opened yet.
+Status: Open for CI and bot review.
 Branch: `codex/gate-a-reproducible-baseline`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/4`.
 
 Goal:
 
@@ -101,13 +101,10 @@ Validation:
 
 Next steps:
 
-1. Finish local implementation and verification.
-2. Stage only Gate A reproducible-baseline files.
-3. Commit, push, and open PR.
-4. Explicitly request Claude review.
-5. Monitor CI and bot comments.
-6. Resolve any actionable review.
-7. Merge when clean.
+1. Monitor CI and bot comments.
+2. Resolve any actionable review.
+3. Explicitly request Claude review again after material fix commits.
+4. Merge when clean.
 
 ## Decision Log
 
@@ -122,6 +119,7 @@ Next steps:
 | 2026-06-09 22:55 | Start Gate A reproducible-baseline PR | Fresh Foundry config exposed that the prior build baseline compiled nothing |
 | 2026-06-09 22:55 | Allow compile-surface import fixes in PR 2 | Honest `forge build` requires the randomizer contracts to import existing Stream interfaces |
 | 2026-06-09 23:00 | Local validation passed for PR 2 | `make check` and Windows `scripts/check.ps1` pass; generated Foundry artifacts are ignored |
+| 2026-06-09 23:02 | Open PR #4 | Explicit Claude review requested because bot review may not run automatically |
 
 ## Resume Instructions
 
