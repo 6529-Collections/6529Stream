@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/3` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 23:18 UTC` |
+| Last updated | `2026-06-09 23:23 UTC` |
 
 ## Packaging Notes
 
@@ -59,9 +59,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ## Current PR Worklog
 
-### PR 2: Reproducible baseline tooling
+### PR #4: Reproducible baseline tooling (Queue Item 2)
 
-Status: Claude review fixes implemented locally; pending commit, push, CI, and bot re-review.
+Status: CodeRabbit CI hardening fixes validated locally; pending commit, push, CI, and bot
+re-review.
 Branch: `codex/gate-a-reproducible-baseline`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/4`.
 
@@ -99,10 +100,11 @@ Validation:
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
 - `git check-ignore -v out/ cache/ broadcast/ .venv-tools/ .env.local` confirmed generated/local artifacts are ignored.
 - Claude fix pass validation: `bash -n scripts/bootstrap-ec2.sh`, `bash -n scripts/check.sh`, PowerShell parser check for `scripts\bootstrap-windows.ps1`, `make -n slither`, and env-template ignore checks passed.
+- CodeRabbit CI hardening validation: GitHub Actions references are pinned to 40-character SHAs, `actions/checkout` uses `persist-credentials: false`, `git diff --check` passed, `make check` passed, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
 
 Next steps:
 
-1. Commit and push Claude fix pass.
+1. Commit and push CodeRabbit CI hardening pass.
 2. Explicitly request Claude re-review.
 3. Monitor CI and bot comments.
 4. Resolve any actionable review.
@@ -123,6 +125,7 @@ Next steps:
 | 2026-06-09 23:00 | Local validation passed for PR 2 | `make check` and Windows `scripts/check.ps1` pass; generated Foundry artifacts are ignored |
 | 2026-06-09 23:02 | Open PR #4 | Explicit Claude review requested because bot review may not run automatically |
 | 2026-06-09 23:18 | Implement Claude PR #4 review fixes | Harden Windows/Linux bootstrap, Makefile PATH handling, bash missing-tool UX, and env template ignores |
+| 2026-06-09 23:23 | Implement CodeRabbit PR #4 review fixes | Pin CI actions to commit SHAs, disable persisted checkout credentials, and clarify the PR worklog label |
 
 ## Resume Instructions
 
