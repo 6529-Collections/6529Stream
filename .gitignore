@@ -1,21 +1,24 @@
-# Ignore node_modules directory
+# Node / frontend artifacts
 node_modules/
 
-# Ignore log files
+# Logs
 logs/
 *.log
 
-# Ignore build directories
+# Build outputs
 dist/
 build/
+out/
+cache/
+broadcast/
 
-# Ignore environment variable files
+# Local environments and secrets
 .env
+.env.*
+.venv-tools/
 
-# Ignore IDE specific files
+# Editors and OS files
 .idea/
 .vscode/
-
-# Ignore OS generated files
 .DS_Store
 Thumbs.db

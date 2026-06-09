@@ -11,15 +11,15 @@
 pragma solidity ^0.8.19;
 
 import "./ArrngConsumer.sol";
-import "./INextGenCore.sol";
-import "./INextGenAdmins.sol";
+import "./IStreamCore.sol";
+import "./IStreamAdmins.sol";
 
 contract NextGenRandomizerRNG is ArrngConsumer {
 
     mapping(uint256 => uint256) public requestToToken;
     address gencore;
-    INextGenCore public gencoreContract;
-    INextGenAdmins private adminsContract;
+    IStreamCore public gencoreContract;
+    IStreamAdmins private adminsContract;
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
     uint256 ethRequired;
     mapping(uint256 => uint256) public tokenToRequest;
@@ -27,8 +27,8 @@ contract NextGenRandomizerRNG is ArrngConsumer {
 
     constructor(address _gencore, address _adminsContract, address _arRNG) ArrngConsumer(_arRNG) {
         gencore = _gencore;
-        gencoreContract = INextGenCore(_gencore);
-        adminsContract = INextGenAdmins(_adminsContract);
+        gencoreContract = IStreamCore(_gencore);
+        adminsContract = IStreamAdmins(_adminsContract);
     }
 
     modifier FunctionAdminRequired(bytes4 _selector) {
@@ -58,13 +58,13 @@ contract NextGenRandomizerRNG is ArrngConsumer {
     // function to update contracts
 
     function updateAdminContract(address _newadminsContract) public FunctionAdminRequired(this.updateAdminContract.selector) {
-        require(INextGenAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin");
-        adminsContract = INextGenAdmins(_newadminsContract);
+        require(IStreamAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin");
+        adminsContract = IStreamAdmins(_newadminsContract);
     }
 
     function updateCoreContract(address _gencore) public FunctionAdminRequired(this.updateCoreContract.selector) { 
         gencore = _gencore;
-        gencoreContract = INextGenCore(_gencore);
+        gencoreContract = IStreamCore(_gencore);
     }
 
     // function to update cost

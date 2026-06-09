@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR 1 branch | `codex/roadmap-control-plane` |
-| Active PR 1 URL | `https://github.com/6529-Collections/6529Stream/pull/3` |
+| Active PR branch | `codex/gate-a-reproducible-baseline` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/3` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 22:36 UTC` |
+| Last updated | `2026-06-09 23:00 UTC` |
 
 ## Packaging Notes
 
@@ -51,43 +51,63 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 | Order | Candidate PR | Gate | Scope | Status |
 | --- | --- | --- | --- | --- |
-| 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | In progress |
-| 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Planned |
+| 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | Merged in PR #3 |
+| 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | In progress |
 | 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Planned |
 | 4 | Characterization test skeleton | Gate A | Test directory, fixtures, compile-only or characterization scaffolding | Planned |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Planned |
 
 ## Current PR Worklog
 
-### PR 1: Roadmap and autonomous run control plane
+### PR 2: Reproducible baseline tooling
 
-Status: In progress.
-Branch: `codex/roadmap-control-plane`.
-Pull request: `https://github.com/6529-Collections/6529Stream/pull/3`.
+Status: Local validation passed; PR not opened yet.
+Branch: `codex/gate-a-reproducible-baseline`.
+Pull request: TBD.
 
 Goal:
 
-- Make the roadmap canonical, gated, issue-ready, and traceable.
-- Add durable autonomous run state to support long-running execution.
+- Make a fresh checkout compile real Solidity sources instead of compiling
+  nothing.
+- Add a canonical `make check` smoke gate.
+- Add Linux and Windows bootstrap/check scripts.
+- Add CI build/test smoke with uploaded logs.
+- Add minimal setup/status docs and repository skeleton directories.
 
 Candidate files:
 
-- `ops/ROADMAP.md`
 - `ops/AUTONOMOUS_RUN.md`
+- `.editorconfig`
+- `.gitattributes`
+- `.gitignore`
+- `.github/workflows/ci.yml`
+- `foundry.toml`
+- `Makefile`
+- `requirements-tools.txt`
+- `scripts/`
+- `docs/`
+- `test/README.md`
+- `script/README.md`
+- `README.md`
+- Compile-surface interface import fixes if required for honest `forge build`
 
 Validation:
 
-- `rg -n "^#|^##|^###" ops/ROADMAP.md`
-- `rg -n "^#|^##|^###" ops/AUTONOMOUS_RUN.md`
-- Confirm Markdown code fences are balanced.
-- Confirm no unrelated files are staged in the PR.
+- `forge build` passed.
+- `forge test -vvv` passed command execution and reported no tests found.
+- `make check` passed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `git check-ignore -v out/ cache/ broadcast/ .venv-tools/ .env.local` confirmed generated/local artifacts are ignored.
 
 Next steps:
 
-1. Finish local verification of roadmap/state files.
-2. Monitor CI and bot comments.
-3. Resolve any actionable review.
-4. Merge when clean.
+1. Finish local implementation and verification.
+2. Stage only Gate A reproducible-baseline files.
+3. Commit, push, and open PR.
+4. Explicitly request Claude review.
+5. Monitor CI and bot comments.
+6. Resolve any actionable review.
+7. Merge when clean.
 
 ## Decision Log
 
@@ -98,6 +118,10 @@ Next steps:
 | 2026-06-09 22:34 | Start with a docs/state PR | It establishes the control plane before code changes and is low risk |
 | 2026-06-09 22:34 | Create PR 1 from a clean branch based on `origin/main` | The initial checkout contained unrelated dirty files and was on the already-merged PR #2 branch |
 | 2026-06-09 22:36 | Open PR #3 for roadmap/control-plane work | PR contains only `ops/ROADMAP.md` and `ops/AUTONOMOUS_RUN.md` |
+| 2026-06-09 22:49 | Merge PR #3 | CodeRabbit was green and review threads were resolved |
+| 2026-06-09 22:55 | Start Gate A reproducible-baseline PR | Fresh Foundry config exposed that the prior build baseline compiled nothing |
+| 2026-06-09 22:55 | Allow compile-surface import fixes in PR 2 | Honest `forge build` requires the randomizer contracts to import existing Stream interfaces |
+| 2026-06-09 23:00 | Local validation passed for PR 2 | `make check` and Windows `scripts/check.ps1` pass; generated Foundry artifacts are ignored |
 
 ## Resume Instructions
 

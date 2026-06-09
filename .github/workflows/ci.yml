@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  foundry:
+    name: Foundry smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+
+      - name: Build
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          forge build 2>&1 | tee ci-logs/forge-build.log
+
+      - name: Test
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          forge test -vvv 2>&1 | tee ci-logs/forge-test.log
+
+      - name: Upload Foundry logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-smoke-logs
+          path: ci-logs/
+          if-no-files-found: ignore
+          retention-days: 14
