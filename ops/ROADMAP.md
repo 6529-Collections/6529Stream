@@ -600,7 +600,7 @@ Acceptance criteria:
 ### P0-AUTH-003: Decide And Implement ERC-1271 Support
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
-- Blocks: Gate B1 and Gate C.
+- Blocks: Gate C.
 - Dependencies: `P0-AUTH-ADR`.
 
 Problem:
@@ -644,7 +644,7 @@ Acceptance criteria:
 ### P0-AUCT-001: Formalize Auction Custody And State Machine
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
-- Blocks: Gate B1 and Gate C.
+- Blocks: Gate C.
 - Dependencies: `P0-AUCT-ADR`.
 
 Problem:
@@ -872,7 +872,7 @@ Acceptance criteria:
 ### P0-ADMIN-002: Define Pause And Emergency Controls
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS+OPS`.
-- Blocks: Gate B1 and Gate C.
+- Blocks: Gate C.
 - Dependencies: `P0-ADMIN-ADR`.
 
 Problem:

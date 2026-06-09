@@ -77,8 +77,8 @@ Candidate files:
 
 Validation:
 
-- `rg -n "^#|^##|^###" ops\ROADMAP.md`
-- `rg -n "^#|^##|^###" ops\AUTONOMOUS_RUN.md`
+- `rg -n "^#|^##|^###" ops/ROADMAP.md`
+- `rg -n "^#|^##|^###" ops/AUTONOMOUS_RUN.md`
 - Confirm Markdown code fences are balanced.
 - Confirm no unrelated files are staged in the PR.
 
