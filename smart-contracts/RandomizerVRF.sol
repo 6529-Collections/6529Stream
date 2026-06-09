@@ -12,8 +12,8 @@ pragma solidity ^0.8.19;
 
 import "./VRFCoordinatorV2Interface.sol";
 import "./VRFConsumerBaseV2.sol";
-import "./INextGenCore.sol";
-import "./INextGenAdmins.sol";
+import "./IStreamCore.sol";
+import "./IStreamAdmins.sol";
 
 contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
@@ -32,15 +32,15 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     mapping(uint256 => uint256) public requestToToken;
 
     address gencore;
-    INextGenCore public gencoreContract;
-    INextGenAdmins private adminsContract;
+    IStreamCore public gencoreContract;
+    IStreamAdmins private adminsContract;
 
     constructor(uint64 subscriptionId, address vrfCoordinator, address _gencore, address _adminsContract) VRFConsumerBaseV2(vrfCoordinator) {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         s_subscriptionId = subscriptionId;
         gencore = _gencore;
-        gencoreContract = INextGenCore(_gencore);
-        adminsContract = INextGenAdmins(_adminsContract);
+        gencoreContract = IStreamCore(_gencore);
+        adminsContract = IStreamAdmins(_adminsContract);
     }
 
     modifier FunctionAdminRequired(bytes4 _selector) {
@@ -91,13 +91,13 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
      // function to update contracts
 
     function updateAdminContract(address _newadminsContract) public FunctionAdminRequired(this.updateAdminContract.selector) {
-        require(INextGenAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin");
-        adminsContract = INextGenAdmins(_newadminsContract);
+        require(IStreamAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin");
+        adminsContract = IStreamAdmins(_newadminsContract);
     }
 
     function updateCoreContract(address _gencore) public FunctionAdminRequired(this.updateCoreContract.selector) { 
         gencore = _gencore;
-        gencoreContract = INextGenCore(_gencore);
+        gencoreContract = IStreamCore(_gencore);
     }
 
     // get randomizer contract status
