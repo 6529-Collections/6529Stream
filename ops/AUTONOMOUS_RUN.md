@@ -30,9 +30,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR 1 branch | `codex/roadmap-control-plane` |
+| Active PR 1 URL | `https://github.com/6529-Collections/6529Stream/pull/3` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 22:34 UTC` |
+| Last updated | `2026-06-09 22:36 UTC` |
 
 ## Packaging Notes
 
@@ -62,6 +63,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 Status: In progress.
 Branch: `codex/roadmap-control-plane`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/3`.
 
 Goal:
 
@@ -83,9 +85,9 @@ Validation:
 Next steps:
 
 1. Finish local verification of roadmap/state files.
-2. Stage only PR 1 files.
-3. Commit, push, open PR.
-4. Monitor CI and bot comments.
+2. Monitor CI and bot comments.
+3. Resolve any actionable review.
+4. Merge when clean.
 
 ## Decision Log
 
@@ -95,6 +97,7 @@ Next steps:
 | 2026-06-09 22:34 | Add `ops/AUTONOMOUS_RUN.md` as durable state | Long-running execution needs repo-persisted state across compaction and PR cycles |
 | 2026-06-09 22:34 | Start with a docs/state PR | It establishes the control plane before code changes and is low risk |
 | 2026-06-09 22:34 | Create PR 1 from a clean branch based on `origin/main` | The initial checkout contained unrelated dirty files and was on the already-merged PR #2 branch |
+| 2026-06-09 22:36 | Open PR #3 for roadmap/control-plane work | PR contains only `ops/ROADMAP.md` and `ops/AUTONOMOUS_RUN.md` |
 
 ## Resume Instructions
 
