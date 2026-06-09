@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/4` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 23:43 UTC` |
+| Last updated | `2026-06-09 23:46 UTC` |
 
 ## Packaging Notes
 
@@ -53,7 +53,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | --- | --- | --- | --- | --- |
 | 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | Merged in PR #3 |
 | 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Merged in PR #4 |
-| 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | In progress on `codex/ci-review-hardening` |
+| 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Open in PR #5 |
 | 4 | Characterization test skeleton | Gate A | Test directory, fixtures, compile-only or characterization scaffolding | Planned |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Planned |
 
@@ -111,9 +111,9 @@ Outcome:
 
 ### PR #5: Repo maturity and contributor docs (Queue Item 3)
 
-Status: Local validation passed; ready to commit and open PR.
+Status: Open; waiting for CI and bot review.
 Branch: `codex/ci-review-hardening`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/5`.
 
 Goal:
 
@@ -155,10 +155,10 @@ Validation:
 
 Next steps:
 
-1. Commit and push PR #5.
-2. Open PR #5.
-3. Explicitly request Claude review if it does not run automatically.
-4. Wait for CI and bot comments before merging.
+1. Explicitly request Claude review if it does not run automatically.
+2. Wait for CI and bot comments.
+3. Resolve any actionable review comments.
+4. Merge only after CI and review are clean.
 
 ## Decision Log
 
@@ -180,6 +180,7 @@ Next steps:
 | 2026-06-09 23:33 | Merge PR #4 | Latest head was CI-clean, CodeRabbit-clean, and all visible review threads were resolved |
 | 2026-06-09 23:35 | Start PR #5 | Queue Item 3 adds security, contribution, issue, PR, and ownership intake files before deeper implementation work |
 | 2026-06-09 23:43 | Finish local PR #5 validation | Docs/templates parse cleanly, CI hygiene syntax passes, and both smoke entrypoints pass |
+| 2026-06-09 23:46 | Open PR #5 | PR packages contributor/security intake docs, review routing, issue forms, PR template, CODEOWNERS, and small CI hygiene |
 
 ## Resume Instructions
 
