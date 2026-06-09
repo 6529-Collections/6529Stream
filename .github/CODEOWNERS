@@ -1,0 +1,12 @@
+# Temporary ownership while dedicated protocol/security teams are formalized.
+# Replace or extend this file when team slugs are available.
+
+* @punk6529
+
+/.github/ @punk6529
+/docs/ @punk6529
+/ops/ @punk6529
+/script/ @punk6529
+/scripts/ @punk6529
+/smart-contracts/ @punk6529
+/test/ @punk6529

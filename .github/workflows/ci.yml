@@ -6,10 +6,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   foundry:
     name: Foundry smoke
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -21,6 +29,31 @@ jobs:
         uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
         with:
           version: v1.7.1
+
+      - name: Repository hygiene
+        shell: bash
+        run: |
+          git diff --check
+          bash -n scripts/check.sh scripts/bootstrap-ec2.sh
+
+      - name: PowerShell syntax
+        shell: pwsh
+        run: |
+          $scriptPaths = @(
+            "scripts/check.ps1",
+            "scripts/bootstrap-windows.ps1"
+          )
+          foreach ($scriptPath in $scriptPaths) {
+            $errors = $null
+            [System.Management.Automation.PSParser]::Tokenize(
+              (Get-Content -Raw $scriptPath),
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List
+              exit 1
+            }
+          }
 
       - name: Build
         shell: bash

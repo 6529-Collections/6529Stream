@@ -77,6 +77,8 @@ Current pinned versions:
 
 ## Important Docs
 
+- [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- [`SECURITY.md`](SECURITY.md)
 - [`ops/ROADMAP.md`](ops/ROADMAP.md)
 - [`ops/AUTONOMOUS_RUN.md`](ops/AUTONOMOUS_RUN.md)
 - [`docs/status.md`](docs/status.md)

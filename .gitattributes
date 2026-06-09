@@ -3,6 +3,7 @@
 .editorconfig text eol=lf
 .gitattributes text eol=lf
 .gitignore text eol=lf
+.github/CODEOWNERS text eol=lf
 
 *.sol text eol=lf
 *.md text eol=lf

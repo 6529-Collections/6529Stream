@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security report
+    url: https://github.com/6529-Collections/6529Stream/security/advisories/new
+    about: Report exploitable vulnerabilities privately. If private reporting is unavailable, see SECURITY.md.
+  - name: Roadmap
+    url: https://github.com/6529-Collections/6529Stream/blob/main/ops/ROADMAP.md
+    about: Review the gated roadmap and known blockers before opening an issue.
