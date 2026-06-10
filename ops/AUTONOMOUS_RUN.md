@@ -1709,6 +1709,11 @@ Validation:
   `arbitrary-send-eth` now reports zero current findings. The regenerated
   branch-local counts are 632 total findings: 9 High, 29 Medium, 58 Low, 530
   Informational, and 6 Optimization.
+- The zero `arbitrary-send-eth` metric was extracted from the regenerated
+  `$env:TEMP\6529stream-slither-emergency.json` output with:
+  `@($json.results.detectors | Where-Object { $_.check -eq "arbitrary-send-eth" }).Count`,
+  after `$json = Get-Content $out -Raw | ConvertFrom-Json`; result:
+  `ARBITRARY_SEND_ETH_COUNT=0`.
 
 ## Decision Log
 
