@@ -12,7 +12,7 @@ Accepted.
 | Issue | [P1-META-ADR](https://github.com/6529-Collections/6529Stream/issues/45) |
 | Blocks | [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9), [P1-META-001](https://github.com/6529-Collections/6529Stream/issues/46), [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47), [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48), [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49), [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50), [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51) |
 | Related issues | [P0-RAND-004](https://github.com/6529-Collections/6529Stream/issues/40), [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34), [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35), [P0-INIT-001](https://github.com/6529-Collections/6529Stream/issues/15) |
-| Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0004](0004-admin-governance.md), [ADR 0005](0005-randomness.md), ADR 0007 |
+| Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0004](0004-admin-governance.md), [ADR 0005](0005-randomness.md), [ADR 0007](0007-upgrade-redeployment.md) |
 | Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/DependencyRegistry.sol`, `smart-contracts/StreamMinter.sol`, randomizer adapters that finalize token metadata |
 | Work type | `DESIGN` |
 
@@ -542,7 +542,8 @@ signal that metadata changed before freeze.
   in this ADR PR.
 - Choosing final metadata field names beyond the minimum schema requirements.
 - Choosing final CDN, IPFS, Arweave, or website hosting infrastructure.
-- Defining upgrade or redeployment strategy. ADR 0007 owns that decision.
+- Defining upgrade or redeployment strategy. [ADR 0007](0007-upgrade-redeployment.md)
+  owns that decision.
 - Defining final randomness provider behavior beyond the metadata interactions
   inherited from ADR 0005.
 
@@ -571,4 +572,5 @@ signal that metadata changed before freeze.
 - Cover [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51).
   This issue must set concrete field, `tokenURI`, generated HTML, calldata, and
   gas budget limits before metadata implementation merges.
-- Reconcile final upgrade/redeployment implications with ADR 0007.
+- Keep metadata/freeze deployment implications aligned with
+  [ADR 0007](0007-upgrade-redeployment.md) during implementation.
