@@ -39,9 +39,12 @@ contributors who start from the README.
 - VRF and arRNG randomizer adapters now record request lifecycle state, expose
   request and token-level lifecycle views, and validate request ID, the core
   token-to-collection binding, provider, and collection randomizer epoch before
-  writing a token hash. Remaining randomness blockers include deterministic
-  post-processing retry, callback-after-burn policy, richer metadata state
-  exposure, provider configuration runbooks, and full handling of weak helper
+  writing a token hash. Ordinary provider migration is blocked while the current
+  lifecycle-aware adapter reports pending requests; admins must explicitly mark
+  affected requests stale before migrating. Remaining randomness blockers include
+  deterministic post-processing retry, callback-after-burn policy, richer
+  metadata state exposure, provider configuration runbooks, canonical
+  core/coordinator lifecycle ownership, and full handling of weak helper
   randomness beyond disabling `RandomizerNXT` as a production randomizer.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.

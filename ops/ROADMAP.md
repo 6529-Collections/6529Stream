@@ -1124,8 +1124,12 @@ Current behavior:
   collection randomizer is updated; stale callbacks from replaced providers
   cannot silently fulfill old requests.
 - VRF and arRNG adapters expose request state, request-to-token,
-  token-to-request, and token-to-collection views; callback-after-burn policy,
-  failed post-processing retry, and richer metadata state remain open.
+  token-to-request, token-to-collection, and pending-request count views.
+- `StreamCore.addRandomizer` now blocks ordinary provider migration while the
+  current lifecycle-aware adapter reports pending requests; explicit admin stale
+  marking or valid fulfillment clears pending counts before migration.
+- Callback-after-burn policy, failed post-processing retry, canonical
+  core/coordinator-owned lifecycle state, and richer metadata state remain open.
 - `RandomizerNXT` and `XRandoms` use block-derived helper randomness that is
   out of production scope under ADR 0005. `RandomizerNXT` no longer advertises
   itself as a production randomizer; `XRandoms` still needs final removal,
@@ -1138,6 +1142,8 @@ Intended behavior:
 - Pending and failed randomness are explicit states.
 - Production drops use provider-backed async randomness only.
 - Provider migration is observable and cannot silently fulfill stale requests.
+- Provider migration is blocked by default while lifecycle-aware providers have
+  pending requests for the collection.
 
 Required code changes:
 
@@ -1153,6 +1159,8 @@ Required code changes:
   provider words in existing fulfillment events; raw-output hash storage remains
   `P0-RAND-007`.
 - Define whether randomizer migration can happen while requests are pending.
+  Implemented default policy: ordinary migration is blocked while the current
+  lifecycle-aware adapter reports pending requests.
 - Record failed or stale post-processing for retry by a separate function if
   needed. Stale marking is implemented; failed post-processing retry remains
   `P0-RAND-004`/`P0-RAND-006`.
@@ -1182,7 +1190,8 @@ Child tickets:
 - [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40):
   Add pending, fulfilled, stale, and failed post-processing states.
 - [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41):
-  Define and test randomizer migration with pending requests.
+  Define and test randomizer migration with pending requests. Implemented
+  default blocking policy for lifecycle-aware providers.
 - [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42):
   Add bounded manual retry for deterministic post-processing failures.
 - [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43):
@@ -1196,7 +1205,9 @@ Required tests:
 - Stale callback fails. Implemented for stale-marked requests and replaced
   randomizer epochs.
 - Replaced randomizer callback fails. Implemented.
-- Randomizer migration with pending requests follows ADR.
+- Randomizer migration with pending requests follows ADR. Implemented for the
+  default block-by-pending policy, plus stale/fulfilled unblocking and
+  new-provider fulfillment.
 - Manual retry cannot change random output.
 - Callback after burn follows ADR behavior.
 - Fulfillment does not revert in normal operation.
@@ -1241,6 +1252,9 @@ Acceptance criteria:
   equivalent.
 - Existing pending requests cannot be silently fulfilled by a replacement
   provider.
+- Ordinary migration while requests are pending is rejected with
+  `PendingRandomnessRequests`; explicit stale marking or fulfillment clears the
+  lifecycle-aware pending count before migration.
 - Manual retry can only retry deterministic post-processing using the same
   provider output. Still open under `P0-RAND-006`.
 - `RandomizerNXT` and `XRandoms` are removed from production paths, moved to
@@ -1938,9 +1952,9 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol`, `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol` | Passing for current first-party surfaces: `StreamAdmins.emergencyRecipient()` is the explicit surplus recipient, `StreamMinter`, `StreamAuctions`, and `StreamCuratorsPool` use it for positive surplus withdrawal, `NextGenRandomizerRNG` exposes zero emergency-withdrawable reserve, unauthorized emergency withdrawals revert without transfer, and payment/reserve tests cover poster, bidder, curator, active-bid escrow, and randomizer reserve boundaries. Dedicated signer-manager and deployment emergency runbooks remain future work | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF and arRNG request records, request state, request-to-token, token-to-request, token-to-collection, first-class token-level request/state views, empty token lookup, token-level stale lookup, requested block/time, fulfilled block/time, and derived seed storage | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
 | Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF/arRNG valid fulfillment, unknown request, zero arRNG request ID, empty output, duplicate fulfillment, core token-to-collection mismatch, live provider/epoch validation, and reentrant arRNG request-submission rejection | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
-| Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerLifecycle.t.sol` | Passing for replaced-provider stale epoch rejection and admin-marked stale requests; bulk stale marking or pending-migration policy remains future work | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
+| Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerLifecycle.t.sol` | Passing for stale epoch rejection, admin-marked stale requests, old-provider callback rejection after explicit stale marking, and duplicate old-provider callbacks after fulfillment | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | In Progress: pending, fulfilled, and stale states are implemented and observable; failed post-processing state, retry, and metadata integration remain missing | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
-| Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | In Progress: provider replacement increments the collection randomizer epoch and old callbacks fail; explicit pending-request migration policy and bulk stale handling remain missing | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
+| Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | Passing for default block-by-pending policy: VRF and arRNG adapters expose lifecycle-aware pending counts; `StreamCore.addRandomizer` rejects migration while pending requests exist; fulfilled and stale requests clear pending counts; migration with no pending requests emits the provider/epoch event; a new provider can request and fulfill after migration. Automatic bulk stale marking remains future incident tooling. | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Missing | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
 | Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerSeed.t.sol` | In Progress: derived seed includes provider, request ID, collection, token, randomizer epoch, and provider output via `abi.encode`; explicit raw-output hash storage remains missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
 | Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerProductionScope.t.sol` | In Progress: `RandomizerNXT.isRandomizerContract()` returns false and `StreamCore.addRandomizer` rejects it for production collections; `XRandoms` Slither `weak-prng` rows remain open pending final scoping/removal | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |

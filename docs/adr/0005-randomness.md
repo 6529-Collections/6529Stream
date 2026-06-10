@@ -81,6 +81,9 @@ Current implementation status:
 - `RandomizerVRF` and `RandomizerRNG` record provider request lifecycle data
   and validate request ID, the core token-to-collection binding, provider, and
   randomizer epoch before writing a derived seed.
+- Lifecycle-aware randomizer adapters expose per-collection and total pending
+  request counts. `StreamCore.addRandomizer` blocks ordinary provider migration
+  while the current lifecycle-aware provider reports pending requests.
 - `RandomizerRNG` guards the arRNG request-submission window where the provider
   request ID is returned from an external payable call, and tests prove a
   reentrant controller cannot fulfill during that window.
@@ -89,8 +92,8 @@ Current implementation status:
 - `RandomizerNXT` no longer advertises itself as a production randomizer.
 - Remaining implementation work includes deterministic post-processing retry,
   callback-after-burn policy, richer metadata state exposure, provider
-  configuration events/runbooks, and final handling of `XRandoms` weak helper
-  randomness.
+  configuration events/runbooks, canonical core/coordinator-owned lifecycle
+  state, and final handling of `XRandoms` weak helper randomness.
 
 ## Decision
 
@@ -264,6 +267,14 @@ Migration rules:
 
 This deliberately favors stuck-but-honest states over the ability to redraw a
 random output after users can observe a mint.
+
+Current implementation status for `P0-RAND-005`: ordinary provider migration is
+blocked while the current lifecycle-aware adapter reports pending requests for
+the collection. Pending counts decrement only when a request reaches a terminal
+`Fulfilled` or `Stale` state. Explicit admin stale marking is the current
+emergency path that makes the pending state observable before provider
+migration; automatic bulk stale marking and redraw/re-request behavior remain
+out of scope.
 
 ## Seed And Storage Policy
 

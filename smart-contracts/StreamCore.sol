@@ -14,6 +14,7 @@ import "./ERC721Enumerable.sol";
 import "./Strings.sol";
 import "./Base64.sol";
 import "./IRandomizer.sol";
+import "./IRandomizerLifecycle.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamMinter.sol";
 import "./ERC2981.sol";
@@ -23,6 +24,10 @@ import "./StreamPauseDomains.sol";
 
 contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
     using Strings for uint256;
+
+    error PendingRandomnessRequests(
+        uint256 collectionId, address randomizer, uint256 pendingRequests
+    );
 
     // declare variables
     uint256 public newCollectionIndex;
@@ -220,6 +225,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
             "Contract is not Randomizer"
         );
         address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
+        _requireNoPendingRandomnessRequests(_collectionID, oldRandomizer);
         collectionRandomizerEpoch[_collectionID] = collectionRandomizerEpoch[_collectionID] + 1;
         collectionAdditionalData[_collectionID].randomizerContract = _randomizerContract;
         collectionAdditionalData[_collectionID].randomizer = IRandomizer(_randomizerContract);
@@ -455,6 +461,31 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    function _requireNoPendingRandomnessRequests(uint256 _collectionID, address oldRandomizer)
+        private
+        view
+    {
+        if (oldRandomizer == address(0)) {
+            return;
+        }
+
+        try IRandomizerLifecycle(oldRandomizer).supportsRandomizerLifecycle() returns (
+            bool supported
+        ) {
+            if (!supported) {
+                return;
+            }
+        } catch {
+            return;
+        }
+
+        uint256 pendingRequests =
+            IRandomizerLifecycle(oldRandomizer).pendingRandomnessRequests(_collectionID);
+        if (pendingRequests != 0) {
+            revert PendingRandomnessRequests(_collectionID, oldRandomizer, pendingRequests);
+        }
     }
 
     // function that return the tokenURI

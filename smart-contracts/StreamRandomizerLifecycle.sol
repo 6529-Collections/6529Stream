@@ -51,6 +51,8 @@ abstract contract StreamRandomizerLifecycle {
     mapping(uint256 => uint256) public requestToToken;
     mapping(uint256 => uint256) public tokenToRequest;
     mapping(uint256 => uint256) public tokenIdToCollection;
+    mapping(uint256 => uint256) private pendingRandomnessRequestsByCollection;
+    uint256 private pendingRandomnessRequestCount;
 
     event RandomnessRequested(
         uint256 indexed requestId,
@@ -105,6 +107,18 @@ abstract contract StreamRandomizerLifecycle {
         return randomnessRequests[tokenToRequest[tokenId]].state;
     }
 
+    function supportsRandomizerLifecycle() external pure returns (bool) {
+        return true;
+    }
+
+    function pendingRandomnessRequests(uint256 collectionId) public view returns (uint256) {
+        return pendingRandomnessRequestsByCollection[collectionId];
+    }
+
+    function totalPendingRandomnessRequests() public view returns (uint256) {
+        return pendingRandomnessRequestCount;
+    }
+
     function _recordRandomnessRequest(
         uint256 _requestId,
         uint256 _collectionId,
@@ -126,6 +140,9 @@ abstract contract StreamRandomizerLifecycle {
         requestToToken[_requestId] = _tokenId;
         tokenToRequest[_tokenId] = _requestId;
         tokenIdToCollection[_tokenId] = _collectionId;
+        pendingRandomnessRequestsByCollection[_collectionId] =
+            pendingRandomnessRequestsByCollection[_collectionId] + 1;
+        pendingRandomnessRequestCount = pendingRandomnessRequestCount + 1;
         randomnessRequests[_requestId] = RandomnessRequest({
             collectionId: _collectionId,
             tokenId: _tokenId,
@@ -196,6 +213,7 @@ abstract contract StreamRandomizerLifecycle {
         }
 
         request.state = RandomnessRequestState.Fulfilled;
+        _decrementPendingRandomnessRequest(collectionId);
         request.fulfilledBlock = block.number;
         request.fulfilledTimestamp = block.timestamp;
         request.derivedSeed = derivedSeed;
@@ -213,6 +231,7 @@ abstract contract StreamRandomizerLifecycle {
         }
 
         request.state = RandomnessRequestState.Stale;
+        _decrementPendingRandomnessRequest(request.collectionId);
         emit RandomnessRequestMarkedStale(
             _requestId,
             request.collectionId,
@@ -220,5 +239,11 @@ abstract contract StreamRandomizerLifecycle {
             request.provider,
             request.randomizerEpoch
         );
+    }
+
+    function _decrementPendingRandomnessRequest(uint256 collectionId) private {
+        pendingRandomnessRequestsByCollection[collectionId] =
+            pendingRandomnessRequestsByCollection[collectionId] - 1;
+        pendingRandomnessRequestCount = pendingRandomnessRequestCount - 1;
     }
 }

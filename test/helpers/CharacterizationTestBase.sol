@@ -2,6 +2,12 @@
 pragma solidity ^0.8.19;
 
 interface Vm {
+    struct Log {
+        bytes32[] topics;
+        bytes data;
+        address emitter;
+    }
+
     function addr(uint256 privateKey) external returns (address);
     function chainId(uint256 newChainId) external;
     function deal(address account, uint256 newBalance) external;
@@ -14,6 +20,8 @@ interface Vm {
     function warp(uint256 newTimestamp) external;
     function expectRevert(bytes calldata revertData) external;
     function expectRevert() external;
+    function recordLogs() external;
+    function getRecordedLogs() external returns (Log[] memory);
 }
 
 abstract contract CharacterizationTestBase {
