@@ -14,8 +14,8 @@ order.
 ### Maturity Statement
 
 - Maturity: pre-audit and not production-ready.
-- Current CI proves only that the repo compiles and that the test command exits.
-  It does not prove protocol correctness because there are no meaningful tests.
+- Current CI proves that the repo compiles and runs the initial
+  characterization test skeleton. It does not prove protocol correctness.
 - Known P0 blockers include `tx.origin` drop execution, ad hoc authorization,
   auction custody ambiguity, auction reentrancy, push payments, untriaged static
   analysis findings, missing tests, and missing deployment discipline.
@@ -39,7 +39,7 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | No meaningful tests | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Initial characterization tests cover admin guards, current drop behavior, fixed-price payout behavior, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a large untriaged baseline | `slither . --foundry-compile-all` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
@@ -67,7 +67,7 @@ This roadmap distinguishes release modes:
 
 ### Gate A: Reproducible Baseline
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
 Blocking issues: TBD.
 Evidence: TBD.
@@ -1176,10 +1176,25 @@ Acceptance criteria:
 
 - Add tests that lock current behavior before P0 rewrites.
 - Characterize current fixed-price drop behavior.
-- Characterize current auction creation and settlement behavior.
+- Characterize current auction creation/custody behavior; settlement remains
+  missing until the auction ADR and P0 auction work.
 - Characterize current admin guards.
 - Characterize current payout behavior.
 - Characterize current randomness/pending metadata behavior.
+- Initial Gate A skeleton coverage: admin signer/global/function permissions,
+  current `StreamDrops` packed drop ID encoding, signer-only drop execution,
+  fixed-price minting to `tx.origin`, drop replay rejection, mocked
+  `StreamDrops` auction argument passing, real
+  `StreamDrops -> StreamMinter -> StreamCore` auction mint custody to the
+  payout address, auction status/end-time recording, current admin selector
+  mismatch behavior, synchronous fixed-price payout plus poster, payout-address,
+  and curators-pool rejection behavior, pending metadata, immediate randomizer fulfillment,
+  configured-randomizer-only token hash setting, and one-time token hash
+  immutability.
+- Note: this Gate A list includes known-unsafe behavior, including
+  `tx.origin`-based drop execution and synchronous fixed-price payout rejection
+  paths. These tests are regression tripwires before P0 rewrites, not
+  endorsements of protocol correctness.
 
 ### Test Ordering
 
@@ -1238,11 +1253,16 @@ No P0 contract PR may merge without:
 
 ### First Test Queue
 
-- Fixed-price drop happy path.
-- Fixed-price drop replay failure.
-- Fixed-price drop wrong signer failure.
+- Fixed-price drops: initial characterization passing for the happy path,
+  replay failure, wrong signer failure, synchronous payout behavior, poster
+  rejection, payout-address rejection, and curators-pool rejection.
 - Fixed-price drop expired deadline failure after EIP-712 is introduced.
-- Auction mint happy path.
+- Admin selector mismatch regression: initial characterization passing.
+- Auction mint custody happy path: initial characterization passing.
+- Pending metadata and immediate randomizer fulfillment: initial
+  characterization passing.
+- Token hash randomizer authorization and one-time immutability: initial
+  characterization passing.
 - Auction bid, outbid, extension, and settlement.
 - Malicious bidder reentrancy.
 - No-bid auction settlement.
@@ -1592,16 +1612,16 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 
 | Finding | Required test | Intended test file | Status | Issue | Gate | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsAuth.t.sol` | Missing | `P0-AUTH-001` | Gate C | TBD |
+| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsAuth.t.sol` | Initial characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; P0 fix tests missing | `P0-AUTH-001` | Gate C | TBD |
 | Ad hoc drop authorization | EIP-712 valid, replayed, expired, wrong chain, wrong contract, wrong signer | `test/StreamDropsEIP712.t.sol` | Missing | `P0-AUTH-002` | Gate C | TBD |
 | ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | `P0-AUTH-003` | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | `P0-AUCT-002` | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | `P0-AUCT-002` | Gate C | TBD |
-| Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
+| Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
-| Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Missing | `P0-ADMIN-001` | Gate C | TBD |
+| Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | `P0-ADMIN-001` | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer fulfillment rejected | `test/StreamRandomizer.t.sol` | Missing | `P0-RAND-001` | Gate C | TBD |
-| Pending randomness metadata | `tokenURI` pending/final behavior is deterministic | `test/StreamMetadata.t.sol` | Missing | `P1-META-*` | Gate D | TBD |
+| Pending randomness metadata | `tokenURI` pending/final behavior is deterministic | `test/StreamMetadata.t.sol` | Initial characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; golden-file tests missing | `P1-META-*` | Gate D | TBD |
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsMerkle.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply and metadata follow ADR | `test/StreamCoreBurn.t.sol` | Missing | `P1-META-*` | Gate D | TBD |
