@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/68` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 16:43 UTC` |
+| Last updated | `2026-06-10 16:45 UTC` |
 
 ## Packaging Notes
 
@@ -80,7 +80,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
-| 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Local validation complete on `codex/randomizer-post-processing-retry`; PR pending |
+| 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #69; awaiting CI and CodeRabbit |
 
 ## Current PR Worklog
 
@@ -2310,9 +2310,9 @@ Outcome:
 
 ### Next PR: Add bounded randomness post-processing retry (Queue Item 28)
 
-Status: Local validation complete; PR creation next.
+Status: PR #69 open; awaiting CI and CodeRabbit.
 Branch: `codex/randomizer-post-processing-retry`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/69`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/42`
@@ -2576,6 +2576,7 @@ Validation so far:
 | 2026-06-10 16:31 | Implement Queue Item 28 local draft | Added admin-gated VRF/arRNG `retryRandomnessPostProcessing`, lifecycle retry count/limit/events/errors, focused retry tests, and docs/roadmap/run-state traceability |
 | 2026-06-10 16:39 | Validate Queue Item 28 locally | Full `make check`, Windows wrapper, focused retry/lifecycle tests, formatting, diff hygiene, traceability, heading scan, and Slither comparison all passed with high/medium counts unchanged |
 | 2026-06-10 16:43 | Expand Queue Item 28 retry validation | Added explicit retry rejection tests for changed randomizer epoch and provider, refreshed full gates to 168 passing tests, and kept Slither high/medium counts unchanged |
+| 2026-06-10 16:45 | Open PR #69 | PR packages bounded deterministic post-processing retry for VRF and arRNG adapters, closes issue #42, and records full local validation evidence |
 
 ## Resume Instructions
 
