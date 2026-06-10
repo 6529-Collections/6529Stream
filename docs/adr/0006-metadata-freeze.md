@@ -474,12 +474,12 @@ P1 metadata tests must include:
 
 1. Keep existing off-chain metadata characterization tests.
 2. Add golden-file tests for current behavior before changing metadata output.
-3. Implement metadata schema versioning and escaping.
-4. Implement explicit pending/final metadata states from ADR 0005.
-5. Implement dependency version records and content hashes.
-6. Implement freeze manifest storage and post-freeze guards.
-7. Implement `ERC-4906` interface support and event emissions.
-8. Implement burn metadata and callback-after-burn behavior.
+3. Introduce metadata schema versioning and escaping.
+4. Add explicit pending/final metadata states from ADR 0005.
+5. Enforce dependency version records and content hashes.
+6. Store freeze manifests and post-freeze guards.
+7. Add `ERC-4906` interface support and event emissions.
+8. Document burn metadata and callback-after-burn behavior in code and tests.
 9. Update protocol docs, event catalog, API matrix, and release checklist.
 10. Re-run `make check`, the Windows wrapper, Slither, metadata golden tests,
     and render sandbox tests before public beta.
@@ -498,8 +498,8 @@ collections must pin immutable dependency content.
 
 ### Keep Raw UTF-8 JSON Data URIs
 
-Rejected for public beta. Raw UTF-8 JSON data URIs are workable only with very
-careful escaping. Base64 JSON gives indexers a cleaner URI boundary while tests
+Rejected for public beta. Raw UTF-8 JSON data URIs are workable only with
+rigorous escaping. Base64 JSON gives indexers a cleaner URI boundary while tests
 still prove JSON correctness.
 
 ### Serve Burned-Token Metadata On-Chain
@@ -539,9 +539,9 @@ signal that metadata changed before freeze.
 
 - Resolve [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9).
 - Implement [P1-META-001](https://github.com/6529-Collections/6529Stream/issues/46).
-- Implement [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47).
-- Implement [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48).
-- Implement [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49).
-- Implement [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50).
-- Implement [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51).
+- Complete [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47).
+- Build [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48).
+- Add [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49).
+- Ship [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50).
+- Cover [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51).
 - Reconcile final upgrade/redeployment implications with ADR 0007.

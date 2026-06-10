@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/44` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 05:07 UTC` |
+| Last updated | `2026-06-10 05:14 UTC` |
 
 ## Packaging Notes
 
@@ -878,11 +878,16 @@ Validation:
   baseline still present.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
   tests passing and the existing Solidity warning baseline still present.
+- After CodeRabbit's style nitpick, targeted grep confirmed the repeated
+  migration wording and `very careful` phrasing were removed; `git diff
+  --check`, `make check`, and the Windows wrapper passed again.
 
 Review feedback:
 
-- GitHub CI is pending for the current PR head.
-- CodeRabbit is pending.
+- GitHub CI passed on head `9948e251e98b58d1e3ea909d5d05712398a41c1a`;
+  rerun pending after the style follow-up commit.
+- CodeRabbit requested one optional prose nitpick in review `4464741958`; the
+  nitpick is addressed locally and will be pushed in the next commit.
 - Claude review was explicitly requested in issue comment `4666753358`.
 
 ## Decision Log
@@ -977,6 +982,7 @@ Review feedback:
 | 2026-06-10 04:59 | Draft metadata/freeze ADR | ADR 0006 accepts schema-versioned metadata, base64 on-chain JSON, explicit pending/final states, immutable freeze manifests, dependency version pinning, ERC-4906 support, and ERC-721 burn semantics |
 | 2026-06-10 05:05 | Validate metadata/freeze ADR locally | Heading, traceability, ASCII, whitespace, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 05:07 | Open PR #52 | Metadata/freeze ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666753358` |
+| 2026-06-10 05:14 | Address CodeRabbit PR #52 style nitpick | Varied ADR rollout verbs and replaced `very careful` with `rigorous`; whitespace, targeted grep, `make check`, and Windows wrapper validations pass |
 
 ## Resume Instructions
 
