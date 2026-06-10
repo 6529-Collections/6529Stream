@@ -9,7 +9,7 @@ positive; this is still not a full security baseline for public launch.
 | Field | Value |
 | --- | --- |
 | Status | High/medium rows triaged; not accepted as a CI gate |
-| Last generated | `2026-06-10 20:01 UTC` |
+| Last generated | `2026-06-10 20:39 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -26,10 +26,10 @@ baseline and lower-impact findings are handled.
 | --- | ---: |
 | High | 4 |
 | Medium | 19 |
-| Low | 63 |
-| Informational | 575 |
-| Optimization | 7 |
-| Total | 668 |
+| Low | 82 |
+| Informational | 577 |
+| Optimization | 11 |
+| Total | 693 |
 
 ## Detector Counts
 
@@ -45,9 +45,9 @@ baseline and lower-impact findings are handled.
 | `locked-ether` | Medium | 7 |
 | `uninitialized-local` | Medium | 1 |
 | `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 63 |
-| Informational findings | Informational | 575 |
-| Optimization findings | Optimization | 7 |
+| Low-impact findings | Low | 82 |
+| Informational findings | Informational | 577 |
+| Optimization findings | Optimization | 11 |
 
 Dependency-script encoding delta from the previous tracked capture:
 
@@ -89,6 +89,15 @@ Dependency-script encoding delta from the previous tracked capture:
     correcting the `Strings.sol` upstream header.
   - The current vendored `incorrect-exp` and `divide-before-multiply` rows are
     documented false positives, not open remediation items.
+- Payment invariant harness delta from the previous tracked capture:
+  - High and Medium counts remain unchanged at 4 and 19.
+  - Low findings increased from 63 to 82, Informational findings increased from
+    575 to 577, Optimization findings increased from 7 to 11, and total
+    findings increased from 668 to 693 after adding
+    `test/StreamPaymentsInvariant.t.sol`.
+  - New test-harness high/medium detector noise is scoped by source-level
+    suppressions for deliberate payable calls, generated-sequence bookkeeping,
+    and the payable mock randomness provider.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
 - Slither still exits non-zero because accepted test-only and vendored
   false-positive rows remain visible, plus lower-impact findings are not yet a
@@ -112,10 +121,10 @@ GitHub work item that owns that resolution.
 
 | Detector | Occurrences | Contract | Function | Source kind | Source location | Severity | Confidence | Status | Resolution | Required test | Issue | Gate | Owner |
 | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `arbitrary-send-eth` | 1 | `StreamAuctions` | `emergencyWithdraw()` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Bounded auction emergency withdrawal to auction-local surplus after bidder credits and active highest-bid escrow | `test/StreamAuctionPayments.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `NextGenRandomizerRNG` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Treats all adapter ETH as randomness reserve, exposes zero emergency-withdrawable balance, and transfers no emergency-withdrawable ETH | `test/StreamEmergencyWithdraw.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `StreamCuratorsPool` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-005` | High | Medium | Fixed | Bounded curator pool emergency withdrawal to surplus after local curator credits owed | `test/StreamCuratorsPool.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `StreamMinter` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Exposes `totalOwed() == 0` and withdraws only `emergencyWithdrawable()` surplus, covering forced ETH without an ordinary payable path | `test/StreamEmergencyWithdraw.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| `arbitrary-send-eth` | 1 | `StreamAuctions` | `emergencyWithdraw()` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Bounded auction emergency withdrawal to auction-local surplus after bidder credits and active highest-bid escrow | `test/StreamAuctionPayments.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| `arbitrary-send-eth` | 1 | `NextGenRandomizerRNG` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Treats all adapter ETH as randomness reserve, exposes zero emergency-withdrawable balance, and transfers no emergency-withdrawable ETH | `test/StreamEmergencyWithdraw.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| `arbitrary-send-eth` | 1 | `StreamCuratorsPool` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-005` | High | Medium | Fixed | Bounded curator pool emergency withdrawal to surplus after local curator credits owed | `test/StreamCuratorsPool.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C | TBD |
+| `arbitrary-send-eth` | 1 | `StreamMinter` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Exposes `totalOwed() == 0` and withdraws only `emergencyWithdrawable()` surplus, covering forced ETH without an ordinary payable path | `test/StreamEmergencyWithdraw.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamCore` | `retrieveDependencyScript(uint256)` | first-party | Fixed in `P0-META-001` | High | High | Fixed | Replaced packed dynamic dependency-script composition with initialized `string.concat` rendering and typed dependency chunk/content hash views that use `abi.encode`, dependency key, chunk count, chunk index, chunk byte length, and per-chunk content hash | Ambiguous chunk-boundary and typed hash regressions in `test/StreamMetadataEncoding.t.sol` | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `retrieveMessageAndDropID(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Removed legacy packed helper; `hashDropAuthorization` now uses EIP-712 domain-separated typed data | Explicit digest, replay, wrong-domain, wrong-chain, wrong-contract, and field-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `mintDrop(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Replaced legacy packed-hash `mintDrop` ABI with `mintDrop(DropAuthorization,string,bytes)` and storage-backed consumed/cancelled drop IDs | EOA, EIP-2098, replay, expiry, cancellation, stale-epoch, wrong-domain, wrong-chain, wrong-contract, wrong-signer, malleability, zero signer, bad quantity, and token-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
@@ -152,6 +161,7 @@ backed by a regression test or accepted-risk rationale.
 | Detector | Scope | Status | Rationale | Required test | Issue | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
 | `reentrancy-eth`, `write-after-write` | `NextGenRandomizerRNG.requestRandomWords(uint256,uint256)` | Accepted scoped suppression | arRNG returns the provider request ID from an external payable call, so the adapter must record request state after that call. The function uses a local request-in-progress guard, fulfillment rejects during the guarded window, and the suppression is limited to this function. | `test/StreamRandomizerLifecycle.t.sol::testArrngControllerCannotReenterFulfillmentDuringRequest`; `test/StreamRandomizerLifecycle.t.sol::testArrngZeroRequestIdFailsBeforeRecordingLifecycle` | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | TBD |
+| `arbitrary-send-eth`, `reentrancy-no-eth`, `locked-ether` | `test/StreamPaymentsInvariant.t.sol` payment-sequence handler and `InvariantArrngController` mock | Accepted scoped suppression | The invariant harness deliberately pays contracts under test, records generated-sequence bookkeeping around those calls, and retains ETH in a payable mock randomness provider to simulate reserve accounting. Production payment safety is asserted by the invariant after each generated action, and the suppressions are limited to test-only harness code. | `test/StreamPaymentsInvariant.t.sol::testPaymentInvariantsHoldAcrossBoundedOperationSequences` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | TBD |
 
 ## Triage Rules
 

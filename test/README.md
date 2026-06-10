@@ -66,6 +66,14 @@ as `emergencyWithdrawable()` surplus, and withdraws only that amount;
 emergency-withdrawable balance, including direct ETH, forced ETH, and
 post-request remaining reserve.
 
+Payment accounting now has a bounded sequence fuzz invariant baseline in
+`StreamPaymentsInvariant.t.sol`: mixed fixed-price mint, auction bid,
+auction settlement, curator claim, withdrawal, emergency withdrawal, randomizer
+reserve, and forced-balance operations are checked after every step so local
+category totals, `totalOwed()` views, balance coverage, reserves, and
+`emergencyWithdrawable()` views remain coherent for the current first-party
+payment surfaces.
+
 Admin permission tests now include P0-ADMIN-001 target-state coverage in
 `StreamAdminSelectors.t.sol` and `StreamAdmins.t.sol`: function-admin grants are
 scoped by account, target contract, and selector; wrong selectors and same
