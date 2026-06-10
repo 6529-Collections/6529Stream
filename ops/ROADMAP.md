@@ -37,7 +37,9 @@ order.
   production source. P0-INIT-001 fixed the remaining first-party production
   `uninitialized-local` rows. P0-META-001 dependency script segment-safe
   encoding now has typed chunk/content hash coverage, and P0-CORE-001 removed
-  dead always-zero public/allowlist mint-accounting state.
+  dead always-zero public/allowlist mint-accounting state. P1-META-004
+  `StreamCore` ERC-4906 metadata update signaling now has implementation and
+  target-state test coverage.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -58,7 +60,7 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a tracked high/medium baseline: 721 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
@@ -185,8 +187,10 @@ Status: In Progress.
 Owner: TBD.
 Blocking issues: TBD.
 Evidence: Payment sequence fuzz invariant baseline added in
-`test/StreamPaymentsInvariant.t.sol`; metadata, supply, replay, freeze, gas, and
-deployment rehearsal baselines remain open.
+`test/StreamPaymentsInvariant.t.sol`; metadata golden and ERC-4906 event
+baselines added in `test/StreamMetadataGolden.t.sol` and
+`test/StreamMetadataEvents.t.sol`; supply, replay, freeze, gas, and deployment
+rehearsal baselines remain open.
 
 Exit criteria:
 
@@ -1551,8 +1555,14 @@ Acceptance criteria:
   collection freeze boundaries and immutable metadata state.
 - Implement [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48):
   dependency registry versioning, immutability, and provenance.
-- Implement [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49):
-  ERC-4906 support and metadata update signaling.
+- [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49)
+  now implements `StreamCore` ERC-4906 support and metadata update signaling:
+  `supportsInterface(0x49064906)` succeeds, token-level metadata writes and
+  randomness fulfillment emit `MetadataUpdate`, collection-level metadata
+  writes emit `BatchMetadataUpdate` over the minted-ever range, and
+  mint-only/burn paths do not emit misleading ERC-4906 events. Dependency
+  registry content reverse signaling remains with
+  [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48).
 - Implement [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50):
   burn metadata and supply semantics.
 - Implement [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51):
@@ -2107,11 +2117,11 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness seed storage | Derived seed/hash includes `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, `test/StreamRandomizerRetry.t.sol` | Passing: VRF and arRNG adapters store `rawOutputHash = keccak256(abi.encode(randomWords))`, derive the token seed from `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token, randomizer epoch, and raw-output hash, expose both values in request/token views and lifecycle interface views, emit both values in fulfillment/failure/retry events, emit provider-specific raw-word fulfillment events for off-chain auditability, avoid storing full provider word arrays, and prove post-request token-data mutation cannot bias the seed | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
 | Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol` | Passing: `RandomizerNXT.isRandomizerContract()` returns false, `StreamCore.addRandomizer` rejects it for production collections, and the concrete `XRandoms` helper contract was removed from production source; Slither now reports `weak-prng=0` | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C/Gate F | TBD |
 | Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadataGolden.t.sol`, later `test/StreamMetadata.t.sol` | Characterization passing for current behavior: off-chain pending/final URIs match fixtures, current on-chain pending output with zero hash is fixture-locked as pre-beta behavior, and current on-chain final output matches fixtures. ADR 0006 target work remains open because public-beta on-chain pending metadata must not treat a zero hash as final generative input. | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
-| Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Initial characterization passing: `offchain-pending-token-uri.txt`, `offchain-final-token-uri.txt`, `current-onchain-pending-token-uri.txt`, and `current-onchain-final-token-uri.txt` lock current output. Final schema-versioned fixtures, base64 JSON policy, escaping, freeze, burn, and ERC-4906 metadata-event fixtures remain future P1-META work. | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |
+| Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Initial characterization passing: `offchain-pending-token-uri.txt`, `offchain-final-token-uri.txt`, `current-onchain-pending-token-uri.txt`, and `current-onchain-final-token-uri.txt` lock current output. Final schema-versioned fixtures, base64 JSON policy, escaping, freeze, and burn remain future P1-META work. | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |
 | Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol` | Missing | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51) | Gate D | TBD |
 | Collection freeze boundary | Frozen collections cannot mutate collection fields, base URI, metadata mode, scripts, dependency references, token data, image, attributes, final supply, or live-token metadata state | `test/StreamMetadataFreeze.t.sol` | Missing | [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47) | Gate D | TBD |
 | Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Missing | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
-| ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit only when token JSON metadata changes | `test/StreamMetadataEvents.t.sol` | Missing | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49) | Gate D | TBD |
+| ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit from metadata write paths that can change token JSON | `test/StreamMetadataEvents.t.sol` | Passing for current `StreamCore` behavior: ERC-4906 interface support succeeds, randomness fulfillment and token metadata input writes emit `MetadataUpdate`, collection-level metadata mode/base URI/display/script/dependency-reference writes emit `BatchMetadataUpdate` over the minted-ever range, empty collections do not emit empty batch events, and mint-only plus burn paths do not emit ERC-4906. Dependency registry content reverse signaling remains future P1-META-003 work. | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Passing: typed chunk/content hashes include dependency key, chunk count, chunk index, chunk byte length, and chunk content hash; ambiguous chunk splits that render the same JavaScript produce distinct content hashes while preserving rendered-script compatibility; zero-chunk dependency hashes are deterministic | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
 | Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | Missing | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) | Gate E/Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |

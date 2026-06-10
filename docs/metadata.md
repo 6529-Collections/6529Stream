@@ -54,6 +54,41 @@ The fixture names use `current-onchain-*` because the current on-chain JSON is
 not yet the accepted public-beta schema. These fixtures are meant to make
 metadata changes reviewable and deliberate.
 
+## ERC-4906 Events
+
+`StreamCore` supports ERC-4906 through `supportsInterface(0x49064906)`.
+
+The current event policy is:
+
+- `MetadataUpdate(tokenId)` is emitted when a live token's randomness is
+  fulfilled through `setTokenHash`.
+- `MetadataUpdate(tokenId)` is emitted when `changeTokenData` writes a live
+  token's generative input.
+- `MetadataUpdate(tokenId)` is emitted for each token written by
+  `updateImagesAndAttributes`.
+- `BatchMetadataUpdate(fromTokenId, toTokenId)` is emitted when
+  `changeMetadataView` writes the metadata mode for a collection with minted
+  tokens.
+- `BatchMetadataUpdate(fromTokenId, toTokenId)` is emitted when
+  `updateCollectionInfo` writes collection-level metadata inputs for a
+  collection with minted tokens, including base URI, display fields, library,
+  dependency reference, or collection script chunks.
+- Batch events use the collection's minted-ever contiguous token range. They are
+  skipped while a collection has no minted tokens.
+
+The current contract intentionally does not emit ERC-4906 events merely because
+a token is minted. If the configured randomizer fulfills during mint, the
+fulfillment itself emits `MetadataUpdate`. Burn also does not emit ERC-4906;
+indexers should treat the ERC-721 transfer-to-zero event as the live-token
+metadata removal signal.
+
+Current freeze does not change `tokenURI` bytes, so `freezeCollection` does not
+emit ERC-4906 yet. Future schema-versioned freeze manifests may add finality
+fields and should update this policy intentionally. Dependency reference changes
+through `updateCollectionInfo` emit batch events; dependency registry content
+versioning and reverse collection-to-dependency signaling remain part of
+P1-META-003.
+
 ## Public-Beta Target
 
 ADR 0006 requires future metadata work to add:
@@ -62,6 +97,5 @@ ADR 0006 requires future metadata work to add:
 - explicit pending, final, stale, and burned-state policy
 - base64 JSON data URIs for on-chain metadata
 - JSON escaping and raw-attribute validation
-- ERC-4906 support and metadata update events
 - freeze manifests and immutable dependency version pins
 - burn semantics and callback-after-burn tests
