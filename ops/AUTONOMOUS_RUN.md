@@ -1731,9 +1731,9 @@ Outcome:
 
 ### PR candidate: Fix admin selector and permission model (Queue Item 22)
 
-Status: Local validation complete; preparing pull request.
+Status: Open; awaiting CI and bot review.
 Branch: `codex/fix-admin-permission-model`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/63`.
 Related issues:
 
 - `https://github.com/6529-Collections/6529Stream/issues/34`
@@ -1975,6 +1975,7 @@ Validation:
 | 2026-06-10 11:51 | Merge PR #62 | Emergency-withdrawal bounds merged as `44a3ebb5b298b437387c056a0c86b1d7ee9db03d`; CI and CodeRabbit were green, Claude was unavailable due org overage, and issue #31 closed completed |
 | 2026-06-10 11:52 | Select Queue Item 22 | Next P0 Gate C blocker is `P0-ADMIN-001`, because admin selector/target permission semantics must be fixed before pause controls and deeper randomness/admin work |
 | 2026-06-10 12:09 | Finish local Queue Item 22 validation | Focused 18-test admin suite, full 129-test `make check`, Windows wrapper, formatting, whitespace, heading scans, and Slither delta evidence pass; Slither reports no `StreamAdmins` high/medium or zero-check findings |
+| 2026-06-10 12:13 | Open PR #63 | Admin permission scoping implementation is published with local validation and Slither delta evidence |
 
 ## Resume Instructions
 
