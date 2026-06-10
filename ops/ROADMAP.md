@@ -16,9 +16,9 @@ order.
 - Maturity: pre-audit and not production-ready.
 - Current CI proves that the repo compiles and runs the initial
   characterization test skeleton. It does not prove protocol correctness.
-- Known P0 blockers include `tx.origin` drop execution, ad hoc authorization,
-  auction custody ambiguity, auction reentrancy, push payments, untriaged static
-  analysis findings, missing tests, and missing deployment discipline.
+- Known P0 blockers include ad hoc drop authorization, auction custody
+  ambiguity, auction reentrancy, push payments, untriaged static analysis
+  findings, missing tests, and missing deployment discipline.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -368,7 +368,7 @@ This is the recommended first batch of issues.
 10. [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) / P0/DESIGN: ADR for randomness.
 11. [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45) / P1/DESIGN: ADR for metadata/freeze.
 12. [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) / P2/DESIGN: ADR for upgrade/redeployment.
-13. `P0-AUTH-001 / P0/CODE+TEST+DOCS`: Remove `tx.origin`.
+13. [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) / P0/CODE+TEST+DOCS: Remove `tx.origin`.
 14. `P0-AUTH-002 / P0/CODE+TEST+DOCS`: Implement EIP-712 authorization.
 15. `P0-AUTH-003 / P0/CODE+TEST+DOCS`: Add ERC-1271 support or explicitly reject contract signers.
 16. [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) / P0/CODE+TEST+DOCS: Refactor auction bidding to pull credits.
@@ -486,21 +486,21 @@ Problem:
   This breaks contract wallets, relayers, multisigs, and account-abstraction
   wallets.
 
-Current behavior:
+Previous behavior:
 
 - `StreamDrops` assigns fixed-price receiver and execution address from
   `tx.origin`.
 
 Intended behavior:
 
-- The intended recipient/execution address is explicit, signed, validated, and
-  stored.
+- The intended recipient/execution address is explicit, validated, and stored.
 - `msg.sender` may be payer/relayer only according to the ADR policy.
+- Full signed-field validation remains owned by `P0-AUTH-002`.
 
 Required code changes:
 
 - Remove all `tx.origin` uses.
-- Add explicit recipient/execution/settlement fields according to the ADR.
+- Add explicit recipient/execution fields according to the ADR.
 - Validate zero addresses and role/payer semantics.
 
 Required tests:
@@ -510,7 +510,8 @@ Required tests:
 - Relayer execution if supported.
 - Recipient different from payer if supported.
 - Zero recipient rejection.
-- Wrong recipient signature failure.
+- Wrong recipient signature failure, once `P0-AUTH-002` adds EIP-712
+  validation.
 
 Required docs:
 
@@ -521,7 +522,8 @@ Acceptance criteria:
 
 - No `tx.origin` remains in protocol source.
 - Contract wallet execution test passes.
-- Signed recipient/execution fields cannot be substituted.
+- Legacy drop IDs include the explicit recipient until `P0-AUTH-002` replaces
+  packed legacy IDs with EIP-712 typed data.
 - External docs describe payer, signer, poster, recipient, execution address, and
   settlement recipient semantics.
 
@@ -1317,7 +1319,7 @@ Acceptance criteria:
 - Characterize current randomness/pending metadata behavior.
 - Initial Gate A skeleton coverage: admin signer/global/function permissions,
   current `StreamDrops` packed drop ID encoding, signer-only drop execution,
-  fixed-price minting to `tx.origin`, drop replay rejection, mocked
+  fixed-price minting to explicit recipients, drop replay rejection, mocked
   `StreamDrops` auction argument passing, real
   `StreamDrops -> StreamMinter -> StreamCore` auction mint custody to the
   payout address, auction status/end-time recording, current admin selector
@@ -1326,7 +1328,7 @@ Acceptance criteria:
   configured-randomizer-only token hash setting, and one-time token hash
   immutability.
 - Note: this Gate A list includes known-unsafe behavior, including
-  `tx.origin`-based drop execution and synchronous fixed-price payout rejection
+  signer-only drop execution and synchronous fixed-price payout rejection
   paths. These tests are regression tripwires before P0 rewrites, not
   endorsements of protocol correctness.
 
@@ -1772,7 +1774,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 
 | Finding | Required test | Intended test file | Status | Issue | Gate | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsAuth.t.sol` | Initial characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; P0 fix tests missing | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
+| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol` | Target-state explicit-recipient, contract-signer execution, non-zero auction-recipient rejection, and no-bid settlement tests added; full EIP-712 field-substitution tests remain under `P0-AUTH-002` | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
 | Ad hoc drop authorization | EIP-712 valid, replayed, expired, wrong chain, wrong contract, wrong signer | `test/StreamDropsEIP712.t.sol` | Missing | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |

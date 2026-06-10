@@ -22,6 +22,13 @@ abstract contract StreamFixture {
         internal
         returns (DeployedStream memory deployed)
     {
+        deployed = deployStreamWithSigner(payout, curatorsPool, address(this));
+    }
+
+    function deployStreamWithSigner(address payout, address curatorsPool, address signer)
+        internal
+        returns (DeployedStream memory deployed)
+    {
         deployed.admins = new StreamAdmins(address(this));
         deployed.dependencyRegistry = new DependencyRegistry(address(deployed.admins));
         deployed.core = new StreamCore(
@@ -30,7 +37,7 @@ abstract contract StreamFixture {
         deployed.minter =
             new StreamMinter(address(deployed.core), address(deployed.admins), address(0));
         deployed.drops = new StreamDrops(
-            address(this), address(deployed.minter), address(deployed.admins), payout, curatorsPool
+            signer, address(deployed.minter), address(deployed.admins), payout, curatorsPool
         );
         deployed.randomizer = new ImmediateRandomizer(address(deployed.core));
 

@@ -18,38 +18,40 @@ Accepted.
 ## Problem
 
 Drop execution needs a signer-authorized, replay-safe, wallet-compatible design
-before any public beta claim. The current implementation is intentionally
+before any public beta claim. The implementation remains intentionally
 characterized but unsafe:
 
 - `StreamDrops.mintDrop` can only be called by `tdhSigner`.
-- Fixed-price token recipient and stored execution address use `tx.origin`.
 - Drop IDs are built from ad hoc string concatenation and `abi.encodePacked`.
 - Replay protection is only `dropExecuted[dropId]` for the packed drop ID.
 - There is no EIP-712 domain, deadline, signer epoch, revocation model,
   signature malleability policy, or ERC-1271 contract signer stance.
+- Before `P0-AUTH-001`, fixed-price token recipient and stored execution
+  address used `tx.origin`.
 
-## Current Behavior
+## Baseline Behavior
 
 Current source references:
 
-- `smart-contracts/StreamDrops.sol#L55-L58`: `authorized` requires
+- `smart-contracts/StreamDrops.sol#L58-L61`: `authorized` requires
   `msg.sender == tdhSigner`.
-- `smart-contracts/StreamDrops.sol#L72-L110`: `mintDrop` computes a packed
-  drop ID, marks it executed, pushes fixed-price ETH, mints, and stores
-  execution state.
-- `smart-contracts/StreamDrops.sol#L73`: drop ID is derived from
-  `abi.encodePacked` string fragments.
-- `smart-contracts/StreamDrops.sol#L74-L75`: replay prevention is keyed only by
+- `smart-contracts/StreamDrops.sol#L81-L146`: `mintDrop` accepts an explicit
+  recipient, computes a packed drop ID, marks it executed, pushes fixed-price
+  ETH, mints, and stores execution state.
+- `smart-contracts/StreamDrops.sol#L92-L104`: drop ID is derived from
+  `abi.encodePacked` string fragments including the explicit recipient.
+- `smart-contracts/StreamDrops.sol#L105-L106`: replay prevention is keyed only by
   `dropExecuted[dropId]`.
-- `smart-contracts/StreamDrops.sol#L86`: fixed-price receiver is `tx.origin`.
-- `smart-contracts/StreamDrops.sol#L108`: stored execution address is
-  `tx.origin`.
-- `smart-contracts/StreamDrops.sol#L175-L179`:
+- `smart-contracts/StreamDrops.sol#L113-L144`: fixed-price recipient and stored
+  execution address use the explicit `_recipient`; auction `_recipient` must be
+  `address(0)`, while the stored execution address uses the poster for the
+  current no-bid settlement fallback.
+- `smart-contracts/StreamDrops.sol#L235-L257`:
   `retrieveMessageAndDropID` exposes the same packed string hashing model.
 - `ops/SLITHER_BASELINE.md`: high-impact `encode-packed-collision` findings are
   tracked for both `mintDrop` and `retrieveMessageAndDropID`.
 
-Current characterization tests intentionally pin these behaviors as migration
+Characterization tests intentionally pin these behaviors as migration
 tripwires:
 
 - `test/StreamDropsCharacterization.t.sol`
@@ -205,9 +207,9 @@ domain separator already binds `chainId` and `verifyingContract`; the derived
 `dropId` is only the replay/cancellation identifier for the validated signer,
 epoch, nonce, and salt tuple.
 
-The legacy `mintDrop(address,string,uint256,uint256,uint256,uint256)` path may
-remain temporarily during migration work, but it must not be available as a
-public-beta drop execution path unless it enforces this ADR's authorization
+The legacy `mintDrop(address,address,string,uint256,uint256,uint256,uint256)`
+path may remain temporarily during migration work, but it must not be available
+as a public-beta drop execution path unless it enforces this ADR's authorization
 semantics.
 
 ## Replay, Revocation, And Signer Compromise
@@ -368,7 +370,7 @@ must not be treated as target-state tests after the implementation lands.
 ## Rollout Plan
 
 1. Merge this ADR.
-2. Implement `P0-AUTH-001`: remove `tx.origin` and use explicit signed
+2. Implement `P0-AUTH-001`: remove `tx.origin` and use explicit
    recipient/execution fields.
 3. Implement `P0-AUTH-002`: add EIP-712 domain, typed schema, signature
    validation, consumed-state storage, deadline checks, and replay tests.

@@ -36,7 +36,7 @@ contract StreamAdminsTest {
     function testTdhSignerCanRegisterFunctionAdmin() public {
         StreamAdmins admins = new StreamAdmins(address(this));
         bytes4 selector =
-            bytes4(keccak256("mintDrop(address,string,uint256,uint256,uint256,uint256)"));
+            bytes4(keccak256("mintDrop(address,address,string,uint256,uint256,uint256,uint256)"));
 
         admins.registerFunctionAdmin(address(0xCAFE), selector, true);
 
