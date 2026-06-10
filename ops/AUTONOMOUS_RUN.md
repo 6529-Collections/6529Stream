@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/55` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 07:09 UTC` |
+| Last updated | `2026-06-10 07:12 UTC` |
 
 ## Packaging Notes
 
@@ -65,7 +65,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merged in PR #52 |
 | 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Merged in PR #54 |
 | 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | Merged in PR #55 |
-| 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | In progress on `codex/eip712-drop-authorization` |
+| 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Open in PR #56 |
 
 ## Current PR Worklog
 
@@ -1072,12 +1072,13 @@ Outcome:
 - GitHub CI and CodeRabbit passed.
 - Claude unavailable due to organization overage.
 
-### PR TBD: Replace drop authorization with EIP-712 (Queue Item 15)
+### PR #56: Replace drop authorization with EIP-712 (Queue Item 15)
 
-Status: Local implementation complete; pending commit, push, PR creation, CI, and bot review.
+Status: Open; pending CI and bot review.
 Branch: `codex/eip712-drop-authorization`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/56`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/10`.
+Claude review request: issue comment `4667572552`.
 
 Goal:
 
@@ -1134,7 +1135,9 @@ Validation:
 
 Review feedback:
 
-- Pending PR creation.
+- GitHub CI pending on head `d3747d0c69093c54bb843992b157c63644662e39`.
+- Claude review requested in issue comment `4667572552`.
+- CodeRabbit pending.
 
 ## Decision Log
 
@@ -1247,6 +1250,8 @@ Review feedback:
 | 2026-06-10 06:54 | Stage ERC-1271 separately | `P0-AUTH-002` implements EOA/EIP-2098 authorization now and explicitly rejects contract signers until `P0-AUTH-003` lands |
 | 2026-06-10 07:01 | Validate focused EIP-712 suite | EOA, EIP-2098, explicit digest encoding, wrong signer/domain/chain, expiry, cancellation, stale epoch, replay, malleability, zero signer, bad quantity, bad payer, and contract-signer rejection tests pass |
 | 2026-06-10 07:09 | Finish local `P0-AUTH-002` validation | `make check`, Windows check, formatting, whitespace, legacy-surface grep, heading scan, and targeted Slither delta checks pass; Slither still exits non-zero for unrelated baseline findings |
+| 2026-06-10 07:11 | Open PR #56 | EIP-712 drop authorization implementation is published with local validation and Slither delta evidence |
+| 2026-06-10 07:12 | Request Claude review on PR #56 | Explicit review ping added in issue comment `4667572552` because Claude may not run automatically |
 
 ## Resume Instructions
 
