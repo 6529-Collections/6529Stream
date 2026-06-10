@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/64` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 13:55 UTC` |
+| Last updated | `2026-06-10 14:00 UTC` |
 
 ## Packaging Notes
 
@@ -76,7 +76,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | Merged in PR #62 |
 | 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
 | 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
-| 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | In progress |
+| 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | PR #65 open; awaiting CI and bot review |
 
 ## Current PR Worklog
 
@@ -1964,9 +1964,9 @@ Validation so far:
 
 ### PR candidate: Harden randomizer requests and callbacks (Queue Item 24)
 
-Status: In progress locally.
+Status: PR #65 open; awaiting CI and bot review.
 Branch: `codex/randomizer-callback-hardening`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/65`.
 Related issues:
 
 - `https://github.com/6529-Collections/6529Stream/issues/37`
@@ -2037,6 +2037,11 @@ Local implementation notes:
   Medium counts, two existing `weak-prng` rows, no
   `NextGenRandomizerRNG.requestRandomWords` `reentrancy-eth` row, and no new
   lifecycle-mock `locked-ether` or `arbitrary-send-eth` rows.
+- Pull request opened as #65 at head
+  `6413d45366a6572b87c81155f764428a191eb554`.
+- Claude review was explicitly requested in issue comment `4671046189`.
+- CodeRabbit latest-head review was explicitly requested in issue comment
+  `4671047964`.
 
 ## Decision Log
 
@@ -2207,6 +2212,7 @@ Local implementation notes:
 | 2026-06-10 13:26 | Select Queue Item 24 | Next P0 Gate C blocker is `P0-RAND-001`, because current randomizer callbacks still lack explicit request lifecycle, provider/epoch validation, and stale/duplicate callback rejection |
 | 2026-06-10 13:48 | Implement Queue Item 24 local draft | Added shared randomizer lifecycle storage, collection randomizer epochs, VRF/arRNG callback validation, wrong-collection checks, manual stale marking, `RandomizerNXT` production-disablement, docs, and focused lifecycle tests |
 | 2026-06-10 13:55 | Finish local Queue Item 24 validation | Full `make check` and Windows wrapper pass with 151 tests; formatting, whitespace, heading scan, traceability grep, and Slither delta evidence pass; Slither final JSON has 686 findings with unchanged 9 High / 29 Medium totals, two existing `weak-prng` rows, and no randomizer reentrancy delta |
+| 2026-06-10 14:00 | Open PR #65 | Randomizer request lifecycle hardening implementation is published, Claude review requested in issue comment `4671046189`, and CodeRabbit latest-head review requested in issue comment `4671047964` |
 
 ## Resume Instructions
 
