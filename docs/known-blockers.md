@@ -10,16 +10,18 @@ contributors who start from the README.
   auction NFTs are escrowed by the auction contract, no-bid and with-bid
   settlement are explicit, outbid refunds use bidder credits, and auction-local
   settlement proceeds use pull credits.
-- Fixed-price payouts, broader payment accounting, curator rewards, randomizer
-  reserves, remaining emergency-withdrawal surplus boundaries, and
-  cross-contract payment invariants still need full pull-payment accounting
-  before production use.
+- Fixed-price mints now record `StreamDrops` poster, protocol, and curator
+  reserve credits instead of pushing ETH during mint execution. Broader payment
+  accounting, curator rewards, randomizer reserves, remaining
+  emergency-withdrawal surplus boundaries, and cross-contract payment
+  invariants still need full pull-payment accounting before production use.
 - Randomizer request and callback validation need production hardening.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
-- Auction custody and auction bid/outbid payment regressions now exist, but
-  broader payment, randomness, metadata, admin/pause, deployment, and invariant
-  tests are still missing.
+- Auction custody, auction bid/outbid payment, auction settlement-credit, and
+  fixed-price pull-payment regressions now exist, but broader payment,
+  randomness, metadata, admin/pause, deployment, and invariant tests are still
+  missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

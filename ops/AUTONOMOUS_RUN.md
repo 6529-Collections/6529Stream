@@ -10,6 +10,8 @@ transient conversation memory.
 - Keep this file updated before and after each meaningful transition.
 - Open one PR at a time.
 - Wait for CI and bot/reviewer comments on each PR.
+- Request Claude review explicitly on each PR after opening because it may not
+  run automatically.
 - Iterate until checks and review comments are clean.
 - Merge only after the PR is review-clean and CI-clean, or after a documented
   autonomous maintainer decision.
@@ -29,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/auction-custody-state-machine` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/58` |
+| Active PR branch | `codex/fixed-price-pull-payments` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/59` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 09:46 UTC` |
+| Last updated | `2026-06-10 10:14 UTC` |
 
 ## Packaging Notes
 
@@ -68,7 +70,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Merged in PR #56 |
 | 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Merged in PR #57 |
 | 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | Merged in PR #58 |
-| 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | Open as PR #59 |
+| 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | Merged in PR #59 |
+| 19 | Convert fixed-price payouts to pull credits | Gate C | Implement P0-PAY-003 for `StreamDrops` fixed-price poster/protocol credits and curator-reserve accounting, with tests/docs/state traceability | In progress |
 
 ## Current PR Worklog
 
@@ -1328,9 +1331,7 @@ Outcome:
 
 ### PR #59: Formalize auction custody and settlement (Queue Item 18)
 
-Status: Open; CodeRabbit review fixes are implemented and final local
-validation is passing. Remote CI and bot re-review must be checked for the
-latest pushed head.
+Status: Merged.
 Branch: `codex/auction-custody-state-machine`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/59`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/22`.
@@ -1425,6 +1426,91 @@ Review feedback:
   proceeds rounding coverage, forced-ETH surplus coverage, zero-address
   proceeds-recipient constructor/setter guards, auction interface validation,
   `AuctionRecord.tokenId`, and matching docs/test-matrix wording.
+
+Outcome:
+
+- Merged as PR #59 on `2026-06-10`.
+- Squash merge commit `48e7031f53a5d4fe3c5b32203c97b39a6ab4cc9f`.
+- Latest head before merge `1e52d6dfaf8a61bc7066ee3fade144bf4a397488`.
+- Issue #22 closed as completed.
+- Issue #28 was closed as completed after PR #58 and PR #59 covered auction
+  outbid refunds and preserved bidder-credit behavior.
+- GitHub CI passed. CodeRabbit review evidence was clean despite stale pending
+  commit status. Claude was unavailable due to organization overage.
+
+### PR candidate: Fixed-price pull payments (Queue Item 19)
+
+Status: Local validation passed; ready to open PR.
+Branch: `codex/fixed-price-pull-payments`.
+Pull request: TBD.
+Related issue: `https://github.com/6529-Collections/6529Stream/issues/27`.
+Claude review request: TBD; request explicitly after PR open because Claude may
+not run automatically.
+
+Goal:
+
+- Convert fixed-price minting in `StreamDrops` from synchronous poster,
+  payout, and curators-pool ETH pushes into ADR 0003 pull-payment accounting.
+- Keep the scope to fixed-price `StreamDrops` payments so broader P0-PAY-001,
+  curator reward credits, randomizer reserves, and cross-contract emergency
+  invariants remain separate roadmap work.
+- Preserve auction payment behavior from PR #58 and PR #59.
+
+Candidate files:
+
+- `smart-contracts/StreamDrops.sol`
+- `test/StreamFixedPricePayments.t.sol`
+- `test/StreamDropsIntegrationCharacterization.t.sol`
+- `docs/adr/0003-payment-accounting.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- `StreamDrops` records fixed-price poster, protocol, and curator-reserve
+  credits before minting and relies on transaction atomicity to roll back
+  credits if minting fails.
+- Poster and protocol credits are withdrawable through a `nonReentrant`
+  fixed-price withdrawal path. Failed withdrawals revert the state update, so
+  credits and totals are preserved.
+- Curator reserve is accounted and protected in total owed/surplus views but is
+  not ordinary withdrawable credit in this PR; later curator-claim work owns
+  reserve movement into individual curator credits.
+- Fixed-price minting no longer calls poster, payout, or curators-pool
+  recipients during the mint path, so rejecting recipients cannot block minting.
+- `StreamDrops.emergencyWithdrawable()` exposes forced/direct surplus without
+  subtracting owed fixed-price poster, protocol, or curator-reserve balances.
+
+Validation:
+
+- `forge test --match-contract StreamFixedPricePaymentsTest -vvv` passed with
+  12 tests and the known compiler/NatSpec/selfdestruct warnings.
+- `forge test --match-contract
+  "Stream(FixedPricePayments|DropsIntegrationCharacterization|DropsCharacterization)Test" -vvv`
+  passed with 33 tests, 0 failed.
+- `forge fmt --check` passed for changed Solidity contracts and tests.
+- `git diff --check` passed.
+- `make check` passed with 97 tests, 0 failed, and known compiler/NatSpec/lint
+  warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 97
+  tests, 0 failed, and known compiler/NatSpec/lint warnings.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
+  on `PATH`; it returned the expected non-zero baseline-finding exit with 11
+  High, 27 Medium, 54 Low, 519 Informational, and 6 Optimization findings. The
+  current high-impact `arbitrary-send-eth` set is down to the three remaining
+  non-`StreamDrops` emergency-withdrawal rows; new high findings are
+  intentional test-only `selfdestruct` helpers for forced-ETH accounting.
+
+Review feedback:
+
+- Contract-risk, test-strategy, and docs/state sidecars completed. Their main
+  recommendations were folded into the implementation: curator reserve is not
+  ordinary withdrawable credit, failed mint rollback is tested, fixed-price
+  rejection characterization tests are converted, and docs avoid claiming full
+  payment-accounting completion.
 
 ## Decision Log
 
@@ -1561,6 +1647,12 @@ Review feedback:
 | 2026-06-10 09:23 | Request Claude review on PR #59 | Explicit review ping added in issue comment `4668570581` because Claude may not run automatically |
 | 2026-06-10 09:39 | Address CodeRabbit PR #59 review | Add no-bid pending-claim rollback coverage, proceeds rounding coverage, forced-ETH accounting coverage, docs clarifications, auction interface validation, token ID storage, and zero-address proceeds-recipient guards |
 | 2026-06-10 09:46 | Validate PR #59 review fixes locally | Focused 35-test suite, full 85-test `make check`, Windows wrapper, formatting, and Slither delta evidence pass; Slither remains non-zero for baseline findings plus intentional test-only `ForceEth` selfdestruct helper |
+| 2026-06-10 09:50 | Merge PR #59 | CI passed, CodeRabbit review evidence was clean despite stale pending status, the stale-status exception was documented, and Claude was unavailable due to organization overage limits |
+| 2026-06-10 09:53 | Close issue #28 | PR #58 fixed auction outbid refunds and PR #59 preserved the bidder-credit behavior while completing auction custody/settlement |
+| 2026-06-10 09:56 | Start `P0-PAY-003` implementation PR | Gate C next removes fixed-price mint-path ETH push payouts by recording `StreamDrops` poster, protocol, and curator-reserve credits |
+| 2026-06-10 10:00 | Confirm Claude per-PR operating rule | User noted Claude may not run automatically, so each PR must receive an explicit Claude review request after opening |
+| 2026-06-10 10:10 | Implement fixed-price pull credits locally | `StreamDrops` records fixed-price credits, exposes fixed-price owed/surplus views, adds guarded poster/protocol withdrawal, keeps curator reserve non-withdrawable pending curator-claim work, and focused 12-test suite passes |
+| 2026-06-10 10:14 | Finish local `P0-PAY-003` validation | Focused 33-test suite, full 97-test `make check`, Windows wrapper, formatting, whitespace, docs heading scans, and Slither delta evidence pass; Slither remains non-zero for known baseline findings plus intentional test-only forced-ETH helpers |
 
 ## Resume Instructions
 

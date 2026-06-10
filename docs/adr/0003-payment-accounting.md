@@ -7,10 +7,11 @@ Accepted.
 Implementation status: P0-AUCT-002 converts auction outbid refunds to bidder
 credits and removes the bid-path push refund. P0-AUCT-001 adds auction-local
 with-bid settlement credits for poster, protocol, and curator proceeds after
-successful NFT transfer. Remaining ADR work includes fixed-price payment
-credits, curator reward credits, protocol-wide ledger views, failed-withdrawal
-coverage for every non-auction payment category, randomizer reserve accounting,
-and cross-contract emergency surplus boundaries.
+successful NFT transfer. P0-PAY-003 adds fixed-price `StreamDrops` credits for
+poster proceeds, protocol proceeds, and curator reserve amounts without
+push-paying during mint execution. Remaining ADR work includes curator reward
+credits, protocol-wide ledger views and invariants, randomizer reserve
+accounting, and cross-contract emergency surplus boundaries.
 
 ## Metadata
 
@@ -46,10 +47,12 @@ Before public beta, the protocol needs to decide:
 
 Current source references:
 
-- `smart-contracts/StreamDrops.sol#L72-L110`: `mintDrop` mints fixed-price or
-  auction drops and stores drop metadata.
-- `smart-contracts/StreamDrops.sol#L90-L92`: fixed-price minting pushes ETH to
-  the poster, payout address, and curators pool with low-level `call`.
+- `smart-contracts/StreamDrops.sol`: `mintDrop` mints fixed-price or auction
+  drops and stores drop metadata.
+- Before P0-PAY-003, fixed-price minting pushed ETH to the poster, payout
+  address, and curators pool with low-level `call`. Target-state
+  fixed-price minting now records poster, protocol, and curator-reserve credits
+  in `StreamDrops` instead.
 - `smart-contracts/AuctionContract.sol#L88-L139`: auction bidding credits the
   previous highest bidder, tracks active highest-bid escrow, and exposes bidder
   credit withdrawals.
@@ -177,6 +180,9 @@ Fixed-price execution must remain consistent with ADR 0001:
 - free fixed-price execution must not create positive payment credits
 - zero-address credit recipients are rejected unless a later ADR defines a burn
   or donation policy
+- the curator reserve amount is accounted and included in owed/reserved totals,
+  but is not an ordinary poster/protocol withdrawal credit until the curator
+  claim workstream defines reserve movement into individual curator credits
 
 ### Auction Bidding
 
@@ -500,7 +506,7 @@ P0 implementation must add tests for:
 Intended test files:
 
 - `test/StreamPayments.t.sol`
-- `test/StreamDropsPayments.t.sol`
+- `test/StreamFixedPricePayments.t.sol`
 - `test/StreamPaymentsInvariant.t.sol`
 - `test/StreamAuctionPayments.t.sol`
 - `test/StreamCuratorsPool.t.sol`
@@ -515,7 +521,8 @@ must not be treated as target-state tests after the implementation lands.
 1. Merge this ADR and link it from the roadmap.
 2. Implement shared payment ledger storage, views, events, custom errors, and
    withdrawal behavior.
-3. Convert fixed-price mint payouts to credits.
+3. Convert fixed-price mint payouts to credits. Implemented for `StreamDrops`
+   fixed-price poster, protocol, and curator-reserve accounting by P0-PAY-003.
 4. Convert auction outbid refunds and final settlement proceeds to credits.
 5. Convert curator reward claims to credits.
 6. Bound emergency withdrawals by surplus in each affected contract.
