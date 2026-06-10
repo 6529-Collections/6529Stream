@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/63` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 13:08 UTC` |
+| Last updated | `2026-06-10 13:12 UTC` |
 
 ## Packaging Notes
 
@@ -75,7 +75,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | Merged in PR #61 |
 | 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | Merged in PR #62 |
 | 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
-| 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Local validation complete; PR pending |
+| 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | PR #64 open; awaiting CI and bot review |
 
 ## Current PR Worklog
 
@@ -1847,9 +1847,9 @@ Validation:
 
 ### PR candidate: Define pause and emergency controls (Queue Item 23)
 
-Status: Local validation complete; PR pending.
+Status: PR #64 open; awaiting CI and bot review.
 Branch: `codex/pause-emergency-controls`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/64`.
 Related issues:
 
 - `https://github.com/6529-Collections/6529Stream/issues/35`
@@ -1943,6 +1943,10 @@ Validation so far:
   Low, 571 Informational, and 6 Optimization. High/medium totals are unchanged,
   `arbitrary-send-eth` remains zero, and the only emergency-matching medium row
   is the accepted test-only `MockArrngController` `locked-ether` row.
+- PR #64 was opened on head `ce55a2dc7585fd9d699241d692d23bb2f9f10e1c`.
+- Claude review was explicitly requested in issue comment `4670568701`.
+- CodeRabbit latest-head review was explicitly requested in issue comment
+  `4670570080`.
 
 ## Decision Log
 
@@ -2108,6 +2112,7 @@ Validation so far:
 | 2026-06-10 12:46 | Select Queue Item 23 | Next P0 Gate C blocker is `P0-ADMIN-002`, because accepted pause domains and withdrawal/emergency policy need executable controls before deeper randomness/admin release work |
 | 2026-06-10 12:57 | Implement Queue Item 23 locally | Domain pause state, pause/unpause authority separation, operational guards, no-withdrawal-pause policy tests, explicit emergency recipient routing, docs, and roadmap traceability are in place; focused pause/emergency and expanded admin/payment suites pass locally |
 | 2026-06-10 13:08 | Finish local Queue Item 23 validation | Full `make check`, Windows wrapper, formatting, whitespace, heading scan, and Slither delta evidence pass; Slither final JSON has 676 findings with unchanged 9 High / 29 Medium totals and zero `arbitrary-send-eth` findings |
+| 2026-06-10 13:12 | Open PR #64 | Pause/emergency-controls implementation is published, Claude review requested in issue comment `4670568701`, and CodeRabbit latest-head review requested in issue comment `4670570080` |
 
 ## Resume Instructions
 
