@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-lifecycle-views` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/65` |
+| Active PR branch | `codex/randomizer-pending-migration` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/66` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 14:47 UTC` |
+| Last updated | `2026-06-10 15:20 UTC` |
 
 ## Packaging Notes
 
@@ -77,7 +77,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
 | 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
-| 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | PR #66 open; CodeRabbit stale-coverage follow-up locally validated |
+| 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
+| 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Open in PR #67; awaiting CI and bot feedback |
 
 ## Current PR Worklog
 
@@ -2061,8 +2062,7 @@ Local implementation notes:
 
 ### PR candidate: Complete randomizer lifecycle views (Queue Item 25)
 
-Status: PR #66 open; CodeRabbit stale-coverage follow-up locally validated
-and ready to push.
+Status: Merged.
 Branch: `codex/randomizer-lifecycle-views`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/66`.
 Related issue:
@@ -2116,6 +2116,10 @@ Review requests:
 - CodeRabbit reported LGTM in issue comment `4671424817` and suggested
   low-priority token-level `Stale` coverage. The follow-up patch adds that
   coverage directly to `testMarkedStaleRequestIsObservableAndCannotFulfill`.
+- CodeRabbit reviewed the latest follow-up in issue comment `4671513141`,
+  reported "LGTM. No further concerns.", and the PR was squash-merged as
+  `1b5c14c802f2c10870f8ee7c089164372d393b54`.
+- Issue #38 closed as completed.
 
 Follow-up validation completed at `2026-06-10 14:47 UTC`:
 
@@ -2134,6 +2138,65 @@ Validation targets retained for PR review:
 - Full `make check` and Windows `scripts/check.ps1`.
 - Touched-file `forge fmt --check`, `git diff --check`, heading/traceability
   greps, and Slither delta if code changes affect the analyzed surface.
+
+### PR #67: Block randomizer migration while requests are pending (Queue Item 26)
+
+Status: Open; awaiting CI, Claude, and CodeRabbit feedback.
+Branch: `codex/randomizer-pending-migration`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/67`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/41`
+
+Review requests:
+
+- Claude requested in issue comment `4671747961`.
+- CodeRabbit requested in issue comment `4671749578`.
+
+Goal:
+
+- Implement ADR 0005's default provider-migration policy: ordinary migration is
+  blocked while the current lifecycle-aware provider reports pending requests.
+- Expose lifecycle-aware per-collection and total pending request counts from
+  randomizer adapters.
+- Allow migration after valid fulfillment or explicit admin stale marking.
+- Prove old-provider callbacks cannot overwrite after stale/fulfilled terminal
+  states, and prove a new provider can request and fulfill after migration.
+
+Candidate files:
+
+- `smart-contracts/IRandomizerLifecycle.sol`
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `test/helpers/CharacterizationTestBase.sol`
+- `docs/adr/0005-randomness.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation completed so far:
+
+- Ran `scripts/bootstrap-windows.ps1` because the app shell did not have
+  `forge` on PATH; the script installed Foundry `v1.7.1` and confirmed
+  `forge Version: 1.7.1`.
+- `forge test --match-contract StreamRandomizerLifecycleTest -vvv` with
+  `.foundry/bin` prefixed in `PATH` passed: 16 tests, 0 failed.
+- `make check` passed: build plus 158 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed:
+  158 tests, 0 failed.
+- `forge fmt --check` passed for touched Solidity/test files.
+- `git diff --check` passed.
+- Roadmap/docs traceability grep passed for `P0-RAND-005`,
+  `PendingRandomnessRequests`, `pendingRandomnessRequests`, branch name, and
+  Queue Item 26.
+- Markdown heading scan passed for changed docs and run-state files.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with
+  Foundry `1.7.1`; it returned the accepted non-zero baseline:
+  `slither_exit=-1 total=686 high=9 medium=29 weak-prng=2
+  arbitrary-send-eth=0 reentrancy-eth=0`.
 
 ## Decision Log
 
@@ -2311,6 +2374,11 @@ Validation targets retained for PR review:
 | 2026-06-10 14:34 | Validate Queue Item 25 | Token-level randomizer lifecycle views are locally green across focused tests, `make check`, Windows wrapper, formatting, diff hygiene, docs traceability, and Slither baseline comparison |
 | 2026-06-10 14:38 | Open PR #66 | Token-level randomizer lifecycle views are published in `https://github.com/6529-Collections/6529Stream/pull/66`; Claude review requested in issue comment `4671390449` and CodeRabbit latest-head review requested in issue comment `4671390698` |
 | 2026-06-10 14:47 | Address CodeRabbit PR #66 follow-up | CodeRabbit reported LGTM in issue comment `4671424817` and suggested token-level `Stale` coverage; follow-up extends the stale request test, updates docs/roadmap traceability, and passes focused tests, `make check`, Windows wrapper, formatting, and diff hygiene |
+| 2026-06-10 14:52 | Merge PR #66 | Token-level randomizer lifecycle views merged as `1b5c14c802f2c10870f8ee7c089164372d393b54`; CI passed, CodeRabbit reported LGTM on the final head, Claude was unavailable due org overage, and issue #38 closed completed |
+| 2026-06-10 15:04 | Start Queue Item 26 | Next P0 randomness child is `P0-RAND-005`; ADR 0005's conservative default is to block lifecycle-aware provider migration while requests are pending |
+| 2026-06-10 15:14 | Validate Queue Item 26 | Randomizer pending-migration guard is locally green across focused tests, `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scans, and Slither baseline comparison |
+| 2026-06-10 15:17 | Open PR #67 | Pending randomizer migration guard published at `https://github.com/6529-Collections/6529Stream/pull/67` from head `ecd8810c19ba2e1d80bebae108d318add4ad1fc9` |
+| 2026-06-10 15:20 | Request PR #67 bot reviews | Claude requested in issue comment `4671747961`; CodeRabbit requested in issue comment `4671749578` |
 
 ## Resume Instructions
 

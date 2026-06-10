@@ -21,8 +21,11 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
     uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant SECOND_TOKEN_ID = TOKEN_ID + 1;
     uint256 private constant COLLECTION_ID = 1;
     bytes32 private constant PAUSE_REASON = keccak256("randomness-incident");
+    bytes32 private constant COLLECTION_RANDOMIZER_UPDATED_TOPIC =
+        keccak256("CollectionRandomizerUpdated(uint256,address,address,uint256)");
 
     function testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce() public {
         (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
@@ -41,6 +44,8 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Pending), "state");
         vrf.tokenToRequest(TOKEN_ID).assertEq(1, "token request");
         vrf.requestToToken(1).assertEq(TOKEN_ID, "request token");
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending collection");
+        vrf.totalPendingRandomnessRequests().assertEq(1, "pending total");
 
         uint256[] memory words = _words(777);
         bytes32 expectedSeed = keccak256(
@@ -55,6 +60,8 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "fulfilled"
             );
         request.derivedSeed.assertEq(expectedSeed, "stored seed");
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "collection cleared");
+        vrf.totalPendingRandomnessRequests().assertEq(0, "total cleared");
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -129,27 +136,32 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
     }
 
     function testVrfStaleEpochOrProviderFulfillmentFails() public {
-        (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
-            _deployVrfRandomizer();
-
-        _mintToken(deployed);
-
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        MockRandomizerCore core = new MockRandomizerCore();
+        MockVrfCoordinator coordinator = new MockVrfCoordinator();
+        NextGenRandomizerVRF vrf = new NextGenRandomizerVRF(
+            1, address(coordinator), address(core), address(deployed.admins)
+        );
         NoopRandomizer replacement = new NoopRandomizer();
-        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+
+        core.setRandomizer(COLLECTION_ID, address(vrf), 1);
+        core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
+
+        vm.prank(address(core));
+        vrf.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+        core.setRandomizer(COLLECTION_ID, address(replacement), 2);
 
         vm.expectRevert(
             abi.encodeWithSelector(
                 StreamRandomizerLifecycle.StaleRandomnessRequest.selector,
                 uint256(1),
+                uint256(1),
                 uint256(2),
-                uint256(3),
                 address(vrf),
                 address(replacement)
             )
         );
         coordinator.fulfill(vrf, 1, _words(777));
-
-        deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "stale hash written");
     }
 
     function testMarkedStaleRequestIsObservableAndCannotFulfill() public {
@@ -157,10 +169,13 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             _deployVrfRandomizer();
 
         _mintToken(deployed);
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending before stale");
 
         vrf.markStaleRequest(1);
         uint256(vrf.randomnessRequestState(1))
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "not stale");
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending after stale");
+        vrf.totalPendingRandomnessRequests().assertEq(0, "total after stale");
         StreamRandomizerLifecycle.RandomnessRequest memory request =
             vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
         uint256(request.state)
@@ -178,6 +193,149 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             )
         );
         coordinator.fulfill(vrf, 1, _words(777));
+    }
+
+    function testRandomizerMigrationWithNoPendingRequestsSucceedsAndEmitsEpoch() public {
+        (DeployedStream memory deployed,, NextGenRandomizerVRF vrf) = _deployVrfRandomizer();
+        NoopRandomizer replacement = new NoopRandomizer();
+
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "unexpected pending");
+        vm.recordLogs();
+        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+        _assertCollectionRandomizerUpdated(
+            vm.getRecordedLogs(), address(deployed.core), address(vrf), address(replacement), 3
+        );
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(replacement), "replacement");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(3, "epoch");
+    }
+
+    function testRandomizerMigrationWithPendingRequestIsBlocked() public {
+        (DeployedStream memory deployed,, NextGenRandomizerVRF vrf) = _deployVrfRandomizer();
+        NoopRandomizer replacement = new NoopRandomizer();
+
+        _mintToken(deployed);
+
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending before migration");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCore.PendingRandomnessRequests.selector,
+                COLLECTION_ID,
+                address(vrf),
+                uint256(1)
+            )
+        );
+        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(vrf), "provider changed");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(2, "epoch changed");
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending changed");
+    }
+
+    function testFulfilledRequestUnblocksMigrationAndOldDuplicateCannotOverwrite() public {
+        (
+            DeployedStream memory deployed,
+            MockVrfCoordinator oldCoordinator,
+            NextGenRandomizerVRF oldVrf
+        ) = _deployVrfRandomizer();
+        NoopRandomizer replacement = new NoopRandomizer();
+
+        _mintToken(deployed);
+        oldCoordinator.fulfill(oldVrf, 1, _words(777));
+
+        oldVrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending after fulfill");
+        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(replacement), "replacement");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(3, "epoch");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestNotPending.selector,
+                uint256(1),
+                StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled
+            )
+        );
+        oldCoordinator.fulfill(oldVrf, 1, _words(999));
+    }
+
+    function testMarkedStaleRequestUnblocksMigrationAndNewProviderFulfillment() public {
+        (
+            DeployedStream memory deployed,
+            MockVrfCoordinator oldCoordinator,
+            NextGenRandomizerVRF oldVrf
+        ) = _deployVrfRandomizer();
+        MockVrfCoordinator newCoordinator = new MockVrfCoordinator();
+        NextGenRandomizerVRF newVrf = new NextGenRandomizerVRF(
+            1, address(newCoordinator), address(deployed.core), address(deployed.admins)
+        );
+
+        _mintToken(deployed);
+        oldVrf.markStaleRequest(1);
+
+        deployed.core.addRandomizer(COLLECTION_ID, address(newVrf));
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(newVrf), "new provider");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(3, "new epoch");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestNotPending.selector,
+                uint256(1),
+                StreamRandomizerLifecycle.RandomnessRequestState.Stale
+            )
+        );
+        oldCoordinator.fulfill(oldVrf, 1, _words(777));
+
+        _mintToken(deployed, SECOND_TOKEN_ID);
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            newVrf.retrieveRandomnessRequestForToken(SECOND_TOKEN_ID);
+        request.randomizerEpoch.assertEq(3, "request epoch");
+        uint256(request.state)
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Pending), "state");
+        newVrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "new pending");
+
+        uint256[] memory words = _words(888);
+        bytes32 expectedSeed = keccak256(
+            abi.encode(
+                address(newVrf), uint256(1), COLLECTION_ID, SECOND_TOKEN_ID, uint256(3), words
+            )
+        );
+        newCoordinator.fulfill(newVrf, 1, words);
+
+        deployed.core.retrieveTokenHash(SECOND_TOKEN_ID).assertEq(expectedSeed, "new hash");
+        newVrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "new pending cleared");
+    }
+
+    function testArrngPendingRequestBlocksMigration() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        MockArrngLifecycleController controller = new MockArrngLifecycleController();
+        NextGenRandomizerRNG rng = new NextGenRandomizerRNG(
+            address(deployed.core), address(deployed.admins), address(controller)
+        );
+        NoopRandomizer replacement = new NoopRandomizer();
+
+        deployed.core.addRandomizer(COLLECTION_ID, address(rng));
+        _mintToken(deployed);
+
+        rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "rng pending");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCore.PendingRandomnessRequests.selector,
+                COLLECTION_ID,
+                address(rng),
+                uint256(1)
+            )
+        );
+        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(rng), "provider changed");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(2, "epoch changed");
     }
 
     function testRandomnessRequestPauseDoesNotBlockVrfFulfillment() public {
@@ -209,6 +367,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         request.tokenId.assertEq(TOKEN_ID, "token");
         request.provider.assertEq(address(rng), "provider");
         request.randomizerEpoch.assertEq(2, "epoch");
+        rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending");
 
         uint256[] memory words = _words(999);
         bytes32 expectedSeed = keccak256(
@@ -221,6 +380,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             .assertEq(
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "fulfilled"
             );
+        rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
     }
 
     function testArrngControllerCannotReenterFulfillmentDuringRequest() public {
@@ -322,13 +482,40 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
     }
 
     function _mintToken(DeployedStream memory deployed) private {
+        _mintToken(deployed, TOKEN_ID);
+    }
+
+    function _mintToken(DeployedStream memory deployed, uint256 tokenId) private {
         vm.prank(address(deployed.minter));
-        deployed.core.mint(TOKEN_ID, address(0xBEEF), "data", 123, COLLECTION_ID);
+        deployed.core.mint(tokenId, address(0xBEEF), "data", 123, COLLECTION_ID);
     }
 
     function _words(uint256 word) private pure returns (uint256[] memory words) {
         words = new uint256[](1);
         words[0] = word;
+    }
+
+    function _assertCollectionRandomizerUpdated(
+        Vm.Log[] memory logs,
+        address emitter,
+        address oldRandomizer,
+        address newRandomizer,
+        uint256 epoch
+    ) private pure {
+        bool found = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == emitter && logs[i].topics.length == 4
+                    && logs[i].topics[0] == COLLECTION_RANDOMIZER_UPDATED_TOPIC
+                    && uint256(logs[i].topics[1]) == COLLECTION_ID
+                    && address(uint160(uint256(logs[i].topics[2]))) == oldRandomizer
+                    && address(uint160(uint256(logs[i].topics[3]))) == newRandomizer
+                    && abi.decode(logs[i].data, (uint256)) == epoch
+            ) {
+                found = true;
+            }
+        }
+        found.assertTrue("randomizer event");
     }
 }
 

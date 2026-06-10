@@ -96,4 +96,6 @@ wrong-collection, stale-provider, and stale-epoch callbacks fail closed; zero
 arRNG request IDs fail before lifecycle state is recorded; manual stale marking
 is observable; randomness-request pauses do not block valid fulfillment; a
 reentrant arRNG controller cannot fulfill during request submission; and
+ordinary randomizer migration is blocked while VRF or arRNG adapters report
+pending requests, then allowed after fulfillment or explicit stale marking.
 `RandomizerNXT` cannot be configured as a production randomizer.
