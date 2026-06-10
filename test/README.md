@@ -9,9 +9,9 @@ fresh checkout after the documented Foundry setup.
 
 These tests lock current behavior before P0 rewrites and are converted into
 target-state tests as individual roadmap fixes land. Some remaining asserted
-behavior is known to be unsafe, such as synchronous fixed-price payouts; those
-tests are regression tripwires and should be updated only when the corresponding
-roadmap fix changes the intended behavior.
+behavior is known to be unsafe; those tests are regression tripwires and should
+be updated only when the corresponding roadmap fix changes the intended
+behavior.
 
 Drop execution now has EIP-712 EOA target-state coverage in
 `StreamDropsEIP712.t.sol` and ERC-1271 contract signer target-state coverage in
@@ -34,3 +34,15 @@ bids, and failed NFT transfers do not release escrow or create final proceeds
 credits. Auction-local tests also cover no-bid pending-claim rollback to a
 rejecting receiver, forced ETH surplus handling, and non-divisible proceeds
 rounding.
+
+Fixed-price payments now have target-state coverage in
+`StreamFixedPricePayments.t.sol` and converted integration characterization
+tests: paid fixed-price mints record poster, protocol, and curator-reserve
+credits instead of pushing ETH during mint execution; rejecting poster, payout,
+and curators-pool recipients cannot block minting; odd-wei and one-wei prices
+account for every wei; free mints create no positive credits; failed poster or
+protocol withdrawals preserve credits; withdrawal reentrancy cannot overdraw;
+mint failure rolls back credits and consumed drop state; and forced ETH is
+exposed only as `StreamDrops` surplus. Curator reserve remains accounted and
+protected for later curator-claim work rather than ordinary recipient
+withdrawal.

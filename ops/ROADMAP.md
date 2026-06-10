@@ -16,13 +16,14 @@ order.
 - Maturity: pre-audit and not production-ready.
 - Current CI proves that the repo compiles and runs the initial
   characterization test skeleton. It does not prove protocol correctness.
-- Known remaining P0 blockers include fixed-price payment push flows, broader
-  payment accounting, emergency withdrawal boundaries outside auction-local
-  accounting, untriaged static analysis findings, missing invariants, randomizer
-  hardening, admin/pause controls, and missing deployment discipline. Drop
-  authorization now uses EIP-712 with EOA and ERC-1271 support; auction custody,
-  settlement state, outbid refunds, and auction-local settlement credits now
-  have target-state implementation coverage.
+- Known remaining P0 blockers include broader payment accounting, curator reward
+  credits, randomizer reserves, emergency withdrawal boundaries outside current
+  local accounting, untriaged static analysis findings, missing invariants,
+  randomizer hardening, admin/pause controls, and missing deployment discipline.
+  Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
+  custody, settlement state, outbid refunds, auction-local settlement credits,
+  and fixed-price `StreamDrops` pull credits now have target-state
+  implementation coverage.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -43,7 +44,7 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Initial characterization tests cover admin guards, current drop behavior, fixed-price payout behavior, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a tracked but unaccepted baseline: 530 total findings, including 13 High and 26 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
@@ -85,9 +86,9 @@ Exit criteria:
 - `test/`, `script/`, `docs/`, and remapping/dependency structure exist.
 - Generated artifacts are ignored by default.
 - README states the repo is not production-ready.
-- Initial characterization tests cover current fixed-price drop, auction
-  creation, admin guard, payout, and randomness behavior enough to detect
-  accidental regressions.
+- Initial and converted target-state tests cover fixed-price drop execution,
+  auction creation, admin guard, payout/accounting, and randomness behavior
+  enough to detect accidental regressions.
 
 Required evidence:
 
@@ -874,7 +875,9 @@ Child tickets:
 - [`P0-PAY-002`](https://github.com/6529-Collections/6529Stream/issues/26):
   Add credit ledger storage and total-owed views.
 - [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27):
-  Convert fixed-price poster/platform payouts to credits.
+  Convert fixed-price poster/platform payouts to credits. Implemented for
+  `StreamDrops` poster, protocol, and curator-reserve accounting; broader
+  payment-parent work remains open.
 - [`P0-PAY-004`](https://github.com/6529-Collections/6529Stream/issues/28):
   Convert auction outbid refunds to credits.
 - [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29):
@@ -1389,7 +1392,8 @@ Acceptance criteria:
 ### Characterization Tests Before Refactors
 
 - Add tests that lock current behavior before P0 rewrites.
-- Characterize current fixed-price drop behavior.
+- Maintain fixed-price drop characterization and target-state payment tests as
+  fixed-price payment work lands.
 - Characterize current auction creation/custody behavior and maintain
   target-state custody and settlement coverage as P0 auction work lands.
 - Characterize current admin guards.
@@ -1401,14 +1405,13 @@ Acceptance criteria:
   `StreamDrops` auction argument passing, real
   `StreamDrops -> StreamMinter -> StreamCore` auction mint custody to the
   auction contract escrow, auction status/end-time recording, current admin selector
-  mismatch behavior, synchronous fixed-price payout plus poster, payout-address,
-  and curators-pool rejection behavior, pending metadata, immediate randomizer fulfillment,
-  configured-randomizer-only token hash setting, and one-time token hash
-  immutability.
-- Note: this Gate A list includes known-unsafe behavior, including
-  signer-only drop execution and synchronous fixed-price payout rejection
-  paths. These tests are regression tripwires before P0 rewrites, not
-  endorsements of protocol correctness.
+  mismatch behavior, converted fixed-price pull-payment behavior, poster,
+  payout-address, and curators-pool rejection behavior, pending metadata,
+  immediate randomizer fulfillment, configured-randomizer-only token hash
+  setting, and one-time token hash immutability.
+- Note: this Gate A list includes some known-unsafe behavior that remains to be
+  rewritten by later P0 work. These tests are regression tripwires before P0
+  rewrites, not endorsements of protocol correctness.
 
 ### Test Ordering
 
@@ -1857,9 +1860,9 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | ERC-1271 decision | ERC-1271 mock signer success, auction success, invalid magic, reverted check, empty/short/extra return, wrong digest, wrong signature bytes, replay, expiry, and EOA regression | `test/StreamDropsERC1271.t.sol` | Passing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionPayments.t.sol` | Passing for P0-AUCT-002: bid path has no outbid push refund, rejecting previous bidder cannot block, and withdrawal reentrancy cannot drain more than credited funds | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Passing: outbid creates bidder credit, current highest bid remains active escrow, previous bidder can withdraw, and failed withdrawal preserves credit | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | In Progress: auction-local bidder owed, active bid escrow, poster/protocol/curator settlement credits, total owed, and emergency-withdrawable views exist; broader payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
-| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamPayments.t.sol` | In Progress: auction bidder-credit and auction proceeds-credit withdrawal failures are covered; broader fixed-price, curator reward, and protocol-wide withdrawal failures remain missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamEmergencyWithdraw.t.sol` | In Progress: auction emergency withdrawal excludes bidder credits, active highest-bid escrow, and auction settlement credits; remaining contracts and full ledger categories are missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol` | In Progress: auction-local bidder owed, active bid escrow, poster/protocol/curator settlement credits, fixed-price poster/protocol/curator-reserve credits, total owed, and emergency-withdrawable views exist; broader payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol` | In Progress: auction bidder-credit, auction proceeds-credit, and fixed-price poster/protocol withdrawal failures are covered; curator reward and protocol-wide withdrawal failures remain missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol` | In Progress: auction emergency withdrawal excludes bidder credits, active highest-bid escrow, and auction settlement credits; `StreamDrops.emergencyWithdrawable()` excludes fixed-price poster, protocol, and curator-reserve owed balances from surplus; remaining contracts and full ledger categories are missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamRandomizerPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Passing: explicit auction-contract escrow, registration, status views, active/ended/terminal states, with-bid settlement, failed NFT transfer, cancellation, extension, and post-terminal bid rejection are covered | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionCustody.t.sol` | Passing: no-bid settlement targets the signed poster, contract posters create pending NFT claims, only the poster can complete the claim, and repeated settlement is rejected | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |

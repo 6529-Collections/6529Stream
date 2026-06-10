@@ -14,12 +14,13 @@ import "./IStreamMinter.sol";
 import "./IStreamAuctions.sol";
 import "./Ownable.sol";
 import "./IStreamAdmins.sol";
+import "./ReentrancyGuard.sol";
 
 interface IERC1271 {
     function isValidSignature(bytes32 _hash, bytes memory _signature) external view returns (bytes4);
 }
 
-contract StreamDrops is Ownable {
+contract StreamDrops is Ownable, ReentrancyGuard {
     uint8 public constant SALE_MODE_FIXED_PRICE = 1;
     uint8 public constant SALE_MODE_AUCTION = 2;
     string public constant EIP712_NAME = "6529StreamDrops";
@@ -57,6 +58,12 @@ contract StreamDrops is Ownable {
         uint256 signerEpoch;
     }
 
+    enum FixedPriceCreditType {
+        Poster,
+        Protocol,
+        CuratorReserve
+    }
+
     // struct that holds a drop's info
     struct dropInfoStruct {
         uint256 tokenid;
@@ -84,6 +91,12 @@ contract StreamDrops is Ownable {
     uint256 public tdhThreshold;
     uint256 public activeTime;
     address public auctionContract;
+    mapping(address => uint256) public fixedPricePosterCredits;
+    mapping(address => uint256) public fixedPriceProtocolCredits;
+    mapping(address => uint256) public fixedPriceCuratorReserveCredits;
+    uint256 public totalFixedPricePosterOwed;
+    uint256 public totalFixedPriceProtocolOwed;
+    uint256 public totalFixedPriceCuratorReserveOwed;
 
     event DropAuthorizationConsumed(
         bytes32 indexed dropId,
@@ -105,6 +118,12 @@ contract StreamDrops is Ownable {
     event AuctionContractChanged(
         address indexed oldAuctionContract, address indexed newAuctionContract
     );
+    event FixedPriceCreditCreated(
+        address indexed _add, bytes32 indexed dropId, uint8 indexed creditType, uint256 funds
+    );
+    event FixedPriceCreditWithdrawn(
+        address indexed _add, address indexed _recipient, uint8 indexed creditType, uint256 funds
+    );
 
     // certain functions can only be called by a global or function admin
     modifier FunctionAdminRequired(bytes4 _selector) {
@@ -125,6 +144,8 @@ contract StreamDrops is Ownable {
         address _curatorsPoolAddress
     ) {
         require(_tdhSignerContract != address(0), "Zero signer");
+        require(_payOutAddress != address(0), "Zero payout");
+        require(_curatorsPoolAddress != address(0), "Zero curator");
         tdhSigner = _tdhSignerContract;
         signerEpoch = 1;
         minterContract = IStreamMinter(_minterContract);
@@ -140,7 +161,7 @@ contract StreamDrops is Ownable {
         DropAuthorization calldata _authorization,
         string calldata _tokenData,
         bytes calldata _signature
-    ) public payable {
+    ) public payable nonReentrant {
         bytes32 digest = hashDropAuthorization(_authorization);
         address signer = _validateSigner(digest, _signature);
         _validateAuthorization(_authorization, signer, _tokenData);
@@ -199,6 +220,7 @@ contract StreamDrops is Ownable {
         public
         FunctionAdminRequired(this.updatePayOutAddress.selector)
     {
+        require(_payOutAddress != address(0), "Zero payout");
         payOutAddress = _payOutAddress;
     }
 
@@ -207,6 +229,7 @@ contract StreamDrops is Ownable {
         public
         FunctionAdminRequired(this.updateCuratorsPoolAddress.selector)
     {
+        require(_curatorsPoolAddress != address(0), "Zero curator");
         curatorsPoolAddress = _curatorsPoolAddress;
     }
 
@@ -284,6 +307,55 @@ contract StreamDrops is Ownable {
     // retrieve execution address
     function retrieveExecutionAddress(uint256 _tokenid) public view returns (address) {
         return dropInfo[retrieveDropID(_tokenid)].executionAddress;
+    }
+
+    function withdrawFixedPriceCredit() external {
+        withdrawFixedPriceCreditTo(payable(msg.sender));
+    }
+
+    function withdrawFixedPriceCreditTo(address payable _recipient) public nonReentrant {
+        require(_recipient != address(0), "Zero recipient");
+        uint256 posterCredit = fixedPricePosterCredits[msg.sender];
+        uint256 protocolCredit = fixedPriceProtocolCredits[msg.sender];
+        uint256 credit = posterCredit + protocolCredit;
+        require(credit != 0, "No credit");
+
+        fixedPricePosterCredits[msg.sender] = 0;
+        fixedPriceProtocolCredits[msg.sender] = 0;
+        totalFixedPricePosterOwed -= posterCredit;
+        totalFixedPriceProtocolOwed -= protocolCredit;
+
+        (bool success,) = _recipient.call{ value: credit }("");
+        require(success, "ETH failed");
+        if (posterCredit != 0) {
+            emit FixedPriceCreditWithdrawn(
+                msg.sender, _recipient, uint8(FixedPriceCreditType.Poster), posterCredit
+            );
+        }
+        if (protocolCredit != 0) {
+            emit FixedPriceCreditWithdrawn(
+                msg.sender, _recipient, uint8(FixedPriceCreditType.Protocol), protocolCredit
+            );
+        }
+    }
+
+    function totalFixedPriceOwed() public view returns (uint256) {
+        return
+            totalFixedPricePosterOwed + totalFixedPriceProtocolOwed
+                + totalFixedPriceCuratorReserveOwed;
+    }
+
+    function totalOwed() public view returns (uint256) {
+        return totalFixedPriceOwed();
+    }
+
+    function emergencyWithdrawable() public view returns (uint256) {
+        uint256 balance = address(this).balance;
+        uint256 owed = totalOwed();
+        if (balance <= owed) {
+            return 0;
+        }
+        return balance - owed;
     }
 
     function domainSeparator() public view returns (bytes32) {
@@ -383,13 +455,42 @@ contract StreamDrops is Ownable {
         salt[0] = 0;
         num[0] = 1;
         tokenData[0] = _tokenData;
-        (bool success1,) = payable(_authorization.poster).call{ value: (msg.value / 2) }("");
-        (bool success2,) = payable(payOutAddress).call{ value: (msg.value / 4) }("");
-        (bool success3,) = payable(curatorsPoolAddress).call{ value: (msg.value / 4) }("");
-        require(success1, "ETH failed");
-        require(success2, "ETH failed");
-        require(success3, "ETH failed");
+        if (msg.value != 0) {
+            _creditFixedPriceProceeds(_authorization.dropId, _authorization.poster, msg.value);
+        }
         return minterContract.mint(receiver, tokenData, salt, _authorization.collectionId, num);
+    }
+
+    function _creditFixedPriceProceeds(bytes32 _dropId, address _poster, uint256 _payment) private {
+        uint256 posterCredit = _payment / 2;
+        uint256 curatorReserveCredit = _payment / 4;
+        // Integer remainders accrue to the protocol credit so all wei remain owed.
+        uint256 protocolCredit = _payment - posterCredit - curatorReserveCredit;
+
+        if (posterCredit != 0) {
+            fixedPricePosterCredits[_poster] += posterCredit;
+            totalFixedPricePosterOwed += posterCredit;
+            emit FixedPriceCreditCreated(
+                _poster, _dropId, uint8(FixedPriceCreditType.Poster), posterCredit
+            );
+        }
+        if (protocolCredit != 0) {
+            fixedPriceProtocolCredits[payOutAddress] += protocolCredit;
+            totalFixedPriceProtocolOwed += protocolCredit;
+            emit FixedPriceCreditCreated(
+                payOutAddress, _dropId, uint8(FixedPriceCreditType.Protocol), protocolCredit
+            );
+        }
+        if (curatorReserveCredit != 0) {
+            fixedPriceCuratorReserveCredits[curatorsPoolAddress] += curatorReserveCredit;
+            totalFixedPriceCuratorReserveOwed += curatorReserveCredit;
+            emit FixedPriceCreditCreated(
+                curatorsPoolAddress,
+                _dropId,
+                uint8(FixedPriceCreditType.CuratorReserve),
+                curatorReserveCredit
+            );
+        }
     }
 
     function _executeAuctionDrop(

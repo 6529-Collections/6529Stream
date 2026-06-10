@@ -20,7 +20,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
 
-    function testFixedPriceDropPaysSynchronouslyAndMintsToExplicitRecipient() public {
+    function testFixedPriceDropCreditsProceedsAndMintsToExplicitRecipient() public {
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         vm.deal(address(this), 10 ether);
@@ -37,13 +37,23 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
             block.timestamp + 1 days
         );
         bytes memory signature = signAuthorization(deployed.drops, authorization);
+        uint256 posterBalanceBefore = POSTER.balance;
+        uint256 payoutBalanceBefore = PAYOUT.balance;
+        uint256 curatorsBalanceBefore = CURATORS_POOL.balance;
 
         deployed.drops.mintDrop{ value: 4 ether }(authorization, "data", signature);
 
         uint256 tokenId = 10_000_000_000;
-        POSTER.balance.assertEq(2 ether, "poster payout changed");
-        PAYOUT.balance.assertEq(1 ether, "protocol payout changed");
-        CURATORS_POOL.balance.assertEq(1 ether, "curator payout changed");
+        POSTER.balance.assertEq(posterBalanceBefore, "poster was push-paid");
+        PAYOUT.balance.assertEq(payoutBalanceBefore, "protocol was push-paid");
+        CURATORS_POOL.balance.assertEq(curatorsBalanceBefore, "curator was push-paid");
+        deployed.drops.fixedPricePosterCredits(POSTER).assertEq(2 ether, "poster credit");
+        deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(1 ether, "protocol credit");
+        deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)
+            .assertEq(1 ether, "curator reserve credit");
+        deployed.drops.totalFixedPriceOwed().assertEq(4 ether, "fixed-price owed");
+        deployed.drops.totalOwed().assertEq(4 ether, "total owed");
+        deployed.drops.emergencyWithdrawable().assertEq(0, "surplus");
         deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "recipient changed");
         deployed.core.retrieveTokenHash(tokenId)
             .assertEq(keccak256(abi.encode(uint256(1), tokenId, uint256(0))), "token hash changed");
@@ -51,7 +61,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
         deployed.drops.retrieveDropID(tokenId).assertEq(authorization.dropId, "drop id changed");
     }
 
-    function testFixedPriceDropCurrentlyRevertsWhenPosterRejectsETH() public {
+    function testFixedPriceDropSucceedsWhenPosterRejectsETH() public {
         RejectETH rejectPoster = new RejectETH();
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
@@ -76,11 +86,13 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
             )
         );
 
-        success.assertFalse("rejecting poster did not revert");
-        deployed.core.totalSupply().assertEq(0, "mint happened despite rejected poster payout");
+        success.assertTrue("rejecting poster blocked mint");
+        deployed.core.totalSupply().assertEq(1, "rejecting poster mint missing");
+        deployed.drops.fixedPricePosterCredits(address(rejectPoster))
+            .assertEq(2 ether, "rejecting poster credit");
     }
 
-    function testFixedPriceDropCurrentlyRevertsWhenPayoutAddressRejectsETH() public {
+    function testFixedPriceDropSucceedsWhenPayoutAddressRejectsETH() public {
         RejectETH rejectPayout = new RejectETH();
         DeployedStream memory deployed =
             deployStreamWithSigner(address(rejectPayout), CURATORS_POOL, signerAddress());
@@ -105,11 +117,13 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
             )
         );
 
-        success.assertFalse("rejecting payout address did not revert");
-        deployed.core.totalSupply().assertEq(0, "mint happened despite rejected payout");
+        success.assertTrue("rejecting payout address blocked mint");
+        deployed.core.totalSupply().assertEq(1, "rejecting payout mint missing");
+        deployed.drops.fixedPriceProtocolCredits(address(rejectPayout))
+            .assertEq(1 ether, "rejecting payout credit");
     }
 
-    function testFixedPriceDropCurrentlyRevertsWhenCuratorsPoolRejectsETH() public {
+    function testFixedPriceDropSucceedsWhenCuratorsPoolRejectsETH() public {
         RejectETH rejectCuratorsPool = new RejectETH();
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, address(rejectCuratorsPool), signerAddress());
@@ -134,8 +148,10 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
             )
         );
 
-        success.assertFalse("rejecting curators pool did not revert");
-        deployed.core.totalSupply().assertEq(0, "mint happened despite rejected curator payout");
+        success.assertTrue("rejecting curators pool blocked mint");
+        deployed.core.totalSupply().assertEq(1, "rejecting curator mint missing");
+        deployed.drops.fixedPriceCuratorReserveCredits(address(rejectCuratorsPool))
+            .assertEq(1 ether, "rejecting curator reserve credit");
     }
 
     function testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState() public {
