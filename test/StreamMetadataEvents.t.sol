@@ -45,7 +45,8 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID, 7);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
-        _countMetadataUpdates(logs, TOKEN_ID).assertEq(0, "mint-only event count");
+        _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "mint-only metadata update emitted");
+        _countTopic(logs, BATCH_METADATA_UPDATE_TOPIC).assertEq(0, "mint-only batch update emitted");
     }
 
     function testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate() public {
@@ -57,7 +58,8 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, tokenHash);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
-        _countMetadataUpdates(logs, TOKEN_ID).assertEq(0, "premint event count");
+        _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "premint metadata update emitted");
+        _countTopic(logs, BATCH_METADATA_UPDATE_TOPIC).assertEq(0, "premint batch update emitted");
         require(deployed.core.retrieveTokenHash(TOKEN_ID) == tokenHash, "hash not stored");
     }
 
@@ -133,7 +135,10 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         deployed.core.changeMetadataView(COLLECTION_ID, true);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
-        _countBatchMetadataUpdates(logs, TOKEN_ID, TOKEN_ID).assertEq(0, "empty batch emitted");
+        _countTopic(logs, METADATA_UPDATE_TOPIC)
+            .assertEq(0, "empty collection metadata update emitted");
+        _countTopic(logs, BATCH_METADATA_UPDATE_TOPIC)
+            .assertEq(0, "empty collection batch update emitted");
     }
 
     function testBurnDoesNotEmitMetadataUpdate() public {
@@ -147,7 +152,30 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         deployed.core.burn(COLLECTION_ID, TOKEN_ID);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
-        _countMetadataUpdates(logs, TOKEN_ID).assertEq(0, "burn emitted metadata update");
+        _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "burn emitted metadata update");
+        _countTopic(logs, BATCH_METADATA_UPDATE_TOPIC)
+            .assertEq(0, "burn emitted batch metadata update");
+    }
+
+    function testPostBurnRandomnessFulfillmentStoresHashWithoutMetadataUpdate() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintToken(deployed, TOKEN_ID, 7);
+
+        vm.prank(RECIPIENT);
+        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+
+        bytes32 tokenHash = keccak256("post-burn hash");
+
+        vm.recordLogs();
+        vm.prank(address(noopRandomizer));
+        deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, tokenHash);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "post-burn metadata update emitted");
+        _countTopic(logs, BATCH_METADATA_UPDATE_TOPIC).assertEq(0, "post-burn batch update emitted");
+        require(deployed.core.retrieveTokenHash(TOKEN_ID) == tokenHash, "post-burn hash not stored");
     }
 
     function _mintToken(DeployedStream memory deployed, uint256 tokenId, uint256 salt) private {
@@ -182,6 +210,14 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
                 if (actualFromTokenId == fromTokenId && actualToTokenId == toTokenId) {
                     count++;
                 }
+            }
+        }
+    }
+
+    function _countTopic(Vm.Log[] memory logs, bytes32 topic) private pure returns (uint256 count) {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].topics.length > 0 && logs[i].topics[0] == topic) {
+                count++;
             }
         }
     }

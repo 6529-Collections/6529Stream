@@ -469,6 +469,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     }
 
     function _emitCollectionMetadataUpdate(uint256 _collectionID) private {
+        // Circulation supply is a minted-ever counter; burns are represented by ERC-721 events.
         uint256 mintedCount = collectionAdditionalData[_collectionID].collectionCirculationSupply;
         if (mintedCount == 0) {
             return;
