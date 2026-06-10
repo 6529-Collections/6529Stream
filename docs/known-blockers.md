@@ -60,11 +60,13 @@ contributors who start from the README.
 - Dependency script retrieval now has segment-safe typed chunk and content
   hashes, so the former packed/dynamic chunk-boundary Slither finding is fixed.
   Current metadata golden fixtures now lock the pre-beta off-chain pending/final
-  URI behavior and current on-chain pending/final JSON output. Remaining
+  URI behavior and current on-chain pending/final JSON output. ERC-4906 support
+  and current `MetadataUpdate` / `BatchMetadataUpdate` semantics now cover
+  `StreamCore` metadata mutations; dependency-registry reverse signaling remains
+  part of dependency versioning/freeze work. Remaining
   metadata blockers include the final schema-versioned public-beta metadata
   implementation, collection freeze manifests, immutable dependency version
-  records, registry identity pinning, ERC-4906 signaling, burn semantics,
-  escaping, and size limits.
+  records, registry identity pinning, burn semantics, escaping, and size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

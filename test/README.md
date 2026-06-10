@@ -153,6 +153,13 @@ output are compared byte-for-byte against `test/fixtures/metadata/`. The
 on-chain fixtures are labeled as current pre-beta behavior because ADR 0006
 still requires an explicit public-beta metadata state model.
 
+ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
+`StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
+randomness fulfillment and token metadata input writes emit `MetadataUpdate`,
+collection-level metadata writes emit `BatchMetadataUpdate` for the minted-ever
+token range, empty collections do not emit empty batch events, and mint-only
+plus burn paths do not emit misleading ERC-4906 events.
+
 Mint-accounting state now has P0-CORE-001 target-state coverage in
 `StreamMintAccounting.t.sol`: never-written public/allowlist mint counters were
 removed from `StreamCore`, while the retained airdrop counter starts at zero,

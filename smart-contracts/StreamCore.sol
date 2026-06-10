@@ -20,10 +20,13 @@ import "./IStreamMinter.sol";
 import "./ERC2981.sol";
 import "./Ownable.sol";
 import "./IDependencyRegistry.sol";
+import "./IERC4906.sol";
 import "./StreamPauseDomains.sol";
 
-contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
+contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     using Strings for uint256;
+
+    bytes4 private constant _INTERFACE_ID_ERC4906 = 0x49064906;
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -321,6 +324,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         } else {
             collectionInfo[_collectionID].collectionScript[_index] = _newCollectionScript[0];
         }
+        _emitCollectionMetadataUpdate(_collectionID);
     }
 
     // function that is used by artists for signing
@@ -347,6 +351,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
             "Not allowed"
         );
         onchainMetadata[_collectionID] = _status;
+        _emitCollectionMetadataUpdate(_collectionID);
     }
 
     // function to change the token data of a token
@@ -358,6 +363,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         require(collectionFreeze[tokenIdsToCollectionIds[_tokenId]] == false, "Data frozen");
         _requireMinted(_tokenId);
         tokenData[_tokenId] = newData;
+        emit MetadataUpdate(_tokenId);
     }
 
     // function to store onchain an imageURI and attributes for a token
@@ -375,6 +381,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
             _requireMinted(_tokenId[x]);
             tokenImageAndAttributes[_tokenId[x]][0] = _images[x];
             tokenImageAndAttributes[_tokenId[x]][1] = _attributes[x];
+            emit MetadataUpdate(_tokenId[x]);
         }
     }
 
@@ -400,6 +407,10 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
                 == 0x0000000000000000000000000000000000000000000000000000000000000000
         );
         tokenToHash[_mintIndex] = _hash;
+        // Record pre-mint callbacks, but only live tokens announce metadata changes.
+        if (_exists(_mintIndex)) {
+            emit MetadataUpdate(_mintIndex);
+        }
     }
 
     // function to set final supply, this applies only for unminted collections and will adjust totalSupply = circulatingSupply
@@ -454,7 +465,17 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         override(ERC721Enumerable, ERC2981)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == _INTERFACE_ID_ERC4906 || super.supportsInterface(interfaceId);
+    }
+
+    function _emitCollectionMetadataUpdate(uint256 _collectionID) private {
+        // Circulation supply is a minted-ever counter; burns are represented by ERC-721 events.
+        uint256 mintedCount = collectionAdditionalData[_collectionID].collectionCirculationSupply;
+        if (mintedCount == 0) {
+            return;
+        }
+        uint256 firstTokenId = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
+        emit BatchMetadataUpdate(firstTokenId, firstTokenId + mintedCount - 1);
     }
 
     function _requireNoPendingRandomnessRequests(uint256 _collectionID, address oldRandomizer)

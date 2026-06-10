@@ -36,6 +36,9 @@ The current Gate A smoke baseline proves:
   content hashes while preserving the existing rendered generative script
   output, and `StreamMetadataGolden.t.sol` locks current off-chain pending/final
   URIs plus current on-chain pending/final JSON data URIs against fixtures.
+  `StreamMetadataEvents.t.sol` proves ERC-4906 interface support and current
+  metadata update event semantics for token-level updates, collection-range
+  updates, randomness fulfillment, mint-only paths, and burn.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known

@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-golden-tests` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/80` |
+| Active PR branch | `codex/metadata-erc4906-events` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/81` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 22:35 UTC` |
+| Last updated | `2026-06-10 23:15 UTC` |
 
 ## Packaging Notes
 
@@ -92,7 +92,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
-| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | PR #81 open on `codex/metadata-golden-tests` |
+| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
+| 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | PR #82 open; CodeRabbit inline review fix ready to push |
 
 ## Current PR Worklog
 
@@ -3244,7 +3245,7 @@ Outcome:
 
 ### PR #81: Add metadata schema and golden-file tests (Queue Item 38)
 
-Status: PR open; CodeRabbit guard and nitpick fixes applied locally.
+Status: Merged.
 Branch: `codex/metadata-golden-tests`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/81`.
 Related issue:
@@ -3327,10 +3328,122 @@ Review requests:
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
+Outcome:
+
+- Merged as PR #81 on `2026-06-10 22:40 UTC`.
+- Merge commit `2b2dbab92c2f4833a8b2e6fff84638ea52edda63`.
+- Latest head before merge `226fd28c89e035b233299e4c9299b0e3d5e38a2d`.
+- GitHub CI run `27310936726` passed on the final head.
+- CodeRabbit explicitly confirmed the guard fix and nitpick fixes in comments
+  `4675293732` and `4675354682`, with no further concerns. The CodeRabbit
+  commit status remained stale pending, so the autonomous maintainer decision
+  used the bot's explicit review comments plus green CI and resolved threads.
+
+### PR #82: Add ERC-4906 metadata update signaling (Queue Item 39)
+
+Status: PR open; CodeRabbit inline review fix applied locally and ready to push.
+Branch: `codex/metadata-erc4906-events`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/82`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/49`
+
+Goal:
+
+- Implement P1-META-004 for current `StreamCore` metadata behavior.
+- Expose ERC-4906 interface support through `supportsInterface(0x49064906)`.
+- Emit `MetadataUpdate` for live-token metadata input writes and randomness
+  fulfillment.
+- Emit `BatchMetadataUpdate` for collection-level metadata mutations over the
+  minted-ever contiguous token range.
+- Avoid misleading ERC-4906 events for mint-only and burn paths.
+- Document current event semantics and update roadmap/test traceability.
+
+Candidate files:
+
+- `smart-contracts/IERC4906.sol`
+- `smart-contracts/StreamCore.sol`
+- `test/StreamMetadataEvents.t.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added a minimal `IERC4906` event interface and manual ERC-4906 interface ID
+  support in `StreamCore`.
+- `setTokenHash` emits `MetadataUpdate` only when the token is still live.
+- `changeTokenData` and `updateImagesAndAttributes` emit token-level
+  `MetadataUpdate` events.
+- `changeMetadataView` and `updateCollectionInfo` emit `BatchMetadataUpdate`
+  for the collection's minted-ever token range and skip empty collections.
+- Mint-only and burn behavior intentionally do not emit ERC-4906 events.
+- Dependency registry content reverse signaling remains future P1-META-003 work
+  because the current registry does not know which collections use each
+  dependency key; dependency reference changes through `updateCollectionInfo`
+  do emit collection batch events.
+- CodeRabbit comment `4675512759` reported the implementation correct and
+  complete for scope, then suggested low-risk extra coverage. The follow-up
+  adds the pre-mint `setTokenHash` no-event regression, two-token
+  `updateImagesAndAttributes` event coverage, and a short comment explaining
+  the `_exists` guard.
+- CodeRabbit inline review thread `PRRT_kwDOM7REis6IpTxK` / discussion
+  `3392151522` correctly noted that negative-path tests could miss unexpected
+  ERC-4906 emissions with different token payloads. The follow-up now asserts
+  the raw `MetadataUpdate` and `BatchMetadataUpdate` topics are absent for
+  mint-only, pre-mint hash storage, empty-collection metadata changes, burns,
+  and post-burn hash storage.
+- Added a post-burn `setTokenHash` regression proving the hash can still be
+  recorded by an authorized randomizer without announcing metadata for a burned
+  token.
+- Added a short collection-range helper comment documenting that collection
+  circulation supply is a minted-ever counter, so burns are represented by
+  ERC-721 transfer events rather than ERC-4906 collection-range shrink events.
+
+Validation:
+
+- Focused ERC-4906 metadata event tests passed:
+  `forge test --match-contract StreamMetadataEventsTest -vvv` with 9 tests.
+- Full canonical local gate passed: `make check` with 210 tests, 0 failed.
+- Windows wrapper passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 210 tests,
+  0 failed.
+- Touched-file formatting passed:
+  `forge fmt --check smart-contracts\IERC4906.sol smart-contracts\StreamCore.sol test\StreamMetadataEvents.t.sol`.
+- Diff whitespace check passed: `git diff --check`.
+- Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
+  `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
+  `ops\AUTONOMOUS_RUN.md`.
+- Traceability grep passed for `P1-META-004`, `ERC-4906`, `MetadataUpdate`,
+  `BatchMetadataUpdate`, `StreamMetadataEvents`, `0x49064906`,
+  `codex/metadata-erc4906-events`, and `Queue Item 39`.
+- Slither baseline comparison remains unchanged from the accepted baseline:
+  `721` total findings, `4` High, `19` Medium, `92` Low, `595`
+  Informational, `11` Optimization. Test-only `StreamMetadataEvents`
+  `reentrancy-events` rows are `0`.
+
+Review requests:
+
+- CodeRabbit requested in comment `4675495632`.
+- CodeRabbit rerun requested in comment `4675504591` after the state commit
+  changed the PR head.
+- CodeRabbit review comment `4675512759` found the implementation correct and
+  complete for the stated scope; low-risk coverage suggestions were accepted
+  and implemented locally.
+- CodeRabbit inline review thread `PRRT_kwDOM7REis6IpTxK` / review
+  `4472309839` identified the raw-topic negative-test gap; the local follow-up
+  is ready to push for rereview.
+- Claude remains intentionally skipped per current user instruction; use
+  CodeRabbit unless risk or future user instruction changes.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-10 23:15 | Address CodeRabbit PR #82 inline test gap | Hardened negative-path ERC-4906 tests to assert no raw metadata event topics, added post-burn hash-storage no-event coverage, and refreshed focused/full/Windows/Slither validation with 210 total tests |
 | 2026-06-09 22:34 | Use `ops/ROADMAP.md` as canonical roadmap | Existing roadmap already contains detailed gates, P0 issues, ADRs, Slither appendix, and test matrix |
 | 2026-06-09 22:34 | Add `ops/AUTONOMOUS_RUN.md` as durable state | Long-running execution needs repo-persisted state across compaction and PR cycles |
 | 2026-06-09 22:34 | Start with a docs/state PR | It establishes the control plane before code changes and is low risk |
@@ -3579,6 +3692,12 @@ Review requests:
 | 2026-06-10 22:25 | Open PR #81 | Metadata golden baseline PR opened on head `a2218e110ff5886dd94db74ead3986afcfcad0d6`; CodeRabbit requested in issue comment `4675228562`; Claude intentionally skipped per current user instruction |
 | 2026-06-10 22:31 | Apply PR #81 CodeRabbit guard fix | CodeRabbit comment `4675250990` correctly noted that the final metadata golden tests should prove they are exercising a fulfilled hash state; added explicit nonzero-hash guards and reran focused metadata tests, `make check`, Windows wrapper, and Slither baseline comparison |
 | 2026-06-10 22:35 | Apply PR #81 CodeRabbit nitpicks | Accepted low-cost follow-ups by documenting raw `collectionBaseURI` URI concatenation, making the Queue Item 38 status explicitly reference PR #81 and branch `codex/metadata-golden-tests`, and noting that `NoopRandomizer` comes from `MockRandomizer.sol` |
+| 2026-06-10 22:40 | Merge PR #81 | CI run `27310936726` passed, CodeRabbit explicitly reported no further concerns in comment `4675354682`, visible review threads were resolved, merge commit is `2b2dbab92c2f4833a8b2e6fff84638ea52edda63`, and issue #46 remains open for final schema-versioned metadata work |
+| 2026-06-10 22:47 | Select Queue Item 39 | Next Gate D gap is P1-META-004 because current metadata can change after mint but `StreamCore` still lacks ERC-4906 interface support and update events for indexers |
+| 2026-06-10 22:47 | Implement Queue Item 39 local draft | Added ERC-4906 interface support, token and collection metadata update events, focused event tests, and docs/roadmap/run-state traceability; dependency registry content reverse signaling remains scoped to P1-META-003 |
+| 2026-06-10 22:58 | Finish local Queue Item 39 validation | Focused ERC-4906 event tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts and zero `StreamMetadataEvents` reentrancy-event rows |
+| 2026-06-10 23:02 | Open PR #82 | ERC-4906 metadata update event PR opened on head `96052819e2cfd5d6f53c4793af03baaadda2ad00`; CodeRabbit requested in issue comment `4675495632`; Claude intentionally skipped per current user instruction |
+| 2026-06-10 23:08 | Address CodeRabbit PR #82 coverage suggestions | Accepted CodeRabbit's low-risk suggestions from comment `4675512759`: added pre-mint `setTokenHash` no-event coverage, two-token image/attribute event coverage, and the `_exists` guard comment; focused tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison all pass with 209 tests |
 
 ## Resume Instructions
 
