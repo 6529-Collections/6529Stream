@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/remove-dead-mint-accounting` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/71` |
+| Active PR branch | `codex/remove-weak-helper-randomness` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/72` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 18:45 UTC` |
+| Last updated | `2026-06-10 19:09 UTC` |
 
 ## Packaging Notes
 
@@ -85,7 +85,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
 | 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Merged in PR #70 |
 | 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Merged in PR #71 |
-| 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Open in PR #72; CodeRabbit requested |
+| 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Merged in PR #72 |
+| 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Ready to open PR |
 
 ## Current PR Worklog
 
@@ -2636,10 +2637,11 @@ Review requests:
 
 ### PR #72: Remove dead mint-accounting state (Queue Item 31)
 
-Status: Open; CodeRabbit requested, CI pending.
+Status: Merged.
 Branch: `codex/remove-dead-mint-accounting`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/72`.
-Latest head before PR-state update: `93984032b8c0fb19d6922e42809fd0892da3c72f`.
+Latest head before merge: `a0c6830862719861648697d722027b40c2090401`.
+Merge commit: `ba2f0cd483bd178f801250ee6ef842ff3a4e77a5`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/13`
@@ -2678,7 +2680,7 @@ Implementation notes:
 - Updated `ops/SLITHER_BASELINE.md` and `ops/ROADMAP.md` to mark
   `uninitialized-state` as `0 current / 2 fixed`.
 
-Validation so far:
+Validation:
 
 - PR #71 merge checked locally by fast-forwarding `main` to
   `20bd9d9d1fa36b7142f3a81b9ab0c86060c9f943`.
@@ -2702,6 +2704,83 @@ Validation so far:
 Review requests:
 
 - CodeRabbit requested in issue comment `4673355477`.
+- CodeRabbit final review/status was clean on head
+  `a0c6830862719861648697d722027b40c2090401`; review comment
+  `4673355663` reported no actionable comments.
+- Claude is intentionally skipped per current user instruction; use CodeRabbit
+  unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #72 on `2026-06-10`.
+- GitHub CI run `27298359897` passed on the final head.
+- Issue #13 closed completed.
+
+### PR #73: Remove weak helper randomness (Queue Item 32)
+
+Status: Ready to open PR.
+Branch: `codex/remove-weak-helper-randomness`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/73`
+
+Goal:
+
+- Complete `P0-RAND-008` by removing the concrete `XRandoms` weak randomness
+  helper from production source.
+- Keep `RandomizerNXT` legacy-only and impossible to configure through
+  `StreamCore.addRandomizer`.
+- Refresh Slither, roadmap, ADR, status, and test traceability so the two
+  former `weak-prng` rows are marked fixed instead of accepted risk.
+
+Candidate files:
+
+- `smart-contracts/XRandoms.sol`
+- `smart-contracts/IXRandoms.sol`
+- `docs/adr/0005-randomness.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Deleted `smart-contracts/XRandoms.sol`.
+- Kept `smart-contracts/IXRandoms.sol` because `RandomizerNXT` and the inline
+  `MockXRandoms` regression still need the interface.
+- Formatted `IXRandoms` so the touched legacy boundary passes targeted
+  `forge fmt --check`.
+- Kept `RandomizerNXT.isRandomizerContract()` returning false, so
+  `StreamCore.addRandomizer` rejects it for production collections.
+- Created issue #73 as the concrete implementation tracker because issue #14
+  already closed the ADR decision.
+
+Validation so far:
+
+- Focused `forge test --match-test
+  testNxtRandomizerCannotBeConfiguredForProductionCollections -vvv` passed:
+  1 test, 0 failed.
+- `make check` passed on the final local head: 176 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed on the
+  final local head: 176 tests, 0 failed.
+- `forge fmt --check smart-contracts\IXRandoms.sol
+  smart-contracts\RandomizerNXT.sol test\StreamRandomizerLifecycle.t.sol`
+  passed.
+- `git diff --check` passed.
+- Markdown heading scan passed for the roadmap, Slither baseline, autonomous
+  run state, ADR 0005, status docs, known blockers, and test README.
+- Traceability grep passed for `P0-RAND-008`, issue #73, `weak-prng=0`,
+  Slither count `676`, `4 High`, branch `codex/remove-weak-helper-randomness`,
+  and `testNxtRandomizerCannotBeConfiguredForProductionCollections`.
+- Slither confirmation returned
+  `{"arbitrary_send_eth":0,"high":4,"informational":575,"low":63,"medium":28,"optimization":6,"reentrancy_eth":0,"slither_exit":-1,"total":676,"uninitialized_state":0,"weak_prng":0}`.
+
+Review requests:
+
+- CodeRabbit will be requested after the PR is opened.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
@@ -2925,6 +3004,11 @@ Review requests:
 | 2026-06-10 18:39 | Validate Queue Item 31 Slither delta | Slither now reports `uninitialized_state=0`, total findings `680`, and High findings `6`; the remaining High rows are weak helper randomness, vendored math, and accepted test-only forced-ETH helpers |
 | 2026-06-10 18:43 | Finish local Queue Item 31 validation | Focused accounting tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass with 176 total tests |
 | 2026-06-10 18:45 | Open PR #72 and request CodeRabbit | PR #72 packages `P0-CORE-001`; CodeRabbit review requested in issue comment `4673355477`, and Claude is skipped per current user instruction |
+| 2026-06-10 18:54 | Merge PR #72 | Dead mint-accounting state merged as `ba2f0cd483bd178f801250ee6ef842ff3a4e77a5`; CI passed on final head `a0c6830862719861648697d722027b40c2090401`, CodeRabbit final clean comment `4673355663`, and issue #13 closed completed |
+| 2026-06-10 18:57 | Select Queue Item 32 | Next focused P0 Slither blocker is weak helper randomness because deleting the concrete `XRandoms` helper can reduce first-party production `weak-prng` findings to zero |
+| 2026-06-10 18:57 | Create issue #73 | Issue #14 was already closed for ADR acceptance, so `P0-RAND-008` now tracks the concrete `XRandoms` removal implementation |
+| 2026-06-10 19:03 | Implement Queue Item 32 local draft | Deleted `smart-contracts/XRandoms.sol`, kept `IXRandoms` and the inline `MockXRandoms` regression, and updated Slither/roadmap/status/ADR/test traceability for `weak-prng=0` |
+| 2026-06-10 19:09 | Finish local Queue Item 32 validation | Focused production-scope regression, full `make check`, Windows wrapper, targeted formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither final JSON has `weak_prng=0`, `total=676`, `high=4`, and `medium=28` |
 
 ## Resume Instructions
 

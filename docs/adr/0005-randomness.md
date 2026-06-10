@@ -11,9 +11,9 @@ Accepted.
 | Date | 2026-06-10 |
 | Issue | [P0-RAND-ADR](https://github.com/6529-Collections/6529Stream/issues/14) |
 | Blocks | [P0-RAND-001](https://github.com/6529-Collections/6529Stream/issues/37), [P0-RAND-002](https://github.com/6529-Collections/6529Stream/issues/38), [P0-RAND-003](https://github.com/6529-Collections/6529Stream/issues/39), [P0-RAND-004](https://github.com/6529-Collections/6529Stream/issues/40), [P0-RAND-005](https://github.com/6529-Collections/6529Stream/issues/41), [P0-RAND-006](https://github.com/6529-Collections/6529Stream/issues/42), [P0-RAND-007](https://github.com/6529-Collections/6529Stream/issues/43) |
-| Related issues | [P0-PAY-007](https://github.com/6529-Collections/6529Stream/issues/31), [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8), [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9) |
+| Related issues | [P0-PAY-007](https://github.com/6529-Collections/6529Stream/issues/31), [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8), [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9), [P0-RAND-008](https://github.com/6529-Collections/6529Stream/issues/73) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0002](0002-auction-custody.md), [ADR 0003](0003-payment-accounting.md), [ADR 0004](0004-admin-governance.md), ADR 0006 |
-| Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/RandomizerVRF.sol`, `smart-contracts/RandomizerRNG.sol`, `smart-contracts/RandomizerNXT.sol`, `smart-contracts/XRandoms.sol`, `smart-contracts/IRandomizer.sol`, `smart-contracts/IArrngController.sol`, `smart-contracts/ArrngConsumer.sol` |
+| Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/RandomizerVRF.sol`, `smart-contracts/RandomizerRNG.sol`, `smart-contracts/RandomizerNXT.sol`, former `smart-contracts/XRandoms.sol`, `smart-contracts/IRandomizer.sol`, `smart-contracts/IArrngController.sol`, `smart-contracts/ArrngConsumer.sol` |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -62,8 +62,9 @@ Current source references:
   randomness reserves and refunds are excluded from surplus.
 - `smart-contracts/RandomizerNXT.sol` synchronously derives a hash from
   `blockhash(block.number - 1)` and `XRandoms`.
-- `smart-contracts/XRandoms.sol` derives helper values from `block.prevrandao`,
-  recent block hash, and timestamp. Slither reports these as high-impact
+- The former `smart-contracts/XRandoms.sol` derived helper values from
+  `block.prevrandao`, recent block hash, and timestamp. It was removed from
+  production source in `P0-RAND-008` after Slither reported high-impact
   `weak-prng` findings.
 - There is no collection-level randomizer epoch, terminal request state, stale
   callback policy, callback-after-burn policy, explicit post-processing failure
@@ -106,10 +107,12 @@ Current implementation status:
   with the raw provider words for off-chain auditability; contract state remains
   hash-only.
 - `RandomizerNXT` no longer advertises itself as a production randomizer.
+- The concrete `XRandoms` helper contract has been removed from production
+  source. Tests retain only an inline mock implementation to prove the
+  `RandomizerNXT` legacy-only boundary.
 - Remaining implementation work includes callback-after-burn policy, richer
-  metadata state exposure, provider configuration events/runbooks, canonical
-  core/coordinator-owned lifecycle state, and final handling of `XRandoms` weak
-  helper randomness.
+  metadata state exposure, provider configuration events/runbooks, and
+  canonical core/coordinator-owned lifecycle state.
 
 ## Decision
 
@@ -462,7 +465,9 @@ P0 tests must include:
   fully removed from production scope
 - event assertions for request, fulfillment, stale, failure, retry, provider
   update, and epoch update events
-- Slither `weak-prng` rows are fixed, scoped, or explicitly accepted with proof
+- Slither `weak-prng` rows are fixed, scoped, or explicitly accepted with proof.
+  Current implementation removes the concrete `XRandoms` helper and Slither
+  reports `weak-prng=0`.
 
 ## Migration And Rollout
 
@@ -474,6 +479,8 @@ P0 tests must include:
 5. Update VRF-compatible and arRNG adapters to write through the canonical
    lifecycle.
 6. Remove or isolate `RandomizerNXT` and `XRandoms` from production paths.
+   Implemented for the concrete weak helper by removing `XRandoms`; implemented
+   for `RandomizerNXT` by keeping it non-production-eligible.
 7. Update provider configuration docs, deployment manifests, and runbooks.
 8. Update Slither baseline rows for `weak-prng` after code resolution.
 9. Re-run `make check`, the Windows check wrapper, Slither, and deployment
@@ -536,4 +543,5 @@ fulfillment safety should come from strict validation.
 - Reconcile final metadata pending/freeze behavior with ADR 0006.
 - Add provider configuration events and production runbooks.
 - Update Slither baseline status after weak randomness code is removed, scoped,
-  or otherwise resolved.
+  or otherwise resolved. Completed for `XRandoms` in `P0-RAND-008`; broader
+  randomness follow-ups remain tracked above.

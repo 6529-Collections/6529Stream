@@ -31,9 +31,11 @@ order.
   domain-scoped pause/emergency-recipient controls now have target-state
   coverage. P0-RAND-001 through P0-RAND-007 randomizer lifecycle, callback,
   migration, failed-state, retry, and raw-output-hash work now have
-  target-state coverage for VRF and arRNG adapters. P0-META-001 dependency
-  script segment-safe encoding now has typed chunk/content hash coverage, and
-  P0-CORE-001 removed dead always-zero public/allowlist mint-accounting state.
+  target-state coverage for VRF and arRNG adapters, and P0-RAND-008 removed
+  the concrete `XRandoms` weak helper from production source. P0-META-001
+  dependency script segment-safe encoding now has typed chunk/content hash
+  coverage, and P0-CORE-001 removed dead always-zero public/allowlist
+  mint-accounting state.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -41,7 +43,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-10 18:43 UTC` local Windows PR candidate validation; CI TBD |
+| Last verified | `2026-06-10 19:09 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -56,7 +58,7 @@ order.
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, raw-output hash storage, dependency-script encoding hashes, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 680 total findings, including 6 High and 28 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 676 total findings, including 4 High and 28 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1144,10 +1146,11 @@ Current behavior:
   followed by fulfillment confirmation for the same request ID; indexers should
   treat that sequence as retry confirmation rather than a second provider
   callback.
-- `RandomizerNXT` and `XRandoms` use block-derived helper randomness that is
-  out of production scope under ADR 0005. `RandomizerNXT` no longer advertises
-  itself as a production randomizer; `XRandoms` still needs final removal,
-  scoping, or accepted-risk treatment.
+- `RandomizerNXT` block-derived helper randomness is out of production scope
+  under ADR 0005 and no longer advertises itself as a production randomizer.
+  The concrete `XRandoms` production-source helper was removed in
+  `P0-RAND-008`; tests keep only an inline mock helper to prove the
+  `RandomizerNXT` legacy boundary.
 
 Intended behavior:
 
@@ -1189,9 +1192,9 @@ Required code changes:
 - Emit request, fulfillment, stale, failure, retry, provider-update, and
   epoch-update events.
 - Remove, isolate, or disable weak helper randomness for production deployment
-  paths. Partially implemented: `RandomizerNXT` cannot be configured as a
-  production randomizer; `XRandoms` Slither rows remain open pending final
-  scoping/removal.
+  paths. Implemented: `RandomizerNXT` cannot be configured as a production
+  randomizer, and the concrete `XRandoms` helper contract was removed from
+  production source.
 - Bind provider fees, refunds, and adapter balances to ADR 0003 reserve and
   surplus accounting.
 
@@ -1219,6 +1222,11 @@ Child tickets:
   storing canonical raw-output hashes alongside derived seeds and deriving token
   hashes from `RANDOMNESS_SEED_TYPEHASH`, request-bound fields, and
   `rawOutputHash`.
+- [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73):
+  Remove weak `XRandoms` helper randomness from production source. Implemented
+  by deleting the concrete helper contract while retaining the `IXRandoms`
+  interface and inline test mock needed to prove `RandomizerNXT` cannot be
+  configured for production collections.
 
 Required tests:
 
@@ -1256,8 +1264,9 @@ Required tests:
 - Wrong randomizer epoch fails. Implemented.
 - Zero derived seed/hash fails.
 - Weak helper randomizer cannot be configured for production collections or is
-  fully outside production scope. Implemented for `RandomizerNXT`; `XRandoms`
-  final scope remains open.
+  fully outside production scope. Implemented: `RandomizerNXT` is rejected by
+  `StreamCore.addRandomizer`, and the concrete `XRandoms` helper was removed
+  from production source.
 - Randomness reserves are not emergency-withdrawable surplus.
 
 Required docs:
@@ -1267,7 +1276,7 @@ Required docs:
 - Stuck request runbook.
 - Deployment manifest policy for production-eligible randomizers.
 - Slither baseline update after `weak-prng` rows are fixed, scoped, or accepted
-  with proof.
+  with proof. Implemented in `ops/SLITHER_BASELINE.md` with `weak-prng=0`.
 
 Acceptance criteria:
 
@@ -1297,7 +1306,9 @@ Acceptance criteria:
   `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`.
 - `RandomizerNXT` and `XRandoms` are removed from production paths, moved to
   test/demo scope, or otherwise made impossible to configure for production
-  drops.
+  drops. Implemented: `RandomizerNXT` cannot be configured for production
+  collections, and `XRandoms` no longer ships as a concrete production-source
+  helper.
 - Provider fee refunds and adapter balances are covered by ADR 0003 reserve and
   emergency-withdrawable tests. Current arRNG adapter reserve boundary is
   covered; request-level provider reserve lifecycle remains open.
@@ -1938,16 +1949,16 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 680 findings, including 6 High and 28 Medium.
+- Result: 676 findings, including 4 High and 28 Medium.
 
 Impact summary:
 
 | Impact | Count |
 | --- | ---: |
-| High | 6 |
+| High | 4 |
 | Medium | 28 |
 | Low | 63 |
-| Informational | 577 |
+| Informational | 575 |
 | Optimization | 6 |
 
 High/medium detector summary:
@@ -1960,7 +1971,7 @@ High/medium detector summary:
 | `reentrancy-eth` | High | 0 current / 1 fixed | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
 | `suicidal` | High | 3 | test-only forced-ETH helpers | Accepted | Accepted test-only | Intentionally retained for forced-ETH accounting tests under Solidity 0.8.19 |
 | `uninitialized-state` | High | 0 current / 2 fixed | mint-accounting mappings | Fixed | [#13](https://github.com/6529-Collections/6529Stream/issues/13) | Removed never-written public/allowlist mint-count mappings and kept retained airdrop-counter regression coverage |
-| `weak-prng` | High | 2 | word pool randomness helpers | Open | [#14](https://github.com/6529-Collections/6529Stream/issues/14) | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C |
+| `weak-prng` | High | 0 current / 2 fixed | word pool randomness helpers | Fixed | [#73](https://github.com/6529-Collections/6529Stream/issues/73) | Removed the concrete `XRandoms` production-source helper and kept `RandomizerNXT` impossible to configure for production collections |
 | `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
 | `incorrect-equality` | Medium | 1 | test-only malleable-signature helper | Accepted | Accepted test-only | Keep scoped to test-only EIP-712 negative coverage |
 | `locked-ether` | Medium | 7 | test-only rejection/reentrancy/mock receivers | Accepted | Accepted test-only | Keep scoped to payment and emergency-withdrawal tests |
@@ -1997,7 +2008,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | Passing for default block-by-pending policy: VRF and arRNG adapters expose lifecycle-aware pending counts; `StreamCore.addRandomizer` rejects migration while pending requests exist; fulfilled and stale requests clear pending counts; migration with no pending requests emits the provider/epoch event; a new provider can request and fulfill after migration. Automatic bulk stale marking remains future incident tooling. | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Passing for bounded deterministic retry: VRF and arRNG adapters expose admin-gated `retryRandomnessPostProcessing`, retry only `FailedPostProcessing` requests, reuse the stored derived seed, emit retry success/failure and fulfillment events without duplicating the initial failure event on retry failure, refresh fulfillment timing on retry success, preserve token/collection/provider/epoch binding validation, reject unauthorized callers and terminal fulfilled requests, and cap repeated failed attempts with `MAX_RANDOMNESS_POST_PROCESSING_RETRIES` | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
 | Randomness seed storage | Derived seed/hash includes `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, `test/StreamRandomizerRetry.t.sol` | Passing: VRF and arRNG adapters store `rawOutputHash = keccak256(abi.encode(randomWords))`, derive the token seed from `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token, randomizer epoch, and raw-output hash, expose both values in request/token views and lifecycle interface views, emit both values in fulfillment/failure/retry events, emit provider-specific raw-word fulfillment events for off-chain auditability, avoid storing full provider word arrays, and prove post-request token-data mutation cannot bias the seed | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
-| Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerProductionScope.t.sol` | In Progress: `RandomizerNXT.isRandomizerContract()` returns false and `StreamCore.addRandomizer` rejects it for production collections; `XRandoms` Slither `weak-prng` rows remain open pending final scoping/removal | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |
+| Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol` | Passing: `RandomizerNXT.isRandomizerContract()` returns false, `StreamCore.addRandomizer` rejects it for production collections, and the concrete `XRandoms` helper contract was removed from production source; Slither now reports `weak-prng=0` | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C/Gate F | TBD |
 | Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadata.t.sol` | Initial off-chain characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; on-chain pending/final and golden-file tests missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Missing | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |
 | Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol` | Missing | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51) | Gate D | TBD |
