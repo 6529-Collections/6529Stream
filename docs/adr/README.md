@@ -7,7 +7,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | ADR | Status | Issue |
 | --- | --- | --- |
 | [`0001-drop-authorization.md`](0001-drop-authorization.md) | Accepted | [#17](https://github.com/6529-Collections/6529Stream/issues/17) |
-| `0002-auction-custody.md` | Missing | `P0-AUCT-ADR` |
+| [`0002-auction-custody.md`](0002-auction-custody.md) | Accepted | [#21](https://github.com/6529-Collections/6529Stream/issues/21) |
 | `0003-payment-accounting.md` | Missing | `P0-PAY-ADR` |
 | `0004-admin-governance.md` | Missing | `P0-ADMIN-ADR` |
 | `0005-randomness.md` | Missing | [#14](https://github.com/6529-Collections/6529Stream/issues/14) |
