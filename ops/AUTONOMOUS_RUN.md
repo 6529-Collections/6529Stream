@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/gate-a-reproducible-baseline` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/3` |
+| Active PR branch | `codex/ci-review-hardening` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/4` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 23:28 UTC` |
+| Last updated | `2026-06-10 00:05 UTC` |
 
 ## Packaging Notes
 
@@ -52,8 +52,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | Order | Candidate PR | Gate | Scope | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | Merged in PR #3 |
-| 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Open in PR #4 |
-| 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Planned |
+| 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Merged in PR #4 |
+| 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Open in PR #5 |
 | 4 | Characterization test skeleton | Gate A | Test directory, fixtures, compile-only or characterization scaffolding | Planned |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Planned |
 
@@ -103,11 +103,72 @@ Validation:
 - CodeRabbit CI hardening validation: GitHub Actions references are pinned to 40-character SHAs, `actions/checkout` uses `persist-credentials: false`, `git diff --check` passed, `make check` passed, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
 - Remote validation: GitHub Actions CI passed on `8944025167a65e120f8e46899d65e3f9cfbbd150`, CodeRabbit reported no actionable comments on the latest pass, and all visible review threads were resolved.
 
+Outcome:
+
+- Merged as PR #4 on `2026-06-09 23:33 UTC`.
+- Merge commit: `0d9438444fc860df98532ba0ecd3d9c77b2c4655`.
+- Latest head before merge: `a4faac0916a4a165ace5a623d1a4a6647ee1493c`.
+
+### PR #5: Repo maturity and contributor docs (Queue Item 3)
+
+Status: Open; CI and bot review green on `5b23c633e8aaef3a894a4e8b1ada3595f39c039a`; ready to merge after the final state-only commit passes.
+Branch: `codex/ci-review-hardening`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/5`.
+
+Goal:
+
+- Add security reporting policy with honest pre-audit warnings.
+- Add contributor workflow and PR expectations.
+- Add GitHub issue forms for bugs and roadmap items.
+- Add PR template with validation, maturity, and review-clean checkboxes.
+- Add CODEOWNERS so GitHub can route reviews once branch protection is enabled.
+- Link the new docs from the README and status docs.
+
+Candidate files:
+
+- `SECURITY.md`
+- `CONTRIBUTING.md`
+- `.gitattributes`
+- `.github/CODEOWNERS`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/ISSUE_TEMPLATE/config.yml`
+- `.github/ISSUE_TEMPLATE/bug_report.yml`
+- `.github/ISSUE_TEMPLATE/roadmap_item.yml`
+- `.github/workflows/ci.yml`
+- `README.md`
+- `docs/status.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `git diff --check` passed.
+- GitHub issue forms and CI workflow parse as YAML.
+- Touched docs/templates/workflow files contain no tabs or non-ASCII
+  characters.
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh` passed.
+- PowerShell parser check passed for `scripts\check.ps1` and
+  `scripts\bootstrap-windows.ps1`.
+- `make check` passed with the known existing compiler/NatSpec warnings and
+  empty-test baseline.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with the
+  known existing warnings and empty-test baseline.
+- Claude review fix validation: workflow YAML parsed, all workflow actions
+  remained pinned to commit SHAs, `git diff --check origin/main...HEAD` passed,
+  each Bash script was checked individually with `bash -n`, PowerShell scripts
+  were checked with `System.Management.Automation.Language.Parser`, `make check`
+  passed, and `scripts\check.ps1` passed.
+- GitHub CI run `27243804024` passed on head
+  `5b23c633e8aaef3a894a4e8b1ada3595f39c039a`.
+- CodeRabbit completed successfully with no actionable comments on head
+  `5b23c633e8aaef3a894a4e8b1ada3595f39c039a`.
+- Claude review threads were resolved after the CI hygiene fixes landed.
+
 Next steps:
 
-1. Merge PR #4.
-2. Refresh a clean branch from `origin/main`.
-3. Start Queue Item 3: CI/review hardening follow-up.
+1. Commit and push this final state-only update.
+2. Wait for CI and bot comments on the final head.
+3. Merge after CI and review are clean.
+4. Pull `main` and start Queue Item 4.
 
 ## Decision Log
 
@@ -126,6 +187,12 @@ Next steps:
 | 2026-06-09 23:18 | Implement Claude PR #4 review fixes | Harden Windows/Linux bootstrap, Makefile PATH handling, bash missing-tool UX, and env template ignores |
 | 2026-06-09 23:23 | Implement CodeRabbit PR #4 review fixes | Pin CI actions to commit SHAs, disable persisted checkout credentials, and clarify the PR worklog label |
 | 2026-06-09 23:28 | Mark PR #4 merge-ready | CI passed, CodeRabbit latest pass had no actionable comments, and visible review threads are resolved |
+| 2026-06-09 23:33 | Merge PR #4 | Latest head was CI-clean, CodeRabbit-clean, and all visible review threads were resolved |
+| 2026-06-09 23:35 | Start PR #5 | Queue Item 3 adds security, contribution, issue, PR, and ownership intake files before deeper implementation work |
+| 2026-06-09 23:43 | Finish local PR #5 validation | Docs/templates parse cleanly, CI hygiene syntax passes, and both smoke entrypoints pass |
+| 2026-06-09 23:46 | Open PR #5 | PR packages contributor/security intake docs, review routing, issue forms, PR template, CODEOWNERS, and small CI hygiene |
+| 2026-06-09 23:59 | Implement Claude PR #5 review fixes | Make CI hygiene checks validate the PR diff, parse each Bash script, use the full PowerShell parser, and preserve main-branch CI artifacts |
+| 2026-06-10 00:05 | Mark PR #5 merge-ready | CI passed, CodeRabbit returned no actionable comments, and Claude review threads were resolved after the workflow fixes |
 
 ## Resume Instructions
 

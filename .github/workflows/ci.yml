@@ -6,21 +6,66 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   foundry:
     name: Foundry smoke
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
         with:
           version: v1.7.1
+
+      - name: Repository hygiene
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --check "${{ github.event.before }}...HEAD"
+          else
+            git diff --check "HEAD^...HEAD"
+          fi
+
+          for script in scripts/check.sh scripts/bootstrap-ec2.sh; do
+            bash -n "$script"
+          done
+
+      - name: PowerShell syntax
+        shell: pwsh
+        run: |
+          $scriptPaths = @(
+            "scripts/check.ps1",
+            "scripts/bootstrap-windows.ps1"
+          )
+          foreach ($scriptPath in $scriptPaths) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $scriptPath,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List
+              exit 1
+            }
+          }
 
       - name: Build
         shell: bash

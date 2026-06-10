@@ -1,0 +1,137 @@
+name: Roadmap item
+description: Propose or package implementation-ready roadmap work.
+title: "[Roadmap]: "
+labels:
+  - roadmap
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+  - type: dropdown
+    id: gate
+    attributes:
+      label: Launch gate
+      options:
+        - Gate A - Reproducible Baseline
+        - Gate B1 - P0 Protocol Decisions Accepted
+        - Gate B2 - Release Protocol Decisions Accepted
+        - Gate C - P0 Implementation Complete
+        - Gate D - Test And Invariant Baseline Complete
+        - Gate E - Deployment Rehearsal Complete
+        - Gate F - External Audit Package Ready
+        - Gate G - Open-Source Release Ready
+    validations:
+      required: true
+  - type: dropdown
+    id: work_type
+    attributes:
+      label: Work type
+      options:
+        - DESIGN
+        - CODE
+        - TEST
+        - DOCS
+        - TOOLING
+        - RELEASE
+        - CODE+TEST+DOCS
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What risk, blocker, or capability gap does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      description: What does the repo or protocol do today?
+    validations:
+      required: true
+  - type: textarea
+    id: intended_behavior
+    attributes:
+      label: Intended behavior
+      description: What should be true when this is complete?
+    validations:
+      required: true
+  - type: textarea
+    id: likely_files
+    attributes:
+      label: Likely files
+      description: Contracts, tests, scripts, docs, or workflows expected to change.
+    validations:
+      required: false
+  - type: textarea
+    id: code_changes
+    attributes:
+      label: Required code changes
+      description: List expected contracts, scripts, tooling, or workflows. Use N/A for docs-only work.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests
+      description: Include happy path, regression, negative, event, invariant, or characterization coverage.
+    validations:
+      required: true
+  - type: textarea
+    id: docs
+    attributes:
+      label: Required docs
+      description: README, ADR, architecture, security, deployment, roadmap, or release docs.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Machine-verifiable criteria and review evidence required before merge.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: What is explicitly out of scope for this issue?
+    validations:
+      required: false
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and blockers
+      description: ADRs, prior PRs, external tools, reviewer signoff, or unresolved assumptions.
+    validations:
+      required: false
+  - type: checkboxes
+    id: review
+    attributes:
+      label: Required review lanes
+      options:
+        - label: Protocol review
+        - label: Security review
+        - label: Test review
+        - label: Docs review

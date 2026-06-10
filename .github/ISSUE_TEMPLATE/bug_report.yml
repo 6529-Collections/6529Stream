@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a non-security bug or regression.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report exploitable vulnerabilities here. Use private reporting from SECURITY.md.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - smart-contracts
+        - tests
+        - scripts
+        - CI/tooling
+        - docs
+        - roadmap
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      description: What happens today?
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Commands, test case, transaction sequence, or minimal steps.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Environment and validation
+      description: Commit SHA, OS, Foundry version, command output summary, and any logs.
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I checked the roadmap and known blockers for an existing entry.
+          required: true
+        - label: This is not an exploitable vulnerability report.
+          required: true
