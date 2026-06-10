@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   foundry:
@@ -23,6 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Install Foundry
@@ -33,8 +34,17 @@ jobs:
       - name: Repository hygiene
         shell: bash
         run: |
-          git diff --check
-          bash -n scripts/check.sh scripts/bootstrap-ec2.sh
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --check "${{ github.event.before }}...HEAD"
+          else
+            git diff --check "HEAD^...HEAD"
+          fi
+
+          for script in scripts/check.sh scripts/bootstrap-ec2.sh; do
+            bash -n "$script"
+          done
 
       - name: PowerShell syntax
         shell: pwsh
@@ -44,9 +54,11 @@ jobs:
             "scripts/bootstrap-windows.ps1"
           )
           foreach ($scriptPath in $scriptPaths) {
+            $tokens = $null
             $errors = $null
-            [System.Management.Automation.PSParser]::Tokenize(
-              (Get-Content -Raw $scriptPath),
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $scriptPath,
+              [ref]$tokens,
               [ref]$errors
             ) | Out-Null
             if ($errors.Count -gt 0) {

@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/4` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-09 23:46 UTC` |
+| Last updated | `2026-06-09 23:59 UTC` |
 
 ## Packaging Notes
 
@@ -111,7 +111,7 @@ Outcome:
 
 ### PR #5: Repo maturity and contributor docs (Queue Item 3)
 
-Status: Open; waiting for CI and bot review.
+Status: Claude review fixes validated locally; ready to push.
 Branch: `codex/ci-review-hardening`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/5`.
 
@@ -152,12 +152,17 @@ Validation:
   empty-test baseline.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with the
   known existing warnings and empty-test baseline.
+- Claude review fix validation: workflow YAML parsed, all workflow actions
+  remained pinned to commit SHAs, `git diff --check origin/main...HEAD` passed,
+  each Bash script was checked individually with `bash -n`, PowerShell scripts
+  were checked with `System.Management.Automation.Language.Parser`, `make check`
+  passed, and `scripts\check.ps1` passed.
 
 Next steps:
 
-1. Explicitly request Claude review if it does not run automatically.
-2. Wait for CI and bot comments.
-3. Resolve any actionable review comments.
+1. Commit and push Claude review fixes.
+2. Wait for CI and bot comments on the updated head.
+3. Resolve any remaining actionable review comments.
 4. Merge only after CI and review are clean.
 
 ## Decision Log
@@ -181,6 +186,7 @@ Next steps:
 | 2026-06-09 23:35 | Start PR #5 | Queue Item 3 adds security, contribution, issue, PR, and ownership intake files before deeper implementation work |
 | 2026-06-09 23:43 | Finish local PR #5 validation | Docs/templates parse cleanly, CI hygiene syntax passes, and both smoke entrypoints pass |
 | 2026-06-09 23:46 | Open PR #5 | PR packages contributor/security intake docs, review routing, issue forms, PR template, CODEOWNERS, and small CI hygiene |
+| 2026-06-09 23:59 | Implement Claude PR #5 review fixes | Make CI hygiene checks validate the PR diff, parse each Bash script, use the full PowerShell parser, and preserve main-branch CI artifacts |
 
 ## Resume Instructions
 
