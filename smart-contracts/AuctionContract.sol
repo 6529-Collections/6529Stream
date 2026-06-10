@@ -16,6 +16,7 @@ import "./IERC721.sol";
 import "./IERC721Receiver.sol";
 import "./IStreamAdmins.sol";
 import "./ReentrancyGuard.sol";
+import "./StreamPauseDomains.sol";
 
 contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     enum AuctionStatus {
@@ -99,6 +100,13 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     );
     event ClaimAuction(uint256 indexed tokenid, uint256 indexed bid);
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
+    event EmergencyWithdrawal(
+        address indexed _admin,
+        address indexed _recipient,
+        bytes32 indexed _domain,
+        uint256 funds,
+        uint256 resultingSurplus
+    );
 
     // constructor
     constructor(
@@ -224,6 +232,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
 
     // participate to auction
     function participateToAuction(uint256 _tokenid) public payable nonReentrant {
+        require(adminsContract.isPaused(StreamPauseDomains.AUCTION_BID) == false, "Bid paused");
         require(retrieveAuctionStatus(_tokenid) == AuctionStatus.Active, "Ended");
 
         AuctionRecord storage record = auctionRecords[_tokenid];
@@ -298,6 +307,10 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
 
     // claim token after auction end
     function claimAuction(uint256 _tokenid) public nonReentrant {
+        require(
+            adminsContract.isPaused(StreamPauseDomains.AUCTION_SETTLEMENT) == false,
+            "Settlement paused"
+        );
         AuctionStatus status = retrieveAuctionStatus(_tokenid);
         require(
             status == AuctionStatus.EndedNoBid || status == AuctionStatus.EndedWithBid, "Not ended"
@@ -312,6 +325,10 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     }
 
     function claimNoBidAuctionToken(uint256 _tokenid, address _recipient) public nonReentrant {
+        require(
+            adminsContract.isPaused(StreamPauseDomains.AUCTION_SETTLEMENT) == false,
+            "Settlement paused"
+        );
         require(_recipient != address(0), "Zero recipient");
         AuctionRecord storage record = auctionRecords[_tokenid];
         require(record.pendingNoBidNftClaimant == msg.sender, "Not claimant");
@@ -493,12 +510,13 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     // function to withdraw any balance from the smart contract
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
         uint256 balance = emergencyWithdrawable();
+        address recipient = adminsContract.emergencyRecipient();
+        emit Withdraw(msg.sender, true, balance);
+        emit EmergencyWithdrawal(msg.sender, recipient, StreamPauseDomains.EMERGENCY, balance, 0);
         if (balance > 0) {
-            address admin = adminsContract.owner();
-            (bool success,) = payable(admin).call{ value: balance }("");
+            (bool success,) = payable(recipient).call{ value: balance }("");
             require(success, "ETH failed");
         }
-        emit Withdraw(msg.sender, true, balance);
     }
 
     function _isFunctionOrGlobalAdmin(address _admin, bytes4 _selector)

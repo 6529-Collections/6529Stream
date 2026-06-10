@@ -11,16 +11,30 @@
 pragma solidity ^0.8.19;
 
 import "./Ownable.sol";
+import "./StreamPauseDomains.sol";
 
 contract StreamAdmins is Ownable {
+    bytes32 public constant PAUSE_DOMAIN_DROP_EXECUTION = StreamPauseDomains.DROP_EXECUTION;
+    bytes32 public constant PAUSE_DOMAIN_MINT = StreamPauseDomains.MINT;
+    bytes32 public constant PAUSE_DOMAIN_AUCTION_BID = StreamPauseDomains.AUCTION_BID;
+    bytes32 public constant PAUSE_DOMAIN_AUCTION_SETTLEMENT = StreamPauseDomains.AUCTION_SETTLEMENT;
+    bytes32 public constant PAUSE_DOMAIN_METADATA_MUTATION = StreamPauseDomains.METADATA_MUTATION;
+    bytes32 public constant PAUSE_DOMAIN_RANDOMNESS_REQUEST = StreamPauseDomains.RANDOMNESS_REQUEST;
+
     // sets global admins
     mapping(address => bool) public adminPermissions;
 
     // sets permission on a specific target contract function
     mapping(address => mapping(address => mapping(bytes4 => bool))) private functionAdmin;
 
+    // sets emergency pause authorities
+    mapping(address => bool) public pauseGuardians;
+    mapping(address => bool) public unpauseAdmins;
+    mapping(bytes32 => bool) private pausedDomains;
+
     // other variables
     address public tdhSigner;
+    address public emergencyRecipient;
 
     event GlobalAdminUpdated(address indexed account, bool enabled, address indexed admin);
     event FunctionAdminUpdated(
@@ -29,6 +43,14 @@ contract StreamAdmins is Ownable {
         bytes4 indexed selector,
         bool enabled,
         address admin
+    );
+    event PauseGuardianUpdated(address indexed account, bool enabled, address indexed admin);
+    event UnpauseAdminUpdated(address indexed account, bool enabled, address indexed admin);
+    event PauseUpdated(
+        bytes32 indexed domain, bool paused, address indexed admin, bytes32 indexed reason
+    );
+    event EmergencyRecipientUpdated(
+        address indexed oldRecipient, address indexed newRecipient, address indexed admin
     );
 
     // certain functions can only be called by the TDHSigner contract or owner root
@@ -44,6 +66,7 @@ contract StreamAdmins is Ownable {
         // The signer starts as a global admin for compatibility, but registrar
         // authority follows `authorized()` and is independent of this bypass.
         adminPermissions[tdhSigner] = true;
+        emergencyRecipient = owner();
     }
 
     // function to register a global admin
@@ -75,6 +98,36 @@ contract StreamAdmins is Ownable {
         }
     }
 
+    function registerPauseGuardian(address _account, bool _status) public onlyOwner {
+        require(_account != address(0), "Zero admin");
+        pauseGuardians[_account] = _status;
+        emit PauseGuardianUpdated(_account, _status, msg.sender);
+    }
+
+    function registerUnpauseAdmin(address _account, bool _status) public onlyOwner {
+        require(_account != address(0), "Zero admin");
+        unpauseAdmins[_account] = _status;
+        emit UnpauseAdminUpdated(_account, _status, msg.sender);
+    }
+
+    function setPaused(bytes32 _domain, bool _paused, bytes32 _reason) public {
+        require(_domain != bytes32(0), "Zero domain");
+        if (_paused) {
+            require(_canPause(msg.sender), "Not allowed");
+        } else {
+            require(_canUnpause(msg.sender), "Not allowed");
+        }
+        pausedDomains[_domain] = _paused;
+        emit PauseUpdated(_domain, _paused, msg.sender, _reason);
+    }
+
+    function updateEmergencyRecipient(address _recipient) public onlyOwner {
+        require(_recipient != address(0), "Zero recipient");
+        address oldRecipient = emergencyRecipient;
+        emergencyRecipient = _recipient;
+        emit EmergencyRecipientUpdated(oldRecipient, _recipient, msg.sender);
+    }
+
     // function to retrieve global admin
     function retrieveGlobalAdmin(address _address) public view returns (bool) {
         return adminPermissions[_address];
@@ -94,6 +147,10 @@ contract StreamAdmins is Ownable {
         return false;
     }
 
+    function isPaused(bytes32 _domain) public view returns (bool) {
+        return pausedDomains[_domain];
+    }
+
     // get admin contract status
     function isAdminContract() external pure returns (bool) {
         return true;
@@ -107,5 +164,13 @@ contract StreamAdmins is Ownable {
         require(_selector != bytes4(0), "Zero selector");
         functionAdmin[_address][_target][_selector] = _status;
         emit FunctionAdminUpdated(_address, _target, _selector, _status, msg.sender);
+    }
+
+    function _canPause(address _account) private view returns (bool) {
+        return _account == owner() || pauseGuardians[_account];
+    }
+
+    function _canUnpause(address _account) private view returns (bool) {
+        return _account == owner() || unpauseAdmins[_account];
     }
 }

@@ -15,6 +15,7 @@ import "./IStreamAuctions.sol";
 import "./Ownable.sol";
 import "./IStreamAdmins.sol";
 import "./ReentrancyGuard.sol";
+import "./StreamPauseDomains.sol";
 
 interface IERC1271 {
     function isValidSignature(bytes32 _hash, bytes memory _signature) external view returns (bytes4);
@@ -162,6 +163,7 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         string calldata _tokenData,
         bytes calldata _signature
     ) public payable nonReentrant {
+        require(adminsContract.isPaused(StreamPauseDomains.DROP_EXECUTION) == false, "Drop paused");
         bytes32 digest = hashDropAuthorization(_authorization);
         address signer = _validateSigner(digest, _signature);
         _validateAuthorization(_authorization, signer, _tokenData);

@@ -13,6 +13,7 @@ pragma solidity ^0.8.19;
 import "./IXRandoms.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamCore.sol";
+import "./StreamPauseDomains.sol";
 
 contract NextGenRandomizerNXT {
     IXRandoms public randoms;
@@ -70,6 +71,10 @@ contract NextGenRandomizerNXT {
         public
     {
         require(msg.sender == gencore);
+        require(
+            adminsContract.isPaused(StreamPauseDomains.RANDOMNESS_REQUEST) == false,
+            "Randomness paused"
+        );
         bytes32 hash = keccak256(
             abi.encodePacked(
                 _mintIndex,

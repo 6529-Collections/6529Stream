@@ -13,6 +13,7 @@ pragma solidity ^0.8.19;
 import "./ArrngConsumer.sol";
 import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
+import "./StreamPauseDomains.sol";
 
 contract NextGenRandomizerRNG is ArrngConsumer {
     mapping(uint256 => uint256) public requestToToken;
@@ -41,6 +42,10 @@ contract NextGenRandomizerRNG is ArrngConsumer {
 
     function requestRandomWords(uint256 tokenid, uint256 _ethRequired) public payable {
         require(msg.sender == gencore);
+        require(
+            adminsContract.isPaused(StreamPauseDomains.RANDOMNESS_REQUEST) == false,
+            "Randomness paused"
+        );
         uint256 requestId =
             arrngController.requestRandomWords{ value: _ethRequired }(1, (address(this)));
         tokenToRequest[tokenid] = requestId;
@@ -60,6 +65,10 @@ contract NextGenRandomizerRNG is ArrngConsumer {
         public
     {
         require(msg.sender == gencore);
+        require(
+            adminsContract.isPaused(StreamPauseDomains.RANDOMNESS_REQUEST) == false,
+            "Randomness paused"
+        );
         tokenIdToCollection[_mintIndex] = _collectionID;
         requestRandomWords(_mintIndex, ethRequired);
     }

@@ -14,6 +14,7 @@ import "./IStreamAdmins.sol";
 import "./MerkleProof.sol";
 import "./IDelegationManagementContract.sol";
 import "./ReentrancyGuard.sol";
+import "./StreamPauseDomains.sol";
 
 contract StreamCuratorsPool is ReentrancyGuard {
     address private constant DELEGATION_COLLECTION = 0x8888888888888888888888888888888888888888;
@@ -48,6 +49,13 @@ contract StreamCuratorsPool is ReentrancyGuard {
         address indexed _add, address indexed _recipient, uint256 indexed funds
     );
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
+    event EmergencyWithdrawal(
+        address indexed _admin,
+        address indexed _recipient,
+        bytes32 indexed _domain,
+        uint256 funds,
+        uint256 resultingSurplus
+    );
 
     constructor(address _adminsContract, address _del) {
         require(_adminsContract != address(0), "Zero admin");
@@ -160,10 +168,11 @@ contract StreamCuratorsPool is ReentrancyGuard {
     // function to withdraw any balance from the smart contract
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
         uint256 balance = emergencyWithdrawable();
+        address recipient = adminsContract.emergencyRecipient();
         emit Withdraw(msg.sender, true, balance);
+        emit EmergencyWithdrawal(msg.sender, recipient, StreamPauseDomains.EMERGENCY, balance, 0);
         if (balance > 0) {
-            address admin = adminsContract.owner();
-            (bool success,) = payable(admin).call{ value: balance }("");
+            (bool success,) = payable(recipient).call{ value: balance }("");
             require(success, "ETH failed");
         }
     }

@@ -19,6 +19,7 @@ import "./IStreamMinter.sol";
 import "./ERC2981.sol";
 import "./Ownable.sol";
 import "./IDependencyRegistry.sol";
+import "./StreamPauseDomains.sol";
 
 contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
     using Strings for uint256;
@@ -143,6 +144,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         bytes32 _collectionDependencyScript,
         string[] memory _collectionScript
     ) public FunctionAdminRequired(this.createCollection.selector) {
+        _requireMetadataMutationNotPaused();
         collectionInfo[newCollectionIndex].collectionName = _collectionName;
         collectionInfo[newCollectionIndex].collectionArtist = _collectionArtist;
         collectionInfo[newCollectionIndex].collectionDescription = _collectionDescription;
@@ -166,6 +168,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         uint256 _collectionTotalSupply,
         uint256 _setFinalSupplyTimeAfterMint
     ) public FunctionAdminRequired(this.setCollectionData.selector) {
+        _requireMetadataMutationNotPaused();
         require(
             (isCollectionCreated[_collectionID] == true)
                 && (collectionFreeze[_collectionID] == false)
@@ -280,6 +283,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         uint256 _index,
         string[] memory _newCollectionScript
     ) public FunctionAdminRequired(this.updateCollectionInfo.selector) {
+        _requireMetadataMutationNotPaused();
         require(
             (isCollectionCreated[_collectionID] == true)
                 && (collectionFreeze[_collectionID] == false),
@@ -304,6 +308,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
 
     // function that is used by artists for signing
     function artistSignature(uint256 _collectionID, string memory _signature) public {
+        _requireMetadataMutationNotPaused();
         require(
             msg.sender == collectionAdditionalData[_collectionID].collectionArtistAddress
                 && artistSigned[_collectionID] == false,
@@ -318,6 +323,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         public
         FunctionAdminRequired(this.changeMetadataView.selector)
     {
+        _requireMetadataMutationNotPaused();
         require(
             (isCollectionCreated[_collectionID] == true)
                 && (collectionFreeze[_collectionID] == false),
@@ -331,6 +337,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         public
         FunctionAdminRequired(this.changeTokenData.selector)
     {
+        _requireMetadataMutationNotPaused();
         require(collectionFreeze[tokenIdsToCollectionIds[_tokenId]] == false, "Data frozen");
         _requireMinted(_tokenId);
         tokenData[_tokenId] = newData;
@@ -342,6 +349,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         string[] memory _images,
         string[] memory _attributes
     ) public FunctionAdminRequired(this.updateImagesAndAttributes.selector) {
+        _requireMetadataMutationNotPaused();
         require(
             (_tokenId.length == _images.length) && (_images.length == _attributes.length), "inv len"
         );
@@ -358,6 +366,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         public
         FunctionAdminRequired(this.freezeCollection.selector)
     {
+        _requireMetadataMutationNotPaused();
         require(
             block.timestamp > IStreamMinter(minterContract).getEndTime(_collectionID)
                 && IStreamMinter(minterContract).getEndTime(_collectionID) != 0
@@ -409,6 +418,13 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         } else if (_opt == 3) {
             dependencyRegistry = IDependencyRegistry(_newContract);
         }
+    }
+
+    function _requireMetadataMutationNotPaused() private view {
+        require(
+            adminsContract.isPaused(StreamPauseDomains.METADATA_MUTATION) == false,
+            "Metadata paused"
+        );
     }
 
     // Retrieve Functions

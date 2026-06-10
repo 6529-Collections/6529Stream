@@ -227,7 +227,7 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
         PoolSetup memory setup = _deployPool();
         bytes32[] memory proof = _setSingleLeafRoot(setup.pool, CURATOR, REWARD_AMOUNT);
         vm.deal(address(setup.pool), REWARD_AMOUNT + 1 ether);
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
 
         vm.prank(CURATOR);
         setup.pool.claimRewards(COLLECTION_ID, REWARD_AMOUNT, proof, address(0));

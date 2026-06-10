@@ -19,11 +19,13 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
     address private constant RECIPIENT = address(0x5005);
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
-    address private constant ADMINS = address(0x4004);
 
     function deployDrops() private returns (StreamDrops drops, MockStreamMinter minter) {
         minter = new MockStreamMinter();
-        drops = new StreamDrops(signerAddress(), address(minter), ADMINS, PAYOUT, CURATORS_POOL);
+        StreamAdmins admins = new StreamAdmins(address(this));
+        drops = new StreamDrops(
+            signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
+        );
     }
 
     function deployDropsWithAuction()
