@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/16` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 02:04 UTC` |
+| Last updated | `2026-06-10 02:27 UTC` |
 
 ## Packaging Notes
 
@@ -373,7 +373,8 @@ Outcome:
 ### PR #20: Drop authorization ADR (Queue Item 7)
 
 Status: Open; Claude token-data, recipient, and salt/nonce clarification
-addressed and validated, waiting for CI/bot rerun.
+addressed and validated; CodeRabbit timestamp feedback addressed, waiting for
+CI/bot rerun.
 Branch: `codex/drop-authorization-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/20`.
 Claude review request: issue comment `4665813753`.
@@ -423,6 +424,9 @@ Review feedback:
   `PRRT_kwDOM7REis6IVySG` requested explicit `salt`/`nonce` semantics, raw
   `tokenData` hash enforcement, and sale-mode-specific `recipient` semantics;
   the ADR now defines all three and adds corresponding required tests.
+- CodeRabbit follow-up requested that this file's `Last updated` field keep
+  pace with the latest PR #20 decision-log entries; the timestamp is now
+  updated to `2026-06-10 02:27 UTC`.
 
 ## Decision Log
 
@@ -476,6 +480,7 @@ Review feedback:
 | 2026-06-10 02:09 | Open PR #20 | Drop authorization ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4665813753` |
 | 2026-06-10 02:18 | Address CodeRabbit PR #20 review | Clarify that `nonce` is the signer-epoch opaque input and `dropId` is the derived replay/cancellation key |
 | 2026-06-10 02:24 | Address Claude PR #20 review | Define `salt` and `nonce`, require raw `tokenData` hash enforcement, and reserve auction `recipient` as zero until ADR 0002 |
+| 2026-06-10 02:27 | Address CodeRabbit PR #20 timestamp feedback | Keep durable manager state metadata in sync with the latest PR #20 decision-log entry |
 
 ## Resume Instructions
 
