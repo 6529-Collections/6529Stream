@@ -77,6 +77,10 @@ contract StreamVendoredLibrariesTest {
         (bool zeroDenominatorSuccess, bytes memory zeroDenominatorRevertData) =
             address(harness).staticcall(abi.encodeWithSelector(harness.mulDiv.selector, 1, 1, 0));
         zeroDenominatorSuccess.assertFalse("zero denominator mulDiv succeeded");
-        (zeroDenominatorRevertData.length > 0).assertTrue("zero denominator revert data");
+        keccak256(zeroDenominatorRevertData)
+            .assertEq(
+                keccak256(abi.encodeWithSignature("Panic(uint256)", 0x12)),
+                "zero denominator revert data"
+            );
     }
 }
