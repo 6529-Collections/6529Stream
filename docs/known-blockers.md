@@ -48,10 +48,11 @@ contributors who start from the README.
   retry path that cannot request new randomness. Request records now store a
   canonical raw-output hash alongside the derived seed and expose both values in
   fulfillment, failure, and retry events without storing full provider word
-  arrays. Remaining randomness blockers include callback-after-burn policy,
-  richer metadata state exposure, provider configuration runbooks, canonical
-  core/coordinator lifecycle ownership, and full handling of weak helper
-  randomness beyond disabling `RandomizerNXT` as a production randomizer.
+  arrays. `RandomizerNXT` remains impossible to configure as a production
+  randomizer, and the concrete weak `XRandoms` helper has been removed from
+  production source. Remaining randomness blockers include callback-after-burn
+  policy, richer metadata state exposure, provider configuration runbooks, and
+  canonical core/coordinator lifecycle ownership.
 - Dependency script retrieval now has segment-safe typed chunk and content
   hashes, so the former packed/dynamic chunk-boundary Slither finding is fixed.
   Remaining metadata blockers include golden-file metadata tests, collection
@@ -60,8 +61,10 @@ contributors who start from the README.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
-- Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
-  need triage before audit readiness.
+- Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md`;
+  current high findings are limited to vendored-library triage and accepted
+  test-only forced-ETH helpers, but remaining medium findings still need triage
+  before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback

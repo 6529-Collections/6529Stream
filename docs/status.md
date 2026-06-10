@@ -19,7 +19,9 @@ The current Gate A smoke baseline proves:
   raw-output hash storage, failed post-processing state, bounded deterministic
   post-processing retry, and the conservative provider-migration policy that
   blocks lifecycle-aware provider replacement while collection requests are
-  pending.
+  pending. They also prove `RandomizerNXT` cannot be configured as a
+  production randomizer after removal of the concrete weak `XRandoms` helper
+  from production source.
 - Metadata encoding tests now prove dependency chunk boundaries are included in
   typed content hashes while preserving the existing rendered generative script
   output.
@@ -30,7 +32,8 @@ blockers remain tracked in `ops/ROADMAP.md`, including broader pull-payment
 accounting and cross-contract invariants, fuller randomizer reserve lifecycle
 accounting, callback-after-burn policy, canonical randomizer lifecycle
 ownership, remaining static-analysis triage beyond the now-fixed
-`uninitialized-state` mint-accounting rows, signer lifecycle operations,
+`uninitialized-state` mint-accounting and `weak-prng` helper rows, signer
+lifecycle operations,
 dependency version/freeze manifest work, deployment discipline, and the broader
 P0/P1 test suite.
 

@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 18:39 UTC` |
+| Last generated | `2026-06-10 19:03 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -23,12 +23,12 @@ baseline.
 
 | Impact | Count |
 | --- | ---: |
-| High | 6 |
+| High | 4 |
 | Medium | 28 |
 | Low | 63 |
-| Informational | 577 |
+| Informational | 575 |
 | Optimization | 6 |
-| Total | 680 |
+| Total | 676 |
 
 ## Detector Counts
 
@@ -38,14 +38,14 @@ baseline.
 | `incorrect-exp` | High | 1 |
 | `suicidal` | High | 3 |
 | `uninitialized-state` | High | 0 |
-| `weak-prng` | High | 2 |
+| `weak-prng` | High | 0 |
 | `divide-before-multiply` | Medium | 9 |
 | `incorrect-equality` | Medium | 1 |
 | `locked-ether` | Medium | 7 |
 | `uninitialized-local` | Medium | 10 |
 | `unused-return` | Medium | 1 |
 | Low-impact findings | Low | 63 |
-| Informational findings | Informational | 580 |
+| Informational findings | Informational | 575 |
 | Optimization findings | Optimization | 6 |
 
 Dependency-script encoding delta from the previous tracked capture:
@@ -66,6 +66,13 @@ Dependency-script encoding delta from the previous tracked capture:
     storage and retrieval surface no longer appears in lower-impact detectors.
   - `uninitialized-state` is now zero current findings; the fixed rows are
     kept below as audit traceability.
+- Weak-helper randomness delta from the previous tracked capture:
+  - High findings decreased from 6 to 4 because the concrete production-source
+    `XRandoms` helper contract was removed.
+  - Informational findings decreased from 577 to 575 because the removed helper
+    source no longer appears in lower-impact detectors.
+  - `weak-prng` is now zero current findings; the fixed rows are kept below as
+    audit traceability.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
 - Slither still exits non-zero because the remaining tracked baseline findings
   require fixes, accepted-risk rationale, or false-positive proof before audit
@@ -101,8 +108,8 @@ GitHub work item that owns that resolution.
 | `reentrancy-eth` | 1 | `StreamAuctions` | `participateToAuction(uint256)` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Replaced synchronous outbid refund `call` with bidder credit accounting; highest-bid state and auction escrow accounting update before any external withdrawal path | `test/StreamAuctionPayments.t.sol` | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedPerAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written public-sale mint-count mapping and retrieval API instead of exposing an always-zero counter with no accepted quota semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedAllowlistAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written allowlist mint-count mapping and retrieval API because the current drop path has no allowlist phase semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
-| `weak-prng` | 1 | `randomPool` | `randomNumber()` | first-party | `smart-contracts/XRandoms.sol#L32-L35` | High | Medium | Open | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C | Randomness provider regression and production-scope test | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C | TBD |
-| `weak-prng` | 1 | `randomPool` | `randomWord()` | first-party | `smart-contracts/XRandoms.sol#L37-L40` | High | Medium | Open | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C | Randomness provider regression and production-scope test | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C | TBD |
+| `weak-prng` | 1 | `randomPool` | `randomNumber()` | first-party | Removed in `P0-RAND-008` | High | Medium | Fixed | Removed the concrete production-source `XRandoms` helper contract instead of shipping block-derived helper randomness alongside production randomizer adapters | `test/StreamRandomizerLifecycle.t.sol::testNxtRandomizerCannotBeConfiguredForProductionCollections` plus Slither `weak-prng=0` confirmation | [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C | TBD |
+| `weak-prng` | 1 | `randomPool` | `randomWord()` | first-party | Removed in `P0-RAND-008` | High | Medium | Fixed | Removed the concrete production-source `XRandoms` helper contract instead of shipping block-derived helper randomness alongside production randomizer adapters | `test/StreamRandomizerLifecycle.t.sol::testNxtRandomizerCannotBeConfiguredForProductionCollections` plus Slither `weak-prng=0` confirmation | [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C | TBD |
 | `divide-before-multiply` | 1 | `Base64` | `encode(bytes)` | vendored | `smart-contracts/Base64.sol#L20-L91` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `divide-before-multiply` | 8 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `incorrect-equality` | 1 | `DropAuthTestHelper` | `signMalleableAuthorization(...)` | test-only | `test/helpers/DropAuthTestHelper.sol#L113-L123` | Medium | Medium | Accepted | Accepted as a test-only helper branch used to manufacture malleable signatures for negative authorization tests | `test/StreamDropsEIP712.t.sol` malleability tests | Accepted test-only | Gate A | TBD |
