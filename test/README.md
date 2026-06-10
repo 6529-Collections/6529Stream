@@ -73,3 +73,15 @@ selectors on another target do not authorize mutation; revoked grants fail;
 owner/root role management does not make the owner an implicit operational
 admin; unsupported collection-admin lookups return false; and global-admin
 bypass remains explicit.
+
+Pause and emergency-control tests now include P0-ADMIN-002 target-state
+coverage in `StreamPauseControls.t.sol` and `StreamEmergencyWithdraw.t.sol`:
+pause guardians can pause but cannot unpause, unpause admins can unpause but
+cannot pause, drop execution, minting, auction bids, auction settlement,
+metadata mutation, and randomness requests each have domain-specific pause
+guards, operational pauses do not block user credit withdrawals, and emergency
+withdrawals use the explicit `StreamAdmins.emergencyRecipient()` while keeping
+the existing surplus/reserve boundaries intact. The pause suite also covers the
+current signer-compromise response path by pausing drop execution, incrementing
+the signer epoch, cancelling the exposed drop ID, unpausing, and proving the
+stale payload cannot mint.

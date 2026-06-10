@@ -12,6 +12,7 @@ pragma solidity ^0.8.19;
 
 import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
+import "./StreamPauseDomains.sol";
 
 contract StreamMinter {
     // checks if minting costs for a collectionwere set
@@ -38,6 +39,13 @@ contract StreamMinter {
 
     // events
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
+    event EmergencyWithdrawal(
+        address indexed _admin,
+        address indexed _recipient,
+        bytes32 indexed _domain,
+        uint256 funds,
+        uint256 resultingSurplus
+    );
 
     // other variables
     address public streamDrops;
@@ -83,6 +91,7 @@ contract StreamMinter {
         uint256 _collectionID,
         uint256[] memory _numberOfTokens
     ) public streamDropRequired returns (uint256) {
+        require(adminsContract.isPaused(StreamPauseDomains.MINT) == false, "Mint paused");
         require(
             _recipients.length == _tokenData.length && _recipients.length == _saltfun_o.length
                 && _recipients.length == _numberOfTokens.length,
@@ -125,6 +134,7 @@ contract StreamMinter {
         uint256 _collectionID,
         uint256 _auctionEndTime
     ) public streamDropRequired returns (uint256) {
+        require(adminsContract.isPaused(StreamPauseDomains.MINT) == false, "Mint paused");
         require(
             collectionPhases[_collectionID].publicStartTime > 0
                 && block.timestamp >= collectionPhases[_collectionID].publicStartTime,
@@ -189,10 +199,11 @@ contract StreamMinter {
     // function to withdraw only surplus balance from the smart contract
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
         uint256 balance = emergencyWithdrawable();
+        address recipient = adminsContract.emergencyRecipient();
         emit Withdraw(msg.sender, true, balance);
+        emit EmergencyWithdrawal(msg.sender, recipient, StreamPauseDomains.EMERGENCY, balance, 0);
         if (balance > 0) {
-            address admin = adminsContract.owner();
-            (bool success,) = payable(admin).call{ value: balance }("");
+            (bool success,) = payable(recipient).call{ value: balance }("");
             require(success, "ETH failed");
         }
     }

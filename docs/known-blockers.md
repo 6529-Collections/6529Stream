@@ -29,16 +29,20 @@ contributors who start from the README.
   P0-ADMIN-001: protected functions require the intended selector, function
   grants are scoped to the target contract and selector, revoked grants fail,
   owner/root role recovery exists, unsupported collection-admin lookups return
-  false, and global-admin bypass remains explicit. Pause controls, signer
-  lifecycle operations, deployment admin ceremony, and richer collection-admin
-  roles remain open.
+  false, and global-admin bypass remains explicit. P0-ADMIN-002 adds
+  domain-scoped pause controls for drop execution, minting, bidding,
+  settlement, metadata mutation, and randomness requests, keeps user credit
+  withdrawals unpaused by default, and makes emergency withdrawal recipients
+  explicit through `StreamAdmins.emergencyRecipient()`. Signer lifecycle
+  operations, deployment admin ceremony, and richer collection-admin roles
+  remain open.
 - Randomizer request and callback validation need production hardening.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, and randomizer reserve-boundary regressions now exist, but
-  broader payment, randomness, metadata, pause, deployment, production-governance,
+  broader payment, randomness, metadata, deployment, production-governance,
   and invariant tests are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 

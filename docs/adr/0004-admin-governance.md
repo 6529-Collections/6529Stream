@@ -10,7 +10,12 @@ permission checks for the current protected-function surface, fixes the
 selector mismatches, adds owner/root role-management recovery, and adds
 regression coverage for wrong-selector, wrong-target, global-admin, revoked
 admin, unauthorized, zero-address, and deferred collection-admin paths.
-Remaining ADR work includes pause domains, signer lifecycle operations,
+P0-ADMIN-002 implements domain-scoped pause state for `DropExecution`, `Mint`,
+`AuctionBid`, `AuctionSettlement`, `MetadataMutation`, and
+`RandomnessRequest`, keeps user credit withdrawals unpaused by default, adds
+pause guardian/unpause admin roles, and replaces implicit owner-based emergency
+withdrawal recipients with an explicit `emergencyRecipient()` on
+`StreamAdmins`. Remaining ADR work includes signer lifecycle operations,
 deployment ceremony/runbooks, final production Safe configuration, and any
 expanded collection-admin role model.
 
@@ -76,17 +81,19 @@ Current source references, including the historical pre-P0-ADMIN-001 baseline:
   by `this.setMerkleRoot.selector`; it now uses
   `this.setMultipleMerkleRoots.selector`.
 - Emergency withdrawals now have surplus/reserve boundaries for the current
-  first-party emergency-withdrawal surface; pause-specific emergency controls
-  remain separate P0-ADMIN-002 work.
+  first-party emergency-withdrawal surface and send withdrawable surplus to the
+  explicit `StreamAdmins.emergencyRecipient()` instead of implicitly using
+  `owner()`.
 - `smart-contracts/StreamDrops.sol#updateTDHsigner` can replace the drop signer,
   but there is no signer epoch, cancellation, role-specific signer manager, or
   compromise runbook.
 - `smart-contracts/StreamAdmins.sol#tdhSigner` still has no dedicated rotation
   path, but `owner()` can now recover role management if the registrar key is
   lost or compromised.
-- There is no pause model for drop execution, minting, bidding, settlement,
-  metadata mutation, randomness requests, randomness fulfillment, or
-  withdrawals.
+- `StreamAdmins` exposes readable domain pause state for drop execution,
+  minting, bidding, settlement, metadata mutation, and randomness requests.
+  Randomness fulfillment remains unpaused by policy and must be hardened by ADR
+  0005 validation work. User credit withdrawals remain unpaused by default.
 - `test/StreamCoreAdminCharacterization.t.sol` has been converted from a
   migration tripwire into target-state coverage for the fixed
   `setCollectionData` selector.

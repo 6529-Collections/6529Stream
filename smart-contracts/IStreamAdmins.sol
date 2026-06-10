@@ -18,6 +18,12 @@ interface IStreamAdmins {
         view
         returns (bool);
 
+    // retrieve pause state by domain
+    function isPaused(bytes32 _domain) external view returns (bool);
+
+    // retrieve explicit emergency recipient
+    function emergencyRecipient() external view returns (address);
+
     // retrieve if the contract is admin contract
     function isAdminContract() external view returns (bool);
 

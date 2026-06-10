@@ -34,7 +34,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function testStreamMinterEmergencyWithdrawsForcedSurplusOnly() public {
         MinterSetup memory setup = _deployMinter();
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
         vm.deal(address(this), 10 ether);
 
         ForceEth forceEth = new ForceEth{ value: 1 ether }();
@@ -57,7 +57,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function testStreamMinterUnauthorizedEmergencyWithdrawRevertsWithoutTransfer() public {
         MinterSetup memory setup = _deployMinter();
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
         vm.deal(address(this), 10 ether);
         ForceEth forceEth = new ForceEth{ value: 1 ether }();
         forceEth.force(payable(address(setup.minter)));
@@ -75,7 +75,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function testRandomizerEmergencyWithdrawCannotDrainAdapterReserve() public {
         RandomizerSetup memory setup = _deployRandomizer();
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
         vm.deal(address(this), 10 ether);
 
         (bool success,) = address(setup.randomizer).call{ value: 1 ether }("");
@@ -99,7 +99,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function testRandomizerUnauthorizedEmergencyWithdrawRevertsWithoutTransfer() public {
         RandomizerSetup memory setup = _deployRandomizer();
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
         vm.deal(address(this), 10 ether);
         (bool funded,) = address(setup.randomizer).call{ value: 1 ether }("");
         funded.assertTrue("randomizer rejected reserve");
@@ -118,7 +118,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function testForcedEthIsRandomizerReserveNotEmergencySurplus() public {
         RandomizerSetup memory setup = _deployRandomizer();
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
         vm.deal(address(this), 10 ether);
 
         ForceEth forceEth = new ForceEth{ value: 1 ether }();
@@ -138,7 +138,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function testRandomizerRequestSpendsReserveAndKeepsRemainderNonWithdrawable() public {
         RandomizerSetup memory setup = _deployRandomizer();
-        setup.admins.transferOwnership(EMERGENCY_RECIPIENT);
+        setup.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
         setup.randomizer.updateRNGCost(0.25 ether);
         vm.deal(address(this), 10 ether);
         (bool success,) = address(setup.randomizer).call{ value: 1 ether }("");

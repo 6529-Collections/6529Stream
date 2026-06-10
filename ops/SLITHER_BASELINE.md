@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 12:21 UTC` |
+| Last generated | `2026-06-10 13:08 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -26,9 +26,9 @@ baseline.
 | High | 9 |
 | Medium | 29 |
 | Low | 61 |
-| Informational | 543 |
+| Informational | 571 |
 | Optimization | 6 |
-| Total | 648 |
+| Total | 676 |
 
 ## Detector Counts
 
@@ -45,18 +45,20 @@ baseline.
 | `uninitialized-local` | Medium | 11 |
 | `unused-return` | Medium | 1 |
 | Low-impact findings | Low | 61 |
-| Informational findings | Informational | 543 |
+| Informational findings | Informational | 571 |
 | Optimization findings | Optimization | 6 |
 
-Low-impact delta from the previous emergency-withdrawal capture:
+Pause-control delta from the previous admin-permission capture:
 
-- Net low-impact findings increased by 3.
-- `missing-zero-check` decreased from 13 to 12 because
-  `StreamAdmins.constructor(address)` now rejects a zero `tdhSigner`.
-- `reentrancy-events` increased from 17 to 21. The four new rows are test-only
-  event assertion patterns in `test/StreamAdmins.t.sol` around
-  `vm.expectEmit(...)` followed by expected role-change events. They are
-  accepted as Foundry test harness noise, not production contract findings.
+- High, medium, low, and optimization counts are unchanged.
+- Net informational findings increased by 28 due to new pause-domain constants,
+  pause/emergency events, role mappings, views, and test harness low-level
+  calls/names.
+- `arbitrary-send-eth` remains at zero findings after the explicit
+  `emergencyRecipient()` routing change.
+- The only medium row whose description mentions emergency is still the
+  test-only `MockArrngController` `locked-ether` row in
+  `test/StreamEmergencyWithdraw.t.sol`; it is accepted as harness-only noise.
 
 ## Status Semantics
 

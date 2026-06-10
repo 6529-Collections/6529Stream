@@ -226,7 +226,7 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         uint256 owed = setup.auctions.totalOwed();
         uint256 balanceBefore = address(setup.auctions).balance;
         vm.deal(address(setup.auctions), balanceBefore + surplus);
-        setup.deployed.admins.transferOwnership(PAYOUT);
+        setup.deployed.admins.updateEmergencyRecipient(PAYOUT);
 
         uint256 payoutBefore = PAYOUT.balance;
         setup.auctions.emergencyWithdraw();

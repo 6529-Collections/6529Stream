@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fix-admin-permission-model` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/62` |
+| Active PR branch | `codex/pause-emergency-controls` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/63` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 12:34 UTC` |
+| Last updated | `2026-06-10 13:12 UTC` |
 
 ## Packaging Notes
 
@@ -74,7 +74,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 19 | Convert fixed-price payouts to pull credits | Gate C | Implement P0-PAY-003 for `StreamDrops` fixed-price poster/protocol credits and curator-reserve accounting, with tests/docs/state traceability | Merged in PR #60 |
 | 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | Merged in PR #61 |
 | 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | Merged in PR #62 |
-| 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | In progress |
+| 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
+| 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | PR #64 open; awaiting CI and bot review |
 
 ## Current PR Worklog
 
@@ -1731,7 +1732,7 @@ Outcome:
 
 ### PR candidate: Fix admin selector and permission model (Queue Item 22)
 
-Status: Open; awaiting CI and bot review.
+Status: Merged in PR #63.
 Branch: `codex/fix-admin-permission-model`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/63`.
 Related issues:
@@ -1831,6 +1832,121 @@ Validation:
   tests for array length mismatch, empty batches, and zero quantity. The Slither
   rerun remains at 648 total findings and reports zero `unused-return` findings
   in `test/StreamMinterValidation.t.sol`.
+- PR #63 was squash-merged as
+  `12f5f461a3ff784287f650b69efbdc0bbe6e0429`.
+- Final head `acac51aa7d1745ed7f677bd9f6a620ec68c4224a` passed GitHub CI
+  run `27276683973`.
+- CodeRabbit inline threads were resolved before merge. Its aggregate status
+  stayed stale/pending after final CI and resolved threads, so the autonomous
+  maintainer decision was documented in the PR before merging.
+- Claude was explicitly requested on the latest head but remained unavailable
+  due to the organization overage skip recorded in review
+  `pullrequestreview-4467627435`.
+- Issue #34 should be closed as completed by the merge; issue #33 remains the
+  broader admin/governance tracking issue.
+
+### PR candidate: Define pause and emergency controls (Queue Item 23)
+
+Status: PR #64 open; awaiting CI and bot review.
+Branch: `codex/pause-emergency-controls`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/64`.
+Related issues:
+
+- `https://github.com/6529-Collections/6529Stream/issues/35`
+- `https://github.com/6529-Collections/6529Stream/issues/33`
+
+Goal:
+
+- Implement the ADR 0004 pause model without changing unrelated protocol
+  behavior.
+- Add domain-specific pause state for accepted P0 domains:
+  `DropExecution`, `Mint`, `AuctionBid`, `AuctionSettlement`,
+  `MetadataMutation`, and `RandomnessRequest`.
+- Keep user withdrawals available by default according to the ADR 0004
+  withdrawal-pause policy.
+- Emit stable pause events with domain, paused state, admin, and reason.
+- Preserve surplus-only emergency-withdrawal bounds already implemented by
+  payment PRs, while documenting emergency-control traceability.
+- Add direct tests proving each pause domain blocks only its intended flow and
+  unpause restores the flow.
+
+Candidate files:
+
+- `smart-contracts/StreamAdmins.sol`
+- `smart-contracts/IStreamAdmins.sol`
+- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/AuctionContract.sol`
+- `smart-contracts/StreamMinter.sol`
+- Randomizer request surface if locally reachable
+- Metadata mutation surfaces if locally reachable
+- `test/StreamPauseControls.t.sol`
+- Existing admin/payment/randomness characterization tests as needed
+- `docs/adr/0004-admin-governance.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Initial validation targets:
+
+- Focused pause-control test suite.
+- Existing admin tests to catch authorization regressions.
+- Focused payment/emergency-withdrawal tests to prove withdrawals and surplus
+  bounds are not accidentally paused or relaxed.
+- Full `make check`, Windows `scripts/check.ps1`, formatting/whitespace checks,
+  Markdown heading scan, and Slither delta evidence.
+
+Implementation notes:
+
+- Added `StreamPauseDomains` constants for `DropExecution`, `Mint`,
+  `AuctionBid`, `AuctionSettlement`, `MetadataMutation`,
+  `RandomnessRequest`, and emergency events.
+- `StreamAdmins` now stores readable domain pause state, separates
+  pause-guardian and unpause-admin authority, emits `PauseUpdated`, and exposes
+  an explicit `emergencyRecipient()` with root-managed updates.
+- `StreamDrops.mintDrop`, `StreamMinter.mint`, `StreamMinter.mintAndAuction`,
+  `StreamAuctions.participateToAuction`, `StreamAuctions.claimAuction`,
+  `StreamAuctions.claimNoBidAuctionToken`, mutable `StreamCore` metadata paths,
+  and new randomizer request paths now check only their intended pause domain.
+- User credit withdrawals are intentionally not pause-gated. The new tests
+  pause every operational domain and still withdraw fixed-price poster credits.
+- `StreamAuctions`, `StreamMinter`, and `StreamCuratorsPool` emergency
+  withdrawals keep their existing surplus bounds but now route positive surplus
+  to `StreamAdmins.emergencyRecipient()` and emit an `EmergencyWithdrawal`
+  event in addition to the legacy `Withdraw` event.
+- Updated ADR 0004, status/blocker docs, test README, roadmap current status,
+  P0-ADMIN-002 notes, and test matrix traceability.
+
+Validation so far:
+
+- Focused pause/emergency suite passed:
+  `forge test --match-contract "Stream(PauseControls|EmergencyWithdraw)Test" -vvv`
+  with 16 passing tests after the signer-compromise pause/invalidation case was
+  added.
+- Expanded admin/drop/auction/payment/curator suite passed:
+  `forge test --match-contract "Stream(Admins|AdminSelectors|PauseControls|EmergencyWithdraw|DropsCharacterization|DropsIntegrationCharacterization|DropsEIP712|DropsERC1271|MinterValidation|AuctionCustody|AuctionPayments|FixedPricePayments|CuratorsPool)Test" -vvv`
+  with 140 passing tests.
+- Targeted emergency/payment suite passed:
+  `forge test --match-contract "Stream(EmergencyWithdraw|AuctionPayments|CuratorsPool)Test" -vvv`
+  with 33 passing tests after the explicit emergency-recipient event routing
+  cleanup.
+- Canonical local gate passed: `make check` with 142 passing tests.
+- Windows wrapper passed:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` with
+  142 passing tests.
+- Formatting, whitespace, and Markdown structure checks passed:
+  `forge fmt --check ...`, `git diff --check`, and
+  `rg -n "^#|^##|^###" ...`.
+- Slither remains non-gating and exits non-zero because baseline findings
+  remain, but the final JSON reports 676 total findings: 9 High, 29 Medium, 61
+  Low, 571 Informational, and 6 Optimization. High/medium totals are unchanged,
+  `arbitrary-send-eth` remains zero, and the only emergency-matching medium row
+  is the accepted test-only `MockArrngController` `locked-ether` row.
+- PR #64 was opened on head `ce55a2dc7585fd9d699241d692d23bb2f9f10e1c`.
+- Claude review was explicitly requested in issue comment `4670568701`.
+- CodeRabbit latest-head review was explicitly requested in issue comment
+  `4670570080`.
 
 ## Decision Log
 
@@ -1992,6 +2108,11 @@ Validation:
 | 2026-06-10 12:13 | Open PR #63 | Admin permission scoping implementation is published with local validation and Slither delta evidence |
 | 2026-06-10 12:21 | Address CodeRabbit PR #63 review | Added signer registrar/global-admin asymmetry coverage, triaged the low-impact Slither delta, removed a no-op test prank, and reran focused/full/Windows/Slither validation |
 | 2026-06-10 12:34 | Address CodeRabbit PR #63 second review | Updated the durable run timestamp, added explicit `StreamMinter.mint` batch guards and revert tests, reran focused/full/Windows validation, and confirmed Slither stayed at 648 findings with no minter-test `unused-return` delta |
+| 2026-06-10 12:46 | Merge PR #63 | Admin permission scoping merged as `12f5f461a3ff784287f650b69efbdc0bbe6e0429`; CI passed, CodeRabbit inline threads were resolved, stale aggregate status was documented, Claude was unavailable due org overage, and issue #34 should close completed |
+| 2026-06-10 12:46 | Select Queue Item 23 | Next P0 Gate C blocker is `P0-ADMIN-002`, because accepted pause domains and withdrawal/emergency policy need executable controls before deeper randomness/admin release work |
+| 2026-06-10 12:57 | Implement Queue Item 23 locally | Domain pause state, pause/unpause authority separation, operational guards, no-withdrawal-pause policy tests, explicit emergency recipient routing, docs, and roadmap traceability are in place; focused pause/emergency and expanded admin/payment suites pass locally |
+| 2026-06-10 13:08 | Finish local Queue Item 23 validation | Full `make check`, Windows wrapper, formatting, whitespace, heading scan, and Slither delta evidence pass; Slither final JSON has 676 findings with unchanged 9 High / 29 Medium totals and zero `arbitrary-send-eth` findings |
+| 2026-06-10 13:12 | Open PR #64 | Pause/emergency-controls implementation is published, Claude review requested in issue comment `4670568701`, and CodeRabbit latest-head review requested in issue comment `4670570080` |
 
 ## Resume Instructions
 

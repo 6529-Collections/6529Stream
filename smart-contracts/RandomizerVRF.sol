@@ -14,6 +14,7 @@ import "./VRFCoordinatorV2Interface.sol";
 import "./VRFConsumerBaseV2.sol";
 import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
+import "./StreamPauseDomains.sol";
 
 contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
@@ -59,6 +60,10 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
 
     function requestRandomWords(uint256 tokenid) public {
         require(msg.sender == gencore);
+        require(
+            adminsContract.isPaused(StreamPauseDomains.RANDOMNESS_REQUEST) == false,
+            "Randomness paused"
+        );
         uint256 requestId = COORDINATOR.requestRandomWords(
             keyHash, s_subscriptionId, requestConfirmations, callbackGasLimit, numWords
         );
@@ -83,6 +88,10 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
         public
     {
         require(msg.sender == gencore);
+        require(
+            adminsContract.isPaused(StreamPauseDomains.RANDOMNESS_REQUEST) == false,
+            "Randomness paused"
+        );
         tokenIdToCollection[_mintIndex] = _collectionID;
         requestRandomWords(_mintIndex);
     }

@@ -19,7 +19,7 @@ order.
 - Known remaining P0 blockers include broader payment accounting and
   cross-contract invariants, fuller randomizer reserve lifecycle accounting,
   untriaged static analysis findings, missing invariants, randomizer hardening,
-  pause controls, broader production governance, and missing deployment
+  broader production governance, and missing deployment
   discipline.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
@@ -27,8 +27,10 @@ order.
   reward credits now have target-state
   implementation coverage. `StreamMinter` and `NextGenRandomizerRNG`
   emergency-withdrawal boundaries now have target-state coverage for their
-  current custody models, and P0-ADMIN-001 target-scoped function-admin checks
-  cover the current protected-function surface.
+  current custody models, P0-ADMIN-001 target-scoped function-admin checks
+  cover the current protected-function surface, and P0-ADMIN-002
+  domain-scoped pause/emergency-recipient controls now have target-state
+  coverage.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -36,7 +38,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | TBD |
+| Last verified | `2026-06-10 13:08 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -49,9 +51,9 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 648 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 676 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -145,7 +147,7 @@ Required evidence:
 
 ### Gate C: P0 Implementation Complete
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
 Blocking issues: TBD.
 Evidence: TBD.
@@ -1028,10 +1030,16 @@ Problem:
 
 Current behavior:
 
-- No clear pause policy for minting, bidding, settlement, withdrawals, or drop
-  execution.
-- Emergency withdrawals send full contract balances to `adminsContract.owner()`
-  without proving owed/reserved balances are protected.
+- Domain-scoped pause controls now exist for drop execution, minting, auction
+  bidding, auction settlement, metadata mutation, and randomness requests.
+- User credit withdrawals remain unpaused by default according to ADR 0004.
+- Current emergency withdrawals are bounded by local `emergencyWithdrawable()`
+  or equivalent reserve accounting and send surplus to the explicit
+  `StreamAdmins.emergencyRecipient()`.
+- Signer-manager-specific compromise controls remain partial: drop execution
+  can be paused and stale signed drops can be invalidated through existing
+  epoch/cancellation paths, but dedicated signer-manager roles remain future
+  work.
 
 Intended behavior:
 
@@ -1041,13 +1049,13 @@ Intended behavior:
 
 Required code changes:
 
-- Decide whether to add pause controls for minting, bidding, settlement,
-  withdrawals, drop execution, and metadata mutation.
-- If added, define who can pause, who can unpause, and whether pause actions are
-  immediate or delayed.
-- Ensure user withdrawals are paused only if explicitly accepted.
-- Pause events should include scope: mint, bid, settlement, withdrawal, drop
-  execution, or metadata.
+- Keep pause controls domain-scoped for minting, bidding, settlement,
+  withdrawals, drop execution, metadata mutation, and randomness requests.
+- Keep pause and unpause authority separated: guardians can pause, unpause
+  admins can unpause, and the governance root can manage both roles.
+- Keep user withdrawals unpaused unless a later ADR-backed bounded withdrawal
+  pause is accepted.
+- Pause events should include scope, paused state, admin, and reason.
 - Add signer-compromise response controls: drop-execution pause, signer epoch
   invalidation, per-drop cancellation, and monitored events.
 - Replace full-balance emergency withdrawals with surplus-bounded withdrawals or
@@ -1078,11 +1086,11 @@ Required docs:
 Acceptance criteria:
 
 - Pause model accepted in ADR.
-- Pause behavior tested and monitored.
-- Withdrawal pause, if implemented, is temporary, evented, and cannot erase
-  credits.
+- Pause behavior is tested and monitored.
+- Withdrawal non-pause behavior is tested; if a later withdrawal pause is
+  implemented, it must be temporary, evented, and cannot erase credits.
 - Emergency controls are bounded by `emergencyWithdrawable()` or equivalent
-  surplus views.
+  surplus views and route surplus to the explicit emergency recipient.
 
 ### P0-RAND-001: Harden Randomizer Requests And Callbacks
 
@@ -1842,7 +1850,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 648 findings, including 9 High and 29 Medium.
+- Result: 676 findings, including 9 High and 29 Medium.
 
 Impact summary:
 
@@ -1851,7 +1859,7 @@ Impact summary:
 | High | 9 |
 | Medium | 29 |
 | Low | 61 |
-| Informational | 543 |
+| Informational | 571 |
 | Optimization | 6 |
 
 High/medium detector summary:
@@ -1892,8 +1900,8 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Passing: function-admin grants are keyed by account, target, and selector; same selector on another target does not authorize; revocation and global-admin bypass are covered | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface behavior is explicit | `test/StreamAdmins.t.sol`, later `test/StreamCollectionAdmins.t.sol` | Passing for deferred support: `StreamAdmins.retrieveCollectionAdmin(...)` returns false and no collection-admin mutation path is implemented; positive collection-admin roles remain future work | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | In Progress: owner/root can recover function/global role management if the registrar is lost, but signer manager, signer rotation, and signer lifecycle tests remain missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
-| Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Missing | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
-| Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol` | In Progress: StreamMinter and NextGenRandomizerRNG unauthorized emergency withdrawals revert without transfer; broader pause/emergency-control policy remains open | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Passing: guardians can pause but not unpause, unpause admins can unpause but not pause, owner/root can manage pause roles, `DropExecution`, `Mint`, `AuctionBid`, `AuctionSettlement`, `MetadataMutation`, and `RandomnessRequest` pauses block their intended paths, ordinary user credit withdrawals remain available during operational pauses, and the signer-compromise flow can pause drop execution, invalidate/cancel an exposed drop, unpause, and still reject the stale payload | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
+| Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol`, `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol` | Passing for current first-party surfaces: `StreamAdmins.emergencyRecipient()` is the explicit surplus recipient, `StreamMinter`, `StreamAuctions`, and `StreamCuratorsPool` use it for positive surplus withdrawal, `NextGenRandomizerRNG` exposes zero emergency-withdrawable reserve, unauthorized emergency withdrawals revert without transfer, and payment/reserve tests cover poster, bidder, curator, active-bid escrow, and randomizer reserve boundaries. Dedicated signer-manager and deployment emergency runbooks remain future work | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
 | Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerCallbacks.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerCallbacks.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
