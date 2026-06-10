@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/upgrade-redeployment-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/52` |
+| Active PR branch | `codex/remove-tx-origin-drop-execution` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/54` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 05:43 UTC` |
+| Last updated | `2026-06-10 06:33 UTC` |
 
 ## Packaging Notes
 
@@ -63,7 +63,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merged in PR #36 |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Merged in PR #44 |
 | 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merged in PR #52 |
-| 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Open in PR #54 |
+| 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Merged in PR #54 |
+| 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | In progress on `codex/remove-tx-origin-drop-execution` |
 
 ## Current PR Worklog
 
@@ -919,7 +920,7 @@ Outcome:
 
 ### PR #54: Upgrade/redeployment ADR (Queue Item 13)
 
-Status: Open; waiting for CI and bot reviews.
+Status: Merged.
 Branch: `codex/upgrade-redeployment-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/54`.
 Claude review request: issue comment `4666936783`.
@@ -972,7 +973,91 @@ Validation:
 
 Review feedback:
 
-- Pending CI and bot review.
+- GitHub CI run `27255914626` passed on head
+  `8b0c8809c5bfeccb04d8e788da4622f4a6b3dd14`.
+- CodeRabbit completed successfully according to GitHub PR checks with no
+  review threads open.
+- Claude review was requested in issue comment `4666936783`, but Claude was
+  unavailable because the organization's Claude Code overage spend limit was
+  reached.
+
+Outcome:
+
+- Merged as PR #54 on `2026-06-10 05:52 UTC`.
+- Squash merge commit `d06b48f1b581871a0e25dd9ac19fb068365bfeee`.
+- Latest head before merge `8b0c8809c5bfeccb04d8e788da4622f4a6b3dd14`.
+- GitHub CI and CodeRabbit passed.
+- Claude unavailable due to organization overage.
+
+### PR `#55`: Remove `tx.origin` from drop execution (Queue Item 14)
+
+Status: In progress.
+Branch: `codex/remove-tx-origin-drop-execution`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/55`.
+Claude review request: issue comment `4667155915`.
+
+Goal:
+
+- Remove executable `tx.origin` usage from `StreamDrops`.
+- Add explicit fixed-price recipient and execution-address storage.
+- Keep auction recipient reserved as `address(0)` according to ADR 0001/0002
+  until settlement-specific authorization lands.
+- Store the current poster-based auction execution fallback so no-bid
+  settlement does not target `address(0)`.
+- Update target-state characterization tests for explicit recipient,
+  zero-recipient rejection, non-zero auction-recipient rejection, no-bid
+  settlement, and contract-based execution.
+- Preserve broader EIP-712 signature, replay, and field-substitution work for
+  `P0-AUTH-002`.
+
+Candidate files:
+
+- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/IArrngController.sol`
+- `test/StreamDropsCharacterization.t.sol`
+- `test/StreamDropsIntegrationCharacterization.t.sol`
+- `test/helpers/CharacterizationTestBase.sol`
+- `test/helpers/StreamFixture.sol`
+- `test/StreamAdmins.t.sol`
+- `test/README.md`
+- `docs/known-blockers.md`
+- `docs/adr/0001-drop-authorization.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `forge test --match-contract StreamDropsCharacterizationTest -vvv` passed
+  with 9 tests.
+- `forge test --match-contract StreamDropsIntegrationCharacterizationTest -vvv`
+  passed with 10 tests.
+- `make check` passed with 24 tests.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 24
+  tests.
+- `forge fmt --check` passed for the formatted touched Solidity files; the
+  provider interface comment diff preserves its existing style to avoid
+  unrelated formatting churn.
+- `git diff --check` passed.
+- `rg -n "tx\.origin" smart-contracts` returned no matches.
+- Stale signature grep passed for legacy drop function signatures and old
+  fixed-price test names.
+- Heading and traceability greps passed for the touched roadmap, ADR, state, and
+  Slither baseline files.
+- Sidecar read-only review completed; auction no-bid settlement and non-zero
+  auction-recipient findings were folded into code and tests.
+
+Review feedback:
+
+- GitHub CI run `27257368139` passed on initial head
+  `9dbcc5e09651eb130a3e64a8330d2a0d6dc931fd`.
+- Claude review was requested in issue comment `4667155915`, but Claude was
+  unavailable because the organization's Claude Code overage spend limit was
+  reached.
+- CodeRabbit review `4465140842` requested a concrete PR number in this run
+  log and a zero-poster rejection in `StreamDrops.mintDrop`.
+- Follow-up fix added the concrete PR heading and rejects zero-poster fixed-price
+  and auction drops, with characterization tests for both paths.
 
 ## Decision Log
 
@@ -1075,6 +1160,11 @@ Review feedback:
 | 2026-06-10 05:41 | Validate upgrade/redeployment ADR locally | Heading, traceability, ASCII, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 05:42 | Open PR #54 | Upgrade/redeployment ADR is published with validation evidence |
 | 2026-06-10 05:43 | Request Claude review on PR #54 | Explicit review ping added in issue comment `4666936783` because Claude may not run automatically |
+| 2026-06-10 05:52 | Merge PR #54 | GitHub CI and CodeRabbit checks passed, no review threads were open, and Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 05:56 | Start `P0-AUTH-001` implementation PR | Gate C starts with removing executable `tx.origin` usage and adding explicit recipient target-state tests while leaving EIP-712 work to `P0-AUTH-002` |
+| 2026-06-10 06:18 | Open PR #55 | `P0-AUTH-001` implementation is published with local build, test, formatting, whitespace, grep, and sidecar-review evidence |
+| 2026-06-10 06:19 | Request Claude review on PR #55 | Explicit review ping added in issue comment `4667155915` because Claude may not run automatically |
+| 2026-06-10 06:33 | Address CodeRabbit PR #55 review | Use concrete PR state in the durable log and reject zero-poster drop execution so payout and no-bid fallback addresses are never zero |
 
 ## Resume Instructions
 

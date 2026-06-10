@@ -4,7 +4,8 @@ This file summarizes the high-level blockers from `ops/ROADMAP.md` for
 contributors who start from the README.
 
 - Drop execution currently needs typed, replay-safe authorization.
-- `tx.origin` usage must be removed from drop execution.
+- Drop execution still needs EIP-712 signed recipient, payer, deadline, and
+  replay-protection fields.
 - Auction custody and settlement need an accepted state-machine model.
 - Push payments must move to pull-payment accounting before production use.
 - Randomizer request and callback validation need production hardening.
