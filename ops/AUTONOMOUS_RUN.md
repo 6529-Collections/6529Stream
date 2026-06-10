@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/81` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 23:02 UTC` |
+| Last updated | `2026-06-10 23:08 UTC` |
 
 ## Packaging Notes
 
@@ -3341,7 +3341,7 @@ Outcome:
 
 ### PR #82: Add ERC-4906 metadata update signaling (Queue Item 39)
 
-Status: PR open; waiting for CI and CodeRabbit.
+Status: PR open; CodeRabbit follow-up applied locally and ready to push.
 Branch: `codex/metadata-erc4906-events`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/82`.
 Related issue:
@@ -3385,14 +3385,19 @@ Implementation notes:
   because the current registry does not know which collections use each
   dependency key; dependency reference changes through `updateCollectionInfo`
   do emit collection batch events.
+- CodeRabbit comment `4675512759` reported the implementation correct and
+  complete for scope, then suggested low-risk extra coverage. The follow-up
+  adds the pre-mint `setTokenHash` no-event regression, two-token
+  `updateImagesAndAttributes` event coverage, and a short comment explaining
+  the `_exists` guard.
 
 Validation:
 
 - Focused ERC-4906 metadata event tests passed:
-  `forge test --match-contract StreamMetadataEventsTest -vvv` with 7 tests.
-- Full canonical local gate passed: `make check` with 208 tests, 0 failed.
+  `forge test --match-contract StreamMetadataEventsTest -vvv` with 8 tests.
+- Full canonical local gate passed: `make check` with 209 tests, 0 failed.
 - Windows wrapper passed:
-  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 208 tests,
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 209 tests,
   0 failed.
 - Touched-file formatting passed:
   `forge fmt --check smart-contracts\IERC4906.sol smart-contracts\StreamCore.sol test\StreamMetadataEvents.t.sol`.
@@ -3411,6 +3416,11 @@ Validation:
 Review requests:
 
 - CodeRabbit requested in comment `4675495632`.
+- CodeRabbit rerun requested in comment `4675504591` after the state commit
+  changed the PR head.
+- CodeRabbit review comment `4675512759` found the implementation correct and
+  complete for the stated scope; low-risk coverage suggestions were accepted
+  and implemented locally.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3671,6 +3681,7 @@ Review requests:
 | 2026-06-10 22:47 | Implement Queue Item 39 local draft | Added ERC-4906 interface support, token and collection metadata update events, focused event tests, and docs/roadmap/run-state traceability; dependency registry content reverse signaling remains scoped to P1-META-003 |
 | 2026-06-10 22:58 | Finish local Queue Item 39 validation | Focused ERC-4906 event tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts and zero `StreamMetadataEvents` reentrancy-event rows |
 | 2026-06-10 23:02 | Open PR #82 | ERC-4906 metadata update event PR opened on head `96052819e2cfd5d6f53c4793af03baaadda2ad00`; CodeRabbit requested in issue comment `4675495632`; Claude intentionally skipped per current user instruction |
+| 2026-06-10 23:08 | Address CodeRabbit PR #82 coverage suggestions | Accepted CodeRabbit's low-risk suggestions from comment `4675512759`: added pre-mint `setTokenHash` no-event coverage, two-token image/attribute event coverage, and the `_exists` guard comment; focused tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison all pass with 209 tests |
 
 ## Resume Instructions
 

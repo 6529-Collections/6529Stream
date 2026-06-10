@@ -48,9 +48,23 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         _countMetadataUpdates(logs, TOKEN_ID).assertEq(0, "mint-only event count");
     }
 
+    function testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 tokenHash = keccak256("premint hash");
+
+        vm.recordLogs();
+        vm.prank(address(deployed.randomizer));
+        deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, tokenHash);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        _countMetadataUpdates(logs, TOKEN_ID).assertEq(0, "premint event count");
+        require(deployed.core.retrieveTokenHash(TOKEN_ID) == tokenHash, "hash not stored");
+    }
+
     function testTokenMetadataMutationsEmitMetadataUpdate() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         _mintToken(deployed, TOKEN_ID, 7);
+        _mintToken(deployed, TOKEN_ID + 1, 8);
 
         vm.recordLogs();
         deployed.core.changeTokenData(TOKEN_ID, "4,5,6");
@@ -58,18 +72,22 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
 
         _countMetadataUpdates(tokenDataLogs, TOKEN_ID).assertEq(1, "token data event count");
 
-        uint256[] memory tokenIds = new uint256[](1);
-        string[] memory images = new string[](1);
-        string[] memory attributes = new string[](1);
+        uint256[] memory tokenIds = new uint256[](2);
+        string[] memory images = new string[](2);
+        string[] memory attributes = new string[](2);
         tokenIds[0] = TOKEN_ID;
         images[0] = "ipfs://image/updated.png";
         attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Loud\"}";
+        tokenIds[1] = TOKEN_ID + 1;
+        images[1] = "ipfs://image/updated-2.png";
+        attributes[1] = "{\"trait_type\":\"Mood\",\"value\":\"Quiet\"}";
 
         vm.recordLogs();
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
         Vm.Log[] memory imageLogs = vm.getRecordedLogs();
 
         _countMetadataUpdates(imageLogs, TOKEN_ID).assertEq(1, "image event count");
+        _countMetadataUpdates(imageLogs, TOKEN_ID + 1).assertEq(1, "second image event count");
     }
 
     function testCollectionMetadataMutationsEmitBatchMetadataUpdate() public {

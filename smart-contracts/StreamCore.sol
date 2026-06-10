@@ -407,6 +407,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 == 0x0000000000000000000000000000000000000000000000000000000000000000
         );
         tokenToHash[_mintIndex] = _hash;
+        // Record pre-mint callbacks, but only live tokens announce metadata changes.
         if (_exists(_mintIndex)) {
             emit MetadataUpdate(_mintIndex);
         }
