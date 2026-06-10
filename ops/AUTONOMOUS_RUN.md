@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/67` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 15:53 UTC` |
+| Last updated | `2026-06-10 16:07 UTC` |
 
 ## Packaging Notes
 
@@ -2206,7 +2206,8 @@ Validation completed so far:
 
 ### PR #68: Add failed randomness post-processing state (Queue Item 27)
 
-Status: Open; awaiting CI, Claude, and CodeRabbit feedback.
+Status: Addressing CodeRabbit review; CI is green and Claude is no longer
+required for this PR by user instruction.
 Branch: `codex/randomizer-failed-state`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/68`.
 Related issue:
@@ -2217,6 +2218,10 @@ Review requests:
 
 - Claude requested in issue comment `4671968774`.
 - CodeRabbit requested in issue comment `4671968843`.
+- Latest-head Claude requested in issue comment `4671977932`; Claude skipped
+  review due to the organization monthly spending cap.
+- Latest-head CodeRabbit requested in issue comment `4671978003`; CodeRabbit
+  found that `RandomnessPostProcessingFailed` should include provider and epoch.
 
 Goal:
 
@@ -2266,6 +2271,23 @@ Validation completed before PR:
   core write, duplicate callbacks and stale marking fail during reentry, and
   the post-call writes only emit/record the deterministic fulfillment or
   post-processing failure outcome.
+
+Review follow-up:
+
+- CodeRabbit review comment `3389722778` requested provider and epoch context in
+  `RandomnessPostProcessingFailed` so indexers can correlate failures without
+  extra storage lookups.
+- User instruction after Claude was requested: no need to use Claude for this
+  PR; CodeRabbit is sufficient.
+- Review-fix validation passed:
+  `forge test --match-contract StreamRandomizerLifecycleTest -vvv` (18 tests),
+  `make check` (160 tests), Windows
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` (160 tests),
+  touched-file `forge fmt --check`, `git diff --check`, traceability grep,
+  heading scan, and Slither
+  `slither_exit=-1 total=685 high=9 medium=29 weak-prng=2
+  arbitrary-send-eth=0 reentrancy-eth=0 reentrancy-no-eth=0
+  reentrancy-events=22`.
 
 ## Decision Log
 
@@ -2453,6 +2475,8 @@ Validation completed before PR:
 | 2026-06-10 15:48 | Validate Queue Item 27 | Failed post-processing state is locally green across focused VRF/arRNG lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scans, and Slither baseline comparison |
 | 2026-06-10 15:48 | Reconfirm Claude manual trigger | User noted Claude may not run automatically and pointed back to PR #3; every new PR must receive an explicit `@claude review` issue comment before waiting on bot feedback |
 | 2026-06-10 15:53 | Open PR #68 and request bot reviews | Failed randomness post-processing state PR published at `https://github.com/6529-Collections/6529Stream/pull/68`; Claude requested in issue comment `4671968774` and CodeRabbit requested in issue comment `4671968843` |
+| 2026-06-10 16:04 | Address CodeRabbit PR #68 event-context review | Add provider and randomizer epoch to `RandomnessPostProcessingFailed`, update tests/docs/run-state traceability, and proceed with CodeRabbit/CI as sufficient for this PR per user instruction |
+| 2026-06-10 16:07 | Validate CodeRabbit PR #68 review fix | Focused lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scan, and Slither baseline comparison all pass after adding provider/epoch event context |
 
 ## Resume Instructions
 

@@ -96,8 +96,8 @@ wrong-collection, stale-provider, and stale-epoch callbacks fail closed; zero
 arRNG request IDs fail before lifecycle state is recorded; manual stale marking
 is observable; failed deterministic core post-processing records
 `FailedPostProcessing`, stores the derived seed and failure-data hash, clears
-pending counts, emits a failure event, and rejects duplicate callbacks for both
-VRF and arRNG adapters; randomness-request pauses do not block valid
+pending counts, emits a failure event with provider and epoch context, and
+rejects duplicate callbacks for both VRF and arRNG adapters; randomness-request pauses do not block valid
 fulfillment; a reentrant arRNG controller cannot fulfill during request
 submission; and ordinary randomizer migration is blocked while VRF or arRNG
 adapters report pending requests, then allowed after fulfillment or explicit

@@ -26,8 +26,9 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
     bytes32 private constant PAUSE_REASON = keccak256("randomness-incident");
     bytes32 private constant COLLECTION_RANDOMIZER_UPDATED_TOPIC =
         keccak256("CollectionRandomizerUpdated(uint256,address,address,uint256)");
-    bytes32 private constant RANDOMNESS_POST_PROCESSING_FAILED_TOPIC =
-        keccak256("RandomnessPostProcessingFailed(uint256,uint256,uint256,bytes32,bytes32)");
+    bytes32 private constant RANDOMNESS_POST_PROCESSING_FAILED_TOPIC = keccak256(
+        "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32)"
+    );
 
     function testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce() public {
         (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
@@ -162,7 +163,13 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         vm.recordLogs();
         coordinator.fulfill(vrf, 1, words);
         _assertRandomnessPostProcessingFailed(
-            vm.getRecordedLogs(), address(vrf), 1, TOKEN_ID, expectedSeed, failureDataHash
+            vm.getRecordedLogs(),
+            address(vrf),
+            1,
+            TOKEN_ID,
+            uint256(1),
+            expectedSeed,
+            failureDataHash
         );
 
         StreamRandomizerLifecycle.RandomnessRequest memory request =
@@ -472,7 +479,13 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         vm.recordLogs();
         controller.fulfill(rng, 1, words);
         _assertRandomnessPostProcessingFailed(
-            vm.getRecordedLogs(), address(rng), 1, TOKEN_ID, expectedSeed, failureDataHash
+            vm.getRecordedLogs(),
+            address(rng),
+            1,
+            TOKEN_ID,
+            uint256(1),
+            expectedSeed,
+            failureDataHash
         );
 
         StreamRandomizerLifecycle.RandomnessRequest memory request =
@@ -638,6 +651,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         address emitter,
         uint256 requestId,
         uint256 tokenId,
+        uint256 expectedEpoch,
         bytes32 expectedSeed,
         bytes32 expectedFailureDataHash
     ) private pure {
@@ -650,10 +664,15 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                     && uint256(logs[i].topics[2]) == COLLECTION_ID
                     && uint256(logs[i].topics[3]) == tokenId
             ) {
-                (bytes32 actualSeed, bytes32 actualFailureDataHash) =
-                    abi.decode(logs[i].data, (bytes32, bytes32));
-                found =
-                    actualSeed == expectedSeed && actualFailureDataHash == expectedFailureDataHash;
+                (
+                    address actualProvider,
+                    uint256 actualEpoch,
+                    bytes32 actualSeed,
+                    bytes32 actualFailureDataHash
+                ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32));
+                found = actualProvider == emitter && actualEpoch == expectedEpoch
+                    && actualSeed == expectedSeed
+                    && actualFailureDataHash == expectedFailureDataHash;
             }
         }
         found.assertTrue("failed event");

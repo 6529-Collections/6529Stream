@@ -80,6 +80,8 @@ abstract contract StreamRandomizerLifecycle {
         uint256 indexed requestId,
         uint256 indexed collectionId,
         uint256 indexed tokenId,
+        address provider,
+        uint256 randomizerEpoch,
         bytes32 derivedSeed,
         bytes32 failureDataHash
     );
@@ -260,7 +262,13 @@ abstract contract StreamRandomizerLifecycle {
         request.failureDataHash = failureDataHash;
 
         emit RandomnessPostProcessingFailed(
-            _requestId, request.collectionId, request.tokenId, request.derivedSeed, failureDataHash
+            _requestId,
+            request.collectionId,
+            request.tokenId,
+            request.provider,
+            request.randomizerEpoch,
+            request.derivedSeed,
+            failureDataHash
         );
     }
 

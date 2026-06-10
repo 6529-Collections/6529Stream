@@ -379,7 +379,7 @@ Required events or stricter equivalents:
 - `RandomnessRequested(collectionId, tokenId, provider, requestId, epoch)`
 - `RandomnessFulfilled(collectionId, tokenId, provider, requestId, epoch, seed, rawOutputHash)`
 - `RandomnessStale(collectionId, tokenId, provider, requestId, epoch, reason)`
-- `RandomnessPostProcessingFailed(collectionId, tokenId, provider, requestId, epoch, failureDataHash)`
+- `RandomnessPostProcessingFailed(requestId, collectionId, tokenId, provider, epoch, seed, failureDataHash)`
 - `RandomnessPostProcessingRetried(collectionId, tokenId, provider, requestId, epoch, seed)`
 - `RandomizerProviderConfigUpdated(provider, field, oldValueHash, newValueHash, admin)`
 
