@@ -18,7 +18,7 @@ Known P0 blockers and the execution roadmap are tracked in
 1. TDH holders provide reputation to drops.
 2. If a drop clears the selected network hurdle, it enters a pool.
 3. Once a drop is in a pool, the configured TDH signer authorizes execution with
-   EIP-712 typed data.
+   EIP-712 typed data through EOA or ERC-1271 contract signatures.
 4. A valid authorization can mint through fixed-price purchase or create an
    auction, subject to the remaining P0 safety blockers.
 

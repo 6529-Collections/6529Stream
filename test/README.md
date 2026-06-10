@@ -14,5 +14,5 @@ auction custody ambiguity; those tests are regression tripwires and should be
 updated only when the corresponding roadmap fix changes the intended behavior.
 
 Drop execution now has EIP-712 EOA target-state coverage in
-`StreamDropsEIP712.t.sol`. ERC-1271 contract signer support remains a separate
-P0 implementation item.
+`StreamDropsEIP712.t.sol` and ERC-1271 contract signer target-state coverage in
+`StreamDropsERC1271.t.sol`.

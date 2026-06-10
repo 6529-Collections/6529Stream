@@ -533,8 +533,8 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Dependencies: `P0-AUTH-ADR`.
 - Status: EOA and EIP-2098 typed authorization implemented in
-  `smart-contracts/StreamDrops.sol`; ERC-1271 contract signer support remains
-  `P0-AUTH-003`.
+  `smart-contracts/StreamDrops.sol`; ERC-1271 contract signer support is
+  implemented separately by `P0-AUTH-003`.
 
 Problem:
 
@@ -544,9 +544,10 @@ Problem:
 
 Current behavior:
 
-- Drop authorization now accepts `DropAuthorization` EIP-712 typed data, validates
-  an EOA signature from the configured signer, consumes the derived `dropId`, and
-  rejects contract signers until ERC-1271 support lands.
+- Drop authorization now accepts `DropAuthorization` EIP-712 typed data,
+  validates the configured signer, consumes the derived `dropId`, and keeps EOA
+  and contract signer validation split between `P0-AUTH-002` and
+  `P0-AUTH-003`.
 
 Intended behavior:
 
@@ -568,7 +569,6 @@ Required code changes:
 - Define front-running semantics: a third party may submit a signed drop only if
   recipient, price, token data, settlement recipient, and signed execution
   constraints cannot be redirected.
-- Reject contract signers explicitly until `P0-AUTH-003` adds ERC-1271.
 - Remove `retrieveMessageAndDropID` and the old packed-hash `mintDrop` surface.
 
 Child tickets:
@@ -600,7 +600,7 @@ Required tests:
 - Auction drops reject non-zero payer and fixed-price value fields.
 - Consumption, cancellation, and signer-epoch events are asserted.
 - Duplicate cancellation is rejected before emitting a second cancellation event.
-- Contract signer path rejects explicitly until `P0-AUTH-003`.
+- Contract signer path is covered by `P0-AUTH-003`.
 
 Required docs:
 
@@ -608,7 +608,7 @@ Required docs:
 - Nonce/drop ID policy.
 - Signer rotation policy.
 - Example payload fixtures.
-- ERC-1271 limitation until `P0-AUTH-003`.
+- ERC-1271 contract signer behavior.
 
 Acceptance criteria:
 
@@ -624,8 +624,7 @@ Acceptance criteria:
   indexed identifiers and data.
 - Duplicate cancellation fails without a second cancellation event.
 - Token data substitution fails.
-- Contract signers fail with an explicit pending-ERC-1271 policy until
-  `P0-AUTH-003`.
+- Contract signer validation is handled by `P0-AUTH-003`.
 - Legacy packed authorization helper and old `mintDrop` ABI are removed.
 - All required negative tests pass.
 
@@ -634,6 +633,8 @@ Acceptance criteria:
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
 - Blocks: Gate C.
 - Dependencies: `P0-AUTH-ADR`.
+- Status: Implemented in `smart-contracts/StreamDrops.sol` with target-state
+  tests in `test/StreamDropsERC1271.t.sol`.
 
 Problem:
 
@@ -642,35 +643,48 @@ Problem:
 
 Current behavior:
 
-- No explicit ERC-1271 signature validation policy.
+- Contract signers validate the same EIP-712 drop authorization digest by
+  returning the ERC-1271 magic value from `isValidSignature(bytes32,bytes)`.
+  Non-ERC-1271 contracts and invalid ERC-1271 responses fail closed.
 
 Intended behavior:
 
-- Contract signers either work via ERC-1271 or are explicitly out of scope for
-  the first release.
+- Contract signers work via ERC-1271 for the first release, while EOA
+  signatures continue to use the low-`s`, valid-`v`, and zero-recovered-signer
+  ECDSA policy from `P0-AUTH-002`.
 
 Required code changes:
 
-- If supported, call `isValidSignature(hash, signature)` when the signer is a
-  contract.
-- If not supported, reject contract signers with a specific error and document
-  the limitation.
+- Call `isValidSignature(hash, signature)` by `staticcall` when the configured
+  signer is a contract.
+- Require the standard ERC-1271 magic value `0x1626ba7e`.
+- Fail closed on reverted calls, empty returns, short or extra return data,
+  invalid magic values, wrong digest, and wrong signature bytes.
+- Preserve the existing EOA recovery path for EOA signers.
 
 Required tests:
 
-- ERC-1271 mock signer success if supported.
-- ERC-1271 invalid magic value failure if supported.
-- Contract signer rejected if out of scope.
+- ERC-1271 mock signer success.
+- ERC-1271 auction path success.
+- ERC-1271 invalid magic value failure.
+- Reverted ERC-1271 signature check failure.
+- Empty, short, and extra ERC-1271 return failures.
+- Wrong digest and wrong signature-byte failures.
+- Replayed and expired ERC-1271 authorization failures.
+- Contract signer without ERC-1271 implementation fails closed.
 - EOA signing remains unaffected.
 
 Required docs:
 
 - Contract signer policy.
-- Safe/DAO signing example if supported.
+- Safe/DAO signing example before public beta.
 
 Acceptance criteria:
 
-- ERC-1271 signatures pass or are explicitly out of scope.
+- ERC-1271 signatures pass only when the contract signer returns the standard
+  magic value for the exact EIP-712 digest and signature bytes.
+- Invalid, reverted, empty-return, malformed-return, replayed, and expired
+  contract-signer paths fail without consuming the drop.
 - Behavior is tested and documented.
 
 ### P0-AUCT-001: Formalize Auction Custody And State Machine
@@ -1801,9 +1815,9 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 
 | Finding | Required test | Intended test file | Status | Issue | Gate | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tx.origin` recipient bug | Contract executor submits a drop without `tx.origin` dependency | `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol` | Target-state explicit-recipient, contract-executor, non-zero auction-recipient rejection, and no-bid settlement tests added; full contract-signer validation remains under `P0-AUTH-003` | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
-| Ad hoc drop authorization | EIP-712 valid, explicit digest encoding, replayed, expired, wrong chain, wrong contract, wrong signer, cancelled, duplicate cancellation, stale epoch, malleable, zero recovered signer, token substitution, bad quantity, bad payer, sale-mode field misuse, lifecycle event assertions, and compact signature tests | `test/StreamDropsEIP712.t.sol` | Passing for EOA/EIP-2098 target state; ERC-1271 remains `P0-AUTH-003` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
-| ERC-1271 decision | ERC-1271 mock signer passes after implementation; interim contract signer rejection remains covered in EIP-712 tests | `test/StreamDropsERC1271.t.sol` | Missing implementation; explicit rejection covered by `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
+| `tx.origin` recipient bug | Contract executor submits a drop without `tx.origin` dependency | `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol` | Target-state explicit-recipient, contract-executor, non-zero auction-recipient rejection, and no-bid settlement tests added | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
+| Ad hoc drop authorization | EIP-712 valid, explicit digest encoding, replayed, expired, wrong chain, wrong contract, wrong signer, cancelled, duplicate cancellation, stale epoch, malleable, zero recovered signer, token substitution, bad quantity, bad payer, sale-mode field misuse, lifecycle event assertions, and compact signature tests | `test/StreamDropsEIP712.t.sol` | Passing for EOA/EIP-2098 target state; non-ERC-1271 contract signer fails closed | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
+| ERC-1271 decision | ERC-1271 mock signer success, auction success, invalid magic, reverted check, empty/short/extra return, wrong digest, wrong signature bytes, replay, expiry, and EOA regression | `test/StreamDropsERC1271.t.sol` | Passing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
