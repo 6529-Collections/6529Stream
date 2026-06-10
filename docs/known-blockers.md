@@ -61,10 +61,12 @@ contributors who start from the README.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
+- First-party production `uninitialized-local` Slither rows now initialize their
+  default locals explicitly and have targeted regressions for string counting,
+  delegation status/gating, empty-script rendering, and minter return indexes.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md`;
-  current high findings are limited to vendored-library triage and accepted
-  test-only forced-ETH helpers, but remaining medium findings still need triage
-  before audit readiness.
+  current high/medium findings are limited to vendored-library triage and
+  accepted test-only helper findings before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback
