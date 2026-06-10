@@ -9,8 +9,10 @@ credits and removes the bid-path push refund. P0-AUCT-001 adds auction-local
 with-bid settlement credits for poster, protocol, and curator proceeds after
 successful NFT transfer. P0-PAY-003 adds fixed-price `StreamDrops` credits for
 poster proceeds, protocol proceeds, and curator reserve amounts without
-push-paying during mint execution. Remaining ADR work includes curator reward
-credits, protocol-wide ledger views and invariants, randomizer reserve
+push-paying during mint execution. P0-PAY-005 adds curator reward credits in
+`StreamCuratorsPool` by validating claims and recording withdrawable curator
+credits instead of push-paying reward recipients. Remaining ADR work
+includes protocol-wide ledger views and invariants, randomizer reserve
 accounting, and cross-contract emergency surplus boundaries.
 
 ## Metadata
@@ -61,15 +63,17 @@ Current source references:
   poster, payout, and curators, then transferred the NFT. Auction-local target
   state now atomically pairs final proceeds credits with successful NFT
   transfer, so failed transfers do not release escrow or create final credits.
-- `smart-contracts/StreamCuratorsPool.sol#L55-L73`: curator reward claims mark a
-  Merkle leaf claimed and push ETH to the reward address.
+- Before P0-PAY-005, `StreamCuratorsPool.claimRewards` marked a Merkle leaf
+  claimed and pushed ETH to the reward address. Target-state curator claims now
+  validate the proof, mark the claim consumed, and record a withdrawable curator
+  credit instead.
 - `smart-contracts/AuctionContract.sol#L231-L254`: auction emergency withdrawal
   is bounded by auction-local bidder credits and active bid escrow.
 - `smart-contracts/StreamMinter.sol#L124-L130`,
-  `smart-contracts/StreamCuratorsPool.sol#L84-L90`, and
   `smart-contracts/RandomizerRNG.sol#L78-L84`: emergency withdrawals send the
-  full contract balance to the admin without an owed-balance or reserved-balance
-  boundary.
+  full contract balance to the admin without an owed-balance or
+  reserved-balance boundary. `StreamCuratorsPool.emergencyWithdraw` is now
+  bounded by curator credits owed in that contract.
 - `ops/SLITHER_BASELINE.md`: the auction bid-path `reentrancy-eth` row and
   auction emergency `arbitrary-send-eth` row are fixed by P0-AUCT-002; remaining
   high-impact emergency-withdrawal rows track the cross-contract payment
@@ -241,6 +245,28 @@ Required behavior:
 - Reject ambiguous or malformed leaves according to the Merkle encoding policy
   in the roadmap.
 - Let the reward address withdraw through the standard withdrawal path.
+
+P0-PAY-005 implementation status:
+
+- `StreamCuratorsPool.claimRewards` now hashes reward leaves with
+  `abi.encode(rewardAddress, collectionID, amount)`, validates the Merkle proof,
+  marks the reward address claimed, records `curatorCredits[rewardAddress]`,
+  increments `totalCuratorOwed`, and emits curator credit events.
+- Claims require enough local curator-pool surplus to cover the reward before
+  the claim is consumed, so the contract does not create unfunded curator
+  credits. Cross-contract reserve movement into the curator pool remains future
+  shared-ledger work.
+- Claiming no longer calls the reward address, so a reverting reward recipient
+  cannot block claim consumption or credit creation.
+- `withdrawCuratorCredit` and `withdrawCuratorCreditTo` are guarded withdrawal
+  paths. Failed withdrawals revert atomically and preserve the curator credit
+  and aggregate owed total.
+- `StreamCuratorsPool.totalOwed()` and `emergencyWithdrawable()` expose the
+  local curator-credit owed boundary. The curator pool emergency withdrawal now
+  withdraws only surplus over `totalOwed`.
+- This is still a local ledger implementation for the curator pool. Shared
+  cross-contract ledger views, randomizer reserves, and full invariant coverage
+  remain open under the parent payment issues.
 
 ### Direct And Forced ETH
 
@@ -524,7 +550,8 @@ must not be treated as target-state tests after the implementation lands.
 3. Convert fixed-price mint payouts to credits. Implemented for `StreamDrops`
    fixed-price poster, protocol, and curator-reserve accounting by P0-PAY-003.
 4. Convert auction outbid refunds and final settlement proceeds to credits.
-5. Convert curator reward claims to credits.
+5. Convert curator reward claims to credits. Implemented for
+   `StreamCuratorsPool` by P0-PAY-005.
 6. Bound emergency withdrawals by surplus in each affected contract.
 7. Add payment regression tests, invariant tests, and forced-ETH tests.
 8. Update user, integrator, deployment, and security docs.

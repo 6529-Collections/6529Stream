@@ -1573,16 +1573,40 @@ Implementation notes:
 
 - Sidecar contract-risk, test-strategy, and docs/state reviews were requested
   before implementation.
-- Existing `claimRewards` currently computes the leaf with
-  `abi.encodePacked(rewardAddress, collectionID, amount)`, marks the reward
-  claimed, records `rewardsPerAddress`, then push-pays ETH to the reward
-  address. This PR should remove that push payment and record a withdrawable
-  curator credit instead.
-- Avoid overclaiming the ADR 0003 parent work: this PR should close #29 only.
+- `StreamCuratorsPool.claimRewards` now hashes reward leaves with
+  `abi.encode(rewardAddress, collectionID, amount)`, validates the Merkle proof,
+  checks local surplus before consuming the claim, records
+  `curatorCredits[rewardAddress]`, increments `totalCuratorOwed`, and emits the
+  existing `Reward` event plus a curator-credit event.
+- The claim path no longer calls the reward address, so reverting reward
+  recipients cannot block claim consumption or credit creation.
+- `withdrawCuratorCredit` and `withdrawCuratorCreditTo` are `nonReentrant`
+  pull-payment exits. Failed withdrawals revert atomically and preserve the
+  curator credit and aggregate owed total.
+- `totalOwed()` and `emergencyWithdrawable()` expose the local curator-pool
+  owed/surplus boundary. `emergencyWithdraw()` now withdraws only surplus over
+  local curator credits owed.
+- This is intentionally local to `StreamCuratorsPool`. Cross-contract reserve
+  movement from `StreamDrops` fixed-price curator reserves and auction curator
+  credits to the curator pool remains future shared-ledger work, so this PR
+  should close #29 only.
 
 Validation:
 
-- TBD.
+- `forge test --match-contract "Stream(CuratorsPool|AuctionPayments|FixedPricePayments)Test" -vvv`
+  passed with 38 tests.
+- `make check` passed with 109 tests and the known compiler/NatSpec/lint
+  warning baseline.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed with 109 tests.
+- `forge fmt --check smart-contracts\StreamCuratorsPool.sol test\StreamCuratorsPool.t.sol`
+  passed.
+- `git diff --check` passed.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
+  on `PATH`; it still exits `-1` for baseline findings and intentional test
+  helpers, but the `arbitrary-send-eth` detector now lists only
+  `NextGenRandomizerRNG.emergencyWithdraw()` and
+  `StreamMinter.emergencyWithdraw()`, not `StreamCuratorsPool`.
 
 Review feedback:
 
@@ -1736,6 +1760,7 @@ Review feedback:
 | 2026-06-10 10:31 | Document PR #60 merge decision | CI passed on review-fix head, Claude was unavailable due to organization overage, CodeRabbit's only finding was addressed, no inline threads are open, and stale CodeRabbit status is documented in issue comment `4669162764` |
 | 2026-06-10 10:33 | Merge PR #60 | Fixed-price pull credits merged as `f7390f28c48f833a75e28a87995f24df27e152c3` and issue #27 closed completed |
 | 2026-06-10 10:35 | Start `P0-PAY-005` implementation PR | Gate C payment work continues by converting `StreamCuratorsPool.claimRewards` from synchronous reward payout to curator pull credits |
+| 2026-06-10 10:53 | Finish local `P0-PAY-005` validation | Curator reward claims now use pull credits, rejecting reward addresses cannot block claims, withdrawal/reentrancy/emergency-surplus tests pass, full 109-test checks pass, and Slither no longer reports `StreamCuratorsPool` in `arbitrary-send-eth` |
 
 ## Resume Instructions
 

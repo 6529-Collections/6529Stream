@@ -13,84 +13,160 @@ pragma solidity ^0.8.19;
 import "./IStreamAdmins.sol";
 import "./MerkleProof.sol";
 import "./IDelegationManagementContract.sol";
+import "./ReentrancyGuard.sol";
 
-contract StreamCuratorsPool {
+contract StreamCuratorsPool is ReentrancyGuard {
+    address private constant DELEGATION_COLLECTION = 0x8888888888888888888888888888888888888888;
+    uint256 private constant CURATOR_REWARD_USE_CASE = 1;
 
     // variables declaration
 
-    mapping (uint256 => bytes32) public collectionMerkleRoot;
-    mapping (uint256 => mapping (address => uint256)) public rewardsPerAddress;
-    mapping (uint256 => mapping (address => bool)) public rewardsClaimPerAddress;
+    mapping(uint256 => bytes32) public collectionMerkleRoot;
+    mapping(uint256 => mapping(address => uint256)) public rewardsPerAddress;
+    mapping(uint256 => mapping(address => bool)) public rewardsClaimPerAddress;
+    mapping(address => uint256) public curatorCredits;
+    uint256 public totalCuratorOwed;
 
     IStreamAdmins adminsContract;
     IDelegationManagementContract dmc;
 
     modifier FunctionAdminRequired(bytes4 _selector) {
-      require(adminsContract.retrieveFunctionAdmin(msg.sender, _selector) == true || adminsContract.retrieveGlobalAdmin(msg.sender) == true , "Not allowed");
-      _;
+        require(
+            adminsContract.retrieveFunctionAdmin(msg.sender, _selector)
+                || adminsContract.retrieveGlobalAdmin(msg.sender),
+            "Not allowed"
+        );
+        _;
     }
 
     // events
     event Reward(address indexed _add, uint256 indexed collectionID, uint256 indexed amount);
+    event CuratorCreditCreated(
+        address indexed _add, uint256 indexed collectionID, uint256 indexed funds
+    );
+    event CuratorCreditWithdrawn(
+        address indexed _add, address indexed _recipient, uint256 indexed funds
+    );
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
 
     constructor(address _adminsContract, address _del) {
+        require(_adminsContract != address(0), "Zero admin");
+        require(_del != address(0), "Zero delegation");
         adminsContract = IStreamAdmins(_adminsContract);
         dmc = IDelegationManagementContract(_del);
     }
 
     // function to set merkle root for each collection
-    function setMerkleRoot(uint256 _collectionID, bytes32 _merkleRoot) public FunctionAdminRequired(this.setMerkleRoot.selector) {
+    function setMerkleRoot(uint256 _collectionID, bytes32 _merkleRoot)
+        public
+        FunctionAdminRequired(this.setMerkleRoot.selector)
+    {
         collectionMerkleRoot[_collectionID] = _merkleRoot;
     }
 
     // function to set merkle root for each drop
-    function setMultipleMerkleRoots(uint256[] memory _collectionIDs, bytes32[] memory _merkleRoot) public FunctionAdminRequired(this.setMerkleRoot.selector) {
-        for (uint256 i=0; i < _collectionIDs.length; i ++) {
+    function setMultipleMerkleRoots(uint256[] memory _collectionIDs, bytes32[] memory _merkleRoot)
+        public
+        FunctionAdminRequired(this.setMerkleRoot.selector)
+    {
+        for (uint256 i = 0; i < _collectionIDs.length; i++) {
             collectionMerkleRoot[_collectionIDs[i]] = _merkleRoot[i];
         }
     }
 
     // function to claim rewards
-    function claimRewards(uint256 _collectionID, uint256 _amount, bytes32[] calldata merkleProof, address _delegator) public {
-        address rewardAddress;
-        bytes32 node;
+    function claimRewards(
+        uint256 _collectionID,
+        uint256 _amount,
+        bytes32[] calldata merkleProof,
+        address _delegator
+    ) public nonReentrant {
+        address rewardAddress = msg.sender;
         if (_delegator != 0x0000000000000000000000000000000000000000) {
             bool isAllowedToClaim;
-            isAllowedToClaim = dmc.retrieveGlobalStatusOfDelegation(_delegator, 0x8888888888888888888888888888888888888888, msg.sender, 1);
-            require(isAllowedToClaim == true, "No delegation");
-            node = keccak256(bytes.concat(keccak256((abi.encodePacked(_delegator, _collectionID, _amount)))));
+            isAllowedToClaim = dmc.retrieveGlobalStatusOfDelegation(
+                _delegator, DELEGATION_COLLECTION, msg.sender, CURATOR_REWARD_USE_CASE
+            );
+            require(isAllowedToClaim, "No delegation");
             rewardAddress = _delegator;
-        } else {
-            node = keccak256(bytes.concat(keccak256((abi.encodePacked(msg.sender, _collectionID, _amount)))));
-            rewardAddress = msg.sender;
         }
+
+        bytes32 node = hashRewardLeaf(rewardAddress, _collectionID, _amount);
         require(rewardsClaimPerAddress[_collectionID][rewardAddress] == false, "Rewards Claimed");
-        require(MerkleProof.verifyCalldata(merkleProof, collectionMerkleRoot[_collectionID], node), 'invalid proof');
+        require(
+            MerkleProof.verifyCalldata(merkleProof, collectionMerkleRoot[_collectionID], node),
+            "invalid proof"
+        );
+        require(emergencyWithdrawable() >= _amount, "Insufficient balance");
         rewardsPerAddress[_collectionID][rewardAddress] = _amount;
         rewardsClaimPerAddress[_collectionID][rewardAddress] = true;
-        (bool success1, ) = payable(rewardAddress).call{value: _amount}("");
-        require(success1, "ETH failed");
+        if (_amount != 0) {
+            curatorCredits[rewardAddress] += _amount;
+            totalCuratorOwed += _amount;
+            emit CuratorCreditCreated(rewardAddress, _collectionID, _amount);
+        }
         emit Reward(rewardAddress, _collectionID, _amount);
     }
 
+    function withdrawCuratorCredit() external {
+        withdrawCuratorCreditTo(payable(msg.sender));
+    }
+
+    function withdrawCuratorCreditTo(address payable _recipient) public nonReentrant {
+        require(_recipient != address(0), "Zero recipient");
+        uint256 credit = curatorCredits[msg.sender];
+        require(credit != 0, "No credit");
+
+        curatorCredits[msg.sender] = 0;
+        totalCuratorOwed -= credit;
+
+        (bool success,) = _recipient.call{ value: credit }("");
+        require(success, "ETH failed");
+        emit CuratorCreditWithdrawn(msg.sender, _recipient, credit);
+    }
+
+    function hashRewardLeaf(address _rewardAddress, uint256 _collectionID, uint256 _amount)
+        public
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
+            bytes.concat(keccak256(abi.encode(_rewardAddress, _collectionID, _amount)))
+        );
+    }
+
+    function totalOwed() public view returns (uint256) {
+        return totalCuratorOwed;
+    }
+
+    function emergencyWithdrawable() public view returns (uint256) {
+        uint256 balance = address(this).balance;
+        uint256 owed = totalOwed();
+        if (balance <= owed) {
+            return 0;
+        }
+        return balance - owed;
+    }
+
     // function to update admin contract
-    function updateAdminContracts(address _newContract) public FunctionAdminRequired(this.updateAdminContracts.selector) { 
-        require(IStreamAdmins(_newContract).isAdminContract() == true, "Contract is not Admin");
+    function updateAdminContracts(address _newContract)
+        public
+        FunctionAdminRequired(this.updateAdminContracts.selector)
+    {
+        require(IStreamAdmins(_newContract).isAdminContract(), "Contract is not Admin");
         adminsContract = IStreamAdmins(_newContract);
     }
 
     // function to withdraw any balance from the smart contract
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
-        uint balance = address(this).balance;
-        address admin = adminsContract.owner();
-        (bool success, ) = payable(admin).call{value: balance}("");
-        require(success, "ETH failed");
-        emit Withdraw(msg.sender, success, balance);
+        uint256 balance = emergencyWithdrawable();
+        emit Withdraw(msg.sender, true, balance);
+        if (balance > 0) {
+            address admin = adminsContract.owner();
+            (bool success,) = payable(admin).call{ value: balance }("");
+            require(success, "ETH failed");
+        }
     }
 
-    receive() external payable {
-
-    }
-
+    receive() external payable { }
 }

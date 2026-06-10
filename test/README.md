@@ -46,3 +46,13 @@ mint failure rolls back credits and consumed drop state; and forced ETH is
 exposed only as `StreamDrops` surplus. Curator reserve remains accounted and
 protected for later curator-claim work rather than ordinary recipient
 withdrawal.
+
+Curator reward claims now have target-state coverage in
+`StreamCuratorsPool.t.sol`: valid Merkle claims create withdrawable curator
+credits instead of pushing ETH to the reward address; duplicate and invalid
+claims fail without increasing credit; delegated claims credit the delegator;
+unfunded claims fail before consuming the Merkle claim;
+rejecting reward recipients cannot block claim consumption; failed withdrawals
+preserve credits; withdrawal reentrancy cannot overdraw; reward leaves use
+`abi.encode`-based hashing; and curator pool emergency withdrawal can withdraw
+only surplus over local curator credits owed, including forced surplus.
