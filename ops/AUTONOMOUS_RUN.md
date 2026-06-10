@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/bound-emergency-withdrawals` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/61` |
+| Active PR branch | `codex/fix-admin-permission-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/62` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 11:30 UTC` |
+| Last updated | `2026-06-10 11:52 UTC` |
 
 ## Packaging Notes
 
@@ -73,7 +73,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | Merged in PR #59 |
 | 19 | Convert fixed-price payouts to pull credits | Gate C | Implement P0-PAY-003 for `StreamDrops` fixed-price poster/protocol credits and curator-reserve accounting, with tests/docs/state traceability | Merged in PR #60 |
 | 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | Merged in PR #61 |
-| 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | In progress |
+| 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | Merged in PR #62 |
+| 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | In progress |
 
 ## Current PR Worklog
 
@@ -1629,7 +1630,7 @@ Outcome:
 
 ### PR candidate: Bound remaining emergency withdrawals (Queue Item 21)
 
-Status: Open.
+Status: Merged.
 Branch: `codex/bound-emergency-withdrawals`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/62`.
 Related issues:
@@ -1714,6 +1715,64 @@ Validation:
   `@($json.results.detectors | Where-Object { $_.check -eq "arbitrary-send-eth" }).Count`,
   after `$json = Get-Content $out -Raw | ConvertFrom-Json`; result:
   `ARBITRARY_SEND_ETH_COUNT=0`.
+
+Outcome:
+
+- PR #62 was squash-merged as
+  `44a3ebb5b298b437387c056a0c86b1d7ee9db03d`.
+- Final head `77743912aac975fe13ac2d622237a9d5b7ecd0ba` passed GitHub CI
+  run `27274061799`.
+- CodeRabbit verified the follow-up review fixes and marked the PR good to
+  merge in issue comment `4669840843`.
+- Claude was explicitly requested but remained unavailable due to the
+  organization overage skip already recorded in review `4467324335`.
+- Issue #31 was closed as completed by the merge; issue #8 remains broader
+  Slither/invariant work.
+
+### PR candidate: Fix admin selector and permission model (Queue Item 22)
+
+Status: In progress.
+Branch: `codex/fix-admin-permission-model`.
+Pull request: TBD.
+Related issues:
+
+- `https://github.com/6529-Collections/6529Stream/issues/34`
+- `https://github.com/6529-Collections/6529Stream/issues/33`
+
+Goal:
+
+- Replace selector-only or mismatched admin authorization with target-scoped,
+  explicit permission semantics consistent with ADR 0004.
+- Add direct regression tests proving that a grant for one function cannot
+  authorize a different selector, and a grant for one contract cannot authorize
+  another contract that happens to share a selector.
+- Preserve intentional owner/global admin flows while documenting any grouped
+  permissions explicitly.
+- Update status, roadmap test traceability, and autonomous run state without
+  bundling pause-control work from P0-ADMIN-002.
+
+Candidate files:
+
+- `smart-contracts/StreamAdmins.sol`
+- `smart-contracts/StreamCore.sol`
+- Admin-related callers using `FunctionAdminRequired`
+- `test/StreamAdminSelectors.t.sol`
+- Existing admin characterization tests
+- `docs/adr/0004-admin-governance.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Initial validation targets:
+
+- Characterize the current selector/target behavior before rewriting.
+- Add P0 target-state tests for wrong selector, wrong target, explicit global
+  admin, owner, and removal/revocation paths.
+- Run focused admin tests, full `make check`, Windows `scripts/check.ps1`,
+  formatting/whitespace checks, and Slither delta evidence if Solidity changes
+  affect detector output.
 
 ## Decision Log
 
@@ -1869,6 +1928,8 @@ Validation:
 | 2026-06-10 11:11 | Select Queue Item 21 | Remaining `arbitrary-send-eth` findings are now limited to `StreamMinter` and `NextGenRandomizerRNG`, so the next PR will bound their emergency-withdrawal behavior and update Slither traceability |
 | 2026-06-10 11:30 | Implement Queue Item 21 locally | `StreamMinter` is modeled as zero-owed surplus-only custody, `NextGenRandomizerRNG` is conservatively modeled as all-balance randomness reserve, and auction emergency withdrawal no longer uses the strict zero-balance equality |
 | 2026-06-10 11:30 | Finish local Queue Item 21 validation | Focused emergency/auction tests, full `make check`, Windows wrapper, new test formatting, whitespace, and Slither delta evidence pass; Slither now reports zero `arbitrary-send-eth` findings |
+| 2026-06-10 11:51 | Merge PR #62 | Emergency-withdrawal bounds merged as `44a3ebb5b298b437387c056a0c86b1d7ee9db03d`; CI and CodeRabbit were green, Claude was unavailable due org overage, and issue #31 closed completed |
+| 2026-06-10 11:52 | Select Queue Item 22 | Next P0 Gate C blocker is `P0-ADMIN-001`, because admin selector/target permission semantics must be fixed before pause controls and deeper randomness/admin work |
 
 ## Resume Instructions
 
