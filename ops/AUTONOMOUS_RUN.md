@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/slither-baseline` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/6` |
+| Active PR branch | `codex/slither-issue-links` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/7` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 01:38 UTC` |
+| Last updated | `2026-06-10 01:55 UTC` |
 
 ## Packaging Notes
 
@@ -55,7 +55,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Merged in PR #4 |
 | 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Merged in PR #5 |
 | 4 | Characterization test skeleton | Gate A | Test helpers, fixtures, mocks, and executable characterization coverage | Merged in PR #6 |
-| 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | In progress on branch `codex/slither-baseline` |
+| 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Merged in PR #7 |
+| 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | In progress on branch `codex/slither-issue-links` |
+| 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Pending |
+| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Pending |
+| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Pending |
+| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
+| 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
 ## Current PR Worklog
 
@@ -234,7 +240,7 @@ Outcome:
 
 ### PR #7: Slither baseline appendix/config (Queue Item 5)
 
-Status: PR open; addressing CodeRabbit review follow-up.
+Status: Merged.
 Branch: `codex/slither-baseline`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/7`.
 
@@ -287,6 +293,72 @@ Validation:
 - Review follow-up validation passed: `python -m json.tool
   slither.config.json`, targeted `rg` checks, Markdown heading scan,
   `git diff --check`, and `make check`.
+- GitHub CI run `27247319104` passed on final head
+  `a0fa95b76c11b792ab941deeb0f8e947af46840a`.
+- CodeRabbit completed successfully on the final head with no actionable
+  comments.
+- Claude was explicitly pinged twice on the PR; no actionable Claude response
+  arrived before merge.
+
+Outcome:
+
+- Merged as PR #7 on `2026-06-10 01:41 UTC`.
+- Squash merge commit: `3201bd1758232554e47aecc95ad20a236aed10df`.
+- Latest head before merge: `a0fa95b76c11b792ab941deeb0f8e947af46840a`.
+
+### PR #8: Slither baseline issue links (Queue Item 6)
+
+Status: In progress.
+Branch: `codex/slither-issue-links`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/16`.
+
+Goal:
+
+- Replace Slither baseline `TBD` issue placeholders with canonical GitHub
+  issues.
+- Keep the baseline grouped by remediation stream so future PRs can link to a
+  stable work item.
+- Update the roadmap appendix and test matrix so issue traceability is visible
+  from both roadmap and Slither baseline entry points.
+
+Created GitHub issues:
+
+- [#8](https://github.com/6529-Collections/6529Stream/issues/8)
+  `P0-PAY-008`: bound emergency withdrawals and prove owed-balance invariants.
+- [#9](https://github.com/6529-Collections/6529Stream/issues/9)
+  `P0-META-001`: replace dependency-script packed concatenation.
+- [#10](https://github.com/6529-Collections/6529Stream/issues/10)
+  `P0-AUTH-002`: replace drop authorization with replay-safe EIP-712 typed
+  data.
+- [#11](https://github.com/6529-Collections/6529Stream/issues/11)
+  `P0-LIB-001`: prove vendored library provenance or replace libraries.
+- [#12](https://github.com/6529-Collections/6529Stream/issues/12)
+  `P0-AUCT-002`: fix auction bidding reentrancy and outbid refunds.
+- [#13](https://github.com/6529-Collections/6529Stream/issues/13)
+  `P0-CORE-001`: resolve uninitialized mint-accounting state variables.
+- [#14](https://github.com/6529-Collections/6529Stream/issues/14)
+  `P0-RAND-ADR`: decide randomness provider model and weak-helper scope.
+- [#15](https://github.com/6529-Collections/6529Stream/issues/15)
+  `P0-INIT-001`: triage and resolve first-party uninitialized-local findings.
+
+Candidate files:
+
+- `ops/SLITHER_BASELINE.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Slither baseline table check passed: every `Open` or `Needs Issue` row has a
+  `github.com/6529-Collections/6529Stream/issues/` link in the Issue column.
+- Markdown heading scan passed for `ops/SLITHER_BASELINE.md`,
+  `ops/ROADMAP.md`, and `ops/AUTONOMOUS_RUN.md`.
+- `git diff --check` passed.
+- `make check` passed with 17 tests and the known existing warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
+  tests and the known existing warnings.
+- Opened PR #16 and explicitly pinged Claude for roadmap/ops-only review in
+  comment `4665744494`.
 
 ## Decision Log
 
@@ -329,6 +401,11 @@ Validation:
 | 2026-06-10 01:31 | Open PR #7 | PR packages the Slither config, tracked high/medium baseline, docs links, and durable state updates |
 | 2026-06-10 01:37 | Address CodeRabbit PR #7 review | Add compiler activation instructions, mark vendored likely false positives as `Needs Issue`, and assign `P0-META-001` to dependency-script packed encoding |
 | 2026-06-10 01:38 | Validate CodeRabbit PR #7 follow-up | JSON parse, targeted text checks, heading scan, whitespace check, and `make check` pass after review edits |
+| 2026-06-10 01:41 | Merge PR #7 | CI and CodeRabbit were clean, no review threads were open, and Claude did not respond after two explicit review pings |
+| 2026-06-10 01:48 | Create Slither baseline GitHub issues | Group high/medium Slither rows by remediation stream so each open or needs-issue row has a canonical work item |
+| 2026-06-10 01:51 | Start PR #8 | Queue Item 6 replaces Slither `TBD` issue placeholders with real GitHub issue links before ADR implementation begins |
+| 2026-06-10 01:54 | Validate PR #8 locally | Slither issue-column check, Markdown heading scan, whitespace check, `make check`, and Windows wrapper all pass |
+| 2026-06-10 01:55 | Open PR #16 | PR packages the Slither issue-link updates and explicitly asks Claude for review |
 
 ## Resume Instructions
 
