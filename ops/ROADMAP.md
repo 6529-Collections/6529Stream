@@ -341,7 +341,7 @@ contract changes until the relevant ADR is accepted.
 | Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` | EIP-712 schema, recipient/payer policy, nonce model, replay protection, signer rotation, ERC-1271 stance |
 | Auction custody | [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` | Token custody, settlement actor, no-bid semantics, transfer method, cancellation |
 | Payment accounting | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
-| Admin/governance | `P0-ADMIN-ADR` | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
+| Admin/governance | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33) | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
 | Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` | Provider choice, pending state, callback validation, retries, stale callback handling |
 | Metadata/freeze | `P1-META-ADR` | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` | Pending/final metadata, frozen state, dependency immutability, burn metadata |
 | Upgrade/redeployment | `P2-UPGRADE-ADR` | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release | Redeploy vs upgrade stance, migration expectations, versioning |
@@ -362,7 +362,7 @@ This is the recommended first batch of issues.
 6. `P0-AUTH-ADR / P0/DESIGN`: ADR for drop authorization.
 7. [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) / P0/DESIGN: ADR for auction custody.
 8. [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) / P0/DESIGN: ADR for payment accounting.
-9. `P0-ADMIN-ADR / P0/DESIGN`: ADR for admin/governance.
+9. [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33) / P0/DESIGN: ADR for admin/governance.
 10. `P0-RAND-ADR / P0/DESIGN`: ADR for randomness.
 11. `P1-META-ADR / P1/DESIGN`: ADR for metadata/freeze.
 12. `P2-UPGRADE-ADR / P2/DESIGN`: ADR for upgrade/redeployment.
@@ -371,11 +371,12 @@ This is the recommended first batch of issues.
 15. `P0-AUTH-003 / P0/CODE+TEST+DOCS`: Add ERC-1271 support or explicitly reject contract signers.
 16. [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) / P0/CODE+TEST+DOCS: Refactor auction bidding to pull credits.
 17. [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) / P0/CODE+TEST+DOCS: Formalize auction custody and settlement.
-18. `P0-ADMIN-001 / P0/CODE+TEST+DOCS`: Fix admin selector mismatch.
-19. `P0-RAND-001 / P0/CODE+TEST+DOCS`: Harden randomizer callbacks.
-20. `P1/TEST`: Add first invariant suite.
-21. `P1/DOCS`: Add protocol spec and threat model.
-22. `P2/OPS`: Add deployment scripts and manifest schema.
+18. [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) / P0/CODE+TEST+DOCS: Fix admin selector mismatch.
+19. [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) / P0/CODE+TEST+DOCS+OPS: Define pause and emergency controls.
+20. `P0-RAND-001 / P0/CODE+TEST+DOCS`: Harden randomizer callbacks.
+21. `P1/TEST`: Add first invariant suite.
+22. `P1/DOCS`: Add protocol spec and threat model.
+23. `P2/OPS`: Add deployment scripts and manifest schema.
 
 ## 5. Best-Practice Checklist
 
@@ -831,7 +832,8 @@ Acceptance criteria:
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
 - Blocks: Gate C.
-- Dependencies: `P0-ADMIN-ADR`.
+- Issue: [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34).
+- Dependencies: [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33).
 
 Problem:
 
@@ -843,16 +845,31 @@ Current behavior:
 
 - `StreamCore.setCollectionData` is gated by
   `this.changeMetadataView.selector`.
+- `StreamCore.updateCollectionInfo` is gated by
+  `this.changeMetadataView.selector`; if this grouping is intended, the target
+  implementation must replace it with an explicit named metadata role and tests.
+- `StreamCuratorsPool.setMultipleMerkleRoots` is gated by
+  `this.setMerkleRoot.selector`.
+- Function-admin grants are keyed by address and selector only, not by target
+  contract and selector.
+- `IStreamAdmins` exposes collection-admin retrieval, but the implementation
+  does not provide collection-admin storage or behavior.
+- `StreamAdmins.tdhSigner` has no rotation path, so the current admin registrar
+  can become stuck if the key is lost or compromised.
 
 Intended behavior:
 
 - Every protected function is gated by the intended selector or role.
+- Function-admin grants are scoped by account, target contract, and selector.
 - Collection-scoped admin rules are explicit.
+- Drop signer identities are not automatically admin identities.
 
 Required code changes:
 
 - Fix selector mismatch.
 - Audit all `FunctionAdminRequired(this.*.selector)` calls.
+- Scope function-admin checks to target contract and selector.
+- Add a root-managed rotation path for the admin registrar or equivalent role.
 - Define global, function, collection, signer, guardian/pause, and owner roles.
 - Make critical role changes two-step where practical: propose/accept or
   schedule/execute.
@@ -860,15 +877,21 @@ Required code changes:
   sensitive address updates.
 - Signer rotation events should include old signer, new signer, signer epoch,
   and effective block or time.
+- Remove or explicitly implement the stale collection-admin interface path.
 
 Required tests:
 
 - Function admin can call only intended function.
 - Wrong selector cannot authorize mutation.
+- Same selector on another target contract cannot be authorized by the grant.
 - Global admin path.
 - Collection admin path if implemented.
+- Unsupported collection-admin path if deferred.
 - Revoked admin path.
 - Unauthorized caller path.
+- Signer add, remove, rotation, epoch increment, and stale epoch rejection.
+- Admin registrar rotation and compromised/lost registrar recovery.
+- Per-drop cancellation.
 - Critical role transfer propose/accept or schedule/execute behavior where
   implemented.
 
@@ -883,12 +906,15 @@ Acceptance criteria:
 - Selector mismatch fixed.
 - Permission matrix tests pass.
 - Role model is documented.
+- Signer lifecycle and cancellation controls match ADR 0004.
+- Deployer has no lasting production authority after the admin ceremony.
 
 ### P0-ADMIN-002: Define Pause And Emergency Controls
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS+OPS`.
 - Blocks: Gate C.
-- Dependencies: `P0-ADMIN-ADR`.
+- Issue: [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35).
+- Dependencies: [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24).
 
 Problem:
 
@@ -899,10 +925,14 @@ Current behavior:
 
 - No clear pause policy for minting, bidding, settlement, withdrawals, or drop
   execution.
+- Emergency withdrawals send full contract balances to `adminsContract.owner()`
+  without proving owed/reserved balances are protected.
 
 Intended behavior:
 
 - Emergency response controls are explicit, minimal, monitored, and tested.
+- Pause controls are domain-scoped and do not silently block unrelated flows.
+- Emergency withdrawals are surplus-only according to ADR 0003.
 
 Required code changes:
 
@@ -913,6 +943,10 @@ Required code changes:
 - Ensure user withdrawals are paused only if explicitly accepted.
 - Pause events should include scope: mint, bid, settlement, withdrawal, drop
   execution, or metadata.
+- Add signer-compromise response controls: drop-execution pause, signer epoch
+  invalidation, per-drop cancellation, and monitored events.
+- Replace full-balance emergency withdrawals with surplus-bounded withdrawals or
+  prove a contract has no owed/reserved balances by construction.
 
 Required tests:
 
@@ -924,16 +958,26 @@ Required tests:
 - Metadata pause if implemented.
 - Withdrawal pause or non-pause according to ADR.
 - Events emitted and indexed.
+- Signer-compromise runbook controls.
+- Emergency withdrawal cannot withdraw poster, bidder, curator, protocol, active
+  bid escrow, or randomness reserve balances.
+- Direct or forced ETH can be withdrawn as surplus only when ADR 0003 accounting
+  proves it is not owed or reserved.
 
 Required docs:
 
 - Emergency controls section in admin/governance docs.
 - Incident runbook updates.
+- Deployment admin ceremony checklist.
 
 Acceptance criteria:
 
 - Pause model accepted in ADR.
 - Pause behavior tested and monitored.
+- Withdrawal pause, if implemented, is temporary, evented, and cannot erase
+  credits.
+- Emergency controls are bounded by `emergencyWithdrawable()` or equivalent
+  surplus views.
 
 ### P0-RAND-001: Harden Randomizer Requests And Callbacks
 
@@ -1666,7 +1710,12 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamRandomizerPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
-| Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | `P0-ADMIN-001` | Gate C | TBD |
+| Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
+| Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
+| Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface reverts clearly | `test/StreamCollectionAdmins.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
+| Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | Missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
+| Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Missing | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
+| Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol` | Missing | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomizer stale callback | Replaced randomizer fulfillment rejected | `test/StreamRandomizer.t.sol` | Missing | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), `P0-RAND-001` | Gate C | TBD |
 | Pending randomness metadata | `tokenURI` pending/final behavior is deterministic | `test/StreamMetadata.t.sol` | Initial characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; golden-file tests missing | `P1-META-*` | Gate D | TBD |
 | Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
@@ -1684,7 +1733,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0001 Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | Accepted | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` |
 | 0002 Auction custody | [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) | Accepted | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` |
 | 0003 Payment accounting | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) | Accepted | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
-| 0004 Admin/governance | `P0-ADMIN-ADR` | Missing | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
+| 0004 Admin/governance | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33) | Accepted | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
 | 0005 Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Missing | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` |
 | 0006 Metadata/freeze | `P1-META-ADR` | Missing | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` |
 | 0007 Upgrade/redeployment | `P2-UPGRADE-ADR` | Missing | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release |
