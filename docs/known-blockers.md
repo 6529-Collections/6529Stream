@@ -25,14 +25,21 @@ contributors who start from the README.
   `NextGenRandomizerRNG` conservatively treats its full adapter balance as
   randomness reserve and exposes zero emergency-withdrawable balance until
   fuller provider reserve accounting lands.
+- Admin selector and function-admin target-scope regressions now cover
+  P0-ADMIN-001: protected functions require the intended selector, function
+  grants are scoped to the target contract and selector, revoked grants fail,
+  owner/root role recovery exists, unsupported collection-admin lookups return
+  false, and global-admin bypass remains explicit. Pause controls, signer
+  lifecycle operations, deployment admin ceremony, and richer collection-admin
+  roles remain open.
 - Randomizer request and callback validation need production hardening.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, and randomizer reserve-boundary regressions now exist, but
-  broader payment, randomness, metadata, admin/pause, deployment, and invariant
-  tests are still missing.
+  broader payment, randomness, metadata, pause, deployment, production-governance,
+  and invariant tests are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

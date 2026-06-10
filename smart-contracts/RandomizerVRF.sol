@@ -35,7 +35,12 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     IStreamCore public gencoreContract;
     IStreamAdmins private adminsContract;
 
-    constructor(uint64 subscriptionId, address vrfCoordinator, address _gencore, address _adminsContract) VRFConsumerBaseV2(vrfCoordinator) {
+    constructor(
+        uint64 subscriptionId,
+        address vrfCoordinator,
+        address _gencore,
+        address _adminsContract
+    ) VRFConsumerBaseV2(vrfCoordinator) {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         s_subscriptionId = subscriptionId;
         gencore = _gencore;
@@ -44,30 +49,39 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     }
 
     modifier FunctionAdminRequired(bytes4 _selector) {
-      require(adminsContract.retrieveFunctionAdmin(msg.sender, _selector) == true || adminsContract.retrieveGlobalAdmin(msg.sender) == true , "Not allowed");
-      _;
+        require(
+            adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector) == true
+                || adminsContract.retrieveGlobalAdmin(msg.sender) == true,
+            "Not allowed"
+        );
+        _;
     }
 
     function requestRandomWords(uint256 tokenid) public {
         require(msg.sender == gencore);
         uint256 requestId = COORDINATOR.requestRandomWords(
-            keyHash,
-            s_subscriptionId,
-            requestConfirmations,
-            callbackGasLimit,  
-            numWords
+            keyHash, s_subscriptionId, requestConfirmations, callbackGasLimit, numWords
         );
         tokenToRequest[tokenid] = requestId;
         requestToToken[requestId] = tokenid;
     }
 
-    function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal override {
-        gencoreContract.setTokenHash(tokenIdToCollection[requestToToken[_requestId]], requestToToken[_requestId], keccak256(abi.encodePacked(_randomWords,requestToToken[_requestId])));
+    function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords)
+        internal
+        override
+    {
+        gencoreContract.setTokenHash(
+            tokenIdToCollection[requestToToken[_requestId]],
+            requestToToken[_requestId],
+            keccak256(abi.encodePacked(_randomWords, requestToToken[_requestId]))
+        );
         emit RequestFulfilled(_requestId, _randomWords);
     }
 
     // function that calculates the random hash and returns it to the gencore contract
-    function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o) public {
+    function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)
+        public
+    {
         require(msg.sender == gencore);
         tokenIdToCollection[_mintIndex] = _collectionID;
         requestRandomWords(_mintIndex);
@@ -75,27 +89,42 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
 
     // function to update callbackGasLimit & keyHash
 
-    function updatecallbackGasLimitAndkeyHash(uint32 _callbackGasLimit, bytes32 _keyHash) public FunctionAdminRequired(this.updatecallbackGasLimitAndkeyHash.selector){
+    function updatecallbackGasLimitAndkeyHash(uint32 _callbackGasLimit, bytes32 _keyHash)
+        public
+        FunctionAdminRequired(this.updatecallbackGasLimitAndkeyHash.selector)
+    {
         callbackGasLimit = _callbackGasLimit;
         keyHash = _keyHash;
     }
 
     // function to change the requests other data
 
-    function updateAdditionalData(uint64 _s_subscriptionId, uint32 _numWords, uint16 _requestConfirmations) public FunctionAdminRequired(this.updateAdditionalData.selector){
+    function updateAdditionalData(
+        uint64 _s_subscriptionId,
+        uint32 _numWords,
+        uint16 _requestConfirmations
+    ) public FunctionAdminRequired(this.updateAdditionalData.selector) {
         s_subscriptionId = _s_subscriptionId;
         numWords = _numWords;
         requestConfirmations = _requestConfirmations;
     }
 
-     // function to update contracts
+    // function to update contracts
 
-    function updateAdminContract(address _newadminsContract) public FunctionAdminRequired(this.updateAdminContract.selector) {
-        require(IStreamAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin");
+    function updateAdminContract(address _newadminsContract)
+        public
+        FunctionAdminRequired(this.updateAdminContract.selector)
+    {
+        require(
+            IStreamAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin"
+        );
         adminsContract = IStreamAdmins(_newadminsContract);
     }
 
-    function updateCoreContract(address _gencore) public FunctionAdminRequired(this.updateCoreContract.selector) { 
+    function updateCoreContract(address _gencore)
+        public
+        FunctionAdminRequired(this.updateCoreContract.selector)
+    {
         gencore = _gencore;
         gencoreContract = IStreamCore(_gencore);
     }
@@ -104,5 +133,4 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     function isRandomizerContract() external view returns (bool) {
         return true;
     }
-
 }

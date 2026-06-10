@@ -128,7 +128,7 @@ contract StreamDrops is Ownable, ReentrancyGuard {
     // certain functions can only be called by a global or function admin
     modifier FunctionAdminRequired(bytes4 _selector) {
         require(
-            adminsContract.retrieveFunctionAdmin(msg.sender, _selector) == true
+            adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector) == true
                 || adminsContract.retrieveGlobalAdmin(msg.sender) == true,
             "Not allowed"
         );
