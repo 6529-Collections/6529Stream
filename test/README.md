@@ -95,10 +95,21 @@ valid callbacks write exactly one derived seed; unknown, empty, duplicate,
 wrong-collection, stale-provider, and stale-epoch callbacks fail closed; zero
 arRNG request IDs fail before lifecycle state is recorded; manual stale marking
 is observable; failed deterministic core post-processing records
-`FailedPostProcessing`, stores the derived seed and failure-data hash, clears
-pending counts, emits a failure event with provider and epoch context, and
-rejects duplicate callbacks for both VRF and arRNG adapters; randomness-request pauses do not block valid
-fulfillment; a reentrant arRNG controller cannot fulfill during request
-submission; and ordinary randomizer migration is blocked while VRF or arRNG
-adapters report pending requests, then allowed after fulfillment or explicit
-stale marking. `RandomizerNXT` cannot be configured as a production randomizer.
+  `FailedPostProcessing`, stores the derived seed and failure-data hash, clears
+  pending counts, emits a failure event with provider and epoch context, and
+  rejects duplicate callbacks for both VRF and arRNG adapters; randomness-request
+  pauses do not block valid fulfillment; a reentrant arRNG controller cannot
+  fulfill during request submission; and ordinary randomizer migration is blocked
+  while VRF or arRNG adapters report pending requests, then allowed after
+  fulfillment or explicit stale marking. `RandomizerNXT` cannot be configured as a
+  production randomizer.
+
+Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
+`StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be
+manually retried by an authorized admin using the stored derived seed, successful
+retry emits retry and fulfillment events while refreshing fulfillment timing,
+retry failure emits only the retry-specific failure event, repeated
+deterministic failures remain bounded by
+`MAX_RANDOMNESS_POST_PROCESSING_RETRIES`, unauthorized retry fails, terminal
+fulfillment cannot be retried, and changed token-to-collection, provider, or
+epoch bindings fail before retry state changes in both adapters.
