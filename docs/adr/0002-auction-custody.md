@@ -11,8 +11,9 @@ outbid refunds use bidder credits, with-bid final proceeds use auction-local
 pull credits, no-bid contract posters get a pending NFT claim path, pre-bid
 cancellation is implemented, and auction-local emergency surplus excludes owed
 auction balances. Broader protocol-wide payment accounting, fixed-price pull
-payments, curator reward accounting, randomizer reserves, pause controls, and
-deployment rehearsal remain separate roadmap work.
+payments, curator reward accounting, fuller randomizer reserve lifecycle
+accounting, pause controls, and deployment rehearsal remain separate roadmap
+work.
 
 ## Metadata
 

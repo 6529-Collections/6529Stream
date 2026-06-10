@@ -56,3 +56,12 @@ rejecting reward recipients cannot block claim consumption; failed withdrawals
 preserve credits; withdrawal reentrancy cannot overdraw; reward leaves use
 `abi.encode`-based hashing; and curator pool emergency withdrawal can withdraw
 only surplus over local curator credits owed, including forced surplus.
+
+StreamMinter and randomizer emergency-withdrawal boundaries now have
+target-state coverage in `StreamEmergencyWithdraw.t.sol`: `StreamMinter`
+rejects ordinary ETH transfers, exposes `totalOwed() == 0`, reports forced ETH
+as `emergencyWithdrawable()` surplus, and withdraws only that amount;
+`NextGenRandomizerRNG` exposes its full balance as
+`totalRandomnessReserved()`/`totalOwed()` and reports zero
+emergency-withdrawable balance, including direct ETH, forced ETH, and
+post-request remaining reserve.
