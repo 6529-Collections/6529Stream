@@ -16,15 +16,17 @@ order.
 - Maturity: pre-audit and not production-ready.
 - Current CI proves that the repo compiles and runs the initial
   characterization test skeleton. It does not prove protocol correctness.
-- Known remaining P0 blockers include broader payment accounting, randomizer
-  reserves, emergency withdrawal boundaries outside current local accounting,
-  untriaged static analysis findings, missing invariants,
-  randomizer hardening, admin/pause controls, and missing deployment discipline.
+- Known remaining P0 blockers include broader payment accounting and
+  cross-contract invariants, fuller randomizer reserve lifecycle accounting,
+  untriaged static analysis findings, missing invariants, randomizer hardening,
+  admin/pause controls, and missing deployment discipline.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
   fixed-price `StreamDrops` pull credits, and `StreamCuratorsPool` curator
   reward credits now have target-state
-  implementation coverage.
+  implementation coverage. `StreamMinter` and `NextGenRandomizerRNG`
+  emergency-withdrawal boundaries now have target-state coverage for their
+  current custody models.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -45,9 +47,9 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 530 total findings, including 13 High and 26 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 632 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -700,10 +702,9 @@ Acceptance criteria:
 - Issue: [#22](https://github.com/6529-Collections/6529Stream/issues/22).
 - Dependencies: [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21), ADR 0002.
 - Status: Implemented for ADR 0002 auction custody and settlement
-  state-machine semantics. Broader protocol-wide payment accounting,
-  fixed-price pull payments, curator rewards, randomizer reserves, pause
-  controls, deployment readiness, and full ADR 0003 completion remain separate
-  roadmap work.
+  state-machine semantics. Broader protocol-wide payment accounting, pause
+  controls, deployment readiness, fuller randomizer reserve lifecycle
+  accounting, and full ADR 0003 completion remain separate roadmap work.
 
 Problem:
 
@@ -888,9 +889,15 @@ Child tickets:
 - [`P0-PAY-006`](https://github.com/6529-Collections/6529Stream/issues/30):
   Add withdrawal functions and failed-withdrawal behavior.
 - [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31):
-  Bound emergency withdrawals by surplus.
+  Bound emergency withdrawals by surplus. Implemented for current
+  emergency-withdrawal surfaces: `StreamAuctions`, `StreamDrops`,
+  `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG`; broader
+  shared-ledger invariants remain open.
 - [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8):
-  Add payment invariants and forced-ETH tests.
+  Add payment invariants and forced-ETH tests. In progress: forced/direct ETH
+  and emergency-boundary tests now cover current local payment contracts,
+  `StreamMinter`, and `NextGenRandomizerRNG`; broader invariant fuzzing remains
+  open.
 
 Required tests:
 
@@ -1825,32 +1832,34 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 530 findings, including 13 High and 26 Medium.
+- Result: 632 findings, including 9 High and 29 Medium.
 
 Impact summary:
 
 | Impact | Count |
 | --- | ---: |
-| High | 13 |
-| Medium | 26 |
-| Low | 51 |
-| Informational | 434 |
+| High | 9 |
+| Medium | 29 |
+| Low | 58 |
+| Informational | 530 |
 | Optimization | 6 |
 
 High/medium detector summary:
 
 | Detector | Impact | Count | Primary scope | Status | Issue | Required action |
 | --- | --- | ---: | --- | --- | --- | --- |
-| `arbitrary-send-eth` | High | 4 | first-party emergency withdrawals | 2 Open / 2 Fixed | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Auction emergency withdrawal is bounded by auction-local surplus after P0-AUCT-002, and curator pool emergency withdrawal is bounded by local curator credits after P0-PAY-005; remaining contracts still need owed/surplus accounting |
-| `encode-packed-collision` | High | 3 | drop authorization and dependency/script hashing | Open | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Replace ad hoc packed hashes with typed/domain-separated encoding; track dependency-script row as `P0-META-001` |
+| `arbitrary-send-eth` | High | 0 current / 4 fixed | first-party emergency withdrawals | Fixed | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Current emergency-withdrawal surfaces are bounded: auction, fixed-price drops, curator pool, StreamMinter surplus, and conservative randomizer reserve boundary tests now exist |
+| `encode-packed-collision` | High | 1 current / 2 fixed | drop authorization and dependency/script hashing | Open | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Drop authorization rows are fixed; replace dependency-script packed concatenation with typed/domain-separated encoding under `P0-META-001` |
 | `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
-| `reentrancy-eth` | High | 1 | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
+| `reentrancy-eth` | High | 0 current / 1 fixed | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
+| `suicidal` | High | 3 | test-only forced-ETH helpers | Accepted | Accepted test-only | Intentionally retained for forced-ETH accounting tests under Solidity 0.8.19 |
 | `uninitialized-state` | High | 2 | mint-accounting mappings | Open | [#13](https://github.com/6529-Collections/6529Stream/issues/13) | Initialize, remove, or complete design |
 | `weak-prng` | High | 2 | word pool randomness helpers | Open | [#14](https://github.com/6529-Collections/6529Stream/issues/14) | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C |
 | `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
-| `locked-ether` | Medium | 1 | test-only rejection mock | Accepted | N/A | Keep scoped to test-only baseline |
-| `uninitialized-local` | Medium | 11 open, 1 fixed | first-party and test helper locals | Open for remaining production rows; `StreamDrops.mintDrop` fixed in `P0-AUTH-002` | [#15](https://github.com/6529-Collections/6529Stream/issues/15) | Initialize or prove Solidity zero-value intent |
-| `unused-return` | Medium | 4 | characterization tests | Accepted | N/A | Keep scoped to test-only baseline |
+| `incorrect-equality` | Medium | 1 | test-only malleable-signature helper | Accepted | Accepted test-only | Keep scoped to test-only EIP-712 negative coverage |
+| `locked-ether` | Medium | 7 | test-only rejection/reentrancy/mock receivers | Accepted | Accepted test-only | Keep scoped to payment and emergency-withdrawal tests |
+| `uninitialized-local` | Medium | 11 current / 1 fixed | first-party and test helper locals | Open for remaining production rows; `StreamDrops.mintDrop` fixed in `P0-AUTH-002` | [#15](https://github.com/6529-Collections/6529Stream/issues/15) | Initialize or prove Solidity zero-value intent |
+| `unused-return` | Medium | 1 | ERC-1271 test tuple helper | Accepted | Accepted test-only | Keep scoped to test-only assertion helper |
 
 ## Appendix B: Test Matrix
 
@@ -1863,10 +1872,10 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | ERC-1271 decision | ERC-1271 mock signer success, auction success, invalid magic, reverted check, empty/short/extra return, wrong digest, wrong signature bytes, replay, expiry, and EOA regression | `test/StreamDropsERC1271.t.sol` | Passing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionPayments.t.sol` | Passing for P0-AUCT-002: bid path has no outbid push refund, rejecting previous bidder cannot block, and withdrawal reentrancy cannot drain more than credited funds | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Passing: outbid creates bidder credit, current highest bid remains active escrow, previous bidder can withdraw, and failed withdrawal preserves credit | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol` | In Progress: auction-local bidder owed, active bid escrow, poster/protocol/curator settlement credits, fixed-price poster/protocol/curator-reserve credits, curator reward credits, local total owed, and emergency-withdrawable views exist; broader shared payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol` | In Progress: auction-local bidder owed, active bid escrow, poster/protocol/curator settlement credits, fixed-price poster/protocol/curator-reserve credits, curator reward credits, StreamMinter zero-owed surplus, randomizer adapter reserve, local total owed, and emergency-withdrawable views exist; broader shared payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol` | In Progress: auction bidder-credit, auction proceeds-credit, fixed-price poster/protocol, and curator reward withdrawal failures are covered; protocol-wide withdrawal failures remain missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol` | In Progress: auction emergency withdrawal excludes bidder credits, active highest-bid escrow, and auction settlement credits; `StreamDrops.emergencyWithdrawable()` excludes fixed-price poster, protocol, and curator-reserve owed balances from surplus; `StreamCuratorsPool.emergencyWithdrawable()` excludes curator reward credits from surplus; remaining contracts and full ledger categories are missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
-| Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamRandomizerPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
+| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol` | Passing for current emergency-withdrawal surfaces: auction emergency withdrawal excludes bidder credits, active highest-bid escrow, and auction settlement credits; `StreamDrops.emergencyWithdrawable()` excludes fixed-price poster, protocol, and curator-reserve owed balances from surplus; `StreamCuratorsPool.emergencyWithdrawable()` excludes curator reward credits from surplus; `StreamMinter` exposes zero owed and withdraws only forced surplus; `NextGenRandomizerRNG` exposes zero emergency-withdrawable balance for adapter reserves. Full shared-ledger invariant coverage remains open | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamEmergencyWithdraw.t.sol`, later `test/StreamRandomizerPayments.t.sol` | Passing for current adapter boundary: `NextGenRandomizerRNG` treats its full balance as `totalRandomnessReserved()`/`totalOwed()` and reports zero `emergencyWithdrawable()` balance, including direct ETH, forced ETH, and post-request remaining reserve. Fuller request-level provider reserve lifecycle accounting remains open | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Passing: explicit auction-contract escrow, registration, status views, active/ended/terminal states, with-bid settlement, failed NFT transfer, cancellation, extension, and post-terminal bid rejection are covered | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionCustody.t.sol` | Passing: no-bid settlement targets the signed poster, contract posters create pending NFT claims, only the poster can complete the claim, and repeated settlement is rejected | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
@@ -1874,7 +1883,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface reverts clearly | `test/StreamCollectionAdmins.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | Missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
 | Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Missing | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
-| Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol` | Missing | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol` | In Progress: StreamMinter and NextGenRandomizerRNG unauthorized emergency withdrawals revert without transfer; broader pause/emergency-control policy remains open | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
 | Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerCallbacks.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerCallbacks.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
@@ -1896,7 +1905,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Passing for P0-PAY-005: valid claims create credits and duplicate claims fail without increasing credit | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C/Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsPool.t.sol` | In Progress: reward leaves use `abi.encode`-based hashing for reward address, collection ID, and amount; root epoch/domain expansion remains future curator metadata work | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply, unavailable `tokenURI`, retained audit state, and callback-after-burn behavior follow ADR 0006 | `test/StreamCoreBurn.t.sol` | Missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate D | TBD |
-| Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamPaymentsInvariant.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, later `test/StreamPaymentsInvariant.t.sol` | In Progress: direct and forced ETH regressions cover auction, fixed-price drops, curator pool, StreamMinter, and NextGenRandomizerRNG local accounting; generalized invariant fuzzing remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 
 ## Appendix C: ADR Index
 

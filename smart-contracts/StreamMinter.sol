@@ -120,13 +120,28 @@ contract StreamMinter {
         }
     }
 
-    // function to withdraw any balance from the smart contract
+    function totalOwed() public pure returns (uint256) {
+        return 0;
+    }
+
+    function emergencyWithdrawable() public view returns (uint256) {
+        uint256 balance = address(this).balance;
+        uint256 owed = totalOwed();
+        if (balance <= owed) {
+            return 0;
+        }
+        return balance - owed;
+    }
+
+    // function to withdraw only surplus balance from the smart contract
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
-        uint balance = address(this).balance;
-        address admin = adminsContract.owner();
-        (bool success, ) = payable(admin).call{value: balance}("");
-        require(success, "ETH failed");
-        emit Withdraw(msg.sender, success, balance);
+        uint256 balance = emergencyWithdrawable();
+        emit Withdraw(msg.sender, true, balance);
+        if (balance > 0) {
+            address admin = adminsContract.owner();
+            (bool success, ) = payable(admin).call{value: balance}("");
+            require(success, "ETH failed");
+        }
     }
 
     // function to retrieve the phases and merkle root of a collection

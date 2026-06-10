@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/curator-claim-credits` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/60` |
+| Active PR branch | `codex/bound-emergency-withdrawals` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/61` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 10:35 UTC` |
+| Last updated | `2026-06-10 11:30 UTC` |
 
 ## Packaging Notes
 
@@ -72,7 +72,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | Merged in PR #58 |
 | 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | Merged in PR #59 |
 | 19 | Convert fixed-price payouts to pull credits | Gate C | Implement P0-PAY-003 for `StreamDrops` fixed-price poster/protocol credits and curator-reserve accounting, with tests/docs/state traceability | Merged in PR #60 |
-| 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | In progress |
+| 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | Merged in PR #61 |
+| 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | In progress |
 
 ## Current PR Worklog
 
@@ -1536,9 +1537,9 @@ Outcome:
   run `27270187899`.
 - Issue #27 was closed as completed by the merge.
 
-### PR candidate: Curator reward claim credits (Queue Item 20)
+### PR #61: Curator reward claim credits (Queue Item 20)
 
-Status: In progress.
+Status: Merged.
 Branch: `codex/curator-claim-credits`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/61`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/29`.
@@ -1610,7 +1611,102 @@ Validation:
 
 Review feedback:
 
-- TBD.
+- Claude review was requested explicitly but skipped because the organization
+  was over its Claude Code review quota.
+- CodeRabbit was explicitly nudged after CI passed. It acknowledged the refresh
+  request and had no visible unresolved review threads.
+- CodeRabbit's commit status remained pending after the clean follow-up, so the
+  PR was merged under the autonomous stale-status exception with the evidence
+  documented in the PR conversation.
+
+Outcome:
+
+- PR #61 was squash-merged as
+  `51db3fd936b1ed7077fe5a7d033037581b9b4997`.
+- Final head `8353d5623fde59ad5e02bbc2e993cb552cc23387` passed GitHub CI
+  run `27271375494`.
+- Issue #29 was closed as completed by the merge.
+
+### PR candidate: Bound remaining emergency withdrawals (Queue Item 21)
+
+Status: In progress.
+Branch: `codex/bound-emergency-withdrawals`.
+Pull request: TBD.
+Related issues:
+
+- `https://github.com/6529-Collections/6529Stream/issues/31`
+- `https://github.com/6529-Collections/6529Stream/issues/8`
+
+Goal:
+
+- Remove the remaining `arbitrary-send-eth` emergency-withdrawal findings from
+  `StreamMinter` and `NextGenRandomizerRNG`.
+- Treat `StreamMinter` balances as forced-ETH surplus by construction and
+  expose explicit owed/surplus views.
+- Treat `NextGenRandomizerRNG` balances as randomness reserve until the fuller
+  randomizer payment model is implemented, so emergency withdrawal cannot drain
+  funds needed for provider requests.
+- Add direct regression tests and update roadmap, Slither baseline, status, and
+  payment-accounting docs without claiming full protocol-wide ledger completion.
+
+Candidate files:
+
+- `smart-contracts/StreamMinter.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/AuctionContract.sol`
+- `test/StreamEmergencyWithdraw.t.sol`
+- `docs/adr/0002-auction-custody.md`
+- `docs/adr/0003-payment-accounting.md`
+- `docs/auction-custody.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Sidecar contract-risk, test-strategy, and docs/state reviews were requested
+  while implementation proceeded.
+- `StreamMinter` now exposes `totalOwed() == 0` and a saturated
+  `emergencyWithdrawable()` view. Its emergency withdrawal transfers only
+  positive surplus to the admin owner. Because the minter has no payable
+  business path or `receive`, the tests prove ordinary ETH transfers fail and
+  forced ETH is the relevant surplus case.
+- `NextGenRandomizerRNG` now exposes `totalRandomnessReserved()` and
+  `totalOwed()` as the full adapter balance, and `emergencyWithdrawable()` as
+  zero. Its emergency withdrawal emits the legacy `Withdraw` event but transfers
+  no ETH, preserving provider reserve funds until fuller request-level reserve
+  lifecycle accounting lands.
+- `StreamAuctions.emergencyWithdraw()` was adjusted to use the positive-surplus
+  branch pattern instead of a strict `balance == 0` equality, removing a medium
+  Slither warning without changing the surplus-only transfer boundary.
+- `test/StreamEmergencyWithdraw.t.sol` covers seven target-state paths:
+  ordinary ETH rejection for `StreamMinter`, forced-surplus withdrawal for
+  `StreamMinter`, unauthorized minter withdrawal rejection, direct reserve
+  preservation for `NextGenRandomizerRNG`, unauthorized randomizer withdrawal
+  rejection, forced-ETH reserve preservation for `NextGenRandomizerRNG`, and
+  request-spend accounting that keeps remaining adapter reserve non-withdrawable.
+- Docs and the Slither baseline now mark the four historical
+  `arbitrary-send-eth` emergency-withdrawal rows fixed for current surfaces,
+  while keeping broader shared-ledger invariants and full randomizer reserve
+  lifecycle accounting open.
+
+Validation:
+
+- `forge test --match-contract "Stream(EmergencyWithdraw|AuctionPayments)Test" -vvv`
+  passed with 21 tests.
+- `make check` passed with 116 tests.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed with 116 tests.
+- `forge fmt --check test\StreamEmergencyWithdraw.t.sol` passed.
+- `git diff --check` passed.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
+  on `PATH`. It still exits `-1` for the accepted/open baseline, but
+  `arbitrary-send-eth` now reports zero current findings. The regenerated
+  branch-local counts are 632 total findings: 9 High, 29 Medium, 58 Low, 530
+  Informational, and 6 Optimization.
 
 ## Decision Log
 
@@ -1762,6 +1858,10 @@ Review feedback:
 | 2026-06-10 10:35 | Start `P0-PAY-005` implementation PR | Gate C payment work continues by converting `StreamCuratorsPool.claimRewards` from synchronous reward payout to curator pull credits |
 | 2026-06-10 10:53 | Finish local `P0-PAY-005` validation | Curator reward claims now use pull credits, rejecting reward addresses cannot block claims, withdrawal/reentrancy/emergency-surplus tests pass, full 109-test checks pass, and Slither no longer reports `StreamCuratorsPool` in `arbitrary-send-eth` |
 | 2026-06-10 10:55 | Open PR #61 and request Claude review | Curator reward claim credit implementation is published, and Claude review was explicitly requested in issue comment `4669369055` |
+| 2026-06-10 11:11 | Merge PR #61 | Curator reward claim credits merged as `51db3fd936b1ed7077fe5a7d033037581b9b4997`, issue #29 closed completed, and stale CodeRabbit status was documented before merge |
+| 2026-06-10 11:11 | Select Queue Item 21 | Remaining `arbitrary-send-eth` findings are now limited to `StreamMinter` and `NextGenRandomizerRNG`, so the next PR will bound their emergency-withdrawal behavior and update Slither traceability |
+| 2026-06-10 11:30 | Implement Queue Item 21 locally | `StreamMinter` is modeled as zero-owed surplus-only custody, `NextGenRandomizerRNG` is conservatively modeled as all-balance randomness reserve, and auction emergency withdrawal no longer uses the strict zero-balance equality |
+| 2026-06-10 11:30 | Finish local Queue Item 21 validation | Focused emergency/auction tests, full `make check`, Windows wrapper, new test formatting, whitespace, and Slither delta evidence pass; Slither now reports zero `arbitrary-send-eth` findings |
 
 ## Resume Instructions
 

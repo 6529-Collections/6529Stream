@@ -109,8 +109,8 @@ This implementation includes auction-local accounting needed for ADR 0002:
 
 Full protocol-wide payment accounting remains owned by ADR 0003 and the
 `P0-PAY-*` roadmap items. Fixed-price pull payments, curator reward accounting,
-randomizer reserves, and cross-contract invariants are not complete in this
-auction-custody change.
+fuller randomizer reserve lifecycle accounting, and cross-contract invariants
+are not complete in this auction-custody change.
 
 ## Key Events
 

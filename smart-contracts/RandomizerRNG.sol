@@ -73,14 +73,22 @@ contract NextGenRandomizerRNG is ArrngConsumer {
         ethRequired = _ethRequired;
     }
 
-    // function to withdraw any balance from the smart contract
+    function totalRandomnessReserved() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function totalOwed() public view returns (uint256) {
+        return totalRandomnessReserved();
+    }
+
+    function emergencyWithdrawable() public pure returns (uint256) {
+        return 0;
+    }
+
+    // function to report the emergency-withdrawal boundary for reserved funds
 
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
-        uint balance = address(this).balance;
-        address admin = adminsContract.owner();
-        (bool success, ) = payable(admin).call{value: balance}("");
-        require(success, "ETH failed");
-        emit Withdraw(msg.sender, success, balance);
+        emit Withdraw(msg.sender, true, emergencyWithdrawable());
     }
 
     receive() external payable {}

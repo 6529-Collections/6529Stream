@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 01:24 UTC` |
+| Last generated | `2026-06-10 11:25 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -23,29 +23,29 @@ baseline.
 
 | Impact | Count |
 | --- | ---: |
-| High | 13 |
-| Medium | 26 |
-| Low | 51 |
-| Informational | 434 |
+| High | 9 |
+| Medium | 29 |
+| Low | 58 |
+| Informational | 530 |
 | Optimization | 6 |
-| Total | 530 |
+| Total | 632 |
 
 ## Detector Counts
 
 | Detector | Impact | Count |
 | --- | --- | ---: |
-| `arbitrary-send-eth` | High | 4 |
-| `encode-packed-collision` | High | 3 |
+| `encode-packed-collision` | High | 1 |
 | `incorrect-exp` | High | 1 |
-| `reentrancy-eth` | High | 1 |
+| `suicidal` | High | 3 |
 | `uninitialized-state` | High | 2 |
 | `weak-prng` | High | 2 |
 | `divide-before-multiply` | Medium | 9 |
-| `locked-ether` | Medium | 1 |
-| `uninitialized-local` | Medium | 12 |
-| `unused-return` | Medium | 4 |
-| Low-impact findings | Low | 51 |
-| Informational findings | Informational | 434 |
+| `incorrect-equality` | Medium | 1 |
+| `locked-ether` | Medium | 7 |
+| `uninitialized-local` | Medium | 11 |
+| `unused-return` | Medium | 1 |
+| Low-impact findings | Low | 58 |
+| Informational findings | Informational | 530 |
 | Optimization findings | Optimization | 6 |
 
 ## Status Semantics
@@ -67,13 +67,14 @@ GitHub work item that owns that resolution.
 | Detector | Occurrences | Contract | Function | Source kind | Source location | Severity | Confidence | Status | Resolution | Required test | Issue | Gate | Owner |
 | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `arbitrary-send-eth` | 1 | `StreamAuctions` | `emergencyWithdraw()` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Bounded auction emergency withdrawal to auction-local surplus after bidder credits and active highest-bid escrow | `test/StreamAuctionPayments.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `NextGenRandomizerRNG` | `emergencyWithdraw()` | first-party | `smart-contracts/RandomizerRNG.sol#L78-L84` | High | Medium | Open | Replace emergency payout push with bounded owed/surplus accounting | Payment invariant and emergency withdrawal tests | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| `arbitrary-send-eth` | 1 | `NextGenRandomizerRNG` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Treats all adapter ETH as randomness reserve, exposes zero emergency-withdrawable balance, and transfers no emergency-withdrawable ETH | `test/StreamEmergencyWithdraw.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
 | `arbitrary-send-eth` | 1 | `StreamCuratorsPool` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-005` | High | Medium | Fixed | Bounded curator pool emergency withdrawal to surplus after local curator credits owed | `test/StreamCuratorsPool.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `StreamMinter` | `emergencyWithdraw()` | first-party | `smart-contracts/StreamMinter.sol#L124-L130` | High | Medium | Open | Replace emergency payout push with bounded owed/surplus accounting | Payment invariant and emergency withdrawal tests | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| `arbitrary-send-eth` | 1 | `StreamMinter` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Exposes `totalOwed() == 0` and withdraws only `emergencyWithdrawable()` surplus, covering forced ETH without an ordinary payable path | `test/StreamEmergencyWithdraw.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamCore` | `retrieveDependencyScript(uint256)` | first-party | `smart-contracts/StreamCore.sol#L402-L408` | High | High | Open | Use typed dependency chunk encoding, versioned content hashes, and frozen dependency pinning per ADR 0006 | Encoding collision and frozen dependency regression | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `retrieveMessageAndDropID(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Removed legacy packed helper; `hashDropAuthorization` now uses EIP-712 domain-separated typed data | Explicit digest, replay, wrong-domain, wrong-chain, wrong-contract, and field-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `mintDrop(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Replaced legacy packed-hash `mintDrop` ABI with `mintDrop(DropAuthorization,string,bytes)` and storage-backed consumed/cancelled drop IDs | EOA, EIP-2098, replay, expiry, cancellation, stale-epoch, wrong-domain, wrong-chain, wrong-contract, wrong-signer, malleability, zero signer, bad quantity, and token-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | `incorrect-exp` | 1 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | High | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or math regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
+| `suicidal` | 3 | Forced-ETH test helpers | `force(address)` | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamFixedPricePayments.t.sol` | High | Medium | Accepted | Accepted as intentional Solidity 0.8.19 `selfdestruct` helpers used only to test forced-ETH surplus accounting | Forced-ETH tests in the owning files | Accepted test-only | Gate A | TBD |
 | `reentrancy-eth` | 1 | `StreamAuctions` | `participateToAuction(uint256)` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Replaced synchronous outbid refund `call` with bidder credit accounting; highest-bid state and auction escrow accounting update before any external withdrawal path | `test/StreamAuctionPayments.t.sol` | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedPerAddress` | first-party | `smart-contracts/StreamCore.sol#L74` | High | High | Open | Initialize, remove, or complete mint-accounting design | Mint-accounting regression | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedAllowlistAddress` | first-party | `smart-contracts/StreamCore.sol#L77` | High | High | Open | Initialize, remove, or complete mint-accounting design | Mint-accounting regression | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
@@ -81,7 +82,8 @@ GitHub work item that owns that resolution.
 | `weak-prng` | 1 | `randomPool` | `randomWord()` | first-party | `smart-contracts/XRandoms.sol#L37-L40` | High | Medium | Open | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C | Randomness provider regression and production-scope test | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C | TBD |
 | `divide-before-multiply` | 1 | `Base64` | `encode(bytes)` | vendored | `smart-contracts/Base64.sol#L20-L91` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `divide-before-multiply` | 8 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
-| `locked-ether` | 1 | `RejectETH` | `receive()` | test-only | `test/mocks/MockRandomizer.sol#L34-L38` | Medium | High | Accepted | Accepted as a test-only receiver used to characterize failing ETH transfers | None; test-only baseline row | Accepted test-only | Gate A | TBD |
+| `incorrect-equality` | 1 | `DropAuthTestHelper` | `signMalleableAuthorization(...)` | test-only | `test/helpers/DropAuthTestHelper.sol#L113-L123` | Medium | Medium | Accepted | Accepted as a test-only helper branch used to manufacture malleable signatures for negative authorization tests | `test/StreamDropsEIP712.t.sol` malleability tests | Accepted test-only | Gate A | TBD |
+| `locked-ether` | 7 | Rejection/reentrancy/mock receivers | payable test helpers | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/mocks/MockRandomizer.sol` | Medium | High | Accepted | Accepted as test-only receivers and mocks used to characterize failed transfers, reentrancy attempts, and randomizer provider payments | Payment and emergency-withdrawal tests in the owning files | Accepted test-only | Gate A | TBD |
 | `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...)._occurrences` | first-party | `smart-contracts/Bytes32Strings.sol#L46` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...).i` | first-party | `smart-contracts/Bytes32Strings.sol#L47` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `DelegationManagementContract` | `registerDelegationAddressUsingSubDelegation(...).subdelegationRightsCol` | first-party | `smart-contracts/NFTdelegation.sol#L118` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
@@ -94,10 +96,7 @@ GitHub work item that owns that resolution.
 | `uninitialized-local` | 1 | `StreamDrops` | `mintDrop(...).tokenid` | first-party | Removed in `P0-AUTH-002` | Medium | Medium | Fixed | Rewritten typed authorization path initializes branch locals explicitly; captured Slither run no longer reports `StreamDrops.mintDrop` uninitialized locals | `make slither` targeted log check plus EIP-712 and characterization tests | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `StreamMinter` | `mint(...).mintIndex` | first-party | `smart-contracts/StreamMinter.sol#L76` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `MockStreamMinter` | `mint(...).mintedCount` | test-only | `test/mocks/MockStreamMinter.sol#L71` | Medium | Medium | Accepted | Accepted as a test-only helper baseline | None; test-only baseline row | Accepted test-only | Gate A | TBD |
-| `unused-return` | 1 | `StreamDropsCharacterizationTest` | `testAuctionDropMintsCurrentCustodyToPayoutAndStoresPosterPrice()` | test-only | `test/StreamDropsCharacterization.t.sol#L135-L156` | Medium | Medium | Accepted | Accepted as a test-only characterization call where return value is intentionally ignored | None; test-only baseline row | Accepted test-only | Gate A | TBD |
-| `unused-return` | 1 | `StreamDropsCharacterizationTest` | `testFixedPriceDropRecordsExplicitRecipientAndExecutionAddress()` | test-only | `test/StreamDropsCharacterization.t.sol#L58-L86` | Medium | Medium | Accepted | Accepted as a test-only characterization call where return value is intentionally ignored | None; test-only baseline row | Accepted test-only | Gate A | TBD |
-| `unused-return` | 1 | `StreamDropsIntegrationCharacterizationTest` | `testAuctionDropCurrentlyMintsCustodyToPayoutAndRecordsAuctionState()` | test-only | `test/StreamDropsIntegrationCharacterization.t.sol#L109-L130` | Medium | Medium | Accepted | Accepted as a test-only characterization call where return value is intentionally ignored | None; test-only baseline row | Accepted test-only | Gate A | TBD |
-| `unused-return` | 1 | `StreamDropsIntegrationCharacterizationTest` | `testFixedPriceDropPaysSynchronouslyAndMintsToExplicitRecipient()` | test-only | `test/StreamDropsIntegrationCharacterization.t.sol#L23-L42` | Medium | Medium | Accepted | Accepted as a test-only characterization call where return value is intentionally ignored | None; test-only baseline row | Accepted test-only | Gate A | TBD |
+| `unused-return` | 1 | `StreamDropsERC1271Test` | `testValidContractSignatureMintsAndConsumesDropId()` | test-only | `test/StreamDropsERC1271.t.sol#L35-L61` | Medium | Medium | Accepted | Accepted as a test-only assertion helper pattern where tuple fields are intentionally ignored except the signer check | `test/StreamDropsERC1271.t.sol` | Accepted test-only | Gate A | TBD |
 
 ## Triage Rules
 

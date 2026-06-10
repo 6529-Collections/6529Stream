@@ -11,9 +11,13 @@ successful NFT transfer. P0-PAY-003 adds fixed-price `StreamDrops` credits for
 poster proceeds, protocol proceeds, and curator reserve amounts without
 push-paying during mint execution. P0-PAY-005 adds curator reward credits in
 `StreamCuratorsPool` by validating claims and recording withdrawable curator
-credits instead of push-paying reward recipients. Remaining ADR work
-includes protocol-wide ledger views and invariants, randomizer reserve
-accounting, and cross-contract emergency surplus boundaries.
+credits instead of push-paying reward recipients. P0-PAY-007/P0-PAY-008 bounds
+the remaining emergency-withdrawal surfaces:
+`StreamMinter` exposes no owed balance and surplus-only emergency withdrawal,
+and `NextGenRandomizerRNG` treats its adapter balance as randomness reserve with
+zero emergency-withdrawable balance. Remaining ADR work includes protocol-wide
+ledger views, richer reserve movement, full randomizer reserve lifecycle
+accounting, and cross-contract invariants.
 
 ## Metadata
 
@@ -69,11 +73,13 @@ Current source references:
   credit instead.
 - `smart-contracts/AuctionContract.sol#L231-L254`: auction emergency withdrawal
   is bounded by auction-local bidder credits and active bid escrow.
-- `smart-contracts/StreamMinter.sol#L124-L130`,
-  `smart-contracts/RandomizerRNG.sol#L78-L84`: emergency withdrawals send the
-  full contract balance to the admin without an owed-balance or
-  reserved-balance boundary. `StreamCuratorsPool.emergencyWithdraw` is now
-  bounded by curator credits owed in that contract.
+- `StreamMinter.emergencyWithdraw` is now bounded by `emergencyWithdrawable()`;
+  `totalOwed()` is zero because the minter has no payable business path.
+- `NextGenRandomizerRNG.emergencyWithdraw` now transfers no ETH and exposes the
+  full adapter balance as `totalRandomnessReserved()`/`totalOwed()` until fuller
+  provider reserve lifecycle accounting lands.
+- `StreamCuratorsPool.emergencyWithdraw` is now bounded by curator credits owed
+  in that contract.
 - `ops/SLITHER_BASELINE.md`: the auction bid-path `reentrancy-eth` row and
   auction emergency `arbitrary-send-eth` row are fixed by P0-AUCT-002; remaining
   high-impact emergency-withdrawal rows track the cross-contract payment
@@ -265,8 +271,8 @@ P0-PAY-005 implementation status:
   local curator-credit owed boundary. The curator pool emergency withdrawal now
   withdraws only surplus over `totalOwed`.
 - This is still a local ledger implementation for the curator pool. Shared
-  cross-contract ledger views, randomizer reserves, and full invariant coverage
-  remain open under the parent payment issues.
+  cross-contract ledger views, fuller randomizer reserve lifecycle accounting,
+  and full invariant coverage remain open under the parent payment issues.
 
 ### Direct And Forced ETH
 
@@ -288,12 +294,20 @@ Required behavior:
 `RandomizerRNG` and any future randomness adapter must distinguish provider
 funding from surplus.
 
+Current implementation note: `NextGenRandomizerRNG` conservatively classifies
+all adapter ETH, including direct or forced ETH, as `RandomnessReserve`.
+Accordingly, `totalRandomnessReserved()` and `totalOwed()` equal the adapter
+balance, and `emergencyWithdrawable()` is zero. A later provider reserve
+lifecycle implementation may replace this conservative boundary with
+request-level reserve accounting.
+
 Required behavior:
 
 - ETH reserved for randomness requests is included in `totalReserved`.
 - Emergency withdrawal cannot withdraw randomness fee reserves.
-- Direct ETH is not automatically randomness reserve unless a funded request or
-  explicit reserve action records it as such.
+- Direct ETH is not automatically randomness reserve unless a funded request,
+  explicit reserve action, or documented conservative adapter boundary records
+  it as such.
 - Spending reserve on a randomness provider must reduce
   `totalRandomnessReserved` or the equivalent reserved-balance view.
 - If an adapter holds no provider reserve, it must document that its full

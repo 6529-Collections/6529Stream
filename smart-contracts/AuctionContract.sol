@@ -493,14 +493,12 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     // function to withdraw any balance from the smart contract
     function emergencyWithdraw() public FunctionAdminRequired(this.emergencyWithdraw.selector) {
         uint256 balance = emergencyWithdrawable();
-        if (balance == 0) {
-            emit Withdraw(msg.sender, true, 0);
-            return;
+        if (balance > 0) {
+            address admin = adminsContract.owner();
+            (bool success,) = payable(admin).call{ value: balance }("");
+            require(success, "ETH failed");
         }
-        address admin = adminsContract.owner();
-        (bool success,) = payable(admin).call{ value: balance }("");
-        require(success, "ETH failed");
-        emit Withdraw(msg.sender, success, balance);
+        emit Withdraw(msg.sender, true, balance);
     }
 
     function _isFunctionOrGlobalAdmin(address _admin, bytes4 _selector)
