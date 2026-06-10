@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/36` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 04:39 UTC` |
+| Last updated | `2026-06-10 04:42 UTC` |
 
 ## Packaging Notes
 
@@ -729,12 +729,12 @@ Outcome:
 - Claude review was unavailable because the organization's Claude Code overage
   spend limit was reached; the explicit request is recorded above.
 
-### PR #TBD: Randomness ADR (Queue Item 11)
+### PR #44: Randomness ADR (Queue Item 11)
 
-Status: In progress.
+Status: Open; waiting on CI and CodeRabbit.
 Branch: `codex/randomness-adr`.
-Pull request: TBD.
-Claude review request: TBD after PR creation.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/44`.
+Claude review request: issue comment `4666596095`.
 
 Goal:
 
@@ -795,7 +795,13 @@ Validation:
 
 Review feedback:
 
-- Pending.
+- GitHub CI run `27253681954` is in progress on head
+  `8b84c7467d64ddeb0edba962117e4641dbe3a18f`.
+- CodeRabbit is processing run `74327056-108a-4c51-add1-cfef356777bb`.
+- Claude review was explicitly requested in issue comment `4666596095`, but
+  Claude returned `Code review skipped` because the organization's Claude Code
+  overage spend limit was reached.
+- No inline review threads are open as of `2026-06-10 04:42 UTC`.
 
 ## Decision Log
 
@@ -881,6 +887,7 @@ Review feedback:
 | 2026-06-10 04:30 | Create randomness implementation issues | Issues #37 through #43 anchor callback hardening, lifecycle storage, validation, states, migration, retry, and seed storage workstreams |
 | 2026-06-10 04:32 | Draft randomness ADR | ADR 0005 accepts provider-backed async randomness, request lifecycle state, provider epoch validation, weak-helper production disablement, deterministic retry limits, and reserve accounting alignment |
 | 2026-06-10 04:39 | Validate randomness ADR locally | Heading, traceability, ASCII, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 04:42 | Open PR #44 | Randomness ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666596095` |
 
 ## Resume Instructions
 
