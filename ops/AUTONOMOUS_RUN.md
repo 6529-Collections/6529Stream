@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/71` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 18:43 UTC` |
+| Last updated | `2026-06-10 18:45 UTC` |
 
 ## Packaging Notes
 
@@ -85,7 +85,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
 | 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Merged in PR #70 |
 | 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Merged in PR #71 |
-| 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Local validation complete; ready to open PR |
+| 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Open in PR #72; CodeRabbit requested |
 
 ## Current PR Worklog
 
@@ -2634,10 +2634,12 @@ Review requests:
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
-### PR candidate: Remove dead mint-accounting state (Queue Item 31)
+### PR #72: Remove dead mint-accounting state (Queue Item 31)
 
-Status: Local validation complete; ready to open PR.
+Status: Open; CodeRabbit requested, CI pending.
 Branch: `codex/remove-dead-mint-accounting`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/72`.
+Latest head before PR-state update: `93984032b8c0fb19d6922e42809fd0892da3c72f`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/13`
@@ -2699,7 +2701,7 @@ Validation so far:
 
 Review requests:
 
-- CodeRabbit will be requested after the PR is opened.
+- CodeRabbit requested in issue comment `4673355477`.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
@@ -2922,6 +2924,7 @@ Review requests:
 | 2026-06-10 18:38 | Implement Queue Item 31 local draft | Removed the dead public/allowlist mint-count mappings and views, preserved the retained airdrop counter, and added focused retained-counter regressions |
 | 2026-06-10 18:39 | Validate Queue Item 31 Slither delta | Slither now reports `uninitialized_state=0`, total findings `680`, and High findings `6`; the remaining High rows are weak helper randomness, vendored math, and accepted test-only forced-ETH helpers |
 | 2026-06-10 18:43 | Finish local Queue Item 31 validation | Focused accounting tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass with 176 total tests |
+| 2026-06-10 18:45 | Open PR #72 and request CodeRabbit | PR #72 packages `P0-CORE-001`; CodeRabbit review requested in issue comment `4673355477`, and Claude is skipped per current user instruction |
 
 ## Resume Instructions
 
