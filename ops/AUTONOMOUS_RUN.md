@@ -372,8 +372,8 @@ Outcome:
 
 ### PR #20: Drop authorization ADR (Queue Item 7)
 
-Status: Open; CodeRabbit nonce/dropId clarification addressed locally, waiting
-for rerun after push.
+Status: Open; Claude token-data, recipient, and salt/nonce clarification
+addressed and validated, waiting for CI/bot rerun.
 Branch: `codex/drop-authorization-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/20`.
 Claude review request: issue comment `4665813753`.
@@ -417,8 +417,12 @@ Review feedback:
 
 - CodeRabbit review `4463940875` / thread `PRRT_kwDOM7REis6IVwJC`
   requested clarification of `nonce` versus `dropId`; the ADR now defines
-  `nonce` as the signer-allocated sequence input within `signerEpoch` and
-  `dropId` as the derived replay/cancellation key.
+  `nonce` as the signer-allocated opaque input within `signerEpoch`, `salt` as
+  drop-ID entropy, and `dropId` as the derived replay/cancellation key.
+- Claude threads `PRRT_kwDOM7REis6IVySB`, `PRRT_kwDOM7REis6IVySE`, and
+  `PRRT_kwDOM7REis6IVySG` requested explicit `salt`/`nonce` semantics, raw
+  `tokenData` hash enforcement, and sale-mode-specific `recipient` semantics;
+  the ADR now defines all three and adds corresponding required tests.
 
 ## Decision Log
 
@@ -470,7 +474,8 @@ Review feedback:
 | 2026-06-10 02:01 | Start drop authorization ADR PR | Gate B1 requires accepted auth design before `tx.origin`, EIP-712, or ERC-1271 implementation |
 | 2026-06-10 02:03 | Create auth follow-up issues | Add canonical issues for `P0-AUTH-ADR`, `P0-AUTH-001`, and `P0-AUTH-003`; `P0-AUTH-002` already exists as issue #10 |
 | 2026-06-10 02:09 | Open PR #20 | Drop authorization ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4665813753` |
-| 2026-06-10 02:18 | Address CodeRabbit PR #20 review | Clarify that `nonce` is the signer-epoch sequence input and `dropId` is the derived replay/cancellation key |
+| 2026-06-10 02:18 | Address CodeRabbit PR #20 review | Clarify that `nonce` is the signer-epoch opaque input and `dropId` is the derived replay/cancellation key |
+| 2026-06-10 02:24 | Address Claude PR #20 review | Define `salt` and `nonce`, require raw `tokenData` hash enforcement, and reserve auction `recipient` as zero until ADR 0002 |
 
 ## Resume Instructions
 

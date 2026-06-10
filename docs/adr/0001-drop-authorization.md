@@ -87,27 +87,39 @@ The public-beta target design is:
    - `signerEpoch`
 5. `tokenDataHash` is `keccak256(bytes(tokenData))`. Raw token data may be
    passed to the minting function for storage/rendering, but the signature binds
-   to the hash.
-6. `recipient` is the NFT receiver and the stored execution address.
+   to the hash. The contract must verify
+   `keccak256(bytes(tokenData)) == auth.tokenDataHash` before storing token
+   data, rendering metadata, or emitting token-data-bearing events.
+6. For fixed-price execution, `recipient` is the NFT receiver and the stored
+   execution address. For auction execution, the eventual NFT receiver is
+   determined by auction settlement; until ADR 0002 defines custody and
+   settlement semantics, signed auction authorizations must set
+   `recipient == address(0)` and the contract must reject non-zero auction
+   recipients.
 7. For the initial P0 implementation, `payer` must equal `msg.sender` for
    payable fixed-price execution. Open relayer execution is out of scope until a
    later ADR explicitly defines reimbursement and payment semantics.
-8. `nonce` is the signer-allocated sequence input within a `signerEpoch`.
-   `dropId` is the derived replay identifier, not an independent nonce. After
-   validating the signer, the contract must require:
-   `dropId == keccak256(abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce))`.
+8. `salt` is signer/integrator-chosen entropy used only in the signed payload
+   and `dropId` derivation. It is not an EIP-712 domain `salt`, and the contract
+   does not store or validate it separately.
+9. `nonce` is a signer-allocated opaque unique value within a `signerEpoch`, not
+   an on-chain monotonic counter. There is no `signerNonces` storage in the P0
+   design. `dropId` is the derived replay identifier, not an independent nonce.
+   After validating the signer, the contract must require:
+   `dropId == keccak256(abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce, salt))`.
    The signer pipeline must not issue two live payloads with the same
-   `(signer, signerEpoch, nonce)` tuple.
-9. `dropId` must be globally unique and consumed in storage before any external
+   `(signer, signerEpoch, nonce, salt)` tuple.
+10. `dropId` must be globally unique and consumed in storage before any external
    calls that can transfer ETH or invoke receiver hooks. P0 replay and
-   cancellation storage is keyed by `dropId`; no separate per-epoch nonce mapping
-   is required unless a later implementation ADR expands the accounting model.
-10. `deadline` must be enforced against `block.timestamp`.
-11. `signerEpoch` must match current contract state so signer compromise or
+   cancellation storage is keyed by `dropId`; no separate per-epoch nonce or
+   salt mapping is required unless a later implementation ADR expands the
+   accounting model.
+11. `deadline` must be enforced against `block.timestamp`.
+12. `signerEpoch` must match current contract state so signer compromise or
     rotation can invalidate outstanding payloads.
-12. Admins must be able to cancel a specific `dropId` before execution.
-13. EOA signatures and ERC-1271 contract signatures are supported.
-14. EOA signatures must reject:
+13. Admins must be able to cancel a specific `dropId` before execution.
+14. EOA signatures and ERC-1271 contract signatures are supported.
+15. EOA signatures must reject:
     - wrong signer
     - wrong domain
     - wrong chain ID
@@ -118,9 +130,9 @@ The public-beta target design is:
     - stale signer epoch
     - malleable signature
     - zero-address recovered signer
-15. ERC-1271 signatures must require the standard magic value from the contract
+16. ERC-1271 signatures must require the standard magic value from the contract
     signer.
-16. EIP-2098 compact signatures are supported and normalized under the same
+17. EIP-2098 compact signatures are supported and normalized under the same
     malleability policy as 65-byte ECDSA signatures.
 
 ## Intended API Shape
@@ -155,14 +167,14 @@ The helper must also expose the `dropId` derivation:
 
 ```solidity
 dropId = keccak256(
-    abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce)
+    abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce, salt)
 );
 ```
 
 `DROP_ID_TYPEHASH` is distinct from the EIP-712 authorization type hash. The
 domain separator already binds `chainId` and `verifyingContract`; the derived
 `dropId` is only the replay/cancellation identifier for the validated signer,
-epoch, and nonce tuple.
+epoch, nonce, and salt tuple.
 
 The legacy `mintDrop(address,string,uint256,uint256,uint256,uint256)` path may
 remain temporarily during migration work, but it must not be available as a
@@ -183,7 +195,8 @@ Required state:
 
 Required controls:
 
-- recompute `dropId` from the validated signer, `signerEpoch`, and `nonce`
+- recompute `dropId` from the validated signer, `signerEpoch`, `nonce`, and
+  `salt`
 - consume `dropId` before external calls
 - reject consumed or cancelled `dropId`
 - reject stale signer epoch
@@ -288,7 +301,7 @@ P0 implementation must add tests for:
 
 - valid EOA signature
 - valid ERC-1271 contract signature
-- wrong `dropId` for the signer, `signerEpoch`, and `nonce`
+- wrong `dropId` for the signer, `signerEpoch`, `nonce`, and `salt`
 - wrong signer
 - wrong domain name or version
 - wrong chain ID
@@ -301,6 +314,8 @@ P0 implementation must add tests for:
 - EIP-2098 compact signature
 - zero-address recovered signer
 - zero recipient
+- raw `tokenData` substitution under a valid signed `tokenDataHash`
+- non-zero auction `recipient` before ADR 0002 defines different semantics
 - field substitution for poster, recipient, payer, collection, sale mode,
   token data hash, price, auction reserve, auction end, salt, nonce, deadline,
   and signer epoch
@@ -340,8 +355,9 @@ must not be treated as target-state tests after the implementation lands.
 - The exact signer registry and pause controls depend on the admin/governance
   ADR. This ADR only requires signer epoch and cancellation semantics to exist.
 - The exact auction custody consequences of signed auction drops depend on the
-  auction custody ADR. This ADR binds auction intent fields but does not decide
-  custody.
+  auction custody ADR. This ADR reserves auction `recipient` as zero and binds
+  auction intent fields, but it does not decide custody or settlement transfer
+  mechanics.
 - EIP-712 payloads are more complex for integrators than the current packed
   string. This is accepted because typed signing is required for safety and
   auditability.
