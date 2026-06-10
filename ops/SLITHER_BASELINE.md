@@ -1,14 +1,15 @@
 # Slither Baseline
 
-This is the tracked high/medium Slither baseline for 6529Stream. It is a triage
-input, not an accepted security baseline.
+This is the tracked high/medium Slither baseline for 6529Stream. High and
+medium rows are fixed, accepted with rationale, or documented as false
+positive; this is still not a full security baseline for public launch.
 
 ## Capture Metadata
 
 | Field | Value |
 | --- | --- |
-| Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 19:30 UTC` |
+| Status | High/medium rows triaged; not accepted as a CI gate |
+| Last generated | `2026-06-10 20:01 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -17,7 +18,7 @@ input, not an accepted security baseline.
 
 Slither returned detector results successfully, but the process exited non-zero
 because findings exist. That is expected until the roadmap accepts a gated
-baseline.
+baseline and lower-impact findings are handled.
 
 ## Impact Counts
 
@@ -26,9 +27,9 @@ baseline.
 | High | 4 |
 | Medium | 19 |
 | Low | 63 |
-| Informational | 574 |
-| Optimization | 6 |
-| Total | 666 |
+| Informational | 575 |
+| Optimization | 7 |
+| Total | 668 |
 
 ## Detector Counts
 
@@ -45,8 +46,8 @@ baseline.
 | `uninitialized-local` | Medium | 1 |
 | `unused-return` | Medium | 1 |
 | Low-impact findings | Low | 63 |
-| Informational findings | Informational | 574 |
-| Optimization findings | Optimization | 6 |
+| Informational findings | Informational | 575 |
+| Optimization findings | Optimization | 7 |
 
 Dependency-script encoding delta from the previous tracked capture:
 
@@ -81,10 +82,17 @@ Dependency-script encoding delta from the previous tracked capture:
     cleanup.
   - `uninitialized-local` now has one current finding, and it is the accepted
     test-only `MockStreamMinter.mint(...).mintedCount` row.
+- Vendored-library provenance delta from the previous tracked capture:
+  - High and Medium counts remain unchanged at 4 and 19.
+  - Informational findings increased from 574 to 575 and Optimization findings
+    increased from 6 to 7 after adding the provenance test harness and
+    correcting the `Strings.sol` upstream header.
+  - The current vendored `incorrect-exp` and `divide-before-multiply` rows are
+    documented false positives, not open remediation items.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
-- Slither still exits non-zero because the remaining tracked baseline findings
-  require fixes, accepted-risk rationale, or false-positive proof before audit
-  readiness.
+- Slither still exits non-zero because accepted test-only and vendored
+  false-positive rows remain visible, plus lower-impact findings are not yet a
+  CI gate.
 
 ## Status Semantics
 
@@ -111,15 +119,15 @@ GitHub work item that owns that resolution.
 | `encode-packed-collision` | 1 | `StreamCore` | `retrieveDependencyScript(uint256)` | first-party | Fixed in `P0-META-001` | High | High | Fixed | Replaced packed dynamic dependency-script composition with initialized `string.concat` rendering and typed dependency chunk/content hash views that use `abi.encode`, dependency key, chunk count, chunk index, chunk byte length, and per-chunk content hash | Ambiguous chunk-boundary and typed hash regressions in `test/StreamMetadataEncoding.t.sol` | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `retrieveMessageAndDropID(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Removed legacy packed helper; `hashDropAuthorization` now uses EIP-712 domain-separated typed data | Explicit digest, replay, wrong-domain, wrong-chain, wrong-contract, and field-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `mintDrop(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Replaced legacy packed-hash `mintDrop` ABI with `mintDrop(DropAuthorization,string,bytes)` and storage-backed consumed/cancelled drop IDs | EOA, EIP-2098, replay, expiry, cancellation, stale-epoch, wrong-domain, wrong-chain, wrong-contract, wrong-signer, malleability, zero signer, bad quantity, and token-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
-| `incorrect-exp` | 1 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | High | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or math regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
+| `incorrect-exp` | 1 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | High | Medium | False Positive | `Math.sol` is tracked to OpenZeppelin Contracts v4.8.0 in `docs/vendored-libraries.md`; `(3 * denominator) ^ 2` is the intended bitwise-XOR seed for modular inverse calculation, not exponentiation | `test/StreamVendoredLibraries.t.sol::testMathMulDivHandlesFullPrecisionBoundaries`; `testMathMulDivRevertsForOverflowAndZeroDenominator` | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `suicidal` | 3 | Forced-ETH test helpers | `force(address)` | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamFixedPricePayments.t.sol` | High | Medium | Accepted | Accepted as intentional Solidity 0.8.19 `selfdestruct` helpers used only to test forced-ETH surplus accounting | Forced-ETH tests in the owning files | Accepted test-only | Gate A | TBD |
 | `reentrancy-eth` | 1 | `StreamAuctions` | `participateToAuction(uint256)` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Replaced synchronous outbid refund `call` with bidder credit accounting; highest-bid state and auction escrow accounting update before any external withdrawal path | `test/StreamAuctionPayments.t.sol` | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedPerAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written public-sale mint-count mapping and retrieval API instead of exposing an always-zero counter with no accepted quota semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedAllowlistAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written allowlist mint-count mapping and retrieval API because the current drop path has no allowlist phase semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | `weak-prng` | 1 | `randomPool` | `randomNumber()` | first-party | Removed in `P0-RAND-008` | High | Medium | Fixed | Removed the concrete production-source `XRandoms` helper contract instead of shipping block-derived helper randomness alongside production randomizer adapters | `test/StreamRandomizerLifecycle.t.sol::testNxtRandomizerCannotBeConfiguredForProductionCollections` plus Slither `weak-prng=0` confirmation | [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C | TBD |
 | `weak-prng` | 1 | `randomPool` | `randomWord()` | first-party | Removed in `P0-RAND-008` | High | Medium | Fixed | Removed the concrete production-source `XRandoms` helper contract instead of shipping block-derived helper randomness alongside production randomizer adapters | `test/StreamRandomizerLifecycle.t.sol::testNxtRandomizerCannotBeConfiguredForProductionCollections` plus Slither `weak-prng=0` confirmation | [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C | TBD |
-| `divide-before-multiply` | 1 | `Base64` | `encode(bytes)` | vendored | `smart-contracts/Base64.sol#L20-L91` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
-| `divide-before-multiply` | 8 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
+| `divide-before-multiply` | 1 | `Base64` | `encode(bytes)` | vendored | `smart-contracts/Base64.sol#L20-L91` | Medium | Medium | False Positive | `Base64.sol` is tracked to OpenZeppelin Contracts v4.7.0 in `docs/vendored-libraries.md`; the flagged expression intentionally computes Base64 output length as `4 * ceil(data.length / 3)` | `test/StreamVendoredLibraries.t.sol::testBase64EncodingMatchesOpenZeppelinGoldenVectors`; `testBase64EncodingPreservesBinaryInputsAndPadding` | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
+| `divide-before-multiply` | 8 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | Medium | Medium | False Positive | `Math.sol` is tracked to OpenZeppelin Contracts v4.8.0 in `docs/vendored-libraries.md`; the flagged operations are part of the full-precision 512-bit `mulDiv` algorithm and are not lossy protocol accounting arithmetic | `test/StreamVendoredLibraries.t.sol::testMathMulDivHandlesFullPrecisionBoundaries`; `testMathMulDivRoundingUpOnlyIncrementsOnRemainder` | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `incorrect-equality` | 1 | `DropAuthTestHelper` | `signMalleableAuthorization(...)` | test-only | `test/helpers/DropAuthTestHelper.sol#L113-L123` | Medium | Medium | Accepted | Accepted as a test-only helper branch used to manufacture malleable signatures for negative authorization tests | `test/StreamDropsEIP712.t.sol` malleability tests | Accepted test-only | Gate A | TBD |
 | `locked-ether` | 7 | Rejection/reentrancy/mock receivers | payable test helpers | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/mocks/MockRandomizer.sol` | Medium | High | Accepted | Accepted as test-only receivers and mocks used to characterize failed transfers, reentrancy attempts, and randomizer provider payments | Payment and emergency-withdrawal tests in the owning files | Accepted test-only | Gate A | TBD |
 | `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...)._occurrences` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the occurrence counter to zero before scanning the bytes32 source | `test/StreamInitialization.t.sol::testBytes32CharacterCountingUsesExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
@@ -150,7 +158,8 @@ backed by a regression test or accepted-risk rationale.
 - Fix first-party high findings before any public beta claim.
 - Convert each fixed finding into a regression test in the test matrix.
 - Replace retained upstream libraries with pinned upstream packages or document
-  provenance before accepting vendored library rows.
+  provenance before accepting vendored library rows. The current retained
+  OpenZeppelin utility files are documented in `docs/vendored-libraries.md`.
 - Keep every `Needs Issue` row linked to a GitHub issue before accepting or
   suppressing it.
 - Do not suppress a detector until the finding or scoped suppression is
