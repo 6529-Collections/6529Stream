@@ -12,9 +12,7 @@ library Bytes32Strings {
      * @notice Intended to convert a `bytes32`-encoded string literal to `string`.
      * Trims zero padding to arrive at original string literal.
      */
-    function toString(
-        bytes32 source
-    ) internal pure returns (string memory result) {
+    function toString(bytes32 source) internal pure returns (string memory result) {
         uint8 length;
         while (source[length] != 0 && length < 32) {
             length++;
@@ -38,14 +36,13 @@ library Bytes32Strings {
      * times. Does not support searching for multi-byte characters, only
      * characters with UTF-8 character codes < 0x80.
      */
-    function containsExactCharacterQty(
-        bytes32 source,
-        uint8 utf8CharCode,
-        uint8 targetQty
-    ) internal pure returns (bool) {
-        uint8 _occurrences;
-        uint8 i;
-        for (i; i < 32; ) {
+    function containsExactCharacterQty(bytes32 source, uint8 utf8CharCode, uint8 targetQty)
+        internal
+        pure
+        returns (bool)
+    {
+        uint8 _occurrences = 0;
+        for (uint8 i = 0; i < 32;) {
             uint8 _charCode = uint8(source[i]);
             // if not a null byte, or a multi-byte UTF-8 character, check match
             if (_charCode != 0 && _charCode < 0x80) {

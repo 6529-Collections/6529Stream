@@ -664,7 +664,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
 
     function retrieveGenerativeScript(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
-        string memory scripttext;
+        string memory scripttext = "";
         for (
             uint256 i = 0;
             i < collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionScript.length;

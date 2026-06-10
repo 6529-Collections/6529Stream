@@ -134,3 +134,9 @@ Mint-accounting state now has P0-CORE-001 target-state coverage in
 removed from `StreamCore`, while the retained airdrop counter starts at zero,
 increments on authorized minter calls, and remains unchanged after an
 unauthorized mint attempt.
+
+Explicit local initialization now has P0-INIT-001 target-state coverage in
+`StreamInitialization.t.sol`: Bytes32 character counts, missing and matching
+delegation status lookups, subdelegation register/revoke gates, empty-script
+generative rendering, and multi-recipient minter return indexes cover the former
+first-party production `uninitialized-local` rows.

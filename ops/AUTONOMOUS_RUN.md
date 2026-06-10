@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/remove-weak-helper-randomness` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/72` |
+| Active PR branch | `codex/resolve-uninitialized-locals` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/74` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 19:09 UTC` |
+| Last updated | `2026-06-10 19:30 UTC` |
 
 ## Packaging Notes
 
@@ -86,7 +86,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Merged in PR #70 |
 | 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Merged in PR #71 |
 | 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Merged in PR #72 |
-| 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Ready to open PR |
+| 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Merged in PR #74 |
+| 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Open in PR #75 |
 
 ## Current PR Worklog
 
@@ -2718,9 +2719,11 @@ Outcome:
 
 ### PR #73: Remove weak helper randomness (Queue Item 32)
 
-Status: Ready to open PR.
+Status: Merged.
 Branch: `codex/remove-weak-helper-randomness`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/74`.
+Latest head before merge: `4ce60549922db5b223597be7c69ff0e94b3b3af5`.
+Merge commit: `8ced3efa316211fa634187c596d3db64e0b4c665`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/73`
@@ -2777,6 +2780,89 @@ Validation so far:
   and `testNxtRandomizerCannotBeConfiguredForProductionCollections`.
 - Slither confirmation returned
   `{"arbitrary_send_eth":0,"high":4,"informational":575,"low":63,"medium":28,"optimization":6,"reentrancy_eth":0,"slither_exit":-1,"total":676,"uninitialized_state":0,"weak_prng":0}`.
+
+Review requests:
+
+- CodeRabbit requested in issue comment `4673578679`.
+- CodeRabbit final review/status was clean on head
+  `4ce60549922db5b223597be7c69ff0e94b3b3af5`; review comment
+  `4673579305` reported no actionable comments and all pre-merge checks passed.
+- Claude is intentionally skipped per current user instruction; use CodeRabbit
+  unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #74 on `2026-06-10`.
+- GitHub CI run `27299886749` passed on the final head.
+- Issue #73 closed completed.
+
+### PR #75: Resolve first-party uninitialized locals (Queue Item 33)
+
+Status: Open.
+Branch: `codex/resolve-uninitialized-locals`.
+Pull request: `#75`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/15`
+
+Goal:
+
+- Complete `P0-INIT-001` by resolving the remaining first-party production
+  Slither `uninitialized-local` rows.
+- Preserve behavior by making Solidity default locals explicit instead of
+  changing control flow.
+- Add targeted tests for externally observable default-local behavior in
+  string counting, delegation status/gating, generated script rendering, and
+  minter return indexes.
+
+Candidate files:
+
+- `smart-contracts/Bytes32Strings.sol`
+- `smart-contracts/NFTdelegation.sol`
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/StreamMinter.sol`
+- `test/StreamInitialization.t.sol`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Initialized `Bytes32Strings.containsExactCharacterQty`'s occurrence counter
+  and loop index explicitly.
+- Initialized `NFTdelegation` subdelegation-rights and status accumulators
+  explicitly to false.
+- Initialized `StreamCore.retrieveGenerativeScript`'s script accumulator to an
+  empty string.
+- Initialized `StreamMinter.mint`'s returned `mintIndex` to zero.
+- Added `test/StreamInitialization.t.sol` covering the production rows and
+  keeping the accepted test-only `MockStreamMinter` baseline separate.
+
+Validation so far:
+
+- `forge fmt --check smart-contracts\Bytes32Strings.sol
+  smart-contracts\NFTdelegation.sol smart-contracts\StreamCore.sol
+  smart-contracts\StreamMinter.sol test\StreamInitialization.t.sol` passed.
+- Focused `forge test --match-path test\StreamInitialization.t.sol -vvv`
+  passed: 6 tests, 0 failed.
+- `make check` passed on the final local head: 182 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed on the
+  final local head: 182 tests, 0 failed.
+- `git diff --check` passed.
+- Markdown heading scan passed for the roadmap, Slither baseline, autonomous
+  run state, status docs, known blockers, and test README.
+- Traceability grep passed for `P0-INIT-001`, issue #15,
+  `uninitialized-local`, `uninitialized_local`, `StreamInitialization`,
+  `testBytes32CharacterCountingUsesExplicitZeroStart`,
+  `testSubdelegationRightsGateRegisterAndRevokePaths`, branch
+  `codex/resolve-uninitialized-locals`, and Queue Item 33.
+- Slither confirmation returned
+  `{"slither_exit":-1,"total":666,"high":4,"medium":19,"low":63,"informational":574,"optimization":6,"uninitialized_local":1,"weak_prng":0,"uninitialized_state":0,"arbitrary_send_eth":0,"reentrancy_eth":0}`.
+- The only current `uninitialized-local` row is the accepted test-only
+  `test/mocks/MockStreamMinter.sol#L71` `mintedCount` helper.
 
 Review requests:
 
@@ -3009,6 +3095,10 @@ Review requests:
 | 2026-06-10 18:57 | Create issue #73 | Issue #14 was already closed for ADR acceptance, so `P0-RAND-008` now tracks the concrete `XRandoms` removal implementation |
 | 2026-06-10 19:03 | Implement Queue Item 32 local draft | Deleted `smart-contracts/XRandoms.sol`, kept `IXRandoms` and the inline `MockXRandoms` regression, and updated Slither/roadmap/status/ADR/test traceability for `weak-prng=0` |
 | 2026-06-10 19:09 | Finish local Queue Item 32 validation | Focused production-scope regression, full `make check`, Windows wrapper, targeted formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither final JSON has `weak_prng=0`, `total=676`, `high=4`, and `medium=28` |
+| 2026-06-10 19:18 | Merge PR #74 | Weak helper randomness removal merged as `8ced3efa316211fa634187c596d3db64e0b4c665`; CI passed on final head `4ce60549922db5b223597be7c69ff0e94b3b3af5`, CodeRabbit final clean comment `4673579305`, and issue #73 closed completed |
+| 2026-06-10 19:20 | Select Queue Item 33 | Next focused P0 Slither blocker is `P0-INIT-001`, because explicit local initialization can eliminate remaining first-party production `uninitialized-local` rows while preserving behavior |
+| 2026-06-10 19:25 | Implement Queue Item 33 local draft | Initialized remaining first-party production locals explicitly, added `StreamInitialization.t.sol`, and refreshed Slither/roadmap/status/test traceability; Slither now reports one accepted test-only `uninitialized-local` row, `total=666`, `high=4`, and `medium=19` |
+| 2026-06-10 19:30 | Finish local Queue Item 33 validation | Focused initialization tests, full `make check`, Windows wrapper, targeted formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither final JSON has `uninitialized_local=1` test-only, `total=666`, `high=4`, and `medium=19` |
 
 ## Resume Instructions
 

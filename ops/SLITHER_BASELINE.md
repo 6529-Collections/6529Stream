@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 19:03 UTC` |
+| Last generated | `2026-06-10 19:30 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -24,11 +24,11 @@ baseline.
 | Impact | Count |
 | --- | ---: |
 | High | 4 |
-| Medium | 28 |
+| Medium | 19 |
 | Low | 63 |
-| Informational | 575 |
+| Informational | 574 |
 | Optimization | 6 |
-| Total | 676 |
+| Total | 666 |
 
 ## Detector Counts
 
@@ -42,10 +42,10 @@ baseline.
 | `divide-before-multiply` | Medium | 9 |
 | `incorrect-equality` | Medium | 1 |
 | `locked-ether` | Medium | 7 |
-| `uninitialized-local` | Medium | 10 |
+| `uninitialized-local` | Medium | 1 |
 | `unused-return` | Medium | 1 |
 | Low-impact findings | Low | 63 |
-| Informational findings | Informational | 575 |
+| Informational findings | Informational | 574 |
 | Optimization findings | Optimization | 6 |
 
 Dependency-script encoding delta from the previous tracked capture:
@@ -56,9 +56,9 @@ Dependency-script encoding delta from the previous tracked capture:
   `StreamCore.retrieveDependencyScript(uint256).scripttext` is now initialized.
 - `encode-packed-collision` is now zero current findings; the remaining fixed
   rows are kept below as audit traceability.
-- `uninitialized-local` is now 10 current findings; the
-  `StreamDrops.mintDrop` and `StreamCore.retrieveDependencyScript` rows are
-  fixed, while the broader `P0-INIT-001` workstream remains open.
+- `uninitialized-local` is now one current accepted test-only finding; the
+  first-party production rows are fixed by `P0-INIT-001`, `P0-AUTH-002`, and
+  `P0-META-001`.
 - Mint-accounting state delta from the previous tracked capture:
   - High findings decreased from 8 to 6 because the two dead
     `uninitialized-state` mint-accounting mappings were removed.
@@ -73,6 +73,14 @@ Dependency-script encoding delta from the previous tracked capture:
     source no longer appears in lower-impact detectors.
   - `weak-prng` is now zero current findings; the fixed rows are kept below as
     audit traceability.
+- Explicit-local-initialization delta from the previous tracked capture:
+  - Medium findings decreased from 28 to 19 because the remaining first-party
+    production `uninitialized-local` rows now initialize their default locals
+    explicitly.
+  - Informational findings decreased from 575 to 574 after the same source
+    cleanup.
+  - `uninitialized-local` now has one current finding, and it is the accepted
+    test-only `MockStreamMinter.mint(...).mintedCount` row.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
 - Slither still exits non-zero because the remaining tracked baseline findings
   require fixes, accepted-risk rationale, or false-positive proof before audit
@@ -114,17 +122,17 @@ GitHub work item that owns that resolution.
 | `divide-before-multiply` | 8 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `incorrect-equality` | 1 | `DropAuthTestHelper` | `signMalleableAuthorization(...)` | test-only | `test/helpers/DropAuthTestHelper.sol#L113-L123` | Medium | Medium | Accepted | Accepted as a test-only helper branch used to manufacture malleable signatures for negative authorization tests | `test/StreamDropsEIP712.t.sol` malleability tests | Accepted test-only | Gate A | TBD |
 | `locked-ether` | 7 | Rejection/reentrancy/mock receivers | payable test helpers | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/mocks/MockRandomizer.sol` | Medium | High | Accepted | Accepted as test-only receivers and mocks used to characterize failed transfers, reentrancy attempts, and randomizer provider payments | Payment and emergency-withdrawal tests in the owning files | Accepted test-only | Gate A | TBD |
-| `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...)._occurrences` | first-party | `smart-contracts/Bytes32Strings.sol#L46` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...).i` | first-party | `smart-contracts/Bytes32Strings.sol#L47` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `registerDelegationAddressUsingSubDelegation(...).subdelegationRightsCol` | first-party | `smart-contracts/NFTdelegation.sol#L118` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `revokeDelegationAddressUsingSubdelegation(...).subdelegationRightsCol` | first-party | `smart-contracts/NFTdelegation.sol#L288` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveTokenStatus(...).status` | first-party | `smart-contracts/NFTdelegation.sol#L617` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveSubDelegationStatus(...).subdelegationRights` | first-party | `smart-contracts/NFTdelegation.sol#L650` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveStatusOfActiveDelegator(...).status` | first-party | `smart-contracts/NFTdelegation.sol#L677` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamCore` | `retrieveGenerativeScript(...).scripttext` | first-party | `smart-contracts/StreamCore.sol#L394` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...)._occurrences` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the occurrence counter to zero before scanning the bytes32 source | `test/StreamInitialization.t.sol::testBytes32CharacterCountingUsesExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...).i` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the loop index in the `for` statement instead of relying on Solidity's default local value | `test/StreamInitialization.t.sol::testBytes32CharacterCountingUsesExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `DelegationManagementContract` | `registerDelegationAddressUsingSubDelegation(...).subdelegationRightsCol` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the subdelegation-rights gate to false before collection/all-collection checks | `test/StreamInitialization.t.sol::testSubdelegationRightsGateRegisterAndRevokePaths` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `DelegationManagementContract` | `revokeDelegationAddressUsingSubdelegation(...).subdelegationRightsCol` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the revoke-path subdelegation-rights gate to false before collection/all-collection checks | `test/StreamInitialization.t.sol::testSubdelegationRightsGateRegisterAndRevokePaths` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveTokenStatus(...).status` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the token-status accumulator to false and covered missing, matching, and non-matching token records | `test/StreamInitialization.t.sol::testDelegationStatusLookupsDefaultFalseWhenNoRecordsExist`, `testDelegationStatusLookupsFindOnlyMatchingRecords` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveSubDelegationStatus(...).subdelegationRights` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the subdelegation-status accumulator to false and covered missing and granted subdelegation records | `test/StreamInitialization.t.sol::testDelegationStatusLookupsDefaultFalseWhenNoRecordsExist`, `testSubdelegationRightsGateRegisterAndRevokePaths` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveStatusOfActiveDelegator(...).status` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the active-delegator accumulator to false and covered missing, active, wrong-delegator, and expired lookups | `test/StreamInitialization.t.sol::testDelegationStatusLookupsDefaultFalseWhenNoRecordsExist`, `testDelegationStatusLookupsFindOnlyMatchingRecords` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `StreamCore` | `retrieveGenerativeScript(...).scripttext` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the generative-script accumulator to an empty string before concatenating collection script chunks | `test/StreamInitialization.t.sol::testGenerativeScriptAccumulatorStartsEmptyForEmptyCollectionScript` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `StreamCore` | `retrieveDependencyScript(...).scripttext` | first-party | Fixed in `P0-META-001` | Medium | Medium | Fixed | Initialized the dependency-script accumulator to an empty string before concatenation and covered the rendered output through the metadata encoding regression suite | `test/StreamMetadataEncoding.t.sol` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15), [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
 | `uninitialized-local` | 1 | `StreamDrops` | `mintDrop(...).tokenid` | first-party | Removed in `P0-AUTH-002` | Medium | Medium | Fixed | Rewritten typed authorization path initializes branch locals explicitly; captured Slither run no longer reports `StreamDrops.mintDrop` uninitialized locals | `make slither` targeted log check plus EIP-712 and characterization tests | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamMinter` | `mint(...).mintIndex` | first-party | `smart-contracts/StreamMinter.sol#L76` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `StreamMinter` | `mint(...).mintIndex` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the returned mint index to zero before mint loops and covered the multi-recipient last-index return value | `test/StreamInitialization.t.sol::testMinterReturnsLastMintedIndexFromExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `MockStreamMinter` | `mint(...).mintedCount` | test-only | `test/mocks/MockStreamMinter.sol#L71` | Medium | Medium | Accepted | Accepted as a test-only helper baseline | None; test-only baseline row | Accepted test-only | Gate A | TBD |
 | `unused-return` | 1 | `StreamDropsERC1271Test` | `testValidContractSignatureMintsAndConsumesDropId()` | test-only | `test/StreamDropsERC1271.t.sol#L35-L61` | Medium | Medium | Accepted | Accepted as a test-only assertion helper pattern where tuple fields are intentionally ignored except the signer check | `test/StreamDropsERC1271.t.sol` | Accepted test-only | Gate A | TBD |
 

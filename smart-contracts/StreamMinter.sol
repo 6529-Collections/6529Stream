@@ -109,7 +109,7 @@ contract StreamMinter {
             "Ended"
         );
         uint256 collectionTokenMintIndex;
-        uint256 mintIndex;
+        uint256 mintIndex = 0;
         for (uint256 y = 0; y < _recipients.length; y++) {
             require(_numberOfTokens[y] > 0, "Zero quantity");
             collectionTokenMintIndex = gencore.viewTokensIndexMin(_collectionID)
