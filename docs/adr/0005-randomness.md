@@ -91,8 +91,8 @@ Current implementation status:
 - VRF and arRNG adapters expose an admin-gated
   `retryRandomnessPostProcessing` path that retries only deterministic core
   writes for `FailedPostProcessing` requests, reuses the stored derived seed,
-  emits retry events, and caps attempts at
-  `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`.
+  emits retry-specific success/failure events, refreshes fulfillment timing on
+  success, and caps attempts at `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`.
 - `RandomizerRNG` guards the arRNG request-submission window where the provider
   request ID is returned from an external payable call, and tests prove a
   reentrant controller cannot fulfill during that window.

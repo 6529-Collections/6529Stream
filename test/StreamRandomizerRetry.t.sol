@@ -24,6 +24,9 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
     bytes32 private constant RANDOMNESS_RETRY_FAILED_TOPIC = keccak256(
         "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)"
     );
+    bytes32 private constant RANDOMNESS_POST_PROCESSING_FAILED_TOPIC = keccak256(
+        "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32)"
+    );
 
     function testVrfRetryCompletesFailedPostProcessingWithStoredSeed() public {
         (MockRandomizerCore core, RetryVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
@@ -32,6 +35,10 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         bytes32 expectedSeed = _failVrfPostProcessing(core, coordinator, vrf, words);
 
         core.setRejectTokenHash(false);
+        uint256 retryBlock = block.number + 10;
+        uint256 retryTimestamp = block.timestamp + 1 hours;
+        vm.roll(retryBlock);
+        vm.warp(retryTimestamp);
         vm.recordLogs();
         vrf.retryRandomnessPostProcessing(1);
         Vm.Log[] memory logs = vm.getRecordedLogs();
@@ -46,6 +53,8 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         request.derivedSeed.assertEq(expectedSeed, "seed changed");
         request.failureDataHash.assertEq(bytes32(0), "failure hash");
         request.postProcessingRetryCount.assertEq(1, "retry count");
+        request.fulfilledBlock.assertEq(retryBlock, "fulfilled block");
+        request.fulfilledTimestamp.assertEq(retryTimestamp, "fulfilled timestamp");
         vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
         vrf.totalPendingRandomnessRequests().assertEq(0, "pending total");
     }
@@ -57,6 +66,10 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         bytes32 expectedSeed = _failArrngPostProcessing(core, controller, rng, words);
 
         core.setRejectTokenHash(false);
+        uint256 retryBlock = block.number + 10;
+        uint256 retryTimestamp = block.timestamp + 1 hours;
+        vm.roll(retryBlock);
+        vm.warp(retryTimestamp);
         vm.recordLogs();
         rng.retryRandomnessPostProcessing(1);
         Vm.Log[] memory logs = vm.getRecordedLogs();
@@ -71,6 +84,8 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         request.derivedSeed.assertEq(expectedSeed, "seed changed");
         request.failureDataHash.assertEq(bytes32(0), "failure hash");
         request.postProcessingRetryCount.assertEq(1, "retry count");
+        request.fulfilledBlock.assertEq(retryBlock, "fulfilled block");
+        request.fulfilledTimestamp.assertEq(retryTimestamp, "fulfilled timestamp");
         rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
         rng.totalPendingRandomnessRequests().assertEq(0, "pending total");
     }
@@ -122,9 +137,9 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         bytes32 failureDataHash = _failureDataHash();
 
         vrf.MAX_RANDOMNESS_POST_PROCESSING_RETRIES().assertEq(3, "max retries");
-        _assertRetryAttemptFails(vrf, 1, expectedSeed, failureDataHash);
-        _assertRetryAttemptFails(vrf, 2, expectedSeed, failureDataHash);
-        _assertRetryAttemptFails(vrf, 3, expectedSeed, failureDataHash);
+        _assertVrfRetryAttemptFails(vrf, 1, expectedSeed, failureDataHash);
+        _assertVrfRetryAttemptFails(vrf, 2, expectedSeed, failureDataHash);
+        _assertVrfRetryAttemptFails(vrf, 3, expectedSeed, failureDataHash);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -135,6 +150,29 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
             )
         );
         vrf.retryRandomnessPostProcessing(1);
+    }
+
+    function testArrngRetryLimitBoundsRepeatedDeterministicFailures() public {
+        (MockRandomizerCore core, RetryArrngController controller, NextGenRandomizerRNG rng) =
+            _deployArrngRetry();
+        uint256[] memory words = _words(999);
+        bytes32 expectedSeed = _failArrngPostProcessing(core, controller, rng, words);
+        bytes32 failureDataHash = _failureDataHash();
+
+        rng.MAX_RANDOMNESS_POST_PROCESSING_RETRIES().assertEq(3, "max retries");
+        _assertArrngRetryAttemptFails(rng, 1, expectedSeed, failureDataHash);
+        _assertArrngRetryAttemptFails(rng, 2, expectedSeed, failureDataHash);
+        _assertArrngRetryAttemptFails(rng, 3, expectedSeed, failureDataHash);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessPostProcessingRetryLimitReached.selector,
+                uint256(1),
+                rng.MAX_RANDOMNESS_POST_PROCESSING_RETRIES(),
+                rng.MAX_RANDOMNESS_POST_PROCESSING_RETRIES()
+            )
+        );
+        rng.retryRandomnessPostProcessing(1);
     }
 
     function testRetryRejectsChangedTokenCollectionBinding() public {
@@ -227,7 +265,57 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "token hash");
     }
 
-    function _assertRetryAttemptFails(
+    function testArrngRetryRejectsChangedBindings() public {
+        (MockRandomizerCore core, RetryArrngController controller, NextGenRandomizerRNG rng) =
+            _deployArrngRetry();
+        _failArrngPostProcessing(core, controller, rng, _words(999));
+
+        core.setRejectTokenHash(false);
+        core.setTokenCollection(TOKEN_ID, COLLECTION_ID + 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.WrongRandomnessTokenCollection.selector,
+                uint256(1),
+                TOKEN_ID,
+                COLLECTION_ID,
+                COLLECTION_ID + 1
+            )
+        );
+        rng.retryRandomnessPostProcessing(1);
+        _assertRetryPreconditionFailurePreservesState(rng, core);
+
+        core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
+        core.setRandomizer(COLLECTION_ID, address(rng), 2);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.StaleRandomnessRequest.selector,
+                uint256(1),
+                uint256(1),
+                uint256(2),
+                address(rng),
+                address(rng)
+            )
+        );
+        rng.retryRandomnessPostProcessing(1);
+        _assertRetryPreconditionFailurePreservesState(rng, core);
+
+        address replacementProvider = address(0xCAFE);
+        core.setRandomizer(COLLECTION_ID, replacementProvider, 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.StaleRandomnessRequest.selector,
+                uint256(1),
+                uint256(1),
+                uint256(1),
+                address(rng),
+                replacementProvider
+            )
+        );
+        rng.retryRandomnessPostProcessing(1);
+        _assertRetryPreconditionFailurePreservesState(rng, core);
+    }
+
+    function _assertVrfRetryAttemptFails(
         NextGenRandomizerVRF vrf,
         uint256 retryCount,
         bytes32 expectedSeed,
@@ -235,12 +323,33 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
     ) private {
         vm.recordLogs();
         vrf.retryRandomnessPostProcessing(1);
-        _assertRetryFailed(
-            vm.getRecordedLogs(), address(vrf), 1, TOKEN_ID, retryCount, expectedSeed
-        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertNoPostProcessingFailed(logs, address(vrf));
+        _assertRetryFailed(logs, address(vrf), 1, TOKEN_ID, retryCount, expectedSeed);
+        _assertRetryFailureState(vrf, retryCount, failureDataHash);
+    }
 
+    function _assertArrngRetryAttemptFails(
+        NextGenRandomizerRNG rng,
+        uint256 retryCount,
+        bytes32 expectedSeed,
+        bytes32 failureDataHash
+    ) private {
+        vm.recordLogs();
+        rng.retryRandomnessPostProcessing(1);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertNoPostProcessingFailed(logs, address(rng));
+        _assertRetryFailed(logs, address(rng), 1, TOKEN_ID, retryCount, expectedSeed);
+        _assertRetryFailureState(rng, retryCount, failureDataHash);
+    }
+
+    function _assertRetryFailureState(
+        StreamRandomizerLifecycle randomizer,
+        uint256 retryCount,
+        bytes32 failureDataHash
+    ) private view {
         StreamRandomizerLifecycle.RandomnessRequest memory request =
-            vrf.retrieveRandomnessRequest(1);
+            randomizer.retrieveRandomnessRequest(1);
         uint256(request.state)
             .assertEq(
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing),
@@ -248,6 +357,22 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
             );
         request.failureDataHash.assertEq(failureDataHash, "failure hash");
         request.postProcessingRetryCount.assertEq(retryCount, "retry count");
+    }
+
+    function _assertRetryPreconditionFailurePreservesState(
+        StreamRandomizerLifecycle randomizer,
+        MockRandomizerCore core
+    ) private view {
+        StreamRandomizerLifecycle.RandomnessRequest memory
+            request = randomizer.retrieveRandomnessRequest(1);
+        uint256(request.state)
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing),
+                "state"
+            );
+        request.failureDataHash.assertEq(_failureDataHash(), "failure hash");
+        request.postProcessingRetryCount.assertEq(0, "retry count");
+        core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "token hash");
     }
 
     function _deployVrfRetry()
@@ -376,6 +501,14 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
             }
         }
         found.assertTrue("retry failed event");
+    }
+
+    function _assertNoPostProcessingFailed(Vm.Log[] memory logs, address emitter) private pure {
+        for (uint256 i = 0; i < logs.length; i++) {
+            bool isPostProcessingFailed = logs[i].emitter == emitter && logs[i].topics.length == 4
+                && logs[i].topics[0] == RANDOMNESS_POST_PROCESSING_FAILED_TOPIC;
+            isPostProcessingFailed.assertFalse("unexpected post-processing failed event");
+        }
     }
 
     function _assertRandomnessFulfilled(

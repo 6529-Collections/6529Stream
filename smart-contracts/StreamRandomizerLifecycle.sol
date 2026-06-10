@@ -277,6 +277,24 @@ abstract contract StreamRandomizerLifecycle {
         internal
         returns (bytes32 failureDataHash)
     {
+        failureDataHash = _setRandomnessPostProcessingFailedState(_requestId, failureData);
+        RandomnessRequest storage request = randomnessRequests[_requestId];
+
+        emit RandomnessPostProcessingFailed(
+            _requestId,
+            request.collectionId,
+            request.tokenId,
+            request.provider,
+            request.randomizerEpoch,
+            request.derivedSeed,
+            failureDataHash
+        );
+    }
+
+    function _setRandomnessPostProcessingFailedState(uint256 _requestId, bytes memory failureData)
+        private
+        returns (bytes32 failureDataHash)
+    {
         RandomnessRequest storage request = randomnessRequests[_requestId];
         if (request.state == RandomnessRequestState.None) {
             revert UnknownRandomnessRequest(_requestId);
@@ -288,16 +306,6 @@ abstract contract StreamRandomizerLifecycle {
         failureDataHash = keccak256(failureData);
         request.state = RandomnessRequestState.FailedPostProcessing;
         request.failureDataHash = failureDataHash;
-
-        emit RandomnessPostProcessingFailed(
-            _requestId,
-            request.collectionId,
-            request.tokenId,
-            request.provider,
-            request.randomizerEpoch,
-            request.derivedSeed,
-            failureDataHash
-        );
     }
 
     function _prepareRandomnessPostProcessingRetry(IStreamCore _core, uint256 _requestId)
@@ -358,6 +366,9 @@ abstract contract StreamRandomizerLifecycle {
             revert RandomnessRequestNotFulfilled(_requestId, request.state);
         }
 
+        request.fulfilledBlock = block.number;
+        request.fulfilledTimestamp = block.timestamp;
+
         emit RandomnessPostProcessingRetried(
             _requestId,
             request.collectionId,
@@ -375,7 +386,7 @@ abstract contract StreamRandomizerLifecycle {
         bytes memory failureData,
         uint256 retryCount
     ) internal {
-        bytes32 failureDataHash = _markRandomnessPostProcessingFailed(_requestId, failureData);
+        bytes32 failureDataHash = _setRandomnessPostProcessingFailedState(_requestId, failureData);
         RandomnessRequest storage request = randomnessRequests[_requestId];
         emit RandomnessPostProcessingRetryFailed(
             _requestId,

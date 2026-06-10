@@ -14,6 +14,7 @@ interface Vm {
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData)
         external;
     function prank(address msgSender) external;
+    function roll(uint256 newHeight) external;
     function sign(uint256 privateKey, bytes32 digest)
         external
         returns (uint8 v, bytes32 r, bytes32 s);

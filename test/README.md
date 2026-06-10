@@ -107,7 +107,9 @@ is observable; failed deterministic core post-processing records
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be
 manually retried by an authorized admin using the stored derived seed, successful
-retry emits retry and fulfillment events, repeated deterministic failures remain
-bounded by `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`, unauthorized retry fails,
-terminal fulfillment cannot be retried, and changed token-to-collection,
-provider, or epoch bindings fail before retry state changes.
+retry emits retry and fulfillment events while refreshing fulfillment timing,
+retry failure emits only the retry-specific failure event, repeated
+deterministic failures remain bounded by
+`MAX_RANDOMNESS_POST_PROCESSING_RETRIES`, unauthorized retry fails, terminal
+fulfillment cannot be retried, and changed token-to-collection, provider, or
+epoch bindings fail before retry state changes in both adapters.

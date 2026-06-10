@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/68` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 16:45 UTC` |
+| Last updated | `2026-06-10 16:59 UTC` |
 
 ## Packaging Notes
 
@@ -2333,6 +2333,7 @@ Candidate files:
 - `smart-contracts/RandomizerVRF.sol`
 - `smart-contracts/RandomizerRNG.sol`
 - `test/StreamRandomizerRetry.t.sol`
+- `test/helpers/CharacterizationTestBase.sol`
 - `docs/adr/0005-randomness.md`
 - `docs/known-blockers.md`
 - `docs/status.md`
@@ -2350,25 +2351,27 @@ Local implementation notes:
   collection, provider, and epoch still match, then temporarily returns the
   request to `Fulfilled` while it retries the deterministic core token-hash
   write with the stored seed.
-- Success clears the failure hash, emits `RandomnessPostProcessingRetried`, and
-  emits the canonical `RandomnessFulfilled` event. Failure records the new
-  failure-data hash, keeps the request failed, and emits
-  `RandomnessPostProcessingRetryFailed`.
+- Success clears the failure hash, refreshes fulfillment block/timestamp, emits
+  `RandomnessPostProcessingRetried`, and emits the canonical
+  `RandomnessFulfilled` event. Failure records the new failure-data hash, keeps
+  the request failed, emits only `RandomnessPostProcessingRetryFailed`, and does
+  not duplicate the initial `RandomnessPostProcessingFailed` event.
 
 Validation so far:
 
 - `forge build` passed.
 - Focused `forge test --match-contract StreamRandomizerRetryTest -vvv` passed:
-  8 tests, 0 failed.
+  10 tests, 0 failed.
 - Focused `forge test --match-contract StreamRandomizerLifecycleTest -vvv`
   passed: 18 tests, 0 failed.
-- Full `make check` passed: 168 tests, 0 failed.
+- Full `make check` passed: 170 tests, 0 failed.
 - Full Windows wrapper
-  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed: 168
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed: 170
   tests, 0 failed.
 - `forge fmt --check smart-contracts\StreamRandomizerLifecycle.sol
   smart-contracts\RandomizerVRF.sol smart-contracts\RandomizerRNG.sol
-  test\StreamRandomizerRetry.t.sol` passed.
+  test\StreamRandomizerRetry.t.sol test\helpers\CharacterizationTestBase.sol`
+  passed.
 - `git diff --check` passed.
 - Traceability grep for `P0-RAND-006`, retry events, retry limit,
   provider/epoch safeguards, and `retryRandomnessPostProcessing` passed across
@@ -2577,6 +2580,7 @@ Validation so far:
 | 2026-06-10 16:39 | Validate Queue Item 28 locally | Full `make check`, Windows wrapper, focused retry/lifecycle tests, formatting, diff hygiene, traceability, heading scan, and Slither comparison all passed with high/medium counts unchanged |
 | 2026-06-10 16:43 | Expand Queue Item 28 retry validation | Added explicit retry rejection tests for changed randomizer epoch and provider, refreshed full gates to 168 passing tests, and kept Slither high/medium counts unchanged |
 | 2026-06-10 16:45 | Open PR #69 | PR packages bounded deterministic post-processing retry for VRF and arRNG adapters, closes issue #42, and records full local validation evidence |
+| 2026-06-10 16:59 | Address CodeRabbit PR #69 review | Split retry-failure state mutation from initial-failure event emission, refresh fulfillment timing on retry success, add arRNG edge-case parity, and refresh full gates to 170 passing tests with Slither high/medium counts unchanged |
 
 ## Resume Instructions
 
