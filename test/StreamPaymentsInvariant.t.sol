@@ -42,7 +42,8 @@ contract StreamPaymentsInvariantTest is DropAuthTestHelper, StreamFixture {
         } else if (action == 3) {
             handler.mintAuction(firstArg, secondArg);
         } else if (action == 4) {
-            handler.bidAuction(firstArg, secondArg, actionSeed);
+            uint256 bidSeed = uint256(keccak256(abi.encode(actionSeed, "bid")));
+            handler.bidAuction(firstArg, secondArg, bidSeed);
         } else if (action == 5) {
             handler.settleAuction(firstArg);
         } else if (action == 6) {
@@ -104,6 +105,7 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
     uint256 private randomizerRequests;
     uint256[MAX_AUCTIONS] private auctionTokenIds;
     mapping(uint256 => uint256) private auctionReserveByTokenId;
+    mapping(uint256 => bool) private randomizerTokenRequested;
 
     constructor(address signer) {
         deployed = deployStreamWithSigner(PAYOUT, CURATORS_POOL, signer);
@@ -341,7 +343,11 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
             return;
         }
         uint256 tokenId = 900_000 + (tokenSeed % 10_000);
+        if (randomizerTokenRequested[tokenId]) {
+            return;
+        }
         randomizerRequests++;
+        randomizerTokenRequested[tokenId] = true;
         randomizer.updateRNGCost(cost);
         vm.prank(address(randomizer.gencoreContract()));
         randomizer.calculateTokenHash(1, tokenId, 0);

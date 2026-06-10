@@ -2952,16 +2952,16 @@ Review requests:
 
 Outcome:
 
-- Merged as PR #76 on `2026-06-10`.
+- Merged as PR #76 on `2026-06-10 20:18 UTC`.
 - Follow-up review fix added an exact `Panic(uint256)` zero-denominator revert
   assertion for the vendored `Math.mulDiv` regression.
 - GitHub CI run `27303499168` passed on the final head.
 - CodeRabbit status was green on the final head.
 - Issue #11 closed as completed.
 
-### PR TBD: Add payment invariant baseline (Queue Item 35)
+### PR `#77`: Add payment invariant baseline (Queue Item 35)
 
-Status: Open; waiting on CI and CodeRabbit.
+Status: Open; CodeRabbit review fixes applied locally and ready to push.
 Branch: `codex/add-payment-invariant-baseline`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/77`.
 Related issue:
@@ -3006,6 +3006,10 @@ Implementation notes:
   before external calls where rollback preserves correctness, and by adding
   narrow source-level suppressions for deliberate test-only payable calls,
   generated-sequence bookkeeping, and the payable mock randomness provider.
+- Applied CodeRabbit review fixes: recorded concrete PR numbering and full
+  merge timestamp in this run log, decoupled bid amount generation from action
+  selection in the fuzz harness, and added harness bookkeeping to skip duplicate
+  randomizer requests for synthetic token IDs.
 
 Validation so far:
 
@@ -3027,10 +3031,17 @@ Validation so far:
   11 Optimization. High/medium counts are unchanged versus the previous tracked
   baseline, `arbitrary-send-eth=0`, `reentrancy-eth=0`,
   `reentrancy-no-eth=0`, `incorrect-equality=1`, and `locked-ether=7`.
+- After CodeRabbit review fixes, focused invariant testing, `make check`, the
+  Windows wrapper, `git diff --check`, and Slither were rerun successfully on
+  `2026-06-10 20:54 UTC`. Slither remained unchanged at 693 total findings, 4
+  High, and 19 Medium.
 
 Review requests:
 
 - CodeRabbit was requested in issue comment `4674282933`.
+- CodeRabbit completed on commit `54597eaa77995236d65e54df33e77db323fd3c54`
+  with two inline comments and one outside-diff comment; all three are applied
+  in the local review-fix diff.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
