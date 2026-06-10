@@ -65,8 +65,11 @@ contributors who start from the README.
   default locals explicitly and have targeted regressions for string counting,
   delegation status/gating, empty-script rendering, and minter return indexes.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md`;
-  current high/medium findings are limited to vendored-library triage and
-  accepted test-only helper findings before audit readiness.
+  current high/medium rows are now fixed, documented as false positives for
+  retained OpenZeppelin utility libraries, or accepted as test-only helper
+  findings. Vendored-library provenance is tracked in
+  `docs/vendored-libraries.md`. Low, informational, and optimization findings
+  remain outside the current CI gate.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback

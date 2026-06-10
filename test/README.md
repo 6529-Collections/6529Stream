@@ -140,3 +140,9 @@ Explicit local initialization now has P0-INIT-001 target-state coverage in
 delegation status lookups, subdelegation register/revoke gates, empty-script
 generative rendering, and multi-recipient minter return indexes cover the former
 first-party production `uninitialized-local` rows.
+
+Vendored library provenance now has P0-LIB-001 coverage in
+`StreamVendoredLibraries.t.sol`: Base64 golden vectors, binary padding,
+`Math.mulDiv` full-precision boundaries, rounding-up behavior, overflow, and
+zero-denominator reverts cover the OpenZeppelin utility-library rows documented
+as false positives in `docs/vendored-libraries.md` and `ops/SLITHER_BASELINE.md`.

@@ -44,7 +44,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-10 19:30 UTC` local Windows PR candidate validation; CI TBD |
+| Last verified | `2026-06-10 20:01 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -57,9 +57,9 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 666 total findings, including 4 High and 19 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked high/medium baseline: 668 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1949,8 +1949,8 @@ Current capture:
 - Tool: Slither `0.11.5`.
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
-- Status: baseline captured, not accepted as a CI gate.
-- Result: 666 findings, including 4 High and 19 Medium.
+- Status: high/medium rows triaged, not accepted as a CI gate.
+- Result: 668 findings, including 4 High and 19 Medium.
 
 Impact summary:
 
@@ -1959,8 +1959,8 @@ Impact summary:
 | High | 4 |
 | Medium | 19 |
 | Low | 63 |
-| Informational | 574 |
-| Optimization | 6 |
+| Informational | 575 |
+| Optimization | 7 |
 
 High/medium detector summary:
 
@@ -1968,12 +1968,12 @@ High/medium detector summary:
 | --- | --- | ---: | --- | --- | --- | --- |
 | `arbitrary-send-eth` | High | 0 current / 4 fixed | first-party emergency withdrawals | Fixed | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Current emergency-withdrawal surfaces are bounded: auction, fixed-price drops, curator pool, StreamMinter surplus, and conservative randomizer reserve boundary tests now exist |
 | `encode-packed-collision` | High | 0 current / 3 fixed | drop authorization and dependency/script hashing | Fixed | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Drop authorization rows and dependency-script segment hashing are fixed; keep typed hash tests and Slither baseline traceability |
-| `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
+| `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | False Positive | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | OpenZeppelin provenance and `mulDiv` full-precision regressions are documented in `docs/vendored-libraries.md` and `test/StreamVendoredLibraries.t.sol` |
 | `reentrancy-eth` | High | 0 current / 1 fixed | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
 | `suicidal` | High | 3 | test-only forced-ETH helpers | Accepted | Accepted test-only | Intentionally retained for forced-ETH accounting tests under Solidity 0.8.19 |
 | `uninitialized-state` | High | 0 current / 2 fixed | mint-accounting mappings | Fixed | [#13](https://github.com/6529-Collections/6529Stream/issues/13) | Removed never-written public/allowlist mint-count mappings and kept retained airdrop-counter regression coverage |
 | `weak-prng` | High | 0 current / 2 fixed | word pool randomness helpers | Fixed | [#73](https://github.com/6529-Collections/6529Stream/issues/73) | Removed the concrete `XRandoms` production-source helper and kept `RandomizerNXT` impossible to configure for production collections |
-| `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
+| `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | False Positive | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | OpenZeppelin provenance plus Base64 padding and `mulDiv` precision regressions are documented in `docs/vendored-libraries.md` and `test/StreamVendoredLibraries.t.sol` |
 | `incorrect-equality` | Medium | 1 | test-only malleable-signature helper | Accepted | Accepted test-only | Keep scoped to test-only EIP-712 negative coverage |
 | `locked-ether` | Medium | 7 | test-only rejection/reentrancy/mock receivers | Accepted | Accepted test-only | Keep scoped to payment and emergency-withdrawal tests |
 | `uninitialized-local` | Medium | 1 current accepted test-only / 11 fixed | first-party and test helper locals | Fixed for first-party production rows; only the accepted test-only `MockStreamMinter` helper row remains current | [#15](https://github.com/6529-Collections/6529Stream/issues/15), [#9](https://github.com/6529-Collections/6529Stream/issues/9) | Keep production locals explicit and test-only acceptance documented |
@@ -2020,6 +2020,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | Missing | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) | Gate E/Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Passing: Bytes32 character counts, missing/matching delegation lookups, subdelegation register/revoke gates, empty-script generative rendering, and multi-recipient minter return indexes cover the remaining first-party production rows; Slither now reports only one accepted test-only `uninitialized-local` row | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| Vendored library Slither findings | Retained OpenZeppelin utility files have provenance, local delta notes, and regressions for flagged math/encoding behavior | `test/StreamVendoredLibraries.t.sol` | Passing: Base64 golden/padding vectors, `Math.mulDiv` full-precision boundaries, rounding-up behavior, overflow, and zero-denominator reverts cover the current vendored false-positive rows | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Passing for P0-PAY-005: valid claims create credits and duplicate claims fail without increasing credit | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C/Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsPool.t.sol` | In Progress: reward leaves use `abi.encode`-based hashing for reward address, collection ID, and amount; root epoch/domain expansion remains future curator metadata work | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply, unavailable `tokenURI`, retained audit state, and callback-after-burn behavior follow ADR 0006 | `test/StreamCoreBurn.t.sol` | Missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate D | TBD |

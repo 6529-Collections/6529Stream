@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/74` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 19:30 UTC` |
+| Last updated | `2026-06-10 20:01 UTC` |
 
 ## Packaging Notes
 
@@ -87,7 +87,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Merged in PR #71 |
 | 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Merged in PR #72 |
 | 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Merged in PR #74 |
-| 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Open in PR #75 |
+| 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Merged in PR #75 |
+| 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | In progress on `codex/prove-vendored-library-provenance` |
 
 ## Current PR Worklog
 
@@ -2798,7 +2799,7 @@ Outcome:
 
 ### PR #75: Resolve first-party uninitialized locals (Queue Item 33)
 
-Status: Open.
+Status: Merged.
 Branch: `codex/resolve-uninitialized-locals`.
 Pull request: `#75`.
 Related issue:
@@ -2863,6 +2864,84 @@ Validation so far:
   `{"slither_exit":-1,"total":666,"high":4,"medium":19,"low":63,"informational":574,"optimization":6,"uninitialized_local":1,"weak_prng":0,"uninitialized_state":0,"arbitrary_send_eth":0,"reentrancy_eth":0}`.
 - The only current `uninitialized-local` row is the accepted test-only
   `test/mocks/MockStreamMinter.sol#L71` `mintedCount` helper.
+
+Review requests:
+
+- CodeRabbit finished successfully on final head `b28466f`.
+- Claude is intentionally skipped per current user instruction; use CodeRabbit
+  unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #75 on `2026-06-10`.
+- GitHub CI run `27301659259` passed on the final head.
+- CodeRabbit status was green and both actionable review threads were marked
+  addressed.
+- Issue #15 closed completed.
+
+### PR TBD: Prove vendored library provenance (Queue Item 34)
+
+Status: Ready to open PR.
+Branch: `codex/prove-vendored-library-provenance`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/11`
+
+Goal:
+
+- Complete `P0-LIB-001` by proving provenance for retained OpenZeppelin utility
+  files and resolving the remaining vendored high/medium Slither rows without
+  suppressing detectors.
+- Add focused regressions for the exact `Base64` and `Math.mulDiv` behavior
+  Slither flags.
+- Keep the current import layout stable; do not introduce package-manager churn
+  in the same PR.
+
+Candidate files:
+
+- `docs/vendored-libraries.md`
+- `smart-contracts/Strings.sol`
+- `test/StreamVendoredLibraries.t.sol`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added a vendored-library manifest with OpenZeppelin tag URLs, upstream
+  hashes, local hashes, and local delta notes.
+- Corrected the `Strings.sol` provenance header to the v4.9.0 OpenZeppelin
+  content it actually matches, while keeping local sibling imports.
+- Added focused Base64 golden-vector/padding tests and `Math.mulDiv`
+  precision, rounding, overflow, and zero-denominator tests.
+- Updated Slither baseline, roadmap, status, blockers, and test README
+  traceability so the vendored rows are documented false positives rather than
+  `Needs Issue`.
+
+Validation so far:
+
+- `forge fmt --check test\StreamVendoredLibraries.t.sol` passed.
+- Focused `forge test --match-path test\StreamVendoredLibraries.t.sol -vvv`
+  passed: 5 tests, 0 failed.
+- `make check` passed on the final local head: 187 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed on the
+  final local head: 187 tests, 0 failed.
+- `git diff --check` passed.
+- Markdown heading scan passed for the vendored-library doc, status docs, test
+  README, roadmap, Slither baseline, and autonomous run state.
+- Traceability grep passed for `P0-LIB-001`, `StreamVendoredLibraries`,
+  `docs/vendored-libraries.md`, `False Positive`, `incorrect-exp`,
+  `divide-before-multiply`, OpenZeppelin v4.7.0/v4.8.0/v4.9.0 tags, and the
+  `668 total` / `4 High and 19 Medium` Slither status.
+- Slither confirmation returned
+  `{"slither_exit":-1,"total":668,"high":4,"medium":19,"low":63,"informational":575,"optimization":7,"incorrect_exp":1,"divide_before_multiply":9,"unused_return":1}`.
+- The only current `unused-return` row remains the accepted test-only
+  `StreamDropsERC1271Test` tuple helper; the vendored-library test adds no
+  high/medium Slither rows.
 
 Review requests:
 
@@ -3099,6 +3178,10 @@ Review requests:
 | 2026-06-10 19:20 | Select Queue Item 33 | Next focused P0 Slither blocker is `P0-INIT-001`, because explicit local initialization can eliminate remaining first-party production `uninitialized-local` rows while preserving behavior |
 | 2026-06-10 19:25 | Implement Queue Item 33 local draft | Initialized remaining first-party production locals explicitly, added `StreamInitialization.t.sol`, and refreshed Slither/roadmap/status/test traceability; Slither now reports one accepted test-only `uninitialized-local` row, `total=666`, `high=4`, and `medium=19` |
 | 2026-06-10 19:30 | Finish local Queue Item 33 validation | Focused initialization tests, full `make check`, Windows wrapper, targeted formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither final JSON has `uninitialized_local=1` test-only, `total=666`, `high=4`, and `medium=19` |
+| 2026-06-10 19:46 | Merge PR #75 | First-party production uninitialized locals merged as `f042b14a43ed427fa57567d8d58a65ca2851e382`; issue #15 closed completed after CI and CodeRabbit were green |
+| 2026-06-10 19:48 | Select Queue Item 34 | The only remaining non-test high/medium Slither rows are vendored OpenZeppelin utility-library findings owned by `P0-LIB-001` |
+| 2026-06-10 19:55 | Implement Queue Item 34 local draft | Added vendored-library provenance docs, Base64/Math regressions, `Strings.sol` header correction, and Slither/roadmap/status/test traceability for false-positive disposition |
+| 2026-06-10 20:01 | Finish local Queue Item 34 validation | Focused vendored tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; high/medium Slither counts remain `4 High / 19 Medium` and vendored rows are documented false positives |
 
 ## Resume Instructions
 
