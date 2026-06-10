@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/66` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 15:14 UTC` |
+| Last updated | `2026-06-10 15:20 UTC` |
 
 ## Packaging Notes
 
@@ -78,7 +78,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
-| 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Locally validated on `codex/randomizer-pending-migration`; ready to open PR |
+| 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Open in PR #67; awaiting CI and bot feedback |
 
 ## Current PR Worklog
 
@@ -2139,13 +2139,19 @@ Validation targets retained for PR review:
 - Touched-file `forge fmt --check`, `git diff --check`, heading/traceability
   greps, and Slither delta if code changes affect the analyzed surface.
 
-### PR candidate: Block randomizer migration while requests are pending (Queue Item 26)
+### PR #67: Block randomizer migration while requests are pending (Queue Item 26)
 
-Status: Local implementation validated; ready to commit and open PR.
+Status: Open; awaiting CI, Claude, and CodeRabbit feedback.
 Branch: `codex/randomizer-pending-migration`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/67`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/41`
+
+Review requests:
+
+- Claude requested in issue comment `4671747961`.
+- CodeRabbit requested in issue comment `4671749578`.
 
 Goal:
 
@@ -2371,6 +2377,8 @@ Validation completed so far:
 | 2026-06-10 14:52 | Merge PR #66 | Token-level randomizer lifecycle views merged as `1b5c14c802f2c10870f8ee7c089164372d393b54`; CI passed, CodeRabbit reported LGTM on the final head, Claude was unavailable due org overage, and issue #38 closed completed |
 | 2026-06-10 15:04 | Start Queue Item 26 | Next P0 randomness child is `P0-RAND-005`; ADR 0005's conservative default is to block lifecycle-aware provider migration while requests are pending |
 | 2026-06-10 15:14 | Validate Queue Item 26 | Randomizer pending-migration guard is locally green across focused tests, `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scans, and Slither baseline comparison |
+| 2026-06-10 15:17 | Open PR #67 | Pending randomizer migration guard published at `https://github.com/6529-Collections/6529Stream/pull/67` from head `ecd8810c19ba2e1d80bebae108d318add4ad1fc9` |
+| 2026-06-10 15:20 | Request PR #67 bot reviews | Claude requested in issue comment `4671747961`; CodeRabbit requested in issue comment `4671749578` |
 
 ## Resume Instructions
 
