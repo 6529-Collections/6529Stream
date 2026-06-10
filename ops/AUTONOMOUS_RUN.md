@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/57` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 08:36 UTC` |
+| Last updated | `2026-06-10 08:38 UTC` |
 
 ## Packaging Notes
 
@@ -1238,11 +1238,11 @@ Outcome:
 
 ### PR #58: Fix auction bidding reentrancy and outbid refunds (Queue Item 17)
 
-Status: Ready to open; local validation passes.
+Status: Open; awaiting GitHub CI and bot reviews.
 Branch: `codex/auction-pull-credits`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/58`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/12`.
-Claude review request: TBD.
+Claude review request: issue comment `4668219408`.
 
 Goal:
 
@@ -1302,6 +1302,8 @@ Review feedback:
 
 - Sidecar review confirmed the narrow issue #12 scope: bid/outbid credits only,
   not full custody or protocol-wide payment ledger work.
+- PR opened on head `ca5ca09f3090b742798fd8bffc06d47090e73125`.
+- Claude review was explicitly requested in issue comment `4668219408`.
 
 ## Decision Log
 
@@ -1427,6 +1429,8 @@ Review feedback:
 | 2026-06-10 08:18 | Start `P0-AUCT-002` implementation PR | Gate C next fixes the high-impact auction bid-path reentrancy/refund issue by converting outbid refunds to bidder pull credits |
 | 2026-06-10 08:28 | Validate focused auction payment suite | Bid/outbid pull credits, rejecting previous bidder, failed withdrawal preservation, withdrawal reentrancy, bid thresholds, emergency escrow/surplus boundaries, and settlement replay tests pass |
 | 2026-06-10 08:36 | Finish local `P0-AUCT-002` validation | Full `make check` and Windows wrapper pass with 69 tests; format, whitespace, heading scan, and Slither delta evidence pass; Slither remains non-zero for unrelated baseline findings |
+| 2026-06-10 08:38 | Open PR #58 | Auction pull-credit implementation is published with local validation and Slither delta evidence |
+| 2026-06-10 08:38 | Request Claude review on PR #58 | Explicit review ping added in issue comment `4668219408` because Claude may not run automatically |
 
 ## Resume Instructions
 
