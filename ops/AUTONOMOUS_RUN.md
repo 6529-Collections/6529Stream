@@ -87,7 +87,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Merged in PR #71 |
 | 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Merged in PR #72 |
 | 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Merged in PR #74 |
-| 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Ready to open PR |
+| 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Open in PR #75 |
 
 ## Current PR Worklog
 
@@ -2796,11 +2796,11 @@ Outcome:
 - GitHub CI run `27299886749` passed on the final head.
 - Issue #73 closed completed.
 
-### PR TBD: Resolve first-party uninitialized locals (Queue Item 33)
+### PR #75: Resolve first-party uninitialized locals (Queue Item 33)
 
-Status: Ready to open PR.
+Status: Open.
 Branch: `codex/resolve-uninitialized-locals`.
-Pull request: TBD.
+Pull request: `#75`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/15`

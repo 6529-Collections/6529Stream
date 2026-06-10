@@ -1950,16 +1950,16 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 676 findings, including 4 High and 28 Medium.
+- Result: 666 findings, including 4 High and 19 Medium.
 
 Impact summary:
 
 | Impact | Count |
 | --- | ---: |
 | High | 4 |
-| Medium | 28 |
+| Medium | 19 |
 | Low | 63 |
-| Informational | 575 |
+| Informational | 574 |
 | Optimization | 6 |
 
 High/medium detector summary:
