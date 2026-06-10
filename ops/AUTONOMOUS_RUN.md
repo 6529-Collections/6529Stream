@@ -10,8 +10,8 @@ transient conversation memory.
 - Keep this file updated before and after each meaningful transition.
 - Open one PR at a time.
 - Wait for CI and bot/reviewer comments on each PR.
-- Request Claude review explicitly on each PR after opening because it may not
-  run automatically.
+- Request Claude review explicitly with `@claude review` on each PR after
+  opening because it may not run automatically.
 - Iterate until checks and review comments are clean.
 - Merge only after the PR is review-clean and CI-clean, or after a documented
   autonomous maintainer decision.
@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-pending-migration` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/66` |
+| Active PR branch | `codex/randomizer-failed-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/67` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 15:20 UTC` |
+| Last updated | `2026-06-10 16:16 UTC` |
 
 ## Packaging Notes
 
@@ -78,7 +78,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
-| 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Open in PR #67; awaiting CI and bot feedback |
+| 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
+| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #68; final CodeRabbit nitpick addressed locally before follow-up push |
 
 ## Current PR Worklog
 
@@ -1955,7 +1956,7 @@ Validation so far:
   re-pinged in issue comments `4670582018` and `4670583894`.
 - GitHub CI run `27278804614` passed on final head
   `055ffb63962de8b33f250e8d86ea2d933bc0bfb9`.
-- Claude remained unavailable due the organization overage skip recorded in
+- Claude remained unavailable due to the organization overage skip recorded in
   review `pullrequestreview-4468100654`.
 - CodeRabbit updated the PR with release notes but its aggregate status remained
   pending despite no visible actionable comments or review threads after
@@ -2141,9 +2142,10 @@ Validation targets retained for PR review:
 
 ### PR #67: Block randomizer migration while requests are pending (Queue Item 26)
 
-Status: Open; awaiting CI, Claude, and CodeRabbit feedback.
+Status: Merged.
 Branch: `codex/randomizer-pending-migration`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/67`.
+Merge commit: `428cbc8213c344b219e746b47f089b1b75730bfb`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/41`
@@ -2152,6 +2154,10 @@ Review requests:
 
 - Claude requested in issue comment `4671747961`.
 - CodeRabbit requested in issue comment `4671749578`.
+- CodeRabbit latest-head nudge posted in issue comment `4671785250`.
+- Claude skipped review due to the organization monthly spending cap.
+- CodeRabbit status resolved to success with `Review skipped`; no inline review
+  comments were present.
 
 Goal:
 
@@ -2197,6 +2203,102 @@ Validation completed so far:
   Foundry `1.7.1`; it returned the accepted non-zero baseline:
   `slither_exit=-1 total=686 high=9 medium=29 weak-prng=2
   arbitrary-send-eth=0 reentrancy-eth=0`.
+
+### PR #68: Add failed randomness post-processing state (Queue Item 27)
+
+Status: Final CodeRabbit nitpick addressed locally; awaiting follow-up CI and
+CodeRabbit refresh after push. Claude is no longer required for this PR by user
+instruction.
+Branch: `codex/randomizer-failed-state`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/68`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/40`
+
+Review requests:
+
+- Claude requested in issue comment `4671968774`.
+- CodeRabbit requested in issue comment `4671968843`.
+- Latest-head Claude requested in issue comment `4671977932`; Claude skipped
+  review due to the organization monthly spending cap.
+- Latest-head CodeRabbit requested in issue comment `4671978003`; CodeRabbit
+  found that `RandomnessPostProcessingFailed` should include provider and epoch.
+
+Goal:
+
+- Complete the missing `FailedPostProcessing` lifecycle path from ADR 0005
+  without implementing the later manual retry entry point.
+- Catch deterministic core post-processing failures after provider output is
+  accepted, mark the request as failed, store the derived seed and failure-data
+  hash, and clear lifecycle-aware pending counts.
+- Prove duplicate provider callbacks cannot overwrite a failed request.
+- Cover both VRF and arRNG adapters, and keep retry/re-request behavior queued
+  under `P0-RAND-006`.
+
+Candidate files:
+
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/RandomizerVRF.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `test/mocks/MockRandomizerCore.sol`
+- `docs/adr/0005-randomness.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation completed before PR:
+
+- Focused `forge test --match-contract StreamRandomizerLifecycleTest -vvv`
+  passed: 18 tests, 0 failed.
+- Full `make check` passed: 160 tests, 0 failed.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed: 160 tests, 0 failed.
+- Touched-file `forge fmt --check` passed for randomizer contracts and tests.
+- `git diff --check` passed.
+- Roadmap/docs traceability grep passed for `P0-RAND-004`,
+  `FailedPostProcessing`, `failureDataHash`,
+  `RandomnessPostProcessingFailed`, and the active branch/work item.
+- Markdown heading scan passed for changed docs and run-state files.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with
+  Foundry `1.7.1`; it returned the accepted non-zero baseline:
+  `slither_exit=-1 total=685 high=9 medium=29 weak-prng=2
+  arbitrary-send-eth=0 reentrancy-eth=0 reentrancy-no-eth=0
+  reentrancy-events=22`.
+- Slither suppressions are scoped to the VRF/arRNG external core
+  post-processing blocks. The request is made non-pending before the external
+  core write, duplicate callbacks and stale marking fail during reentry, and
+  the post-call writes only emit/record the deterministic fulfillment or
+  post-processing failure outcome.
+
+Review follow-up:
+
+- CodeRabbit review comment `3389722778` requested provider and epoch context in
+  `RandomnessPostProcessingFailed` so indexers can correlate failures without
+  extra storage lookups.
+- CodeRabbit review body also suggested aligning `MockRandomizerCore.setTokenHash`
+  with `StreamCore` by requiring the registered randomizer caller and rejecting
+  token-hash overwrites. This is valid test-harness hardening and has been
+  applied.
+- User instruction after Claude was requested: no need to use Claude for this
+  PR; CodeRabbit is sufficient.
+- Review-fix validation passed:
+  `forge test --match-contract StreamRandomizerLifecycleTest -vvv` (18 tests),
+  `make check` (160 tests), Windows
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` (160 tests),
+  touched-file `forge fmt --check`, `git diff --check`, traceability grep,
+  heading scan, and Slither
+  `slither_exit=-1 total=685 high=9 medium=29 weak-prng=2
+  arbitrary-send-eth=0 reentrancy-eth=0 reentrancy-no-eth=0
+  reentrancy-events=22`.
+- Final mock-guard validation passed after the CodeRabbit nitpick:
+  `forge test --match-contract StreamRandomizerLifecycleTest -vvv` (18 tests),
+  `make check` (160 tests), Windows
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` (160 tests),
+  touched-file `forge fmt --check test\mocks\MockRandomizerCore.sol`, and
+  `git diff --check`.
 
 ## Decision Log
 
@@ -2379,6 +2481,14 @@ Validation completed so far:
 | 2026-06-10 15:14 | Validate Queue Item 26 | Randomizer pending-migration guard is locally green across focused tests, `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scans, and Slither baseline comparison |
 | 2026-06-10 15:17 | Open PR #67 | Pending randomizer migration guard published at `https://github.com/6529-Collections/6529Stream/pull/67` from head `ecd8810c19ba2e1d80bebae108d318add4ad1fc9` |
 | 2026-06-10 15:20 | Request PR #67 bot reviews | Claude requested in issue comment `4671747961`; CodeRabbit requested in issue comment `4671749578` |
+| 2026-06-10 15:29 | Merge PR #67 | Pending randomizer migration guard merged as `428cbc8213c344b219e746b47f089b1b75730bfb`; CI passed, CodeRabbit resolved to success with `Review skipped`, Claude was unavailable due org overage, and issue #41 closed completed |
+| 2026-06-10 15:33 | Start Queue Item 27 | Next randomness blocker is `P0-RAND-004`; failed post-processing state should become observable before retry semantics in `P0-RAND-006` |
+| 2026-06-10 15:48 | Validate Queue Item 27 | Failed post-processing state is locally green across focused VRF/arRNG lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scans, and Slither baseline comparison |
+| 2026-06-10 15:48 | Reconfirm Claude manual trigger | User noted Claude may not run automatically and pointed back to PR #3; every new PR must receive an explicit `@claude review` issue comment before waiting on bot feedback |
+| 2026-06-10 15:53 | Open PR #68 and request bot reviews | Failed randomness post-processing state PR published at `https://github.com/6529-Collections/6529Stream/pull/68`; Claude requested in issue comment `4671968774` and CodeRabbit requested in issue comment `4671968843` |
+| 2026-06-10 16:04 | Address CodeRabbit PR #68 event-context review | Add provider and randomizer epoch to `RandomnessPostProcessingFailed`, update tests/docs/run-state traceability, and proceed with CodeRabbit/CI as sufficient for this PR per user instruction |
+| 2026-06-10 16:07 | Validate CodeRabbit PR #68 review fix | Focused lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scan, and Slither baseline comparison all pass after adding provider/epoch event context |
+| 2026-06-10 16:16 | Address final CodeRabbit PR #68 mock nitpick | Align `MockRandomizerCore.setTokenHash` with production caller/overwrite guards and rerun focused lifecycle tests, `make check`, Windows wrapper, formatting, and whitespace checks |
 
 ## Resume Instructions
 

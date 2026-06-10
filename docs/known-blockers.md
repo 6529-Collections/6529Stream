@@ -41,11 +41,14 @@ contributors who start from the README.
   token-to-collection binding, provider, and collection randomizer epoch before
   writing a token hash. Ordinary provider migration is blocked while the current
   lifecycle-aware adapter reports pending requests; admins must explicitly mark
-  affected requests stale before migrating. Remaining randomness blockers include
-  deterministic post-processing retry, callback-after-burn policy, richer
-  metadata state exposure, provider configuration runbooks, canonical
-  core/coordinator lifecycle ownership, and full handling of weak helper
-  randomness beyond disabling `RandomizerNXT` as a production randomizer.
+  affected requests stale before migrating. Deterministic post-processing
+  failures now become observable `FailedPostProcessing` requests with stored
+  derived seed and failure-data hash instead of rolling back to pending.
+  Remaining randomness blockers include bounded retry for failed
+  post-processing, callback-after-burn policy, richer metadata state exposure,
+  provider configuration runbooks, canonical core/coordinator lifecycle
+  ownership, and full handling of weak helper randomness beyond disabling
+  `RandomizerNXT` as a production randomizer.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,

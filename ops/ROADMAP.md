@@ -1130,6 +1130,11 @@ Current behavior:
   marking or valid fulfillment clears pending counts before migration.
 - Callback-after-burn policy, failed post-processing retry, canonical
   core/coordinator-owned lifecycle state, and richer metadata state remain open.
+- Failed post-processing is now observable: if core token-hash writing reverts
+  after valid provider output is accepted, VRF and arRNG adapters mark the
+  request `FailedPostProcessing`, store the derived seed and failure-data hash,
+  clear pending counts, emit a failure event with provider and epoch context,
+  and reject duplicate callbacks.
 - `RandomizerNXT` and `XRandoms` use block-derived helper randomness that is
   out of production scope under ADR 0005. `RandomizerNXT` no longer advertises
   itself as a production randomizer; `XRandoms` still needs final removal,
@@ -1162,8 +1167,9 @@ Required code changes:
   Implemented default policy: ordinary migration is blocked while the current
   lifecycle-aware adapter reports pending requests.
 - Record failed or stale post-processing for retry by a separate function if
-  needed. Stale marking is implemented; failed post-processing retry remains
-  `P0-RAND-004`/`P0-RAND-006`.
+  needed. Stale marking is implemented; failed post-processing state is
+  implemented for VRF and arRNG adapters. Manual retry remains
+  `P0-RAND-006`.
 - Add a bounded manual-retry path only for deterministic post-processing
   failures, not for changing random output.
 - Do not allow user-significant inputs after randomness request.
@@ -1188,7 +1194,9 @@ Child tickets:
   Add callback validation for request, token, collection, and randomizer epoch.
   Closed as completed after PR #65.
 - [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40):
-  Add pending, fulfilled, stale, and failed post-processing states.
+  Add pending, fulfilled, stale, and failed post-processing states. Implemented
+  for request lifecycle state, failed post-processing eventing, failure-data
+  hash storage, and duplicate-callback rejection.
 - [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41):
   Define and test randomizer migration with pending requests. Implemented
   default blocking policy for lifecycle-aware providers.
@@ -1208,6 +1216,8 @@ Required tests:
 - Randomizer migration with pending requests follows ADR. Implemented for the
   default block-by-pending policy, plus stale/fulfilled unblocking and
   new-provider fulfillment.
+- Failed post-processing state is observable. Implemented for VRF and arRNG
+  adapters when deterministic core hash writing reverts.
 - Manual retry cannot change random output.
 - Callback after burn follows ADR behavior.
 - Fulfillment does not revert in normal operation.
@@ -1237,8 +1247,8 @@ Acceptance criteria:
 
 - Randomizer fulfillment validates request ID, token, collection, provider, and
   randomizer epoch for VRF and arRNG adapters.
-- Pending, fulfilled, and stale states are implemented and documented; failed
-  post-processing remains a queued child ticket.
+- Pending, fulfilled, stale, and failed post-processing states are implemented
+  and documented; metadata integration remains broader Gate D work.
 - A valid provider callback produces exactly one terminal seed/hash for VRF and
   arRNG adapters.
 - Unknown, empty-output, duplicate, stale, wrong-collection, and wrong-epoch
@@ -1953,7 +1963,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF and arRNG request records, request state, request-to-token, token-to-request, token-to-collection, first-class token-level request/state views, empty token lookup, token-level stale lookup, requested block/time, fulfilled block/time, and derived seed storage | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
 | Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF/arRNG valid fulfillment, unknown request, zero arRNG request ID, empty output, duplicate fulfillment, core token-to-collection mismatch, live provider/epoch validation, and reentrant arRNG request-submission rejection | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerLifecycle.t.sol` | Passing for stale epoch rejection, admin-marked stale requests, old-provider callback rejection after explicit stale marking, and duplicate old-provider callbacks after fulfillment | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
-| Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | In Progress: pending, fulfilled, and stale states are implemented and observable; failed post-processing state, retry, and metadata integration remain missing | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
+| Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | Passing for lifecycle state coverage: pending, fulfilled, stale, and failed post-processing states are observable by request and token where applicable; VRF and arRNG adapters catch deterministic core hash-writing failures, record `FailedPostProcessing`, store the derived seed and failure-data hash, clear pending counts, emit a failure event with provider and epoch context, and reject duplicate callbacks. Metadata integration remains Gate D work. | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | Passing for default block-by-pending policy: VRF and arRNG adapters expose lifecycle-aware pending counts; `StreamCore.addRandomizer` rejects migration while pending requests exist; fulfilled and stale requests clear pending counts; migration with no pending requests emits the provider/epoch event; a new provider can request and fulfill after migration. Automatic bulk stale marking remains future incident tooling. | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Missing | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
 | Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerSeed.t.sol` | In Progress: derived seed includes provider, request ID, collection, token, randomizer epoch, and provider output via `abi.encode`; explicit raw-output hash storage remains missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
