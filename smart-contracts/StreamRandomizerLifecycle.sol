@@ -5,6 +5,8 @@ pragma solidity ^0.8.19;
 import "./IStreamCore.sol";
 
 abstract contract StreamRandomizerLifecycle {
+    uint256 public constant MAX_RANDOMNESS_POST_PROCESSING_RETRIES = 3;
+
     enum RandomnessRequestState {
         None,
         Pending,
@@ -26,6 +28,7 @@ abstract contract StreamRandomizerLifecycle {
         uint256 fulfilledTimestamp;
         bytes32 derivedSeed;
         bytes32 failureDataHash;
+        uint256 postProcessingRetryCount;
     }
 
     error UnknownRandomnessRequest(uint256 requestId);
@@ -48,6 +51,10 @@ abstract contract StreamRandomizerLifecycle {
     error EmptyRandomWords(uint256 requestId);
     error ZeroDerivedSeed(uint256 requestId);
     error RandomnessRequestNotFulfilled(uint256 requestId, RandomnessRequestState state);
+    error RandomnessRequestNotFailedPostProcessing(uint256 requestId, RandomnessRequestState state);
+    error RandomnessPostProcessingRetryLimitReached(
+        uint256 requestId, uint256 retryCount, uint256 maxRetryCount
+    );
 
     mapping(uint256 => RandomnessRequest) private randomnessRequests;
     mapping(uint256 => uint256) public requestToToken;
@@ -82,6 +89,25 @@ abstract contract StreamRandomizerLifecycle {
         uint256 indexed tokenId,
         address provider,
         uint256 randomizerEpoch,
+        bytes32 derivedSeed,
+        bytes32 failureDataHash
+    );
+    event RandomnessPostProcessingRetried(
+        uint256 indexed requestId,
+        uint256 indexed collectionId,
+        uint256 indexed tokenId,
+        address provider,
+        uint256 randomizerEpoch,
+        uint256 retryCount,
+        bytes32 derivedSeed
+    );
+    event RandomnessPostProcessingRetryFailed(
+        uint256 indexed requestId,
+        uint256 indexed collectionId,
+        uint256 indexed tokenId,
+        address provider,
+        uint256 randomizerEpoch,
+        uint256 retryCount,
         bytes32 derivedSeed,
         bytes32 failureDataHash
     );
@@ -166,7 +192,8 @@ abstract contract StreamRandomizerLifecycle {
             fulfilledBlock: 0,
             fulfilledTimestamp: 0,
             derivedSeed: bytes32(0),
-            failureDataHash: bytes32(0)
+            failureDataHash: bytes32(0),
+            postProcessingRetryCount: 0
         });
 
         emit RandomnessRequested(
@@ -248,6 +275,7 @@ abstract contract StreamRandomizerLifecycle {
 
     function _markRandomnessPostProcessingFailed(uint256 _requestId, bytes memory failureData)
         internal
+        returns (bytes32 failureDataHash)
     {
         RandomnessRequest storage request = randomnessRequests[_requestId];
         if (request.state == RandomnessRequestState.None) {
@@ -257,7 +285,7 @@ abstract contract StreamRandomizerLifecycle {
             revert RandomnessRequestNotFulfilled(_requestId, request.state);
         }
 
-        bytes32 failureDataHash = keccak256(failureData);
+        failureDataHash = keccak256(failureData);
         request.state = RandomnessRequestState.FailedPostProcessing;
         request.failureDataHash = failureDataHash;
 
@@ -267,6 +295,95 @@ abstract contract StreamRandomizerLifecycle {
             request.tokenId,
             request.provider,
             request.randomizerEpoch,
+            request.derivedSeed,
+            failureDataHash
+        );
+    }
+
+    function _prepareRandomnessPostProcessingRetry(IStreamCore _core, uint256 _requestId)
+        internal
+        returns (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed, uint256 retryCount)
+    {
+        RandomnessRequest storage request = randomnessRequests[_requestId];
+        if (request.state == RandomnessRequestState.None) {
+            revert UnknownRandomnessRequest(_requestId);
+        }
+        if (request.state != RandomnessRequestState.FailedPostProcessing) {
+            revert RandomnessRequestNotFailedPostProcessing(_requestId, request.state);
+        }
+        if (request.postProcessingRetryCount >= MAX_RANDOMNESS_POST_PROCESSING_RETRIES) {
+            revert RandomnessPostProcessingRetryLimitReached(
+                _requestId, request.postProcessingRetryCount, MAX_RANDOMNESS_POST_PROCESSING_RETRIES
+            );
+        }
+        if (request.provider != address(this)) {
+            revert WrongRandomnessProvider(_requestId, request.provider, address(this));
+        }
+
+        collectionId = request.collectionId;
+        tokenId = request.tokenId;
+        uint256 tokenCollectionId = _core.viewColIDforTokenID(tokenId);
+        if (tokenCollectionId != collectionId) {
+            revert WrongRandomnessTokenCollection(
+                _requestId, tokenId, collectionId, tokenCollectionId
+            );
+        }
+        uint256 currentEpoch = _core.viewRandomizerEpoch(collectionId);
+        address currentProvider = _core.viewCollectionRandomizerContract(collectionId);
+        if (currentEpoch != request.randomizerEpoch || currentProvider != address(this)) {
+            revert StaleRandomnessRequest(
+                _requestId, request.randomizerEpoch, currentEpoch, address(this), currentProvider
+            );
+        }
+
+        derivedSeed = request.derivedSeed;
+        if (derivedSeed == bytes32(0)) {
+            revert ZeroDerivedSeed(_requestId);
+        }
+
+        retryCount = request.postProcessingRetryCount + 1;
+        request.postProcessingRetryCount = retryCount;
+        request.state = RandomnessRequestState.Fulfilled;
+        request.failureDataHash = bytes32(0);
+    }
+
+    function _confirmRandomnessPostProcessingRetry(uint256 _requestId, uint256 retryCount)
+        internal
+    {
+        RandomnessRequest storage request = randomnessRequests[_requestId];
+        if (request.state == RandomnessRequestState.None) {
+            revert UnknownRandomnessRequest(_requestId);
+        }
+        if (request.state != RandomnessRequestState.Fulfilled) {
+            revert RandomnessRequestNotFulfilled(_requestId, request.state);
+        }
+
+        emit RandomnessPostProcessingRetried(
+            _requestId,
+            request.collectionId,
+            request.tokenId,
+            request.provider,
+            request.randomizerEpoch,
+            retryCount,
+            request.derivedSeed
+        );
+        _confirmRandomnessFulfillment(_requestId);
+    }
+
+    function _markRandomnessPostProcessingRetryFailed(
+        uint256 _requestId,
+        bytes memory failureData,
+        uint256 retryCount
+    ) internal {
+        bytes32 failureDataHash = _markRandomnessPostProcessingFailed(_requestId, failureData);
+        RandomnessRequest storage request = randomnessRequests[_requestId];
+        emit RandomnessPostProcessingRetryFailed(
+            _requestId,
+            request.collectionId,
+            request.tokenId,
+            request.provider,
+            request.randomizerEpoch,
+            retryCount,
             request.derivedSeed,
             failureDataHash
         );

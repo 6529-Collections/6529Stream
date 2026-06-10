@@ -110,6 +110,25 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
         _markRandomnessRequestStale(_requestId);
     }
 
+    function retryRandomnessPostProcessing(uint256 _requestId)
+        public
+        FunctionAdminRequired(this.retryRandomnessPostProcessing.selector)
+    {
+        (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed, uint256 retryCount) =
+            _prepareRandomnessPostProcessingRetry(gencoreContract, _requestId);
+        // Retry reuses the already accepted seed and performs only the
+        // deterministic core write. The lifecycle state is Fulfilled during the
+        // external call, so duplicate callbacks and nested retry/stale attempts
+        // fail closed.
+        // slither-disable-start reentrancy-no-eth,reentrancy-events
+        try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
+            _confirmRandomnessPostProcessingRetry(_requestId, retryCount);
+        } catch (bytes memory failureData) {
+            _markRandomnessPostProcessingRetryFailed(_requestId, failureData, retryCount);
+        }
+        // slither-disable-end reentrancy-no-eth,reentrancy-events
+    }
+
     // function to update callbackGasLimit & keyHash
 
     function updatecallbackGasLimitAndkeyHash(uint32 _callbackGasLimit, bytes32 _keyHash)

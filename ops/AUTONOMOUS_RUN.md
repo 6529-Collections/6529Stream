@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-failed-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/67` |
+| Active PR branch | `codex/randomizer-post-processing-retry` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/68` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 16:16 UTC` |
+| Last updated | `2026-06-10 16:43 UTC` |
 
 ## Packaging Notes
 
@@ -79,7 +79,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
-| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #68; final CodeRabbit nitpick addressed locally before follow-up push |
+| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
+| 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Local validation complete on `codex/randomizer-post-processing-retry`; PR pending |
 
 ## Current PR Worklog
 
@@ -2206,9 +2207,7 @@ Validation completed so far:
 
 ### PR #68: Add failed randomness post-processing state (Queue Item 27)
 
-Status: Final CodeRabbit nitpick addressed locally; awaiting follow-up CI and
-CodeRabbit refresh after push. Claude is no longer required for this PR by user
-instruction.
+Status: Merged.
 Branch: `codex/randomizer-failed-state`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/68`.
 Related issue:
@@ -2299,6 +2298,89 @@ Review follow-up:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` (160 tests),
   touched-file `forge fmt --check test\mocks\MockRandomizerCore.sol`, and
   `git diff --check`.
+- Follow-up CodeRabbit review on head
+  `06ed909f994b06578fe7bef520373834c8ce79ec` reported no actionable comments,
+  Foundry smoke passed, and GitHub combined status was success before merge.
+
+Outcome:
+
+- Merged as PR #68 on `2026-06-10 16:20 UTC`.
+- Merge commit: `0c463840cbc4f2e000a9df8b7ca6a7b7e3c717e1`.
+- Issue #40 closed completed.
+
+### Next PR: Add bounded randomness post-processing retry (Queue Item 28)
+
+Status: Local validation complete; PR creation next.
+Branch: `codex/randomizer-post-processing-retry`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/42`
+
+Goal:
+
+- Complete `P0-RAND-006` by adding bounded manual retry for deterministic
+  `FailedPostProcessing` requests without requesting new provider output.
+- Reuse the stored derived seed; do not accept new random words, token IDs, or
+  collection IDs during retry.
+- Gate retry through the existing function-admin/global-admin pattern.
+- Emit retry success/failure events and cap failed retry attempts.
+- Cover both VRF and arRNG adapters.
+
+Candidate files:
+
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/RandomizerVRF.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `test/StreamRandomizerRetry.t.sol`
+- `docs/adr/0005-randomness.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Local implementation notes:
+
+- `StreamRandomizerLifecycle` now tracks `postProcessingRetryCount`, exposes
+  `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`, and adds custom errors for
+  non-failed-state retry and retry-limit exhaustion.
+- VRF and arRNG adapters expose `retryRandomnessPostProcessing(uint256)`.
+- Retry validates the request is `FailedPostProcessing`, verifies token,
+  collection, provider, and epoch still match, then temporarily returns the
+  request to `Fulfilled` while it retries the deterministic core token-hash
+  write with the stored seed.
+- Success clears the failure hash, emits `RandomnessPostProcessingRetried`, and
+  emits the canonical `RandomnessFulfilled` event. Failure records the new
+  failure-data hash, keeps the request failed, and emits
+  `RandomnessPostProcessingRetryFailed`.
+
+Validation so far:
+
+- `forge build` passed.
+- Focused `forge test --match-contract StreamRandomizerRetryTest -vvv` passed:
+  8 tests, 0 failed.
+- Focused `forge test --match-contract StreamRandomizerLifecycleTest -vvv`
+  passed: 18 tests, 0 failed.
+- Full `make check` passed: 168 tests, 0 failed.
+- Full Windows wrapper
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed: 168
+  tests, 0 failed.
+- `forge fmt --check smart-contracts\StreamRandomizerLifecycle.sol
+  smart-contracts\RandomizerVRF.sol smart-contracts\RandomizerRNG.sol
+  test\StreamRandomizerRetry.t.sol` passed.
+- `git diff --check` passed.
+- Traceability grep for `P0-RAND-006`, retry events, retry limit,
+  provider/epoch safeguards, and `retryRandomnessPostProcessing` passed across
+  contracts, tests, docs, and ops state.
+- Markdown heading scan passed for `ops/ROADMAP.md`, ADR 0005, known
+  blockers, project status, and test README.
+- Slither baseline comparison passed with no new high/medium or production
+  reentrancy findings: `slither_exit=-1`, `total=687`, `high=9`,
+  `medium=29`, `weak-prng=2`, `arbitrary-send-eth=0`, `reentrancy-eth=0`,
+  `reentrancy-no-eth=0`, `reentrancy-events=22`. The total is +2 versus the
+  prior count from informational `pragma` and `solc-version` entries caused by
+  adding `test/StreamRandomizerRetry.t.sol`.
 
 ## Decision Log
 
@@ -2489,6 +2571,11 @@ Review follow-up:
 | 2026-06-10 16:04 | Address CodeRabbit PR #68 event-context review | Add provider and randomizer epoch to `RandomnessPostProcessingFailed`, update tests/docs/run-state traceability, and proceed with CodeRabbit/CI as sufficient for this PR per user instruction |
 | 2026-06-10 16:07 | Validate CodeRabbit PR #68 review fix | Focused lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scan, and Slither baseline comparison all pass after adding provider/epoch event context |
 | 2026-06-10 16:16 | Address final CodeRabbit PR #68 mock nitpick | Align `MockRandomizerCore.setTokenHash` with production caller/overwrite guards and rerun focused lifecycle tests, `make check`, Windows wrapper, formatting, and whitespace checks |
+| 2026-06-10 16:20 | Merge PR #68 | Final head was CI-clean, CodeRabbit reported no actionable comments, Claude was not required for this PR per user instruction, and issue #40 closed completed |
+| 2026-06-10 16:21 | Select Queue Item 28 | Next randomness blocker is `P0-RAND-006`; retry should reuse the accepted derived seed and avoid new provider output |
+| 2026-06-10 16:31 | Implement Queue Item 28 local draft | Added admin-gated VRF/arRNG `retryRandomnessPostProcessing`, lifecycle retry count/limit/events/errors, focused retry tests, and docs/roadmap/run-state traceability |
+| 2026-06-10 16:39 | Validate Queue Item 28 locally | Full `make check`, Windows wrapper, focused retry/lifecycle tests, formatting, diff hygiene, traceability, heading scan, and Slither comparison all passed with high/medium counts unchanged |
+| 2026-06-10 16:43 | Expand Queue Item 28 retry validation | Added explicit retry rejection tests for changed randomizer epoch and provider, refreshed full gates to 168 passing tests, and kept Slither high/medium counts unchanged |
 
 ## Resume Instructions
 

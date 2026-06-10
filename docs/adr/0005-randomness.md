@@ -88,17 +88,21 @@ Current implementation status:
   failures after provider output is validated, mark the request
   `FailedPostProcessing`, store the derived seed and failure-data hash, and
   clear pending counts without requesting new randomness.
+- VRF and arRNG adapters expose an admin-gated
+  `retryRandomnessPostProcessing` path that retries only deterministic core
+  writes for `FailedPostProcessing` requests, reuses the stored derived seed,
+  emits retry events, and caps attempts at
+  `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`.
 - `RandomizerRNG` guards the arRNG request-submission window where the provider
   request ID is returned from an external payable call, and tests prove a
   reentrant controller cannot fulfill during that window.
 - The derived seed includes provider adapter, provider request ID, collection,
   token, randomizer epoch, and provider output via `abi.encode`.
 - `RandomizerNXT` no longer advertises itself as a production randomizer.
-- Remaining implementation work includes deterministic post-processing retry,
-  callback-after-burn policy, richer metadata state exposure, raw-output hash
-  storage policy, provider configuration events/runbooks, canonical
-  core/coordinator-owned lifecycle state, and final handling of `XRandoms` weak
-  helper randomness.
+- Remaining implementation work includes callback-after-burn policy, richer
+  metadata state exposure, raw-output hash storage policy, provider configuration
+  events/runbooks, canonical core/coordinator-owned lifecycle state, and final
+  handling of `XRandoms` weak helper randomness.
 
 ## Decision
 
@@ -380,7 +384,8 @@ Required events or stricter equivalents:
 - `RandomnessFulfilled(collectionId, tokenId, provider, requestId, epoch, seed, rawOutputHash)`
 - `RandomnessStale(collectionId, tokenId, provider, requestId, epoch, reason)`
 - `RandomnessPostProcessingFailed(requestId, collectionId, tokenId, provider, epoch, seed, failureDataHash)`
-- `RandomnessPostProcessingRetried(collectionId, tokenId, provider, requestId, epoch, seed)`
+- `RandomnessPostProcessingRetried(requestId, collectionId, tokenId, provider, epoch, retryCount, seed)`
+- `RandomnessPostProcessingRetryFailed(requestId, collectionId, tokenId, provider, epoch, retryCount, seed, failureDataHash)`
 - `RandomizerProviderConfigUpdated(provider, field, oldValueHash, newValueHash, admin)`
 
 Required views or stricter equivalents:
@@ -513,9 +518,6 @@ fulfillment safety should come from strict validation.
 
 ## Open Follow-Ups
 
-- Implement [P0-RAND-006](https://github.com/6529-Collections/6529Stream/issues/42)
-  for bounded deterministic retry of `FailedPostProcessing` requests without
-  requesting new provider output.
 - Implement [P0-RAND-007](https://github.com/6529-Collections/6529Stream/issues/43)
   for the final raw-output versus derived-seed storage policy.
 - Define and test callback-after-burn behavior.

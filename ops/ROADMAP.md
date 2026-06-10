@@ -1128,13 +1128,17 @@ Current behavior:
 - `StreamCore.addRandomizer` now blocks ordinary provider migration while the
   current lifecycle-aware adapter reports pending requests; explicit admin stale
   marking or valid fulfillment clears pending counts before migration.
-- Callback-after-burn policy, failed post-processing retry, canonical
-  core/coordinator-owned lifecycle state, and richer metadata state remain open.
+- Callback-after-burn policy, canonical core/coordinator-owned lifecycle state,
+  and richer metadata state remain open.
 - Failed post-processing is now observable: if core token-hash writing reverts
   after valid provider output is accepted, VRF and arRNG adapters mark the
   request `FailedPostProcessing`, store the derived seed and failure-data hash,
   clear pending counts, emit a failure event with provider and epoch context,
   and reject duplicate callbacks.
+- Failed post-processing retry is now bounded and deterministic: admins can call
+  `retryRandomnessPostProcessing` only on `FailedPostProcessing` requests, the
+  retry uses the stored derived seed, emits retry success/failure events, and
+  cannot request new provider output.
 - `RandomizerNXT` and `XRandoms` use block-derived helper randomness that is
   out of production scope under ADR 0005. `RandomizerNXT` no longer advertises
   itself as a production randomizer; `XRandoms` still needs final removal,
@@ -1167,11 +1171,11 @@ Required code changes:
   Implemented default policy: ordinary migration is blocked while the current
   lifecycle-aware adapter reports pending requests.
 - Record failed or stale post-processing for retry by a separate function if
-  needed. Stale marking is implemented; failed post-processing state is
-  implemented for VRF and arRNG adapters. Manual retry remains
-  `P0-RAND-006`.
+  needed. Stale marking, failed post-processing state, and bounded deterministic
+  manual retry are implemented for VRF and arRNG adapters.
 - Add a bounded manual-retry path only for deterministic post-processing
-  failures, not for changing random output.
+  failures, not for changing random output. Implemented for VRF and arRNG
+  adapters.
 - Do not allow user-significant inputs after randomness request.
 - Expose request lifecycle views by request ID and token ID. Implemented for
   request records, request state, token-level request/state views,
@@ -1202,6 +1206,8 @@ Child tickets:
   default blocking policy for lifecycle-aware providers.
 - [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42):
   Add bounded manual retry for deterministic post-processing failures.
+  Implemented for VRF and arRNG adapters with stored-seed retry and attempt
+  limits.
 - [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43):
   Implement raw random words versus derived hash storage policy.
 
@@ -1218,7 +1224,9 @@ Required tests:
   new-provider fulfillment.
 - Failed post-processing state is observable. Implemented for VRF and arRNG
   adapters when deterministic core hash writing reverts.
-- Manual retry cannot change random output.
+- Manual retry cannot change random output. Implemented in
+  `StreamRandomizerRetry.t.sol` by retrying only the stored derived seed, with no
+  random-word, token, or collection inputs.
 - Callback after burn follows ADR behavior.
 - Fulfillment does not revert in normal operation.
 - Unknown request ID fails. Implemented.
@@ -1266,7 +1274,9 @@ Acceptance criteria:
   `PendingRandomnessRequests`; explicit stale marking or fulfillment clears the
   lifecycle-aware pending count before migration.
 - Manual retry can only retry deterministic post-processing using the same
-  provider output. Still open under `P0-RAND-006`.
+  provider output. Implemented for VRF and arRNG adapters through stored-seed
+  retry, function-admin authorization, retry success/failure events, and
+  `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`.
 - `RandomizerNXT` and `XRandoms` are removed from production paths, moved to
   test/demo scope, or otherwise made impossible to configure for production
   drops.
@@ -1965,7 +1975,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerLifecycle.t.sol` | Passing for stale epoch rejection, admin-marked stale requests, old-provider callback rejection after explicit stale marking, and duplicate old-provider callbacks after fulfillment | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | Passing for lifecycle state coverage: pending, fulfilled, stale, and failed post-processing states are observable by request and token where applicable; VRF and arRNG adapters catch deterministic core hash-writing failures, record `FailedPostProcessing`, store the derived seed and failure-data hash, clear pending counts, emit a failure event with provider and epoch context, and reject duplicate callbacks. Metadata integration remains Gate D work. | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | Passing for default block-by-pending policy: VRF and arRNG adapters expose lifecycle-aware pending counts; `StreamCore.addRandomizer` rejects migration while pending requests exist; fulfilled and stale requests clear pending counts; migration with no pending requests emits the provider/epoch event; a new provider can request and fulfill after migration. Automatic bulk stale marking remains future incident tooling. | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
-| Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Missing | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
+| Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Passing for bounded deterministic retry: VRF and arRNG adapters expose admin-gated `retryRandomnessPostProcessing`, retry only `FailedPostProcessing` requests, reuse the stored derived seed, emit retry success/failure and fulfillment events, preserve token/collection/provider/epoch binding validation, reject unauthorized callers and terminal fulfilled requests, and cap repeated failed attempts with `MAX_RANDOMNESS_POST_PROCESSING_RETRIES` | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
 | Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerSeed.t.sol` | In Progress: derived seed includes provider, request ID, collection, token, randomizer epoch, and provider output via `abi.encode`; explicit raw-output hash storage remains missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
 | Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerProductionScope.t.sol` | In Progress: `RandomizerNXT.isRandomizerContract()` returns false and `StreamCore.addRandomizer` rejects it for production collections; `XRandoms` Slither `weak-prng` rows remain open pending final scoping/removal | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |
 | Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadata.t.sol` | Initial off-chain characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; on-chain pending/final and golden-file tests missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
