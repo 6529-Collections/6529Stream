@@ -165,7 +165,15 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
         return totalRandomnessReserved();
     }
 
+    function totalReserved() public view returns (uint256) {
+        return totalRandomnessReserved();
+    }
+
     function emergencyWithdrawable() public pure returns (uint256) {
+        return surplus();
+    }
+
+    function surplus() public pure returns (uint256) {
         return 0;
     }
 

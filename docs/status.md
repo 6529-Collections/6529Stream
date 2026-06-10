@@ -21,7 +21,9 @@ The current Gate A smoke baseline proves:
   auction settlement, curator claim, withdrawal, emergency withdrawal,
   randomizer reserve, and forced-balance operations, proving the current local
   ledgers keep category totals, owed totals, balance coverage, reserves, and
-  emergency-withdrawable surplus coherent after each step.
+  emergency-withdrawable surplus coherent after each step. Current value-holding
+  payment surfaces also expose ADR-style local-ledger aliases for reserved
+  balances and surplus where applicable.
 - Randomizer tests now cover request lifecycle views, callback validation,
   raw-output hash storage, failed post-processing state, bounded deterministic
   post-processing retry, and the conservative provider-migration policy that
@@ -36,7 +38,8 @@ The current Gate A smoke baseline proves:
 
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including any future unified
-pull-payment ledger abstraction, fuller randomizer reserve lifecycle accounting,
+pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
+randomizer reserve lifecycle accounting,
 callback-after-burn policy, canonical randomizer lifecycle
 ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, signer lifecycle operations, dependency version/freeze

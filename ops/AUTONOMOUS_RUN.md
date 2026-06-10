@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/add-payment-invariant-baseline` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/76` |
+| Active PR branch | `codex/add-payment-ledger-view-aliases` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/77` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 20:42 UTC` |
+| Last updated | `2026-06-10 21:21 UTC` |
 
 ## Packaging Notes
 
@@ -89,7 +89,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Merged in PR #74 |
 | 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Merged in PR #75 |
 | 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | Merged in PR #76 |
-| 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | In progress on `codex/add-payment-invariant-baseline` |
+| 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
+| 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Open in PR #78 |
 
 ## Current PR Worklog
 
@@ -2961,7 +2962,7 @@ Outcome:
 
 ### PR `#77`: Add payment invariant baseline (Queue Item 35)
 
-Status: Open; CodeRabbit review fixes applied locally and ready to push.
+Status: Merged.
 Branch: `codex/add-payment-invariant-baseline`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/77`.
 Related issue:
@@ -3044,6 +3045,90 @@ Review requests:
   in the local review-fix diff.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #77 on `2026-06-10 20:57 UTC`.
+- GitHub CI run `27305755033` passed on the final head.
+- CodeRabbit status was green on the final head and previous review threads
+  were resolved as addressed by commit `5b25559`.
+- Issue #8 closed as completed.
+
+### PR `#78`: Add payment ledger view aliases (Queue Item 36)
+
+Status: Open; applying CodeRabbit nitpick after CI success.
+Branch: `codex/add-payment-ledger-view-aliases`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/78`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/26`
+
+Goal:
+
+- Close the remaining P0-PAY-002 view-surface gap by making the accepted ADR
+  0003 local-ledger model easier to query consistently.
+- Add additive read APIs for `totalReserved()` and `surplus()` to current
+  value-holding payment surfaces.
+- Add fixed-price category aliases in `StreamDrops` so poster, protocol, and
+  curator-reserve totals are available under ADR-style names.
+- Assert the aliases in `StreamPaymentsInvariant.t.sol` so mixed payment
+  operation sequences keep the new views coherent.
+- Reconcile roadmap/status/docs state without introducing a riskier shared
+  storage abstraction in this PR.
+
+Candidate files:
+
+- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/AuctionContract.sol`
+- `smart-contracts/StreamCuratorsPool.sol`
+- `smart-contracts/StreamMinter.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `test/StreamPaymentsInvariant.t.sol`
+- `docs/adr/0003-payment-accounting.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added additive local-ledger view aliases only; no existing payment behavior,
+  storage layout, authorization, custody, or withdrawal semantics changed.
+- `StreamDrops` now exposes fixed-price poster/protocol/curator-reserve totals
+  through ADR-style aliases and treats curator reserve as the contract-local
+  reserved balance.
+- `StreamAuctions` now exposes active highest-bid escrow as its local reserved
+  balance and zero-valued aliases for categories it does not own.
+- `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG` now expose
+  the same `totalReserved()` / `surplus()` local-ledger view pattern.
+- The bounded payment sequence invariant now asserts the aliases after every
+  generated operation.
+
+Validation so far:
+
+- `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv` passed.
+- `make check` passed with 188 tests.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
+  188 tests.
+- `forge fmt --check smart-contracts\StreamDrops.sol
+  smart-contracts\AuctionContract.sol smart-contracts\StreamCuratorsPool.sol
+  smart-contracts\StreamMinter.sol smart-contracts\RandomizerRNG.sol
+  test\StreamPaymentsInvariant.t.sol` passed.
+- `git diff --check` passed.
+- `rg -n "totalReserved\(\)|surplus\(\)|P0-PAY-002|Add payment ledger view
+  aliases" smart-contracts test docs ops` found the expected code, test, docs,
+  and run-state references.
+- Slither completed with the existing accepted baseline unchanged: 693 total
+  findings; High 4, Medium 19, Low 82, Informational 577, Optimization 11.
+
+Review requests:
+
+- CodeRabbit requested in issue comment `4674566512`.
+- CodeRabbit completed with green status and one valid nitpick in review
+  `4471658076`; accepted by updating this section header to `PR #78`.
+- Claude remains intentionally skipped per current user instruction; use
+  CodeRabbit unless risk or future user instruction changes.
 
 ## Decision Log
 
@@ -3283,6 +3368,10 @@ Review requests:
 | 2026-06-10 20:27 | Implement Queue Item 35 local draft | Added a bounded payment sequence fuzz invariant harness covering local ledgers, owed totals, reserves, withdrawals, emergency surplus, randomizer reserves, and forced-balance surplus |
 | 2026-06-10 20:40 | Finish local Queue Item 35 validation | Focused payment invariant fuzzing, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither high/medium remain `4 High / 19 Medium` with the updated total at 693 findings |
 | 2026-06-10 20:42 | Open PR #77 and request CodeRabbit | Payment invariant baseline published at `https://github.com/6529-Collections/6529Stream/pull/77`; CodeRabbit review requested in issue comment `4674282933`, and Claude is skipped per current user instruction |
+| 2026-06-10 20:57 | Merge PR #77 | Payment invariant baseline merged as `9f2337009114fc4263bc88bc2f26f220d17c91fc`; CI and CodeRabbit were green, all visible review threads were resolved, and issue #8 closed completed |
+| 2026-06-10 21:02 | Select Queue Item 36 | The remaining P0-PAY-002 view-surface issue can be closed conservatively by exposing ADR 0003 local-ledger aliases and asserting them in the bounded payment invariant, without introducing a riskier shared storage abstraction |
+| 2026-06-10 21:12 | Open PR #78 and request CodeRabbit | Payment ledger view aliases published at `https://github.com/6529-Collections/6529Stream/pull/78`; CodeRabbit review requested in issue comment `4674566512`, and Claude remains skipped per current user instruction |
+| 2026-06-10 21:21 | Apply PR #78 CodeRabbit nitpick | CodeRabbit status was green and CI run `27306718755` passed; the only review note was to replace the run-state section header's `PR TBD` placeholder with concrete PR `#78` |
 
 ## Resume Instructions
 
