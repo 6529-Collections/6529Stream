@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/77` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 21:10 UTC` |
+| Last updated | `2026-06-10 21:12 UTC` |
 
 ## Packaging Notes
 
@@ -90,7 +90,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Merged in PR #75 |
 | 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | Merged in PR #76 |
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
-| 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | In progress on `codex/add-payment-ledger-view-aliases` |
+| 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Open in PR #78 |
 
 ## Current PR Worklog
 
@@ -3056,9 +3056,9 @@ Outcome:
 
 ### PR TBD: Add payment ledger view aliases (Queue Item 36)
 
-Status: Local implementation and validation complete; ready for PR packaging.
+Status: Open; waiting for GitHub CI and CodeRabbit.
 Branch: `codex/add-payment-ledger-view-aliases`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/78`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/26`
@@ -3124,7 +3124,7 @@ Validation so far:
 
 Review requests:
 
-- Pending PR open.
+- CodeRabbit requested in issue comment `4674566512`.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3368,6 +3368,7 @@ Review requests:
 | 2026-06-10 20:42 | Open PR #77 and request CodeRabbit | Payment invariant baseline published at `https://github.com/6529-Collections/6529Stream/pull/77`; CodeRabbit review requested in issue comment `4674282933`, and Claude is skipped per current user instruction |
 | 2026-06-10 20:57 | Merge PR #77 | Payment invariant baseline merged as `9f2337009114fc4263bc88bc2f26f220d17c91fc`; CI and CodeRabbit were green, all visible review threads were resolved, and issue #8 closed completed |
 | 2026-06-10 21:02 | Select Queue Item 36 | The remaining P0-PAY-002 view-surface issue can be closed conservatively by exposing ADR 0003 local-ledger aliases and asserting them in the bounded payment invariant, without introducing a riskier shared storage abstraction |
+| 2026-06-10 21:12 | Open PR #78 and request CodeRabbit | Payment ledger view aliases published at `https://github.com/6529-Collections/6529Stream/pull/78`; CodeRabbit review requested in issue comment `4674566512`, and Claude remains skipped per current user instruction |
 
 ## Resume Instructions
 
