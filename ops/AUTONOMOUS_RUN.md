@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/70` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 18:18 UTC` |
+| Last updated | `2026-06-10 18:20 UTC` |
 
 ## Packaging Notes
 
@@ -84,7 +84,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
 | 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Merged in PR #70 |
-| 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Locally validated on `codex/dependency-script-safe-encoding`; ready to open PR |
+| 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Open in PR #71; local validation complete, CI and CodeRabbit pending |
 
 ## Current PR Worklog
 
@@ -2525,10 +2525,12 @@ Outcome:
 - Claude was not requested for this PR per user instruction; CodeRabbit was
   sufficient.
 
-### PR candidate: Fix dependency script packed encoding (Queue Item 30)
+### PR #71: Fix dependency script packed encoding (Queue Item 30)
 
-Status: Locally validated; ready to open PR.
+Status: Open; local validation complete, CI and CodeRabbit pending.
 Branch: `codex/dependency-script-safe-encoding`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/71`.
+Latest head before PR-state update: `457ca920cb55c9d4b75efcede714ccc1ef700a5b`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/9`
@@ -2602,6 +2604,12 @@ Validation so far:
   final clean comment `4672928268`.
 - Final Slither confirmation returned
   `{"slither_exit":-1,"total":685,"high":8,"medium":28,"low":63,"informational":580,"optimization":6,"encode_packed_collision":0,"uninitialized_local":10,"calls_loop":8}`.
+
+Review requests:
+
+- CodeRabbit request pending after PR-state update lands.
+- Claude is intentionally skipped per current user instruction; use CodeRabbit
+  unless risk or future user instruction changes.
 
 ## Decision Log
 
@@ -2814,6 +2822,7 @@ Validation so far:
 | 2026-06-10 18:05 | Select Queue Item 30 | Next open P0 Slither blocker is `P0-META-001`, a focused dependency-script `encode-packed-collision` fix with clear tests and low coupling to later metadata/freeze work |
 | 2026-06-10 18:11 | Implement Queue Item 30 local draft | Added typed dependency chunk/content hashes, initialized `StreamCore` dependency script rendering, focused ambiguous-boundary tests, and Slither delta evidence showing `encode-packed-collision=0` |
 | 2026-06-10 18:18 | Validate Queue Item 30 locally | Focused metadata tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and final Slither confirmation pass with 173 tests and `encode-packed-collision=0` |
+| 2026-06-10 18:20 | Open PR #71 | Dependency-script encoding hash fix published with full local validation evidence; CodeRabbit review will be requested on the PR-state head |
 
 ## Resume Instructions
 
