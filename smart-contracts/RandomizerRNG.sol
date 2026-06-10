@@ -73,7 +73,17 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
         }
         (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed) =
             _fulfillRandomnessRequest(gencoreContract, id, numbers);
-        gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed);
+        // The lifecycle marks this request non-pending before the external core
+        // write, so duplicate callbacks and stale marking fail during any
+        // reentrant read/write attempt. The catch records only the deterministic
+        // local post-processing failure outcome.
+        // slither-disable-start reentrancy-no-eth,reentrancy-events
+        try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
+            _confirmRandomnessFulfillment(id);
+        } catch (bytes memory failureData) {
+            _markRandomnessPostProcessingFailed(id, failureData);
+        }
+        // slither-disable-end reentrancy-no-eth,reentrancy-events
     }
 
     // function that calculates the random hash and returns it to the gencore contract

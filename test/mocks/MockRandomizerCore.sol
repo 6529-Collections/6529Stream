@@ -2,9 +2,13 @@
 pragma solidity ^0.8.19;
 
 contract MockRandomizerCore {
+    error MockTokenHashRejected();
+
     mapping(uint256 => uint256) private randomizerEpochs;
     mapping(uint256 => address) private randomizerContracts;
     mapping(uint256 => uint256) private tokenCollections;
+    mapping(uint256 => bytes32) private tokenHashes;
+    bool private rejectTokenHash;
 
     function setRandomizer(uint256 collectionId, address randomizer, uint256 epoch) external {
         randomizerContracts[collectionId] = randomizer;
@@ -13,6 +17,21 @@ contract MockRandomizerCore {
 
     function setTokenCollection(uint256 tokenId, uint256 collectionId) external {
         tokenCollections[tokenId] = collectionId;
+    }
+
+    function setRejectTokenHash(bool status) external {
+        rejectTokenHash = status;
+    }
+
+    function setTokenHash(uint256, uint256 tokenId, bytes32 tokenHash) external {
+        if (rejectTokenHash) {
+            revert MockTokenHashRejected();
+        }
+        tokenHashes[tokenId] = tokenHash;
+    }
+
+    function retrieveTokenHash(uint256 tokenId) external view returns (bytes32) {
+        return tokenHashes[tokenId];
     }
 
     function viewColIDforTokenID(uint256 tokenId) external view returns (uint256) {

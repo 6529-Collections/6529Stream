@@ -13,15 +13,16 @@ The current Gate A smoke baseline proves:
   randomness lifecycle behavior. Current emergency-withdrawal target-state
   tests also cover explicit emergency recipients, `StreamMinter` surplus
   withdrawal, and `NextGenRandomizerRNG` reserve boundaries.
-- Randomizer tests now cover request lifecycle views, callback validation, and
-  the conservative provider-migration policy that blocks lifecycle-aware
-  provider replacement while collection requests are pending.
+- Randomizer tests now cover request lifecycle views, callback validation,
+  failed post-processing state, and the conservative provider-migration policy
+  that blocks lifecycle-aware provider replacement while collection requests
+  are pending.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including broader pull-payment
 accounting and cross-contract invariants, fuller randomizer reserve lifecycle
-accounting, deterministic randomness retry, callback-after-burn policy,
+accounting, bounded randomness retry, callback-after-burn policy,
 canonical randomizer lifecycle ownership, static-analysis triage, signer
 lifecycle operations, deployment discipline, and the broader P0/P1 test suite.
 

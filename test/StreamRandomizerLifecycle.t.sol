@@ -26,6 +26,8 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
     bytes32 private constant PAUSE_REASON = keccak256("randomness-incident");
     bytes32 private constant COLLECTION_RANDOMIZER_UPDATED_TOPIC =
         keccak256("CollectionRandomizerUpdated(uint256,address,address,uint256)");
+    bytes32 private constant RANDOMNESS_POST_PROCESSING_FAILED_TOPIC =
+        keccak256("RandomnessPostProcessingFailed(uint256,uint256,uint256,bytes32,bytes32)");
 
     function testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce() public {
         (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
@@ -133,6 +135,68 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             abi.encodeWithSelector(StreamRandomizerLifecycle.EmptyRandomWords.selector, uint256(1))
         );
         coordinator.fulfill(vrf, 1, new uint256[](0));
+    }
+
+    function testVrfPostProcessingFailureRecordsFailedState() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        MockRandomizerCore core = new MockRandomizerCore();
+        MockVrfCoordinator coordinator = new MockVrfCoordinator();
+        NextGenRandomizerVRF vrf = new NextGenRandomizerVRF(
+            1, address(coordinator), address(core), address(deployed.admins)
+        );
+
+        core.setRandomizer(COLLECTION_ID, address(vrf), 1);
+        core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
+        core.setRejectTokenHash(true);
+
+        vm.prank(address(core));
+        vrf.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+
+        uint256[] memory words = _words(777);
+        bytes32 expectedSeed = keccak256(
+            abi.encode(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(1), words)
+        );
+        bytes32 failureDataHash =
+            keccak256(abi.encodeWithSelector(MockRandomizerCore.MockTokenHashRejected.selector));
+
+        vm.recordLogs();
+        coordinator.fulfill(vrf, 1, words);
+        _assertRandomnessPostProcessingFailed(
+            vm.getRecordedLogs(), address(vrf), 1, TOKEN_ID, expectedSeed, failureDataHash
+        );
+
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            vrf.retrieveRandomnessRequest(1);
+        uint256(request.state)
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing),
+                "failed state"
+            );
+        request.derivedSeed.assertEq(expectedSeed, "failed seed");
+        request.failureDataHash.assertEq(failureDataHash, "failure hash");
+        (request.fulfilledBlock > 0).assertTrue("failed block");
+        (request.fulfilledTimestamp > 0).assertTrue("failed timestamp");
+        vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
+        vrf.totalPendingRandomnessRequests().assertEq(0, "pending total");
+        core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "core hash");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestNotPending.selector,
+                uint256(1),
+                StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing
+            )
+        );
+        coordinator.fulfill(vrf, 1, words);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestNotPending.selector,
+                uint256(1),
+                StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing
+            )
+        );
+        vrf.markStaleRequest(1);
     }
 
     function testVrfStaleEpochOrProviderFulfillmentFails() public {
@@ -383,6 +447,57 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
     }
 
+    function testArrngPostProcessingFailureRecordsFailedState() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        MockRandomizerCore core = new MockRandomizerCore();
+        MockArrngLifecycleController controller = new MockArrngLifecycleController();
+        NextGenRandomizerRNG rng = new NextGenRandomizerRNG(
+            address(core), address(deployed.admins), address(controller)
+        );
+
+        core.setRandomizer(COLLECTION_ID, address(rng), 1);
+        core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
+        core.setRejectTokenHash(true);
+
+        vm.prank(address(core));
+        rng.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+
+        uint256[] memory words = _words(999);
+        bytes32 expectedSeed = keccak256(
+            abi.encode(address(rng), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(1), words)
+        );
+        bytes32 failureDataHash =
+            keccak256(abi.encodeWithSelector(MockRandomizerCore.MockTokenHashRejected.selector));
+
+        vm.recordLogs();
+        controller.fulfill(rng, 1, words);
+        _assertRandomnessPostProcessingFailed(
+            vm.getRecordedLogs(), address(rng), 1, TOKEN_ID, expectedSeed, failureDataHash
+        );
+
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            rng.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(request.state)
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing),
+                "failed state"
+            );
+        request.derivedSeed.assertEq(expectedSeed, "failed seed");
+        request.failureDataHash.assertEq(failureDataHash, "failure hash");
+        rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
+        rng.totalPendingRandomnessRequests().assertEq(0, "pending total");
+        core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "core hash");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestNotPending.selector,
+                uint256(1),
+                StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing
+            )
+        );
+        controller.fulfill(rng, 1, words);
+    }
+
     function testArrngControllerCannotReenterFulfillmentDuringRequest() public {
         DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
         ReentrantArrngLifecycleController controller = new ReentrantArrngLifecycleController();
@@ -516,6 +631,32 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             }
         }
         found.assertTrue("randomizer event");
+    }
+
+    function _assertRandomnessPostProcessingFailed(
+        Vm.Log[] memory logs,
+        address emitter,
+        uint256 requestId,
+        uint256 tokenId,
+        bytes32 expectedSeed,
+        bytes32 expectedFailureDataHash
+    ) private pure {
+        bool found = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == emitter && logs[i].topics.length == 4
+                    && logs[i].topics[0] == RANDOMNESS_POST_PROCESSING_FAILED_TOPIC
+                    && uint256(logs[i].topics[1]) == requestId
+                    && uint256(logs[i].topics[2]) == COLLECTION_ID
+                    && uint256(logs[i].topics[3]) == tokenId
+            ) {
+                (bytes32 actualSeed, bytes32 actualFailureDataHash) =
+                    abi.decode(logs[i].data, (bytes32, bytes32));
+                found =
+                    actualSeed == expectedSeed && actualFailureDataHash == expectedFailureDataHash;
+            }
+        }
+        found.assertTrue("failed event");
     }
 }
 

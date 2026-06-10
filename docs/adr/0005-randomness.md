@@ -84,6 +84,10 @@ Current implementation status:
 - Lifecycle-aware randomizer adapters expose per-collection and total pending
   request counts. `StreamCore.addRandomizer` blocks ordinary provider migration
   while the current lifecycle-aware provider reports pending requests.
+- VRF and arRNG adapters catch deterministic `setTokenHash` post-processing
+  failures after provider output is validated, mark the request
+  `FailedPostProcessing`, store the derived seed and failure-data hash, and
+  clear pending counts without requesting new randomness.
 - `RandomizerRNG` guards the arRNG request-submission window where the provider
   request ID is returned from an external payable call, and tests prove a
   reentrant controller cannot fulfill during that window.
@@ -91,9 +95,10 @@ Current implementation status:
   token, randomizer epoch, and provider output via `abi.encode`.
 - `RandomizerNXT` no longer advertises itself as a production randomizer.
 - Remaining implementation work includes deterministic post-processing retry,
-  callback-after-burn policy, richer metadata state exposure, provider
-  configuration events/runbooks, canonical core/coordinator-owned lifecycle
-  state, and final handling of `XRandoms` weak helper randomness.
+  callback-after-burn policy, richer metadata state exposure, raw-output hash
+  storage policy, provider configuration events/runbooks, canonical
+  core/coordinator-owned lifecycle state, and final handling of `XRandoms` weak
+  helper randomness.
 
 ## Decision
 
@@ -154,7 +159,7 @@ runbooks, and audits:
 - requested block and timestamp
 - fulfilled block and timestamp when fulfilled
 - random output hash or derived seed
-- post-processing failure reason when applicable
+- post-processing failure-data hash when applicable
 
 The request record must not be keyed only by token ID if a provider can return
 request IDs. The protocol must be able to answer "which exact request fulfilled
@@ -374,7 +379,7 @@ Required events or stricter equivalents:
 - `RandomnessRequested(collectionId, tokenId, provider, requestId, epoch)`
 - `RandomnessFulfilled(collectionId, tokenId, provider, requestId, epoch, seed, rawOutputHash)`
 - `RandomnessStale(collectionId, tokenId, provider, requestId, epoch, reason)`
-- `RandomnessPostProcessingFailed(collectionId, tokenId, provider, requestId, epoch, reason)`
+- `RandomnessPostProcessingFailed(collectionId, tokenId, provider, requestId, epoch, failureDataHash)`
 - `RandomnessPostProcessingRetried(collectionId, tokenId, provider, requestId, epoch, seed)`
 - `RandomizerProviderConfigUpdated(provider, field, oldValueHash, newValueHash, admin)`
 
@@ -508,13 +513,13 @@ fulfillment safety should come from strict validation.
 
 ## Open Follow-Ups
 
-- Implement [P0-RAND-001](https://github.com/6529-Collections/6529Stream/issues/37).
-- Implement [P0-RAND-002](https://github.com/6529-Collections/6529Stream/issues/38).
-- Implement [P0-RAND-003](https://github.com/6529-Collections/6529Stream/issues/39).
-- Implement [P0-RAND-004](https://github.com/6529-Collections/6529Stream/issues/40).
-- Implement [P0-RAND-005](https://github.com/6529-Collections/6529Stream/issues/41).
-- Implement [P0-RAND-006](https://github.com/6529-Collections/6529Stream/issues/42).
-- Implement [P0-RAND-007](https://github.com/6529-Collections/6529Stream/issues/43).
+- Implement [P0-RAND-006](https://github.com/6529-Collections/6529Stream/issues/42)
+  for bounded deterministic retry of `FailedPostProcessing` requests without
+  requesting new provider output.
+- Implement [P0-RAND-007](https://github.com/6529-Collections/6529Stream/issues/43)
+  for the final raw-output versus derived-seed storage policy.
+- Define and test callback-after-burn behavior.
 - Reconcile final metadata pending/freeze behavior with ADR 0006.
+- Add provider configuration events and production runbooks.
 - Update Slither baseline status after weak randomness code is removed, scoped,
   or otherwise resolved.
