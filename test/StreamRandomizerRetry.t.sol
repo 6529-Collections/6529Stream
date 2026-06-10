@@ -492,9 +492,10 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
                     bytes32 actualSeed,
                     bytes32 actualRawOutputHash
                 ) = abi.decode(logs[i].data, (address, uint256, uint256, bytes32, bytes32));
-                found = actualProvider == emitter && actualEpoch == 1
+                bool matches = actualProvider == emitter && actualEpoch == 1
                     && actualRetryCount == retryCount && actualSeed == expectedSeed
                     && actualRawOutputHash == expectedRawOutputHash;
+                found = found || matches;
             }
         }
         found.assertTrue("retry event");
@@ -526,10 +527,11 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
                     bytes32 actualRawOutputHash,
                     bytes32 actualFailureDataHash
                 ) = abi.decode(logs[i].data, (address, uint256, uint256, bytes32, bytes32, bytes32));
-                found = actualProvider == emitter && actualEpoch == 1
+                bool matches = actualProvider == emitter && actualEpoch == 1
                     && actualRetryCount == retryCount && actualSeed == expectedSeed
                     && actualRawOutputHash == expectedRawOutputHash
                     && actualFailureDataHash == _failureDataHash();
+                found = found || matches;
             }
         }
         found.assertTrue("retry failed event");
@@ -568,9 +570,10 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
                     bytes32 actualSeed,
                     bytes32 actualRawOutputHash
                 ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32));
-                found = actualProvider == expectedProvider
+                bool matches = actualProvider == expectedProvider
                     && actualRandomizerEpoch == expectedRandomizerEpoch
                     && actualSeed == expectedSeed && actualRawOutputHash == expectedRawOutputHash;
+                found = found || matches;
             }
         }
         found.assertTrue("fulfilled event");

@@ -99,19 +99,23 @@ raw-output hash; manual stale marking is observable; failed deterministic core
 post-processing records `FailedPostProcessing`, stores the derived seed,
 raw-output hash, and failure-data hash, clears pending counts, emits a failure
 event with provider, epoch, seed, and raw-output hash context, fulfillment
-events include the same provider and epoch context, and duplicate callbacks are
-rejected for both VRF and arRNG adapters; randomness-request pauses do not block
-valid fulfillment; a reentrant arRNG controller cannot fulfill during request
-submission; and ordinary randomizer migration is blocked while VRF or arRNG
-adapters report pending requests, then allowed after fulfillment or explicit
-stale marking. `RandomizerNXT` cannot be configured as a production randomizer.
+events include the same provider and epoch context, VRF and arRNG adapters both
+emit provider-specific raw-word fulfillment events, lifecycle interface views
+expose request records and raw-output hashes, stale requests keep a zero
+raw-output hash, and duplicate callbacks are rejected for both VRF and arRNG
+adapters; randomness-request pauses do not block valid fulfillment; a reentrant
+arRNG controller cannot fulfill during request submission; and ordinary
+randomizer migration is blocked while VRF or arRNG adapters report pending
+requests, then allowed after fulfillment or explicit stale marking.
+`RandomizerNXT` cannot be configured as a production randomizer.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be
 manually retried by an authorized admin using the stored derived seed and
 raw-output hash, successful retry emits retry and fulfillment events while
-refreshing fulfillment timing, retry failure emits only the retry-specific
-failure event, repeated deterministic failures remain bounded by
+refreshing fulfillment timing, retry success's fulfillment event is documented as
+a retry confirmation rather than a second provider callback, retry failure emits
+only the retry-specific failure event, repeated deterministic failures remain bounded by
 `MAX_RANDOMNESS_POST_PROCESSING_RETRIES`, unauthorized retry fails, terminal
 fulfillment cannot be retried, and changed token-to-collection, provider, or
 epoch bindings fail before retry state changes in both adapters.

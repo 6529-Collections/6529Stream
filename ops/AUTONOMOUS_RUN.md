@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/69` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 17:46 UTC` |
+| Last updated | `2026-06-10 17:56 UTC` |
 
 ## Packaging Notes
 
@@ -83,7 +83,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
-| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Open in PR #70; awaiting CI and CodeRabbit |
+| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Open in PR #70; CodeRabbit response locally addressed |
 
 ## Current PR Worklog
 
@@ -2401,7 +2401,8 @@ Outcome:
 
 ### Next PR: Store raw random output hashes (Queue Item 29)
 
-Status: PR #70 open; awaiting CI and CodeRabbit.
+Status: PR #70 open; CodeRabbit response locally addressed and validated, ready
+to push review-response commit.
 Branch: `codex/randomizer-raw-output-hash`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/70`.
 Related issue:
@@ -2424,6 +2425,7 @@ Goal:
 Candidate files:
 
 - `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/IRandomizerLifecycle.sol`
 - `smart-contracts/RandomizerVRF.sol`
 - `smart-contracts/RandomizerRNG.sol`
 - `test/StreamRandomizerLifecycle.t.sol`
@@ -2444,16 +2446,23 @@ Initial implementation notes:
   keccak256(abi.encode(randomWords))` and derives the token seed from
   `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token,
   randomizer epoch, and `rawOutputHash`.
-- Full provider word arrays remain outside contract storage; VRF still emits
-  provider-specific `RequestFulfilled` words as before.
+- Full provider word arrays remain outside contract storage; VRF and arRNG now
+  both emit provider-specific `RequestFulfilled` words for off-chain
+  auditability.
 - Fulfillment, failed post-processing, retry success, and retry failure events
   now include both the derived seed and raw-output hash. Fulfillment events also
   include provider and randomizer epoch context for indexers.
 - `RandomnessRequest` views by request ID and token ID expose both seed and
-  raw-output hash.
+  raw-output hash, and `IRandomizerLifecycle` now exposes those lifecycle views
+  for typed monitoring and audit tooling.
 - Added coverage that post-request mutable `tokenData` changes do not affect the
   stored seed or raw-output hash because seed derivation is independent from
   mutable metadata.
+- Added explicit stale-request coverage that `rawOutputHash` remains zero before
+  fulfillment, plus provider raw-word event assertions and monotonic log-scan
+  helper matching.
+- Documented that deterministic retry success emits retry plus fulfillment
+  confirmation for the same request ID.
 - Issue #43 requires stored randomness data to match ADR 0005, deterministic
   token hash derivation from stored data, no post-request user-significant
   mutation that can bias output, and indexer-sufficient events.
@@ -2484,10 +2493,20 @@ Validation so far:
   `slither_exit=-1`, `total=687`, `high=9`, `medium=29`, `weak-prng=2`,
   `arbitrary-send-eth=0`, `reentrancy-eth=0`, `reentrancy-no-eth=0`,
   `reentrancy-events=22`.
+- After CodeRabbit review comments, refreshed focused lifecycle and retry
+  suites, `forge fmt --check`, `git diff --check`, traceability grep, Markdown
+  heading scan, full `make check`, Windows `scripts\check.ps1`, and Slither
+  baseline comparison. Results remained 171 tests passing and Slither unchanged
+  at `total=687`, `high=9`, `medium=29`.
 
 Review requests:
 
 - CodeRabbit requested in issue comment `4672775171`.
+- CodeRabbit refresh requested in issue comment `4672782169` after the state
+  commit moved the head.
+- CodeRabbit review comments `4672797859` and `4672799547` were addressed
+  locally by adding interface views, arRNG provider raw-word events, retry event
+  documentation, stale zero-hash coverage, and monotonic log helpers.
 
 ## Decision Log
 
@@ -2693,6 +2712,8 @@ Review requests:
 | 2026-06-10 17:45 | Validate Queue Item 29 locally | Focused lifecycle/retry suites, full `make check`, Windows wrapper, formatting, diff hygiene, traceability, heading scan, and Slither baseline comparison all pass with 171 total tests and unchanged high/medium counts |
 | 2026-06-10 17:45 | Use CodeRabbit-only review path for Queue Item 29 | Latest user instruction says Claude is not needed and CodeRabbit is fine, so this PR will request CodeRabbit explicitly and skip Claude unless risk or new instructions change |
 | 2026-06-10 17:46 | Open PR #70 | PR packages P0-RAND-007 raw-output hash storage, domain-separated seed derivation, event/view exposure, focused tests, full local validation evidence, and a CodeRabbit review request |
+| 2026-06-10 17:52 | Address CodeRabbit PR #70 review | Add lifecycle interface request views, arRNG provider raw-word fulfillment event, stale zero-hash coverage, monotonic log helpers, retry-event documentation, and a defense-in-depth seed guard comment |
+| 2026-06-10 17:56 | Validate CodeRabbit PR #70 review response | Focused lifecycle/retry suites, full `make check`, Windows wrapper, formatting, diff hygiene, traceability, heading scan, and Slither baseline comparison all pass with 171 tests and unchanged high/medium counts |
 
 ## Resume Instructions
 

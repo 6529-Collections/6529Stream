@@ -257,6 +257,8 @@ abstract contract StreamRandomizerLifecycle {
             request.randomizerEpoch,
             rawOutputHash
         );
+        // This should be unreachable for keccak256 output, but the explicit
+        // guard preserves the no-zero-seed invariant if derivation changes.
         if (derivedSeed == bytes32(0)) {
             revert ZeroDerivedSeed(_requestId);
         }

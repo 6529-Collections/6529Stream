@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IXRandoms.sol";
+import "../smart-contracts/IRandomizerLifecycle.sol";
 import "../smart-contracts/RandomizerNXT.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
@@ -31,6 +32,8 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         keccak256("CollectionRandomizerUpdated(uint256,address,address,uint256)");
     bytes32 private constant RANDOMNESS_FULFILLED_TOPIC =
         keccak256("RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)");
+    bytes32 private constant PROVIDER_REQUEST_FULFILLED_TOPIC =
+        keccak256("RequestFulfilled(uint256,uint256[])");
     bytes32 private constant RANDOMNESS_POST_PROCESSING_FAILED_TOPIC = keccak256(
         "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)"
     );
@@ -61,16 +64,11 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             _expectedSeed(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words);
         vm.recordLogs();
         coordinator.fulfill(vrf, 1, words);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
         _assertRandomnessFulfilled(
-            vm.getRecordedLogs(),
-            address(vrf),
-            1,
-            TOKEN_ID,
-            address(vrf),
-            uint256(2),
-            expectedSeed,
-            rawOutputHash
+            logs, address(vrf), 1, TOKEN_ID, address(vrf), uint256(2), expectedSeed, rawOutputHash
         );
+        _assertProviderRequestFulfilled(logs, address(vrf), 1, words);
 
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(expectedSeed, "token hash");
         request = vrf.retrieveRandomnessRequest(1);
@@ -80,6 +78,15 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             );
         request.derivedSeed.assertEq(expectedSeed, "stored seed");
         request.rawOutputHash.assertEq(rawOutputHash, "raw output hash");
+        IRandomizerLifecycle lifecycle = IRandomizerLifecycle(address(vrf));
+        IRandomizerLifecycle.RandomnessRequest memory interfaceRequest =
+            lifecycle.retrieveRandomnessRequest(1);
+        uint256(interfaceRequest.state)
+            .assertEq(uint256(IRandomizerLifecycle.RandomnessRequestState.Fulfilled), "iface");
+        interfaceRequest.rawOutputHash.assertEq(rawOutputHash, "iface raw hash");
+        lifecycle.requestToToken(1).assertEq(TOKEN_ID, "iface request token");
+        lifecycle.tokenToRequest(TOKEN_ID).assertEq(1, "iface token request");
+        lifecycle.tokenIdToCollection(TOKEN_ID).assertEq(COLLECTION_ID, "iface token collection");
         vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "collection cleared");
         vrf.totalPendingRandomnessRequests().assertEq(0, "total cleared");
 
@@ -293,8 +300,15 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             .assertEq(
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "token stale"
             );
+        request.rawOutputHash.assertEq(bytes32(0), "stale raw hash");
         uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "view stale");
+        IRandomizerLifecycle lifecycle = IRandomizerLifecycle(address(vrf));
+        IRandomizerLifecycle.RandomnessRequest memory interfaceRequest =
+            lifecycle.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(interfaceRequest.state)
+            .assertEq(uint256(IRandomizerLifecycle.RandomnessRequestState.Stale), "iface stale");
+        interfaceRequest.rawOutputHash.assertEq(bytes32(0), "iface stale raw hash");
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -482,7 +496,9 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         bytes32 rawOutputHash = _rawOutputHash(words);
         bytes32 expectedSeed =
             _expectedSeed(address(rng), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words);
+        vm.recordLogs();
         controller.fulfill(rng, 1, words);
+        _assertProviderRequestFulfilled(vm.getRecordedLogs(), address(rng), 1, words);
 
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(expectedSeed, "token hash");
         uint256(rng.randomnessRequestState(1))
@@ -715,12 +731,51 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                     bytes32 actualSeed,
                     bytes32 actualRawOutputHash
                 ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32));
-                found = actualProvider == expectedProvider
+                bool matches = actualProvider == expectedProvider
                     && actualRandomizerEpoch == expectedRandomizerEpoch
                     && actualSeed == expectedSeed && actualRawOutputHash == expectedRawOutputHash;
+                found = found || matches;
             }
         }
         found.assertTrue("fulfilled event");
+    }
+
+    function _assertProviderRequestFulfilled(
+        Vm.Log[] memory logs,
+        address emitter,
+        uint256 requestId,
+        uint256[] memory expectedWords
+    ) private pure {
+        bool found = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == emitter && logs[i].topics.length == 1
+                    && logs[i].topics[0] == PROVIDER_REQUEST_FULFILLED_TOPIC
+            ) {
+                (uint256 actualRequestId, uint256[] memory actualWords) =
+                    abi.decode(logs[i].data, (uint256, uint256[]));
+                bool matches =
+                    actualRequestId == requestId && _wordsMatch(actualWords, expectedWords);
+                found = found || matches;
+            }
+        }
+        found.assertTrue("provider fulfilled event");
+    }
+
+    function _wordsMatch(uint256[] memory actualWords, uint256[] memory expectedWords)
+        private
+        pure
+        returns (bool)
+    {
+        if (actualWords.length != expectedWords.length) {
+            return false;
+        }
+        for (uint256 i = 0; i < actualWords.length; i++) {
+            if (actualWords[i] != expectedWords[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function _assertCollectionRandomizerUpdated(
@@ -772,9 +827,10 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                     bytes32 actualRawOutputHash,
                     bytes32 actualFailureDataHash
                 ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32, bytes32));
-                found = actualProvider == emitter && actualEpoch == expectedEpoch
+                bool matches = actualProvider == emitter && actualEpoch == expectedEpoch
                     && actualSeed == expectedSeed && actualRawOutputHash == expectedRawOutputHash
                     && actualFailureDataHash == expectedFailureDataHash;
+                found = found || matches;
             }
         }
         found.assertTrue("failed event");

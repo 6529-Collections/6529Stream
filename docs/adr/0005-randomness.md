@@ -102,6 +102,9 @@ Current implementation status:
 - The derived seed includes `RANDOMNESS_SEED_TYPEHASH`, provider adapter,
   provider request ID, collection, token, randomizer epoch, and the stored
   raw-output hash via `abi.encode`.
+- VRF and arRNG adapters both emit provider-specific `RequestFulfilled` events
+  with the raw provider words for off-chain auditability; contract state remains
+  hash-only.
 - `RandomizerNXT` no longer advertises itself as a production randomizer.
 - Remaining implementation work includes callback-after-burn policy, richer
   metadata state exposure, provider configuration events/runbooks, canonical
@@ -392,6 +395,11 @@ Required events or stricter equivalents:
 - `RandomnessPostProcessingRetried(requestId, collectionId, tokenId, provider, epoch, retryCount, seed, rawOutputHash)`
 - `RandomnessPostProcessingRetryFailed(requestId, collectionId, tokenId, provider, epoch, retryCount, seed, rawOutputHash, failureDataHash)`
 - `RandomizerProviderConfigUpdated(provider, field, oldValueHash, newValueHash, admin)`
+
+Successful deterministic post-processing retries emit
+`RandomnessPostProcessingRetried` followed by `RandomnessFulfilled` for the same
+request ID. Indexers should treat that fulfillment event as retry success
+confirmation, not as a second provider callback.
 
 Required views or stricter equivalents:
 
