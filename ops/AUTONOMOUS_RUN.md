@@ -1440,7 +1440,7 @@ Outcome:
 
 ### PR candidate: Fixed-price pull payments (Queue Item 19)
 
-Status: Open; CodeRabbit nitpick fix locally validated and ready to push.
+Status: Ready to merge after final state commit CI.
 Branch: `codex/fixed-price-pull-payments`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/60`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/27`.
@@ -1522,6 +1522,10 @@ Review feedback:
   `forge test --match-contract StreamFixedPricePaymentsTest -vvv`,
   `forge fmt --check test\StreamFixedPricePayments.t.sol`, and
   `git diff --check` passed locally.
+- Review-fix commit `b2d0a7481bc8392b1504b3a8687a12f274d4226e` passed CI
+  run `27269901786`. No inline review threads are open. CodeRabbit status
+  remains pending, but PR comment `4669162764` documents the stale-status
+  exception and clean review evidence.
 
 ## Decision Log
 
@@ -1668,6 +1672,7 @@ Review feedback:
 | 2026-06-10 10:18 | Request Claude review on PR #60 | Explicit review ping added in issue comment `4669058148` because Claude may not run automatically |
 | 2026-06-10 10:23 | Nudge CodeRabbit PR #60 | CodeRabbit status remained pending after CI passed; issue comment `4669093106` requested latest-head review |
 | 2026-06-10 10:26 | Address CodeRabbit PR #60 nitpick | Documented intentional Solidity 0.8.19 `selfdestruct` usage in the forced-ETH test helper and reran focused fixed-price validation |
+| 2026-06-10 10:31 | Document PR #60 merge decision | CI passed on review-fix head, Claude was unavailable due to organization overage, CodeRabbit's only finding was addressed, no inline threads are open, and stale CodeRabbit status is documented in issue comment `4669162764` |
 
 ## Resume Instructions
 
