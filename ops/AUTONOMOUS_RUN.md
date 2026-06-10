@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/80` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 22:22 UTC` |
+| Last updated | `2026-06-10 22:25 UTC` |
 
 ## Packaging Notes
 
@@ -92,7 +92,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
-| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | In progress on `codex/metadata-golden-tests` |
+| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | PR #81 open |
 
 ## Current PR Worklog
 
@@ -3242,11 +3242,11 @@ Outcome:
   comments.
 - Issue #79 closed as completed.
 
-### PR TBD: Add metadata schema and golden-file tests (Queue Item 38)
+### PR #81: Add metadata schema and golden-file tests (Queue Item 38)
 
-Status: Local implementation validated; PR not opened yet.
+Status: PR open; waiting for GitHub CI and CodeRabbit.
 Branch: `codex/metadata-golden-tests`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/81`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/46`
@@ -3307,6 +3307,12 @@ Validation so far:
 - Slither baseline comparison passed with no new detector count:
   721 total findings, 4 High, 19 Medium, 92 Low, 595 Informational, and 11
   Optimization.
+
+Review requests:
+
+- CodeRabbit requested in issue comment `4675228562`.
+- Claude remains intentionally skipped per current user instruction; use
+  CodeRabbit unless risk or future user instruction changes.
 
 ## Decision Log
 
@@ -3557,6 +3563,7 @@ Validation so far:
 | 2026-06-10 22:08 | Merge PR #80 | CI passed on final head `d4a13a19c19a5f609ea75a308f6defdf17c019e5`, CodeRabbit status was green with no actionable comments, merge commit is `9c81f71c59357dd124d3513ca6a006ceeba9ad55`, and issue #79 closed completed |
 | 2026-06-10 22:10 | Select Queue Item 38 | Next Gate D gap is P1-META-001 metadata schema and golden-file coverage because pending/final/on-chain metadata fixtures remain missing while the randomness and payment foundations are now in place |
 | 2026-06-10 22:22 | Finish local Queue Item 38 validation | Metadata golden fixtures now lock current off-chain pending/final and current on-chain pending/final outputs; focused tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts |
+| 2026-06-10 22:25 | Open PR #81 | Metadata golden baseline PR opened on head `a2218e110ff5886dd94db74ead3986afcfcad0d6`; CodeRabbit requested in issue comment `4675228562`; Claude intentionally skipped per current user instruction |
 
 ## Resume Instructions
 
