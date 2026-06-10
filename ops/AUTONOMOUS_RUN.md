@@ -372,7 +372,8 @@ Outcome:
 
 ### PR #20: Drop authorization ADR (Queue Item 7)
 
-Status: Open; waiting for CI, CodeRabbit, and Claude review.
+Status: Open; CodeRabbit nonce/dropId clarification addressed locally, waiting
+for rerun after push.
 Branch: `codex/drop-authorization-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/20`.
 Claude review request: issue comment `4665813753`.
@@ -411,6 +412,13 @@ Validation:
 - `make check` passed with 17 tests and known compiler warnings.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
   17 tests and known compiler warnings.
+
+Review feedback:
+
+- CodeRabbit review `4463940875` / thread `PRRT_kwDOM7REis6IVwJC`
+  requested clarification of `nonce` versus `dropId`; the ADR now defines
+  `nonce` as the signer-allocated sequence input within `signerEpoch` and
+  `dropId` as the derived replay/cancellation key.
 
 ## Decision Log
 
@@ -462,6 +470,7 @@ Validation:
 | 2026-06-10 02:01 | Start drop authorization ADR PR | Gate B1 requires accepted auth design before `tx.origin`, EIP-712, or ERC-1271 implementation |
 | 2026-06-10 02:03 | Create auth follow-up issues | Add canonical issues for `P0-AUTH-ADR`, `P0-AUTH-001`, and `P0-AUTH-003`; `P0-AUTH-002` already exists as issue #10 |
 | 2026-06-10 02:09 | Open PR #20 | Drop authorization ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4665813753` |
+| 2026-06-10 02:18 | Address CodeRabbit PR #20 review | Clarify that `nonce` is the signer-epoch sequence input and `dropId` is the derived replay/cancellation key |
 
 ## Resume Instructions
 

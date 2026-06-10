@@ -92,14 +92,22 @@ The public-beta target design is:
 7. For the initial P0 implementation, `payer` must equal `msg.sender` for
    payable fixed-price execution. Open relayer execution is out of scope until a
    later ADR explicitly defines reimbursement and payment semantics.
-8. `dropId` must be globally unique and consumed in storage before any external
-   calls that can transfer ETH or invoke receiver hooks.
-9. `deadline` must be enforced against `block.timestamp`.
-10. `signerEpoch` must match current contract state so signer compromise or
+8. `nonce` is the signer-allocated sequence input within a `signerEpoch`.
+   `dropId` is the derived replay identifier, not an independent nonce. After
+   validating the signer, the contract must require:
+   `dropId == keccak256(abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce))`.
+   The signer pipeline must not issue two live payloads with the same
+   `(signer, signerEpoch, nonce)` tuple.
+9. `dropId` must be globally unique and consumed in storage before any external
+   calls that can transfer ETH or invoke receiver hooks. P0 replay and
+   cancellation storage is keyed by `dropId`; no separate per-epoch nonce mapping
+   is required unless a later implementation ADR expands the accounting model.
+10. `deadline` must be enforced against `block.timestamp`.
+11. `signerEpoch` must match current contract state so signer compromise or
     rotation can invalidate outstanding payloads.
-11. Admins must be able to cancel a specific `dropId` before execution.
-12. EOA signatures and ERC-1271 contract signatures are supported.
-13. EOA signatures must reject:
+12. Admins must be able to cancel a specific `dropId` before execution.
+13. EOA signatures and ERC-1271 contract signatures are supported.
+14. EOA signatures must reject:
     - wrong signer
     - wrong domain
     - wrong chain ID
@@ -110,9 +118,9 @@ The public-beta target design is:
     - stale signer epoch
     - malleable signature
     - zero-address recovered signer
-14. ERC-1271 signatures must require the standard magic value from the contract
+15. ERC-1271 signatures must require the standard magic value from the contract
     signer.
-15. EIP-2098 compact signatures are supported and normalized under the same
+16. EIP-2098 compact signatures are supported and normalized under the same
     malleability policy as 65-byte ECDSA signatures.
 
 ## Intended API Shape
@@ -143,6 +151,19 @@ struct DropAuthorization {
 The implementation should expose a typed-data helper or documented off-chain
 fixture so integrators can reproduce the digest exactly.
 
+The helper must also expose the `dropId` derivation:
+
+```solidity
+dropId = keccak256(
+    abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce)
+);
+```
+
+`DROP_ID_TYPEHASH` is distinct from the EIP-712 authorization type hash. The
+domain separator already binds `chainId` and `verifyingContract`; the derived
+`dropId` is only the replay/cancellation identifier for the validated signer,
+epoch, and nonce tuple.
+
 The legacy `mintDrop(address,string,uint256,uint256,uint256,uint256)` path may
 remain temporarily during migration work, but it must not be available as a
 public-beta drop execution path unless it enforces this ADR's authorization
@@ -162,6 +183,7 @@ Required state:
 
 Required controls:
 
+- recompute `dropId` from the validated signer, `signerEpoch`, and `nonce`
 - consume `dropId` before external calls
 - reject consumed or cancelled `dropId`
 - reject stale signer epoch
@@ -266,6 +288,7 @@ P0 implementation must add tests for:
 
 - valid EOA signature
 - valid ERC-1271 contract signature
+- wrong `dropId` for the signer, `signerEpoch`, and `nonce`
 - wrong signer
 - wrong domain name or version
 - wrong chain ID
