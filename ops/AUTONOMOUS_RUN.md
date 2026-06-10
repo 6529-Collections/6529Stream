@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/69` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 17:45 UTC` |
+| Last updated | `2026-06-10 17:46 UTC` |
 
 ## Packaging Notes
 
@@ -83,7 +83,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
-| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Local validation complete; ready to open PR |
+| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Open in PR #70; awaiting CI and CodeRabbit |
 
 ## Current PR Worklog
 
@@ -2401,9 +2401,9 @@ Outcome:
 
 ### Next PR: Store raw random output hashes (Queue Item 29)
 
-Status: local validation complete; ready to open PR.
+Status: PR #70 open; awaiting CI and CodeRabbit.
 Branch: `codex/randomizer-raw-output-hash`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/70`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/43`
@@ -2484,6 +2484,10 @@ Validation so far:
   `slither_exit=-1`, `total=687`, `high=9`, `medium=29`, `weak-prng=2`,
   `arbitrary-send-eth=0`, `reentrancy-eth=0`, `reentrancy-no-eth=0`,
   `reentrancy-events=22`.
+
+Review requests:
+
+- CodeRabbit requested in issue comment `4672775171`.
 
 ## Decision Log
 
@@ -2688,6 +2692,7 @@ Validation so far:
 | 2026-06-10 17:43 | Align Queue Item 29 with ADR event and seed shape | Add `RANDOMNESS_SEED_TYPEHASH` domain separation and provider/epoch context to fulfillment events before opening the PR |
 | 2026-06-10 17:45 | Validate Queue Item 29 locally | Focused lifecycle/retry suites, full `make check`, Windows wrapper, formatting, diff hygiene, traceability, heading scan, and Slither baseline comparison all pass with 171 total tests and unchanged high/medium counts |
 | 2026-06-10 17:45 | Use CodeRabbit-only review path for Queue Item 29 | Latest user instruction says Claude is not needed and CodeRabbit is fine, so this PR will request CodeRabbit explicitly and skip Claude unless risk or new instructions change |
+| 2026-06-10 17:46 | Open PR #70 | PR packages P0-RAND-007 raw-output hash storage, domain-separated seed derivation, event/view exposure, focused tests, full local validation evidence, and a CodeRabbit review request |
 
 ## Resume Instructions
 
