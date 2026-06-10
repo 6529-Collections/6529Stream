@@ -1440,7 +1440,7 @@ Outcome:
 
 ### PR candidate: Fixed-price pull payments (Queue Item 19)
 
-Status: Open; waiting for CI and bot review.
+Status: Open; CodeRabbit nitpick fix locally validated and ready to push.
 Branch: `codex/fixed-price-pull-payments`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/60`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/27`.
@@ -1513,6 +1513,15 @@ Review feedback:
 - PR #60 opened from head `e7b4efea5e0ac7a234cf0ec98448a3509e1c0d9b`.
 - Claude review was explicitly requested because Claude may not run
   automatically.
+- GitHub CI passed on head `507a47cac7e5c1fc258972ad731e1760210b4366`.
+  Claude skipped review due to organization overage. CodeRabbit was nudged in
+  issue comment `4669093106`, acknowledged the full-review request in comment
+  `4669095051`, and left one low-value nitpick to document intentional
+  `selfdestruct` usage in the forced-ETH test helper.
+- Review fix added the forced-ETH helper comment and
+  `forge test --match-contract StreamFixedPricePaymentsTest -vvv`,
+  `forge fmt --check test\StreamFixedPricePayments.t.sol`, and
+  `git diff --check` passed locally.
 
 ## Decision Log
 
@@ -1657,6 +1666,8 @@ Review feedback:
 | 2026-06-10 10:14 | Finish local `P0-PAY-003` validation | Focused 33-test suite, full 97-test `make check`, Windows wrapper, formatting, whitespace, docs heading scans, and Slither delta evidence pass; Slither remains non-zero for known baseline findings plus intentional test-only forced-ETH helpers |
 | 2026-06-10 10:17 | Open PR #60 | Fixed-price pull-credit implementation is published with local validation and Slither delta evidence |
 | 2026-06-10 10:18 | Request Claude review on PR #60 | Explicit review ping added in issue comment `4669058148` because Claude may not run automatically |
+| 2026-06-10 10:23 | Nudge CodeRabbit PR #60 | CodeRabbit status remained pending after CI passed; issue comment `4669093106` requested latest-head review |
+| 2026-06-10 10:26 | Address CodeRabbit PR #60 nitpick | Documented intentional Solidity 0.8.19 `selfdestruct` usage in the forced-ETH test helper and reran focused fixed-price validation |
 
 ## Resume Instructions
 

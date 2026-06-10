@@ -399,6 +399,8 @@ contract RevertingStreamMinter {
     function updateAuctionEndTime(uint256, uint256) external pure { }
 }
 
+// Intentionally uses selfdestruct under Solidity 0.8.19 to test forced-ETH
+// surplus accounting that cannot be exercised with a normal payable call.
 contract FixedPriceForceEth {
     constructor() payable { }
 
