@@ -32,7 +32,7 @@ contract StreamCuratorsPool is ReentrancyGuard {
 
     modifier FunctionAdminRequired(bytes4 _selector) {
         require(
-            adminsContract.retrieveFunctionAdmin(msg.sender, _selector)
+            adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector)
                 || adminsContract.retrieveGlobalAdmin(msg.sender),
             "Not allowed"
         );
@@ -67,7 +67,7 @@ contract StreamCuratorsPool is ReentrancyGuard {
     // function to set merkle root for each drop
     function setMultipleMerkleRoots(uint256[] memory _collectionIDs, bytes32[] memory _merkleRoot)
         public
-        FunctionAdminRequired(this.setMerkleRoot.selector)
+        FunctionAdminRequired(this.setMultipleMerkleRoots.selector)
     {
         for (uint256 i = 0; i < _collectionIDs.length; i++) {
             collectionMerkleRoot[_collectionIDs[i]] = _merkleRoot[i];

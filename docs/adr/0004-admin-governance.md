@@ -4,6 +4,16 @@
 
 Accepted.
 
+Implementation status: P0-ADMIN-001 implements target-scoped function-admin
+permission checks for the current protected-function surface, fixes the
+`setCollectionData`, `updateCollectionInfo`, and `setMultipleMerkleRoots`
+selector mismatches, adds owner/root role-management recovery, and adds
+regression coverage for wrong-selector, wrong-target, global-admin, revoked
+admin, unauthorized, zero-address, and deferred collection-admin paths.
+Remaining ADR work includes pause domains, signer lifecycle operations,
+deployment ceremony/runbooks, final production Safe configuration, and any
+expanded collection-admin role model.
+
 ## Metadata
 
 | Field | Value |
@@ -34,41 +44,48 @@ Before public beta, the protocol needs to decide:
 - how emergency withdrawals interact with owed and reserved balances
 - which events, views, and runbooks make admin changes observable
 
-## Current Behavior
+## Current Behavior And Remaining Gaps
 
-Current source references:
+Current source references, including the historical pre-P0-ADMIN-001 baseline:
 
 - `smart-contracts/StreamAdmins.sol`: `tdhSigner` can register global admins
-  and function admins. The inherited `owner()` is separate from `tdhSigner`.
+  and function admins. P0-ADMIN-001 also lets `owner()` manage those roles as a
+  root recovery path without making `owner()` an implicit operational admin on
+  protected protocol contracts.
 - `smart-contracts/IStreamAdmins.sol`: exposes
-  `retrieveCollectionAdmin(address,uint256)`, but `StreamAdmins` does not
-  implement collection-admin storage or retrieval.
+  `retrieveCollectionAdmin(address,uint256)`. P0-ADMIN-001 implements the
+  deferred path as an explicit `false` result; collection-admin mutation powers
+  remain future work.
 - `smart-contracts/StreamCore.sol`,
   `smart-contracts/StreamMinter.sol`, `smart-contracts/StreamDrops.sol`,
   `smart-contracts/AuctionContract.sol`, `smart-contracts/StreamCuratorsPool.sol`,
   `smart-contracts/DependencyRegistry.sol`, and randomizer contracts use
-  `FunctionAdminRequired(bytes4)` with global-admin bypass.
-- `smart-contracts/StreamCore.sol#setCollectionData` is guarded by
-  `this.changeMetadataView.selector`, not `this.setCollectionData.selector`.
-- `smart-contracts/StreamCore.sol#updateCollectionInfo` is also guarded by
-  `this.changeMetadataView.selector`. If this grouping is intentional, the P0
-  implementation must replace it with an explicit named metadata role and tests;
-  otherwise it must use `this.updateCollectionInfo.selector`.
-- `smart-contracts/StreamCuratorsPool.sol#setMultipleMerkleRoots` is guarded by
-  `this.setMerkleRoot.selector`, not `this.setMultipleMerkleRoots.selector`.
-- Emergency withdrawals in minter, auction, curator, and RNG contracts send the
-  whole contract balance to `adminsContract.owner()`.
+  `FunctionAdminRequired(bytes4)` with target-scoped function-admin checks and
+  explicit global-admin bypass.
+- Before P0-ADMIN-001, `StreamCore.setCollectionData` was guarded by
+  `this.changeMetadataView.selector`; it now uses
+  `this.setCollectionData.selector`.
+- Before P0-ADMIN-001, `StreamCore.updateCollectionInfo` was guarded by
+  `this.changeMetadataView.selector`; it now uses
+  `this.updateCollectionInfo.selector`.
+- Before P0-ADMIN-001, `StreamCuratorsPool.setMultipleMerkleRoots` was guarded
+  by `this.setMerkleRoot.selector`; it now uses
+  `this.setMultipleMerkleRoots.selector`.
+- Emergency withdrawals now have surplus/reserve boundaries for the current
+  first-party emergency-withdrawal surface; pause-specific emergency controls
+  remain separate P0-ADMIN-002 work.
 - `smart-contracts/StreamDrops.sol#updateTDHsigner` can replace the drop signer,
   but there is no signer epoch, cancellation, role-specific signer manager, or
   compromise runbook.
-- `smart-contracts/StreamAdmins.sol#tdhSigner` has no rotation path, so the
-  address that can grant or revoke global and function admins can become stuck
-  if it is lost or compromised.
+- `smart-contracts/StreamAdmins.sol#tdhSigner` still has no dedicated rotation
+  path, but `owner()` can now recover role management if the registrar key is
+  lost or compromised.
 - There is no pause model for drop execution, minting, bidding, settlement,
   metadata mutation, randomness requests, randomness fulfillment, or
   withdrawals.
-- `test/StreamCoreAdminCharacterization.t.sol` intentionally pins the current
-  `setCollectionData` selector mismatch as a migration tripwire.
+- `test/StreamCoreAdminCharacterization.t.sol` has been converted from a
+  migration tripwire into target-state coverage for the fixed
+  `setCollectionData` selector.
 
 ## Decision
 

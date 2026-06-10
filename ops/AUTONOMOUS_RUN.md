@@ -1731,7 +1731,7 @@ Outcome:
 
 ### PR candidate: Fix admin selector and permission model (Queue Item 22)
 
-Status: In progress.
+Status: Local validation complete; preparing pull request.
 Branch: `codex/fix-admin-permission-model`.
 Pull request: TBD.
 Related issues:
@@ -1773,6 +1773,50 @@ Initial validation targets:
 - Run focused admin tests, full `make check`, Windows `scripts/check.ps1`,
   formatting/whitespace checks, and Slither delta evidence if Solidity changes
   affect detector output.
+
+Implementation notes:
+
+- `StreamAdmins` now stores function-admin grants by
+  `(account, target, selector)`, rejects zero admin/target/selector inputs, and
+  emits `GlobalAdminUpdated` / `FunctionAdminUpdated` events for role changes.
+- `StreamAdmins` keeps the current `tdhSigner` registration behavior for
+  compatibility but adds owner/root recovery for role management and rejects a
+  zero constructor signer.
+- `retrieveCollectionAdmin(address,uint256)` is implemented as an explicit
+  always-false deferred surface for P0-ADMIN-001, leaving collection-scoped
+  delegation for a later ADR-backed implementation.
+- All `FunctionAdminRequired` call sites now ask for authorization against
+  `address(this)`, so selector grants do not leak across target contracts.
+- `StreamCore.setCollectionData`, `StreamCore.updateCollectionInfo`, and
+  `StreamCuratorsPool.setMultipleMerkleRoots` now check their own selectors
+  instead of unrelated selectors.
+- Added `test/StreamAdminSelectors.t.sol` and expanded
+  `test/StreamAdmins.t.sol` to cover wrong selector, wrong target, revocation,
+  global-admin bypass, owner/root role-management recovery, batch grants,
+  zero-address rejection, zero-selector rejection, constructor signer
+  validation, and the deferred collection-admin behavior.
+- Updated ADR 0004, roadmap traceability, status docs, blocker docs, and test
+  README language to distinguish the implemented selector/target model from
+  remaining signer-lifecycle and pause-control follow-ups.
+
+Validation:
+
+- Focused admin suite passed:
+  `forge test --match-contract "Stream(Admins|AdminSelectors|CoreAdminCharacterization)Test" -vvv`
+  with 18 passing tests.
+- Full local gate passed: `make check` with 129 passing tests.
+- Windows wrapper passed:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` with
+  129 passing tests.
+- Formatting and whitespace checks passed for touched Solidity/test files and
+  `git diff --check`.
+- Markdown heading scan passed for touched roadmap/ADR files.
+- Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry `1.7.1`
+  and Slither `0.11.5`; it still exits non-zero for known baseline findings,
+  but the final JSON has 647 total findings: 9 High, 29 Medium, 61 Low, 542
+  Informational, and 6 Optimization. It reports zero `arbitrary-send-eth`
+  findings, zero high/medium findings involving `StreamAdmins`, and zero
+  `StreamAdmins` `missing-zero-check` findings.
 
 ## Decision Log
 
@@ -1930,6 +1974,7 @@ Initial validation targets:
 | 2026-06-10 11:30 | Finish local Queue Item 21 validation | Focused emergency/auction tests, full `make check`, Windows wrapper, new test formatting, whitespace, and Slither delta evidence pass; Slither now reports zero `arbitrary-send-eth` findings |
 | 2026-06-10 11:51 | Merge PR #62 | Emergency-withdrawal bounds merged as `44a3ebb5b298b437387c056a0c86b1d7ee9db03d`; CI and CodeRabbit were green, Claude was unavailable due org overage, and issue #31 closed completed |
 | 2026-06-10 11:52 | Select Queue Item 22 | Next P0 Gate C blocker is `P0-ADMIN-001`, because admin selector/target permission semantics must be fixed before pause controls and deeper randomness/admin work |
+| 2026-06-10 12:09 | Finish local Queue Item 22 validation | Focused 18-test admin suite, full 129-test `make check`, Windows wrapper, formatting, whitespace, heading scans, and Slither delta evidence pass; Slither reports no `StreamAdmins` high/medium or zero-check findings |
 
 ## Resume Instructions
 

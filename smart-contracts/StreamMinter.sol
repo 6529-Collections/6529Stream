@@ -14,24 +14,23 @@ import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
 
 contract StreamMinter {
-
     // checks if minting costs for a collectionwere set
-    mapping (uint256 => bool) private setMintingCosts;
+    mapping(uint256 => bool) private setMintingCosts;
 
     // struct that holds minting costs and phases
     struct collectionPhasesDataStructure {
-        uint publicStartTime;
-        uint publicEndTime;
+        uint256 publicStartTime;
+        uint256 publicEndTime;
     }
 
     // mapping of collectionPhasesData struct
-    mapping (uint256 => collectionPhasesDataStructure) private collectionPhases;
+    mapping(uint256 => collectionPhasesDataStructure) private collectionPhases;
 
     // mapping that holds the auction end time when a token is sent to auction
-    mapping (uint256 => uint) private mintToAuctionData;
+    mapping(uint256 => uint256) private mintToAuctionData;
 
     // mapping that holds the auction status when a token is sent to auction
-    mapping (uint256 => bool) private mintToAuctionStatus;
+    mapping(uint256 => bool) private mintToAuctionStatus;
 
     //external contracts declaration
     IStreamCore public gencore;
@@ -44,7 +43,7 @@ contract StreamMinter {
     address public streamDrops;
 
     // constructor
-    constructor (address _gencore, address _adminsContract, address _streamDrops) {
+    constructor(address _gencore, address _adminsContract, address _streamDrops) {
         gencore = IStreamCore(_gencore);
         adminsContract = IStreamAdmins(_adminsContract);
         streamDrops = _streamDrops;
@@ -52,48 +51,89 @@ contract StreamMinter {
 
     // certain functions can only be called by a global or function admin
     modifier FunctionAdminRequired(bytes4 _selector) {
-      require(adminsContract.retrieveFunctionAdmin(msg.sender, _selector) == true || adminsContract.retrieveGlobalAdmin(msg.sender) == true , "Not allowed");
-      _;
+        require(
+            adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector) == true
+                || adminsContract.retrieveGlobalAdmin(msg.sender) == true,
+            "Not allowed"
+        );
+        _;
     }
     // certain functions can only be called by the stream drops contract
     modifier streamDropRequired() {
-      require(msg.sender == streamDrops, "Not allowed");
-      _;
+        require(msg.sender == streamDrops, "Not allowed");
+        _;
     }
 
     // function to add a collection's minting phases
-    function setCollectionPhases(uint256 _collectionID, uint _publicStartTime, uint _publicEndTime) public FunctionAdminRequired(this.setCollectionPhases.selector) {
+    function setCollectionPhases(
+        uint256 _collectionID,
+        uint256 _publicStartTime,
+        uint256 _publicEndTime
+    ) public FunctionAdminRequired(this.setCollectionPhases.selector) {
         require(gencore.retrievewereDataAdded(_collectionID) == true, "Add data");
         collectionPhases[_collectionID].publicStartTime = _publicStartTime;
         collectionPhases[_collectionID].publicEndTime = _publicEndTime;
     }
 
     // mint token function - NextGenMinter airdrop function
-    function mint(address[] memory _recipients, string[] memory _tokenData, uint256[] memory _saltfun_o, uint256 _collectionID, uint256[] memory _numberOfTokens) public streamDropRequired returns (uint256) {
-        require(collectionPhases[_collectionID].publicStartTime > 0 && block.timestamp >= collectionPhases[_collectionID].publicStartTime, "Not started");
-        require(collectionPhases[_collectionID].publicEndTime > 0 && block.timestamp <= collectionPhases[_collectionID].publicEndTime, "Ended");
+    function mint(
+        address[] memory _recipients,
+        string[] memory _tokenData,
+        uint256[] memory _saltfun_o,
+        uint256 _collectionID,
+        uint256[] memory _numberOfTokens
+    ) public streamDropRequired returns (uint256) {
+        require(
+            collectionPhases[_collectionID].publicStartTime > 0
+                && block.timestamp >= collectionPhases[_collectionID].publicStartTime,
+            "Not started"
+        );
+        require(
+            collectionPhases[_collectionID].publicEndTime > 0
+                && block.timestamp <= collectionPhases[_collectionID].publicEndTime,
+            "Ended"
+        );
         uint256 collectionTokenMintIndex;
         uint256 mintIndex;
-        for (uint256 y=0; y< _recipients.length; y++) {
-            collectionTokenMintIndex = gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID) + _numberOfTokens[y] - 1;
-            require(collectionTokenMintIndex <= gencore.viewTokensIndexMax(_collectionID), "No supply");
-            for(uint256 i = 0; i < _numberOfTokens[y]; i++) {
-                mintIndex = gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
+        for (uint256 y = 0; y < _recipients.length; y++) {
+            collectionTokenMintIndex = gencore.viewTokensIndexMin(_collectionID)
+                + gencore.viewCirSupply(_collectionID) + _numberOfTokens[y] - 1;
+            require(
+                collectionTokenMintIndex <= gencore.viewTokensIndexMax(_collectionID), "No supply"
+            );
+            for (uint256 i = 0; i < _numberOfTokens[y]; i++) {
+                mintIndex = gencore.viewTokensIndexMin(_collectionID)
+                    + gencore.viewCirSupply(_collectionID);
                 gencore.mint(mintIndex, _recipients[y], _tokenData[y], _saltfun_o[y], _collectionID);
-                
             }
         }
         return mintIndex;
     }
 
     // mint and auction
-    function mintAndAuction(address _recipient, string memory _tokenData, uint256 _saltfun_o, uint256 _collectionID, uint _auctionEndTime) public streamDropRequired returns (uint256) {
-        require(collectionPhases[_collectionID].publicStartTime > 0 && block.timestamp >= collectionPhases[_collectionID].publicStartTime, "Not started");
-        require(collectionPhases[_collectionID].publicEndTime > 0 && block.timestamp <= collectionPhases[_collectionID].publicEndTime, "Ended");
+    function mintAndAuction(
+        address _recipient,
+        string memory _tokenData,
+        uint256 _saltfun_o,
+        uint256 _collectionID,
+        uint256 _auctionEndTime
+    ) public streamDropRequired returns (uint256) {
+        require(
+            collectionPhases[_collectionID].publicStartTime > 0
+                && block.timestamp >= collectionPhases[_collectionID].publicStartTime,
+            "Not started"
+        );
+        require(
+            collectionPhases[_collectionID].publicEndTime > 0
+                && block.timestamp <= collectionPhases[_collectionID].publicEndTime,
+            "Ended"
+        );
         uint256 collectionTokenMintIndex;
-        collectionTokenMintIndex = gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
+        collectionTokenMintIndex =
+            gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
         require(collectionTokenMintIndex <= gencore.viewTokensIndexMax(_collectionID), "No supply");
-        uint256 mintIndex = gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
+        uint256 mintIndex =
+            gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
         require(_auctionEndTime >= block.timestamp + 600); // 10mins min auction
         mintToAuctionData[mintIndex] = _auctionEndTime;
         mintToAuctionStatus[mintIndex] = true;
@@ -103,13 +143,19 @@ contract StreamMinter {
     }
 
     // function to update AuctionEndTime
-    function updateAuctionEndTime(uint256 _tokenId, uint256 _auctionEndTime) public FunctionAdminRequired(this.updateAuctionEndTime.selector) {
+    function updateAuctionEndTime(uint256 _tokenId, uint256 _auctionEndTime)
+        public
+        FunctionAdminRequired(this.updateAuctionEndTime.selector)
+    {
         require(mintToAuctionStatus[_tokenId] == true);
         mintToAuctionData[_tokenId] = _auctionEndTime;
     }
 
     // function to update contracts
-    function updateContracts(uint256 _opt, address _newContract) public FunctionAdminRequired(this.updateContracts.selector) { 
+    function updateContracts(uint256 _opt, address _newContract)
+        public
+        FunctionAdminRequired(this.updateContracts.selector)
+    {
         if (_opt == 1) {
             gencore = IStreamCore(_newContract);
         } else if (_opt == 2) {
@@ -139,14 +185,21 @@ contract StreamMinter {
         emit Withdraw(msg.sender, true, balance);
         if (balance > 0) {
             address admin = adminsContract.owner();
-            (bool success, ) = payable(admin).call{value: balance}("");
+            (bool success,) = payable(admin).call{ value: balance }("");
             require(success, "ETH failed");
         }
     }
 
     // function to retrieve the phases and merkle root of a collection
-    function retrieveCollectionPhases(uint256 _collectionID) public view returns(uint, uint){
-        return (collectionPhases[_collectionID].publicStartTime, collectionPhases[_collectionID].publicEndTime);
+    function retrieveCollectionPhases(uint256 _collectionID)
+        public
+        view
+        returns (uint256, uint256)
+    {
+        return (
+            collectionPhases[_collectionID].publicStartTime,
+            collectionPhases[_collectionID].publicEndTime
+        );
     }
 
     // retrieve minter contract status
@@ -155,18 +208,17 @@ contract StreamMinter {
     }
 
     // retrieve minting end time
-    function getEndTime(uint256 _collectionID) external view returns (uint) {
+    function getEndTime(uint256 _collectionID) external view returns (uint256) {
         return collectionPhases[_collectionID].publicEndTime;
     }
 
     // retrieve auction end time
-    function getAuctionEndTime(uint256 _tokenId) external view returns (uint) {
+    function getAuctionEndTime(uint256 _tokenId) external view returns (uint256) {
         return mintToAuctionData[_tokenId];
     }
 
     // retrieve auction status
-    function getAuctionStatus(uint256 _tokenId) external view  returns (bool) {
+    function getAuctionStatus(uint256 _tokenId) external view returns (bool) {
         return mintToAuctionStatus[_tokenId];
     }
-
 }

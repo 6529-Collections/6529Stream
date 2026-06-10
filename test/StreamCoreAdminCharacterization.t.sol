@@ -10,7 +10,7 @@ import "./helpers/CharacterizationTestBase.sol";
 contract StreamCoreAdminCharacterizationTest is CharacterizationTestBase {
     using Assertions for bool;
 
-    function testSetCollectionDataCurrentlyUsesChangeMetadataViewSelector() public {
+    function testSetCollectionDataUsesOwnSelector() public {
         address functionAdmin = address(0xA11CE);
         StreamAdmins admins = new StreamAdmins(address(this));
         DependencyRegistry registry = new DependencyRegistry(address(admins));
@@ -31,22 +31,9 @@ contract StreamCoreAdminCharacterizationTest is CharacterizationTestBase {
             scripts
         );
 
-        admins.registerFunctionAdmin(functionAdmin, core.setCollectionData.selector, true);
-        vm.prank(functionAdmin);
-        (bool wrongSelectorSuccess,) = address(core)
-            .call(
-                abi.encodeWithSelector(
-                    core.setCollectionData.selector,
-                    uint256(1),
-                    address(0xA11CE),
-                    uint256(5),
-                    uint256(10),
-                    uint256(1 days)
-                )
-            );
-        wrongSelectorSuccess.assertFalse("setCollectionData selector unexpectedly authorized");
-
-        admins.registerFunctionAdmin(functionAdmin, core.changeMetadataView.selector, true);
+        admins.registerFunctionAdmin(
+            functionAdmin, address(core), core.changeMetadataView.selector, true
+        );
         vm.prank(functionAdmin);
         (bool changeMetadataSelectorSuccess,) = address(core)
             .call(
@@ -59,6 +46,25 @@ contract StreamCoreAdminCharacterizationTest is CharacterizationTestBase {
                     uint256(1 days)
                 )
             );
-        changeMetadataSelectorSuccess.assertTrue("changeMetadataView selector did not authorize");
+        changeMetadataSelectorSuccess.assertFalse(
+            "changeMetadataView selector authorized setCollectionData"
+        );
+
+        admins.registerFunctionAdmin(
+            functionAdmin, address(core), core.setCollectionData.selector, true
+        );
+        vm.prank(functionAdmin);
+        (bool setCollectionDataSelectorSuccess,) = address(core)
+            .call(
+                abi.encodeWithSelector(
+                    core.setCollectionData.selector,
+                    uint256(1),
+                    address(0xA11CE),
+                    uint256(5),
+                    uint256(10),
+                    uint256(1 days)
+                )
+            );
+        setCollectionDataSelectorSuccess.assertTrue("setCollectionData selector did not authorize");
     }
 }

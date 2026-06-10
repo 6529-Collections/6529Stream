@@ -506,7 +506,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         view
         returns (bool)
     {
-        return adminsContract.retrieveFunctionAdmin(_admin, _selector) == true
+        return adminsContract.retrieveFunctionAdmin(_admin, address(this), _selector) == true
             || adminsContract.retrieveGlobalAdmin(_admin) == true;
     }
 }

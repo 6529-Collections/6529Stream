@@ -19,14 +19,16 @@ order.
 - Known remaining P0 blockers include broader payment accounting and
   cross-contract invariants, fuller randomizer reserve lifecycle accounting,
   untriaged static analysis findings, missing invariants, randomizer hardening,
-  admin/pause controls, and missing deployment discipline.
+  pause controls, broader production governance, and missing deployment
+  discipline.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
   fixed-price `StreamDrops` pull credits, and `StreamCuratorsPool` curator
   reward credits now have target-state
   implementation coverage. `StreamMinter` and `NextGenRandomizerRNG`
   emergency-withdrawal boundaries now have target-state coverage for their
-  current custody models.
+  current custody models, and P0-ADMIN-001 target-scoped function-admin checks
+  cover the current protected-function surface.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -47,9 +49,9 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 632 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 647 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -929,6 +931,11 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Issue: [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34).
 - Dependencies: [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33).
+- Status: Implemented for target-scoped function-admin checks, selector mismatch
+  fixes, global-admin bypass, owner/root role-management recovery, revocation,
+  deferred collection-admin lookup behavior, and negative permission tests.
+  Pause domains, signer lifecycle operations, deployment ceremony, and broader
+  production role operations remain separate roadmap work.
 
 Problem:
 
@@ -936,7 +943,7 @@ Problem:
   selector. Collection admin permissions exist but are not consistently
   enforced.
 
-Current behavior:
+Historical behavior before P0-ADMIN-001:
 
 - `StreamCore.setCollectionData` is gated by
   `this.changeMetadataView.selector`.
@@ -947,10 +954,10 @@ Current behavior:
   `this.setMerkleRoot.selector`.
 - Function-admin grants are keyed by address and selector only, not by target
   contract and selector.
-- `IStreamAdmins` exposes collection-admin retrieval, but the implementation
-  does not provide collection-admin storage or behavior.
-- `StreamAdmins.tdhSigner` has no rotation path, so the current admin registrar
-  can become stuck if the key is lost or compromised.
+- `IStreamAdmins` exposed collection-admin retrieval, but the implementation
+  did not provide collection-admin storage or behavior.
+- `StreamAdmins.tdhSigner` had no root recovery path, so the current admin
+  registrar could become stuck if the key was lost or compromised.
 
 Intended behavior:
 
@@ -965,7 +972,8 @@ Required code changes:
 - Audit all `FunctionAdminRequired(this.*.selector)` calls.
 - Scope function-admin checks to target contract and selector.
 - Add a root-managed rotation path for the admin registrar or equivalent role.
-- Define global, function, collection, signer, guardian/pause, and owner roles.
+- Define global, function, deferred collection, signer, guardian/pause, and
+  owner roles.
 - Make critical role changes two-step where practical: propose/accept or
   schedule/execute.
 - Add events for grants, revocations, signer updates, ownership transfer, and
@@ -1001,8 +1009,10 @@ Acceptance criteria:
 - Selector mismatch fixed.
 - Permission matrix tests pass.
 - Role model is documented.
-- Signer lifecycle and cancellation controls match ADR 0004.
-- Deployer has no lasting production authority after the admin ceremony.
+- P0-ADMIN-001 selector, target-scope, revocation, root-recovery, and deferred
+  collection-admin tests pass.
+- Signer lifecycle, cancellation controls, pause domains, and deployment admin
+  ceremony remain tracked by follow-up roadmap items.
 
 ### P0-ADMIN-002: Define Pause And Emergency Controls
 
@@ -1832,7 +1842,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 632 findings, including 9 High and 29 Medium.
+- Result: 647 findings, including 9 High and 29 Medium.
 
 Impact summary:
 
@@ -1840,8 +1850,8 @@ Impact summary:
 | --- | ---: |
 | High | 9 |
 | Medium | 29 |
-| Low | 58 |
-| Informational | 530 |
+| Low | 61 |
+| Informational | 542 |
 | Optimization | 6 |
 
 High/medium detector summary:
@@ -1878,10 +1888,10 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamEmergencyWithdraw.t.sol`, later `test/StreamRandomizerPayments.t.sol` | Passing for current adapter boundary: `NextGenRandomizerRNG` treats its full balance as `totalRandomnessReserved()`/`totalOwed()` and reports zero `emergencyWithdrawable()` balance, including direct ETH, forced ETH, and post-request remaining reserve. Fuller request-level provider reserve lifecycle accounting remains open | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Passing: explicit auction-contract escrow, registration, status views, active/ended/terminal states, with-bid settlement, failed NFT transfer, cancellation, extension, and post-terminal bid rejection are covered | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionCustody.t.sol` | Passing: no-bid settlement targets the signed poster, contract posters create pending NFT claims, only the poster can complete the claim, and repeated settlement is rejected | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
-| Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
-| Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
-| Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface reverts clearly | `test/StreamCollectionAdmins.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
-| Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | Missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
+| Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol`, `test/StreamCoreAdminCharacterization.t.sol` | Passing: P0-ADMIN-001 fixes `setCollectionData`, `updateCollectionInfo`, and `setMultipleMerkleRoots` selector guards and covers wrong-selector regressions | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
+| Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Passing: function-admin grants are keyed by account, target, and selector; same selector on another target does not authorize; revocation and global-admin bypass are covered | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
+| Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface behavior is explicit | `test/StreamAdmins.t.sol`, later `test/StreamCollectionAdmins.t.sol` | Passing for deferred support: `StreamAdmins.retrieveCollectionAdmin(...)` returns false and no collection-admin mutation path is implemented; positive collection-admin roles remain future work | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
+| Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | In Progress: owner/root can recover function/global role management if the registrar is lost, but signer manager, signer rotation, and signer lifecycle tests remain missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
 | Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Missing | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
 | Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol` | In Progress: StreamMinter and NextGenRandomizerRNG unauthorized emergency withdrawals revert without transfer; broader pause/emergency-control policy remains open | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |

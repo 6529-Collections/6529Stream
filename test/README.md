@@ -65,3 +65,11 @@ as `emergencyWithdrawable()` surplus, and withdraws only that amount;
 `totalRandomnessReserved()`/`totalOwed()` and reports zero
 emergency-withdrawable balance, including direct ETH, forced ETH, and
 post-request remaining reserve.
+
+Admin permission tests now include P0-ADMIN-001 target-state coverage in
+`StreamAdminSelectors.t.sol` and `StreamAdmins.t.sol`: function-admin grants are
+scoped by account, target contract, and selector; wrong selectors and same
+selectors on another target do not authorize mutation; revoked grants fail;
+owner/root role management does not make the owner an implicit operational
+admin; unsupported collection-admin lookups return false; and global-admin
+bypass remains explicit.

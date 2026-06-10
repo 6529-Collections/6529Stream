@@ -15,7 +15,6 @@ import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
 
 contract NextGenRandomizerRNG is ArrngConsumer {
-
     mapping(uint256 => uint256) public requestToToken;
     address gencore;
     IStreamCore public gencoreContract;
@@ -32,24 +31,34 @@ contract NextGenRandomizerRNG is ArrngConsumer {
     }
 
     modifier FunctionAdminRequired(bytes4 _selector) {
-        require(adminsContract.retrieveFunctionAdmin(msg.sender, _selector) == true || adminsContract.retrieveGlobalAdmin(msg.sender) == true, "Not allowed");
+        require(
+            adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector) == true
+                || adminsContract.retrieveGlobalAdmin(msg.sender) == true,
+            "Not allowed"
+        );
         _;
     }
 
     function requestRandomWords(uint256 tokenid, uint256 _ethRequired) public payable {
         require(msg.sender == gencore);
-        uint256 requestId = arrngController.requestRandomWords{value: _ethRequired}(1, (address(this)));
+        uint256 requestId =
+            arrngController.requestRandomWords{ value: _ethRequired }(1, (address(this)));
         tokenToRequest[tokenid] = requestId;
         requestToToken[requestId] = tokenid;
-
     }
 
     function fulfillRandomWords(uint256 id, uint256[] memory numbers) internal override {
-        gencoreContract.setTokenHash(tokenIdToCollection[requestToToken[id]], requestToToken[id], keccak256(abi.encodePacked(numbers,requestToToken[id])));
+        gencoreContract.setTokenHash(
+            tokenIdToCollection[requestToToken[id]],
+            requestToToken[id],
+            keccak256(abi.encodePacked(numbers, requestToToken[id]))
+        );
     }
 
     // function that calculates the random hash and returns it to the gencore contract
-    function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o) public {
+    function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)
+        public
+    {
         require(msg.sender == gencore);
         tokenIdToCollection[_mintIndex] = _collectionID;
         requestRandomWords(_mintIndex, ethRequired);
@@ -57,19 +66,30 @@ contract NextGenRandomizerRNG is ArrngConsumer {
 
     // function to update contracts
 
-    function updateAdminContract(address _newadminsContract) public FunctionAdminRequired(this.updateAdminContract.selector) {
-        require(IStreamAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin");
+    function updateAdminContract(address _newadminsContract)
+        public
+        FunctionAdminRequired(this.updateAdminContract.selector)
+    {
+        require(
+            IStreamAdmins(_newadminsContract).isAdminContract() == true, "Contract is not Admin"
+        );
         adminsContract = IStreamAdmins(_newadminsContract);
     }
 
-    function updateCoreContract(address _gencore) public FunctionAdminRequired(this.updateCoreContract.selector) { 
+    function updateCoreContract(address _gencore)
+        public
+        FunctionAdminRequired(this.updateCoreContract.selector)
+    {
         gencore = _gencore;
         gencoreContract = IStreamCore(_gencore);
     }
 
     // function to update cost
 
-    function updateRNGCost(uint256 _ethRequired) public FunctionAdminRequired(this.updateRNGCost.selector) {
+    function updateRNGCost(uint256 _ethRequired)
+        public
+        FunctionAdminRequired(this.updateRNGCost.selector)
+    {
         ethRequired = _ethRequired;
     }
 
@@ -91,7 +111,7 @@ contract NextGenRandomizerRNG is ArrngConsumer {
         emit Withdraw(msg.sender, true, emergencyWithdrawable());
     }
 
-    receive() external payable {}
+    receive() external payable { }
 
     // get randomizer contract status
     function isRandomizerContract() external view returns (bool) {

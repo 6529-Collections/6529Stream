@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 11:25 UTC` |
+| Last generated | `2026-06-10 12:09 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -25,10 +25,10 @@ baseline.
 | --- | ---: |
 | High | 9 |
 | Medium | 29 |
-| Low | 58 |
-| Informational | 530 |
+| Low | 61 |
+| Informational | 542 |
 | Optimization | 6 |
-| Total | 632 |
+| Total | 647 |
 
 ## Detector Counts
 
@@ -44,8 +44,8 @@ baseline.
 | `locked-ether` | Medium | 7 |
 | `uninitialized-local` | Medium | 11 |
 | `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 58 |
-| Informational findings | Informational | 530 |
+| Low-impact findings | Low | 61 |
+| Informational findings | Informational | 542 |
 | Optimization findings | Optimization | 6 |
 
 ## Status Semantics
