@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/44` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 05:05 UTC` |
+| Last updated | `2026-06-10 05:07 UTC` |
 
 ## Packaging Notes
 
@@ -819,12 +819,12 @@ Outcome:
 - Claude review was unavailable because the organization's Claude Code overage
   spend limit was reached; the explicit request is recorded above.
 
-### PR #TBD: Metadata/freeze ADR (Queue Item 12)
+### PR #52: Metadata/freeze ADR (Queue Item 12)
 
-Status: In progress.
+Status: Open; waiting on CI, CodeRabbit, and Claude.
 Branch: `codex/metadata-freeze-adr`.
-Pull request: TBD.
-Claude review request: TBD after PR creation.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/52`.
+Claude review request: issue comment `4666753358`.
 
 Goal:
 
@@ -881,7 +881,9 @@ Validation:
 
 Review feedback:
 
-- Pending.
+- GitHub CI is pending for the current PR head.
+- CodeRabbit is pending.
+- Claude review was explicitly requested in issue comment `4666753358`.
 
 ## Decision Log
 
@@ -974,6 +976,7 @@ Review feedback:
 | 2026-06-10 04:58 | Accept sidecar metadata audit findings | ADR 0006 must explicitly decide on-chain pending metadata, complete freeze boundaries, dependency immutability, burned-token tokenURI behavior, ERC-4906 signaling, and escaping/size limits |
 | 2026-06-10 04:59 | Draft metadata/freeze ADR | ADR 0006 accepts schema-versioned metadata, base64 on-chain JSON, explicit pending/final states, immutable freeze manifests, dependency version pinning, ERC-4906 support, and ERC-721 burn semantics |
 | 2026-06-10 05:05 | Validate metadata/freeze ADR locally | Heading, traceability, ASCII, whitespace, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 05:07 | Open PR #52 | Metadata/freeze ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666753358` |
 
 ## Resume Instructions
 
