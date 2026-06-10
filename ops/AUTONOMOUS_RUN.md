@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/81` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 22:58 UTC` |
+| Last updated | `2026-06-10 23:02 UTC` |
 
 ## Packaging Notes
 
@@ -93,7 +93,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
 | 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
-| 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | In progress on `codex/metadata-erc4906-events` |
+| 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | PR #82 open on `codex/metadata-erc4906-events` |
 
 ## Current PR Worklog
 
@@ -3339,11 +3339,11 @@ Outcome:
   commit status remained stale pending, so the autonomous maintainer decision
   used the bot's explicit review comments plus green CI and resolved threads.
 
-### PR candidate: Add ERC-4906 metadata update signaling (Queue Item 39)
+### PR #82: Add ERC-4906 metadata update signaling (Queue Item 39)
 
-Status: Local validation complete; ready to commit and open PR.
+Status: PR open; waiting for CI and CodeRabbit.
 Branch: `codex/metadata-erc4906-events`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/82`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/49`
@@ -3407,6 +3407,12 @@ Validation:
   `721` total findings, `4` High, `19` Medium, `92` Low, `595`
   Informational, `11` Optimization. Test-only `StreamMetadataEvents`
   `reentrancy-events` rows are `0`.
+
+Review requests:
+
+- CodeRabbit requested in comment `4675495632`.
+- Claude remains intentionally skipped per current user instruction; use
+  CodeRabbit unless risk or future user instruction changes.
 
 ## Decision Log
 
@@ -3664,6 +3670,7 @@ Validation:
 | 2026-06-10 22:47 | Select Queue Item 39 | Next Gate D gap is P1-META-004 because current metadata can change after mint but `StreamCore` still lacks ERC-4906 interface support and update events for indexers |
 | 2026-06-10 22:47 | Implement Queue Item 39 local draft | Added ERC-4906 interface support, token and collection metadata update events, focused event tests, and docs/roadmap/run-state traceability; dependency registry content reverse signaling remains scoped to P1-META-003 |
 | 2026-06-10 22:58 | Finish local Queue Item 39 validation | Focused ERC-4906 event tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts and zero `StreamMetadataEvents` reentrancy-event rows |
+| 2026-06-10 23:02 | Open PR #82 | ERC-4906 metadata update event PR opened on head `96052819e2cfd5d6f53c4793af03baaadda2ad00`; CodeRabbit requested in issue comment `4675495632`; Claude intentionally skipped per current user instruction |
 
 ## Resume Instructions
 
