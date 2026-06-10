@@ -719,26 +719,27 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
 
     // function to retrieve on-chain dependency script
     function retrieveDependencyScript(uint256 tokenId) private view returns (string memory) {
-        string memory scripttext;
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        bytes32 dependencyNameAndVersion = collectionInfo[collectionId].collectionDependencyScript;
+        string memory scripttext = "";
         for (
             uint256 i = 0;
-            i
-                < dependencyRegistry.getDependencyScriptCount(
-                    collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionDependencyScript
-                );
+            i < dependencyRegistry.getDependencyScriptCount(dependencyNameAndVersion);
             i++
         ) {
-            scripttext = string(
-                abi.encodePacked(
-                    scripttext,
-                    dependencyRegistry.getDependencyScript(
-                        collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionDependencyScript,
-                        i
-                    )
-                )
+            scripttext = string.concat(
+                scripttext, dependencyRegistry.getDependencyScript(dependencyNameAndVersion, i)
             );
         }
-        return string(abi.encodePacked(scripttext));
+        return scripttext;
+    }
+
+    function retrieveDependencyScriptContentHash(uint256 tokenId) public view returns (bytes32) {
+        _requireMinted(tokenId);
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        return dependencyRegistry.getDependencyScriptContentHash(
+            collectionInfo[collectionId].collectionDependencyScript
+        );
     }
 
     // function to retrieve the supply of a collection

@@ -13,6 +13,13 @@ pragma solidity ^0.8.19;
 import "./IStreamAdmins.sol";
 
 contract DependencyRegistry {
+    bytes32 public constant DEPENDENCY_SCRIPT_CONTENT_TYPEHASH = keccak256(
+        "6529StreamDependencyScript(bytes32 dependencyNameAndVersion,uint256 chunkCount,bytes32 chunksHash)"
+    );
+    bytes32 public constant DEPENDENCY_SCRIPT_CHUNK_TYPEHASH = keccak256(
+        "6529StreamDependencyScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
+    );
+
     // struct that holds a collection's info
     struct dependencyInfoStructure {
         bytes32 _collectionDependencyName;
@@ -83,5 +90,49 @@ contract DependencyRegistry {
         returns (string memory)
     {
         return (dependencyInfo[dependencyNameAndVersion].libraryScript[index]);
+    }
+
+    function getDependencyScriptChunkHash(bytes32 dependencyNameAndVersion, uint256 index)
+        public
+        view
+        returns (bytes32)
+    {
+        return _hashDependencyScriptChunk(
+            index, dependencyInfo[dependencyNameAndVersion].libraryScript[index]
+        );
+    }
+
+    function getDependencyScriptContentHash(bytes32 dependencyNameAndVersion)
+        external
+        view
+        returns (bytes32)
+    {
+        uint256 chunkCount = dependencyInfo[dependencyNameAndVersion].libraryScript.length;
+        bytes32 chunksHash = bytes32(0);
+
+        for (uint256 i = 0; i < chunkCount; i++) {
+            chunksHash = keccak256(
+                abi.encode(chunksHash, getDependencyScriptChunkHash(dependencyNameAndVersion, i))
+            );
+        }
+
+        return keccak256(
+            abi.encode(
+                DEPENDENCY_SCRIPT_CONTENT_TYPEHASH, dependencyNameAndVersion, chunkCount, chunksHash
+            )
+        );
+    }
+
+    function _hashDependencyScriptChunk(uint256 index, string memory chunk)
+        private
+        pure
+        returns (bytes32)
+    {
+        bytes memory chunkBytes = bytes(chunk);
+        return keccak256(
+            abi.encode(
+                DEPENDENCY_SCRIPT_CHUNK_TYPEHASH, index, keccak256(chunkBytes), chunkBytes.length
+            )
+        );
     }
 }

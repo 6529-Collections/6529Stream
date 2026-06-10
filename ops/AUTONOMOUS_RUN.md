@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-raw-output-hash` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/69` |
+| Active PR branch | `codex/dependency-script-safe-encoding` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/70` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 17:58 UTC` |
+| Last updated | `2026-06-10 18:18 UTC` |
 
 ## Packaging Notes
 
@@ -83,7 +83,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
-| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Open in PR #70; CI green, CodeRabbit clean by review comment, aggregate status stale pending |
+| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Merged in PR #70 |
+| 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Locally validated on `codex/dependency-script-safe-encoding`; ready to open PR |
 
 ## Current PR Worklog
 
@@ -2401,9 +2402,7 @@ Outcome:
 
 ### PR #70: Store raw random output hashes (Queue Item 29)
 
-Status: PR #70 open and merge-ready by autonomous maintainer decision; CI is
-green, CodeRabbit's latest review comment is clean, and the aggregate CodeRabbit
-status remains stale pending as documented in prior PR cycles.
+Status: Merged.
 Branch: `codex/randomizer-raw-output-hash`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/70`.
 Related issue:
@@ -2514,6 +2513,95 @@ Review requests:
 - CodeRabbit comment `4672884249` verified the review fixes, marked the PR
   clean, and left only non-blocking maintainability notes. Its aggregate commit
   status remained stale pending despite the clean review evidence.
+
+Outcome:
+
+- Merged as PR #70 on `2026-06-10 18:02 UTC`.
+- Merge commit: `350667fff6472e938790f0c7db5895fc3c4ddee9`.
+- Latest head before merge: `f52cd8f3cf83a8c131bdbc233c4769a4ba72e3fb`.
+- Issue #43 closed completed.
+- GitHub CI passed on final head in run `27295440912`.
+- CodeRabbit final clean comment: `4672928268`.
+- Claude was not requested for this PR per user instruction; CodeRabbit was
+  sufficient.
+
+### PR candidate: Fix dependency script packed encoding (Queue Item 30)
+
+Status: Locally validated; ready to open PR.
+Branch: `codex/dependency-script-safe-encoding`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/9`
+
+Goal:
+
+- Complete `P0-META-001` by eliminating the remaining first-party Slither
+  `encode-packed-collision` row for dependency script composition.
+- Preserve the current rendered dependency script output for compatibility while
+  exposing typed, segment-safe chunk and content hashes for proof, indexing, and
+  future freeze manifests.
+- Keep full dependency versioning, registry identity pinning, provenance, and
+  freeze-manifest semantics in the later `P1-META-003` workstream.
+
+Candidate files:
+
+- `smart-contracts/DependencyRegistry.sol`
+- `smart-contracts/IDependencyRegistry.sol`
+- `smart-contracts/StreamCore.sol`
+- `test/StreamMetadataEncoding.t.sol`
+- `docs/adr/0006-metadata-freeze.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Initial implementation notes:
+
+- `DependencyRegistry` now exposes
+  `getDependencyScriptChunkHash(bytes32,uint256)` and
+  `getDependencyScriptContentHash(bytes32)`.
+- Chunk hashes include `DEPENDENCY_SCRIPT_CHUNK_TYPEHASH`, chunk index,
+  `keccak256(bytes(chunk))`, and byte length.
+- Content hashes include `DEPENDENCY_SCRIPT_CONTENT_TYPEHASH`, dependency key,
+  chunk count, and a folded `abi.encode` hash of all typed chunk hashes.
+- `StreamCore.retrieveDependencyScript(uint256)` initializes its accumulator and
+  uses `string.concat` for rendering.
+- `StreamCore.retrieveDependencyScriptContentHash(uint256)` exposes the
+  referenced dependency content hash for minted tokens.
+- `test/StreamMetadataEncoding.t.sol` proves that chunks `["ab", "c"]` and
+  `["a", "bc"]` render the same script but produce distinct typed content
+  hashes, and that empty chunk hashes differ by index.
+
+Validation so far:
+
+- PR #70 merge checked locally by fast-forwarding `main` to
+  `350667fff6472e938790f0c7db5895fc3c4ddee9`.
+- Focused `forge test --match-contract StreamMetadataEncodingTest -vvv`
+  passed: 2 tests, 0 failed.
+- `forge fmt` ran on changed Solidity files.
+- Slither delta run returned the expected remaining baseline findings while
+  removing the target rows: `slither_exit=-1`, `total=685`, `high=8`,
+  `medium=28`, `low=63`, `informational=580`, `optimization=6`,
+  `encode-packed-collision=0`, and `uninitialized-local=10`.
+- `forge fmt --check smart-contracts\DependencyRegistry.sol
+  smart-contracts\IDependencyRegistry.sol smart-contracts\StreamCore.sol
+  test\StreamMetadataEncoding.t.sol` passed.
+- Focused `forge test --match-contract StreamMetadataEncodingTest -vvv`
+  passed: 2 tests, 0 failed.
+- `make check` passed: 173 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed:
+  173 tests, 0 failed.
+- `git diff --check` passed.
+- Markdown heading scan passed for the roadmap, Slither baseline, autonomous
+  run state, ADR 0006, status docs, known blockers, and test README.
+- Traceability grep passed for `P0-META-001`, `StreamMetadataEncoding`,
+  dependency typehashes, dependency hash views, Slither detector rows, PR #70
+  merge commit `350667fff6472e938790f0c7db5895fc3c4ddee9`, and CodeRabbit
+  final clean comment `4672928268`.
+- Final Slither confirmation returned
+  `{"slither_exit":-1,"total":685,"high":8,"medium":28,"low":63,"informational":580,"optimization":6,"encode_packed_collision":0,"uninitialized_local":10,"calls_loop":8}`.
 
 ## Decision Log
 
@@ -2722,6 +2810,10 @@ Review requests:
 | 2026-06-10 17:52 | Address CodeRabbit PR #70 review | Add lifecycle interface request views, arRNG provider raw-word fulfillment event, stale zero-hash coverage, monotonic log helpers, retry-event documentation, and a defense-in-depth seed guard comment |
 | 2026-06-10 17:56 | Validate CodeRabbit PR #70 review response | Focused lifecycle/retry suites, full `make check`, Windows wrapper, formatting, diff hygiene, traceability, heading scan, and Slither baseline comparison all pass with 171 tests and unchanged high/medium counts |
 | 2026-06-10 17:58 | Mark PR #70 merge-ready by review evidence | GitHub CI passed on head `f8d0470b665eee2b528f95c380719014be639295`, CodeRabbit comment `4672884249` verified the fixes and marked the PR clean, and the stale aggregate pending context is documented as non-blocking |
+| 2026-06-10 18:02 | Merge PR #70 | Raw-output hash storage merged as `350667fff6472e938790f0c7db5895fc3c4ddee9`; CI passed on final head `f52cd8f3cf83a8c131bdbc233c4769a4ba72e3fb`, CodeRabbit final clean comment `4672928268`, and issue #43 closed completed |
+| 2026-06-10 18:05 | Select Queue Item 30 | Next open P0 Slither blocker is `P0-META-001`, a focused dependency-script `encode-packed-collision` fix with clear tests and low coupling to later metadata/freeze work |
+| 2026-06-10 18:11 | Implement Queue Item 30 local draft | Added typed dependency chunk/content hashes, initialized `StreamCore` dependency script rendering, focused ambiguous-boundary tests, and Slither delta evidence showing `encode-packed-collision=0` |
+| 2026-06-10 18:18 | Validate Queue Item 30 locally | Focused metadata tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and final Slither confirmation pass with 173 tests and `encode-packed-collision=0` |
 
 ## Resume Instructions
 

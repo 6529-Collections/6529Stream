@@ -12,20 +12,25 @@ The current Gate A smoke baseline proves:
   fixed-price pull-payment credits, curator reward claim credits, and
   randomness lifecycle behavior. Current emergency-withdrawal target-state
   tests also cover explicit emergency recipients, `StreamMinter` surplus
-  withdrawal, and `NextGenRandomizerRNG` reserve boundaries.
+  withdrawal, `NextGenRandomizerRNG` reserve boundaries, and dependency-script
+  segment-safe content hashing.
 - Randomizer tests now cover request lifecycle views, callback validation,
   raw-output hash storage, failed post-processing state, bounded deterministic
   post-processing retry, and the conservative provider-migration policy that
   blocks lifecycle-aware provider replacement while collection requests are
   pending.
+- Metadata encoding tests now prove dependency chunk boundaries are included in
+  typed content hashes while preserving the existing rendered generative script
+  output.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including broader pull-payment
 accounting and cross-contract invariants, fuller randomizer reserve lifecycle
 accounting, callback-after-burn policy, canonical randomizer lifecycle
-ownership, static-analysis triage, signer lifecycle operations, deployment
-discipline, and the broader P0/P1 test suite.
+ownership, remaining static-analysis triage, signer lifecycle operations,
+dependency version/freeze manifest work, deployment discipline, and the broader
+P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.
