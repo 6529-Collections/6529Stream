@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/dependency-script-safe-encoding` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/70` |
+| Active PR branch | `codex/remove-dead-mint-accounting` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/71` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 18:27 UTC` |
+| Last updated | `2026-06-10 18:43 UTC` |
 
 ## Packaging Notes
 
@@ -84,7 +84,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
 | 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Merged in PR #70 |
-| 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Open in PR #71; follow-up local validation complete, post-follow-up CI pending |
+| 30 | Fix dependency script packed encoding | Gate C/Gate D | Implement P0-META-001 typed dependency chunk/content hashes, preserve rendered-script compatibility, add metadata encoding tests, and update Slither/roadmap traceability | Merged in PR #71 |
+| 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Local validation complete; ready to open PR |
 
 ## Current PR Worklog
 
@@ -2527,11 +2528,11 @@ Outcome:
 
 ### PR #71: Fix dependency script packed encoding (Queue Item 30)
 
-Status: Open; CodeRabbit clean with non-blocking observations addressed in
-follow-up; local follow-up validation complete, post-follow-up CI pending.
+Status: Merged.
 Branch: `codex/dependency-script-safe-encoding`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/71`.
-Latest head before PR-state update: `457ca920cb55c9d4b75efcede714ccc1ef700a5b`.
+Latest head before merge: `1668c6ee9c45aca9193a48ae9b56eb81b5c02583`.
+Merge commit: `20bd9d9d1fa36b7142f3a81b9ab0c86060c9f943`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/9`
@@ -2621,12 +2622,84 @@ Validation so far:
   passed: 174 tests, 0 failed.
 - Follow-up Slither confirmation remained unchanged:
   `{"slither_exit":-1,"total":685,"high":8,"medium":28,"low":63,"informational":580,"optimization":6,"encode_packed_collision":0,"uninitialized_local":10,"calls_loop":8}`.
+- GitHub CI passed on final head in run `27297432586`.
+- CodeRabbit final clean comment: `4673227541`.
+- Issue #9 closed completed.
 
 Review requests:
 
 - CodeRabbit requested in issue comment `4673145958`.
 - CodeRabbit review comment `4673171581` reported the PR correct and
   well-scoped; non-blocking observations were addressed in follow-up.
+- Claude is intentionally skipped per current user instruction; use CodeRabbit
+  unless risk or future user instruction changes.
+
+### PR candidate: Remove dead mint-accounting state (Queue Item 31)
+
+Status: Local validation complete; ready to open PR.
+Branch: `codex/remove-dead-mint-accounting`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/13`
+
+Goal:
+
+- Complete `P0-CORE-001` by resolving the two first-party Slither
+  `uninitialized-state` rows in `StreamCore`.
+- Remove the never-written public-sale and allowlist mint-count mappings rather
+  than expose always-zero views with no accepted drop quota or allowlist
+  semantics.
+- Preserve and test the retained airdrop counter as the only current
+  per-address mint-accounting surface in `StreamCore`.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/IStreamCore.sol`
+- `test/StreamMintAccounting.t.sol`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Removed `tokensMintedPerAddress` and
+  `tokensMintedAllowlistAddress` from `StreamCore`.
+- Removed `retrieveTokensMintedPublicPerAddress` and
+  `retrieveTokensMintedALPerAddress` from `StreamCore` and `IStreamCore`.
+- Added `test/StreamMintAccounting.t.sol` to prove the retained airdrop counter
+  starts at zero, increments on authorized minter calls, and remains unchanged
+  after an unauthorized mint attempt.
+- Updated `ops/SLITHER_BASELINE.md` and `ops/ROADMAP.md` to mark
+  `uninitialized-state` as `0 current / 2 fixed`.
+
+Validation so far:
+
+- PR #71 merge checked locally by fast-forwarding `main` to
+  `20bd9d9d1fa36b7142f3a81b9ab0c86060c9f943`.
+- `forge fmt --check smart-contracts\StreamCore.sol
+  smart-contracts\IStreamCore.sol test\StreamMintAccounting.t.sol` passed.
+- Focused `forge test --match-contract StreamMintAccountingTest -vvv` passed:
+  2 tests, 0 failed.
+- `make check` passed: 176 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed:
+  176 tests, 0 failed.
+- `git diff --check` passed.
+- Markdown heading scan passed for the roadmap, Slither baseline, autonomous
+  run state, status docs, known blockers, and test README.
+- Traceability grep passed for `P0-CORE-001`, `StreamMintAccounting`,
+  `uninitialized-state`, `uninitialized_state`, Slither count `680`, branch
+  `codex/remove-dead-mint-accounting`, and PR #71 merge commit
+  `20bd9d9d1fa36b7142f3a81b9ab0c86060c9f943`.
+- Slither confirmation returned
+  `{"slither_exit":-1,"total":680,"high":6,"medium":28,"low":63,"informational":577,"optimization":6,"uninitialized_state":0,"uninitialized_local":10,"weak_prng":2,"encode_packed_collision":0}`.
+
+Review requests:
+
+- CodeRabbit will be requested after the PR is opened.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
@@ -2844,6 +2917,11 @@ Review requests:
 | 2026-06-10 18:20 | Open PR #71 | Dependency-script encoding hash fix published with full local validation evidence; CodeRabbit review will be requested on the PR-state head |
 | 2026-06-10 18:21 | Request CodeRabbit PR #71 review | CodeRabbit review requested in issue comment `4673145958`; Claude intentionally skipped per current user instruction |
 | 2026-06-10 18:27 | Address CodeRabbit PR #71 non-blocking observations | Added NatSpec for the new hash views, added zero-chunk dependency hash coverage, refreshed focused/full/Windows/Slither validation, and kept Slither counts unchanged |
+| 2026-06-10 18:33 | Merge PR #71 | Dependency-script encoding hashes merged as `20bd9d9d1fa36b7142f3a81b9ab0c86060c9f943`; CI passed on final head `1668c6ee9c45aca9193a48ae9b56eb81b5c02583`, CodeRabbit final clean comment `4673227541`, and issue #9 closed completed |
+| 2026-06-10 18:35 | Select Queue Item 31 | Next focused P0 Slither blocker is `P0-CORE-001`, because `StreamCore` exposes two never-written public/allowlist mint counters that Slither reports as high-impact uninitialized state |
+| 2026-06-10 18:38 | Implement Queue Item 31 local draft | Removed the dead public/allowlist mint-count mappings and views, preserved the retained airdrop counter, and added focused retained-counter regressions |
+| 2026-06-10 18:39 | Validate Queue Item 31 Slither delta | Slither now reports `uninitialized_state=0`, total findings `680`, and High findings `6`; the remaining High rows are weak helper randomness, vendored math, and accepted test-only forced-ETH helpers |
+| 2026-06-10 18:43 | Finish local Queue Item 31 validation | Focused accounting tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass with 176 total tests |
 
 ## Resume Instructions
 

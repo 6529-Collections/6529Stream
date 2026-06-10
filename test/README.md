@@ -126,3 +126,9 @@ dependency JavaScript produce distinct typed content hashes, chunk hashes includ
 the chunk index and byte length, zero-chunk dependency hashes are deterministic,
 and the existing rendered generative script output remains
 compatibility-preserving.
+
+Mint-accounting state now has P0-CORE-001 target-state coverage in
+`StreamMintAccounting.t.sol`: never-written public/allowlist mint counters were
+removed from `StreamCore`, while the retained airdrop counter starts at zero,
+increments on authorized minter calls, and remains unchanged after an
+unauthorized mint attempt.
