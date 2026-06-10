@@ -14,16 +14,17 @@ import "./ArrngConsumer.sol";
 import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
 import "./StreamPauseDomains.sol";
+import "./StreamRandomizerLifecycle.sol";
 
-contract NextGenRandomizerRNG is ArrngConsumer {
-    mapping(uint256 => uint256) public requestToToken;
+contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
     address gencore;
     IStreamCore public gencoreContract;
     IStreamAdmins private adminsContract;
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
     uint256 ethRequired;
-    mapping(uint256 => uint256) public tokenToRequest;
-    mapping(uint256 => uint256) public tokenIdToCollection;
+    bool private randomnessRequestInProgress;
+
+    error RandomizerRequestReentrancy();
 
     constructor(address _gencore, address _adminsContract, address _arRNG) ArrngConsumer(_arRNG) {
         gencore = _gencore;
@@ -40,24 +41,37 @@ contract NextGenRandomizerRNG is ArrngConsumer {
         _;
     }
 
+    // arRNG returns the provider request ID from the external payable call, so
+    // recording request state must happen after the call. The local guard blocks
+    // reentrant fulfillment during that window and has a regression test.
+    // slither-disable-start reentrancy-eth,write-after-write
     function requestRandomWords(uint256 tokenid, uint256 _ethRequired) public payable {
         require(msg.sender == gencore);
         require(
             adminsContract.isPaused(StreamPauseDomains.RANDOMNESS_REQUEST) == false,
             "Randomness paused"
         );
+        if (randomnessRequestInProgress) {
+            revert RandomizerRequestReentrancy();
+        }
+        randomnessRequestInProgress = true;
+        uint256 collectionId = tokenIdToCollection[tokenid];
         uint256 requestId =
             arrngController.requestRandomWords{ value: _ethRequired }(1, (address(this)));
-        tokenToRequest[tokenid] = requestId;
-        requestToToken[requestId] = tokenid;
+        randomnessRequestInProgress = false;
+        _recordRandomnessRequest(
+            requestId, collectionId, tokenid, gencoreContract.viewRandomizerEpoch(collectionId)
+        );
     }
+    // slither-disable-end reentrancy-eth,write-after-write
 
     function fulfillRandomWords(uint256 id, uint256[] memory numbers) internal override {
-        gencoreContract.setTokenHash(
-            tokenIdToCollection[requestToToken[id]],
-            requestToToken[id],
-            keccak256(abi.encodePacked(numbers, requestToToken[id]))
-        );
+        if (randomnessRequestInProgress) {
+            revert RandomizerRequestReentrancy();
+        }
+        (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed) =
+            _fulfillRandomnessRequest(gencoreContract, id, numbers);
+        gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed);
     }
 
     // function that calculates the random hash and returns it to the gencore contract
@@ -71,6 +85,13 @@ contract NextGenRandomizerRNG is ArrngConsumer {
         );
         tokenIdToCollection[_mintIndex] = _collectionID;
         requestRandomWords(_mintIndex, ethRequired);
+    }
+
+    function markStaleRequest(uint256 _requestId)
+        public
+        FunctionAdminRequired(this.markStaleRequest.selector)
+    {
+        _markRandomnessRequestStale(_requestId);
     }
 
     // function to update contracts

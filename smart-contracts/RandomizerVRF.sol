@@ -15,8 +15,9 @@ import "./VRFConsumerBaseV2.sol";
 import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
 import "./StreamPauseDomains.sol";
+import "./StreamRandomizerLifecycle.sol";
 
-contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
+contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
     VRFCoordinatorV2Interface public COORDINATOR;
@@ -27,10 +28,6 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
     uint32 public callbackGasLimit = 40000;
     uint16 public requestConfirmations = 3;
     uint32 public numWords = 1;
-
-    mapping(uint256 => uint256) public tokenIdToCollection;
-    mapping(uint256 => uint256) public tokenToRequest;
-    mapping(uint256 => uint256) public requestToToken;
 
     address gencore;
     IStreamCore public gencoreContract;
@@ -67,19 +64,19 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
         uint256 requestId = COORDINATOR.requestRandomWords(
             keyHash, s_subscriptionId, requestConfirmations, callbackGasLimit, numWords
         );
-        tokenToRequest[tokenid] = requestId;
-        requestToToken[requestId] = tokenid;
+        uint256 collectionId = tokenIdToCollection[tokenid];
+        _recordRandomnessRequest(
+            requestId, collectionId, tokenid, gencoreContract.viewRandomizerEpoch(collectionId)
+        );
     }
 
     function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords)
         internal
         override
     {
-        gencoreContract.setTokenHash(
-            tokenIdToCollection[requestToToken[_requestId]],
-            requestToToken[_requestId],
-            keccak256(abi.encodePacked(_randomWords, requestToToken[_requestId]))
-        );
+        (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed) =
+            _fulfillRandomnessRequest(gencoreContract, _requestId, _randomWords);
+        gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed);
         emit RequestFulfilled(_requestId, _randomWords);
     }
 
@@ -94,6 +91,13 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2 {
         );
         tokenIdToCollection[_mintIndex] = _collectionID;
         requestRandomWords(_mintIndex);
+    }
+
+    function markStaleRequest(uint256 _requestId)
+        public
+        FunctionAdminRequired(this.markStaleRequest.selector)
+    {
+        _markRandomnessRequestStale(_requestId);
     }
 
     // function to update callbackGasLimit & keyHash

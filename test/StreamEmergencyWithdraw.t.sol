@@ -6,6 +6,7 @@ import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamMinter.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
+import "./mocks/MockRandomizerCore.sol";
 
 contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
     using Assertions for address;
@@ -144,7 +145,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
         (bool success,) = address(setup.randomizer).call{ value: 1 ether }("");
         success.assertTrue("randomizer rejected reserve");
 
-        vm.prank(CORE);
+        vm.prank(address(setup.core));
         setup.randomizer.calculateTokenHash(1, TOKEN_ID, 123);
 
         setup.controller.lastValue().assertEq(0.25 ether, "controller payment");
@@ -171,9 +172,12 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
 
     function _deployRandomizer() private returns (RandomizerSetup memory setup) {
         setup.admins = new StreamAdmins(address(this));
+        setup.core = new MockRandomizerCore();
         setup.controller = new MockArrngController();
-        setup.randomizer =
-            new NextGenRandomizerRNG(CORE, address(setup.admins), address(setup.controller));
+        setup.randomizer = new NextGenRandomizerRNG(
+            address(setup.core), address(setup.admins), address(setup.controller)
+        );
+        setup.core.setRandomizer(1, address(setup.randomizer), 1);
     }
 }
 
@@ -184,6 +188,7 @@ struct MinterSetup {
 
 struct RandomizerSetup {
     StreamAdmins admins;
+    MockRandomizerCore core;
     MockArrngController controller;
     NextGenRandomizerRNG randomizer;
 }

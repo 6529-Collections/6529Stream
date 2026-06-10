@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 13:08 UTC` |
+| Last generated | `2026-06-10 13:55 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -25,10 +25,10 @@ baseline.
 | --- | ---: |
 | High | 9 |
 | Medium | 29 |
-| Low | 61 |
-| Informational | 571 |
+| Low | 64 |
+| Informational | 578 |
 | Optimization | 6 |
-| Total | 676 |
+| Total | 686 |
 
 ## Detector Counts
 
@@ -44,20 +44,24 @@ baseline.
 | `locked-ether` | Medium | 7 |
 | `uninitialized-local` | Medium | 11 |
 | `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 61 |
-| Informational findings | Informational | 571 |
+| Low-impact findings | Low | 64 |
+| Informational findings | Informational | 578 |
 | Optimization findings | Optimization | 6 |
 
-Pause-control delta from the previous admin-permission capture:
+Randomizer-lifecycle delta from the previous pause-control capture:
 
-- High, medium, low, and optimization counts are unchanged.
-- Net informational findings increased by 28 due to new pause-domain constants,
-  pause/emergency events, role mappings, views, and test harness low-level
-  calls/names.
-- `arbitrary-send-eth` remains at zero findings after the explicit
-  `emergencyRecipient()` routing change.
-- The only medium row whose description mentions emergency is still the
-  test-only `MockArrngController` `locked-ether` row in
+- High, medium, and optimization counts are unchanged.
+- Low findings increased by 3 and informational findings increased by 7 due to
+  shared randomizer lifecycle storage, events, views, request-state tests, and
+  low-level negative-call coverage.
+- `NextGenRandomizerRNG.requestRandomWords` uses a scoped Slither suppression
+  for the guarded arRNG request-ID pattern: the provider returns the request ID
+  from an external payable call, state is recorded immediately after, and
+  `test/StreamRandomizerLifecycle.t.sol` proves a reentrant controller cannot
+  fulfill during that window.
+- `arbitrary-send-eth` remains at zero findings.
+- The only medium row whose description mentions randomizer-provider payment is
+  still the test-only `MockArrngController` `locked-ether` row in
   `test/StreamEmergencyWithdraw.t.sol`; it is accepted as harness-only noise.
 
 ## Status Semantics
@@ -110,6 +114,15 @@ GitHub work item that owns that resolution.
 | `uninitialized-local` | 1 | `MockStreamMinter` | `mint(...).mintedCount` | test-only | `test/mocks/MockStreamMinter.sol#L71` | Medium | Medium | Accepted | Accepted as a test-only helper baseline | None; test-only baseline row | Accepted test-only | Gate A | TBD |
 | `unused-return` | 1 | `StreamDropsERC1271Test` | `testValidContractSignatureMintsAndConsumesDropId()` | test-only | `test/StreamDropsERC1271.t.sol#L35-L61` | Medium | Medium | Accepted | Accepted as a test-only assertion helper pattern where tuple fields are intentionally ignored except the signer check | `test/StreamDropsERC1271.t.sol` | Accepted test-only | Gate A | TBD |
 
+## Source-Level Suppressions
+
+Source suppressions must stay narrow, include an adjacent code comment, and be
+backed by a regression test or accepted-risk rationale.
+
+| Detector | Scope | Status | Rationale | Required test | Issue | Owner |
+| --- | --- | --- | --- | --- | --- | --- |
+| `reentrancy-eth`, `write-after-write` | `NextGenRandomizerRNG.requestRandomWords(uint256,uint256)` | Accepted scoped suppression | arRNG returns the provider request ID from an external payable call, so the adapter must record request state after that call. The function uses a local request-in-progress guard, fulfillment rejects during the guarded window, and the suppression is limited to this function. | `test/StreamRandomizerLifecycle.t.sol::testArrngControllerCannotReenterFulfillmentDuringRequest` | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | TBD |
+
 ## Triage Rules
 
 - Fix first-party high findings before any public beta claim.
@@ -118,7 +131,7 @@ GitHub work item that owns that resolution.
   provenance before accepting vendored library rows.
 - Keep every `Needs Issue` row linked to a GitHub issue before accepting or
   suppressing it.
-- Do not suppress a detector until a row is `Fixed`, `Accepted`, or
-  `False Positive`.
+- Do not suppress a detector until the finding or scoped suppression is
+  documented as `Fixed`, `Accepted`, or `False Positive`.
 - Do not convert Slither into a CI gate until high and medium findings have a
   stable accepted baseline.

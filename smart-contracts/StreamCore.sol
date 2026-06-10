@@ -59,6 +59,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
     // mapping of collectionAdditionalData struct
     mapping(uint256 => collectionAdditonalDataStructure) private collectionAdditionalData;
 
+    // monotonic version for randomizer provider changes per collection
+    mapping(uint256 => uint256) private collectionRandomizerEpoch;
+
     // checks if a collection was created
     mapping(uint256 => bool) private isCollectionCreated;
 
@@ -108,6 +111,12 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
 
     // events
     event CollectionCreated(uint256 indexed _collectionID);
+    event CollectionRandomizerUpdated(
+        uint256 indexed _collectionID,
+        address indexed oldRandomizer,
+        address indexed newRandomizer,
+        uint256 randomizerEpoch
+    );
 
     // constructor
     constructor(
@@ -210,8 +219,16 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
             IRandomizer(_randomizerContract).isRandomizerContract() == true,
             "Contract is not Randomizer"
         );
+        address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
+        collectionRandomizerEpoch[_collectionID] = collectionRandomizerEpoch[_collectionID] + 1;
         collectionAdditionalData[_collectionID].randomizerContract = _randomizerContract;
         collectionAdditionalData[_collectionID].randomizer = IRandomizer(_randomizerContract);
+        emit CollectionRandomizerUpdated(
+            _collectionID,
+            oldRandomizer,
+            _randomizerContract,
+            collectionRandomizerEpoch[_collectionID]
+        );
     }
 
     // mint function - NextGenCore airdrop function (function is called from minter contract)
@@ -510,6 +527,16 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
     // function to return the collection id given a token id
     function viewColIDforTokenID(uint256 _tokenid) public view returns (uint256) {
         return (tokenIdsToCollectionIds[_tokenid]);
+    }
+
+    // function to return the current randomizer contract for a collection
+    function viewCollectionRandomizerContract(uint256 _collectionID) public view returns (address) {
+        return collectionAdditionalData[_collectionID].randomizerContract;
+    }
+
+    // function to return the current randomizer epoch for a collection
+    function viewRandomizerEpoch(uint256 _collectionID) public view returns (uint256) {
+        return collectionRandomizerEpoch[_collectionID];
     }
 
     // function to retrieve if data were added on a collection

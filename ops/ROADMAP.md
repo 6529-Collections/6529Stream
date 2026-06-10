@@ -18,9 +18,9 @@ order.
   characterization test skeleton. It does not prove protocol correctness.
 - Known remaining P0 blockers include broader payment accounting and
   cross-contract invariants, fuller randomizer reserve lifecycle accounting,
-  untriaged static analysis findings, missing invariants, randomizer hardening,
-  broader production governance, and missing deployment
-  discipline.
+  deterministic randomness retry and metadata state work, untriaged static
+  analysis findings, missing invariants, broader production governance, and
+  missing deployment discipline.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
   fixed-price `StreamDrops` pull credits, and `StreamCuratorsPool` curator
@@ -30,7 +30,8 @@ order.
   current custody models, P0-ADMIN-001 target-scoped function-admin checks
   cover the current protected-function surface, and P0-ADMIN-002
   domain-scoped pause/emergency-recipient controls now have target-state
-  coverage.
+  coverage. P0-RAND-001 randomizer request lifecycle and callback validation
+  now have target-state coverage for VRF and arRNG adapters.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -38,7 +39,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-10 13:08 UTC` local Windows PR candidate validation; CI TBD |
+| Last verified | `2026-06-10 13:55 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -51,9 +52,9 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 676 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 686 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1098,6 +1099,11 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Issue: [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37).
 - Dependencies: [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [ADR 0005](../docs/adr/0005-randomness.md), ADR 0003, ADR 0004.
+- Status: In Progress. VRF and arRNG adapters now have request lifecycle
+  storage, provider/epoch validation, duplicate/stale rejection, observable
+  stale marking, seed derivation that includes provider/request/collection/token
+  epoch/output, and target-state tests. Remaining work is tracked under the
+  child tickets below.
 
 Problem:
 
@@ -1106,45 +1112,62 @@ Problem:
 
 Current behavior:
 
-- Randomizer adapters set token hashes with limited request lifecycle tracking.
+- VRF and arRNG randomizer adapters now record request lifecycle state before
+  fulfillment and validate callbacks through `StreamRandomizerLifecycle`.
 - `StreamCore.setTokenHash` only checks the caller is the current collection
   randomizer and the token hash is still zero.
 - `_safeMint` runs before `calculateTokenHash`, so receivers and indexers can
   observe a minted token while randomness is pending.
 - Off-chain metadata returns a `pending` URI while the hash is zero; on-chain
   metadata currently embeds the zero hash directly.
-- VRF and arRNG adapters keep provider-specific request mappings, but there is
-  no canonical protocol request state, provider epoch, stale callback state, or
-  callback-after-burn policy.
+- `StreamCore` now exposes a collection randomizer epoch that increments when a
+  collection randomizer is updated; stale callbacks from replaced providers
+  cannot silently fulfill old requests.
+- VRF and arRNG adapters expose request state, request-to-token,
+  token-to-request, and token-to-collection views; callback-after-burn policy,
+  failed post-processing retry, and richer metadata state remain open.
 - `RandomizerNXT` and `XRandoms` use block-derived helper randomness that is
-  out of production scope under ADR 0005.
+  out of production scope under ADR 0005. `RandomizerNXT` no longer advertises
+  itself as a production randomizer; `XRandoms` still needs final removal,
+  scoping, or accepted-risk treatment.
 
 Intended behavior:
 
-- Fulfillment validates request ID, token, collection, and randomizer epoch.
+- Fulfillment validates request ID, token, collection, provider, and randomizer
+  epoch.
 - Pending and failed randomness are explicit states.
 - Production drops use provider-backed async randomness only.
 - Provider migration is observable and cannot silently fulfill stale requests.
 
 Required code changes:
 
-- Store `requestId => tokenId/collectionId/randomizerEpoch`.
-- Fulfill by request ID, not arrival order.
-- Reject stale callbacks from replaced randomizers.
-- Reject duplicate fulfillments.
+- Store `requestId => tokenId/collectionId/randomizerEpoch`. Implemented for
+  VRF and arRNG adapters.
+- Fulfill by request ID, not arrival order. Implemented for VRF and arRNG
+  adapters.
+- Reject stale callbacks from replaced randomizers. Implemented for VRF and
+  arRNG adapters.
+- Reject duplicate fulfillments. Implemented for VRF and arRNG adapters.
 - Define whether fulfillment stores raw random words, derived token hash, or
-  both.
+  both. Partially implemented: adapters store the derived seed/hash and emit
+  provider words in existing fulfillment events; raw-output hash storage remains
+  `P0-RAND-007`.
 - Define whether randomizer migration can happen while requests are pending.
 - Record failed or stale post-processing for retry by a separate function if
-  needed.
+  needed. Stale marking is implemented; failed post-processing retry remains
+  `P0-RAND-004`/`P0-RAND-006`.
 - Add a bounded manual-retry path only for deterministic post-processing
   failures, not for changing random output.
 - Do not allow user-significant inputs after randomness request.
-- Expose request lifecycle views by request ID and token ID.
+- Expose request lifecycle views by request ID and token ID. Implemented for
+  request records, request state, request-to-token, token-to-request, and
+  token-to-collection adapter views.
 - Emit request, fulfillment, stale, failure, retry, provider-update, and
   epoch-update events.
 - Remove, isolate, or disable weak helper randomness for production deployment
-  paths.
+  paths. Partially implemented: `RandomizerNXT` cannot be configured as a
+  production randomizer; `XRandoms` Slither rows remain open pending final
+  scoping/removal.
 - Bind provider fees, refunds, and adapter balances to ADR 0003 reserve and
   surplus accounting.
 
@@ -1167,21 +1190,25 @@ Required tests:
 
 - Pending metadata.
 - Fulfilled metadata.
-- Duplicate fulfillment fails.
-- Stale callback fails.
-- Replaced randomizer callback fails.
+- Duplicate fulfillment fails. Implemented for VRF and arRNG adapters.
+- Stale callback fails. Implemented for stale-marked requests and replaced
+  randomizer epochs.
+- Replaced randomizer callback fails. Implemented.
 - Randomizer migration with pending requests follows ADR.
 - Manual retry cannot change random output.
 - Callback after burn follows ADR behavior.
 - Fulfillment does not revert in normal operation.
-- Unknown request ID fails.
-- Wrong provider fails.
-- Wrong token fails.
-- Wrong collection fails.
-- Wrong randomizer epoch fails.
+- Unknown request ID fails. Implemented.
+- Wrong provider fails. Implemented through live provider/epoch checks.
+- Wrong token fails. Implemented by binding fulfillment to the recorded request
+  token.
+- Wrong collection fails. Implemented by validating the core token-to-collection
+  binding before fulfillment.
+- Wrong randomizer epoch fails. Implemented.
 - Zero derived seed/hash fails.
 - Weak helper randomizer cannot be configured for production collections or is
-  fully outside production scope.
+  fully outside production scope. Implemented for `RandomizerNXT`; `XRandoms`
+  final scope remains open.
 - Randomness reserves are not emergency-withdrawable surplus.
 
 Required docs:
@@ -1195,13 +1222,17 @@ Required docs:
 
 Acceptance criteria:
 
-- Randomizer fulfillment validates request ID, token, collection, and randomizer
-  epoch.
-- Pending and failed states are documented.
-- A valid provider callback produces exactly one terminal seed/hash.
-- Unknown, duplicate, stale, wrong-provider, wrong-token, wrong-collection, and
-  wrong-epoch callbacks fail with asserted custom errors.
-- Fulfillment cannot finalize a zero derived seed/hash.
+- Randomizer fulfillment validates request ID, token, collection, provider, and
+  randomizer epoch for VRF and arRNG adapters.
+- Pending, fulfilled, and stale states are implemented and documented; failed
+  post-processing remains a queued child ticket.
+- A valid provider callback produces exactly one terminal seed/hash for VRF and
+  arRNG adapters.
+- Unknown, empty-output, duplicate, stale, wrong-collection, and wrong-epoch
+  callbacks fail with asserted custom errors.
+- Fulfillment cannot finalize a zero derived seed/hash. The guard is present;
+  a dedicated preimage-style test remains future work because `keccak256` zero
+  output is not practically constructible.
 - Pending/final metadata behavior is explicit for both off-chain and on-chain
   metadata.
 - Provider migration increments a collection-level randomizer epoch or stricter
@@ -1209,12 +1240,13 @@ Acceptance criteria:
 - Existing pending requests cannot be silently fulfilled by a replacement
   provider.
 - Manual retry can only retry deterministic post-processing using the same
-  provider output.
+  provider output. Still open under `P0-RAND-006`.
 - `RandomizerNXT` and `XRandoms` are removed from production paths, moved to
   test/demo scope, or otherwise made impossible to configure for production
   drops.
 - Provider fee refunds and adapter balances are covered by ADR 0003 reserve and
-  emergency-withdrawable tests.
+  emergency-withdrawable tests. Current arRNG adapter reserve boundary is
+  covered; request-level provider reserve lifecycle remains open.
 
 ### P0-SLITHER-001: Triage Static Analysis Baseline
 
@@ -1850,7 +1882,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 676 findings, including 9 High and 29 Medium.
+- Result: 686 findings, including 9 High and 29 Medium.
 
 Impact summary:
 
@@ -1858,8 +1890,8 @@ Impact summary:
 | --- | ---: |
 | High | 9 |
 | Medium | 29 |
-| Low | 61 |
-| Informational | 571 |
+| Low | 64 |
+| Informational | 578 |
 | Optimization | 6 |
 
 High/medium detector summary:
@@ -1902,14 +1934,14 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | In Progress: owner/root can recover function/global role management if the registrar is lost, but signer manager, signer rotation, and signer lifecycle tests remain missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
 | Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Passing: guardians can pause but not unpause, unpause admins can unpause but not pause, owner/root can manage pause roles, `DropExecution`, `Mint`, `AuctionBid`, `AuctionSettlement`, `MetadataMutation`, and `RandomnessRequest` pauses block their intended paths, ordinary user credit withdrawals remain available during operational pauses, and the signer-compromise flow can pause drop execution, invalidate/cancel an exposed drop, unpause, and still reject the stale payload | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
 | Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol`, `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol` | Passing for current first-party surfaces: `StreamAdmins.emergencyRecipient()` is the explicit surplus recipient, `StreamMinter`, `StreamAuctions`, and `StreamCuratorsPool` use it for positive surplus withdrawal, `NextGenRandomizerRNG` exposes zero emergency-withdrawable reserve, unauthorized emergency withdrawals revert without transfer, and payment/reserve tests cover poster, bidder, curator, active-bid escrow, and randomizer reserve boundaries. Dedicated signer-manager and deployment emergency runbooks remain future work | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
-| Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
-| Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerCallbacks.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
-| Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerCallbacks.t.sol` | Missing | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
-| Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | Missing | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
-| Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerMigration.t.sol` | Missing | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
+| Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF and arRNG request records, request state, request-to-token, token-to-request, token-to-collection, requested block/time, fulfilled block/time, and derived seed storage | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
+| Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF/arRNG valid fulfillment, unknown request, empty output, duplicate fulfillment, core token-to-collection mismatch, live provider/epoch validation, and reentrant arRNG request-submission rejection | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
+| Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerLifecycle.t.sol` | Passing for replaced-provider stale epoch rejection and admin-marked stale requests; bulk stale marking or pending-migration policy remains future work | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
+| Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | In Progress: pending, fulfilled, and stale states are implemented and observable; failed post-processing state, retry, and metadata integration remain missing | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
+| Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | In Progress: provider replacement increments the collection randomizer epoch and old callbacks fail; explicit pending-request migration policy and bulk stale handling remain missing | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Missing | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
-| Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerSeed.t.sol` | Missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
-| Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerProductionScope.t.sol` | Missing | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |
+| Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerSeed.t.sol` | In Progress: derived seed includes provider, request ID, collection, token, randomizer epoch, and provider output via `abi.encode`; explicit raw-output hash storage remains missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
+| Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerProductionScope.t.sol` | In Progress: `RandomizerNXT.isRandomizerContract()` returns false and `StreamCore.addRandomizer` rejects it for production collections; `XRandoms` Slither `weak-prng` rows remain open pending final scoping/removal | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |
 | Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadata.t.sol` | Initial off-chain characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; on-chain pending/final and golden-file tests missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Missing | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |
 | Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol` | Missing | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51) | Gate D | TBD |
