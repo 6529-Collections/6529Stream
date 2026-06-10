@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/56` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 07:55 UTC` |
+| Last updated | `2026-06-10 07:58 UTC` |
 
 ## Packaging Notes
 
@@ -66,7 +66,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Merged in PR #54 |
 | 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | Merged in PR #55 |
 | 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Merged in PR #56 |
-| 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | In progress on `codex/erc1271-drop-authorization` |
+| 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Open in PR #57 |
 
 ## Current PR Worklog
 
@@ -1167,11 +1167,13 @@ Outcome:
 - GitHub CI and CodeRabbit passed.
 - Claude unavailable due to organization overage.
 
-### PR TBD: Implement ERC-1271 contract signer support (Queue Item 16)
+### PR #57: Implement ERC-1271 contract signer support (Queue Item 16)
 
-Status: Local validation complete; ready to commit and open a PR.
+Status: Open; awaiting GitHub CI and bot reviews.
 Branch: `codex/erc1271-drop-authorization`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/57`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/19`.
+Claude review request: issue comment `4667907301`.
 
 Goal:
 
@@ -1210,6 +1212,11 @@ Validation:
   state files.
 - Stale ERC-1271 pending-policy grep returned no active documentation or source
   matches outside historical run-log entries.
+
+Review feedback:
+
+- PR opened on head `73a2edf983772625f23ed92aefa1b7c542101696`.
+- Claude review was explicitly requested in issue comment `4667907301`.
 
 ## Decision Log
 
@@ -1329,6 +1336,8 @@ Validation:
 | 2026-06-10 07:45 | Merge PR #56 | Final head was CI-clean and CodeRabbit-clean; Claude was externally unavailable due to organization overage limits |
 | 2026-06-10 07:47 | Start `P0-AUTH-003` implementation PR | EIP-712 is merged, so Gate C can add ERC-1271 contract signer validation against the same typed-data digest |
 | 2026-06-10 07:55 | Finish local `P0-AUTH-003` validation | ERC-1271 exact-magic staticcall validation, fail-closed malformed returns, contract-signer tests, docs, roadmap, full `make check`, and Windows wrapper all pass locally |
+| 2026-06-10 07:57 | Open PR #57 | ERC-1271 drop authorization implementation is published with local validation evidence |
+| 2026-06-10 07:58 | Request Claude review on PR #57 | Explicit review ping added in issue comment `4667907301` because Claude may not run automatically |
 
 ## Resume Instructions
 
