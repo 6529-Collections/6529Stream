@@ -17,10 +17,10 @@ Known P0 blockers and the execution roadmap are tracked in
 
 1. TDH holders provide reputation to drops.
 2. If a drop clears the selected network hurdle, it enters a pool.
-3. Once a drop is in a pool, addresses that meet TDH signer requirements can
-   sign a minting transaction.
-4. Once signer requirements are met, the NFT can be minted through fixed-price
-   purchase or sent to auction.
+3. Once a drop is in a pool, the configured TDH signer authorizes execution with
+   EIP-712 typed data.
+4. A valid authorization can mint through fixed-price purchase or create an
+   auction, subject to the remaining P0 safety blockers.
 
 ## Quickstart
 

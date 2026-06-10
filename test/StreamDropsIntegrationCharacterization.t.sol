@@ -4,11 +4,11 @@ pragma solidity ^0.8.19;
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/AuctionContract.sol";
 import "./helpers/Assertions.sol";
-import "./helpers/CharacterizationTestBase.sol";
+import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";
 import "./mocks/MockRandomizer.sol";
 
-contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase, StreamFixture {
+contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, StreamFixture {
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
@@ -21,13 +21,24 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
     address private constant CURATORS_POOL = address(0x3003);
 
     function testFixedPriceDropPaysSynchronouslyAndMintsToExplicitRecipient() public {
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         vm.deal(address(this), 10 ether);
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(this),
+            "data",
+            1,
+            4 ether,
+            1,
+            2,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
-        (, bytes32 expectedDropId) =
-            deployed.drops.retrieveMessageAndDropID(POSTER, RECIPIENT, "data", 1, 1, 4 ether, 999);
-
-        deployed.drops.mintDrop{ value: 4 ether }(POSTER, RECIPIENT, "data", 1, 1, 4 ether, 999);
+        deployed.drops.mintDrop{ value: 4 ether }(authorization, "data", signature);
 
         uint256 tokenId = 10_000_000_000;
         POSTER.balance.assertEq(2 ether, "poster payout changed");
@@ -37,24 +48,31 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
         deployed.core.retrieveTokenHash(tokenId)
             .assertEq(keccak256(abi.encode(uint256(1), tokenId, uint256(0))), "token hash changed");
         deployed.core.tokenURI(tokenId).assertEq("ipfs://base/10000000000", "tokenURI changed");
-        deployed.drops.retrieveDropID(tokenId).assertEq(expectedDropId, "drop id changed");
+        deployed.drops.retrieveDropID(tokenId).assertEq(authorization.dropId, "drop id changed");
     }
 
     function testFixedPriceDropCurrentlyRevertsWhenPosterRejectsETH() public {
         RejectETH rejectPoster = new RejectETH();
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         vm.deal(address(this), 10 ether);
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            address(rejectPoster),
+            RECIPIENT,
+            address(this),
+            "data",
+            1,
+            4 ether,
+            3,
+            4,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
         (bool success,) = address(deployed.drops).call{ value: 4 ether }(
             abi.encodeWithSelector(
-                deployed.drops.mintDrop.selector,
-                address(rejectPoster),
-                RECIPIENT,
-                "data",
-                uint256(1),
-                uint256(1),
-                uint256(4 ether),
-                uint256(999)
+                deployed.drops.mintDrop.selector, authorization, "data", signature
             )
         );
 
@@ -64,19 +82,26 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
 
     function testFixedPriceDropCurrentlyRevertsWhenPayoutAddressRejectsETH() public {
         RejectETH rejectPayout = new RejectETH();
-        DeployedStream memory deployed = deployStream(address(rejectPayout), CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(address(rejectPayout), CURATORS_POOL, signerAddress());
         vm.deal(address(this), 10 ether);
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(this),
+            "data",
+            1,
+            4 ether,
+            5,
+            6,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
         (bool success,) = address(deployed.drops).call{ value: 4 ether }(
             abi.encodeWithSelector(
-                deployed.drops.mintDrop.selector,
-                POSTER,
-                RECIPIENT,
-                "data",
-                uint256(1),
-                uint256(1),
-                uint256(4 ether),
-                uint256(999)
+                deployed.drops.mintDrop.selector, authorization, "data", signature
             )
         );
 
@@ -86,19 +111,26 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
 
     function testFixedPriceDropCurrentlyRevertsWhenCuratorsPoolRejectsETH() public {
         RejectETH rejectCuratorsPool = new RejectETH();
-        DeployedStream memory deployed = deployStream(PAYOUT, address(rejectCuratorsPool));
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, address(rejectCuratorsPool), signerAddress());
         vm.deal(address(this), 10 ether);
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(this),
+            "data",
+            1,
+            4 ether,
+            7,
+            8,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
         (bool success,) = address(deployed.drops).call{ value: 4 ether }(
             abi.encodeWithSelector(
-                deployed.drops.mintDrop.selector,
-                POSTER,
-                RECIPIENT,
-                "data",
-                uint256(1),
-                uint256(1),
-                uint256(4 ether),
-                uint256(999)
+                deployed.drops.mintDrop.selector, authorization, "data", signature
             )
         );
 
@@ -107,15 +139,24 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
     }
 
     function testAuctionDropCurrentlyMintsCustodyToPayoutAndRecordsAuctionState() public {
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         uint256 auctionEndTime = block.timestamp + 1 days;
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            deployed.drops,
+            POSTER,
+            address(0),
+            "auction-data",
+            1,
+            5 ether,
+            auctionEndTime,
+            9,
+            10,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
-        (, bytes32 expectedDropId) = deployed.drops
-            .retrieveMessageAndDropID(
-                POSTER, address(0), "auction-data", 1, 2, 5 ether, auctionEndTime
-            );
-
-        deployed.drops.mintDrop(POSTER, address(0), "auction-data", 1, 2, 5 ether, auctionEndTime);
+        deployed.drops.mintDrop(authorization, "auction-data", signature);
 
         uint256 tokenId = 10_000_000_000;
         deployed.core.ownerOf(tokenId).assertEq(PAYOUT, "auction custody recipient changed");
@@ -125,26 +166,34 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
         deployed.drops.retrieveAuctionPoster(tokenId).assertEq(POSTER, "auction poster changed");
         deployed.drops.retrieveAuctionPrice(tokenId)
             .assertEq(5 ether, "auction starting price changed");
-        deployed.drops.retrieveDropID(tokenId).assertEq(expectedDropId, "auction drop id changed");
+        deployed.drops.retrieveDropID(tokenId)
+            .assertEq(authorization.dropId, "auction drop id changed");
         deployed.drops.retrieveExecutionAddress(tokenId)
             .assertEq(POSTER, "auction execution changed");
     }
 
     function testAuctionDropRejectsNonZeroRecipient() public {
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         uint256 auctionEndTime = block.timestamp + 1 days;
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            "auction-data",
+            1,
+            5 ether,
+            auctionEndTime,
+            11,
+            12,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
         (bool success,) = address(deployed.drops)
             .call(
                 abi.encodeWithSelector(
-                    deployed.drops.mintDrop.selector,
-                    POSTER,
-                    RECIPIENT,
-                    "auction-data",
-                    uint256(1),
-                    uint256(2),
-                    uint256(5 ether),
-                    auctionEndTime
+                    deployed.drops.mintDrop.selector, authorization, "auction-data", signature
                 )
             );
 
@@ -153,7 +202,8 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
     }
 
     function testNoBidAuctionSettlementTransfersToPoster() public {
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         StreamAuctions auctions = new StreamAuctions(
             address(deployed.minter),
             address(deployed.core),
@@ -163,8 +213,21 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
             CURATORS_POOL
         );
         uint256 auctionEndTime = block.timestamp + 1 days;
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            deployed.drops,
+            POSTER,
+            address(0),
+            "auction-data",
+            1,
+            5 ether,
+            auctionEndTime,
+            13,
+            14,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
-        deployed.drops.mintDrop(POSTER, address(0), "auction-data", 1, 2, 5 ether, auctionEndTime);
+        deployed.drops.mintDrop(authorization, "auction-data", signature);
 
         uint256 tokenId = 10_000_000_000;
         deployed.drops.retrieveExecutionAddress(tokenId)
@@ -178,15 +241,26 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
         deployed.core.ownerOf(tokenId).assertEq(POSTER, "no-bid settlement recipient changed");
     }
 
-    function testContractSignerCanMintFixedPriceDropToExplicitRecipient() public {
+    function testContractExecutorCanMintFixedPriceDropToExplicitRecipient() public {
         AuthorizedDropExecutor executor = new AuthorizedDropExecutor();
         DeployedStream memory deployed =
-            deployStreamWithSigner(PAYOUT, CURATORS_POOL, address(executor));
-        vm.deal(address(this), 10 ether);
-
-        executor.mintFixedPrice{ value: 4 ether }(
-            deployed.drops, POSTER, RECIPIENT, "data", 1, 4 ether, 999
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        vm.deal(address(executor), 10 ether);
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(executor),
+            "data",
+            1,
+            4 ether,
+            15,
+            16,
+            block.timestamp + 1 days
         );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
+
+        executor.mintFixedPrice{ value: 4 ether }(deployed.drops, authorization, "data", signature);
 
         uint256 tokenId = 10_000_000_000;
         deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "contract execution recipient changed");
@@ -195,12 +269,25 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
     }
 
     function testPendingMetadataCurrentlyUsesPendingSuffixWhenRandomizerDoesNothing() public {
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         NoopRandomizer noopRandomizer = new NoopRandomizer();
         deployed.core.addRandomizer(1, address(noopRandomizer));
-        vm.deal(address(this), 1 ether);
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(0),
+            "data",
+            1,
+            0,
+            17,
+            18,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
-        deployed.drops.mintDrop(POSTER, RECIPIENT, "data", 1, 1, 0, 999);
+        deployed.drops.mintDrop(authorization, "data", signature);
 
         uint256 tokenId = 10_000_000_000;
         deployed.core.retrieveTokenHash(tokenId).assertEq(bytes32(0), "noop hash changed");
@@ -208,13 +295,26 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
     }
 
     function testSetTokenHashCurrentlyAllowsConfiguredRandomizerOnlyAndOnlyOnce() public {
-        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         NoopRandomizer noopRandomizer = new NoopRandomizer();
         deployed.core.addRandomizer(1, address(noopRandomizer));
         uint256 tokenId = 10_000_000_000;
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(0),
+            "data",
+            1,
+            0,
+            19,
+            20,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
 
-        vm.deal(address(this), 1 ether);
-        deployed.drops.mintDrop(POSTER, RECIPIENT, "data", 1, 1, 0, 999);
+        deployed.drops.mintDrop(authorization, "data", signature);
         deployed.core.retrieveTokenHash(tokenId).assertEq(bytes32(0), "noop hash changed");
 
         (bool nonRandomizerSuccess,) = address(deployed.core)
@@ -249,15 +349,10 @@ contract StreamDropsIntegrationCharacterizationTest is CharacterizationTestBase,
 contract AuthorizedDropExecutor {
     function mintFixedPrice(
         StreamDrops drops,
-        address poster,
-        address recipient,
-        string memory tokenData,
-        uint256 collectionId,
-        uint256 price,
-        uint256 endDate
+        StreamDrops.DropAuthorization calldata authorization,
+        string calldata tokenData,
+        bytes calldata signature
     ) external payable {
-        drops.mintDrop{ value: msg.value }(
-            poster, recipient, tokenData, collectionId, uint256(1), price, endDate
-        );
+        drops.mintDrop{ value: msg.value }(authorization, tokenData, signature);
     }
 }

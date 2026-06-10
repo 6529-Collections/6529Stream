@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/remove-tx-origin-drop-execution` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/54` |
+| Active PR branch | `codex/eip712-drop-authorization` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/55` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 06:33 UTC` |
+| Last updated | `2026-06-10 07:12 UTC` |
 
 ## Packaging Notes
 
@@ -64,7 +64,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Merged in PR #44 |
 | 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merged in PR #52 |
 | 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Merged in PR #54 |
-| 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | In progress on `codex/remove-tx-origin-drop-execution` |
+| 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | Merged in PR #55 |
+| 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Open in PR #56 |
 
 ## Current PR Worklog
 
@@ -991,7 +992,7 @@ Outcome:
 
 ### PR `#55`: Remove `tx.origin` from drop execution (Queue Item 14)
 
-Status: In progress.
+Status: Merged.
 Branch: `codex/remove-tx-origin-drop-execution`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/55`.
 Claude review request: issue comment `4667155915`.
@@ -1058,6 +1059,101 @@ Review feedback:
   log and a zero-poster rejection in `StreamDrops.mintDrop`.
 - Follow-up fix added the concrete PR heading and rejects zero-poster fixed-price
   and auction drops, with characterization tests for both paths.
+- GitHub CI run `27257963206` passed on final head
+  `1e09d7ab6a67e7c8b8cffbf338ca85cd9ebb08de`.
+- CodeRabbit reported no further actionable comments on the final head.
+
+Outcome:
+
+- Merged as PR #55 on `2026-06-10 06:46 UTC`.
+- Squash merge commit `f7e34ee264f5a8caf6693c83a167dbf4cc028340`.
+- Latest head before merge `1e09d7ab6a67e7c8b8cffbf338ca85cd9ebb08de`.
+- Issue #18 closed as completed.
+- GitHub CI and CodeRabbit passed.
+- Claude unavailable due to organization overage.
+
+### PR #56: Replace drop authorization with EIP-712 (Queue Item 15)
+
+Status: Open; CodeRabbit follow-up fixes implemented locally and awaiting
+remote CI/bot re-check after push.
+Branch: `codex/eip712-drop-authorization`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/56`.
+Related issue: `https://github.com/6529-Collections/6529Stream/issues/10`.
+Claude review request: issue comment `4667572552`.
+
+Goal:
+
+- Replace legacy packed drop IDs and signer-only execution with EIP-712
+  `DropAuthorization` typed data.
+- Bind drop execution to `name`, `version`, `chainId`, and `verifyingContract`.
+- Add storage-backed consumed and cancelled drop IDs.
+- Add signer epoch rotation and per-drop cancellation controls.
+- Support EOA signatures and EIP-2098 compact signatures with low-`s`, valid
+  `v`, and zero-recovered-signer checks.
+- Explicitly reject contract signers until `P0-AUTH-003` adds ERC-1271 support.
+- Remove `retrieveMessageAndDropID` and the old
+  `mintDrop(address,address,string,uint256,uint256,uint256,uint256)` execution
+  surface.
+- Update roadmap, ADR, Slither baseline, blockers, and tests.
+
+Candidate files:
+
+- `smart-contracts/StreamDrops.sol`
+- `test/StreamDropsCharacterization.t.sol`
+- `test/StreamDropsIntegrationCharacterization.t.sol`
+- `test/StreamDropsEIP712.t.sol`
+- `test/StreamAdmins.t.sol`
+- `test/helpers/CharacterizationTestBase.sol`
+- `test/helpers/DropAuthTestHelper.sol`
+- `test/README.md`
+- `docs/known-blockers.md`
+- `docs/adr/0001-drop-authorization.md`
+- `README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `forge test --match-contract StreamDropsEIP712Test -vvv` passed with 23
+  tests.
+- `forge test --match-contract StreamAdminsTest -vvv` passed with 4 tests.
+- `make check` passed with 47 tests and the known Solidity warning baseline.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 47
+  tests and the known Solidity warning baseline.
+- `forge fmt --check` passed for all touched Solidity files.
+- `git diff --check` passed.
+- Markdown heading scan passed for touched README, docs, roadmap, Slither
+  baseline, and autonomous state files.
+- Executable legacy-surface grep over `smart-contracts` and `test` found no
+  `retrieveMessageAndDropID`, old `mintDrop(address,address,string,...)`,
+  `dropExecuted`, `MintsToTxOrigin`, or `tx.origin` matches.
+- `make slither` returned non-zero as expected because baseline findings remain;
+  targeted log check confirmed the `StreamDrops` packed-hash findings are gone,
+  only `StreamCore.retrieveDependencyScript` remains under
+  `encode-packed-collision`, and `StreamDrops.mintDrop` no longer appears under
+  `uninitialized-local`.
+
+Review feedback:
+
+- GitHub CI run `27259664728` passed on head
+  `175c24929ac76e5cc5cece64786201dd47063745`.
+- Claude review was requested in issue comment `4667572552`, but Claude was
+  unavailable because the organization's Claude Code overage spend limit was
+  reached.
+- CodeRabbit initially remained pending on the review-processing note; follow-up
+  command comment `4667699009` requested completion for the latest head.
+- CodeRabbit status passed and reported no actionable comments on head
+  `175c24929ac76e5cc5cece64786201dd47063745`.
+- Follow-up CodeRabbit command review comment `4667722117` found duplicate
+  cancellation events, five missing sale-mode negative tests, and missing event
+  assertions.
+- Follow-up fix added an `Already cancelled` guard, `DropAuthorizationConsumed`,
+  `DropAuthorizationCancelled`, and `SignerEpochChanged` event assertions, and
+  negative tests for free fixed-price payer, auction payer, fixed-price auction
+  reserve, fixed-price auction end, and auction price field misuse.
+- Focused EIP-712 suite now passes with 23 tests; `make check` and the Windows
+  wrapper both pass with 47 tests.
 
 ## Decision Log
 
@@ -1165,6 +1261,15 @@ Review feedback:
 | 2026-06-10 06:18 | Open PR #55 | `P0-AUTH-001` implementation is published with local build, test, formatting, whitespace, grep, and sidecar-review evidence |
 | 2026-06-10 06:19 | Request Claude review on PR #55 | Explicit review ping added in issue comment `4667155915` because Claude may not run automatically |
 | 2026-06-10 06:33 | Address CodeRabbit PR #55 review | Use concrete PR state in the durable log and reject zero-poster drop execution so payout and no-bid fallback addresses are never zero |
+| 2026-06-10 06:46 | Merge PR #55 | Final head was CI-clean and CodeRabbit-clean; Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 06:48 | Start `P0-AUTH-002` implementation PR | Gate C next removes packed drop authorization and adds replay-safe EIP-712 typed authorization |
+| 2026-06-10 06:54 | Stage ERC-1271 separately | `P0-AUTH-002` implements EOA/EIP-2098 authorization now and explicitly rejects contract signers until `P0-AUTH-003` lands |
+| 2026-06-10 07:01 | Validate focused EIP-712 suite | EOA, EIP-2098, explicit digest encoding, wrong signer/domain/chain, expiry, cancellation, stale epoch, replay, malleability, zero signer, bad quantity, bad payer, and contract-signer rejection tests pass |
+| 2026-06-10 07:09 | Finish local `P0-AUTH-002` validation | `make check`, Windows check, formatting, whitespace, legacy-surface grep, heading scan, and targeted Slither delta checks pass; Slither still exits non-zero for unrelated baseline findings |
+| 2026-06-10 07:11 | Open PR #56 | EIP-712 drop authorization implementation is published with local validation and Slither delta evidence |
+| 2026-06-10 07:12 | Request Claude review on PR #56 | Explicit review ping added in issue comment `4667572552` because Claude may not run automatically |
+| 2026-06-10 07:30 | Nudge CodeRabbit PR #56 | CodeRabbit had remained pending since PR open; issue comment `4667699009` requested completion for the latest head |
+| 2026-06-10 07:34 | Address CodeRabbit PR #56 command review | Added duplicate-cancel guard, sale-mode negative tests, and lifecycle event assertions; focused suite, full `make check`, and Windows wrapper pass |
 
 ## Resume Instructions
 

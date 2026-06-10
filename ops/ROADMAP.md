@@ -369,8 +369,8 @@ This is the recommended first batch of issues.
 11. [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45) / P1/DESIGN: ADR for metadata/freeze.
 12. [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) / P2/DESIGN: ADR for upgrade/redeployment.
 13. [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) / P0/CODE+TEST+DOCS: Remove `tx.origin`.
-14. `P0-AUTH-002 / P0/CODE+TEST+DOCS`: Implement EIP-712 authorization.
-15. `P0-AUTH-003 / P0/CODE+TEST+DOCS`: Add ERC-1271 support or explicitly reject contract signers.
+14. [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) / P0/CODE+TEST+DOCS: Implement EIP-712 authorization.
+15. [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) / P0/CODE+TEST+DOCS: Add ERC-1271 support.
 16. [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) / P0/CODE+TEST+DOCS: Refactor auction bidding to pull credits.
 17. [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) / P0/CODE+TEST+DOCS: Formalize auction custody and settlement.
 18. [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) / P0/CODE+TEST+DOCS: Fix admin selector mismatch.
@@ -522,8 +522,8 @@ Acceptance criteria:
 
 - No `tx.origin` remains in protocol source.
 - Contract wallet execution test passes.
-- Legacy drop IDs include the explicit recipient until `P0-AUTH-002` replaces
-  packed legacy IDs with EIP-712 typed data.
+- `P0-AUTH-001` interim legacy drop IDs included the explicit recipient; packed
+  IDs are replaced by `P0-AUTH-002`.
 - External docs describe payer, signer, poster, recipient, execution address, and
   settlement recipient semantics.
 
@@ -532,16 +532,21 @@ Acceptance criteria:
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
 - Blocks: Gate C.
 - Dependencies: `P0-AUTH-ADR`.
+- Status: EOA and EIP-2098 typed authorization implemented in
+  `smart-contracts/StreamDrops.sol`; ERC-1271 contract signer support remains
+  `P0-AUTH-003`.
 
 Problem:
 
-- Current drop IDs are built with string concatenation and `abi.encodePacked`.
-  Authorization does not provide a robust typed domain, nonce/deadline model, or
-  replay protection.
+- Previous drop IDs were built with string concatenation and `abi.encodePacked`.
+  Authorization needed a robust typed domain, nonce/deadline model, and
+  storage-backed replay protection.
 
 Current behavior:
 
-- Drop authorization is tied to a TDH signer call and ad hoc drop ID hashing.
+- Drop authorization now accepts `DropAuthorization` EIP-712 typed data, validates
+  an EOA signature from the configured signer, consumes the derived `dropId`, and
+  rejects contract signers until ERC-1271 support lands.
 
 Intended behavior:
 
@@ -559,11 +564,12 @@ Required code changes:
   replayed signatures.
 - Enforce signature malleability policy: low `s`, valid `v`, and zero-address
   recovered signer rejection.
-- Decide whether EIP-2098 compact signatures are supported or explicitly
-  rejected.
+- Support EIP-2098 compact signatures under the same malleability policy.
 - Define front-running semantics: a third party may submit a signed drop only if
   recipient, price, token data, settlement recipient, and signed execution
   constraints cannot be redirected.
+- Reject contract signers explicitly until `P0-AUTH-003` adds ERC-1271.
+- Remove `retrieveMessageAndDropID` and the old packed-hash `mintDrop` surface.
 
 Child tickets:
 
@@ -577,6 +583,7 @@ Child tickets:
 Required tests:
 
 - EOA signature passes.
+- EIP-712 digest matches the explicit typed-data domain and struct encoding.
 - Replay on same contract fails.
 - Replay across chain ID/domain/verifying contract fails.
 - Expired signature fails.
@@ -588,6 +595,12 @@ Required tests:
   settlement recipient.
 - Zero-address recovered signer fails.
 - Signer rotation behavior is tested.
+- Free fixed-price drops reject non-zero payer.
+- Fixed-price drops reject non-zero auction reserve and auction end fields.
+- Auction drops reject non-zero payer and fixed-price value fields.
+- Consumption, cancellation, and signer-epoch events are asserted.
+- Duplicate cancellation is rejected before emitting a second cancellation event.
+- Contract signer path rejects explicitly until `P0-AUTH-003`.
 
 Required docs:
 
@@ -595,11 +608,25 @@ Required docs:
 - Nonce/drop ID policy.
 - Signer rotation policy.
 - Example payload fixtures.
+- ERC-1271 limitation until `P0-AUTH-003`.
 
 Acceptance criteria:
 
 - EIP-712 domain includes name, version, chain ID, and verifying contract.
 - Replay protection is backed by consumed-state storage.
+- EOA signatures pass.
+- EIP-2098 compact signatures pass.
+- Wrong signer, wrong domain, wrong chain, wrong verifying contract, expired,
+  replayed, cancelled, stale-epoch, malleable, bad-quantity, bad-payer, and
+  zero-recovered-signer authorizations fail.
+- Sale-mode-specific field misuse fails before a drop is consumed.
+- Drop consumption, cancellation, and signer-epoch events include the expected
+  indexed identifiers and data.
+- Duplicate cancellation fails without a second cancellation event.
+- Token data substitution fails.
+- Contract signers fail with an explicit pending-ERC-1271 policy until
+  `P0-AUTH-003`.
+- Legacy packed authorization helper and old `mintDrop` ABI are removed.
 - All required negative tests pass.
 
 ### P0-AUTH-003: Decide And Implement ERC-1271 Support
@@ -1765,7 +1792,7 @@ High/medium detector summary:
 | `weak-prng` | High | 2 | word pool randomness helpers | Open | [#14](https://github.com/6529-Collections/6529Stream/issues/14) | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C |
 | `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
 | `locked-ether` | Medium | 1 | test-only rejection mock | Accepted | N/A | Keep scoped to test-only baseline |
-| `uninitialized-local` | Medium | 12 | first-party and test helper locals | Open for production rows | [#15](https://github.com/6529-Collections/6529Stream/issues/15) | Initialize or prove Solidity zero-value intent |
+| `uninitialized-local` | Medium | 11 open, 1 fixed | first-party and test helper locals | Open for remaining production rows; `StreamDrops.mintDrop` fixed in `P0-AUTH-002` | [#15](https://github.com/6529-Collections/6529Stream/issues/15) | Initialize or prove Solidity zero-value intent |
 | `unused-return` | Medium | 4 | characterization tests | Accepted | N/A | Keep scoped to test-only baseline |
 
 ## Appendix B: Test Matrix
@@ -1774,9 +1801,9 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 
 | Finding | Required test | Intended test file | Status | Issue | Gate | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol` | Target-state explicit-recipient, contract-signer execution, non-zero auction-recipient rejection, and no-bid settlement tests added; full EIP-712 field-substitution tests remain under `P0-AUTH-002` | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
-| Ad hoc drop authorization | EIP-712 valid, replayed, expired, wrong chain, wrong contract, wrong signer | `test/StreamDropsEIP712.t.sol` | Missing | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
-| ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
+| `tx.origin` recipient bug | Contract executor submits a drop without `tx.origin` dependency | `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol` | Target-state explicit-recipient, contract-executor, non-zero auction-recipient rejection, and no-bid settlement tests added; full contract-signer validation remains under `P0-AUTH-003` | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
+| Ad hoc drop authorization | EIP-712 valid, explicit digest encoding, replayed, expired, wrong chain, wrong contract, wrong signer, cancelled, duplicate cancellation, stale epoch, malleable, zero recovered signer, token substitution, bad quantity, bad payer, sale-mode field misuse, lifecycle event assertions, and compact signature tests | `test/StreamDropsEIP712.t.sol` | Passing for EOA/EIP-2098 target state; ERC-1271 remains `P0-AUTH-003` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
+| ERC-1271 decision | ERC-1271 mock signer passes after implementation; interim contract signer rejection remains covered in EIP-712 tests | `test/StreamDropsERC1271.t.sol` | Missing implementation; explicit rejection covered by `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
