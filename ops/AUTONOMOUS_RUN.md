@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/ci-review-hardening` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/4` |
+| Active PR branch | `codex/characterization-test-skeleton` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/5` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 00:05 UTC` |
+| Last updated | `2026-06-10 01:04 UTC` |
 
 ## Packaging Notes
 
@@ -53,8 +53,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | --- | --- | --- | --- | --- |
 | 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | Merged in PR #3 |
 | 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Merged in PR #4 |
-| 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Open in PR #5 |
-| 4 | Characterization test skeleton | Gate A | Test directory, fixtures, compile-only or characterization scaffolding | Planned |
+| 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Merged in PR #5 |
+| 4 | Characterization test skeleton | Gate A | Test helpers, fixtures, mocks, and executable characterization coverage | In progress on branch `codex/characterization-test-skeleton` |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Planned |
 
 ## Current PR Worklog
@@ -111,7 +111,7 @@ Outcome:
 
 ### PR #5: Repo maturity and contributor docs (Queue Item 3)
 
-Status: Open; CI and bot review green on `5b23c633e8aaef3a894a4e8b1ada3595f39c039a`; ready to merge after the final state-only commit passes.
+Status: Merged.
 Branch: `codex/ci-review-hardening`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/5`.
 
@@ -162,13 +162,69 @@ Validation:
 - CodeRabbit completed successfully with no actionable comments on head
   `5b23c633e8aaef3a894a4e8b1ada3595f39c039a`.
 - Claude review threads were resolved after the CI hygiene fixes landed.
+- GitHub CI run `27243970322` passed on final head
+  `20b147e8e0b25bf444bc94e6b926d8ea8035cbd3`.
+
+Outcome:
+
+- Merged as PR #5 on `2026-06-10 00:10 UTC`.
+- Merge commit: `f244687711bac5becf2ab4ce90d58b6f00a8a5d1`.
+- Latest head before merge: `20b147e8e0b25bf444bc94e6b926d8ea8035cbd3`.
+
+### PR #6: Characterization test skeleton (Queue Item 4)
+
+Status: PR open; latest CodeRabbit token-hash authorization comment fixed locally.
+Branch: `codex/characterization-test-skeleton`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/6`.
+
+Goal:
+
+- Turn the empty Foundry test baseline into real executable characterization
+  tests.
+- Add self-contained test helpers and mocks without introducing a new external
+  dependency.
+- Lock current admin and drop behavior before P0 authorization, auction, and
+  payment rewrites.
+- Document that some passing behavior is known-unsafe and exists as a
+  regression tripwire, not as an endorsement.
+
+Candidate files:
+
+- `test/helpers/Assertions.sol`
+- `test/helpers/CharacterizationTestBase.sol`
+- `test/helpers/StreamFixture.sol`
+- `test/mocks/MockRandomizer.sol`
+- `test/mocks/MockStreamMinter.sol`
+- `test/StreamAdmins.t.sol`
+- `test/StreamCoreAdminCharacterization.t.sol`
+- `test/StreamDropsCharacterization.t.sol`
+- `test/StreamDropsIntegrationCharacterization.t.sol`
+- `test/README.md`
+- `docs/status.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `make check` passed with 17 tests passing and the known existing
+  compiler/NatSpec/lint warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
+  tests passing and the known existing warnings.
+- `forge fmt --check test` passed.
+- `git diff --check` passed.
+- CodeRabbit follow-up validation: focused
+  `forge test --match-contract StreamDropsIntegrationCharacterizationTest -vvv`
+  passed with 7 integration characterization tests, and full `make check` plus
+  `scripts\check.ps1` passed with 17 tests.
+- Direct `forge` is still not available on the raw PowerShell `PATH`; the
+  documented `make` and PowerShell wrapper paths resolve the installed Foundry
+  binary.
 
 Next steps:
 
-1. Commit and push this final state-only update.
-2. Wait for CI and bot comments on the final head.
-3. Merge after CI and review are clean.
-4. Pull `main` and start Queue Item 4.
+1. Push the CodeRabbit token-hash authorization follow-up.
+2. Wait for refreshed CI, CodeRabbit, and Claude status.
+3. Resolve actionable review comments before merge.
 
 ## Decision Log
 
@@ -193,6 +249,14 @@ Next steps:
 | 2026-06-09 23:46 | Open PR #5 | PR packages contributor/security intake docs, review routing, issue forms, PR template, CODEOWNERS, and small CI hygiene |
 | 2026-06-09 23:59 | Implement Claude PR #5 review fixes | Make CI hygiene checks validate the PR diff, parse each Bash script, use the full PowerShell parser, and preserve main-branch CI artifacts |
 | 2026-06-10 00:05 | Mark PR #5 merge-ready | CI passed, CodeRabbit returned no actionable comments, and Claude review threads were resolved after the workflow fixes |
+| 2026-06-10 00:10 | Merge PR #5 | Final head was CI-clean, CodeRabbit-clean, and visible Claude review threads were resolved |
+| 2026-06-10 00:17 | Start PR #6 | Queue Item 4 adds the first executable characterization tests without changing production contract behavior |
+| 2026-06-10 00:23 | Finish local PR #6 validation | `make check` and `scripts/check.ps1` pass with 14 characterization tests; scope remains test/docs only |
+| 2026-06-10 00:29 | Address sidecar PR #6 auction coverage finding | Added real auction mint custody integration coverage through `StreamDrops -> StreamMinter -> StreamCore`; `make check` now passes with 15 tests |
+| 2026-06-10 00:36 | Address CodeRabbit PR #6 nitpicks | Consolidated repetitive fixed-price roadmap bullets and expanded `MockStreamMinter` to record full mint batches |
+| 2026-06-10 00:45 | Address CodeRabbit PR #6 second-pass comment | Added the empty-batch guard before `MockStreamMinter` reads the first mint array elements |
+| 2026-06-10 00:55 | Address Claude PR #6 characterization-honesty comment | Renamed the poster rejection test and added explicit payout-address and curators-pool rejection characterization cases |
+| 2026-06-10 01:04 | Address CodeRabbit PR #6 token-hash authorization comment | Mint with a no-op randomizer before the non-randomizer `setTokenHash` assertion, then switch to the configured randomizer to prove first-set and no-overwrite behavior |
 
 ## Resume Instructions
 
