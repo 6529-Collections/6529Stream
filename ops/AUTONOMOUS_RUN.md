@@ -1440,12 +1440,11 @@ Outcome:
 
 ### PR candidate: Fixed-price pull payments (Queue Item 19)
 
-Status: Local validation passed; ready to open PR.
+Status: Open; waiting for CI and bot review.
 Branch: `codex/fixed-price-pull-payments`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/60`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/27`.
-Claude review request: TBD; request explicitly after PR open because Claude may
-not run automatically.
+Claude review request: issue comment `4669058148`.
 
 Goal:
 
@@ -1511,6 +1510,9 @@ Review feedback:
   ordinary withdrawable credit, failed mint rollback is tested, fixed-price
   rejection characterization tests are converted, and docs avoid claiming full
   payment-accounting completion.
+- PR #60 opened from head `e7b4efea5e0ac7a234cf0ec98448a3509e1c0d9b`.
+- Claude review was explicitly requested because Claude may not run
+  automatically.
 
 ## Decision Log
 
@@ -1653,6 +1655,8 @@ Review feedback:
 | 2026-06-10 10:00 | Confirm Claude per-PR operating rule | User noted Claude may not run automatically, so each PR must receive an explicit Claude review request after opening |
 | 2026-06-10 10:10 | Implement fixed-price pull credits locally | `StreamDrops` records fixed-price credits, exposes fixed-price owed/surplus views, adds guarded poster/protocol withdrawal, keeps curator reserve non-withdrawable pending curator-claim work, and focused 12-test suite passes |
 | 2026-06-10 10:14 | Finish local `P0-PAY-003` validation | Focused 33-test suite, full 97-test `make check`, Windows wrapper, formatting, whitespace, docs heading scans, and Slither delta evidence pass; Slither remains non-zero for known baseline findings plus intentional test-only forced-ETH helpers |
+| 2026-06-10 10:17 | Open PR #60 | Fixed-price pull-credit implementation is published with local validation and Slither delta evidence |
+| 2026-06-10 10:18 | Request Claude review on PR #60 | Explicit review ping added in issue comment `4669058148` because Claude may not run automatically |
 
 ## Resume Instructions
 
