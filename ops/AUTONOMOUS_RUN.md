@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/23` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 03:44 UTC` |
+| Last updated | `2026-06-10 03:46 UTC` |
 
 ## Packaging Notes
 
@@ -59,7 +59,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
-| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | In progress on `codex/payment-accounting-adr` |
+| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Open as PR #32 |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
@@ -560,12 +560,12 @@ Outcome:
   head.
 - Claude review threads were addressed and resolved before merge.
 
-### PR TBD: Payment accounting ADR (Queue Item 9)
+### PR #32: Payment accounting ADR (Queue Item 9)
 
-Status: In progress.
+Status: Open; waiting for CI and bot review.
 Branch: `codex/payment-accounting-adr`.
-Pull request: TBD.
-Claude review request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/32`.
+Claude review request: issue comment `4666247442`.
 
 Goal:
 
@@ -627,7 +627,7 @@ Validation:
 
 Review feedback:
 
-- TBD after PR publication and bot review.
+- Waiting for CI and bot review on the initial PR head.
 
 ## Decision Log
 
@@ -699,6 +699,8 @@ Review feedback:
 | 2026-06-10 03:38 | Validate payment accounting ADR locally | Heading, traceability, whitespace, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 03:42 | Create payment implementation issues | Issues #25 through #31 now track the payment ledger, fixed-price, auction refund, curator claim, withdrawal, and emergency surplus workstreams |
 | 2026-06-10 03:44 | Revalidate payment ADR traceability | Staged whitespace, `make check`, and Windows wrapper validations pass after issue-link updates |
+| 2026-06-10 03:45 | Open PR #32 | Payment accounting ADR is published with validation evidence |
+| 2026-06-10 03:46 | Request Claude review on PR #32 | Explicit review ping added in issue comment `4666247442` because Claude may not run automatically |
 
 ## Resume Instructions
 
