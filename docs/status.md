@@ -35,10 +35,13 @@ The current Gate A smoke baseline proves:
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output, and `StreamMetadataGolden.t.sol` locks current off-chain pending/final
-  URIs plus current on-chain pending/final JSON data URIs against fixtures.
-  `StreamMetadataEvents.t.sol` proves ERC-4906 interface support and current
-  metadata update event semantics for token-level updates, collection-range
-  updates, randomness fulfillment, mint-only paths, and burn.
+  URIs plus schema-v1 on-chain pending/final base64 JSON data URIs against
+  fixtures. The on-chain schema exposes `metadata_schema_version` and
+  `metadata_state`, and pending on-chain metadata no longer runs final
+  generative HTML with a zero token hash. `StreamMetadataEvents.t.sol` proves
+  ERC-4906 interface support and current metadata update event semantics for
+  token-level updates, collection-range updates, randomness fulfillment,
+  mint-only paths, and burn.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -47,8 +50,8 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 callback-after-burn policy, canonical randomizer lifecycle
 ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, signer/deployment ceremony runbooks, final metadata
-schema/escaping, dependency version/freeze manifest work, deployment
+high/medium baseline, signer/deployment ceremony runbooks, metadata escaping,
+dependency version/freeze manifest work, burn metadata policy, deployment
 discipline, and the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and

@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-erc4906-events` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/81` |
+| Active PR branch | `codex/metadata-schema-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/82` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 23:15 UTC` |
+| Last updated | `2026-06-10 23:28 UTC` |
 
 ## Packaging Notes
 
@@ -93,7 +93,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
 | 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
-| 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | PR #82 open; CodeRabbit inline review fix ready to push |
+| 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
+| 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Local branch ready to commit |
 
 ## Current PR Worklog
 
@@ -3341,7 +3342,7 @@ Outcome:
 
 ### PR #82: Add ERC-4906 metadata update signaling (Queue Item 39)
 
-Status: PR open; CodeRabbit inline review fix applied locally and ready to push.
+Status: Merged in PR #82.
 Branch: `codex/metadata-erc4906-events`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/82`.
 Related issue:
@@ -3435,7 +3436,98 @@ Review requests:
   and implemented locally.
 - CodeRabbit inline review thread `PRRT_kwDOM7REis6IpTxK` / review
   `4472309839` identified the raw-topic negative-test gap; the local follow-up
-  is ready to push for rereview.
+  was pushed in commit `87e9634bb93681db7ffe3e9dec5bfcfd657614c5`.
+- CodeRabbit latest-head comment `4675594572` confirmed all review items were
+  addressed, the thread was resolved, and no concerns remained.
+- GitHub Actions CI passed in run `27312549432`.
+- The aggregate CodeRabbit commit status stayed pending after the clean
+  latest-head review, so PR comment `4675606561` documented the autonomous
+  maintainer merge decision using green CI, resolved threads, and explicit
+  CodeRabbit approval evidence.
+- Claude remains intentionally skipped per current user instruction; use
+  CodeRabbit unless risk or future user instruction changes.
+
+Merge:
+
+- Squash merge commit: `944f614688ea15ec6cd7317a940978dfa9aaeeb3`.
+- Merged at `2026-06-10 23:20 UTC`.
+- Issue `#49` closed by PR merge.
+
+### PR TBD: Add schema-v1 metadata state outputs (Queue Item 40)
+
+Status: Local implementation validated and ready to commit.
+Branch: `codex/metadata-schema-state`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/46`
+
+Goal:
+
+- Continue P1-META-001 after the current-output golden baseline.
+- Add an explicit `metadata_schema_version` field to on-chain JSON.
+- Add an explicit `metadata_state` field for pending and final on-chain JSON.
+- Base64-encode on-chain JSON data URIs.
+- Stop pending on-chain metadata from running final generative HTML with a zero
+  token hash.
+- Expose public schema/state views for tests and integrators.
+- Update golden fixtures, docs, roadmap, and test traceability.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `test/StreamMetadataGolden.t.sol`
+- `test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt`
+- `test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added `METADATA_SCHEMA_VERSION = "6529stream-v1"` plus public
+  `metadataSchemaVersion()` and `tokenMetadataState(tokenId)` views.
+- Off-chain token URI behavior remains compatibility-preserving:
+  `baseURI + "pending"` before final randomness and `baseURI + tokenId` after
+  final randomness.
+- On-chain token URI output now uses `data:application/json;base64,`.
+- Pending on-chain JSON includes `metadata_state: "pending"` and omits
+  `animation_url`.
+- Final on-chain JSON includes `metadata_state: "final"` and preserves the
+  existing base64 HTML animation URL.
+- This PR intentionally leaves JSON escaping, raw-attribute validation, stale
+  state display, freeze manifests, dependency immutability, and burn semantics
+  to the remaining P1-META issues.
+
+Validation so far:
+
+- Focused metadata golden tests passed:
+  `forge test --match-contract StreamMetadataGoldenTest -vvv` with 5 tests.
+- Full canonical local gate passed: `make check` with 211 tests, 0 failed.
+- Windows wrapper passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 211 tests,
+  0 failed.
+- Touched-file formatting passed:
+  `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataGolden.t.sol`.
+- Diff whitespace check passed: `git diff --check`.
+- Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
+  `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
+  `ops\AUTONOMOUS_RUN.md`.
+- Traceability grep passed for `P1-META-001`, `metadata_schema_version`,
+  `metadata_state`, `metadataSchemaVersion`, `tokenMetadataState`,
+  `onchain-pending-schema-v1`, `onchain-final-schema-v1`,
+  `codex/metadata-schema-state`, and `Queue Item 40`.
+- Slither baseline comparison remains non-blocking and high/medium unchanged:
+  `717` total findings, `4` High, `19` Medium, `92` Low, `591`
+  Informational, `11` Optimization. The only metadata-schema-related row is an
+  existing informational `too-many-digits` style finding.
+
+Review requests:
+
+- CodeRabbit will be requested after the branch is pushed and the PR is opened.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3443,6 +3535,9 @@ Review requests:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-10 23:28 | Validate Queue Item 40 locally | Focused metadata tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain unchanged |
+| 2026-06-10 23:26 | Start Queue Item 40 | ADR 0006 sequencing calls for schema versioning and explicit metadata state after current-output golden files and before freeze/dependency/burn hardening |
+| 2026-06-10 23:20 | Merge PR #82 | CI passed, CodeRabbit resolved the inline thread and approved the latest head, and the stale aggregate CodeRabbit status was documented before merge |
 | 2026-06-10 23:15 | Address CodeRabbit PR #82 inline test gap | Hardened negative-path ERC-4906 tests to assert no raw metadata event topics, added post-burn hash-storage no-event coverage, and refreshed focused/full/Windows/Slither validation with 210 total tests |
 | 2026-06-09 22:34 | Use `ops/ROADMAP.md` as canonical roadmap | Existing roadmap already contains detailed gates, P0 issues, ADRs, Slither appendix, and test matrix |
 | 2026-06-09 22:34 | Add `ops/AUTONOMOUS_RUN.md` as durable state | Long-running execution needs repo-persisted state across compaction and PR cycles |

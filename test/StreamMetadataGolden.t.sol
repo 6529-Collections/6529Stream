@@ -20,6 +20,23 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
     string private constant TOKEN_DATA = "1,2,3";
     uint256 private constant TOKEN_SALT = 7;
 
+    function testMetadataSchemaVersionAndTokenStateViews() public {
+        DeployedStream memory pendingDeployment = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        pendingDeployment.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintGoldenToken(pendingDeployment);
+
+        pendingDeployment.core.metadataSchemaVersion()
+            .assertEq("6529stream-v1", "schema version changed");
+        pendingDeployment.core.tokenMetadataState(TOKEN_ID)
+            .assertEq("pending", "pending state changed");
+
+        DeployedStream memory finalDeployment = deployStream(address(0xBEEF), address(0xCAFE));
+        _mintGoldenToken(finalDeployment);
+
+        finalDeployment.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
+    }
+
     function testOffchainPendingTokenUriMatchesGoldenFile() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         NoopRandomizer noopRandomizer = new NoopRandomizer();
@@ -48,7 +65,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         );
     }
 
-    function testCurrentOnchainPendingTokenUriMatchesGoldenFile() public {
+    function testOnchainPendingSchemaV1TokenUriMatchesGoldenFile() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         NoopRandomizer noopRandomizer = new NoopRandomizer();
         deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
@@ -60,12 +77,12 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "pending hash changed");
         _assertMatchesFixture(
             deployed.core.tokenURI(TOKEN_ID),
-            "test/fixtures/metadata/current-onchain-pending-token-uri.txt",
-            "current on-chain pending tokenURI"
+            "test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt",
+            "schema-v1 on-chain pending tokenURI"
         );
     }
 
-    function testCurrentOnchainFinalTokenUriMatchesGoldenFile() public {
+    function testOnchainFinalSchemaV1TokenUriMatchesGoldenFile() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
         _mintGoldenToken(deployed);
@@ -75,8 +92,8 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         (deployed.core.retrieveTokenHash(TOKEN_ID) != bytes32(0)).assertTrue("expected final hash");
         _assertMatchesFixture(
             deployed.core.tokenURI(TOKEN_ID),
-            "test/fixtures/metadata/current-onchain-final-token-uri.txt",
-            "current on-chain final tokenURI"
+            "test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt",
+            "schema-v1 on-chain final tokenURI"
         );
     }
 
