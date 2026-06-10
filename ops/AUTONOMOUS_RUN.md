@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/resolve-uninitialized-locals` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/74` |
+| Active PR branch | `codex/add-payment-invariant-baseline` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/76` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 20:01 UTC` |
+| Last updated | `2026-06-10 20:42 UTC` |
 
 ## Packaging Notes
 
@@ -88,7 +88,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 31 | Remove dead mint-accounting state | Gate C | Implement P0-CORE-001 by removing never-written public/allowlist mint counters, keeping retained airdrop-counter tests, and updating Slither/roadmap traceability | Merged in PR #72 |
 | 32 | Remove weak helper randomness | Gate C | Implement P0-RAND-008 by removing the concrete `XRandoms` helper from production source, preserving the `RandomizerNXT` legacy-only regression, and updating Slither/roadmap traceability | Merged in PR #74 |
 | 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Merged in PR #75 |
-| 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | In progress on `codex/prove-vendored-library-provenance` |
+| 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | Merged in PR #76 |
+| 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | In progress on `codex/add-payment-invariant-baseline` |
 
 ## Current PR Worklog
 
@@ -2879,11 +2880,11 @@ Outcome:
   addressed.
 - Issue #15 closed completed.
 
-### PR TBD: Prove vendored library provenance (Queue Item 34)
+### PR #76: Prove vendored library provenance (Queue Item 34)
 
-Status: Ready to open PR.
+Status: Merged.
 Branch: `codex/prove-vendored-library-provenance`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/76`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/11`
@@ -2945,7 +2946,102 @@ Validation so far:
 
 Review requests:
 
-- CodeRabbit will be requested after the PR is opened.
+- CodeRabbit was requested and completed without remaining actionable comments.
+- Claude is intentionally skipped per current user instruction; use CodeRabbit
+  unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #76 on `2026-06-10 20:18 UTC`.
+- Follow-up review fix added an exact `Panic(uint256)` zero-denominator revert
+  assertion for the vendored `Math.mulDiv` regression.
+- GitHub CI run `27303499168` passed on the final head.
+- CodeRabbit status was green on the final head.
+- Issue #11 closed as completed.
+
+### PR `#77`: Add payment invariant baseline (Queue Item 35)
+
+Status: Open; CodeRabbit review fixes applied locally and ready to push.
+Branch: `codex/add-payment-invariant-baseline`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/77`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/8`
+
+Goal:
+
+- Complete the remaining P0-PAY-008 test gap by adding a bounded sequence fuzz
+  invariant baseline for the current local payment ledgers.
+- Exercise fixed-price drops, auction bidding/settlement, curator claims,
+  withdrawals, emergency withdrawals, randomizer reserves, and deterministic
+  forced-balance surplus in mixed orders.
+- Prove category totals equal per-account credits, contract balances cover owed
+  and reserved funds, and emergency-withdrawable views expose only surplus.
+- Keep broader shared-ledger abstraction work open for issues #25, #26, and #30
+  unless a later implementation introduces a unified protocol-wide ledger.
+
+Candidate files:
+
+- `test/StreamPaymentsInvariant.t.sol`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added `StreamPaymentsInvariantTest`, a bounded sequence fuzz harness that
+  runs 24 mixed operations per generated sequence.
+- The handler deploys real `StreamDrops`, `StreamAuctions`,
+  `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG` instances
+  and shares a configured `StreamAdmins.emergencyRecipient()`.
+- Invariants assert local Drops, Auctions, CuratorsPool, StreamMinter, and RNG
+  category totals, owed totals, balance coverage, reserves, and
+  emergency-withdrawable surplus after every operation.
+- The sequence uses `vm.deal` as a deterministic forced-balance model; existing
+  scenario tests still cover the selfdestruct-forced ETH path directly.
+- Kept Slither high/medium counts stable by moving harmless harness bookkeeping
+  before external calls where rollback preserves correctness, and by adding
+  narrow source-level suppressions for deliberate test-only payable calls,
+  generated-sequence bookkeeping, and the payable mock randomness provider.
+- Applied CodeRabbit review fixes: recorded concrete PR numbering and full
+  merge timestamp in this run log, decoupled bid amount generation from action
+  selection in the fuzz harness, and added harness bookkeeping to skip duplicate
+  randomizer requests for synthetic token IDs.
+
+Validation so far:
+
+- `forge fmt --check test\StreamPaymentsInvariant.t.sol` passed.
+- Focused `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`
+  passed: 1 fuzz test, 256 runs, 0 failed.
+- Canonical local gate passed: `make check` with 188 tests, 0 failed.
+- Windows wrapper passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 188 tests,
+  0 failed.
+- Formatting, whitespace, Markdown heading scan, and traceability greps passed:
+  `forge fmt --check test\StreamPaymentsInvariant.t.sol`,
+  `git diff --check`, `rg -n "^#|^##|^###" ...`, and traceability grep for
+  `StreamPaymentsInvariant`, `P0-PAY-008`, `bounded sequence fuzz`, and Slither
+  suppression markers.
+- Slither remains non-gating and exits non-zero because accepted test-only,
+  vendored false-positive, and lower-impact findings remain. The final JSON
+  reports 693 total findings: 4 High, 19 Medium, 82 Low, 577 Informational, and
+  11 Optimization. High/medium counts are unchanged versus the previous tracked
+  baseline, `arbitrary-send-eth=0`, `reentrancy-eth=0`,
+  `reentrancy-no-eth=0`, `incorrect-equality=1`, and `locked-ether=7`.
+- After CodeRabbit review fixes, focused invariant testing, `make check`, the
+  Windows wrapper, `git diff --check`, and Slither were rerun successfully on
+  `2026-06-10 20:54 UTC`. Slither remained unchanged at 693 total findings, 4
+  High, and 19 Medium.
+
+Review requests:
+
+- CodeRabbit was requested in issue comment `4674282933`.
+- CodeRabbit completed on commit `54597eaa77995236d65e54df33e77db323fd3c54`
+  with two inline comments and one outside-diff comment; all three are applied
+  in the local review-fix diff.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
@@ -3182,6 +3278,11 @@ Review requests:
 | 2026-06-10 19:48 | Select Queue Item 34 | The only remaining non-test high/medium Slither rows are vendored OpenZeppelin utility-library findings owned by `P0-LIB-001` |
 | 2026-06-10 19:55 | Implement Queue Item 34 local draft | Added vendored-library provenance docs, Base64/Math regressions, `Strings.sol` header correction, and Slither/roadmap/status/test traceability for false-positive disposition |
 | 2026-06-10 20:01 | Finish local Queue Item 34 validation | Focused vendored tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; high/medium Slither counts remain `4 High / 19 Medium` and vendored rows are documented false positives |
+| 2026-06-10 20:18 | Merge PR #76 | Vendored-library provenance merged as `4f1e69a44327017697204bf44b5b14a3f5bd2fd3`; CI and CodeRabbit were green, and issue #11 closed completed |
+| 2026-06-10 20:22 | Select Queue Item 35 | P0-PAY-008 remains open for executable payment invariants after emergency-withdraw and local pull-payment work landed |
+| 2026-06-10 20:27 | Implement Queue Item 35 local draft | Added a bounded payment sequence fuzz invariant harness covering local ledgers, owed totals, reserves, withdrawals, emergency surplus, randomizer reserves, and forced-balance surplus |
+| 2026-06-10 20:40 | Finish local Queue Item 35 validation | Focused payment invariant fuzzing, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither high/medium remain `4 High / 19 Medium` with the updated total at 693 findings |
+| 2026-06-10 20:42 | Open PR #77 and request CodeRabbit | Payment invariant baseline published at `https://github.com/6529-Collections/6529Stream/pull/77`; CodeRabbit review requested in issue comment `4674282933`, and Claude is skipped per current user instruction |
 
 ## Resume Instructions
 

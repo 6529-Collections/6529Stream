@@ -11,15 +11,17 @@ contributors who start from the README.
   settlement are explicit, outbid refunds use bidder credits, and auction-local
   settlement proceeds use pull credits.
 - Fixed-price mints now record `StreamDrops` poster, protocol, and curator
-  reserve credits instead of pushing ETH during mint execution. Broader payment
-  accounting, shared ledger views, richer randomizer reserve lifecycle
-  accounting, and cross-contract payment invariants still need full
-  pull-payment accounting before production use.
+  reserve credits instead of pushing ETH during mint execution. Current local
+  ledgers now have fixed scenario coverage plus bounded sequence fuzz invariants
+  for owed totals, surplus, reserves, and emergency-withdrawable views. Broader
+  shared ledger architecture and richer randomizer reserve lifecycle accounting
+  remain open before production use.
 - Curator reward claims now validate the Merkle claim and record
   `StreamCuratorsPool` curator credits instead of pushing ETH to the reward
   address. Curator pool emergency withdrawal is bounded by local curator credits
-  owed, but protocol-wide payment invariants and shared ledger views remain
-  open.
+  owed, and mixed payment-operation invariants now cover the current local
+  curator accounting. A unified protocol-wide ledger remains future work if the
+  project introduces that abstraction.
 - `StreamMinter` now treats its balance as surplus with `totalOwed() == 0` and
   emergency withdrawal bounded by `emergencyWithdrawable()`.
   `NextGenRandomizerRNG` conservatively treats its full adapter balance as
@@ -73,10 +75,11 @@ contributors who start from the README.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback
-  validation, deterministic randomizer retry, raw-output hash storage, and
-  randomizer reserve-boundary regressions now exist, but broader payment,
-  metadata, dependency versioning/freeze, deployment, production-governance, and
-  invariant tests are still missing.
+  validation, deterministic randomizer retry, raw-output hash storage,
+  randomizer reserve-boundary regressions, and a bounded payment sequence
+  invariant baseline now exist, but metadata, dependency versioning/freeze,
+  deployment, production-governance, supply/replay/freeze invariant tests, and
+  any future shared-ledger invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

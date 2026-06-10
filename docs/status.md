@@ -17,6 +17,11 @@ The current Gate A smoke baseline proves:
   vendored OpenZeppelin utility-library provenance/behavior regressions, and
   retained airdrop mint-accounting behavior after removal of dead public/allowlist
   counters.
+- Payment sequence fuzzing now covers mixed fixed-price mint, auction bid,
+  auction settlement, curator claim, withdrawal, emergency withdrawal,
+  randomizer reserve, and forced-balance operations, proving the current local
+  ledgers keep category totals, owed totals, balance coverage, reserves, and
+  emergency-withdrawable surplus coherent after each step.
 - Randomizer tests now cover request lifecycle views, callback validation,
   raw-output hash storage, failed post-processing state, bounded deterministic
   post-processing retry, and the conservative provider-migration policy that
@@ -30,9 +35,9 @@ The current Gate A smoke baseline proves:
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
-blockers remain tracked in `ops/ROADMAP.md`, including broader pull-payment
-accounting and cross-contract invariants, fuller randomizer reserve lifecycle
-accounting, callback-after-burn policy, canonical randomizer lifecycle
+blockers remain tracked in `ops/ROADMAP.md`, including any future unified
+pull-payment ledger abstraction, fuller randomizer reserve lifecycle accounting,
+callback-after-burn policy, canonical randomizer lifecycle
 ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, signer lifecycle operations, dependency version/freeze
 manifest work, deployment discipline, and the broader P0/P1 test suite.
