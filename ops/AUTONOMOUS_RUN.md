@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/67` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 15:48 UTC` |
+| Last updated | `2026-06-10 15:53 UTC` |
 
 ## Packaging Notes
 
@@ -79,7 +79,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
-| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | In progress on `codex/randomizer-failed-state` |
+| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #68; awaiting CI and bot feedback |
 
 ## Current PR Worklog
 
@@ -2204,13 +2204,19 @@ Validation completed so far:
   `slither_exit=-1 total=686 high=9 medium=29 weak-prng=2
   arbitrary-send-eth=0 reentrancy-eth=0`.
 
-### PR candidate: Add failed randomness post-processing state (Queue Item 27)
+### PR #68: Add failed randomness post-processing state (Queue Item 27)
 
-Status: Local validation complete; ready to commit, push, and open PR.
+Status: Open; awaiting CI, Claude, and CodeRabbit feedback.
 Branch: `codex/randomizer-failed-state`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/68`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/40`
+
+Review requests:
+
+- Claude requested in issue comment `4671968774`.
+- CodeRabbit requested in issue comment `4671968843`.
 
 Goal:
 
@@ -2446,6 +2452,7 @@ Validation completed before PR:
 | 2026-06-10 15:33 | Start Queue Item 27 | Next randomness blocker is `P0-RAND-004`; failed post-processing state should become observable before retry semantics in `P0-RAND-006` |
 | 2026-06-10 15:48 | Validate Queue Item 27 | Failed post-processing state is locally green across focused VRF/arRNG lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scans, and Slither baseline comparison |
 | 2026-06-10 15:48 | Reconfirm Claude manual trigger | User noted Claude may not run automatically and pointed back to PR #3; every new PR must receive an explicit `@claude review` issue comment before waiting on bot feedback |
+| 2026-06-10 15:53 | Open PR #68 and request bot reviews | Failed randomness post-processing state PR published at `https://github.com/6529-Collections/6529Stream/pull/68`; Claude requested in issue comment `4671968774` and CodeRabbit requested in issue comment `4671968843` |
 
 ## Resume Instructions
 
