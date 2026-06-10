@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/payment-accounting-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/23` |
+| Active PR branch | `codex/admin-governance-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/32` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 03:54 UTC` |
+| Last updated | `2026-06-10 04:13 UTC` |
 
 ## Packaging Notes
 
@@ -59,8 +59,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
-| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merge-ready as PR #32 |
-| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
+| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
+| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | In progress on `codex/admin-governance-adr` |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
 ## Current PR Worklog
@@ -562,7 +562,7 @@ Outcome:
 
 ### PR #32: Payment accounting ADR (Queue Item 9)
 
-Status: Merge-ready under autonomous maintainer decision.
+Status: Merged.
 Branch: `codex/payment-accounting-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/32`.
 Claude review request: issue comment `4666247442`.
@@ -639,6 +639,73 @@ Review feedback:
   sidecar, CI, and CodeRabbit review.
 - No inline review threads are open.
 
+Outcome:
+
+- Merged as PR #32 on `2026-06-10 03:59 UTC`.
+- Squash merge commit:
+  `a22b1d9c966f8e20420a62f9bae63279f2daf5b3`.
+- Latest head before merge:
+  `4ee5d8d503e47fe482d1fad175b031eaba2ebad4`.
+- GitHub CI run `27252081065` passed on the final head.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review was unavailable because the organization's Claude Code overage
+  spend limit was reached; the explicit request is recorded above.
+
+### PR #TBD: Admin/governance ADR (Queue Item 10)
+
+Status: In progress.
+Branch: `codex/admin-governance-adr`.
+Pull request: TBD.
+Claude review request: TBD.
+
+Goal:
+
+- Accept `docs/adr/0004-admin-governance.md` before any P0 permission,
+  selector, signer-lifecycle, pause, or emergency-control rewrite.
+- Decide the production root authority, role model, function-admin target
+  scoping, collection-admin stance, signer manager, pause domains, withdrawal
+  pause policy, surplus-only emergency controls, event requirements, and tests.
+- Link the ADR from the roadmap and ADR index.
+
+Created GitHub issues:
+
+- [#33](https://github.com/6529-Collections/6529Stream/issues/33)
+  `P0-ADMIN-ADR`: accept admin and governance design.
+- [#34](https://github.com/6529-Collections/6529Stream/issues/34)
+  `P0-ADMIN-001`: fix admin selector mismatch and permission model.
+- [#35](https://github.com/6529-Collections/6529Stream/issues/35)
+  `P0-ADMIN-002`: define and implement pause and emergency controls.
+
+Candidate files:
+
+- `docs/adr/0004-admin-governance.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Markdown heading scan passed for `docs/adr/0004-admin-governance.md`,
+  `docs/adr/README.md`, `ops/ROADMAP.md`, and `ops/AUTONOMOUS_RUN.md`.
+- Admin/governance traceability scan passed for issues #33 through #35,
+  `P0-ADMIN-ADR`, `0004-admin-governance`, target-scoped function admins,
+  signer lifecycle, pause controls, `emergencyWithdrawable`, and the intended
+  admin test files.
+- Sidecar read-only governance review completed; findings about
+  `updateCollectionInfo`, `setMultipleMerkleRoots`, missing target-contract
+  selector scope, stale collection-admin interface, non-rotatable
+  `StreamAdmins.tdhSigner`, and `owner()` emergency-recipient ambiguity were
+  folded into the ADR and roadmap.
+- `git diff --check` passed.
+- `make check` passed with 17 tests and known compiler/NatSpec warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
+  17 tests and known compiler/NatSpec warnings.
+
+Review feedback:
+
+- Pending.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
@@ -712,6 +779,10 @@ Review feedback:
 | 2026-06-10 03:45 | Open PR #32 | Payment accounting ADR is published with validation evidence |
 | 2026-06-10 03:46 | Request Claude review on PR #32 | Explicit review ping added in issue comment `4666247442` because Claude may not run automatically |
 | 2026-06-10 03:54 | Mark PR #32 merge-ready | CI passed, CodeRabbit reported no actionable comments, no inline review threads are open, and Claude is unavailable due to organization overage limits |
+| 2026-06-10 03:59 | Merge PR #32 | Final head was CI-clean, CodeRabbit-clean, and Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 04:01 | Create admin/governance issues | Issues #33 through #35 anchor ADR 0004 plus selector/permission and pause/emergency implementation follow-ups |
+| 2026-06-10 04:08 | Draft admin/governance ADR | ADR 0004 accepts Safe-rooted roles, target-scoped selector grants, signer lifecycle controls, domain-specific pause, and surplus-only emergency controls |
+| 2026-06-10 04:13 | Validate admin/governance ADR locally | Heading, traceability, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
 
 ## Resume Instructions
 
