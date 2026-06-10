@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomness-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/36` |
+| Active PR branch | `codex/metadata-freeze-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/44` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 04:42 UTC` |
+| Last updated | `2026-06-10 05:05 UTC` |
 
 ## Packaging Notes
 
@@ -61,7 +61,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merged in PR #36 |
-| 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | In progress on `codex/randomness-adr` |
+| 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Merged in PR #44 |
+| 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | In progress on `codex/metadata-freeze-adr` |
 
 ## Current PR Worklog
 
@@ -731,7 +732,7 @@ Outcome:
 
 ### PR #44: Randomness ADR (Queue Item 11)
 
-Status: Open; waiting on CI and CodeRabbit.
+Status: Merged.
 Branch: `codex/randomness-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/44`.
 Claude review request: issue comment `4666596095`.
@@ -795,13 +796,92 @@ Validation:
 
 Review feedback:
 
-- GitHub CI run `27253681954` is in progress on head
-  `8b84c7467d64ddeb0edba962117e4641dbe3a18f`.
-- CodeRabbit is processing run `74327056-108a-4c51-add1-cfef356777bb`.
+- GitHub CI run `27253743069` passed on final head
+  `5a95055e4c3c2538fb1b4957b6150630f8e19932`.
+- CodeRabbit completed successfully on final head
+  `5a95055e4c3c2538fb1b4957b6150630f8e19932` with no actionable comments
+  and all five pre-merge checks passing.
 - Claude review was explicitly requested in issue comment `4666596095`, but
   Claude returned `Code review skipped` because the organization's Claude Code
   overage spend limit was reached.
-- No inline review threads are open as of `2026-06-10 04:42 UTC`.
+- No inline review threads are open.
+
+Outcome:
+
+- Merged as PR #44 on `2026-06-10 04:50 UTC`.
+- Squash merge commit:
+  `dd98e914e20a4f3849ad1ae41a4e9698023a1e7d`.
+- Latest head before merge:
+  `5a95055e4c3c2538fb1b4957b6150630f8e19932`.
+- GitHub CI run `27253743069` passed on the final head.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review was unavailable because the organization's Claude Code overage
+  spend limit was reached; the explicit request is recorded above.
+
+### PR #TBD: Metadata/freeze ADR (Queue Item 12)
+
+Status: In progress.
+Branch: `codex/metadata-freeze-adr`.
+Pull request: TBD.
+Claude review request: TBD after PR creation.
+
+Goal:
+
+- Accept `docs/adr/0006-metadata-freeze.md` before any P1 metadata schema,
+  freeze, dependency immutability, burn metadata, ERC-4906, or dependency
+  packed-encoding implementation work.
+- Decide pending/final metadata behavior, freeze boundaries, dependency
+  registry versioning and immutability, mutable token data policy, burn
+  metadata, ERC-4906 event semantics, metadata update authorization, JSON/HTML
+  escaping, and golden-file test requirements.
+- Link the ADR from the roadmap, ADR index, Slither baseline, and test matrix.
+
+Created GitHub issues:
+
+- Existing [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9):
+  dependency-script packed/dynamic composition.
+- [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45):
+  accept metadata, dependency, freeze, and burn design.
+- [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46):
+  metadata schema and golden-file tests.
+- [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47):
+  collection freeze boundaries and immutable metadata state.
+- [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48):
+  dependency registry versioning, immutability, and provenance.
+- [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49):
+  ERC-4906 metadata update signaling.
+- [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50):
+  burn metadata and supply semantics.
+- [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51):
+  metadata escaping, size limits, and render-sandbox tests.
+
+Candidate files:
+
+- `docs/adr/0006-metadata-freeze.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `rg -n "^#|^##|^###" docs\adr\0006-metadata-freeze.md docs\adr\README.md ops\ROADMAP.md ops\SLITHER_BASELINE.md ops\AUTONOMOUS_RUN.md`
+  passed and confirmed heading structure.
+- Traceability grep for `P1-META-ADR`, issues #45 through #51, issue #9,
+  `ERC-4906`, `0x49064906`, `MetadataUpdate`, `BatchMetadataUpdate`,
+  dependency version events, freeze events, and burned-token callback events
+  passed.
+- ASCII scan passed for the touched docs.
+- `git diff --check` passed.
+- `make check` passed with 17 tests passing and the existing Solidity warning
+  baseline still present.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
+  tests passing and the existing Solidity warning baseline still present.
+
+Review feedback:
+
+- Pending.
 
 ## Decision Log
 
@@ -888,6 +968,12 @@ Review feedback:
 | 2026-06-10 04:32 | Draft randomness ADR | ADR 0005 accepts provider-backed async randomness, request lifecycle state, provider epoch validation, weak-helper production disablement, deterministic retry limits, and reserve accounting alignment |
 | 2026-06-10 04:39 | Validate randomness ADR locally | Heading, traceability, ASCII, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 04:42 | Open PR #44 | Randomness ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666596095` |
+| 2026-06-10 04:50 | Merge PR #44 | Final head was CI-clean, CodeRabbit-clean, and Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 04:51 | Start metadata/freeze ADR PR | Gate B2 requires accepted metadata/freeze design before schema, freeze, dependency, burn, ERC-4906, and metadata test work |
+| 2026-06-10 04:55 | Create metadata/freeze issue set | Issues #45 through #51 anchor ADR 0006 and the schema, freeze, dependency, ERC-4906, burn, and escaping implementation tracks; existing issue #9 remains the P0 dependency encoding blocker |
+| 2026-06-10 04:58 | Accept sidecar metadata audit findings | ADR 0006 must explicitly decide on-chain pending metadata, complete freeze boundaries, dependency immutability, burned-token tokenURI behavior, ERC-4906 signaling, and escaping/size limits |
+| 2026-06-10 04:59 | Draft metadata/freeze ADR | ADR 0006 accepts schema-versioned metadata, base64 on-chain JSON, explicit pending/final states, immutable freeze manifests, dependency version pinning, ERC-4906 support, and ERC-721 burn semantics |
+| 2026-06-10 05:05 | Validate metadata/freeze ADR locally | Heading, traceability, ASCII, whitespace, `make check`, and Windows wrapper validations pass |
 
 ## Resume Instructions
 
