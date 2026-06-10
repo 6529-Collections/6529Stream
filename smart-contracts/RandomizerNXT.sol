@@ -86,8 +86,8 @@ contract NextGenRandomizerNXT {
         gencoreContract.setTokenHash(_collectionID, _mintIndex, hash);
     }
 
-    // get randomizer contract status
+    // block-derived helper randomness is not production-eligible under ADR 0005
     function isRandomizerContract() external view returns (bool) {
-        return true;
+        return false;
     }
 }

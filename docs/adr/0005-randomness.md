@@ -74,6 +74,24 @@ production. It prevents direct overwrites through the current randomizer path,
 but it does not prove that a callback belongs to the correct live request and
 provider epoch.
 
+Current implementation status:
+
+- `StreamCore` exposes the current collection randomizer and a monotonic
+  randomizer epoch that increments on `addRandomizer`.
+- `RandomizerVRF` and `RandomizerRNG` record provider request lifecycle data
+  and validate request ID, the core token-to-collection binding, provider, and
+  randomizer epoch before writing a derived seed.
+- `RandomizerRNG` guards the arRNG request-submission window where the provider
+  request ID is returned from an external payable call, and tests prove a
+  reentrant controller cannot fulfill during that window.
+- The derived seed includes provider adapter, provider request ID, collection,
+  token, randomizer epoch, and provider output via `abi.encode`.
+- `RandomizerNXT` no longer advertises itself as a production randomizer.
+- Remaining implementation work includes deterministic post-processing retry,
+  callback-after-burn policy, richer metadata state exposure, provider
+  configuration events/runbooks, and final handling of `XRandoms` weak helper
+  randomness.
+
 ## Decision
 
 6529Stream will use asynchronous, provider-backed randomness with an explicit

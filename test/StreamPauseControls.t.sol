@@ -8,6 +8,7 @@ import "../smart-contracts/StreamDrops.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";
+import "./mocks/MockRandomizerCore.sol";
 
 contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
     using Assertions for address;
@@ -25,7 +26,6 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
     address private constant WITHDRAW_RECIPIENT = address(0x4004);
     address private constant PAUSE_GUARDIAN = address(0x6006);
     address private constant UNPAUSE_ADMIN = address(0x7007);
-    address private constant CORE = address(0xC0DE);
     uint256 private constant TOKEN_ID = 10_000_000_000;
     bytes32 private constant REASON = keccak256("pause-regression");
 
@@ -233,12 +233,14 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
     function testRandomnessRequestPauseBlocksNewRequestsUntilUnpaused() public {
         StreamAdmins admins = new StreamAdmins(address(this));
         PauseMockArrngController controller = new PauseMockArrngController();
+        MockRandomizerCore core = new MockRandomizerCore();
         NextGenRandomizerRNG randomizer =
-            new NextGenRandomizerRNG(CORE, address(admins), address(controller));
+            new NextGenRandomizerRNG(address(core), address(admins), address(controller));
+        core.setRandomizer(1, address(randomizer), 1);
 
         _setPaused(admins, admins.PAUSE_DOMAIN_RANDOMNESS_REQUEST(), true);
 
-        vm.prank(CORE);
+        vm.prank(address(core));
         (bool pausedRequest,) = address(randomizer)
             .call(abi.encodeWithSelector(randomizer.calculateTokenHash.selector, 1, TOKEN_ID, 123));
 
@@ -246,7 +248,7 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
         randomizer.tokenToRequest(TOKEN_ID).assertEq(0, "paused request recorded");
 
         _setPaused(admins, admins.PAUSE_DOMAIN_RANDOMNESS_REQUEST(), false);
-        vm.prank(CORE);
+        vm.prank(address(core));
         randomizer.calculateTokenHash(1, TOKEN_ID, 123);
 
         randomizer.tokenToRequest(TOKEN_ID).assertEq(1, "request not recorded");

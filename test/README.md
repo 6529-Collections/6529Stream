@@ -85,3 +85,13 @@ the existing surplus/reserve boundaries intact. The pause suite also covers the
 current signer-compromise response path by pausing drop execution, incrementing
 the signer epoch, cancelling the exposed drop ID, unpausing, and proving the
 stale payload cannot mint.
+
+Randomizer request lifecycle and callback validation now have P0-RAND-001
+target-state coverage in `StreamRandomizerLifecycle.t.sol`: VRF and arRNG
+requests record collection, token, provider, provider request ID, epoch,
+timestamps, and state; valid callbacks write exactly one derived seed; unknown,
+empty, duplicate, wrong-collection, stale-provider, and stale-epoch callbacks
+fail closed; zero arRNG request IDs fail before lifecycle state is recorded;
+manual stale marking is observable; randomness-request pauses do not block valid
+fulfillment; a reentrant arRNG controller cannot fulfill during request
+submission; and `RandomizerNXT` cannot be configured as a production randomizer.

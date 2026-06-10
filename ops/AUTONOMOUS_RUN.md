@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/pause-emergency-controls` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/63` |
+| Active PR branch | `codex/randomizer-callback-hardening` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/64` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 13:12 UTC` |
+| Last updated | `2026-06-10 14:18 UTC` |
 
 ## Packaging Notes
 
@@ -75,7 +75,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | Merged in PR #61 |
 | 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | Merged in PR #62 |
 | 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
-| 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | PR #64 open; awaiting CI and bot review |
+| 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
+| 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | PR #65 open; addressing CodeRabbit follow-up |
 
 ## Current PR Worklog
 
@@ -1847,7 +1848,7 @@ Validation:
 
 ### PR candidate: Define pause and emergency controls (Queue Item 23)
 
-Status: PR #64 open; awaiting CI and bot review.
+Status: Merged in PR #64.
 Branch: `codex/pause-emergency-controls`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/64`.
 Related issues:
@@ -1947,6 +1948,110 @@ Validation so far:
 - Claude review was explicitly requested in issue comment `4670568701`.
 - CodeRabbit latest-head review was explicitly requested in issue comment
   `4670570080`.
+- State-only follow-up commit moved the final head to
+  `055ffb63962de8b33f250e8d86ea2d933bc0bfb9`; Claude and CodeRabbit were
+  re-pinged in issue comments `4670582018` and `4670583894`.
+- GitHub CI run `27278804614` passed on final head
+  `055ffb63962de8b33f250e8d86ea2d933bc0bfb9`.
+- Claude remained unavailable due the organization overage skip recorded in
+  review `pullrequestreview-4468100654`.
+- CodeRabbit updated the PR with release notes but its aggregate status remained
+  pending despite no visible actionable comments or review threads after
+  repeated polls. The stale-status maintainer decision was documented in issue
+  comment `4670664451`.
+- Merged via squash as `4e73435d59dba9bcca05a10ad18a529c53489c75`.
+- Issue #35 closed as completed by the merge.
+
+### PR candidate: Harden randomizer requests and callbacks (Queue Item 24)
+
+Status: PR #65 open; CodeRabbit follow-up addressed and validated locally before
+push.
+Branch: `codex/randomizer-callback-hardening`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/65`.
+Related issues:
+
+- `https://github.com/6529-Collections/6529Stream/issues/37`
+- `https://github.com/6529-Collections/6529Stream/issues/14`
+
+Goal:
+
+- Implement the ADR 0005 request lifecycle and callback-hardening model for the
+  current async randomizer adapters.
+- Bind requests to request ID, token, collection, provider adapter, and
+  collection randomizer epoch.
+- Reject unknown, duplicate, stale, wrong-provider, wrong-epoch, and malformed
+  callback outputs before final token hashes are written.
+- Validate the core token-to-collection binding before fulfillment so an
+  adapter cannot finalize a request against the wrong collection.
+- Keep randomness fulfillment unpaused while pause controls only block new
+  requests.
+- Make the weak `RandomizerNXT` helper path impossible to configure as a
+  production collection randomizer or explicitly document any narrower scope.
+- Update docs, roadmap/test matrix, and Slither traceability after
+  implementation.
+
+Initial candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/IStreamCore.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/RandomizerVRF.sol`
+- `smart-contracts/RandomizerNXT.sol`
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `test/mocks/MockRandomizerCore.sol`
+- `test/StreamEmergencyWithdraw.t.sol`
+- `test/StreamPauseControls.t.sol`
+- `docs/adr/0005-randomness.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Initial validation targets:
+
+- Focused randomizer lifecycle test suite.
+- Existing pause/emergency/randomizer characterization tests.
+- Full `make check`, Windows `scripts/check.ps1`, formatting/whitespace checks,
+  Markdown heading scan, and Slither delta evidence.
+
+Local implementation notes:
+
+- `StreamCore` now exposes `viewCollectionRandomizerContract` and
+  `viewRandomizerEpoch`, increments the collection randomizer epoch on
+  `addRandomizer`, and emits `CollectionRandomizerUpdated`.
+- `StreamRandomizerLifecycle` records request state and rejects unknown,
+  duplicate, empty-output, stale, wrong-provider/epoch, and wrong-collection
+  fulfillment paths before the token hash is written.
+- VRF and arRNG adapters use the shared lifecycle helper. New randomness
+  requests remain pausable, but valid fulfillments are not blocked by the
+  randomness-request pause.
+- `RandomizerNXT.isRandomizerContract()` returns false so the weak synchronous
+  helper cannot be configured as a production randomizer.
+- Focused `StreamRandomizerLifecycleTest` currently passes with 10 tests.
+- Final local validation passed: focused lifecycle suite, nearby
+  pause/emergency/randomizer characterization suite, full `make check`, Windows
+  `scripts/check.ps1`, touched-file `forge fmt --check`, `git diff --check`,
+  Markdown heading scan, traceability grep, and Slither delta evidence.
+- Final Slither JSON reports 686 total findings with unchanged 9 High / 29
+  Medium counts, two existing `weak-prng` rows, no
+  `NextGenRandomizerRNG.requestRandomWords` `reentrancy-eth` row, and no new
+  lifecycle-mock `locked-ether` or `arbitrary-send-eth` rows.
+- Pull request opened as #65 at head
+  `6413d45366a6572b87c81155f764428a191eb554`.
+- Claude review was explicitly requested in issue comment `4671046189`.
+- CodeRabbit latest-head review was explicitly requested in issue comment
+  `4671047964`.
+- CI passed on head `02950ba1e5c5f5f109a669697cc93968749a0189` in run
+  `27281733224`.
+- CodeRabbit initially failed when the head moved, then was explicitly nudged in
+  issue comments `4671059687` and `4671081645`. It acknowledged the latest-head
+  review in comment `4671123708`.
+- CodeRabbit comment `4671138033` reported no blocking issues and suggested
+  low-priority clarity comments plus explicit coverage for arRNG provider
+  request ID `0`. The follow-up patch adds the comments and zero-request-ID
+  regression coverage before pushing a new head.
 
 ## Decision Log
 
@@ -2113,6 +2218,12 @@ Validation so far:
 | 2026-06-10 12:57 | Implement Queue Item 23 locally | Domain pause state, pause/unpause authority separation, operational guards, no-withdrawal-pause policy tests, explicit emergency recipient routing, docs, and roadmap traceability are in place; focused pause/emergency and expanded admin/payment suites pass locally |
 | 2026-06-10 13:08 | Finish local Queue Item 23 validation | Full `make check`, Windows wrapper, formatting, whitespace, heading scan, and Slither delta evidence pass; Slither final JSON has 676 findings with unchanged 9 High / 29 Medium totals and zero `arbitrary-send-eth` findings |
 | 2026-06-10 13:12 | Open PR #64 | Pause/emergency-controls implementation is published, Claude review requested in issue comment `4670568701`, and CodeRabbit latest-head review requested in issue comment `4670570080` |
+| 2026-06-10 13:23 | Merge PR #64 | Pause/emergency controls merged as `4e73435d59dba9bcca05a10ad18a529c53489c75`; CI passed, no review threads were open, Claude was unavailable due org overage, CodeRabbit's aggregate status was stale after producing release notes, and issue #35 closed completed |
+| 2026-06-10 13:26 | Select Queue Item 24 | Next P0 Gate C blocker is `P0-RAND-001`, because current randomizer callbacks still lack explicit request lifecycle, provider/epoch validation, and stale/duplicate callback rejection |
+| 2026-06-10 13:48 | Implement Queue Item 24 local draft | Added shared randomizer lifecycle storage, collection randomizer epochs, VRF/arRNG callback validation, wrong-collection checks, manual stale marking, `RandomizerNXT` production-disablement, docs, and focused lifecycle tests |
+| 2026-06-10 13:55 | Finish local Queue Item 24 validation on pre-review head | Full `make check` and Windows wrapper pass with 151 tests; formatting, whitespace, heading scan, traceability grep, and Slither delta evidence pass; Slither final JSON has 686 findings with unchanged 9 High / 29 Medium totals, two existing `weak-prng` rows, and no randomizer reentrancy delta |
+| 2026-06-10 14:00 | Open PR #65 | Randomizer request lifecycle hardening implementation is published, Claude review requested in issue comment `4671046189`, and CodeRabbit latest-head review requested in issue comment `4671047964` |
+| 2026-06-10 14:15 | Address CodeRabbit PR #65 follow-up | Added lifecycle invariant comments, direct arRNG request precondition commentary, zero request ID regression coverage, and updated roadmap/test/run-state traceability; focused suite and full `make check`/Windows wrapper pass with 152 tests |
 
 ## Resume Instructions
 
