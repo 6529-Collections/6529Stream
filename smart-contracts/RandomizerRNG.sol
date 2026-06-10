@@ -17,6 +17,8 @@ import "./StreamPauseDomains.sol";
 import "./StreamRandomizerLifecycle.sol";
 
 contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
+    event RequestFulfilled(uint256 requestId, uint256[] randomWords);
+
     address gencore;
     IStreamCore public gencoreContract;
     IStreamAdmins private adminsContract;
@@ -80,6 +82,7 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
         // slither-disable-start reentrancy-no-eth,reentrancy-events
         try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
             _confirmRandomnessFulfillment(id);
+            emit RequestFulfilled(id, numbers);
         } catch (bytes memory failureData) {
             _markRandomnessPostProcessingFailed(id, failureData);
         }

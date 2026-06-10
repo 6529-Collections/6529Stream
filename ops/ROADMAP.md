@@ -1137,7 +1137,10 @@ Current behavior:
 - Failed post-processing retry is now bounded and deterministic: admins can call
   `retryRandomnessPostProcessing` only on `FailedPostProcessing` requests, the
   retry uses the stored derived seed, emits retry success/failure events, and
-  cannot request new provider output.
+  cannot request new provider output. Successful retry emits the retry event
+  followed by fulfillment confirmation for the same request ID; indexers should
+  treat that sequence as retry confirmation rather than a second provider
+  callback.
 - `RandomizerNXT` and `XRandoms` use block-derived helper randomness that is
   out of production scope under ADR 0005. `RandomizerNXT` no longer advertises
   itself as a production randomizer; `XRandoms` still needs final removal,
@@ -1163,9 +1166,10 @@ Required code changes:
   arRNG adapters.
 - Reject duplicate fulfillments. Implemented for VRF and arRNG adapters.
 - Define whether fulfillment stores raw random words, derived token hash, or
-  both. Partially implemented: adapters store the derived seed/hash and emit
-  provider words in existing fulfillment events; raw-output hash storage remains
-  `P0-RAND-007`.
+  both. Implemented policy: adapters store the derived seed/hash and a
+  canonical `rawOutputHash = keccak256(abi.encode(randomWords))`, expose both in
+  request records, and avoid storing full provider word arrays in contract
+  storage.
 - Define whether randomizer migration can happen while requests are pending.
   Implemented default policy: ordinary migration is blocked while the current
   lifecycle-aware adapter reports pending requests.
@@ -1208,7 +1212,10 @@ Child tickets:
   Implemented for VRF and arRNG adapters with stored-seed retry and attempt
   limits.
 - [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43):
-  Implement raw random words versus derived hash storage policy.
+  Implement raw random words versus derived hash storage policy. Implemented by
+  storing canonical raw-output hashes alongside derived seeds and deriving token
+  hashes from `RANDOMNESS_SEED_TYPEHASH`, request-bound fields, and
+  `rawOutputHash`.
 
 Required tests:
 
@@ -1226,6 +1233,15 @@ Required tests:
 - Manual retry cannot change random output. Implemented in
   `StreamRandomizerRetry.t.sol` by retrying only the stored derived seed, with no
   random-word, token, or collection inputs.
+- Stored randomness data matches ADR 0005. Implemented with `rawOutputHash`
+  request storage and event assertions in `StreamRandomizerLifecycle.t.sol` and
+  `StreamRandomizerRetry.t.sol`.
+- Derived token hash is deterministic from stored data. Implemented by deriving
+  seeds from `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection,
+  token, epoch, and `rawOutputHash`.
+- User-significant token data cannot bias output after request. Implemented by
+  proving post-request `tokenData` mutation does not affect the stored seed or
+  raw-output hash.
 - Callback after burn follows ADR behavior.
 - Fulfillment does not revert in normal operation.
 - Unknown request ID fails. Implemented.
@@ -1975,7 +1991,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | Passing for lifecycle state coverage: pending, fulfilled, stale, and failed post-processing states are observable by request and token where applicable; VRF and arRNG adapters catch deterministic core hash-writing failures, record `FailedPostProcessing`, store the derived seed and failure-data hash, clear pending counts, emit a failure event with provider and epoch context, and reject duplicate callbacks. Metadata integration remains Gate D work. | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Randomizer migration | Provider migration with pending requests is blocked or explicitly marks affected requests stale according to ADR 0005 | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerMigration.t.sol` | Passing for default block-by-pending policy: VRF and arRNG adapters expose lifecycle-aware pending counts; `StreamCore.addRandomizer` rejects migration while pending requests exist; fulfilled and stale requests clear pending counts; migration with no pending requests emits the provider/epoch event; a new provider can request and fulfill after migration. Automatic bulk stale marking remains future incident tooling. | [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Passing for bounded deterministic retry: VRF and arRNG adapters expose admin-gated `retryRandomnessPostProcessing`, retry only `FailedPostProcessing` requests, reuse the stored derived seed, emit retry success/failure and fulfillment events without duplicating the initial failure event on retry failure, refresh fulfillment timing on retry success, preserve token/collection/provider/epoch binding validation, reject unauthorized callers and terminal fulfilled requests, and cap repeated failed attempts with `MAX_RANDOMNESS_POST_PROCESSING_RETRIES` | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
-| Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerSeed.t.sol` | In Progress: derived seed includes provider, request ID, collection, token, randomizer epoch, and provider output via `abi.encode`; explicit raw-output hash storage remains missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
+| Randomness seed storage | Derived seed/hash includes `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerLifecycle.t.sol`, `test/StreamRandomizerRetry.t.sol` | Passing: VRF and arRNG adapters store `rawOutputHash = keccak256(abi.encode(randomWords))`, derive the token seed from `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token, randomizer epoch, and raw-output hash, expose both values in request/token views and lifecycle interface views, emit both values in fulfillment/failure/retry events, emit provider-specific raw-word fulfillment events for off-chain auditability, avoid storing full provider word arrays, and prove post-request token-data mutation cannot bias the seed | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
 | Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol`, later `test/StreamRandomizerProductionScope.t.sol` | In Progress: `RandomizerNXT.isRandomizerContract()` returns false and `StreamCore.addRandomizer` rejects it for production collections; `XRandoms` Slither `weak-prng` rows remain open pending final scoping/removal | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |
 | Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadata.t.sol` | Initial off-chain characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; on-chain pending/final and golden-file tests missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Missing | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |

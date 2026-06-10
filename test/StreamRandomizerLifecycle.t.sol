@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IXRandoms.sol";
+import "../smart-contracts/IRandomizerLifecycle.sol";
 import "../smart-contracts/RandomizerNXT.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
@@ -24,10 +25,17 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
     uint256 private constant SECOND_TOKEN_ID = TOKEN_ID + 1;
     uint256 private constant COLLECTION_ID = 1;
     bytes32 private constant PAUSE_REASON = keccak256("randomness-incident");
+    bytes32 private constant RANDOMNESS_SEED_TYPEHASH = keccak256(
+        "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
+    );
     bytes32 private constant COLLECTION_RANDOMIZER_UPDATED_TOPIC =
         keccak256("CollectionRandomizerUpdated(uint256,address,address,uint256)");
+    bytes32 private constant RANDOMNESS_FULFILLED_TOPIC =
+        keccak256("RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)");
+    bytes32 private constant PROVIDER_REQUEST_FULFILLED_TOPIC =
+        keccak256("RequestFulfilled(uint256,uint256[])");
     bytes32 private constant RANDOMNESS_POST_PROCESSING_FAILED_TOPIC = keccak256(
-        "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32)"
+        "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)"
     );
 
     function testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce() public {
@@ -51,10 +59,16 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         vrf.totalPendingRandomnessRequests().assertEq(1, "pending total");
 
         uint256[] memory words = _words(777);
-        bytes32 expectedSeed = keccak256(
-            abi.encode(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words)
-        );
+        bytes32 rawOutputHash = _rawOutputHash(words);
+        bytes32 expectedSeed =
+            _expectedSeed(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words);
+        vm.recordLogs();
         coordinator.fulfill(vrf, 1, words);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertRandomnessFulfilled(
+            logs, address(vrf), 1, TOKEN_ID, address(vrf), uint256(2), expectedSeed, rawOutputHash
+        );
+        _assertProviderRequestFulfilled(logs, address(vrf), 1, words);
 
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(expectedSeed, "token hash");
         request = vrf.retrieveRandomnessRequest(1);
@@ -63,6 +77,16 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "fulfilled"
             );
         request.derivedSeed.assertEq(expectedSeed, "stored seed");
+        request.rawOutputHash.assertEq(rawOutputHash, "raw output hash");
+        IRandomizerLifecycle lifecycle = IRandomizerLifecycle(address(vrf));
+        IRandomizerLifecycle.RandomnessRequest memory interfaceRequest =
+            lifecycle.retrieveRandomnessRequest(1);
+        uint256(interfaceRequest.state)
+            .assertEq(uint256(IRandomizerLifecycle.RandomnessRequestState.Fulfilled), "iface");
+        interfaceRequest.rawOutputHash.assertEq(rawOutputHash, "iface raw hash");
+        lifecycle.requestToToken(1).assertEq(TOKEN_ID, "iface request token");
+        lifecycle.tokenToRequest(TOKEN_ID).assertEq(1, "iface token request");
+        lifecycle.tokenIdToCollection(TOKEN_ID).assertEq(COLLECTION_ID, "iface token collection");
         vrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "collection cleared");
         vrf.totalPendingRandomnessRequests().assertEq(0, "total cleared");
 
@@ -102,21 +126,42 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             );
 
         uint256[] memory words = _words(111);
-        bytes32 expectedSeed = keccak256(
-            abi.encode(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words)
-        );
+        bytes32 expectedSeed =
+            _expectedSeed(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words);
+        bytes32 rawOutputHash = _rawOutputHash(words);
         coordinator.fulfill(vrf, 1, words);
 
         request = vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
         uint256(request.state)
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "done");
         request.derivedSeed.assertEq(expectedSeed, "token seed");
+        request.rawOutputHash.assertEq(rawOutputHash, "token raw hash");
         (request.fulfilledBlock > 0).assertTrue("fulfilled block");
         (request.fulfilledTimestamp > 0).assertTrue("fulfilled timestamp");
         uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
             .assertEq(
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "token done"
             );
+    }
+
+    function testVrfSeedIgnoresMutableTokenDataChangedAfterRequest() public {
+        (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
+            _deployVrfRandomizer();
+
+        _mintToken(deployed);
+        deployed.core.changeTokenData(TOKEN_ID, "changed-after-randomness-request");
+
+        uint256[] memory words = _words(222);
+        bytes32 rawOutputHash = _rawOutputHash(words);
+        bytes32 expectedSeed =
+            _expectedSeed(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words);
+        coordinator.fulfill(vrf, 1, words);
+
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            vrf.retrieveRandomnessRequest(1);
+        request.derivedSeed.assertEq(expectedSeed, "seed");
+        request.rawOutputHash.assertEq(rawOutputHash, "raw output hash");
+        deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(expectedSeed, "token hash");
     }
 
     function testVrfUnknownAndEmptyFulfillmentsFailClosed() public {
@@ -154,9 +199,9 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         vrf.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
 
         uint256[] memory words = _words(777);
-        bytes32 expectedSeed = keccak256(
-            abi.encode(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(1), words)
-        );
+        bytes32 rawOutputHash = _rawOutputHash(words);
+        bytes32 expectedSeed =
+            _expectedSeed(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(1), words);
         bytes32 failureDataHash =
             keccak256(abi.encodeWithSelector(MockRandomizerCore.MockTokenHashRejected.selector));
 
@@ -169,6 +214,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             TOKEN_ID,
             uint256(1),
             expectedSeed,
+            rawOutputHash,
             failureDataHash
         );
 
@@ -180,6 +226,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                 "failed state"
             );
         request.derivedSeed.assertEq(expectedSeed, "failed seed");
+        request.rawOutputHash.assertEq(rawOutputHash, "failed raw hash");
         request.failureDataHash.assertEq(failureDataHash, "failure hash");
         (request.fulfilledBlock > 0).assertTrue("failed block");
         (request.fulfilledTimestamp > 0).assertTrue("failed timestamp");
@@ -253,8 +300,15 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             .assertEq(
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "token stale"
             );
+        request.rawOutputHash.assertEq(bytes32(0), "stale raw hash");
         uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "view stale");
+        IRandomizerLifecycle lifecycle = IRandomizerLifecycle(address(vrf));
+        IRandomizerLifecycle.RandomnessRequest memory interfaceRequest =
+            lifecycle.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(interfaceRequest.state)
+            .assertEq(uint256(IRandomizerLifecycle.RandomnessRequestState.Stale), "iface stale");
+        interfaceRequest.rawOutputHash.assertEq(bytes32(0), "iface stale raw hash");
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -371,10 +425,8 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         newVrf.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "new pending");
 
         uint256[] memory words = _words(888);
-        bytes32 expectedSeed = keccak256(
-            abi.encode(
-                address(newVrf), uint256(1), COLLECTION_ID, SECOND_TOKEN_ID, uint256(3), words
-            )
+        bytes32 expectedSeed = _expectedSeed(
+            address(newVrf), uint256(1), COLLECTION_ID, SECOND_TOKEN_ID, uint256(3), words
         );
         newCoordinator.fulfill(newVrf, 1, words);
 
@@ -441,16 +493,20 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending");
 
         uint256[] memory words = _words(999);
-        bytes32 expectedSeed = keccak256(
-            abi.encode(address(rng), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words)
-        );
+        bytes32 rawOutputHash = _rawOutputHash(words);
+        bytes32 expectedSeed =
+            _expectedSeed(address(rng), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words);
+        vm.recordLogs();
         controller.fulfill(rng, 1, words);
+        _assertProviderRequestFulfilled(vm.getRecordedLogs(), address(rng), 1, words);
 
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(expectedSeed, "token hash");
         uint256(rng.randomnessRequestState(1))
             .assertEq(
                 uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "fulfilled"
             );
+        request = rng.retrieveRandomnessRequest(1);
+        request.rawOutputHash.assertEq(rawOutputHash, "raw output hash");
         rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
     }
 
@@ -470,9 +526,9 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         rng.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
 
         uint256[] memory words = _words(999);
-        bytes32 expectedSeed = keccak256(
-            abi.encode(address(rng), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(1), words)
-        );
+        bytes32 rawOutputHash = _rawOutputHash(words);
+        bytes32 expectedSeed =
+            _expectedSeed(address(rng), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(1), words);
         bytes32 failureDataHash =
             keccak256(abi.encodeWithSelector(MockRandomizerCore.MockTokenHashRejected.selector));
 
@@ -485,6 +541,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             TOKEN_ID,
             uint256(1),
             expectedSeed,
+            rawOutputHash,
             failureDataHash
         );
 
@@ -496,6 +553,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                 "failed state"
             );
         request.derivedSeed.assertEq(expectedSeed, "failed seed");
+        request.rawOutputHash.assertEq(rawOutputHash, "failed raw hash");
         request.failureDataHash.assertEq(failureDataHash, "failure hash");
         rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
         rng.totalPendingRandomnessRequests().assertEq(0, "pending total");
@@ -623,6 +681,103 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         words[0] = word;
     }
 
+    function _rawOutputHash(uint256[] memory words) private pure returns (bytes32) {
+        return keccak256(abi.encode(words));
+    }
+
+    function _expectedSeed(
+        address provider,
+        uint256 requestId,
+        uint256 collectionId,
+        uint256 tokenId,
+        uint256 randomizerEpoch,
+        uint256[] memory words
+    ) private pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                RANDOMNESS_SEED_TYPEHASH,
+                provider,
+                requestId,
+                collectionId,
+                tokenId,
+                randomizerEpoch,
+                _rawOutputHash(words)
+            )
+        );
+    }
+
+    function _assertRandomnessFulfilled(
+        Vm.Log[] memory logs,
+        address emitter,
+        uint256 requestId,
+        uint256 tokenId,
+        address expectedProvider,
+        uint256 expectedRandomizerEpoch,
+        bytes32 expectedSeed,
+        bytes32 expectedRawOutputHash
+    ) private pure {
+        bool found = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == emitter && logs[i].topics.length == 4
+                    && logs[i].topics[0] == RANDOMNESS_FULFILLED_TOPIC
+                    && uint256(logs[i].topics[1]) == requestId
+                    && uint256(logs[i].topics[2]) == COLLECTION_ID
+                    && uint256(logs[i].topics[3]) == tokenId
+            ) {
+                (
+                    address actualProvider,
+                    uint256 actualRandomizerEpoch,
+                    bytes32 actualSeed,
+                    bytes32 actualRawOutputHash
+                ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32));
+                bool matches = actualProvider == expectedProvider
+                    && actualRandomizerEpoch == expectedRandomizerEpoch
+                    && actualSeed == expectedSeed && actualRawOutputHash == expectedRawOutputHash;
+                found = found || matches;
+            }
+        }
+        found.assertTrue("fulfilled event");
+    }
+
+    function _assertProviderRequestFulfilled(
+        Vm.Log[] memory logs,
+        address emitter,
+        uint256 requestId,
+        uint256[] memory expectedWords
+    ) private pure {
+        bool found = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == emitter && logs[i].topics.length == 1
+                    && logs[i].topics[0] == PROVIDER_REQUEST_FULFILLED_TOPIC
+            ) {
+                (uint256 actualRequestId, uint256[] memory actualWords) =
+                    abi.decode(logs[i].data, (uint256, uint256[]));
+                bool matches =
+                    actualRequestId == requestId && _wordsMatch(actualWords, expectedWords);
+                found = found || matches;
+            }
+        }
+        found.assertTrue("provider fulfilled event");
+    }
+
+    function _wordsMatch(uint256[] memory actualWords, uint256[] memory expectedWords)
+        private
+        pure
+        returns (bool)
+    {
+        if (actualWords.length != expectedWords.length) {
+            return false;
+        }
+        for (uint256 i = 0; i < actualWords.length; i++) {
+            if (actualWords[i] != expectedWords[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function _assertCollectionRandomizerUpdated(
         Vm.Log[] memory logs,
         address emitter,
@@ -653,6 +808,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         uint256 tokenId,
         uint256 expectedEpoch,
         bytes32 expectedSeed,
+        bytes32 expectedRawOutputHash,
         bytes32 expectedFailureDataHash
     ) private pure {
         bool found = false;
@@ -668,11 +824,13 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
                     address actualProvider,
                     uint256 actualEpoch,
                     bytes32 actualSeed,
+                    bytes32 actualRawOutputHash,
                     bytes32 actualFailureDataHash
-                ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32));
-                found = actualProvider == emitter && actualEpoch == expectedEpoch
-                    && actualSeed == expectedSeed
+                ) = abi.decode(logs[i].data, (address, uint256, bytes32, bytes32, bytes32));
+                bool matches = actualProvider == emitter && actualEpoch == expectedEpoch
+                    && actualSeed == expectedSeed && actualRawOutputHash == expectedRawOutputHash
                     && actualFailureDataHash == expectedFailureDataHash;
+                found = found || matches;
             }
         }
         found.assertTrue("failed event");

@@ -96,13 +96,20 @@ Current implementation status:
 - `RandomizerRNG` guards the arRNG request-submission window where the provider
   request ID is returned from an external payable call, and tests prove a
   reentrant controller cannot fulfill during that window.
-- The derived seed includes provider adapter, provider request ID, collection,
-  token, randomizer epoch, and provider output via `abi.encode`.
+- VRF and arRNG adapters store `rawOutputHash =
+  keccak256(abi.encode(randomWords))` for each accepted fulfillment. They do not
+  store full provider word arrays in contract storage.
+- The derived seed includes `RANDOMNESS_SEED_TYPEHASH`, provider adapter,
+  provider request ID, collection, token, randomizer epoch, and the stored
+  raw-output hash via `abi.encode`.
+- VRF and arRNG adapters both emit provider-specific `RequestFulfilled` events
+  with the raw provider words for off-chain auditability; contract state remains
+  hash-only.
 - `RandomizerNXT` no longer advertises itself as a production randomizer.
 - Remaining implementation work includes callback-after-burn policy, richer
-  metadata state exposure, raw-output hash storage policy, provider configuration
-  events/runbooks, canonical core/coordinator-owned lifecycle state, and final
-  handling of `XRandoms` weak helper randomness.
+  metadata state exposure, provider configuration events/runbooks, canonical
+  core/coordinator-owned lifecycle state, and final handling of `XRandoms` weak
+  helper randomness.
 
 ## Decision
 
@@ -287,8 +294,9 @@ out of scope.
 
 ## Seed And Storage Policy
 
-P0 implementation will store a canonical derived seed/hash, not provider output
-as an unstructured implementation detail.
+P0 implementation stores a canonical derived seed/hash and a canonical hash of
+the raw provider output. It does not store full provider word arrays as
+unstructured implementation detail.
 
 The derived value should be domain-separated from provider internals and include
 at least:
@@ -317,8 +325,8 @@ keccak256(
 ```
 
 The implementation may also emit raw provider words in a provider-specific
-event if gas and privacy considerations are accepted, but the canonical
-contract state must expose the derived seed/hash and the raw-output hash.
+event if gas and privacy considerations are accepted. The canonical contract
+state exposes the derived seed/hash and the raw-output hash.
 
 ## Metadata And Request-Time Inputs
 
@@ -383,10 +391,15 @@ Required events or stricter equivalents:
 - `RandomnessRequested(collectionId, tokenId, provider, requestId, epoch)`
 - `RandomnessFulfilled(collectionId, tokenId, provider, requestId, epoch, seed, rawOutputHash)`
 - `RandomnessStale(collectionId, tokenId, provider, requestId, epoch, reason)`
-- `RandomnessPostProcessingFailed(requestId, collectionId, tokenId, provider, epoch, seed, failureDataHash)`
-- `RandomnessPostProcessingRetried(requestId, collectionId, tokenId, provider, epoch, retryCount, seed)`
-- `RandomnessPostProcessingRetryFailed(requestId, collectionId, tokenId, provider, epoch, retryCount, seed, failureDataHash)`
+- `RandomnessPostProcessingFailed(requestId, collectionId, tokenId, provider, epoch, seed, rawOutputHash, failureDataHash)`
+- `RandomnessPostProcessingRetried(requestId, collectionId, tokenId, provider, epoch, retryCount, seed, rawOutputHash)`
+- `RandomnessPostProcessingRetryFailed(requestId, collectionId, tokenId, provider, epoch, retryCount, seed, rawOutputHash, failureDataHash)`
 - `RandomizerProviderConfigUpdated(provider, field, oldValueHash, newValueHash, admin)`
+
+Successful deterministic post-processing retries emit
+`RandomnessPostProcessingRetried` followed by `RandomnessFulfilled` for the same
+request ID. Indexers should treat that fulfillment event as retry success
+confirmation, not as a second provider callback.
 
 Required views or stricter equivalents:
 
@@ -508,8 +521,9 @@ fulfillment safety should come from strict validation.
 - Tokens may remain pending or stale if a provider fails after accepting a
   request. This is safer than redrawing randomness without a proven unbiased
   process.
-- P0 may store derived seed/hash state rather than full raw words. Events and
-  provider logs must preserve enough auditability for the chosen provider.
+- P0 stores derived seed/hash state and a raw-output hash rather than full raw
+  words. Provider-specific events and provider logs must preserve enough
+  auditability for the chosen provider.
 - arRNG support may be deferred if it cannot meet the same lifecycle,
   accounting, and monitoring requirements as the VRF-compatible path.
 - Weak helper contracts may remain in the repository during transition if they
@@ -518,8 +532,6 @@ fulfillment safety should come from strict validation.
 
 ## Open Follow-Ups
 
-- Implement [P0-RAND-007](https://github.com/6529-Collections/6529Stream/issues/43)
-  for the final raw-output versus derived-seed storage policy.
 - Define and test callback-after-burn behavior.
 - Reconcile final metadata pending/freeze behavior with ADR 0006.
 - Add provider configuration events and production runbooks.

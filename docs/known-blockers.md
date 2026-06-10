@@ -45,18 +45,21 @@ contributors who start from the README.
   failures now become observable `FailedPostProcessing` requests with stored
   derived seed and failure-data hash instead of rolling back to pending. Admins
   can retry deterministic post-processing with the stored seed through a bounded
-  retry path that cannot request new randomness. Remaining randomness blockers
-  include callback-after-burn policy, richer metadata state exposure, provider
-  configuration runbooks, canonical core/coordinator lifecycle ownership, and
-  full handling of weak helper randomness beyond disabling `RandomizerNXT` as a
-  production randomizer.
+  retry path that cannot request new randomness. Request records now store a
+  canonical raw-output hash alongside the derived seed and expose both values in
+  fulfillment, failure, and retry events without storing full provider word
+  arrays. Remaining randomness blockers include callback-after-burn policy,
+  richer metadata state exposure, provider configuration runbooks, canonical
+  core/coordinator lifecycle ownership, and full handling of weak helper
+  randomness beyond disabling `RandomizerNXT` as a production randomizer.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback
-  validation, deterministic randomizer retry, and randomizer reserve-boundary
-  regressions now exist, but broader payment, metadata, deployment,
+  validation, deterministic randomizer retry, raw-output hash storage, and
+  randomizer reserve-boundary regressions now exist, but broader payment,
+  metadata, deployment,
   production-governance, and invariant tests are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 

@@ -6,6 +6,9 @@ import "./IStreamCore.sol";
 
 abstract contract StreamRandomizerLifecycle {
     uint256 public constant MAX_RANDOMNESS_POST_PROCESSING_RETRIES = 3;
+    bytes32 public constant RANDOMNESS_SEED_TYPEHASH = keccak256(
+        "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
+    );
 
     enum RandomnessRequestState {
         None,
@@ -27,6 +30,7 @@ abstract contract StreamRandomizerLifecycle {
         uint256 fulfilledBlock;
         uint256 fulfilledTimestamp;
         bytes32 derivedSeed;
+        bytes32 rawOutputHash;
         bytes32 failureDataHash;
         uint256 postProcessingRetryCount;
     }
@@ -74,7 +78,10 @@ abstract contract StreamRandomizerLifecycle {
         uint256 indexed requestId,
         uint256 indexed collectionId,
         uint256 indexed tokenId,
-        bytes32 derivedSeed
+        address provider,
+        uint256 randomizerEpoch,
+        bytes32 derivedSeed,
+        bytes32 rawOutputHash
     );
     event RandomnessRequestMarkedStale(
         uint256 indexed requestId,
@@ -90,6 +97,7 @@ abstract contract StreamRandomizerLifecycle {
         address provider,
         uint256 randomizerEpoch,
         bytes32 derivedSeed,
+        bytes32 rawOutputHash,
         bytes32 failureDataHash
     );
     event RandomnessPostProcessingRetried(
@@ -99,7 +107,8 @@ abstract contract StreamRandomizerLifecycle {
         address provider,
         uint256 randomizerEpoch,
         uint256 retryCount,
-        bytes32 derivedSeed
+        bytes32 derivedSeed,
+        bytes32 rawOutputHash
     );
     event RandomnessPostProcessingRetryFailed(
         uint256 indexed requestId,
@@ -109,6 +118,7 @@ abstract contract StreamRandomizerLifecycle {
         uint256 randomizerEpoch,
         uint256 retryCount,
         bytes32 derivedSeed,
+        bytes32 rawOutputHash,
         bytes32 failureDataHash
     );
 
@@ -192,6 +202,7 @@ abstract contract StreamRandomizerLifecycle {
             fulfilledBlock: 0,
             fulfilledTimestamp: 0,
             derivedSeed: bytes32(0),
+            rawOutputHash: bytes32(0),
             failureDataHash: bytes32(0),
             postProcessingRetryCount: 0
         });
@@ -237,16 +248,17 @@ abstract contract StreamRandomizerLifecycle {
             );
         }
 
-        derivedSeed = keccak256(
-            abi.encode(
-                address(this),
-                _requestId,
-                collectionId,
-                tokenId,
-                request.randomizerEpoch,
-                _randomWords
-            )
+        bytes32 rawOutputHash = _hashRawRandomWords(_randomWords);
+        derivedSeed = _deriveRandomnessSeed(
+            request.provider,
+            _requestId,
+            collectionId,
+            tokenId,
+            request.randomizerEpoch,
+            rawOutputHash
         );
+        // This should be unreachable for keccak256 output, but the explicit
+        // guard preserves the no-zero-seed invariant if derivation changes.
         if (derivedSeed == bytes32(0)) {
             revert ZeroDerivedSeed(_requestId);
         }
@@ -256,6 +268,7 @@ abstract contract StreamRandomizerLifecycle {
         request.fulfilledBlock = block.number;
         request.fulfilledTimestamp = block.timestamp;
         request.derivedSeed = derivedSeed;
+        request.rawOutputHash = rawOutputHash;
         request.failureDataHash = bytes32(0);
     }
 
@@ -269,7 +282,13 @@ abstract contract StreamRandomizerLifecycle {
         }
 
         emit RandomnessFulfilled(
-            _requestId, request.collectionId, request.tokenId, request.derivedSeed
+            _requestId,
+            request.collectionId,
+            request.tokenId,
+            request.provider,
+            request.randomizerEpoch,
+            request.derivedSeed,
+            request.rawOutputHash
         );
     }
 
@@ -287,6 +306,7 @@ abstract contract StreamRandomizerLifecycle {
             request.provider,
             request.randomizerEpoch,
             request.derivedSeed,
+            request.rawOutputHash,
             failureDataHash
         );
     }
@@ -376,7 +396,8 @@ abstract contract StreamRandomizerLifecycle {
             request.provider,
             request.randomizerEpoch,
             retryCount,
-            request.derivedSeed
+            request.derivedSeed,
+            request.rawOutputHash
         );
         _confirmRandomnessFulfillment(_requestId);
     }
@@ -396,6 +417,7 @@ abstract contract StreamRandomizerLifecycle {
             request.randomizerEpoch,
             retryCount,
             request.derivedSeed,
+            request.rawOutputHash,
             failureDataHash
         );
     }
@@ -424,5 +446,30 @@ abstract contract StreamRandomizerLifecycle {
         pendingRandomnessRequestsByCollection[collectionId] =
             pendingRandomnessRequestsByCollection[collectionId] - 1;
         pendingRandomnessRequestCount = pendingRandomnessRequestCount - 1;
+    }
+
+    function _hashRawRandomWords(uint256[] memory _randomWords) private pure returns (bytes32) {
+        return keccak256(abi.encode(_randomWords));
+    }
+
+    function _deriveRandomnessSeed(
+        address provider,
+        uint256 requestId,
+        uint256 collectionId,
+        uint256 tokenId,
+        uint256 randomizerEpoch,
+        bytes32 rawOutputHash
+    ) private pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                RANDOMNESS_SEED_TYPEHASH,
+                provider,
+                requestId,
+                collectionId,
+                tokenId,
+                randomizerEpoch,
+                rawOutputHash
+            )
+        );
     }
 }
