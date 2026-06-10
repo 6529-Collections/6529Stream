@@ -89,9 +89,11 @@ stale payload cannot mint.
 Randomizer request lifecycle and callback validation now have P0-RAND-001
 target-state coverage in `StreamRandomizerLifecycle.t.sol`: VRF and arRNG
 requests record collection, token, provider, provider request ID, epoch,
-timestamps, and state; valid callbacks write exactly one derived seed; unknown,
-empty, duplicate, wrong-collection, stale-provider, and stale-epoch callbacks
-fail closed; zero arRNG request IDs fail before lifecycle state is recorded;
-manual stale marking is observable; randomness-request pauses do not block valid
-fulfillment; a reentrant arRNG controller cannot fulfill during request
-submission; and `RandomizerNXT` cannot be configured as a production randomizer.
+timestamps, and state; request records and states are viewable by request ID and
+token ID; token-level views expose empty, pending, and fulfilled state; valid
+callbacks write exactly one derived seed; unknown, empty, duplicate,
+wrong-collection, stale-provider, and stale-epoch callbacks fail closed; zero
+arRNG request IDs fail before lifecycle state is recorded; manual stale marking
+is observable; randomness-request pauses do not block valid fulfillment; a
+reentrant arRNG controller cannot fulfill during request submission; and
+`RandomizerNXT` cannot be configured as a production randomizer.

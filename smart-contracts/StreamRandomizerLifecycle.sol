@@ -89,6 +89,22 @@ abstract contract StreamRandomizerLifecycle {
         return randomnessRequests[_requestId].state;
     }
 
+    function retrieveRandomnessRequestForToken(uint256 tokenId)
+        public
+        view
+        returns (RandomnessRequest memory)
+    {
+        return randomnessRequests[tokenToRequest[tokenId]];
+    }
+
+    function randomnessRequestStateForToken(uint256 tokenId)
+        public
+        view
+        returns (RandomnessRequestState)
+    {
+        return randomnessRequests[tokenToRequest[tokenId]].state;
+    }
+
     function _recordRandomnessRequest(
         uint256 _requestId,
         uint256 _collectionId,
