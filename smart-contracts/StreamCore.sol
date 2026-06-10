@@ -405,6 +405,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     // function to set the tokenHash (this function is called only from randomizer contracts)
     function setTokenHash(uint256 _collectionID, uint256 _mintIndex, bytes32 _hash) external {
         require(msg.sender == collectionAdditionalData[_collectionID].randomizerContract);
+        require(_hash != bytes32(0), "Zero token hash");
         require(
             tokenToHash[_mintIndex]
                 == 0x0000000000000000000000000000000000000000000000000000000000000000

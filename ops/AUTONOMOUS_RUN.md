@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/82` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 23:30 UTC` |
+| Last updated | `2026-06-10 23:48 UTC` |
 
 ## Packaging Notes
 
@@ -3455,7 +3455,7 @@ Merge:
 
 ### PR #83: Add schema-v1 metadata state outputs (Queue Item 40)
 
-Status: PR open; state follow-up ready to push before CodeRabbit request.
+Status: PR open; CodeRabbit zero-hash review fix ready to push and re-request.
 Branch: `codex/metadata-schema-state`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/83`.
 Related issue:
@@ -3498,6 +3498,11 @@ Implementation notes:
   `animation_url`.
 - Final on-chain JSON includes `metadata_state: "final"` and preserves the
   existing base64 HTML animation URL.
+- CodeRabbit correctly noted that `bytes32(0)` is now the pending sentinel, so
+  `setTokenHash` must reject zero hashes at the randomizer write boundary.
+- Added the nonzero-hash guard plus a regression proving a configured
+  randomizer cannot finalize a token with `bytes32(0)` and the metadata state
+  remains pending after the rejected write.
 - This PR intentionally leaves JSON escaping, raw-attribute validation, stale
   state display, freeze manifests, dependency immutability, and burn semantics
   to the remaining P1-META issues.
@@ -3505,10 +3510,11 @@ Implementation notes:
 Validation so far:
 
 - Focused metadata golden tests passed:
-  `forge test --match-contract StreamMetadataGoldenTest -vvv` with 5 tests.
-- Full canonical local gate passed: `make check` with 211 tests, 0 failed.
+  `forge test --match-contract StreamMetadataGoldenTest -vvv` with 6 tests,
+  0 failed, after the CodeRabbit zero-hash guard fix.
+- Full canonical local gate passed: `make check` with 212 tests, 0 failed.
 - Windows wrapper passed:
-  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 211 tests,
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 212 tests,
   0 failed.
 - Touched-file formatting passed:
   `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataGolden.t.sol`.
@@ -3527,8 +3533,9 @@ Validation so far:
 
 Review requests:
 
-- CodeRabbit will be requested after this state follow-up is pushed so the bot
-  reviews the final opened-PR head.
+- CodeRabbit was requested in issue comment `4675688299`.
+- CodeRabbit review thread `PRRT_kwDOM7REis6IpsTo` requested the nonzero hash
+  guard; the follow-up is ready to push and re-request.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3536,6 +3543,7 @@ Review requests:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-10 23:48 | Address CodeRabbit PR #83 zero-hash finding | Added `setTokenHash` guard for `bytes32(0)`, added pending-sentinel regression coverage, and reran focused metadata tests, `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison |
 | 2026-06-10 23:30 | Open PR #83 | Schema-v1 metadata state outputs are published with local validation evidence; next step is state follow-up push and CodeRabbit request |
 | 2026-06-10 23:28 | Validate Queue Item 40 locally | Focused metadata tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain unchanged |
 | 2026-06-10 23:26 | Start Queue Item 40 | ADR 0006 sequencing calls for schema versioning and explicit metadata state after current-output golden files and before freeze/dependency/burn hardening |

@@ -37,6 +37,21 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         finalDeployment.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
     }
 
+    function testSetTokenHashRejectsZeroHashReservedForPendingState() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintGoldenToken(deployed);
+
+        vm.prank(address(noopRandomizer));
+        vm.expectRevert("Zero token hash");
+        deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, bytes32(0));
+
+        deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "zero hash stored");
+        deployed.core.tokenMetadataState(TOKEN_ID)
+            .assertEq("pending", "zero hash changed metadata state");
+    }
+
     function testOffchainPendingTokenUriMatchesGoldenFile() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         NoopRandomizer noopRandomizer = new NoopRandomizer();
