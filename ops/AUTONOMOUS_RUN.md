@@ -1629,13 +1629,15 @@ Outcome:
 
 ### PR candidate: Bound remaining emergency withdrawals (Queue Item 21)
 
-Status: In progress.
+Status: Open.
 Branch: `codex/bound-emergency-withdrawals`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/62`.
 Related issues:
 
 - `https://github.com/6529-Collections/6529Stream/issues/31`
 - `https://github.com/6529-Collections/6529Stream/issues/8`
+Claude review request: issue comment `4669695551`; requested explicitly because
+Claude may not run automatically.
 
 Goal:
 
