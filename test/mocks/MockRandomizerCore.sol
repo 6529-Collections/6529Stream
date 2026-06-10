@@ -23,10 +23,12 @@ contract MockRandomizerCore {
         rejectTokenHash = status;
     }
 
-    function setTokenHash(uint256, uint256 tokenId, bytes32 tokenHash) external {
+    function setTokenHash(uint256 collectionId, uint256 tokenId, bytes32 tokenHash) external {
         if (rejectTokenHash) {
             revert MockTokenHashRejected();
         }
+        require(msg.sender == randomizerContracts[collectionId]);
+        require(tokenHashes[tokenId] == bytes32(0));
         tokenHashes[tokenId] = tokenHash;
     }
 

@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/67` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 16:07 UTC` |
+| Last updated | `2026-06-10 16:16 UTC` |
 
 ## Packaging Notes
 
@@ -79,7 +79,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
-| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #68; awaiting CI and bot feedback |
+| 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #68; final CodeRabbit nitpick addressed locally before follow-up push |
 
 ## Current PR Worklog
 
@@ -2206,8 +2206,9 @@ Validation completed so far:
 
 ### PR #68: Add failed randomness post-processing state (Queue Item 27)
 
-Status: Addressing CodeRabbit review; CI is green and Claude is no longer
-required for this PR by user instruction.
+Status: Final CodeRabbit nitpick addressed locally; awaiting follow-up CI and
+CodeRabbit refresh after push. Claude is no longer required for this PR by user
+instruction.
 Branch: `codex/randomizer-failed-state`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/68`.
 Related issue:
@@ -2277,6 +2278,10 @@ Review follow-up:
 - CodeRabbit review comment `3389722778` requested provider and epoch context in
   `RandomnessPostProcessingFailed` so indexers can correlate failures without
   extra storage lookups.
+- CodeRabbit review body also suggested aligning `MockRandomizerCore.setTokenHash`
+  with `StreamCore` by requiring the registered randomizer caller and rejecting
+  token-hash overwrites. This is valid test-harness hardening and has been
+  applied.
 - User instruction after Claude was requested: no need to use Claude for this
   PR; CodeRabbit is sufficient.
 - Review-fix validation passed:
@@ -2288,6 +2293,12 @@ Review follow-up:
   `slither_exit=-1 total=685 high=9 medium=29 weak-prng=2
   arbitrary-send-eth=0 reentrancy-eth=0 reentrancy-no-eth=0
   reentrancy-events=22`.
+- Final mock-guard validation passed after the CodeRabbit nitpick:
+  `forge test --match-contract StreamRandomizerLifecycleTest -vvv` (18 tests),
+  `make check` (160 tests), Windows
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` (160 tests),
+  touched-file `forge fmt --check test\mocks\MockRandomizerCore.sol`, and
+  `git diff --check`.
 
 ## Decision Log
 
@@ -2477,6 +2488,7 @@ Review follow-up:
 | 2026-06-10 15:53 | Open PR #68 and request bot reviews | Failed randomness post-processing state PR published at `https://github.com/6529-Collections/6529Stream/pull/68`; Claude requested in issue comment `4671968774` and CodeRabbit requested in issue comment `4671968843` |
 | 2026-06-10 16:04 | Address CodeRabbit PR #68 event-context review | Add provider and randomizer epoch to `RandomnessPostProcessingFailed`, update tests/docs/run-state traceability, and proceed with CodeRabbit/CI as sufficient for this PR per user instruction |
 | 2026-06-10 16:07 | Validate CodeRabbit PR #68 review fix | Focused lifecycle tests, full `make check`, Windows wrapper, formatting, whitespace, docs traceability, heading scan, and Slither baseline comparison all pass after adding provider/epoch event context |
+| 2026-06-10 16:16 | Address final CodeRabbit PR #68 mock nitpick | Align `MockRandomizerCore.setTokenHash` with production caller/overwrite guards and rerun focused lifecycle tests, `make check`, Windows wrapper, formatting, and whitespace checks |
 
 ## Resume Instructions
 
