@@ -108,6 +108,29 @@ contract StreamDropsCharacterizationTest {
         drops.retrieveDrops().length.assertEq(0, "zero recipient recorded drop");
     }
 
+    function testFixedPriceDropRejectsZeroPoster() public {
+        MockStreamMinter minter = new MockStreamMinter();
+        StreamDrops drops =
+            new StreamDrops(address(this), address(minter), ADMINS, PAYOUT, CURATORS_POOL);
+
+        (bool success,) = address(drops)
+            .call(
+                abi.encodeWithSelector(
+                    drops.mintDrop.selector,
+                    address(0),
+                    RECIPIENT,
+                    "data",
+                    uint256(1),
+                    uint256(1),
+                    uint256(0),
+                    uint256(999)
+                )
+            );
+
+        success.assertFalse("zero poster minted fixed-price drop");
+        drops.retrieveDrops().length.assertEq(0, "zero poster recorded fixed-price drop");
+    }
+
     function testDropIdReplayIsRejectedAfterFirstExecution() public {
         MockStreamMinter minter = new MockStreamMinter();
         StreamDrops drops =
@@ -177,5 +200,29 @@ contract StreamDropsCharacterizationTest {
 
         success.assertFalse("non-zero auction recipient minted");
         drops.retrieveDrops().length.assertEq(0, "non-zero auction recipient recorded drop");
+    }
+
+    function testAuctionDropRejectsZeroPoster() public {
+        MockStreamMinter minter = new MockStreamMinter();
+        StreamDrops drops =
+            new StreamDrops(address(this), address(minter), ADMINS, PAYOUT, CURATORS_POOL);
+        uint256 auctionEndTime = block.timestamp + 1 days;
+
+        (bool success,) = address(drops)
+            .call(
+                abi.encodeWithSelector(
+                    drops.mintDrop.selector,
+                    address(0),
+                    address(0),
+                    "auction-data",
+                    uint256(7),
+                    uint256(2),
+                    uint256(5 ether),
+                    auctionEndTime
+                )
+            );
+
+        success.assertFalse("zero poster minted auction drop");
+        drops.retrieveDrops().length.assertEq(0, "zero poster recorded auction drop");
     }
 }

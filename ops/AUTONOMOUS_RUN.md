@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/54` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 06:19 UTC` |
+| Last updated | `2026-06-10 06:33 UTC` |
 
 ## Packaging Notes
 
@@ -989,7 +989,7 @@ Outcome:
 - GitHub CI and CodeRabbit passed.
 - Claude unavailable due to organization overage.
 
-### PR TBD: Remove `tx.origin` from drop execution (Queue Item 14)
+### PR `#55`: Remove `tx.origin` from drop execution (Queue Item 14)
 
 Status: In progress.
 Branch: `codex/remove-tx-origin-drop-execution`.
@@ -1029,11 +1029,11 @@ Candidate files:
 Validation:
 
 - `forge test --match-contract StreamDropsCharacterizationTest -vvv` passed
-  with 7 tests.
+  with 9 tests.
 - `forge test --match-contract StreamDropsIntegrationCharacterizationTest -vvv`
   passed with 10 tests.
-- `make check` passed with 22 tests.
-- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 22
+- `make check` passed with 24 tests.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 24
   tests.
 - `forge fmt --check` passed for the formatted touched Solidity files; the
   provider interface comment diff preserves its existing style to avoid
@@ -1049,7 +1049,15 @@ Validation:
 
 Review feedback:
 
-- Pending CI and bot review.
+- GitHub CI run `27257368139` passed on initial head
+  `9dbcc5e09651eb130a3e64a8330d2a0d6dc931fd`.
+- Claude review was requested in issue comment `4667155915`, but Claude was
+  unavailable because the organization's Claude Code overage spend limit was
+  reached.
+- CodeRabbit review `4465140842` requested a concrete PR number in this run
+  log and a zero-poster rejection in `StreamDrops.mintDrop`.
+- Follow-up fix added the concrete PR heading and rejects zero-poster fixed-price
+  and auction drops, with characterization tests for both paths.
 
 ## Decision Log
 
@@ -1156,6 +1164,7 @@ Review feedback:
 | 2026-06-10 05:56 | Start `P0-AUTH-001` implementation PR | Gate C starts with removing executable `tx.origin` usage and adding explicit recipient target-state tests while leaving EIP-712 work to `P0-AUTH-002` |
 | 2026-06-10 06:18 | Open PR #55 | `P0-AUTH-001` implementation is published with local build, test, formatting, whitespace, grep, and sidecar-review evidence |
 | 2026-06-10 06:19 | Request Claude review on PR #55 | Explicit review ping added in issue comment `4667155915` because Claude may not run automatically |
+| 2026-06-10 06:33 | Address CodeRabbit PR #55 review | Use concrete PR state in the durable log and reject zero-poster drop execution so payout and no-bid fallback addresses are never zero |
 
 ## Resume Instructions
 

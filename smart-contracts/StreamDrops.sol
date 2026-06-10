@@ -87,6 +87,7 @@ contract StreamDrops is Ownable {
         uint256 _price,
         uint256 _endDate
     ) public payable authorized {
+        require(_poster != address(0), "Zero poster");
         bytes32 dropId = keccak256(
             abi.encodePacked(
                 string(
