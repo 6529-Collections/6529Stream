@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/32` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 04:14 UTC` |
+| Last updated | `2026-06-10 04:20 UTC` |
 
 ## Packaging Notes
 
@@ -60,7 +60,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
-| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Open as PR #36 |
+| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merge-ready as PR #36 |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
 ## Current PR Worklog
@@ -654,7 +654,7 @@ Outcome:
 
 ### PR #TBD: Admin/governance ADR (Queue Item 10)
 
-Status: In progress.
+Status: Merge-ready under autonomous maintainer decision.
 Branch: `codex/admin-governance-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/36`.
 Claude review request: issue comment `4666434728`.
@@ -704,7 +704,17 @@ Validation:
 
 Review feedback:
 
-- Pending remote CI and bot review.
+- GitHub CI run `27252679337` passed on head
+  `6e4455654c46027cfe0046478e8df5d715e13099`.
+- CodeRabbit completed successfully on head
+  `6e4455654c46027cfe0046478e8df5d715e13099` with no actionable comments
+  and all five pre-merge checks passing.
+- Claude review was explicitly requested in issue comment `4666434728`, but
+  Claude returned `Code review skipped` because the organization's Claude Code
+  overage spend limit was reached. This is an external billing/admin condition,
+  so PR #36 proceeds under autonomous maintainer decision after local,
+  sidecar, CI, and CodeRabbit review.
+- No inline review threads are open.
 
 ## Decision Log
 
@@ -784,6 +794,7 @@ Review feedback:
 | 2026-06-10 04:08 | Draft admin/governance ADR | ADR 0004 accepts Safe-rooted roles, target-scoped selector grants, signer lifecycle controls, domain-specific pause, and surplus-only emergency controls |
 | 2026-06-10 04:13 | Validate admin/governance ADR locally | Heading, traceability, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 04:14 | Open PR #36 | Admin/governance ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666434728` |
+| 2026-06-10 04:20 | Mark PR #36 merge-ready | CI passed, CodeRabbit reported no actionable comments, no inline review threads are open, and Claude is unavailable due to organization overage limits |
 
 ## Resume Instructions
 
