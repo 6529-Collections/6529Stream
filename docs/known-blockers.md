@@ -36,13 +36,13 @@ contributors who start from the README.
   explicit through `StreamAdmins.emergencyRecipient()`. Signer lifecycle
   operations, deployment admin ceremony, and richer collection-admin roles
   remain open.
-- VRF and arRNG randomizer adapters now record request lifecycle state and
-  validate request ID, the core token-to-collection binding, provider, and
-  collection randomizer epoch before writing a token hash. Remaining randomness
-  blockers include deterministic post-processing retry, callback-after-burn
-  policy, richer metadata state exposure, provider configuration runbooks, and
-  full handling of weak helper randomness beyond disabling `RandomizerNXT` as a
-  production randomizer.
+- VRF and arRNG randomizer adapters now record request lifecycle state, expose
+  request and token-level lifecycle views, and validate request ID, the core
+  token-to-collection binding, provider, and collection randomizer epoch before
+  writing a token hash. Remaining randomness blockers include deterministic
+  post-processing retry, callback-after-burn policy, richer metadata state
+  exposure, provider configuration runbooks, and full handling of weak helper
+  randomness beyond disabling `RandomizerNXT` as a production randomizer.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,

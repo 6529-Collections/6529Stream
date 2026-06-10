@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-callback-hardening` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/64` |
+| Active PR branch | `codex/randomizer-lifecycle-views` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/65` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 14:18 UTC` |
+| Last updated | `2026-06-10 14:47 UTC` |
 
 ## Packaging Notes
 
@@ -76,7 +76,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 21 | Bound remaining emergency withdrawals | Gate C | Finish the remaining P0-PAY-007/P0-PAY-008 emergency-withdrawal surface for `StreamMinter` and `NextGenRandomizerRNG`, with tests, Slither traceability, and docs updates | Merged in PR #62 |
 | 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
 | 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
-| 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | PR #65 open; addressing CodeRabbit follow-up |
+| 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
+| 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | PR #66 open; CodeRabbit stale-coverage follow-up locally validated |
 
 ## Current PR Worklog
 
@@ -1964,8 +1965,7 @@ Validation so far:
 
 ### PR candidate: Harden randomizer requests and callbacks (Queue Item 24)
 
-Status: PR #65 open; CodeRabbit follow-up addressed and validated locally before
-push.
+Status: Merged.
 Branch: `codex/randomizer-callback-hardening`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/65`.
 Related issues:
@@ -2052,6 +2052,88 @@ Local implementation notes:
   low-priority clarity comments plus explicit coverage for arRNG provider
   request ID `0`. The follow-up patch adds the comments and zero-request-ID
   regression coverage before pushing a new head.
+- Follow-up commit `d6b3788bbe820a1dcb4cd8b091110eb067d9ba24` passed CI run
+  `27282886446`; CodeRabbit comment `4671241284` verified the follow-up and
+  marked it LGTM.
+- Merged via squash as `9bf44c1e292e891f01fa4a7bc27373032e9beaaf`.
+- Issue #37 closed as completed by the merge. Issue #39 was closed as completed
+  after evidence comment `4671273910`.
+
+### PR candidate: Complete randomizer lifecycle views (Queue Item 25)
+
+Status: PR #66 open; CodeRabbit stale-coverage follow-up locally validated
+and ready to push.
+Branch: `codex/randomizer-lifecycle-views`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/66`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/38`
+
+Goal:
+
+- Make lifecycle lookup by token ID first-class for contributors, indexers, and
+  runbooks.
+- Preserve the current request-ID views while adding token-level request and
+  state views.
+- Prove unknown, pending, fulfilled, and stale token-level lookup behavior.
+- Update roadmap, status docs, tests, and run state.
+
+Candidate files:
+
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `test/README.md`
+- `docs/known-blockers.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation completed at `2026-06-10 14:34 UTC`:
+
+- `forge test --match-contract StreamRandomizerLifecycleTest -vvv`
+  passed: 11 tests, 0 failed.
+- `make check` passed: 153 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts/check.ps1` passed:
+  153 tests, 0 failed.
+- `forge fmt --check smart-contracts/StreamRandomizerLifecycle.sol test/StreamRandomizerLifecycle.t.sol`
+  passed.
+- `git diff --check` passed.
+- Heading and traceability greps passed for roadmap, run state, test README,
+  blocker docs, lifecycle contract, and lifecycle tests.
+- Slither baseline read passed for comparison purposes:
+  `total=686`, `high=9`, `medium=29`, `weak-prng=2`; the token-level
+  view helpers did not expand the accepted baseline after parameter naming was
+  cleaned up. Slither still exits nonzero because known baseline findings are
+  present.
+
+Review requests:
+
+- Claude requested in issue comment `4671390449`; expected to skip while the org
+  overage limit remains in effect.
+- CodeRabbit latest-head review requested in issue comment `4671390698`.
+- Claude manual review was triggered in issue comment `4671415027` and skipped
+  in review `4468903992` because the organization reached its monthly code
+  review spending cap.
+- CodeRabbit reported LGTM in issue comment `4671424817` and suggested
+  low-priority token-level `Stale` coverage. The follow-up patch adds that
+  coverage directly to `testMarkedStaleRequestIsObservableAndCannotFulfill`.
+
+Follow-up validation completed at `2026-06-10 14:47 UTC`:
+
+- `forge test --match-contract StreamRandomizerLifecycleTest -vvv`
+  passed: 11 tests, 0 failed.
+- `make check` passed: 153 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts/check.ps1` passed:
+  153 tests, 0 failed.
+- `forge fmt --check test/StreamRandomizerLifecycle.t.sol` passed.
+- `git diff --check` passed.
+- Traceability grep passed for token-level stale coverage.
+
+Validation targets retained for PR review:
+
+- Focused `StreamRandomizerLifecycleTest`.
+- Full `make check` and Windows `scripts/check.ps1`.
+- Touched-file `forge fmt --check`, `git diff --check`, heading/traceability
+  greps, and Slither delta if code changes affect the analyzed surface.
 
 ## Decision Log
 
@@ -2224,6 +2306,11 @@ Local implementation notes:
 | 2026-06-10 13:55 | Finish local Queue Item 24 validation on pre-review head | Full `make check` and Windows wrapper pass with 151 tests; formatting, whitespace, heading scan, traceability grep, and Slither delta evidence pass; Slither final JSON has 686 findings with unchanged 9 High / 29 Medium totals, two existing `weak-prng` rows, and no randomizer reentrancy delta |
 | 2026-06-10 14:00 | Open PR #65 | Randomizer request lifecycle hardening implementation is published, Claude review requested in issue comment `4671046189`, and CodeRabbit latest-head review requested in issue comment `4671047964` |
 | 2026-06-10 14:15 | Address CodeRabbit PR #65 follow-up | Added lifecycle invariant comments, direct arRNG request precondition commentary, zero request ID regression coverage, and updated roadmap/test/run-state traceability; focused suite and full `make check`/Windows wrapper pass with 152 tests |
+| 2026-06-10 14:24 | Merge PR #65 | Randomizer lifecycle hardening merged as `9bf44c1e292e891f01fa4a7bc27373032e9beaaf`; CI passed, CodeRabbit was green/LGTM, Claude was unavailable due org overage, issue #37 closed completed, and issue #39 was closed with evidence |
+| 2026-06-10 14:25 | Select Queue Item 25 | Next P0 randomness child is `P0-RAND-002`; token-level lifecycle views should be explicit before moving into failed-state/retry/metadata work |
+| 2026-06-10 14:34 | Validate Queue Item 25 | Token-level randomizer lifecycle views are locally green across focused tests, `make check`, Windows wrapper, formatting, diff hygiene, docs traceability, and Slither baseline comparison |
+| 2026-06-10 14:38 | Open PR #66 | Token-level randomizer lifecycle views are published in `https://github.com/6529-Collections/6529Stream/pull/66`; Claude review requested in issue comment `4671390449` and CodeRabbit latest-head review requested in issue comment `4671390698` |
+| 2026-06-10 14:47 | Address CodeRabbit PR #66 follow-up | CodeRabbit reported LGTM in issue comment `4671424817` and suggested token-level `Stale` coverage; follow-up extends the stale request test, updates docs/roadmap traceability, and passes focused tests, `make check`, Windows wrapper, formatting, and diff hygiene |
 
 ## Resume Instructions
 

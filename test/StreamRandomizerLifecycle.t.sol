@@ -66,6 +66,49 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         coordinator.fulfill(vrf, 1, words);
     }
 
+    function testTokenLevelViewsExposeEmptyPendingAndFulfilledState() public {
+        (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
+            _deployVrfRandomizer();
+
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(request.state)
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.None), "empty state");
+        request.provider.assertEq(address(0), "empty provider");
+        uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.None), "empty token");
+
+        _mintToken(deployed);
+
+        request = vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
+        request.providerRequestId.assertEq(1, "request id");
+        request.collectionId.assertEq(COLLECTION_ID, "pending collection");
+        request.tokenId.assertEq(TOKEN_ID, "pending token");
+        uint256(request.state)
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Pending), "pending");
+        uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.Pending), "token pending"
+            );
+
+        uint256[] memory words = _words(111);
+        bytes32 expectedSeed = keccak256(
+            abi.encode(address(vrf), uint256(1), COLLECTION_ID, TOKEN_ID, uint256(2), words)
+        );
+        coordinator.fulfill(vrf, 1, words);
+
+        request = vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(request.state)
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "done");
+        request.derivedSeed.assertEq(expectedSeed, "token seed");
+        (request.fulfilledBlock > 0).assertTrue("fulfilled block");
+        (request.fulfilledTimestamp > 0).assertTrue("fulfilled timestamp");
+        uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "token done"
+            );
+    }
+
     function testVrfUnknownAndEmptyFulfillmentsFailClosed() public {
         (DeployedStream memory deployed, MockVrfCoordinator coordinator, NextGenRandomizerVRF vrf) =
             _deployVrfRandomizer();
@@ -118,6 +161,14 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         vrf.markStaleRequest(1);
         uint256(vrf.randomnessRequestState(1))
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "not stale");
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(request.state)
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "token stale"
+            );
+        uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "view stale");
 
         vm.expectRevert(
             abi.encodeWithSelector(

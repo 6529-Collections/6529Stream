@@ -1099,11 +1099,11 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Issue: [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37).
 - Dependencies: [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [ADR 0005](../docs/adr/0005-randomness.md), ADR 0003, ADR 0004.
-- Status: In Progress. VRF and arRNG adapters now have request lifecycle
-  storage, provider/epoch validation, duplicate/stale rejection, observable
-  stale marking, seed derivation that includes provider/request/collection/token
-  epoch/output, and target-state tests. Remaining work is tracked under the
-  child tickets below.
+- Status: Parent issue completed in PR #65, with child follow-ups tracked below.
+  VRF and arRNG adapters now have request lifecycle storage, provider/epoch
+  validation, duplicate/stale rejection, observable stale marking, seed
+  derivation that includes provider/request/collection/token epoch/output, and
+  target-state tests.
 
 Problem:
 
@@ -1160,8 +1160,8 @@ Required code changes:
   failures, not for changing random output.
 - Do not allow user-significant inputs after randomness request.
 - Expose request lifecycle views by request ID and token ID. Implemented for
-  request records, request state, request-to-token, token-to-request, and
-  token-to-collection adapter views.
+  request records, request state, token-level request/state views,
+  request-to-token, token-to-request, and token-to-collection adapter views.
 - Emit request, fulfillment, stale, failure, retry, provider-update, and
   epoch-update events.
 - Remove, isolate, or disable weak helper randomness for production deployment
@@ -1174,9 +1174,11 @@ Required code changes:
 Child tickets:
 
 - [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38):
-  Add request lifecycle storage and views.
+  Add request lifecycle storage and views. Implemented for request and token
+  lookups.
 - [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39):
   Add callback validation for request, token, collection, and randomizer epoch.
+  Closed as completed after PR #65.
 - [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40):
   Add pending, fulfilled, stale, and failed post-processing states.
 - [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41):
@@ -1934,7 +1936,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | In Progress: owner/root can recover function/global role management if the registrar is lost, but signer manager, signer rotation, and signer lifecycle tests remain missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
 | Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Passing: guardians can pause but not unpause, unpause admins can unpause but not pause, owner/root can manage pause roles, `DropExecution`, `Mint`, `AuctionBid`, `AuctionSettlement`, `MetadataMutation`, and `RandomnessRequest` pauses block their intended paths, ordinary user credit withdrawals remain available during operational pauses, and the signer-compromise flow can pause drop execution, invalidate/cancel an exposed drop, unpause, and still reject the stale payload | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
 | Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol`, `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol` | Passing for current first-party surfaces: `StreamAdmins.emergencyRecipient()` is the explicit surplus recipient, `StreamMinter`, `StreamAuctions`, and `StreamCuratorsPool` use it for positive surplus withdrawal, `NextGenRandomizerRNG` exposes zero emergency-withdrawable reserve, unauthorized emergency withdrawals revert without transfer, and payment/reserve tests cover poster, bidder, curator, active-bid escrow, and randomizer reserve boundaries. Dedicated signer-manager and deployment emergency runbooks remain future work | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
-| Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF and arRNG request records, request state, request-to-token, token-to-request, token-to-collection, requested block/time, fulfilled block/time, and derived seed storage | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
+| Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF and arRNG request records, request state, request-to-token, token-to-request, token-to-collection, first-class token-level request/state views, empty token lookup, token-level stale lookup, requested block/time, fulfilled block/time, and derived seed storage | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |
 | Randomizer callback validation | Valid fulfillment accepts only the stored request ID, token, collection, provider, and randomizer epoch | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF/arRNG valid fulfillment, unknown request, zero arRNG request ID, empty output, duplicate fulfillment, core token-to-collection mismatch, live provider/epoch validation, and reentrant arRNG request-submission rejection | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39) | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer or stale-epoch fulfillment rejected | `test/StreamRandomizerLifecycle.t.sol` | Passing for replaced-provider stale epoch rejection and admin-marked stale requests; bulk stale marking or pending-migration policy remains future work | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-003`](https://github.com/6529-Collections/6529Stream/issues/39), [`P0-RAND-005`](https://github.com/6529-Collections/6529Stream/issues/41) | Gate C | TBD |
 | Randomness lifecycle states | Pending, fulfilled, stale, and failed post-processing states drive metadata and views | `test/StreamRandomizerLifecycle.t.sol` | In Progress: pending, fulfilled, and stale states are implemented and observable; failed post-processing state, retry, and metadata integration remain missing | [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
