@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-freeze-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/44` |
+| Active PR branch | `codex/upgrade-redeployment-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/52` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 05:25 UTC` |
+| Last updated | `2026-06-10 05:41 UTC` |
 
 ## Packaging Notes
 
@@ -62,7 +62,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merged in PR #36 |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Merged in PR #44 |
-| 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merge-ready in PR #52 |
+| 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merged in PR #52 |
+| 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | In progress on `codex/upgrade-redeployment-adr` |
 
 ## Current PR Worklog
 
@@ -821,9 +822,7 @@ Outcome:
 
 ### PR #52: Metadata/freeze ADR (Queue Item 12)
 
-Status: Merge-ready; CI is green, CodeRabbit is green with no actionable
-comments on the latest head, and Claude is unavailable due to organization
-overage limits.
+Status: Merged.
 Branch: `codex/metadata-freeze-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/52`.
 Claude review request: issue comment `4666753358`.
@@ -904,6 +903,75 @@ Review feedback:
 - Claude review was explicitly requested in issue comment `4666753358` and was
   unavailable because the organization's Claude Code overage spend limit was
   reached.
+
+Outcome:
+
+- Merged as PR #52 on `2026-06-10 05:32 UTC`.
+- Squash merge commit:
+  `623e447baa9df90f3add1ddf4f2ec1c4ef09a869`.
+- Latest head before merge:
+  `4e8cab6d488b0602f6d497090d8106b5eb3e8dfb`.
+- GitHub CI passed on the final head.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review was unavailable because the organization's Claude Code overage
+  spend limit was reached; the explicit request is recorded above.
+
+### PR TBD: Upgrade/redeployment ADR (Queue Item 13)
+
+Status: Local validation passed; ready to open PR.
+Branch: `codex/upgrade-redeployment-adr`.
+Pull request: TBD.
+
+Goal:
+
+- Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, manifest,
+  release, deprecation, emergency redeployment, proxy, storage-layout, or
+  migration work.
+- Decide public-beta immutable redeployment policy, proxy out-of-scope status,
+  deployment lifecycle states, manifest requirements, state handoff boundaries,
+  breaking-change rules, emergency redeployment requirements, and release
+  artifact evidence.
+- Link the ADR from the roadmap, ADR index, and test matrix.
+
+Created GitHub issues:
+
+- [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53):
+  accept upgrade and redeployment strategy.
+
+Candidate files:
+
+- `docs/adr/0007-upgrade-redeployment.md`
+- `docs/adr/0006-metadata-freeze.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Markdown heading scan passed for `docs/adr/0006-metadata-freeze.md`,
+  `docs/adr/0007-upgrade-redeployment.md`, `docs/adr/README.md`,
+  `ops/ROADMAP.md`, and `ops/AUTONOMOUS_RUN.md`.
+- Traceability grep passed for `P2-UPGRADE-ADR`, issue #53,
+  `0007-upgrade-redeployment`, immutable redeployments, proxy policy,
+  `verifyingContract`, deployment manifests, emergency redeployment, Gate B2,
+  and the deployment rehearsal test-matrix row.
+- ASCII scan passed for touched docs and ops files.
+- `git diff --check` passed.
+- Sidecar read-only upgrade/redeployment review completed; findings about
+  immutable redeployment posture, no proxy public-beta policy, manifest
+  contents, versioning, breaking-change definitions, ADR 0001-0006
+  consistency, Gate E/F/G evidence, and tests were folded into ADR 0007.
+- Sidecar read-only roadmap/state review completed; stale PR #52 state was
+  updated, issue #53 was linked, and ADR 0006 now links ADR 0007.
+- `make check` passed with 17 tests passing and the existing Solidity warning
+  baseline still present.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
+  tests passing and the existing Solidity warning baseline still present.
+
+Review feedback:
+
+- Pending PR review.
 
 ## Decision Log
 
@@ -999,7 +1067,11 @@ Review feedback:
 | 2026-06-10 05:07 | Open PR #52 | Metadata/freeze ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666753358` |
 | 2026-06-10 05:14 | Address CodeRabbit PR #52 style nitpick | Varied ADR rollout verbs and replaced `very careful` with `rigorous`; whitespace, targeted grep, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 05:18 | Address CodeRabbit PR #52 clarity review | ADR now pins freeze-eligible randomness to fulfilled live tokens, defines manifest hash encoding, clarifies burn/ERC-4906 behavior, chooses audit-record post-burn callbacks, delegates concrete size limits to P1-META-006, clarifies generated HTML proofing, and marks Gate B2 in progress |
-| 2026-06-10 05:25 | Mark PR #52 merge-ready | CI passed, CodeRabbit reported no actionable comments on final head `8058c20258c064356c3b7c3f102608f17c501978`, and Claude is unavailable due to organization overage limits |
+| 2026-06-10 05:25 | Mark PR #52 merge-ready | CI passed, CodeRabbit reported no actionable comments on final head `4e8cab6d488b0602f6d497090d8106b5eb3e8dfb`, and Claude is unavailable due to organization overage limits |
+| 2026-06-10 05:32 | Merge PR #52 | Final head was CI-clean, CodeRabbit-clean, and Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 05:34 | Create upgrade/redeployment ADR issue | Issue #53 anchors `P2-UPGRADE-ADR` before Gate B2 can close |
+| 2026-06-10 05:36 | Start upgrade/redeployment ADR PR | Gate B2 needs ADR 0007 accepted before deployment, release, manifest, deprecation, emergency redeployment, or proxy policy work |
+| 2026-06-10 05:41 | Validate upgrade/redeployment ADR locally | Heading, traceability, ASCII, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
 
 ## Resume Instructions
 
