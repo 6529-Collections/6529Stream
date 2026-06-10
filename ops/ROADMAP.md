@@ -29,14 +29,15 @@ order.
   current custody models, P0-ADMIN-001 target-scoped function-admin checks
   cover the current protected-function surface, and P0-ADMIN-002
   domain-scoped pause/emergency-recipient controls now have target-state
-  coverage. P0-RAND-001 through P0-RAND-007 randomizer lifecycle, callback,
-  migration, failed-state, retry, and raw-output-hash work now have
-  target-state coverage for VRF and arRNG adapters, and P0-RAND-008 removed
-  the concrete `XRandoms` weak helper from production source. P0-INIT-001 fixed
-  the remaining first-party production `uninitialized-local` rows. P0-META-001
-  dependency script segment-safe encoding now has typed chunk/content hash
-  coverage, and P0-CORE-001 removed dead always-zero public/allowlist
-  mint-accounting state.
+  coverage. P0-ADMIN-003 signer-manager controls now separate drop-signing
+  identities from signer-lifecycle authority. P0-RAND-001 through P0-RAND-007
+  randomizer lifecycle, callback, migration, failed-state, retry, and
+  raw-output-hash work now have target-state coverage for VRF and arRNG
+  adapters, and P0-RAND-008 removed the concrete `XRandoms` weak helper from
+  production source. P0-INIT-001 fixed the remaining first-party production
+  `uninitialized-local` rows. P0-META-001 dependency script segment-safe
+  encoding now has typed chunk/content hash coverage, and P0-CORE-001 removed
+  dead always-zero public/allowlist mint-accounting state.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -59,7 +60,7 @@ order.
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked high/medium baseline: 693 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked high/medium baseline: 721 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -395,10 +396,11 @@ This is the recommended first batch of issues.
 17. [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) / P0/CODE+TEST+DOCS: Formalize auction custody and settlement.
 18. [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) / P0/CODE+TEST+DOCS: Fix admin selector mismatch.
 19. [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) / P0/CODE+TEST+DOCS+OPS: Define pause and emergency controls.
-20. [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) / P0/CODE+TEST+DOCS: Harden randomizer callbacks.
-21. `P1/TEST`: Add first invariant suite.
-22. `P1/DOCS`: Add protocol spec and threat model.
-23. `P2/OPS`: Add deployment scripts and manifest schema.
+20. [`P0-ADMIN-003`](https://github.com/6529-Collections/6529Stream/issues/79) / P0/CODE+TEST+DOCS: Implement signer lifecycle manager.
+21. [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) / P0/CODE+TEST+DOCS: Harden randomizer callbacks.
+22. `P1/TEST`: Add first invariant suite.
+23. `P1/DOCS`: Add protocol spec and threat model.
+24. `P2/OPS`: Add deployment scripts and manifest schema.
 
 ## 5. Best-Practice Checklist
 
@@ -957,7 +959,8 @@ Acceptance criteria:
 - Status: Implemented for target-scoped function-admin checks, selector mismatch
   fixes, global-admin bypass, owner/root role-management recovery, revocation,
   deferred collection-admin lookup behavior, and negative permission tests.
-  Pause domains, signer lifecycle operations, deployment ceremony, and broader
+  Pause domains are implemented under P0-ADMIN-002; signer lifecycle manager
+  controls are implemented under P0-ADMIN-003. Deployment ceremony and broader
   production role operations remain separate roadmap work.
 
 Problem:
@@ -1112,6 +1115,81 @@ Acceptance criteria:
   implemented, it must be temporary, evented, and cannot erase credits.
 - Emergency controls are bounded by `emergencyWithdrawable()` or equivalent
   surplus views and route surplus to the explicit emergency recipient.
+
+### P0-ADMIN-003: Implement Signer Lifecycle Manager
+
+- Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
+- Blocks: Gate B1/Gate C.
+- Issue: [`P0-ADMIN-003`](https://github.com/6529-Collections/6529Stream/issues/79).
+- Dependencies: [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), ADR 0001.
+- Status: Implemented for a single active drop signer model with
+  root-managed signer managers, owner-approved signer-lifecycle targets, exact
+  signer-lifecycle function grants, signer rotation, epoch invalidation, and
+  per-drop cancellation tests.
+  Multi-signer sets, production signing runbooks, and deployment ceremony
+  manifests remain future release work.
+
+Problem:
+
+- Drop-signing identities should authorize drops, not manage protocol roles.
+- ADR 0004 requires explicit signer-manager authority, signer rotation,
+  epoch invalidation, per-drop cancellation, and observable events.
+
+Historical behavior before P0-ADMIN-003:
+
+- `StreamAdmins` allowed the constructor `tdhSigner` to register global and
+  function admins through the same registrar path as the root owner.
+- `StreamAdmins` also seeded that signer as a global admin by default.
+- `StreamDrops` had signer rotation, epoch increment, and cancellation
+  functions, but signer-manager authority and direct signer-lifecycle tests
+  were incomplete.
+
+Intended behavior:
+
+- The governance root can grant and revoke signer managers.
+- Signer managers can grant or revoke only the exact `StreamDrops`
+  signer-lifecycle selectors on owner-approved signer-lifecycle targets:
+  `updateTDHsigner`, `incrementSignerEpoch`, and `cancelDrop`.
+- Drop signers are not operational admins merely because they can sign drops.
+- Signer rotation increments the epoch, invalidates stale signed payloads, and
+  permits fresh payloads from the new signer.
+
+Required code changes:
+
+- Add root-managed signer-manager storage and events to `StreamAdmins`.
+- Add owner-managed signer-lifecycle target allowlisting.
+- Remove drop-signer-based role-management authority from `StreamAdmins`.
+- Add restricted signer-lifecycle function-admin grant helpers.
+- Keep owner/root recovery for broader role management.
+
+Required tests:
+
+- Owner can grant and revoke signer managers.
+- Owner can grant and revoke signer-lifecycle targets.
+- Signer managers can grant exact signer-lifecycle selectors and cannot grant
+  broad function-admin, non-signer selectors, or unapproved targets.
+- Revoked signer managers cannot grant signer-lifecycle selectors.
+- Drop signer cannot manage global or function-admin roles by default.
+- Signer rotation emits epoch/signer events, invalidates stale payloads, and
+  accepts a fresh payload from the new signer.
+- Per-drop cancellation works before execution and fails after consumption.
+- Unauthorized signer-lifecycle calls fail.
+
+Required docs:
+
+- Admin/governance ADR.
+- Test matrix.
+- Status and known blockers.
+- Signer lifecycle runbook in a later deployment/ops PR.
+
+Acceptance criteria:
+
+- Drop-signing identities are not operational admins by default.
+- Signer-manager authority is root-managed, evented, and restricted to
+  signer-lifecycle grants on approved targets.
+- Signer rotation and cancellation behavior are covered by direct tests.
+- Roadmap/status docs distinguish implemented signer lifecycle controls from
+  remaining deployment ceremony and signing-runbook work.
 
 ### P0-RAND-001: Harden Randomizer Requests And Callbacks
 
@@ -1965,7 +2043,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: high/medium rows triaged, not accepted as a CI gate.
-- Result: 693 findings, including 4 High and 19 Medium.
+- Result: 721 findings, including 4 High and 19 Medium.
 
 Impact summary:
 
@@ -1973,8 +2051,8 @@ Impact summary:
 | --- | ---: |
 | High | 4 |
 | Medium | 19 |
-| Low | 82 |
-| Informational | 577 |
+| Low | 92 |
+| Informational | 595 |
 | Optimization | 11 |
 
 High/medium detector summary:
@@ -2014,7 +2092,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol`, `test/StreamCoreAdminCharacterization.t.sol` | Passing: P0-ADMIN-001 fixes `setCollectionData`, `updateCollectionInfo`, and `setMultipleMerkleRoots` selector guards and covers wrong-selector regressions | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Passing: function-admin grants are keyed by account, target, and selector; same selector on another target does not authorize; revocation and global-admin bypass are covered | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface behavior is explicit | `test/StreamAdmins.t.sol`, later `test/StreamCollectionAdmins.t.sol` | Passing for deferred support: `StreamAdmins.retrieveCollectionAdmin(...)` returns false and no collection-admin mutation path is implemented; positive collection-admin roles remain future work | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
-| Signer lifecycle | Signer add, remove, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamSignerAdmin.t.sol` | In Progress: owner/root can recover function/global role management if the registrar is lost, but signer manager, signer rotation, and signer lifecycle tests remain missing | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate B1/Gate C | TBD |
+| Signer lifecycle | Signer manager grants, rotation, epoch increment, stale epoch rejection, and per-drop cancellation follow ADR 0004 | `test/StreamAdmins.t.sol`, `test/StreamAdminSelectors.t.sol`, `test/StreamSignerAdmin.t.sol`, `test/StreamDropsEIP712.t.sol` | Passing for current single-active-signer model: drop signers are not global or role-management admins by default, owner/root can grant and revoke signer managers and signer-lifecycle targets, signer managers can grant only exact `StreamDrops` signer-lifecycle selectors on approved targets, revoked signer managers cannot grant, signer rotation emits events and invalidates stale old-signer payloads, fresh new-signer payloads pass, per-drop cancellation works before execution and fails after consumption, and unauthorized lifecycle calls fail. Multi-signer sets and production signing runbooks remain future work. | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33), [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34), [`P0-ADMIN-003`](https://github.com/6529-Collections/6529Stream/issues/79) | Gate B1/Gate C | TBD |
 | Pause controls | Domain-specific pause blocks only the intended mint, bid, settlement, metadata, randomness-request, or drop-execution path | `test/StreamPauseControls.t.sol` | Passing: guardians can pause but not unpause, unpause admins can unpause but not pause, owner/root can manage pause roles, `DropExecution`, `Mint`, `AuctionBid`, `AuctionSettlement`, `MetadataMutation`, and `RandomnessRequest` pauses block their intended paths, ordinary user credit withdrawals remain available during operational pauses, and the signer-compromise flow can pause drop execution, invalidate/cancel an exposed drop, unpause, and still reject the stale payload | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35) | Gate C | TBD |
 | Admin emergency controls | Emergency admin can withdraw only surplus and cannot alter credits, reserves, custody, or consumed drop IDs | `test/StreamEmergencyWithdraw.t.sol`, `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamPaymentsInvariant.t.sol` | Passing for current first-party surfaces: `StreamAdmins.emergencyRecipient()` is the explicit surplus recipient, `StreamMinter`, `StreamAuctions`, and `StreamCuratorsPool` use it for positive surplus withdrawal, `NextGenRandomizerRNG` exposes zero emergency-withdrawable reserve, unauthorized emergency withdrawals revert without transfer, and payment/reserve tests cover poster, bidder, curator, active-bid escrow, and randomizer reserve boundaries. Sequence fuzzing now covers emergency controls against mixed payment operations. Dedicated signer-manager and deployment emergency runbooks remain future work | [`P0-ADMIN-002`](https://github.com/6529-Collections/6529Stream/issues/35), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness request lifecycle | Request records expose token, collection, provider, request ID, epoch, state, request time, and fulfillment time | `test/StreamRandomizerLifecycle.t.sol` | Passing for VRF and arRNG request records, request state, request-to-token, token-to-request, token-to-collection, first-class token-level request/state views, empty token lookup, token-level stale lookup, requested block/time, fulfilled block/time, and derived seed storage | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37), [`P0-RAND-002`](https://github.com/6529-Collections/6529Stream/issues/38) | Gate C | TBD |

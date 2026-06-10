@@ -38,6 +38,9 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
             signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
         );
         auctions = new MockStreamAuctions();
+        admins.registerFunctionAdmin(
+            address(this), address(drops), drops.updateAuctionContract.selector, true
+        );
         drops.updateAuctionContract(address(auctions));
     }
 
@@ -174,6 +177,9 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
         StreamAdmins admins = new StreamAdmins(address(this));
         StreamDrops drops = new StreamDrops(
             signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
+        );
+        admins.registerFunctionAdmin(
+            address(this), address(drops), drops.updateAuctionContract.selector, true
         );
 
         (bool success,) = address(drops)

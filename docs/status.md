@@ -8,15 +8,16 @@ The current Gate A smoke baseline proves:
 - `forge build` runs against Solidity `0.8.19`.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
-  EIP-712 and ERC-1271 drop authorization, auction custody and payment credits,
-  fixed-price pull-payment credits, curator reward claim credits, and
-  randomness lifecycle behavior. Current emergency-withdrawal target-state
-  tests also cover explicit emergency recipients, `StreamMinter` surplus
-  withdrawal, `NextGenRandomizerRNG` reserve boundaries, dependency-script
-  segment-safe content hashing, explicit local-initialization regressions,
-  vendored OpenZeppelin utility-library provenance/behavior regressions, and
-  retained airdrop mint-accounting behavior after removal of dead public/allowlist
-  counters.
+  signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271
+  drop authorization,
+  auction custody and payment credits, fixed-price pull-payment credits,
+  curator reward claim credits, and randomness lifecycle behavior. Current
+  emergency-withdrawal target-state tests also cover explicit emergency
+  recipients, `StreamMinter` surplus withdrawal, `NextGenRandomizerRNG` reserve
+  boundaries, dependency-script segment-safe content hashing, explicit
+  local-initialization regressions, vendored OpenZeppelin utility-library
+  provenance/behavior regressions, and retained airdrop mint-accounting
+  behavior after removal of dead public/allowlist counters.
 - Payment sequence fuzzing now covers mixed fixed-price mint, auction bid,
   auction settlement, curator claim, withdrawal, emergency withdrawal,
   randomizer reserve, and forced-balance operations, proving the current local
@@ -42,8 +43,9 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 callback-after-burn policy, canonical randomizer lifecycle
 ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, signer lifecycle operations, dependency version/freeze
-manifest work, deployment discipline, and the broader P0/P1 test suite.
+high/medium baseline, signer/deployment ceremony runbooks, dependency
+version/freeze manifest work, deployment discipline, and the broader P0/P1 test
+suite.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.

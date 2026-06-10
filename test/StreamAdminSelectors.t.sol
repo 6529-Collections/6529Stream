@@ -149,32 +149,40 @@ contract StreamAdminSelectorsTest is CharacterizationTestBase {
         functionAdminSuccess.assertTrue("owner could not grant function admin");
     }
 
-    function testSignerRegistrarPowerIsIndependentFromGlobalAdminBypass() public {
+    function testDropSignerCannotManageRolesByDefault() public {
         address signer = address(0xBEEF);
         StreamAdmins admins = new StreamAdmins(signer);
         DependencyRegistry registry = new DependencyRegistry(address(admins));
 
-        admins.registerAdmin(signer, false);
-        admins.retrieveGlobalAdmin(signer).assertFalse("signer global admin still enabled");
+        admins.retrieveGlobalAdmin(signer).assertFalse("signer global admin enabled");
 
         vm.prank(signer);
-        (bool revokedGlobalBypassSuccess,) =
+        (bool signerGlobalGrantSuccess,) = address(admins)
+            .call(abi.encodeWithSelector(admins.registerAdmin.selector, signer, true));
+        signerGlobalGrantSuccess.assertFalse("drop signer registered global admin");
+
+        vm.prank(signer);
+        (bool signerFunctionGrantSuccess,) = address(admins)
+            .call(
+                abi.encodeWithSelector(
+                    admins.registerFunctionAdmin.selector,
+                    signer,
+                    address(registry),
+                    registry.addDependency.selector,
+                    true
+                )
+            );
+        signerFunctionGrantSuccess.assertFalse("drop signer registered function admin");
+
+        vm.prank(signer);
+        (bool signerOperationalSuccess,) =
             address(registry).call(_addDependencyCall(bytes32("no-bypass")));
-        revokedGlobalBypassSuccess.assertFalse("revoked signer global bypass still authorized");
-
-        vm.prank(signer);
-        admins.registerFunctionAdmin(
-            signer, address(registry), registry.addDependency.selector, true
-        );
-
-        vm.prank(signer);
-        (bool explicitFunctionGrantSuccess,) =
-            address(registry).call(_addDependencyCall(bytes32("function-grant")));
-        explicitFunctionGrantSuccess.assertTrue("signer registrar could not grant target role");
+        signerOperationalSuccess.assertFalse("drop signer was operational admin");
     }
 
     function _deployCore() private returns (StreamAdmins admins, StreamCore core) {
         admins = new StreamAdmins(address(this));
+        admins.registerAdmin(address(this), true);
         DependencyRegistry registry = new DependencyRegistry(address(admins));
         core = new StreamCore("6529 Stream", "STREAM", address(admins), address(registry));
     }

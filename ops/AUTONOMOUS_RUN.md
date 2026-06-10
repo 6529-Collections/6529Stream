@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/add-payment-ledger-view-aliases` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/77` |
+| Active PR branch | `codex/add-signer-lifecycle-manager` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/78` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 21:21 UTC` |
+| Last updated | `2026-06-10 21:53 UTC` |
 
 ## Packaging Notes
 
@@ -90,7 +90,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 33 | Resolve first-party uninitialized locals | Gate C | Implement P0-INIT-001 by explicitly initializing remaining production locals, adding targeted regression tests, and updating Slither/roadmap traceability | Merged in PR #75 |
 | 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | Merged in PR #76 |
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
-| 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Open in PR #78 |
+| 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
+| 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | In progress on `codex/add-signer-lifecycle-manager` |
 
 ## Current PR Worklog
 
@@ -3056,7 +3057,7 @@ Outcome:
 
 ### PR `#78`: Add payment ledger view aliases (Queue Item 36)
 
-Status: Open; applying CodeRabbit nitpick after CI success.
+Status: Merged.
 Branch: `codex/add-payment-ledger-view-aliases`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/78`.
 Related issue:
@@ -3127,6 +3128,103 @@ Review requests:
 - CodeRabbit requested in issue comment `4674566512`.
 - CodeRabbit completed with green status and one valid nitpick in review
   `4471658076`; accepted by updating this section header to `PR #78`.
+- Claude remains intentionally skipped per current user instruction; use
+  CodeRabbit unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #78 on `2026-06-10 21:25 UTC`.
+- Merge commit `785f9ebca5c91a18e0cdbe20b35a8b0c955bfb3f`.
+- GitHub CI run `27307238585` passed on the final head.
+- CodeRabbit status was green on the final head; the only review nitpick was
+  fixed by commit `dc8b206`.
+- Issue #26 closed as completed.
+
+### PR TBD: Add signer lifecycle manager (Queue Item 37)
+
+Status: Local implementation and validation complete; ready to open PR.
+Branch: `codex/add-signer-lifecycle-manager`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/79`
+
+Goal:
+
+- Complete the remaining ADR 0004 signer-lifecycle implementation gap by
+  separating drop-signing identities from signer-management authority.
+- Add an explicit signer-manager role and signer-lifecycle target allowlist in
+  `StreamAdmins` that the governance root can grant and revoke.
+- Preserve owner/root recovery while removing the constructor drop signer's
+  implicit role-management authority.
+- Add signer-lifecycle tests for grants, revocation, rotation, stale payload
+  rejection, fresh signer payload success, and per-drop cancellation.
+- Update ADR/status/roadmap/test docs and run-state traceability.
+
+Candidate files:
+
+- `smart-contracts/StreamAdmins.sol`
+- `test/StreamAdmins.t.sol`
+- `test/StreamAdminSelectors.t.sol`
+- `test/StreamSignerAdmin.t.sol`
+- `docs/adr/0004-admin-governance.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added root-managed signer managers to `StreamAdmins` through
+  `registerSignerManager`, owner-approved signer-lifecycle targets through
+  `registerSignerLifecycleTarget`, exact signer-lifecycle selector grants, and
+  batch signer-lifecycle grants.
+- Removed the constructor drop signer's implicit role-management authority; the
+  governance owner/root remains the recovery path for broad role grants.
+- Restricted signer managers to approved targets and the exact `StreamDrops`
+  lifecycle selectors: `updateTDHsigner(address)`, `incrementSignerEpoch()`,
+  and `cancelDrop(bytes32)`.
+- Added signer-manager event/test coverage for grant, revoke, disallowed broad
+  role management, and disallowed non-signer selector grants.
+- Added `StreamSignerAdmin.t.sol` coverage for signer-manager grants, signer
+  rotation invalidating stale payloads, fresh new-signer payload execution,
+  per-drop cancellation before execution, cancellation failure after
+  consumption, and unauthorized lifecycle calls.
+- Converted legacy test setup assumptions exposed by the constructor change into
+  explicit selector grants, keeping the production contract strict while
+  preserving the old tests' intended assertions.
+- Updated ADR 0004, roadmap/status/blocker docs, test README, and Slither
+  baseline traceability.
+
+Validation so far:
+
+- Focused admin/signer/drop/pause coverage passed:
+  `forge test --match-contract "Stream(Admins|AdminSelectors|SignerAdmin|DropsEIP712|PauseControls)Test" -vvv`
+  with 59 tests passing.
+- Additional focused regression suites passed while migrating explicit test
+  grants: `StreamCuratorsPoolTest`,
+  `Stream(CoreAdminCharacterization|RandomizerRetry)Test`, and
+  `Stream(EmergencyWithdraw|DropsCharacterization)Test`.
+- Full local gate passed: `make check` with 197 tests passing.
+- Windows contributor wrapper passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 197 tests
+  passing.
+- Formatting check passed for all touched Solidity/test files:
+  `forge fmt --check ...`.
+- Whitespace check passed: `git diff --check`.
+- Traceability grep passed for `P0-ADMIN-003`, signer manager APIs, and
+  `StreamSignerAdmin`.
+- Slither ran with pinned toolchain and expected non-zero baseline exit:
+  721 total findings; High 4, Medium 19, Low 92, Informational 595,
+  Optimization 11. High/medium counts are unchanged; `arbitrary-send-eth`,
+  `reentrancy-eth`, `encode-packed-collision`, `weak-prng`, and
+  `uninitialized-state` remain at zero current findings.
+
+Review requests:
+
+- Pending PR open.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3372,6 +3470,9 @@ Review requests:
 | 2026-06-10 21:02 | Select Queue Item 36 | The remaining P0-PAY-002 view-surface issue can be closed conservatively by exposing ADR 0003 local-ledger aliases and asserting them in the bounded payment invariant, without introducing a riskier shared storage abstraction |
 | 2026-06-10 21:12 | Open PR #78 and request CodeRabbit | Payment ledger view aliases published at `https://github.com/6529-Collections/6529Stream/pull/78`; CodeRabbit review requested in issue comment `4674566512`, and Claude remains skipped per current user instruction |
 | 2026-06-10 21:21 | Apply PR #78 CodeRabbit nitpick | CodeRabbit status was green and CI run `27306718755` passed; the only review note was to replace the run-state section header's `PR TBD` placeholder with concrete PR `#78` |
+| 2026-06-10 21:25 | Merge PR #78 | Payment ledger view aliases merged as `785f9ebca5c91a18e0cdbe20b35a8b0c955bfb3f`; CI and CodeRabbit were green, the visible review nitpick was fixed, and issue #26 closed completed |
+| 2026-06-10 21:27 | Create issue #79 and select Queue Item 37 | The remaining signer-lifecycle test-matrix row is `In Progress`; a focused P0-ADMIN-003 issue lets the next PR separate drop-signing identity from signer-management authority without bundling deployment ceremony work |
+| 2026-06-10 21:53 | Finish local Queue Item 37 validation | Signer-manager implementation with owner-approved lifecycle targets, focused 59-test admin/drop coverage, full 197-test `make check`, Windows wrapper, formatting, whitespace, traceability grep, and Slither baseline comparison all pass; Slither high/medium counts remain unchanged at 4 High / 19 Medium |
 
 ## Resume Instructions
 

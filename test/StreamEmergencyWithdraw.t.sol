@@ -168,6 +168,10 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
     function _deployMinter() private returns (MinterSetup memory setup) {
         setup.admins = new StreamAdmins(address(this));
         setup.minter = new StreamMinter(CORE, address(setup.admins), STREAM_DROPS);
+        setup.admins
+            .registerFunctionAdmin(
+                address(this), address(setup.minter), setup.minter.emergencyWithdraw.selector, true
+            );
     }
 
     function _deployRandomizer() private returns (RandomizerSetup memory setup) {
@@ -177,6 +181,20 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
         setup.randomizer = new NextGenRandomizerRNG(
             address(setup.core), address(setup.admins), address(setup.controller)
         );
+        setup.admins
+            .registerFunctionAdmin(
+                address(this),
+                address(setup.randomizer),
+                setup.randomizer.emergencyWithdraw.selector,
+                true
+            );
+        setup.admins
+            .registerFunctionAdmin(
+                address(this),
+                address(setup.randomizer),
+                setup.randomizer.updateRNGCost.selector,
+                true
+            );
         setup.core.setRandomizer(1, address(setup.randomizer), 1);
     }
 }

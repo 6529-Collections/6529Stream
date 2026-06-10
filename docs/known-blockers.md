@@ -37,8 +37,9 @@ contributors who start from the README.
   settlement, metadata mutation, and randomness requests, keeps user credit
   withdrawals unpaused by default, and makes emergency withdrawal recipients
   explicit through `StreamAdmins.emergencyRecipient()`. Signer lifecycle
-  operations, deployment admin ceremony, and richer collection-admin roles
-  remain open.
+  authority is now separated from drop-signing identities through root-managed
+  signer managers with exact lifecycle grants on owner-approved drop targets.
+  Deployment admin ceremony and richer collection-admin roles remain open.
 - VRF and arRNG randomizer adapters now record request lifecycle state, expose
   request and token-level lifecycle views, and validate request ID, the core
   token-to-collection binding, provider, and collection randomizer epoch before

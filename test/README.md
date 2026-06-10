@@ -83,6 +83,14 @@ owner/root role management does not make the owner an implicit operational
 admin; unsupported collection-admin lookups return false; and global-admin
 bypass remains explicit.
 
+Signer lifecycle tests in `StreamSignerAdmin.t.sol` cover P0-ADMIN-003:
+drop-signing identities are not operational admins by default, root-managed
+signer managers can grant only exact `StreamDrops` signer-lifecycle selectors
+on owner-approved drop targets, signer rotation increments the epoch and
+invalidates stale payloads, fresh payloads from the new signer work,
+unauthorized lifecycle calls fail, and per-drop cancellation remains
+unavailable after consumption.
+
 Pause and emergency-control tests now include P0-ADMIN-002 target-state
 coverage in `StreamPauseControls.t.sol` and `StreamEmergencyWithdraw.t.sol`:
 pause guardians can pause but cannot unpause, unpause admins can unpause but

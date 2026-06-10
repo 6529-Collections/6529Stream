@@ -407,6 +407,9 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         core = new MockRandomizerCore();
         coordinator = new RetryVrfCoordinator();
         vrf = new NextGenRandomizerVRF(1, address(coordinator), address(core), address(admins));
+        admins.registerFunctionAdmin(
+            address(this), address(vrf), vrf.retryRandomnessPostProcessing.selector, true
+        );
         core.setRandomizer(COLLECTION_ID, address(vrf), 1);
         core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
     }
@@ -419,6 +422,9 @@ contract StreamRandomizerRetryTest is CharacterizationTestBase {
         core = new MockRandomizerCore();
         controller = new RetryArrngController();
         rng = new NextGenRandomizerRNG(address(core), address(admins), address(controller));
+        admins.registerFunctionAdmin(
+            address(this), address(rng), rng.retryRandomnessPostProcessing.selector, true
+        );
         core.setRandomizer(COLLECTION_ID, address(rng), 1);
         core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
     }

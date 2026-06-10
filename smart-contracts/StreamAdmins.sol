@@ -20,6 +20,10 @@ contract StreamAdmins is Ownable {
     bytes32 public constant PAUSE_DOMAIN_AUCTION_SETTLEMENT = StreamPauseDomains.AUCTION_SETTLEMENT;
     bytes32 public constant PAUSE_DOMAIN_METADATA_MUTATION = StreamPauseDomains.METADATA_MUTATION;
     bytes32 public constant PAUSE_DOMAIN_RANDOMNESS_REQUEST = StreamPauseDomains.RANDOMNESS_REQUEST;
+    bytes4 public constant DROP_SIGNER_UPDATE_SELECTOR =
+        bytes4(keccak256("updateTDHsigner(address)"));
+    bytes4 public constant DROP_SIGNER_EPOCH_SELECTOR = bytes4(keccak256("incrementSignerEpoch()"));
+    bytes4 public constant DROP_CANCEL_SELECTOR = bytes4(keccak256("cancelDrop(bytes32)"));
 
     // sets global admins
     mapping(address => bool) public adminPermissions;
@@ -30,6 +34,8 @@ contract StreamAdmins is Ownable {
     // sets emergency pause authorities
     mapping(address => bool) public pauseGuardians;
     mapping(address => bool) public unpauseAdmins;
+    mapping(address => bool) public signerManagers;
+    mapping(address => bool) public signerLifecycleTargets;
     mapping(bytes32 => bool) private pausedDomains;
 
     // other variables
@@ -46,6 +52,8 @@ contract StreamAdmins is Ownable {
     );
     event PauseGuardianUpdated(address indexed account, bool enabled, address indexed admin);
     event UnpauseAdminUpdated(address indexed account, bool enabled, address indexed admin);
+    event SignerManagerUpdated(address indexed account, bool enabled, address indexed admin);
+    event SignerLifecycleTargetUpdated(address indexed target, bool enabled, address indexed admin);
     event PauseUpdated(
         bytes32 indexed domain, bool paused, address indexed admin, bytes32 indexed reason
     );
@@ -53,9 +61,8 @@ contract StreamAdmins is Ownable {
         address indexed oldRecipient, address indexed newRecipient, address indexed admin
     );
 
-    // certain functions can only be called by the TDHSigner contract or owner root
-    modifier authorized() {
-        require(msg.sender == tdhSigner || msg.sender == owner(), "Not Allowed");
+    modifier signerManagerOrOwner() {
+        require(msg.sender == owner() || signerManagers[msg.sender], "Not Allowed");
         _;
     }
 
@@ -63,14 +70,11 @@ contract StreamAdmins is Ownable {
     constructor(address _tdhSigner) {
         require(_tdhSigner != address(0), "Zero tdh signer");
         tdhSigner = _tdhSigner;
-        // The signer starts as a global admin for compatibility, but registrar
-        // authority follows `authorized()` and is independent of this bypass.
-        adminPermissions[tdhSigner] = true;
         emergencyRecipient = owner();
     }
 
     // function to register a global admin
-    function registerAdmin(address _admin, bool _status) public authorized {
+    function registerAdmin(address _admin, bool _status) public onlyOwner {
         require(_admin != address(0), "Zero admin");
         adminPermissions[_admin] = _status;
         emit GlobalAdminUpdated(_admin, _status, msg.sender);
@@ -82,7 +86,7 @@ contract StreamAdmins is Ownable {
         address _target,
         bytes4 _selector,
         bool _status
-    ) public authorized {
+    ) public onlyOwner {
         _setFunctionAdmin(_address, _target, _selector, _status);
     }
 
@@ -92,9 +96,41 @@ contract StreamAdmins is Ownable {
         address _target,
         bytes4[] memory _selector,
         bool _status
-    ) public authorized {
+    ) public onlyOwner {
         for (uint256 i = 0; i < _selector.length; i++) {
             _setFunctionAdmin(_address, _target, _selector[i], _status);
+        }
+    }
+
+    function registerSignerManager(address _account, bool _status) public onlyOwner {
+        require(_account != address(0), "Zero admin");
+        signerManagers[_account] = _status;
+        emit SignerManagerUpdated(_account, _status, msg.sender);
+    }
+
+    function registerSignerLifecycleTarget(address _target, bool _status) public onlyOwner {
+        require(_target != address(0), "Zero target");
+        signerLifecycleTargets[_target] = _status;
+        emit SignerLifecycleTargetUpdated(_target, _status, msg.sender);
+    }
+
+    function registerSignerFunctionAdmin(
+        address _address,
+        address _target,
+        bytes4 _selector,
+        bool _status
+    ) public signerManagerOrOwner {
+        _setSignerFunctionAdmin(_address, _target, _selector, _status);
+    }
+
+    function registerBatchSignerFunctionAdmin(
+        address _address,
+        address _target,
+        bytes4[] memory _selector,
+        bool _status
+    ) public signerManagerOrOwner {
+        for (uint256 i = 0; i < _selector.length; i++) {
+            _setSignerFunctionAdmin(_address, _target, _selector[i], _status);
         }
     }
 
@@ -164,6 +200,24 @@ contract StreamAdmins is Ownable {
         require(_selector != bytes4(0), "Zero selector");
         functionAdmin[_address][_target][_selector] = _status;
         emit FunctionAdminUpdated(_address, _target, _selector, _status, msg.sender);
+    }
+
+    function _setSignerFunctionAdmin(
+        address _address,
+        address _target,
+        bytes4 _selector,
+        bool _status
+    ) private {
+        require(_isSignerLifecycleSelector(_selector), "Not signer selector");
+        if (msg.sender != owner()) {
+            require(signerLifecycleTargets[_target], "Not signer target");
+        }
+        _setFunctionAdmin(_address, _target, _selector, _status);
+    }
+
+    function _isSignerLifecycleSelector(bytes4 _selector) private pure returns (bool) {
+        return _selector == DROP_SIGNER_UPDATE_SELECTOR || _selector == DROP_SIGNER_EPOCH_SELECTOR
+            || _selector == DROP_CANCEL_SELECTOR;
     }
 
     function _canPause(address _account) private view returns (bool) {
