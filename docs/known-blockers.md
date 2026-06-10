@@ -52,6 +52,11 @@ contributors who start from the README.
   richer metadata state exposure, provider configuration runbooks, canonical
   core/coordinator lifecycle ownership, and full handling of weak helper
   randomness beyond disabling `RandomizerNXT` as a production randomizer.
+- Dependency script retrieval now has segment-safe typed chunk and content
+  hashes, so the former packed/dynamic chunk-boundary Slither finding is fixed.
+  Remaining metadata blockers include golden-file metadata tests, collection
+  freeze manifests, immutable dependency version records, registry identity
+  pinning, ERC-4906 signaling, burn semantics, escaping, and size limits.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
@@ -59,8 +64,8 @@ contributors who start from the README.
   emergency-surplus, randomizer request lifecycle, randomizer callback
   validation, deterministic randomizer retry, raw-output hash storage, and
   randomizer reserve-boundary regressions now exist, but broader payment,
-  metadata, deployment,
-  production-governance, and invariant tests are still missing.
+  metadata, dependency versioning/freeze, deployment, production-governance, and
+  invariant tests are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

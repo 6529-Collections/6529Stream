@@ -2,10 +2,24 @@
 
 pragma solidity ^0.8.19;
 
-interface IDependencyRegistry {   
+interface IDependencyRegistry {
+    function getDependencyScriptCount(bytes32 dependencyNameAndVersion)
+        external
+        view
+        returns (uint256);
 
-    function getDependencyScriptCount(bytes32 dependencyNameAndVersion ) external view returns (uint256);
+    function getDependencyScript(bytes32 dependencyNameAndVersion, uint256 index)
+        external
+        view
+        returns (string memory);
 
-    function getDependencyScript(bytes32 dependencyNameAndVersion, uint256 index) external view returns (string memory);
+    function getDependencyScriptChunkHash(bytes32 dependencyNameAndVersion, uint256 index)
+        external
+        view
+        returns (bytes32);
 
+    function getDependencyScriptContentHash(bytes32 dependencyNameAndVersion)
+        external
+        view
+        returns (bytes32);
 }

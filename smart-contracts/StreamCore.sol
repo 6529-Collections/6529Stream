@@ -719,26 +719,32 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
 
     // function to retrieve on-chain dependency script
     function retrieveDependencyScript(uint256 tokenId) private view returns (string memory) {
-        string memory scripttext;
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        bytes32 dependencyNameAndVersion = collectionInfo[collectionId].collectionDependencyScript;
+        string memory scripttext = "";
         for (
             uint256 i = 0;
-            i
-                < dependencyRegistry.getDependencyScriptCount(
-                    collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionDependencyScript
-                );
+            i < dependencyRegistry.getDependencyScriptCount(dependencyNameAndVersion);
             i++
         ) {
-            scripttext = string(
-                abi.encodePacked(
-                    scripttext,
-                    dependencyRegistry.getDependencyScript(
-                        collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionDependencyScript,
-                        i
-                    )
-                )
+            scripttext = string.concat(
+                scripttext, dependencyRegistry.getDependencyScript(dependencyNameAndVersion, i)
             );
         }
-        return string(abi.encodePacked(scripttext));
+        return scripttext;
+    }
+
+    /// @notice Returns the current typed dependency script content hash for a minted token.
+    /// @dev This is a current registry-content hash, not a freeze manifest or immutable
+    /// dependency-version proof.
+    /// @param tokenId Minted token whose collection dependency key should be resolved.
+    /// @return The dependency script content hash currently reported by the registry.
+    function retrieveDependencyScriptContentHash(uint256 tokenId) public view returns (bytes32) {
+        _requireMinted(tokenId);
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        return dependencyRegistry.getDependencyScriptContentHash(
+            collectionInfo[collectionId].collectionDependencyScript
+        );
     }
 
     // function to retrieve the supply of a collection

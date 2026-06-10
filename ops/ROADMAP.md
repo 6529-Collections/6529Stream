@@ -29,8 +29,10 @@ order.
   current custody models, P0-ADMIN-001 target-scoped function-admin checks
   cover the current protected-function surface, and P0-ADMIN-002
   domain-scoped pause/emergency-recipient controls now have target-state
-  coverage. P0-RAND-001 randomizer request lifecycle and callback validation
-  now have target-state coverage for VRF and arRNG adapters.
+  coverage. P0-RAND-001 through P0-RAND-007 randomizer lifecycle, callback,
+  migration, failed-state, retry, and raw-output-hash work now have
+  target-state coverage for VRF and arRNG adapters. P0-META-001 dependency
+  script segment-safe encoding now has typed chunk/content hash coverage.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -38,7 +40,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-10 13:55 UTC` local Windows PR candidate validation; CI TBD |
+| Last verified | `2026-06-10 18:18 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -51,9 +53,9 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, raw-output hash storage, and dependency-script encoding hashes; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 686 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 685 total findings, including 8 High and 28 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1429,9 +1431,11 @@ Acceptance criteria:
 
 - Accept [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45)
   before metadata schema, freeze, dependency, burn, or ERC-4906 implementation.
-- Resolve [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9)
-  before any production dependency-script output depends on dynamic chunk
-  composition.
+- [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9)
+  now provides segment-safe dependency-script rendering plus typed chunk and
+  content hashes. Immutable dependency versions, provenance, registry identity,
+  and frozen collection pinning remain with
+  [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48).
 - Implement [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46):
   metadata schema and golden-file tests.
 - Implement [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47):
@@ -1933,16 +1937,16 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 686 findings, including 9 High and 29 Medium.
+- Result: 685 findings, including 8 High and 28 Medium.
 
 Impact summary:
 
 | Impact | Count |
 | --- | ---: |
-| High | 9 |
-| Medium | 29 |
-| Low | 64 |
-| Informational | 578 |
+| High | 8 |
+| Medium | 28 |
+| Low | 63 |
+| Informational | 580 |
 | Optimization | 6 |
 
 High/medium detector summary:
@@ -1950,7 +1954,7 @@ High/medium detector summary:
 | Detector | Impact | Count | Primary scope | Status | Issue | Required action |
 | --- | --- | ---: | --- | --- | --- | --- |
 | `arbitrary-send-eth` | High | 0 current / 4 fixed | first-party emergency withdrawals | Fixed | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Current emergency-withdrawal surfaces are bounded: auction, fixed-price drops, curator pool, StreamMinter surplus, and conservative randomizer reserve boundary tests now exist |
-| `encode-packed-collision` | High | 1 current / 2 fixed | drop authorization and dependency/script hashing | Open | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Drop authorization rows are fixed; replace dependency-script packed concatenation with typed/domain-separated encoding under `P0-META-001` |
+| `encode-packed-collision` | High | 0 current / 3 fixed | drop authorization and dependency/script hashing | Fixed | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Drop authorization rows and dependency-script segment hashing are fixed; keep typed hash tests and Slither baseline traceability |
 | `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
 | `reentrancy-eth` | High | 0 current / 1 fixed | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
 | `suicidal` | High | 3 | test-only forced-ETH helpers | Accepted | Accepted test-only | Intentionally retained for forced-ETH accounting tests under Solidity 0.8.19 |
@@ -1959,7 +1963,7 @@ High/medium detector summary:
 | `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
 | `incorrect-equality` | Medium | 1 | test-only malleable-signature helper | Accepted | Accepted test-only | Keep scoped to test-only EIP-712 negative coverage |
 | `locked-ether` | Medium | 7 | test-only rejection/reentrancy/mock receivers | Accepted | Accepted test-only | Keep scoped to payment and emergency-withdrawal tests |
-| `uninitialized-local` | Medium | 11 current / 1 fixed | first-party and test helper locals | Open for remaining production rows; `StreamDrops.mintDrop` fixed in `P0-AUTH-002` | [#15](https://github.com/6529-Collections/6529Stream/issues/15) | Initialize or prove Solidity zero-value intent |
+| `uninitialized-local` | Medium | 10 current / 2 fixed | first-party and test helper locals | Open for remaining production rows; `StreamDrops.mintDrop` fixed in `P0-AUTH-002` and `StreamCore.retrieveDependencyScript` fixed in `P0-META-001` | [#15](https://github.com/6529-Collections/6529Stream/issues/15), [#9](https://github.com/6529-Collections/6529Stream/issues/9) | Initialize or prove Solidity zero-value intent |
 | `unused-return` | Medium | 1 | ERC-1271 test tuple helper | Accepted | Accepted test-only | Keep scoped to test-only assertion helper |
 
 ## Appendix B: Test Matrix
@@ -1999,7 +2003,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Collection freeze boundary | Frozen collections cannot mutate collection fields, base URI, metadata mode, scripts, dependency references, token data, image, attributes, final supply, or live-token metadata state | `test/StreamMetadataFreeze.t.sol` | Missing | [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47) | Gate D | TBD |
 | Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Missing | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit only when token JSON metadata changes | `test/StreamMetadataEvents.t.sol` | Missing | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49) | Gate D | TBD |
-| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
+| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Passing: typed chunk/content hashes include dependency key, chunk count, chunk index, chunk byte length, and chunk content hash; ambiguous chunk splits that render the same JavaScript produce distinct content hashes while preserving rendered-script compatibility; zero-chunk dependency hashes are deterministic | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
 | Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | Missing | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) | Gate E/Gate G | TBD |
 | Mint-accounting state | Mint counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Missing | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Missing | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |

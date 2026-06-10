@@ -65,9 +65,12 @@ Current source references:
   possible after collections reference that dependency key.
 - `StreamCore.updateContracts(3, newContract)` can swap the dependency registry
   address for future reads.
-- `retrieveDependencyScript` concatenates dependency chunks through dynamic
-  string composition. Slither tracks this as
-  [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9).
+- `retrieveDependencyScript` renders dependency chunks with initialized
+  `string.concat`, and `retrieveDependencyScriptContentHash(tokenId)` exposes a
+  typed dependency content hash for the referenced dependency key. The hash is
+  segment-safe for the current registry content, but it is not a full freeze
+  manifest by itself because it does not pin registry identity, provenance, or
+  immutable version lifecycle.
 - `burn(collectionId, tokenId)` burns the ERC-721 token and increments
   `burnAmount[collectionId]`. After burn, `tokenURI(tokenId)` reverts through
   `_requireMinted`, while internal token mappings remain in storage.
@@ -332,10 +335,16 @@ Required model:
 - frozen collections resolve dependency output from the pinned immutable record
   or from a manifest snapshot
 
-`P0-META-001` owns the packed/dynamic composition fix. The implementation must
-avoid ambiguous dynamic concatenation when hashing or proving dependency
-content. Use `abi.encode`, length-prefixing, per-chunk hashes, or an equivalent
-typed format instead of ambiguous packed dynamic fields.
+`P0-META-001` owns the packed/dynamic composition fix and now provides typed
+per-chunk and full-content hashes. The accepted hash shape uses `abi.encode`,
+the dependency key, chunk count, chunk index, chunk byte length, and per-chunk
+content hash so two ambiguous chunk layouts that render the same JavaScript
+still produce distinct proof hashes.
+
+`P1-META-003` remains responsible for immutable dependency versions,
+provenance, registry identity, deprecation semantics, and freeze-manifest
+pinning. Release manifests must pair any dependency content hash with the
+registry contract identity and accepted dependency version record.
 
 ## ERC-4906 Event Policy
 
@@ -561,7 +570,9 @@ signal that metadata changed before freeze.
 
 ## Open Follow-Ups
 
-- Resolve [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9).
+- Keep the [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9)
+  typed dependency hash regression suite in place while later freeze-manifest
+  work builds on it.
 - Implement [P1-META-001](https://github.com/6529-Collections/6529Stream/issues/46).
 - Complete [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47).
 - Build [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48).

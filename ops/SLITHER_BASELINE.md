@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 13:55 UTC` |
+| Last generated | `2026-06-10 18:18 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -23,18 +23,18 @@ baseline.
 
 | Impact | Count |
 | --- | ---: |
-| High | 9 |
-| Medium | 29 |
-| Low | 64 |
-| Informational | 578 |
+| High | 8 |
+| Medium | 28 |
+| Low | 63 |
+| Informational | 580 |
 | Optimization | 6 |
-| Total | 686 |
+| Total | 685 |
 
 ## Detector Counts
 
 | Detector | Impact | Count |
 | --- | --- | ---: |
-| `encode-packed-collision` | High | 1 |
+| `encode-packed-collision` | High | 0 |
 | `incorrect-exp` | High | 1 |
 | `suicidal` | High | 3 |
 | `uninitialized-state` | High | 2 |
@@ -42,27 +42,27 @@ baseline.
 | `divide-before-multiply` | Medium | 9 |
 | `incorrect-equality` | Medium | 1 |
 | `locked-ether` | Medium | 7 |
-| `uninitialized-local` | Medium | 11 |
+| `uninitialized-local` | Medium | 10 |
 | `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 64 |
-| Informational findings | Informational | 578 |
+| Low-impact findings | Low | 63 |
+| Informational findings | Informational | 580 |
 | Optimization findings | Optimization | 6 |
 
-Randomizer-lifecycle delta from the previous pause-control capture:
+Dependency-script encoding delta from the previous tracked capture:
 
-- High, medium, and optimization counts are unchanged.
-- Low findings increased by 3 and informational findings increased by 7 due to
-  shared randomizer lifecycle storage, events, views, request-state tests, and
-  low-level negative-call coverage.
-- `NextGenRandomizerRNG.requestRandomWords` uses a scoped Slither suppression
-  for the guarded arRNG request-ID pattern: the provider returns the request ID
-  from an external payable call, state is recorded immediately after, and
-  `test/StreamRandomizerLifecycle.t.sol` proves a reentrant controller cannot
-  fulfill during that window.
-- `arbitrary-send-eth` remains at zero findings.
-- The only medium row whose description mentions randomizer-provider payment is
-  still the test-only `MockArrngController` `locked-ether` row in
-  `test/StreamEmergencyWithdraw.t.sol`; it is accepted as harness-only noise.
+- High findings decreased from 9 to 8 because the final
+  `encode-packed-collision` row is fixed.
+- Medium findings decreased from 29 to 28 because
+  `StreamCore.retrieveDependencyScript(uint256).scripttext` is now initialized.
+- `encode-packed-collision` is now zero current findings; the remaining fixed
+  rows are kept below as audit traceability.
+- `uninitialized-local` is now 10 current findings; the
+  `StreamDrops.mintDrop` and `StreamCore.retrieveDependencyScript` rows are
+  fixed, while the broader `P0-INIT-001` workstream remains open.
+- `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
+- Slither still exits non-zero because the remaining tracked baseline findings
+  require fixes, accepted-risk rationale, or false-positive proof before audit
+  readiness.
 
 ## Status Semantics
 
@@ -86,7 +86,7 @@ GitHub work item that owns that resolution.
 | `arbitrary-send-eth` | 1 | `NextGenRandomizerRNG` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Treats all adapter ETH as randomness reserve, exposes zero emergency-withdrawable balance, and transfers no emergency-withdrawable ETH | `test/StreamEmergencyWithdraw.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
 | `arbitrary-send-eth` | 1 | `StreamCuratorsPool` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-005` | High | Medium | Fixed | Bounded curator pool emergency withdrawal to surplus after local curator credits owed | `test/StreamCuratorsPool.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C | TBD |
 | `arbitrary-send-eth` | 1 | `StreamMinter` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Exposes `totalOwed() == 0` and withdraws only `emergencyWithdrawable()` surplus, covering forced ETH without an ordinary payable path | `test/StreamEmergencyWithdraw.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `encode-packed-collision` | 1 | `StreamCore` | `retrieveDependencyScript(uint256)` | first-party | `smart-contracts/StreamCore.sol#L402-L408` | High | High | Open | Use typed dependency chunk encoding, versioned content hashes, and frozen dependency pinning per ADR 0006 | Encoding collision and frozen dependency regression | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
+| `encode-packed-collision` | 1 | `StreamCore` | `retrieveDependencyScript(uint256)` | first-party | Fixed in `P0-META-001` | High | High | Fixed | Replaced packed dynamic dependency-script composition with initialized `string.concat` rendering and typed dependency chunk/content hash views that use `abi.encode`, dependency key, chunk count, chunk index, chunk byte length, and per-chunk content hash | Ambiguous chunk-boundary and typed hash regressions in `test/StreamMetadataEncoding.t.sol` | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `retrieveMessageAndDropID(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Removed legacy packed helper; `hashDropAuthorization` now uses EIP-712 domain-separated typed data | Explicit digest, replay, wrong-domain, wrong-chain, wrong-contract, and field-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | `encode-packed-collision` | 1 | `StreamDrops` | `mintDrop(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Replaced legacy packed-hash `mintDrop` ABI with `mintDrop(DropAuthorization,string,bytes)` and storage-backed consumed/cancelled drop IDs | EOA, EIP-2098, replay, expiry, cancellation, stale-epoch, wrong-domain, wrong-chain, wrong-contract, wrong-signer, malleability, zero signer, bad quantity, and token-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | `incorrect-exp` | 1 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | High | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or math regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
@@ -108,7 +108,7 @@ GitHub work item that owns that resolution.
 | `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveSubDelegationStatus(...).subdelegationRights` | first-party | `smart-contracts/NFTdelegation.sol#L650` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveStatusOfActiveDelegator(...).status` | first-party | `smart-contracts/NFTdelegation.sol#L677` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `StreamCore` | `retrieveGenerativeScript(...).scripttext` | first-party | `smart-contracts/StreamCore.sol#L394` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamCore` | `retrieveDependencyScript(...).scripttext` | first-party | `smart-contracts/StreamCore.sol#L403` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| `uninitialized-local` | 1 | `StreamCore` | `retrieveDependencyScript(...).scripttext` | first-party | Fixed in `P0-META-001` | Medium | Medium | Fixed | Initialized the dependency-script accumulator to an empty string before concatenation and covered the rendered output through the metadata encoding regression suite | `test/StreamMetadataEncoding.t.sol` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15), [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
 | `uninitialized-local` | 1 | `StreamDrops` | `mintDrop(...).tokenid` | first-party | Removed in `P0-AUTH-002` | Medium | Medium | Fixed | Rewritten typed authorization path initializes branch locals explicitly; captured Slither run no longer reports `StreamDrops.mintDrop` uninitialized locals | `make slither` targeted log check plus EIP-712 and characterization tests | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `StreamMinter` | `mint(...).mintIndex` | first-party | `smart-contracts/StreamMinter.sol#L76` | Medium | Medium | Open | Initialize local before use or prove Solidity zero-value intent with tests/docs | Targeted regression for affected function | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | `uninitialized-local` | 1 | `MockStreamMinter` | `mint(...).mintedCount` | test-only | `test/mocks/MockStreamMinter.sol#L71` | Medium | Medium | Accepted | Accepted as a test-only helper baseline | None; test-only baseline row | Accepted test-only | Gate A | TBD |
