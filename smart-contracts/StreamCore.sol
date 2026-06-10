@@ -27,6 +27,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     using Strings for uint256;
 
     bytes4 private constant _INTERFACE_ID_ERC4906 = 0x49064906;
+    string public constant METADATA_SCHEMA_VERSION = "6529stream-v1";
+    string private constant _METADATA_STATE_PENDING = "pending";
+    string private constant _METADATA_STATE_FINAL = "final";
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -402,6 +405,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     // function to set the tokenHash (this function is called only from randomizer contracts)
     function setTokenHash(uint256 _collectionID, uint256 _mintIndex, bytes32 _hash) external {
         require(msg.sender == collectionAdditionalData[_collectionID].randomizerContract);
+        require(_hash != bytes32(0), "Zero token hash");
         require(
             tokenToHash[_mintIndex]
                 == 0x0000000000000000000000000000000000000000000000000000000000000000
@@ -506,52 +510,104 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     // function that return the tokenURI
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         _requireMinted(tokenId);
-        if (
-            onchainMetadata[tokenIdsToCollectionIds[tokenId]] == false
-                && tokenToHash[tokenId]
-                    != 0x0000000000000000000000000000000000000000000000000000000000000000
-        ) {
-            string memory
-                baseURI = collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionBaseURI;
-            return
-                bytes(baseURI).length > 0
-                    ? string(abi.encodePacked(baseURI, tokenId.toString()))
-                    : "";
-        } else if (
-            onchainMetadata[tokenIdsToCollectionIds[tokenId]] == false
-                && tokenToHash[tokenId]
-                    == 0x0000000000000000000000000000000000000000000000000000000000000000
-        ) {
-            string memory
-                baseURI = collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionBaseURI;
-            return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "pending")) : "";
-        } else {
-            string memory b64 = Base64.encode(
-                abi.encodePacked(
-                    "<html><head></head><body><script src=\"",
-                    collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionLibrary,
-                    "\"></script><script>",
-                    retrieveGenerativeScript(tokenId),
-                    "</script></body></html>"
-                )
-            );
-            string memory _uri = string(
-                abi.encodePacked(
-                    "data:application/json;utf8,{\"name\":\"",
-                    getTokenName(tokenId),
-                    "\",\"description\":\"",
-                    collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionDescription,
-                    "\",\"image\":\"",
-                    tokenImageAndAttributes[tokenId][0],
-                    "\",\"attributes\":[",
-                    tokenImageAndAttributes[tokenId][1],
-                    "],\"animation_url\":\"data:text/html;base64,",
-                    b64,
-                    "\"}"
-                )
-            );
-            return _uri;
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        bool finalMetadata = _isTokenMetadataFinal(tokenId);
+
+        if (!onchainMetadata[collectionId]) {
+            string memory baseURI = collectionInfo[collectionId].collectionBaseURI;
+            if (bytes(baseURI).length == 0) {
+                return "";
+            }
+            return finalMetadata
+                ? string(abi.encodePacked(baseURI, tokenId.toString()))
+                : string(abi.encodePacked(baseURI, _METADATA_STATE_PENDING));
         }
+
+        return _onchainTokenURI(tokenId, collectionId, finalMetadata);
+    }
+
+    /// @notice Returns the active on-chain metadata schema version.
+    function metadataSchemaVersion() public pure returns (string memory) {
+        return METADATA_SCHEMA_VERSION;
+    }
+
+    /// @notice Returns the token's public metadata state under the active schema.
+    function tokenMetadataState(uint256 tokenId) public view returns (string memory) {
+        _requireMinted(tokenId);
+        return _isTokenMetadataFinal(tokenId) ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING;
+    }
+
+    function _isTokenMetadataFinal(uint256 tokenId) private view returns (bool) {
+        return tokenToHash[tokenId] != bytes32(0);
+    }
+
+    function _onchainTokenURI(uint256 tokenId, uint256 collectionId, bool finalMetadata)
+        private
+        view
+        returns (string memory)
+    {
+        return string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(bytes(_onchainMetadataJson(tokenId, collectionId, finalMetadata)))
+            )
+        );
+    }
+
+    function _onchainMetadataJson(uint256 tokenId, uint256 collectionId, bool finalMetadata)
+        private
+        view
+        returns (string memory)
+    {
+        string memory animationField = "";
+        if (finalMetadata) {
+            animationField = string(
+                abi.encodePacked(
+                    ",\"animation_url\":\"", _onchainAnimationURI(tokenId, collectionId), "\""
+                )
+            );
+        }
+
+        return string(
+            abi.encodePacked(
+                "{\"metadata_schema_version\":\"",
+                METADATA_SCHEMA_VERSION,
+                "\",\"metadata_state\":\"",
+                finalMetadata ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING,
+                "\",\"name\":\"",
+                getTokenName(tokenId),
+                "\",\"description\":\"",
+                collectionInfo[collectionId].collectionDescription,
+                "\",\"image\":\"",
+                tokenImageAndAttributes[tokenId][0],
+                "\",\"attributes\":[",
+                tokenImageAndAttributes[tokenId][1],
+                "]",
+                animationField,
+                "}"
+            )
+        );
+    }
+
+    function _onchainAnimationURI(uint256 tokenId, uint256 collectionId)
+        private
+        view
+        returns (string memory)
+    {
+        return string(
+            abi.encodePacked(
+                "data:text/html;base64,",
+                Base64.encode(
+                    abi.encodePacked(
+                        "<html><head></head><body><script src=\"",
+                        collectionInfo[collectionId].collectionLibrary,
+                        "\"></script><script>",
+                        retrieveGenerativeScript(tokenId),
+                        "</script></body></html>"
+                    )
+                )
+            )
+        );
     }
 
     // function to retrieve the name attribute

@@ -148,10 +148,11 @@ compatibility-preserving.
 
 Metadata golden fixtures now have P1-META-001 characterization coverage in
 `StreamMetadataGolden.t.sol`: current off-chain pending and final token URI
-rules, current on-chain pending JSON output, and current on-chain final JSON
-output are compared byte-for-byte against `test/fixtures/metadata/`. The
-on-chain fixtures are labeled as current pre-beta behavior because ADR 0006
-still requires an explicit public-beta metadata state model.
+rules, schema-v1 on-chain pending base64 JSON, and schema-v1 on-chain final
+base64 JSON are compared byte-for-byte against `test/fixtures/metadata/`. The
+suite also asserts `metadataSchemaVersion()` and the token-level
+`pending`/`final` metadata state view, and pending on-chain metadata no longer
+executes the final generative HTML path with a zero token hash.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

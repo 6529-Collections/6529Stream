@@ -25,21 +25,30 @@ would produce `https://example.com/collections/abcpending` and
 Current on-chain metadata is returned as:
 
 ```text
-data:application/json;utf8,<json>
+data:application/json;base64,<base64-json>
 ```
 
 The current JSON includes:
 
+- `metadata_schema_version` with value `6529stream-v1`
+- `metadata_state` with value `pending` or `final`
 - `name`
 - `description`
 - `image`
 - `attributes`
-- `animation_url`
+- `animation_url` for final on-chain metadata only
 
-The current on-chain pending output still embeds the zero token hash in the
-generated HTML. ADR 0006 rejects that as the final public-beta behavior; future
-metadata work must replace it with an explicit pending state and update the
-golden fixtures intentionally.
+Pending on-chain metadata no longer runs the final generative HTML path with a
+zero token hash. It returns schema-versioned JSON with
+`metadata_state: "pending"` and omits `animation_url`. Final on-chain metadata
+returns schema-versioned JSON with `metadata_state: "final"` and the existing
+base64-encoded HTML animation URL.
+
+`StreamCore.metadataSchemaVersion()` exposes the active schema version and
+`StreamCore.tokenMetadataState(tokenId)` exposes the current `pending` or
+`final` state for minted tokens. The current schema version does not yet solve
+JSON escaping, raw attribute validation, metadata size limits, freeze manifests,
+dependency immutability, stale randomness display, or burn metadata semantics.
 
 ## Golden Fixtures
 
@@ -47,12 +56,11 @@ golden fixtures intentionally.
 
 - `test/fixtures/metadata/offchain-pending-token-uri.txt`
 - `test/fixtures/metadata/offchain-final-token-uri.txt`
-- `test/fixtures/metadata/current-onchain-pending-token-uri.txt`
-- `test/fixtures/metadata/current-onchain-final-token-uri.txt`
+- `test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt`
+- `test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt`
 
-The fixture names use `current-onchain-*` because the current on-chain JSON is
-not yet the accepted public-beta schema. These fixtures are meant to make
-metadata changes reviewable and deliberate.
+The on-chain fixture names include the schema version so later schema migrations
+are reviewable and deliberate.
 
 ## ERC-4906 Events
 
@@ -93,9 +101,7 @@ P1-META-003.
 
 ADR 0006 requires future metadata work to add:
 
-- schema version fields
-- explicit pending, final, stale, and burned-state policy
-- base64 JSON data URIs for on-chain metadata
+- stale and burned-state policy
 - JSON escaping and raw-attribute validation
 - freeze manifests and immutable dependency version pins
 - burn semantics and callback-after-burn tests
