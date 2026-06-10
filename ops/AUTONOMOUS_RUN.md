@@ -10,8 +10,10 @@ transient conversation memory.
 - Keep this file updated before and after each meaningful transition.
 - Open one PR at a time.
 - Wait for CI and bot/reviewer comments on each PR.
-- Request Claude review explicitly with `@claude review` on each PR after
-  opening because it may not run automatically.
+- Request CodeRabbit review explicitly with `@coderabbitai review` on each PR
+  after opening. Claude review is optional while the user-approved
+  CodeRabbit-only path remains in effect, and should be requested only when the
+  PR risk or a future user instruction calls for it.
 - Iterate until checks and review comments are clean.
 - Merge only after the PR is review-clean and CI-clean, or after a documented
   autonomous maintainer decision.
@@ -31,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-post-processing-retry` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/68` |
+| Active PR branch | `codex/randomizer-raw-output-hash` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/69` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 17:08 UTC` |
+| Last updated | `2026-06-10 17:45 UTC` |
 
 ## Packaging Notes
 
@@ -80,7 +82,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Merged in PR #66 |
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
-| 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Open in PR #69; awaiting CI and CodeRabbit |
+| 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
+| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Local validation complete; ready to open PR |
 
 ## Current PR Worklog
 
@@ -2308,9 +2311,9 @@ Outcome:
 - Merge commit: `0c463840cbc4f2e000a9df8b7ca6a7b7e3c717e1`.
 - Issue #40 closed completed.
 
-### Next PR: Add bounded randomness post-processing retry (Queue Item 28)
+### Completed: Add bounded randomness post-processing retry (Queue Item 28)
 
-Status: PR #69 open; CI clean and awaiting CodeRabbit after review follow-up.
+Status: merged.
 Branch: `codex/randomizer-post-processing-retry`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/69`.
 Related issue:
@@ -2387,6 +2390,100 @@ Validation so far:
   `reentrancy-no-eth=0`, `reentrancy-events=22`. The total is +2 versus the
   prior count from informational `pragma` and `solc-version` entries caused by
   adding `test/StreamRandomizerRetry.t.sol`.
+
+Outcome:
+
+- Merged as PR #69 on `2026-06-10 17:15 UTC`.
+- Merge commit: `c5623f69ef5a37be650014ced36bfeb2141bf363`.
+- Issue #42 closed completed.
+- Claude was not requested for this PR per user instruction; CodeRabbit was
+  sufficient and reported success on the final head.
+
+### Next PR: Store raw random output hashes (Queue Item 29)
+
+Status: local validation complete; ready to open PR.
+Branch: `codex/randomizer-raw-output-hash`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/43`
+
+Goal:
+
+- Complete `P0-RAND-007` by deciding and implementing the final
+  raw-randomness versus derived-seed storage policy from ADR 0005.
+- Store a canonical hash of the provider output alongside the derived seed so
+  state and events are deterministic and indexer-friendly without retaining
+  full provider word arrays.
+- Preserve the existing no-redraw safety model: fulfillment and retry must keep
+  using the accepted derived seed and must not accept user-significant input
+  after request.
+- Cover both VRF and arRNG adapter fulfillments, token-level views, and failed
+  post-processing/retry paths where stored randomness remains observable.
+
+Candidate files:
+
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/RandomizerVRF.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `test/StreamRandomizerRetry.t.sol`
+- `test/StreamRandomizerSeed.t.sol` if a dedicated focused suite is cleaner
+- `docs/adr/0005-randomness.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Initial implementation notes:
+
+- Current `RandomnessRequest` records `derivedSeed` but not the raw provider
+  output hash on `main`; this branch adds `rawOutputHash`.
+- Implemented policy stores `rawOutputHash =
+  keccak256(abi.encode(randomWords))` and derives the token seed from
+  `RANDOMNESS_SEED_TYPEHASH`, provider, request ID, collection, token,
+  randomizer epoch, and `rawOutputHash`.
+- Full provider word arrays remain outside contract storage; VRF still emits
+  provider-specific `RequestFulfilled` words as before.
+- Fulfillment, failed post-processing, retry success, and retry failure events
+  now include both the derived seed and raw-output hash. Fulfillment events also
+  include provider and randomizer epoch context for indexers.
+- `RandomnessRequest` views by request ID and token ID expose both seed and
+  raw-output hash.
+- Added coverage that post-request mutable `tokenData` changes do not affect the
+  stored seed or raw-output hash because seed derivation is independent from
+  mutable metadata.
+- Issue #43 requires stored randomness data to match ADR 0005, deterministic
+  token hash derivation from stored data, no post-request user-significant
+  mutation that can bias output, and indexer-sufficient events.
+
+Validation so far:
+
+- PR #69 merge checked locally by fast-forwarding `main` to
+  `c5623f69ef5a37be650014ced36bfeb2141bf363`.
+- Issue #42 verified closed completed.
+- Focused `forge test --match-contract StreamRandomizerLifecycleTest -vvv`
+  passed: 19 tests, 0 failed.
+- Focused `forge test --match-contract StreamRandomizerRetryTest -vvv` passed:
+  10 tests, 0 failed.
+- `forge fmt --check smart-contracts\StreamRandomizerLifecycle.sol
+  test\StreamRandomizerLifecycle.t.sol test\StreamRandomizerRetry.t.sol`
+  passed.
+- `git diff --check` passed.
+- Traceability grep for `P0-RAND-007`, `rawOutputHash`, raw-output hash,
+  `RANDOMNESS_SEED_TYPEHASH`, and the new `RandomnessFulfilled` event signature
+  passed.
+- Markdown heading scan passed for `ops\ROADMAP.md`,
+  `docs\adr\0005-randomness.md`, `docs\known-blockers.md`,
+  `docs\status.md`, and `test\README.md`.
+- `make check` passed: 171 tests, 0 failed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed:
+  171 tests, 0 failed.
+- Slither baseline comparison passed with unchanged counts:
+  `slither_exit=-1`, `total=687`, `high=9`, `medium=29`, `weak-prng=2`,
+  `arbitrary-send-eth=0`, `reentrancy-eth=0`, `reentrancy-no-eth=0`,
+  `reentrancy-events=22`.
 
 ## Decision Log
 
@@ -2585,6 +2682,12 @@ Validation so far:
 | 2026-06-10 16:45 | Open PR #69 | PR packages bounded deterministic post-processing retry for VRF and arRNG adapters, closes issue #42, and records full local validation evidence |
 | 2026-06-10 16:59 | Address CodeRabbit PR #69 review | Split retry-failure state mutation from initial-failure event emission, refresh fulfillment timing on retry success, add arRNG edge-case parity, and refresh full gates to 170 passing tests with Slither high/medium counts unchanged |
 | 2026-06-10 17:08 | Address CodeRabbit PR #69 roadmap wording review | Remove stale top-level `deterministic randomness retry` remaining-blocker wording now that P0-RAND-006 is implemented and passing in the traceability matrix |
+| 2026-06-10 17:15 | Merge PR #69 | CI passed, CodeRabbit confirmed the event refactor and roadmap wording fix, final status was clean, and issue #42 closed completed |
+| 2026-06-10 17:21 | Select Queue Item 29 | Next randomness blocker is `P0-RAND-007`; ADR 0005 requires explicit raw-output hash exposure alongside the stored derived seed without retaining full provider words |
+| 2026-06-10 17:39 | Implement Queue Item 29 local draft | Store canonical raw-output hashes, derive seeds from raw-output hash plus request-bound fields, emit raw-output hash in fulfillment/failure/retry events, and add focused lifecycle/retry coverage |
+| 2026-06-10 17:43 | Align Queue Item 29 with ADR event and seed shape | Add `RANDOMNESS_SEED_TYPEHASH` domain separation and provider/epoch context to fulfillment events before opening the PR |
+| 2026-06-10 17:45 | Validate Queue Item 29 locally | Focused lifecycle/retry suites, full `make check`, Windows wrapper, formatting, diff hygiene, traceability, heading scan, and Slither baseline comparison all pass with 171 total tests and unchanged high/medium counts |
+| 2026-06-10 17:45 | Use CodeRabbit-only review path for Queue Item 29 | Latest user instruction says Claude is not needed and CodeRabbit is fine, so this PR will request CodeRabbit explicitly and skip Claude unless risk or new instructions change |
 
 ## Resume Instructions
 
