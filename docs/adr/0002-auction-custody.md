@@ -72,8 +72,8 @@ creation path as a migration tripwire:
 The public-beta target design is:
 
 1. Auctioned tokens are minted or transferred into protocol-controlled escrow
-   when an auction is created. The default escrow is the auction contract
-   itself, renamed or refactored as needed. A dedicated custody contract may be
+   during auction creation. The default escrow is the auction contract itself,
+   renamed or refactored as needed. A dedicated custody contract may be
    introduced only if it preserves the same invariants and has its own tests.
 2. `payOutAddress` is not NFT custody. It is only a payment recipient or
    accounting identity.
@@ -133,6 +133,14 @@ The implementation may derive `EndedNoBid` and `EndedWithBid` from
 Terminal states must be stored so repeated settlement or cancellation cannot
 repeat side effects.
 
+`Created -> Active` fires only when custody is confirmed. The implementation
+must expose this distinction through `custody != address(0)` if the custody
+field is written only after receipt, or through an explicit `custodyConfirmed`
+field if the intended custody address is written before receipt. When minting
+and custody confirmation happen atomically in one transaction, the auction may
+be created and activated in that transaction, but events and views must still
+make the custody-confirmed state observable.
+
 The implementation should keep the current auction-extension product behavior
 only if it can be expressed inside this state model and covered by tests. An
 extension must emit an event and must not move an already-ended auction back to
@@ -165,13 +173,15 @@ struct AuctionRecord {
     uint256 reservePrice;
     uint256 highestBid;
     uint256 endTime;
+    bool custodyConfirmed;
     AuctionStatus terminalStatus;
 }
 ```
 
 Derived status views may compute active and ended states from `terminalStatus`,
-`endTime`, and highest-bid fields. The stored record must still be sufficient
-to prove custody, recipient, reserve, and settlement behavior.
+`custody`, `custodyConfirmed`, `endTime`, and highest-bid fields. The stored
+record must still be sufficient to prove custody, recipient, reserve, and
+settlement behavior.
 
 ## Payment And External Interaction Policy
 
@@ -299,6 +309,8 @@ documents otherwise.
 Implementation PRs must add or update tests for:
 
 - auction creation and custody assignment
+- `Created -> Active` transition and custody-confirmed status views
+- bids rejected before custody is confirmed
 - escrow receiver behavior
 - active bidding before the end time
 - bid below reserve rejection

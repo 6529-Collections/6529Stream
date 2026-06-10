@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/20` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 03:03 UTC` |
+| Last updated | `2026-06-10 03:08 UTC` |
 
 ## Packaging Notes
 
@@ -500,6 +500,12 @@ Validation:
 - After the ADR 0001 cleanup, `git diff --check`, `make check`, and
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed again
   with 17 tests and known compiler/NatSpec warnings.
+- Claude state-machine cleanup validation passed for explicit
+  `Created -> Active` trigger semantics, `custodyConfirmed` storage shape,
+  derived status inputs, and bid-before-custody rejection coverage.
+- After the ADR 0002 state-machine cleanup, `git diff --check`, `make check`,
+  and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed
+  again with 17 tests and known compiler/NatSpec warnings.
 
 Review feedback:
 
@@ -509,6 +515,12 @@ Review feedback:
   `DROP_ID_TYPEHASH` preimage plus explicit `payer`, sale-mode price, and
   `poster` semantics. Those still-valid comments are addressed in this PR so
   the accepted drop-authorization ADR remains implementation-ready.
+- Claude thread `PRRT_kwDOM7REis6IWKpg` requested an explicit
+  `Created -> Active` trigger and a storage/view shape that can distinguish
+  created auctions from custody-confirmed active auctions. ADR 0002 now makes
+  custody confirmation observable through `custody != address(0)` or explicit
+  `custodyConfirmed`, adds those fields to derived status inputs, and requires
+  tests for activation plus bid rejection before custody is confirmed.
 - Waiting for CI and bot review to rerun on the latest head.
 
 ## Decision Log
@@ -573,6 +585,7 @@ Review feedback:
 | 2026-06-10 02:50 | Validate auction custody ADR locally | Heading, traceability, whitespace, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 02:52 | Open PR #23 | Auction custody ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666002050` |
 | 2026-06-10 03:03 | Address late Claude PR #20 comments in PR #23 | ADR 0001 now pins `DROP_ID_TYPEHASH` and closes remaining signed-field semantic gaps for payer, sale-mode price fields, and poster attribution |
+| 2026-06-10 03:08 | Address Claude PR #23 state-machine review | ADR 0002 now clarifies custody-confirmation trigger and `Created -> Active` derivation |
 
 ## Resume Instructions
 
