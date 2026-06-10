@@ -30,9 +30,9 @@ order.
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
-| Slither version | TBD |
+| Slither version | `0.11.5` |
 | CI run | TBD |
-| Command transcript location | TBD |
+| Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; other transcripts TBD |
 
 ### Machine-Verifiable Baseline
 
@@ -41,7 +41,7 @@ order.
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Initial characterization tests cover admin guards, current drop behavior, fixed-price payout behavior, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a large untriaged baseline | `slither . --foundry-compile-all` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 530 total findings, including 13 High and 26 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1020,14 +1020,16 @@ Required tests:
 
 Required docs:
 
-- Appendix A Slither baseline table.
-- Slither config after triage.
+- Appendix A Slither baseline summary.
+- Detailed high/medium baseline in `ops/SLITHER_BASELINE.md`.
+- Slither config after triage for any detector suppressions.
 
 Acceptance criteria:
 
 - Slither baseline table has detector, contract, function, source kind, source
   location, severity, confidence, status, resolution, required test, issue,
   gate, and owner.
+- Current high/medium Slither rows are captured in `ops/SLITHER_BASELINE.md`.
 - Every `Open` or `Needs Issue` finding has an issue link or `TBD` placeholder
   marked as blocking triage.
 - CI fails on new high/medium findings after baseline is accepted.
@@ -1315,7 +1317,7 @@ No P0 contract PR may merge without:
 - Add Markdown lint.
 - Add ShellCheck for shell scripts.
 - Add PowerShell Script Analyzer for PowerShell scripts.
-- Add `slither.config.json` after triage.
+- Keep `slither.config.json` free of detector suppressions until triage.
 - Fail CI on new high/medium findings after baseline acceptance.
 
 ### Dependency And Provenance Management
@@ -1592,19 +1594,45 @@ No P0 contract PR may merge without:
 
 ## Appendix A: Slither Baseline
 
-Status values: `Open`, `Fixed`, `Accepted`, `False Positive`, `Needs Issue`.
-Every row must record source file and line range, identify whether the finding
-is first-party, vendored, generated, or test-only, and include an issue link for
-each `Open` or `Needs Issue` row before Gate F.
+Source of truth: `ops/SLITHER_BASELINE.md`.
 
-| Detector | Contract | Function | Source kind | Source location | Severity | Confidence | Status | Resolution | Required test | Issue | Gate | Owner |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `arbitrary-send-eth` | TBD | emergency withdrawals / payouts | first-party | TBD | High | TBD | Open | Replace or bound with owed/surplus accounting | payment invariant + emergency withdrawal tests | TBD | Gate C | TBD |
-| `reentrancy-eth` | `AuctionContract.sol` | `participateToAuction` | first-party | TBD | High | TBD | Open | Pull credits and state-before-call | malicious bidder regression | TBD | Gate C | TBD |
-| `weak-prng` | `XRandoms.sol` / `RandomizerNXT.sol` | randomness helpers | first-party | TBD | High | TBD | Open | Demo-only or replace with production randomizer | randomness provider tests | TBD | Gate C | TBD |
-| `encode-packed-collision` | `StreamDrops.sol` and script/dependency hashing paths | drop ID / concatenation | first-party | TBD | Medium/High | TBD | Open | Use typed `abi.encode` / EIP-712 | replay/collision tests | TBD | Gate C | TBD |
-| `uninitialized-state` | TBD | mint-accounting mappings | first-party | TBD | Medium | TBD | Open | Remove, initialize, or complete design | harness regression | TBD | Gate C | TBD |
-| vendored library warnings | `Math.sol`, `SignedMath.sol`, retained libraries | library functions | vendored | TBD | TBD | TBD | Open | Replace with pinned upstream or suppress with rationale | build/lint baseline | TBD | Gate F | TBD |
+Status values: `Open`, `Fixed`, `Accepted`, `False Positive`, `Needs Issue`.
+Every detailed row must record source file and line range, identify whether the
+finding is first-party, vendored, generated, or test-only, and include an issue
+link for each `Open` or `Needs Issue` row before Gate F.
+
+Current capture:
+
+- Tool: Slither `0.11.5`.
+- Compiler: Solidity `0.8.19`.
+- Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
+- Status: baseline captured, not accepted as a CI gate.
+- Result: 530 findings, including 13 High and 26 Medium.
+
+Impact summary:
+
+| Impact | Count |
+| --- | ---: |
+| High | 13 |
+| Medium | 26 |
+| Low | 51 |
+| Informational | 434 |
+| Optimization | 6 |
+
+High/medium detector summary:
+
+| Detector | Impact | Count | Primary scope | Status | Required action |
+| --- | --- | ---: | --- | --- | --- |
+| `arbitrary-send-eth` | High | 4 | first-party emergency withdrawals | Open | Replace or bound with owed/surplus accounting |
+| `encode-packed-collision` | High | 3 | drop authorization and dependency/script hashing | Open | Replace ad hoc packed hashes with typed/domain-separated encoding; track dependency-script row as `P0-META-001` |
+| `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | Confirm likely false positive against pinned upstream or replace vendored library |
+| `reentrancy-eth` | High | 1 | auction bidding | Open | Move to pull credits and state-before-external-call flow |
+| `uninitialized-state` | High | 2 | mint-accounting mappings | Open | Initialize, remove, or complete design |
+| `weak-prng` | High | 2 | word pool randomness helpers | Open | Replace or explicitly scope through randomness ADR |
+| `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | Confirm likely false positive against pinned upstream or replace vendored library |
+| `locked-ether` | Medium | 1 | test-only rejection mock | Accepted | Keep scoped to test-only baseline |
+| `uninitialized-local` | Medium | 12 | first-party and test helper locals | Open for production rows | Initialize or prove Solidity zero-value intent |
+| `unused-return` | Medium | 4 | characterization tests | Accepted | Keep scoped to test-only baseline |
 
 ## Appendix B: Test Matrix
 
@@ -1622,6 +1650,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | `P0-ADMIN-001` | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer fulfillment rejected | `test/StreamRandomizer.t.sol` | Missing | `P0-RAND-001` | Gate C | TBD |
 | Pending randomness metadata | `tokenURI` pending/final behavior is deterministic | `test/StreamMetadata.t.sol` | Initial characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; golden-file tests missing | `P1-META-*` | Gate D | TBD |
+| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | `P0-META-001` | Gate C | TBD |
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsMerkle.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply and metadata follow ADR | `test/StreamCoreBurn.t.sol` | Missing | `P1-META-*` | Gate D | TBD |

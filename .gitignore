@@ -12,6 +12,14 @@ out/
 cache/
 broadcast/
 
+# Static analysis reports
+slither-baseline.json
+slither-report.json
+slither-results.json
+slither.db.json
+export.sarif
+export.sarif.sarifexplorer
+
 # Local environments and secrets
 .env
 .env.*
