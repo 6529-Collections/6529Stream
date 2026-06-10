@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/32` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 04:13 UTC` |
+| Last updated | `2026-06-10 04:14 UTC` |
 
 ## Packaging Notes
 
@@ -60,7 +60,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
-| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | In progress on `codex/admin-governance-adr` |
+| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Open as PR #36 |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
 ## Current PR Worklog
@@ -656,8 +656,8 @@ Outcome:
 
 Status: In progress.
 Branch: `codex/admin-governance-adr`.
-Pull request: TBD.
-Claude review request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/36`.
+Claude review request: issue comment `4666434728`.
 
 Goal:
 
@@ -704,7 +704,7 @@ Validation:
 
 Review feedback:
 
-- Pending.
+- Pending remote CI and bot review.
 
 ## Decision Log
 
@@ -783,6 +783,7 @@ Review feedback:
 | 2026-06-10 04:01 | Create admin/governance issues | Issues #33 through #35 anchor ADR 0004 plus selector/permission and pause/emergency implementation follow-ups |
 | 2026-06-10 04:08 | Draft admin/governance ADR | ADR 0004 accepts Safe-rooted roles, target-scoped selector grants, signer lifecycle controls, domain-specific pause, and surplus-only emergency controls |
 | 2026-06-10 04:13 | Validate admin/governance ADR locally | Heading, traceability, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 04:14 | Open PR #36 | Admin/governance ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666434728` |
 
 ## Resume Instructions
 
