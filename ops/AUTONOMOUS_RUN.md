@@ -1074,7 +1074,7 @@ Outcome:
 
 ### PR #56: Replace drop authorization with EIP-712 (Queue Item 15)
 
-Status: Open; pending CI and bot review.
+Status: Open; merge-ready after CI and CodeRabbit review.
 Branch: `codex/eip712-drop-authorization`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/56`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/10`.
@@ -1135,9 +1135,15 @@ Validation:
 
 Review feedback:
 
-- GitHub CI pending on head `d3747d0c69093c54bb843992b157c63644662e39`.
-- Claude review requested in issue comment `4667572552`.
-- CodeRabbit pending.
+- GitHub CI run `27259664728` passed on head
+  `175c24929ac76e5cc5cece64786201dd47063745`.
+- Claude review was requested in issue comment `4667572552`, but Claude was
+  unavailable because the organization's Claude Code overage spend limit was
+  reached.
+- CodeRabbit initially remained pending on the review-processing note; follow-up
+  command comment `4667699009` requested completion for the latest head.
+- CodeRabbit status passed and reported no actionable comments on head
+  `175c24929ac76e5cc5cece64786201dd47063745`.
 
 ## Decision Log
 
