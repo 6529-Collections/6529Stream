@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/auction-custody-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/20` |
+| Active PR branch | `codex/payment-accounting-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/23` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 03:17 UTC` |
+| Last updated | `2026-06-10 03:54 UTC` |
 
 ## Packaging Notes
 
@@ -58,8 +58,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Merged in PR #7 |
 | 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
-| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Open as PR #23 |
-| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Pending |
+| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
+| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merge-ready as PR #32 |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
@@ -447,7 +447,7 @@ Outcome:
 
 ### PR #23: Auction custody ADR (Queue Item 8)
 
-Status: Open; waiting for CI and bot review.
+Status: Merged.
 Branch: `codex/auction-custody-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/23`.
 Claude review request: issue comment `4666002050`.
@@ -491,9 +491,11 @@ Validation:
   `P0-AUCT-002`, `0002-auction-custody`, issue links, and canonical auction
   states.
 - `git diff --check` passed.
-- `make check` passed with 17 tests and known compiler/NatSpec warnings.
+- `make check` passed with 17 tests and known compiler/NatSpec warnings after
+  payment issue-link traceability updates.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
-  17 tests and known compiler/NatSpec warnings.
+  17 tests and known compiler/NatSpec warnings after payment issue-link
+  traceability updates.
 - Late Claude PR #20 cleanup validation passed for canonical
   `DROP_ID_TYPEHASH`, sale-mode-specific payer/price/auction fields, zero
   poster, and poster/signature semantics.
@@ -539,7 +541,103 @@ Review feedback:
   deferred auction `recipient` rule. ADR 0002 now keeps auction
   `recipient == address(0)`, rejects non-zero signed auction recipients, and
   derives settlement recipients from `poster` and `highestBidder`.
-- Waiting for CI and bot review to rerun on the latest head.
+- Final CI passed on run `27250789199`.
+- CodeRabbit completed successfully on the final head.
+- Claude review threads were addressed and resolved before merge.
+- Late Claude PR #20 review threads were also addressed and resolved after PR
+  #23 merged, because PR #23 had already updated ADR 0001 with the requested
+  field semantics and canonical `DROP_ID_TYPEHASH`.
+
+Outcome:
+
+- Merged as PR #23 on `2026-06-10 03:22 UTC`.
+- Squash merge commit:
+  `e65a6814e55c7638f55c6de0714fd56296480e51`.
+- Latest head before merge:
+  `6bfa7c79e3565adf47dd8f7d9dbb0578594c067c`.
+- GitHub CI run `27250789199` passed on the final head.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review threads were addressed and resolved before merge.
+
+### PR #32: Payment accounting ADR (Queue Item 9)
+
+Status: Merge-ready under autonomous maintainer decision.
+Branch: `codex/payment-accounting-adr`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/32`.
+Claude review request: issue comment `4666247442`.
+
+Goal:
+
+- Accept `docs/adr/0003-payment-accounting.md` before any P0 pull-payment,
+  emergency-withdrawal, or auction payment rewrite.
+- Decide credit categories, owed-balance totals, surplus, withdrawal semantics,
+  failed-withdrawal behavior, forced/direct ETH handling, emergency withdrawal
+  limits, events, invariants, and test requirements.
+- Link the ADR from the roadmap and ADR index.
+
+Created GitHub issues:
+
+- [#24](https://github.com/6529-Collections/6529Stream/issues/24)
+  `P0-PAY-ADR`: accept payment accounting design.
+- [#25](https://github.com/6529-Collections/6529Stream/issues/25)
+  `P0-PAY-001`: add pull-payment accounting.
+- [#26](https://github.com/6529-Collections/6529Stream/issues/26)
+  `P0-PAY-002`: add credit ledger storage and total-owed views.
+- [#27](https://github.com/6529-Collections/6529Stream/issues/27)
+  `P0-PAY-003`: convert fixed-price payouts to credits.
+- [#28](https://github.com/6529-Collections/6529Stream/issues/28)
+  `P0-PAY-004`: convert auction outbid refunds to credits.
+- [#29](https://github.com/6529-Collections/6529Stream/issues/29)
+  `P0-PAY-005`: convert curator reward claims to credits.
+- [#30](https://github.com/6529-Collections/6529Stream/issues/30)
+  `P0-PAY-006`: add withdrawal functions and failed-withdrawal behavior.
+- [#31](https://github.com/6529-Collections/6529Stream/issues/31)
+  `P0-PAY-007`: bound emergency withdrawals by surplus.
+
+Related existing issues:
+
+- [#8](https://github.com/6529-Collections/6529Stream/issues/8)
+  `P0-PAY-008`: bound emergency withdrawals and prove owed-balance invariants.
+- [#12](https://github.com/6529-Collections/6529Stream/issues/12)
+  `P0-AUCT-002`: fix auction bidding reentrancy and outbid refunds.
+- [#22](https://github.com/6529-Collections/6529Stream/issues/22)
+  `P0-AUCT-001`: formalize auction custody, settlement, and lifecycle state
+  machine.
+
+Candidate files:
+
+- `docs/adr/0003-payment-accounting.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Markdown heading scan passed for `docs/adr/0003-payment-accounting.md`,
+  `docs/adr/README.md`, `ops/ROADMAP.md`, and `ops/AUTONOMOUS_RUN.md`.
+- Payment traceability scan passed for issue #24, `P0-PAY-ADR`,
+  `0003-payment-accounting`, `totalAuctionBidEscrow`,
+  `totalRandomnessReserved`, `emergencyWithdrawable`, failed withdrawals,
+  forced ETH, and the intended payment test files.
+- `git diff --check` passed.
+- `make check` passed with 17 tests and known compiler/NatSpec warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
+  17 tests and known compiler/NatSpec warnings.
+- GitHub CI run `27251741547` passed on head
+  `e160bda2fb0c9898ff05b6f35f90333f86a2f479`.
+
+Review feedback:
+
+- CodeRabbit completed successfully on head
+  `e160bda2fb0c9898ff05b6f35f90333f86a2f479` with no actionable comments and
+  all five pre-merge checks passing.
+- Claude review was explicitly requested in issue comment `4666247442`, but
+  Claude returned `Code review skipped` because the organization's Claude Code
+  overage spend limit was reached. This is an external billing/admin condition,
+  so PR #32 proceeds under autonomous maintainer decision after local,
+  sidecar, CI, and CodeRabbit review.
+- No inline review threads are open.
 
 ## Decision Log
 
@@ -605,6 +703,15 @@ Review feedback:
 | 2026-06-10 03:03 | Address late Claude PR #20 comments in PR #23 | ADR 0001 now pins `DROP_ID_TYPEHASH` and closes remaining signed-field semantic gaps for payer, sale-mode price fields, and poster attribution |
 | 2026-06-10 03:08 | Address Claude PR #23 state-machine review | ADR 0002 now clarifies custody-confirmation trigger and `Created -> Active` derivation |
 | 2026-06-10 03:17 | Address Claude PR #23 follow-up review | ADR 0002 now specifies no-bid NFT claim fallback, auction recipient policy, and first-bid cancellation guard |
+| 2026-06-10 03:22 | Merge PR #23 | Final head was CI-clean, CodeRabbit-clean, and visible Claude review threads were resolved |
+| 2026-06-10 03:25 | Create payment accounting ADR issue | Issue #24 defines the required payment accounting decisions before pull-payment rewrites |
+| 2026-06-10 03:32 | Draft payment accounting ADR | ADR 0003 chooses pull-payment accounting, owed-balance totals, surplus-only emergency withdrawal, forced-ETH handling, and payment invariants |
+| 2026-06-10 03:38 | Validate payment accounting ADR locally | Heading, traceability, whitespace, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 03:42 | Create payment implementation issues | Issues #25 through #31 now track the payment ledger, fixed-price, auction refund, curator claim, withdrawal, and emergency surplus workstreams |
+| 2026-06-10 03:44 | Revalidate payment ADR traceability | Staged whitespace, `make check`, and Windows wrapper validations pass after issue-link updates |
+| 2026-06-10 03:45 | Open PR #32 | Payment accounting ADR is published with validation evidence |
+| 2026-06-10 03:46 | Request Claude review on PR #32 | Explicit review ping added in issue comment `4666247442` because Claude may not run automatically |
+| 2026-06-10 03:54 | Mark PR #32 merge-ready | CI passed, CodeRabbit reported no actionable comments, no inline review threads are open, and Claude is unavailable due to organization overage limits |
 
 ## Resume Instructions
 

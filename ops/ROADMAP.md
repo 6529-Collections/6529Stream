@@ -94,7 +94,7 @@ Required evidence:
 
 ### Gate B1: P0 Protocol Decisions Accepted
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
 Blocking issues: TBD.
 Evidence: TBD.
@@ -340,7 +340,7 @@ contract changes until the relevant ADR is accepted.
 | --- | --- | --- | --- | --- |
 | Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` | EIP-712 schema, recipient/payer policy, nonce model, replay protection, signer rotation, ERC-1271 stance |
 | Auction custody | [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` | Token custody, settlement actor, no-bid semantics, transfer method, cancellation |
-| Payment accounting | `P0-PAY-ADR` | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
+| Payment accounting | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
 | Admin/governance | `P0-ADMIN-ADR` | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
 | Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` | Provider choice, pending state, callback validation, retries, stale callback handling |
 | Metadata/freeze | `P1-META-ADR` | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` | Pending/final metadata, frozen state, dependency immutability, burn metadata |
@@ -361,7 +361,7 @@ This is the recommended first batch of issues.
 5. `P0/M0`: Add Slither baseline table.
 6. `P0-AUTH-ADR / P0/DESIGN`: ADR for drop authorization.
 7. [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) / P0/DESIGN: ADR for auction custody.
-8. `P0-PAY-ADR / P0/DESIGN`: ADR for payment accounting.
+8. [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) / P0/DESIGN: ADR for payment accounting.
 9. `P0-ADMIN-ADR / P0/DESIGN`: ADR for admin/governance.
 10. `P0-RAND-ADR / P0/DESIGN`: ADR for randomness.
 11. `P1-META-ADR / P1/DESIGN`: ADR for metadata/freeze.
@@ -713,7 +713,7 @@ Acceptance criteria:
 - Priority/severity/type: `P0 / Critical / CODE+TEST+DOCS`.
 - Blocks: Gate C.
 - Issue: [#12](https://github.com/6529-Collections/6529Stream/issues/12).
-- Dependencies: `P0-PAY-ADR`, ADR 0002.
+- Dependencies: [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), ADR 0002.
 
 Problem:
 
@@ -759,7 +759,8 @@ Acceptance criteria:
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
 - Blocks: Gate C.
-- Dependencies: `P0-PAY-ADR`.
+- Issue: [#25](https://github.com/6529-Collections/6529Stream/issues/25).
+- Dependencies: [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24).
 
 Problem:
 
@@ -778,21 +779,29 @@ Intended behavior:
 
 Required code changes:
 
-- Add accounting for poster credits, bidder credits, curator credits, protocol
-  surplus, total poster owed, total bidder owed, total curator owed, total owed,
-  and emergency withdrawable balance.
+- Add accounting for poster credits, bidder credits, curator credits, curator
+  reserves, protocol credits, active auction bid escrow, randomness reserves,
+  protocol surplus, total poster owed, total bidder owed, total curator owed,
+  total reserved, total owed, and emergency withdrawable balance.
 - Add withdrawal functions.
 - Ensure failed withdrawal does not erase credit.
 
 Child tickets:
 
-- `P0-PAY-002`: Add credit ledger storage and total-owed views.
-- `P0-PAY-003`: Convert fixed-price poster/platform payouts to credits.
-- `P0-PAY-004`: Convert auction outbid refunds to credits.
-- `P0-PAY-005`: Convert curator reward claims to credits.
-- `P0-PAY-006`: Add withdrawal functions and failed-withdrawal behavior.
-- `P0-PAY-007`: Bound emergency withdrawals by surplus.
-- `P0-PAY-008`: Add payment invariants and forced-ETH tests.
+- [`P0-PAY-002`](https://github.com/6529-Collections/6529Stream/issues/26):
+  Add credit ledger storage and total-owed views.
+- [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27):
+  Convert fixed-price poster/platform payouts to credits.
+- [`P0-PAY-004`](https://github.com/6529-Collections/6529Stream/issues/28):
+  Convert auction outbid refunds to credits.
+- [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29):
+  Convert curator reward claims to credits.
+- [`P0-PAY-006`](https://github.com/6529-Collections/6529Stream/issues/30):
+  Add withdrawal functions and failed-withdrawal behavior.
+- [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31):
+  Bound emergency withdrawals by surplus.
+- [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8):
+  Add payment invariants and forced-ETH tests.
 
 Required tests:
 
@@ -810,8 +819,11 @@ Required docs:
 
 Acceptance criteria:
 
-- `totalOwed == totalPosterOwed + totalBidderOwed + totalCuratorOwed`.
-- `address(this).balance >= totalOwed` except where forced ETH creates surplus.
+- `totalOwed == totalPosterOwed + totalBidderOwed + totalCuratorOwed +
+  totalCuratorReserved + totalProtocolOwed + totalAuctionBidEscrow +
+  totalRandomnessReserved + otherContractSpecificReserved`.
+- `address(this).balance >= totalOwed`; direct or forced ETH may make
+  `address(this).balance > totalOwed` by creating surplus.
 - `emergencyWithdrawable == address(this).balance - totalOwed`.
 - No withdrawal can reduce another user's owed balance.
 
@@ -1648,6 +1660,10 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
+| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamEmergencyWithdraw.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamRandomizerPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | `P0-ADMIN-001` | Gate C | TBD |
@@ -1659,7 +1675,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsMerkle.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply and metadata follow ADR | `test/StreamCoreBurn.t.sol` | Missing | `P1-META-*` | Gate D | TBD |
-| Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamPaymentsInvariant.t.sol` | Missing | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamPaymentsInvariant.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 
 ## Appendix C: ADR Index
 
@@ -1667,7 +1683,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | --- | --- | --- | --- | --- |
 | 0001 Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | Accepted | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` |
 | 0002 Auction custody | [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) | Accepted | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` |
-| 0003 Payment accounting | `P0-PAY-ADR` | Missing | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
+| 0003 Payment accounting | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) | Accepted | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
 | 0004 Admin/governance | `P0-ADMIN-ADR` | Missing | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
 | 0005 Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Missing | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` |
 | 0006 Metadata/freeze | `P1-META-ADR` | Missing | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` |
