@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/admin-governance-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/32` |
+| Active PR branch | `codex/randomness-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/36` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 04:20 UTC` |
+| Last updated | `2026-06-10 04:42 UTC` |
 
 ## Packaging Notes
 
@@ -60,8 +60,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
-| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merge-ready as PR #36 |
-| 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
+| 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merged in PR #36 |
+| 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | In progress on `codex/randomness-adr` |
 
 ## Current PR Worklog
 
@@ -652,9 +652,9 @@ Outcome:
 - Claude review was unavailable because the organization's Claude Code overage
   spend limit was reached; the explicit request is recorded above.
 
-### PR #TBD: Admin/governance ADR (Queue Item 10)
+### PR #36: Admin/governance ADR (Queue Item 10)
 
-Status: Merge-ready under autonomous maintainer decision.
+Status: Merged.
 Branch: `codex/admin-governance-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/36`.
 Claude review request: issue comment `4666434728`.
@@ -715,6 +715,93 @@ Review feedback:
   so PR #36 proceeds under autonomous maintainer decision after local,
   sidecar, CI, and CodeRabbit review.
 - No inline review threads are open.
+
+Outcome:
+
+- Merged as PR #36 on `2026-06-10 04:24 UTC`.
+- Squash merge commit:
+  `8ee2dca0af2ffa989aec073fbec764a81eb868aa`.
+- Latest head before merge:
+  `d29569fee2d445b47888839278c54d32a5ba3e29`.
+- GitHub CI run `27253041315` passed on the final head.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review was unavailable because the organization's Claude Code overage
+  spend limit was reached; the explicit request is recorded above.
+
+### PR #44: Randomness ADR (Queue Item 11)
+
+Status: Open; waiting on CI and CodeRabbit.
+Branch: `codex/randomness-adr`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/44`.
+Claude review request: issue comment `4666596095`.
+
+Goal:
+
+- Accept `docs/adr/0005-randomness.md` before any P0 randomizer callback,
+  provider, request-lifecycle, or weak-helper randomness rewrite.
+- Decide the production provider model, request lifecycle, callback validation,
+  randomizer epoch, stale callback handling, migration policy, retry limits,
+  seed storage, provider accounting, and weak-helper scope.
+- Link the ADR from the roadmap, ADR index, Slither baseline, and test matrix.
+
+Created GitHub issues:
+
+- [#37](https://github.com/6529-Collections/6529Stream/issues/37)
+  `P0-RAND-001`: harden randomizer requests and callbacks.
+- [#38](https://github.com/6529-Collections/6529Stream/issues/38)
+  `P0-RAND-002`: add randomness request lifecycle storage and views.
+- [#39](https://github.com/6529-Collections/6529Stream/issues/39)
+  `P0-RAND-003`: validate randomness callbacks by request, token, collection,
+  provider, and epoch.
+- [#40](https://github.com/6529-Collections/6529Stream/issues/40)
+  `P0-RAND-004`: add pending, fulfilled, stale, and failed randomness states.
+- [#41](https://github.com/6529-Collections/6529Stream/issues/41)
+  `P0-RAND-005`: define and test randomizer migration with pending requests.
+- [#42](https://github.com/6529-Collections/6529Stream/issues/42)
+  `P0-RAND-006`: add bounded manual retry for deterministic randomness
+  post-processing failures.
+- [#43](https://github.com/6529-Collections/6529Stream/issues/43)
+  `P0-RAND-007`: decide and implement raw random words versus derived hash
+  storage policy.
+
+Candidate files:
+
+- `docs/adr/0005-randomness.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Markdown heading scan passed for `docs/adr/0005-randomness.md`,
+  `docs/adr/README.md`, `ops/ROADMAP.md`, `ops/SLITHER_BASELINE.md`, and
+  `ops/AUTONOMOUS_RUN.md`.
+- Randomness traceability scan passed for issue #14, issues #37 through #43,
+  `P0-RAND-ADR`, `0005-randomness`, `randomizerEpoch`,
+  `RandomizerNXT`, `XRandoms`, `weak-prng`, `RandomnessRequested`,
+  `RandomnessFulfilled`, and `FailedPostProcessing`.
+- ASCII scan passed for touched docs and ops files.
+- `git diff --check` passed.
+- Sidecar read-only randomness review completed; findings about mint-before-
+  randomness zero-hash observability, on-chain zero-hash metadata, nonzero hash
+  validation, provider-origin versus semantic callback validation, weak helper
+  scope, reserve accounting, and ADR 0004 pause compatibility were folded into
+  the ADR and roadmap.
+- `make check` passed with 17 tests and known compiler/NatSpec warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
+  17 tests and known compiler/NatSpec warnings.
+
+Review feedback:
+
+- GitHub CI run `27253681954` is in progress on head
+  `8b84c7467d64ddeb0edba962117e4641dbe3a18f`.
+- CodeRabbit is processing run `74327056-108a-4c51-add1-cfef356777bb`.
+- Claude review was explicitly requested in issue comment `4666596095`, but
+  Claude returned `Code review skipped` because the organization's Claude Code
+  overage spend limit was reached.
+- No inline review threads are open as of `2026-06-10 04:42 UTC`.
 
 ## Decision Log
 
@@ -795,6 +882,12 @@ Review feedback:
 | 2026-06-10 04:13 | Validate admin/governance ADR locally | Heading, traceability, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 04:14 | Open PR #36 | Admin/governance ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666434728` |
 | 2026-06-10 04:20 | Mark PR #36 merge-ready | CI passed, CodeRabbit reported no actionable comments, no inline review threads are open, and Claude is unavailable due to organization overage limits |
+| 2026-06-10 04:24 | Merge PR #36 | Final head was CI-clean, CodeRabbit-clean, and Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 04:28 | Start randomness ADR PR | Gate B1 requires accepted randomness design before callback, provider, migration, or weak-helper rewrites |
+| 2026-06-10 04:30 | Create randomness implementation issues | Issues #37 through #43 anchor callback hardening, lifecycle storage, validation, states, migration, retry, and seed storage workstreams |
+| 2026-06-10 04:32 | Draft randomness ADR | ADR 0005 accepts provider-backed async randomness, request lifecycle state, provider epoch validation, weak-helper production disablement, deterministic retry limits, and reserve accounting alignment |
+| 2026-06-10 04:39 | Validate randomness ADR locally | Heading, traceability, ASCII, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 04:42 | Open PR #44 | Randomness ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666596095` |
 
 ## Resume Instructions
 
