@@ -17,12 +17,14 @@ contract StreamAdminsTest is CharacterizationTestBase {
         bool enabled,
         address admin
     );
+    event SignerManagerUpdated(address indexed account, bool enabled, address indexed admin);
+    event SignerLifecycleTargetUpdated(address indexed target, bool enabled, address indexed admin);
 
-    function testConstructorSetsSignerAsGlobalAdmin() public {
+    function testConstructorRecordsSignerWithoutAdminGrant() public {
         StreamAdmins admins = new StreamAdmins(address(this));
 
         address(admins.tdhSigner()).assertEq(address(this), "tdh signer mismatch");
-        admins.retrieveGlobalAdmin(address(this)).assertTrue("signer is not global admin");
+        admins.retrieveGlobalAdmin(address(this)).assertFalse("signer is global admin");
     }
 
     function testZeroTdhSignerConstructorFails() public {
@@ -30,7 +32,7 @@ contract StreamAdminsTest is CharacterizationTestBase {
         new StreamAdmins(address(0));
     }
 
-    function testOnlyRegistrarCanRegisterGlobalAdmin() public {
+    function testOnlyOwnerCanRegisterGlobalAdmin() public {
         StreamAdmins admins = new StreamAdmins(address(0xBEEF));
 
         vm.prank(address(0xBAD));
@@ -52,17 +54,19 @@ contract StreamAdminsTest is CharacterizationTestBase {
             .assertTrue("owner did not register global admin");
     }
 
-    function testTdhSignerCanRegisterGlobalAdmin() public {
-        StreamAdmins admins = new StreamAdmins(address(this));
+    function testDropSignerCannotRegisterGlobalAdmin() public {
+        address signer = address(0xBEEF);
+        StreamAdmins admins = new StreamAdmins(signer);
 
-        vm.expectEmit(true, false, true, true);
-        emit GlobalAdminUpdated(address(0xCAFE), true, address(this));
-        admins.registerAdmin(address(0xCAFE), true);
+        vm.prank(signer);
+        (bool success,) = address(admins)
+            .call(abi.encodeWithSelector(admins.registerAdmin.selector, address(0xCAFE), true));
 
-        admins.retrieveGlobalAdmin(address(0xCAFE)).assertTrue("global admin not set");
+        success.assertFalse("drop signer registered global admin");
+        admins.retrieveGlobalAdmin(address(0xCAFE)).assertFalse("global admin was set");
     }
 
-    function testTdhSignerCanRegisterFunctionAdmin() public {
+    function testOwnerCanRegisterFunctionAdmin() public {
         StreamAdmins admins = new StreamAdmins(address(this));
         address target = address(0xF00D);
         bytes4 selector = StreamAdmins.registerAdmin.selector;
@@ -75,7 +79,7 @@ contract StreamAdminsTest is CharacterizationTestBase {
             .assertTrue("function admin not set");
     }
 
-    function testTdhSignerCanRevokeFunctionAdmin() public {
+    function testOwnerCanRevokeFunctionAdmin() public {
         StreamAdmins admins = new StreamAdmins(address(this));
         address functionAdmin = address(0xCAFE);
         address target = address(0xF00D);
@@ -91,7 +95,7 @@ contract StreamAdminsTest is CharacterizationTestBase {
             .assertFalse("function admin not revoked");
     }
 
-    function testTdhSignerCanBatchRegisterFunctionAdmins() public {
+    function testOwnerCanBatchRegisterFunctionAdmins() public {
         StreamAdmins admins = new StreamAdmins(address(this));
         address functionAdmin = address(0xCAFE);
         address target = address(0xF00D);
@@ -107,6 +111,135 @@ contract StreamAdminsTest is CharacterizationTestBase {
             .assertTrue("second selector not set");
         admins.retrieveFunctionAdmin(functionAdmin, address(0xABCD), selectors[0])
             .assertFalse("batch grant leaked to another target");
+    }
+
+    function testOwnerCanRegisterAndRevokeSignerManager() public {
+        StreamAdmins admins = new StreamAdmins(address(this));
+        address signerManager = address(0x5151);
+
+        vm.expectEmit(true, false, true, true);
+        emit SignerManagerUpdated(signerManager, true, address(this));
+        admins.registerSignerManager(signerManager, true);
+        admins.signerManagers(signerManager).assertTrue("signer manager not set");
+
+        vm.expectEmit(true, false, true, true);
+        emit SignerManagerUpdated(signerManager, false, address(this));
+        admins.registerSignerManager(signerManager, false);
+        admins.signerManagers(signerManager).assertFalse("signer manager not revoked");
+    }
+
+    function testOwnerCanRegisterAndRevokeSignerLifecycleTarget() public {
+        StreamAdmins admins = new StreamAdmins(address(this));
+        address dropsTarget = address(0xD0D0);
+
+        vm.expectEmit(true, false, true, true);
+        emit SignerLifecycleTargetUpdated(dropsTarget, true, address(this));
+        admins.registerSignerLifecycleTarget(dropsTarget, true);
+        admins.signerLifecycleTargets(dropsTarget).assertTrue("signer target not set");
+
+        vm.expectEmit(true, false, true, true);
+        emit SignerLifecycleTargetUpdated(dropsTarget, false, address(this));
+        admins.registerSignerLifecycleTarget(dropsTarget, false);
+        admins.signerLifecycleTargets(dropsTarget).assertFalse("signer target not revoked");
+    }
+
+    function testSignerManagerCanGrantOnlySignerLifecycleSelectors() public {
+        StreamAdmins admins = new StreamAdmins(address(this));
+        address signerManager = address(0x5151);
+        address operator = address(0x5152);
+        address dropsTarget = address(0xD0D0);
+        bytes4 signerUpdateSelector = admins.DROP_SIGNER_UPDATE_SELECTOR();
+
+        admins.registerSignerManager(signerManager, true);
+        admins.registerSignerLifecycleTarget(dropsTarget, true);
+
+        vm.expectEmit(true, true, true, true);
+        emit FunctionAdminUpdated(operator, dropsTarget, signerUpdateSelector, true, signerManager);
+        vm.prank(signerManager);
+        admins.registerSignerFunctionAdmin(operator, dropsTarget, signerUpdateSelector, true);
+        admins.retrieveFunctionAdmin(operator, dropsTarget, signerUpdateSelector)
+            .assertTrue("signer selector not granted");
+
+        vm.prank(signerManager);
+        (bool broadGrantSuccess,) = address(admins)
+            .call(
+                abi.encodeWithSelector(
+                    admins.registerFunctionAdmin.selector,
+                    operator,
+                    dropsTarget,
+                    StreamAdmins.registerAdmin.selector,
+                    true
+                )
+            );
+        broadGrantSuccess.assertFalse("signer manager used broad registrar");
+
+        vm.prank(signerManager);
+        (bool nonSignerSelectorSuccess,) = address(admins)
+            .call(
+                abi.encodeWithSelector(
+                    admins.registerSignerFunctionAdmin.selector,
+                    operator,
+                    dropsTarget,
+                    StreamAdmins.registerAdmin.selector,
+                    true
+                )
+            );
+        nonSignerSelectorSuccess.assertFalse("signer manager granted non-signer selector");
+        admins.retrieveFunctionAdmin(operator, dropsTarget, StreamAdmins.registerAdmin.selector)
+            .assertFalse("non-signer selector was granted");
+    }
+
+    function testSignerManagerCannotGrantUnregisteredLifecycleTarget() public {
+        StreamAdmins admins = new StreamAdmins(address(this));
+        address signerManager = address(0x5151);
+        address operator = address(0x5152);
+        address dropsTarget = address(0xD0D0);
+        bytes4 signerUpdateSelector = admins.DROP_SIGNER_UPDATE_SELECTOR();
+
+        admins.registerSignerManager(signerManager, true);
+
+        vm.prank(signerManager);
+        (bool success,) = address(admins)
+            .call(
+                abi.encodeWithSelector(
+                    admins.registerSignerFunctionAdmin.selector,
+                    operator,
+                    dropsTarget,
+                    signerUpdateSelector,
+                    true
+                )
+            );
+
+        success.assertFalse("signer manager granted unregistered target");
+        admins.retrieveFunctionAdmin(operator, dropsTarget, signerUpdateSelector)
+            .assertFalse("unregistered target grant was stored");
+    }
+
+    function testRevokedSignerManagerCannotGrantSignerLifecycleSelectors() public {
+        StreamAdmins admins = new StreamAdmins(address(this));
+        address signerManager = address(0x5151);
+        address operator = address(0x5152);
+        address dropsTarget = address(0xD0D0);
+        bytes4 signerUpdateSelector = admins.DROP_SIGNER_UPDATE_SELECTOR();
+
+        admins.registerSignerManager(signerManager, true);
+        admins.registerSignerManager(signerManager, false);
+
+        vm.prank(signerManager);
+        (bool success,) = address(admins)
+            .call(
+                abi.encodeWithSelector(
+                    admins.registerSignerFunctionAdmin.selector,
+                    operator,
+                    dropsTarget,
+                    signerUpdateSelector,
+                    true
+                )
+            );
+
+        success.assertFalse("revoked signer manager granted selector");
+        admins.retrieveFunctionAdmin(operator, dropsTarget, signerUpdateSelector)
+            .assertFalse("revoked grant was stored");
     }
 
     function testZeroAddressRoleAssignmentsFail() public {

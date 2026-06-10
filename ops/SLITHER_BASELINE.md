@@ -9,7 +9,7 @@ positive; this is still not a full security baseline for public launch.
 | Field | Value |
 | --- | --- |
 | Status | High/medium rows triaged; not accepted as a CI gate |
-| Last generated | `2026-06-10 20:39 UTC` |
+| Last generated | `2026-06-10 21:53 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -26,10 +26,10 @@ baseline and lower-impact findings are handled.
 | --- | ---: |
 | High | 4 |
 | Medium | 19 |
-| Low | 82 |
-| Informational | 577 |
+| Low | 92 |
+| Informational | 595 |
 | Optimization | 11 |
-| Total | 693 |
+| Total | 721 |
 
 ## Detector Counts
 
@@ -45,8 +45,8 @@ baseline and lower-impact findings are handled.
 | `locked-ether` | Medium | 7 |
 | `uninitialized-local` | Medium | 1 |
 | `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 82 |
-| Informational findings | Informational | 577 |
+| Low-impact findings | Low | 92 |
+| Informational findings | Informational | 595 |
 | Optimization findings | Optimization | 11 |
 
 Dependency-script encoding delta from the previous tracked capture:
@@ -98,6 +98,21 @@ Dependency-script encoding delta from the previous tracked capture:
   - New test-harness high/medium detector noise is scoped by source-level
     suppressions for deliberate payable calls, generated-sequence bookkeeping,
     and the payable mock randomness provider.
+- Signer lifecycle manager delta from the previous tracked capture:
+  - High and Medium counts remain unchanged at 4 and 19.
+  - Low findings increased from 82 to 90, Informational findings increased from
+    577 to 592, Optimization findings remain 11, and total findings increased
+    from 693 to 716 after adding `StreamAdmins` signer-manager entrypoints,
+    focused signer-lifecycle tests, and explicit selector grants in legacy test
+    harness setup.
+  - `arbitrary-send-eth`, `reentrancy-eth`, `encode-packed-collision`,
+    `weak-prng`, and `uninitialized-state` remain at zero findings.
+- Signer lifecycle target allowlist delta from the previous tracked capture:
+  - High and Medium counts remain unchanged at 4 and 19.
+  - Low findings increased from 90 to 92, Informational findings increased from
+    592 to 595, Optimization findings remain 11, and total findings increased
+    from 716 to 721 after adding owner-approved signer-lifecycle targets and
+    their event/test coverage.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
 - Slither still exits non-zero because accepted test-only and vendored
   false-positive rows remain visible, plus lower-impact findings are not yet a

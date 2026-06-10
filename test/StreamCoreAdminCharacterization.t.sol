@@ -17,6 +17,10 @@ contract StreamCoreAdminCharacterizationTest is CharacterizationTestBase {
         StreamCore core =
             new StreamCore("6529 Stream", "STREAM", address(admins), address(registry));
 
+        admins.registerFunctionAdmin(
+            address(this), address(core), core.createCollection.selector, true
+        );
+
         string[] memory scripts = new string[](1);
         scripts[0] = "function draw(){}";
         core.createCollection(

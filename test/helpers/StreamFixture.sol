@@ -30,6 +30,7 @@ abstract contract StreamFixture {
         returns (DeployedStream memory deployed)
     {
         deployed.admins = new StreamAdmins(address(this));
+        deployed.admins.registerAdmin(address(this), true);
         deployed.dependencyRegistry = new DependencyRegistry(address(deployed.admins));
         deployed.core = new StreamCore(
             "6529 Stream", "STREAM", address(deployed.admins), address(deployed.dependencyRegistry)

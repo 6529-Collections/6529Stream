@@ -38,6 +38,17 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
         drops = new StreamDrops(
             signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
         );
+        _grantSignerLifecycle(admins, drops, address(this));
+    }
+
+    function _grantSignerLifecycle(StreamAdmins admins, StreamDrops drops, address account)
+        private
+    {
+        bytes4[] memory selectors = new bytes4[](3);
+        selectors[0] = drops.updateTDHsigner.selector;
+        selectors[1] = drops.incrementSignerEpoch.selector;
+        selectors[2] = drops.cancelDrop.selector;
+        admins.registerBatchSignerFunctionAdmin(account, address(drops), selectors, true);
     }
 
     function testHashDropAuthorizationMatchesExplicitEip712Encoding() public {

@@ -270,6 +270,14 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
         setup.admins = new StreamAdmins(address(this));
         setup.delegation = new MockDelegationManagement();
         setup.pool = new StreamCuratorsPool(address(setup.admins), address(setup.delegation));
+        setup.admins
+            .registerFunctionAdmin(
+                address(this), address(setup.pool), setup.pool.setMerkleRoot.selector, true
+            );
+        setup.admins
+            .registerFunctionAdmin(
+                address(this), address(setup.pool), setup.pool.emergencyWithdraw.selector, true
+            );
     }
 
     function _setSingleLeafRoot(StreamCuratorsPool pool, address rewardAddress, uint256 amount)

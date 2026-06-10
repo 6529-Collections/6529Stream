@@ -248,6 +248,9 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
             address(contractSigner), address(minter), address(admins), PAYOUT, CURATORS_POOL
         );
         MockStreamAuctions auctions = new MockStreamAuctions();
+        admins.registerFunctionAdmin(
+            address(this), address(drops), drops.updateAuctionContract.selector, true
+        );
         drops.updateAuctionContract(address(auctions));
     }
 
@@ -258,6 +261,9 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
             signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
         );
         MockStreamAuctions auctions = new MockStreamAuctions();
+        admins.registerFunctionAdmin(
+            address(this), address(drops), drops.updateAuctionContract.selector, true
+        );
         drops.updateAuctionContract(address(auctions));
     }
 

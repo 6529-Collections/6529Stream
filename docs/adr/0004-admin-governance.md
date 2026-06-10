@@ -15,9 +15,12 @@ P0-ADMIN-002 implements domain-scoped pause state for `DropExecution`, `Mint`,
 `RandomnessRequest`, keeps user credit withdrawals unpaused by default, adds
 pause guardian/unpause admin roles, and replaces implicit owner-based emergency
 withdrawal recipients with an explicit `emergencyRecipient()` on
-`StreamAdmins`. Remaining ADR work includes signer lifecycle operations,
-deployment ceremony/runbooks, final production Safe configuration, and any
-expanded collection-admin role model.
+`StreamAdmins`. P0-ADMIN-003 adds root-managed signer managers, owner-approved
+signer-lifecycle targets, removes the drop signer's implicit role-management
+authority, and covers signer lifecycle grants, rotation, epoch invalidation,
+and per-drop cancellation. Remaining ADR work includes deployment
+ceremony/runbooks, final production Safe configuration, and any expanded
+collection-admin role model.
 
 ## Metadata
 
@@ -25,7 +28,7 @@ expanded collection-admin role model.
 | --- | --- |
 | Date | 2026-06-10 |
 | Issue | [P0-ADMIN-ADR](https://github.com/6529-Collections/6529Stream/issues/33) |
-| Blocks | [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34), [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35) |
+| Blocks | [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34), [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35), [P0-ADMIN-003](https://github.com/6529-Collections/6529Stream/issues/79) |
 | Related issues | [P0-PAY-007](https://github.com/6529-Collections/6529Stream/issues/31), [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0002](0002-auction-custody.md), [ADR 0003](0003-payment-accounting.md) |
 | Affected contracts | `smart-contracts/StreamAdmins.sol`, `smart-contracts/StreamCore.sol`, `smart-contracts/StreamMinter.sol`, `smart-contracts/StreamDrops.sol`, `smart-contracts/AuctionContract.sol`, `smart-contracts/StreamCuratorsPool.sol`, `smart-contracts/DependencyRegistry.sol`, `smart-contracts/RandomizerRNG.sol`, `smart-contracts/RandomizerVRF.sol`, `smart-contracts/RandomizerNXT.sol` |
@@ -53,14 +56,14 @@ Before public beta, the protocol needs to decide:
 
 Current source references, including the historical pre-P0-ADMIN-001 baseline:
 
-- `smart-contracts/StreamAdmins.sol`: `tdhSigner` can register global admins
-  and function admins. P0-ADMIN-001 also lets `owner()` manage those roles as a
-  root recovery path without making `owner()` an implicit operational admin on
-  protected protocol contracts.
-- The constructor still seeds `tdhSigner` as a global admin for compatibility.
-  That global-admin bypass is independently revocable through
-  `registerAdmin(tdhSigner,false)`, while registrar authority remains governed
-  by `authorized()` until signer lifecycle work lands.
+- `smart-contracts/StreamAdmins.sol`: `owner()` manages global admins,
+  function admins, pause guardians, unpause admins, emergency recipients, and
+  signer managers as the root recovery path without making `owner()` an
+  implicit operational admin on protected protocol contracts.
+- Drop-signing identities are no longer role registrars or global admins by
+  default. Root-managed signer managers can grant only the exact
+  `StreamDrops` signer-lifecycle selectors on owner-approved signer-lifecycle
+  targets: `updateTDHsigner`, `incrementSignerEpoch`, and `cancelDrop`.
 - `smart-contracts/IStreamAdmins.sol`: exposes
   `retrieveCollectionAdmin(address,uint256)`. P0-ADMIN-001 implements the
   deferred path as an explicit `false` result; collection-admin mutation powers
@@ -84,12 +87,12 @@ Current source references, including the historical pre-P0-ADMIN-001 baseline:
   first-party emergency-withdrawal surface and send withdrawable surplus to the
   explicit `StreamAdmins.emergencyRecipient()` instead of implicitly using
   `owner()`.
-- `smart-contracts/StreamDrops.sol#updateTDHsigner` can replace the drop signer,
-  but there is no signer epoch, cancellation, role-specific signer manager, or
-  compromise runbook.
-- `smart-contracts/StreamAdmins.sol#tdhSigner` still has no dedicated rotation
-  path, but `owner()` can now recover role management if the registrar key is
-  lost or compromised.
+- `smart-contracts/StreamDrops.sol#updateTDHsigner` can replace the drop signer
+  and increments `signerEpoch`, while `incrementSignerEpoch` and `cancelDrop`
+  support signer compromise response. P0-ADMIN-003 covers these paths through
+  explicit signer-manager grants on approved signer-lifecycle targets.
+- `smart-contracts/StreamAdmins.sol#tdhSigner` remains a readable constructor
+  signer reference for compatibility, but it is not a role-management authority.
 - `StreamAdmins` exposes readable domain pause state for drop execution,
   minting, bidding, settlement, metadata mutation, and randomness requests.
   Randomness fulfillment remains unpaused by policy and must be hardened by ADR
@@ -519,9 +522,11 @@ clearer incident response while preserving user safety.
 
 ## Open Follow-Ups
 
-- Implement [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34).
-- Implement [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35).
+- P0-ADMIN-001, P0-ADMIN-002, and
+  [P0-ADMIN-003](https://github.com/6529-Collections/6529Stream/issues/79)
+  implementation coverage has landed for the current role, pause, emergency,
+  and signer-lifecycle surfaces.
 - Update deployment docs with concrete Safe addresses and thresholds before any
   production drop.
-- Reconcile final pause implementation with ADR 0005 once randomness design is
-  accepted.
+- Keep pause implementation docs aligned with ADR 0005 callback policy as
+  metadata and deployment work lands.
