@@ -16,9 +16,11 @@ order.
 - Maturity: pre-audit and not production-ready.
 - Current CI proves that the repo compiles and runs the initial
   characterization test skeleton. It does not prove protocol correctness.
-- Known P0 blockers include ad hoc drop authorization, auction custody
-  ambiguity, auction reentrancy, push payments, untriaged static analysis
-  findings, missing tests, and missing deployment discipline.
+- Known P0 blockers include auction custody ambiguity, remaining payment push
+  flows, emergency withdrawal boundaries, untriaged static analysis findings,
+  missing tests, and missing deployment discipline. Drop authorization now uses
+  EIP-712 with EOA and ERC-1271 support, and auction outbid refunds now use
+  bidder pull credits.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -760,13 +762,16 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Issue: [#12](https://github.com/6529-Collections/6529Stream/issues/12).
 - Dependencies: [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), ADR 0002.
+- Status: Implemented for auction bid/outbid refunds by PR #58. Broader auction
+  custody, settlement proceeds, fixed-price pull payments, curator rewards, and
+  emergency surplus boundaries remain separate P0 work.
 
 Problem:
 
 - Outbid refunds use push `call` before bid state is fully updated, creating
   reentrancy and denial-of-service risk.
 
-Current behavior:
+Historical behavior before PR #58:
 
 - Previous highest bidder is synchronously refunded during bidding.
 
@@ -800,6 +805,9 @@ Acceptance criteria:
 - No push refund in bid path.
 - Previous bidder refund becomes withdrawable credit.
 - Reentrant bidder test passes.
+- Failed withdrawal preserves credit.
+- Active highest-bid escrow and bidder credits are excluded from auction
+  emergency-withdrawable surplus.
 
 ### P0-PAY-001: Add Pull-Payment Accounting
 
@@ -1798,10 +1806,10 @@ High/medium detector summary:
 
 | Detector | Impact | Count | Primary scope | Status | Issue | Required action |
 | --- | --- | ---: | --- | --- | --- | --- |
-| `arbitrary-send-eth` | High | 4 | first-party emergency withdrawals | Open | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Replace or bound with owed/surplus accounting |
+| `arbitrary-send-eth` | High | 4 | first-party emergency withdrawals | 3 Open / 1 Fixed | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Auction emergency withdrawal is bounded by auction-local surplus after P0-AUCT-002; remaining contracts still need owed/surplus accounting |
 | `encode-packed-collision` | High | 3 | drop authorization and dependency/script hashing | Open | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Replace ad hoc packed hashes with typed/domain-separated encoding; track dependency-script row as `P0-META-001` |
 | `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
-| `reentrancy-eth` | High | 1 | auction bidding | Open | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Move to pull credits and state-before-external-call flow |
+| `reentrancy-eth` | High | 1 | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
 | `uninitialized-state` | High | 2 | mint-accounting mappings | Open | [#13](https://github.com/6529-Collections/6529Stream/issues/13) | Initialize, remove, or complete design |
 | `weak-prng` | High | 2 | word pool randomness helpers | Open | [#14](https://github.com/6529-Collections/6529Stream/issues/14) | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C |
 | `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
@@ -1818,11 +1826,11 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | `tx.origin` recipient bug | Contract executor submits a drop without `tx.origin` dependency | `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol` | Target-state explicit-recipient, contract-executor, non-zero auction-recipient rejection, and no-bid settlement tests added | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
 | Ad hoc drop authorization | EIP-712 valid, explicit digest encoding, replayed, expired, wrong chain, wrong contract, wrong signer, cancelled, duplicate cancellation, stale epoch, malleable, zero recovered signer, token substitution, bad quantity, bad payer, sale-mode field misuse, lifecycle event assertions, and compact signature tests | `test/StreamDropsEIP712.t.sol` | Passing for EOA/EIP-2098 target state; non-ERC-1271 contract signer fails closed | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | ERC-1271 decision | ERC-1271 mock signer success, auction success, invalid magic, reverted check, empty/short/extra return, wrong digest, wrong signature bytes, replay, expiry, and EOA regression | `test/StreamDropsERC1271.t.sol` | Passing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
-| Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
-| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamEmergencyWithdraw.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionPayments.t.sol` | Passing for P0-AUCT-002: bid path has no outbid push refund, rejecting previous bidder cannot block, and withdrawal reentrancy cannot drain more than credited funds | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
+| Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Passing: outbid creates bidder credit, current highest bid remains active escrow, previous bidder can withdraw, and failed withdrawal preserves credit | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
+| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | In Progress: auction-local bidder owed, active bid escrow, total owed, and emergency-withdrawable views exist; broader payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamPayments.t.sol` | In Progress: auction bidder-credit withdrawal failure is covered; broader poster, curator, protocol, and reward withdrawal failures remain missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamEmergencyWithdraw.t.sol` | In Progress: auction emergency withdrawal excludes bidder credits and active highest-bid escrow; remaining contracts and full ledger categories are missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamRandomizerPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |

@@ -4,6 +4,12 @@
 
 Accepted.
 
+Implementation status: P0-AUCT-002 converts auction outbid refunds to bidder
+credits and removes the bid-path push refund. Remaining ADR work includes
+fixed-price payment credits, with-bid settlement credits, curator reward
+credits, protocol-wide ledger views, failed-withdrawal coverage for every
+payment category, and emergency surplus boundaries.
+
 ## Metadata
 
 | Field | Value |
@@ -42,22 +48,24 @@ Current source references:
   auction drops and stores drop metadata.
 - `smart-contracts/StreamDrops.sol#L90-L92`: fixed-price minting pushes ETH to
   the poster, payout address, and curators pool with low-level `call`.
-- `smart-contracts/AuctionContract.sol#L64-L88`: bidding refunds the previous
-  highest bidder with an external `call` before writing the new highest bid and
-  highest bidder.
-- `smart-contracts/AuctionContract.sol#L91-L108`: auction settlement marks the
-  token claimed, pushes final proceeds to poster, payout, and curators, then
-  transfers the NFT.
+- `smart-contracts/AuctionContract.sol#L88-L139`: auction bidding credits the
+  previous highest bidder, tracks active highest-bid escrow, and exposes bidder
+  credit withdrawals.
+- `smart-contracts/AuctionContract.sol#L142-L170`: auction settlement marks the
+  token claimed, decrements active highest-bid escrow for with-bid settlement,
+  pushes final proceeds to poster, payout, and curators, then transfers the NFT.
 - `smart-contracts/StreamCuratorsPool.sol#L55-L73`: curator reward claims mark a
   Merkle leaf claimed and push ETH to the reward address.
-- `smart-contracts/AuctionContract.sol#L147-L153`,
-  `smart-contracts/StreamMinter.sol#L124-L130`,
+- `smart-contracts/AuctionContract.sol#L231-L254`: auction emergency withdrawal
+  is bounded by auction-local bidder credits and active bid escrow.
+- `smart-contracts/StreamMinter.sol#L124-L130`,
   `smart-contracts/StreamCuratorsPool.sol#L84-L90`, and
   `smart-contracts/RandomizerRNG.sol#L78-L84`: emergency withdrawals send the
   full contract balance to the admin without an owed-balance or reserved-balance
   boundary.
-- `ops/SLITHER_BASELINE.md`: high-impact `arbitrary-send-eth` and
-  `reentrancy-eth` findings track these payment and emergency-withdrawal
+- `ops/SLITHER_BASELINE.md`: the auction bid-path `reentrancy-eth` row and
+  auction emergency `arbitrary-send-eth` row are fixed by P0-AUCT-002; remaining
+  high-impact emergency-withdrawal rows track the cross-contract payment
   surfaces.
 
 Current characterization tests intentionally pin some unsafe behavior as
