@@ -238,13 +238,58 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         setup.auctions.emergencyWithdrawable().assertEq(0, "surplus remained");
     }
 
+    function testForcedEthOnlyIncreasesAuctionLocalSurplus() public {
+        AuctionSetup memory setup = _createAuction();
+        vm.deal(FIRST_BIDDER, 10 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+
+        uint256 owedBefore = setup.auctions.totalOwed();
+        uint256 balanceBefore = address(setup.auctions).balance;
+        ForceEth forceEth = new ForceEth{ value: 1 ether }();
+        forceEth.force(payable(address(setup.auctions)));
+
+        address(setup.auctions).balance.assertEq(balanceBefore + 1 ether, "forced balance");
+        setup.auctions.totalOwed().assertEq(owedBefore, "owed changed");
+        setup.auctions.emergencyWithdrawable().assertEq(1 ether, "surplus not exposed");
+    }
+
+    function testProceedsRecipientConfigurationRejectsZeroAddresses() public {
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+
+        _tryDeployAuctions(deployed, address(0), CURATORS_POOL)
+            .assertFalse("zero payout constructor accepted");
+        _tryDeployAuctions(deployed, PAYOUT, address(0))
+            .assertFalse("zero curator constructor accepted");
+
+        StreamAuctions auctions = new StreamAuctions(
+            address(deployed.minter),
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.drops),
+            PAYOUT,
+            CURATORS_POOL
+        );
+
+        (bool payoutSuccess,) = address(auctions)
+            .call(abi.encodeWithSelector(auctions.updatePayOutAddress.selector, address(0)));
+        (bool curatorSuccess,) = address(auctions)
+            .call(abi.encodeWithSelector(auctions.updateCuratorsPoolAddress.selector, address(0)));
+
+        payoutSuccess.assertFalse("zero payout setter accepted");
+        curatorSuccess.assertFalse("zero curator setter accepted");
+        auctions.payOutAddress().assertEq(PAYOUT, "payout changed");
+        auctions.curatorsPoolAddress().assertEq(CURATORS_POOL, "curator changed");
+    }
+
     function testWithBidSettlementIsIdempotentAndReleasesActiveEscrow() public {
         AuctionSetup memory setup = _createAuction();
         vm.deal(FIRST_BIDDER, 10 ether);
 
         vm.prank(FIRST_BIDDER);
         setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
-        _approveAuction(setup);
         vm.warp(setup.auctionEndTime + 1);
 
         uint256 posterBalanceBefore = POSTER.balance;
@@ -255,10 +300,15 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
 
         setup.deployed.core.ownerOf(setup.tokenId).assertEq(FIRST_BIDDER, "winner owner");
         setup.auctions.totalAuctionBidEscrow().assertEq(0, "escrow not released");
-        POSTER.balance.assertEq(posterBalanceBefore + (RESERVE_PRICE / 2), "poster payout");
-        PAYOUT.balance.assertEq(payoutBalanceBefore + (RESERVE_PRICE / 4), "protocol payout");
-        CURATORS_POOL.balance
-            .assertEq(curatorsBalanceBefore + (RESERVE_PRICE / 4), "curators payout");
+        POSTER.balance.assertEq(posterBalanceBefore, "poster was push-paid");
+        PAYOUT.balance.assertEq(payoutBalanceBefore, "protocol was push-paid");
+        CURATORS_POOL.balance.assertEq(curatorsBalanceBefore, "curator was push-paid");
+        setup.auctions.auctionPosterCredits(POSTER).assertEq(RESERVE_PRICE / 2, "poster credit");
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(RESERVE_PRICE / 4, "protocol credit");
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL)
+            .assertEq(RESERVE_PRICE / 4, "curator credit");
+        setup.auctions.totalProceedsOwed().assertEq(RESERVE_PRICE, "proceeds owed");
+        setup.auctions.totalOwed().assertEq(RESERVE_PRICE, "total owed");
 
         uint256 contractBalanceBefore = address(setup.auctions).balance;
         (bool secondClaimSuccess,) = address(setup.auctions)
@@ -267,6 +317,59 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         secondClaimSuccess.assertFalse("second settlement succeeded");
         address(setup.auctions).balance.assertEq(contractBalanceBefore, "balance changed");
         setup.deployed.core.ownerOf(setup.tokenId).assertEq(FIRST_BIDDER, "owner changed");
+
+        vm.prank(POSTER);
+        setup.auctions.withdrawAuctionProceedsCredit();
+        vm.prank(PAYOUT);
+        setup.auctions.withdrawAuctionProceedsCredit();
+        vm.prank(CURATORS_POOL);
+        setup.auctions.withdrawAuctionProceedsCredit();
+
+        POSTER.balance.assertEq(posterBalanceBefore + (RESERVE_PRICE / 2), "poster payout");
+        PAYOUT.balance.assertEq(payoutBalanceBefore + (RESERVE_PRICE / 4), "protocol payout");
+        CURATORS_POOL.balance
+            .assertEq(curatorsBalanceBefore + (RESERVE_PRICE / 4), "curators payout");
+        setup.auctions.totalOwed().assertEq(0, "owed balance after withdrawals");
+    }
+
+    function testProceedsRemainderAccruesToCuratorCredit() public {
+        AuctionSetup memory setup = _createAuctionForPosterAndReserve(POSTER, 7 wei);
+        vm.deal(FIRST_BIDDER, 1 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: 7 wei }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        setup.auctions.auctionPosterCredits(POSTER).assertEq(3 wei, "poster credit");
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(1 wei, "protocol credit");
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL).assertEq(3 wei, "curator credit");
+        setup.auctions.totalProceedsOwed().assertEq(7 wei, "proceeds owed");
+        setup.auctions.totalOwed().assertEq(7 wei, "total owed");
+    }
+
+    function testProceedsWithdrawalFailurePreservesCredit() public {
+        RejectingProceedsRecipient rejectingPoster = new RejectingProceedsRecipient();
+        AuctionSetup memory setup = _createAuctionForPoster(address(rejectingPoster));
+        vm.deal(FIRST_BIDDER, 10 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        (bool success,) = address(rejectingPoster)
+            .call(
+                abi.encodeWithSelector(
+                    rejectingPoster.withdrawProceedsToSelf.selector, setup.auctions
+                )
+            );
+
+        success.assertFalse("failed proceeds withdrawal succeeded");
+        setup.auctions.auctionPosterCredits(address(rejectingPoster))
+            .assertEq(RESERVE_PRICE / 2, "poster credit was erased");
+        setup.auctions.totalPosterOwed().assertEq(RESERVE_PRICE / 2, "poster owed changed");
+        setup.auctions.totalOwed().assertEq(RESERVE_PRICE, "total owed changed");
     }
 
     struct AuctionSetup {
@@ -277,6 +380,17 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
     }
 
     function _createAuction() private returns (AuctionSetup memory setup) {
+        return _createAuctionForPoster(POSTER);
+    }
+
+    function _createAuctionForPoster(address poster) private returns (AuctionSetup memory setup) {
+        return _createAuctionForPosterAndReserve(poster, RESERVE_PRICE);
+    }
+
+    function _createAuctionForPosterAndReserve(address poster, uint256 reservePrice)
+        private
+        returns (AuctionSetup memory setup)
+    {
         setup.deployed = deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         setup.auctions = new StreamAuctions(
             address(setup.deployed.minter),
@@ -286,14 +400,15 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
             PAYOUT,
             CURATORS_POOL
         );
+        setup.deployed.drops.updateAuctionContract(address(setup.auctions));
         setup.auctionEndTime = block.timestamp + 1 days;
         StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
             setup.deployed.drops,
-            POSTER,
+            poster,
             address(0),
             "auction-data",
             1,
-            RESERVE_PRICE,
+            reservePrice,
             setup.auctionEndTime,
             uint256(uint160(address(setup.auctions))),
             uint256(uint160(address(setup.auctions))) + 1,
@@ -305,9 +420,25 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         setup.tokenId = 10_000_000_000;
     }
 
-    function _approveAuction(AuctionSetup memory setup) private {
-        vm.prank(PAYOUT);
-        setup.deployed.core.setApprovalForAll(address(setup.auctions), true);
+    function _tryDeployAuctions(
+        DeployedStream memory deployed,
+        address payout,
+        address curatorsPool
+    ) private returns (bool) {
+        try new StreamAuctions(
+            address(deployed.minter),
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.drops),
+            payout,
+            curatorsPool
+        ) returns (
+            StreamAuctions
+        ) {
+            return true;
+        } catch {
+            return false;
+        }
     }
 }
 
@@ -322,6 +453,24 @@ contract RejectingBidder {
 
     function withdrawCredit(StreamAuctions auctions, address payable recipient) external {
         auctions.withdrawBidderCreditTo(recipient);
+    }
+}
+
+contract RejectingProceedsRecipient {
+    receive() external payable {
+        revert("reject eth");
+    }
+
+    function withdrawProceedsToSelf(StreamAuctions auctions) external {
+        auctions.withdrawAuctionProceedsCredit();
+    }
+}
+
+contract ForceEth {
+    constructor() payable { }
+
+    function force(address payable target) external {
+        selfdestruct(target);
     }
 }
 

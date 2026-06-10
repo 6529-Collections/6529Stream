@@ -16,11 +16,13 @@ order.
 - Maturity: pre-audit and not production-ready.
 - Current CI proves that the repo compiles and runs the initial
   characterization test skeleton. It does not prove protocol correctness.
-- Known P0 blockers include auction custody ambiguity, remaining payment push
-  flows, emergency withdrawal boundaries, untriaged static analysis findings,
-  missing tests, and missing deployment discipline. Drop authorization now uses
-  EIP-712 with EOA and ERC-1271 support, and auction outbid refunds now use
-  bidder pull credits.
+- Known remaining P0 blockers include fixed-price payment push flows, broader
+  payment accounting, emergency withdrawal boundaries outside auction-local
+  accounting, untriaged static analysis findings, missing invariants, randomizer
+  hardening, admin/pause controls, and missing deployment discipline. Drop
+  authorization now uses EIP-712 with EOA and ERC-1271 support; auction custody,
+  settlement state, outbid refunds, and auction-local settlement credits now
+  have target-state implementation coverage.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -695,16 +697,37 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Issue: [#22](https://github.com/6529-Collections/6529Stream/issues/22).
 - Dependencies: [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21), ADR 0002.
+- Status: Implemented for ADR 0002 auction custody and settlement
+  state-machine semantics. Broader protocol-wide payment accounting,
+  fixed-price pull payments, curator rewards, randomizer reserves, pause
+  controls, deployment readiness, and full ADR 0003 completion remain separate
+  roadmap work.
 
 Problem:
 
 - Auction settlement can fail if the auction contract lacks custody or approval
   for the token.
 
-Current behavior:
+Historical behavior before P0-AUCT-001:
 
 - Auction minting and settlement imply token transfer authority that is not
   guaranteed end to end.
+
+Current behavior after P0-AUCT-001:
+
+- Auction drops mint NFT custody to the configured auction contract and register
+  an explicit auction record.
+- `StreamAuctions` exposes auction status, custody, end-time, and pending
+  no-bid claim views.
+- Bid and no-bid settlement transfer from auction escrow and store terminal
+  state before repeated attempts can duplicate side effects.
+- No-bid EOA poster settlement transfers directly; no-bid contract poster
+  settlement records a pending NFT claim for poster-controlled completion.
+- With-bid settlement atomically creates poster, protocol, and curator pull
+  credits with the highest-bidder NFT transfer; a failed transfer reverts the
+  credits and terminal state.
+- Auction-local proceeds rounding is explicit: poster gets half, protocol gets
+  one quarter, and the curator credit receives any integer remainder.
 
 Intended behavior:
 
@@ -713,11 +736,10 @@ Intended behavior:
 
 Required code changes:
 
-- Implement or document custody strategy: escrow by auction contract, dedicated
-  custody address, or tested approval flow.
-- Define whether cancellation exists before first bid, after first bid, or never.
-- If approval-based custody is chosen, define whether seller/poster approval
-  revocation can grief settlement and how the protocol prevents or surfaces it.
+- Implement escrow custody through the auction contract.
+- Require auction contract configuration before auction drops mint.
+- Register auction records after mint and require custody confirmation.
+- Define pre-bid cancellation by poster or authorized auction admin.
 - Add a formal `AuctionStatus` state model:
   - `None`
   - `Created`
@@ -728,6 +750,7 @@ Required code changes:
   - `SettledWithBid`
   - `Cancelled`
 - Add events for state transitions.
+- Convert with-bid final auction proceeds to auction-local pull credits.
 
 Required tests:
 
@@ -735,13 +758,16 @@ Required tests:
 - Token custody verified.
 - Successful bid settlement.
 - No-bid settlement.
-- Cancellation behavior before first bid, after first bid, or rejection if no
-  cancellation exists.
-- Transfer approval failure.
-- Approval revocation after auction creation if approval-based custody is chosen.
+- Contract poster no-bid settlement pending-claim fallback.
+- Cancellation before first bid and rejection after first bid.
+- Failed NFT transfer leaves auction unsettled and credits unchanged.
 - Reverting ERC721 receiver.
+- No-bid pending-claim transfer failure rollback.
+- Non-divisible highest-bid proceeds rounding.
+- Forced ETH does not corrupt owed or emergency-surplus views.
 - Repeated settlement attempt.
 - Post-claim bid failure.
+- Auction extension updates the auction record and emits an event.
 
 Required docs:
 
@@ -755,6 +781,9 @@ Acceptance criteria:
 - Settlement is idempotent.
 - Failed NFT transfer cannot trap ETH or mark settlement complete.
 - Implementation matches `docs/adr/0002-auction-custody.md`.
+- No-bid contract poster fallback keeps custody pending and allows a
+  poster-authorized claim to a receiver.
+- With-bid settlement credits final proceeds only after NFT transfer succeeds.
 
 ### P0-AUCT-002: Fix Auction Bidding Reentrancy And Refunds
 
@@ -1361,8 +1390,8 @@ Acceptance criteria:
 
 - Add tests that lock current behavior before P0 rewrites.
 - Characterize current fixed-price drop behavior.
-- Characterize current auction creation/custody behavior; settlement remains
-  missing until the auction ADR and P0 auction work.
+- Characterize current auction creation/custody behavior and maintain
+  target-state custody and settlement coverage as P0 auction work lands.
 - Characterize current admin guards.
 - Characterize current payout behavior.
 - Characterize current randomness/pending metadata behavior.
@@ -1371,7 +1400,7 @@ Acceptance criteria:
   fixed-price minting to explicit recipients, drop replay rejection, mocked
   `StreamDrops` auction argument passing, real
   `StreamDrops -> StreamMinter -> StreamCore` auction mint custody to the
-  payout address, auction status/end-time recording, current admin selector
+  auction contract escrow, auction status/end-time recording, current admin selector
   mismatch behavior, synchronous fixed-price payout plus poster, payout-address,
   and curators-pool rejection behavior, pending metadata, immediate randomizer fulfillment,
   configured-randomizer-only token hash setting, and one-time token hash
@@ -1828,12 +1857,12 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | ERC-1271 decision | ERC-1271 mock signer success, auction success, invalid magic, reverted check, empty/short/extra return, wrong digest, wrong signature bytes, replay, expiry, and EOA regression | `test/StreamDropsERC1271.t.sol` | Passing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionPayments.t.sol` | Passing for P0-AUCT-002: bid path has no outbid push refund, rejecting previous bidder cannot block, and withdrawal reentrancy cannot drain more than credited funds | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Passing: outbid creates bidder credit, current highest bid remains active escrow, previous bidder can withdraw, and failed withdrawal preserves credit | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | In Progress: auction-local bidder owed, active bid escrow, total owed, and emergency-withdrawable views exist; broader payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
-| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamPayments.t.sol` | In Progress: auction bidder-credit withdrawal failure is covered; broader poster, curator, protocol, and reward withdrawal failures remain missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamEmergencyWithdraw.t.sol` | In Progress: auction emergency withdrawal excludes bidder credits and active highest-bid escrow; remaining contracts and full ledger categories are missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Payment ledger totals | Poster, bidder, curator, curator reserve, protocol, total owed, surplus, and emergency-withdrawable views follow ADR 0003 | `test/StreamPayments.t.sol` | In Progress: auction-local bidder owed, active bid escrow, poster/protocol/curator settlement credits, total owed, and emergency-withdrawable views exist; broader payment ledger remains missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
+| Withdrawal failure behavior | Failed withdrawal preserves account credit and category totals | `test/StreamPayments.t.sol` | In Progress: auction bidder-credit and auction proceeds-credit withdrawal failures are covered; broader fixed-price, curator reward, and protocol-wide withdrawal failures remain missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
+| Emergency surplus boundary | Emergency withdrawal can withdraw only surplus and cannot withdraw owed or reserved funds | `test/StreamEmergencyWithdraw.t.sol` | In Progress: auction emergency withdrawal excludes bidder credits, active highest-bid escrow, and auction settlement credits; remaining contracts and full ledger categories are missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 | Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamRandomizerPayments.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C/Gate D | TBD |
-| Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
-| No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
+| Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Passing: explicit auction-contract escrow, registration, status views, active/ended/terminal states, with-bid settlement, failed NFT transfer, cancellation, extension, and post-terminal bid rejection are covered | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
+| No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionCustody.t.sol` | Passing: no-bid settlement targets the signed poster, contract posters create pending NFT claims, only the poster can complete the claim, and repeated settlement is rejected | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface reverts clearly | `test/StreamCollectionAdmins.t.sol` | Missing | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |

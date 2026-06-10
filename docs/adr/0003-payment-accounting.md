@@ -5,10 +5,12 @@
 Accepted.
 
 Implementation status: P0-AUCT-002 converts auction outbid refunds to bidder
-credits and removes the bid-path push refund. Remaining ADR work includes
-fixed-price payment credits, with-bid settlement credits, curator reward
-credits, protocol-wide ledger views, failed-withdrawal coverage for every
-payment category, and emergency surplus boundaries.
+credits and removes the bid-path push refund. P0-AUCT-001 adds auction-local
+with-bid settlement credits for poster, protocol, and curator proceeds after
+successful NFT transfer. Remaining ADR work includes fixed-price payment
+credits, curator reward credits, protocol-wide ledger views, failed-withdrawal
+coverage for every non-auction payment category, randomizer reserve accounting,
+and cross-contract emergency surplus boundaries.
 
 ## Metadata
 
@@ -51,9 +53,11 @@ Current source references:
 - `smart-contracts/AuctionContract.sol#L88-L139`: auction bidding credits the
   previous highest bidder, tracks active highest-bid escrow, and exposes bidder
   credit withdrawals.
-- `smart-contracts/AuctionContract.sol#L142-L170`: auction settlement marks the
-  token claimed, decrements active highest-bid escrow for with-bid settlement,
-  pushes final proceeds to poster, payout, and curators, then transfers the NFT.
+- Before P0-AUCT-001, auction settlement marked the token claimed, decremented
+  active highest-bid escrow for with-bid settlement, pushed final proceeds to
+  poster, payout, and curators, then transferred the NFT. Auction-local target
+  state now atomically pairs final proceeds credits with successful NFT
+  transfer, so failed transfers do not release escrow or create final credits.
 - `smart-contracts/StreamCuratorsPool.sol#L55-L73`: curator reward claims mark a
   Merkle leaf claimed and push ETH to the reward address.
 - `smart-contracts/AuctionContract.sol#L231-L254`: auction emergency withdrawal
@@ -199,8 +203,12 @@ With-bid settlement must create credits instead of pushing final proceeds.
 For the current 50 / 25 / 25 economics:
 
 - poster credit is `highestBid / 2`
-- curator reserve credit is `highestBid / 4`
-- protocol credit is `highestBid - posterCredit - curatorReserveCredit`
+- protocol credit is `highestBid / 4`
+- curator credit is `highestBid - posterCredit - protocolCredit`
+
+This makes integer rounding explicit: any non-divisible remainder accrues to
+the curator credit, and
+`posterCredit + protocolCredit + curatorCredit == highestBid` must always hold.
 
 No-bid settlement must not create final payment credits unless the
 implementation records an explicit fee or refund rule in a later ADR.

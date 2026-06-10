@@ -11,6 +11,7 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamMinter.sol";
+import "./IStreamAuctions.sol";
 import "./Ownable.sol";
 import "./IStreamAdmins.sol";
 
@@ -82,6 +83,7 @@ contract StreamDrops is Ownable {
     address public curatorsPoolAddress;
     uint256 public tdhThreshold;
     uint256 public activeTime;
+    address public auctionContract;
 
     event DropAuthorizationConsumed(
         bytes32 indexed dropId,
@@ -99,6 +101,9 @@ contract StreamDrops is Ownable {
     event SignerEpochChanged(uint256 indexed oldEpoch, uint256 indexed newEpoch);
     event DropSignerChanged(
         address indexed oldSigner, address indexed newSigner, uint256 indexed signerEpoch
+    );
+    event AuctionContractChanged(
+        address indexed oldAuctionContract, address indexed newAuctionContract
     );
 
     // certain functions can only be called by a global or function admin
@@ -203,6 +208,20 @@ contract StreamDrops is Ownable {
         FunctionAdminRequired(this.updateCuratorsPoolAddress.selector)
     {
         curatorsPoolAddress = _curatorsPoolAddress;
+    }
+
+    function updateAuctionContract(address _auctionContract)
+        public
+        FunctionAdminRequired(this.updateAuctionContract.selector)
+    {
+        require(_auctionContract != address(0), "Zero auction");
+        require(
+            IStreamAuctions(_auctionContract).isStreamAuctionsContract() == true,
+            "Contract is not Auction"
+        );
+        address oldAuctionContract = auctionContract;
+        auctionContract = _auctionContract;
+        emit AuctionContractChanged(oldAuctionContract, _auctionContract);
     }
 
     // function to update admin contract
@@ -377,11 +396,25 @@ contract StreamDrops is Ownable {
         DropAuthorization calldata _authorization,
         string calldata _tokenData
     ) private returns (uint256) {
+        require(auctionContract != address(0), "No auction");
         uint256 tokenid = minterContract.mintAndAuction(
-            payOutAddress, _tokenData, 0, _authorization.collectionId, _authorization.auctionEndTime
+            auctionContract,
+            _tokenData,
+            0,
+            _authorization.collectionId,
+            _authorization.auctionEndTime
         );
         posterAuctionAddress[tokenid] = _authorization.poster;
         auctionPrice[tokenid] = _authorization.auctionReservePrice;
+        IStreamAuctions(auctionContract)
+            .registerAuction(
+                _authorization.dropId,
+                tokenid,
+                _authorization.collectionId,
+                _authorization.poster,
+                _authorization.auctionReservePrice,
+                _authorization.auctionEndTime
+            );
         return tokenid;
     }
 

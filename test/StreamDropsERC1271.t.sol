@@ -5,6 +5,7 @@ import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/DropAuthTestHelper.sol";
+import "./mocks/MockStreamAuctions.sol";
 import "./mocks/MockStreamMinter.sol";
 
 contract StreamDropsERC1271Test is DropAuthTestHelper {
@@ -246,6 +247,8 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
         drops = new StreamDrops(
             address(contractSigner), address(minter), address(admins), PAYOUT, CURATORS_POOL
         );
+        MockStreamAuctions auctions = new MockStreamAuctions();
+        drops.updateAuctionContract(address(auctions));
     }
 
     function deployEoaSignerDrops() private returns (StreamDrops drops) {
@@ -254,6 +257,8 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
         drops = new StreamDrops(
             signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
         );
+        MockStreamAuctions auctions = new MockStreamAuctions();
+        drops.updateAuctionContract(address(auctions));
     }
 
     function authorize(
