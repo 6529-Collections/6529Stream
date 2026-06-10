@@ -9,6 +9,7 @@ import "./helpers/StreamFixture.sol";
 import "./mocks/MockRandomizer.sol";
 
 contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
+    using Assertions for bool;
     using Assertions for bytes32;
     using Assertions for string;
 
@@ -38,6 +39,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
 
         _mintGoldenToken(deployed);
 
+        (deployed.core.retrieveTokenHash(TOKEN_ID) != bytes32(0)).assertTrue("expected final hash");
         _assertMatchesFixture(
             deployed.core.tokenURI(TOKEN_ID),
             "test/fixtures/metadata/offchain-final-token-uri.txt",
@@ -69,6 +71,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         _setGoldenTokenMetadataInputs(deployed.core);
         deployed.core.changeMetadataView(COLLECTION_ID, true);
 
+        (deployed.core.retrieveTokenHash(TOKEN_ID) != bytes32(0)).assertTrue("expected final hash");
         _assertMatchesFixture(
             deployed.core.tokenURI(TOKEN_ID),
             "test/fixtures/metadata/current-onchain-final-token-uri.txt",

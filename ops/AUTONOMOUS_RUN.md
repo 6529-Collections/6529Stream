@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/80` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 22:25 UTC` |
+| Last updated | `2026-06-10 22:31 UTC` |
 
 ## Packaging Notes
 
@@ -3244,7 +3244,7 @@ Outcome:
 
 ### PR #81: Add metadata schema and golden-file tests (Queue Item 38)
 
-Status: PR open; waiting for GitHub CI and CodeRabbit.
+Status: PR open; CodeRabbit final-state guard fix applied locally.
 Branch: `codex/metadata-golden-tests`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/81`.
 Related issue:
@@ -3307,10 +3307,19 @@ Validation so far:
 - Slither baseline comparison passed with no new detector count:
   721 total findings, 4 High, 19 Medium, 92 Low, 595 Informational, and 11
   Optimization.
+- After CodeRabbit's final-state guard review, focused metadata tests, full
+  `make check`, Windows wrapper, and Slither baseline comparison all passed
+  again; total tests remain 201 and Slither remains at 721 total findings.
 
 Review requests:
 
 - CodeRabbit requested in issue comment `4675228562`.
+- Latest-head CodeRabbit requested in issue comment `4675238958` after the
+  state-only follow-up commit; CodeRabbit acknowledged the request in comment
+  `4675243338`.
+- CodeRabbit review comment `4675250990` requested explicit nonzero-hash guards
+  in final metadata tests. Local fix adds those guards while keeping the
+  non-blocking helper-promotion note deferred.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3564,6 +3573,7 @@ Review requests:
 | 2026-06-10 22:10 | Select Queue Item 38 | Next Gate D gap is P1-META-001 metadata schema and golden-file coverage because pending/final/on-chain metadata fixtures remain missing while the randomness and payment foundations are now in place |
 | 2026-06-10 22:22 | Finish local Queue Item 38 validation | Metadata golden fixtures now lock current off-chain pending/final and current on-chain pending/final outputs; focused tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts |
 | 2026-06-10 22:25 | Open PR #81 | Metadata golden baseline PR opened on head `a2218e110ff5886dd94db74ead3986afcfcad0d6`; CodeRabbit requested in issue comment `4675228562`; Claude intentionally skipped per current user instruction |
+| 2026-06-10 22:31 | Apply PR #81 CodeRabbit guard fix | CodeRabbit comment `4675250990` correctly noted that the final metadata golden tests should prove they are exercising a fulfilled hash state; added explicit nonzero-hash guards and reran focused metadata tests, `make check`, Windows wrapper, and Slither baseline comparison |
 
 ## Resume Instructions
 
