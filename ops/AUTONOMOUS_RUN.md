@@ -31,11 +31,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fixed-price-pull-payments` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/59` |
+| Active PR branch | `codex/curator-claim-credits` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/60` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 10:14 UTC` |
+| Last updated | `2026-06-10 10:35 UTC` |
 
 ## Packaging Notes
 
@@ -71,7 +71,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Merged in PR #57 |
 | 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | Merged in PR #58 |
 | 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | Merged in PR #59 |
-| 19 | Convert fixed-price payouts to pull credits | Gate C | Implement P0-PAY-003 for `StreamDrops` fixed-price poster/protocol credits and curator-reserve accounting, with tests/docs/state traceability | In progress |
+| 19 | Convert fixed-price payouts to pull credits | Gate C | Implement P0-PAY-003 for `StreamDrops` fixed-price poster/protocol credits and curator-reserve accounting, with tests/docs/state traceability | Merged in PR #60 |
+| 20 | Convert curator reward claims to credits | Gate C | Implement P0-PAY-005 for `StreamCuratorsPool` curator reward claim credits, withdrawal safety, Merkle/delegation tests, docs, and state traceability | In progress |
 
 ## Current PR Worklog
 
@@ -1440,7 +1441,7 @@ Outcome:
 
 ### PR candidate: Fixed-price pull payments (Queue Item 19)
 
-Status: Ready to merge after final state commit CI.
+Status: Merged.
 Branch: `codex/fixed-price-pull-payments`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/60`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/27`.
@@ -1526,6 +1527,90 @@ Review feedback:
   run `27269901786`. No inline review threads are open. CodeRabbit status
   remains pending, but PR comment `4669162764` documents the stale-status
   exception and clean review evidence.
+
+Outcome:
+
+- PR #60 was squash-merged as
+  `f7390f28c48f833a75e28a87995f24df27e152c3`.
+- Final head `5f2770b0d82c04ecb49fc19c20c12665766389b1` passed GitHub CI
+  run `27270187899`.
+- Issue #27 was closed as completed by the merge.
+
+### PR candidate: Curator reward claim credits (Queue Item 20)
+
+Status: In progress.
+Branch: `codex/curator-claim-credits`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/61`.
+Related issue: `https://github.com/6529-Collections/6529Stream/issues/29`.
+Claude review request: issue comment `4669369055`; requested explicitly because
+Claude may not run automatically.
+
+Goal:
+
+- Convert `StreamCuratorsPool.claimRewards` from synchronous ETH push payout to
+  ADR 0003 curator pull-credit accounting.
+- Preserve Merkle proof validation, duplicate-claim rejection, and delegation
+  semantics while making reverting reward addresses unable to block claim
+  consumption or credit creation.
+- Add curator-credit withdrawal behavior with failed-withdrawal preservation,
+  reentrancy coverage, owed/surplus views, and docs/test traceability.
+- Keep scope limited to curator reward claims. Broader protocol-wide #25/#26
+  ledger unification, randomizer reserves, and full emergency-withdrawal
+  boundaries remain separate work.
+
+Candidate files:
+
+- `smart-contracts/StreamCuratorsPool.sol`
+- `test/StreamCuratorsPool.t.sol`
+- `docs/adr/0003-payment-accounting.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Sidecar contract-risk, test-strategy, and docs/state reviews were requested
+  before implementation.
+- `StreamCuratorsPool.claimRewards` now hashes reward leaves with
+  `abi.encode(rewardAddress, collectionID, amount)`, validates the Merkle proof,
+  checks local surplus before consuming the claim, records
+  `curatorCredits[rewardAddress]`, increments `totalCuratorOwed`, and emits the
+  existing `Reward` event plus a curator-credit event.
+- The claim path no longer calls the reward address, so reverting reward
+  recipients cannot block claim consumption or credit creation.
+- `withdrawCuratorCredit` and `withdrawCuratorCreditTo` are `nonReentrant`
+  pull-payment exits. Failed withdrawals revert atomically and preserve the
+  curator credit and aggregate owed total.
+- `totalOwed()` and `emergencyWithdrawable()` expose the local curator-pool
+  owed/surplus boundary. `emergencyWithdraw()` now withdraws only surplus over
+  local curator credits owed.
+- This is intentionally local to `StreamCuratorsPool`. Cross-contract reserve
+  movement from `StreamDrops` fixed-price curator reserves and auction curator
+  credits to the curator pool remains future shared-ledger work, so this PR
+  should close #29 only.
+
+Validation:
+
+- `forge test --match-contract "Stream(CuratorsPool|AuctionPayments|FixedPricePayments)Test" -vvv`
+  passed with 38 tests.
+- `make check` passed with 109 tests and the known compiler/NatSpec/lint
+  warning baseline.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed with 109 tests.
+- `forge fmt --check smart-contracts\StreamCuratorsPool.sol test\StreamCuratorsPool.t.sol`
+  passed.
+- `git diff --check` passed.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
+  on `PATH`; it still exits `-1` for baseline findings and intentional test
+  helpers, but the `arbitrary-send-eth` detector now lists only
+  `NextGenRandomizerRNG.emergencyWithdraw()` and
+  `StreamMinter.emergencyWithdraw()`, not `StreamCuratorsPool`.
+
+Review feedback:
+
+- TBD.
 
 ## Decision Log
 
@@ -1673,6 +1758,10 @@ Review feedback:
 | 2026-06-10 10:23 | Nudge CodeRabbit PR #60 | CodeRabbit status remained pending after CI passed; issue comment `4669093106` requested latest-head review |
 | 2026-06-10 10:26 | Address CodeRabbit PR #60 nitpick | Documented intentional Solidity 0.8.19 `selfdestruct` usage in the forced-ETH test helper and reran focused fixed-price validation |
 | 2026-06-10 10:31 | Document PR #60 merge decision | CI passed on review-fix head, Claude was unavailable due to organization overage, CodeRabbit's only finding was addressed, no inline threads are open, and stale CodeRabbit status is documented in issue comment `4669162764` |
+| 2026-06-10 10:33 | Merge PR #60 | Fixed-price pull credits merged as `f7390f28c48f833a75e28a87995f24df27e152c3` and issue #27 closed completed |
+| 2026-06-10 10:35 | Start `P0-PAY-005` implementation PR | Gate C payment work continues by converting `StreamCuratorsPool.claimRewards` from synchronous reward payout to curator pull credits |
+| 2026-06-10 10:53 | Finish local `P0-PAY-005` validation | Curator reward claims now use pull credits, rejecting reward addresses cannot block claims, withdrawal/reentrancy/emergency-surplus tests pass, full 109-test checks pass, and Slither no longer reports `StreamCuratorsPool` in `arbitrary-send-eth` |
+| 2026-06-10 10:55 | Open PR #61 and request Claude review | Curator reward claim credit implementation is published, and Claude review was explicitly requested in issue comment `4669369055` |
 
 ## Resume Instructions
 

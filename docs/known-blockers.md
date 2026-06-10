@@ -12,16 +12,21 @@ contributors who start from the README.
   settlement proceeds use pull credits.
 - Fixed-price mints now record `StreamDrops` poster, protocol, and curator
   reserve credits instead of pushing ETH during mint execution. Broader payment
-  accounting, curator rewards, randomizer reserves, remaining
-  emergency-withdrawal surplus boundaries, and cross-contract payment
-  invariants still need full pull-payment accounting before production use.
+  accounting, randomizer reserves, remaining emergency-withdrawal surplus
+  boundaries, and cross-contract payment invariants still need full
+  pull-payment accounting before production use.
+- Curator reward claims now validate the Merkle claim and record
+  `StreamCuratorsPool` curator credits instead of pushing ETH to the reward
+  address. Curator pool emergency withdrawal is bounded by local curator credits
+  owed, but protocol-wide payment invariants and shared ledger views remain
+  open.
 - Randomizer request and callback validation need production hardening.
 - Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md` and
   need triage before audit readiness.
-- Auction custody, auction bid/outbid payment, auction settlement-credit, and
-  fixed-price pull-payment regressions now exist, but broader payment,
-  randomness, metadata, admin/pause, deployment, and invariant tests are still
-  missing.
+- Auction custody, auction bid/outbid payment, auction settlement-credit,
+  fixed-price pull-payment, and curator reward-credit regressions now exist,
+  but broader payment, randomness, metadata, admin/pause, deployment, and
+  invariant tests are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.
