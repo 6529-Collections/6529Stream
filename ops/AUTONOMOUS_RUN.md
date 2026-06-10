@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/20` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 02:50 UTC` |
+| Last updated | `2026-06-10 02:52 UTC` |
 
 ## Packaging Notes
 
@@ -58,7 +58,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Merged in PR #7 |
 | 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
-| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | In progress |
+| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Open as PR #23 |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Pending |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
@@ -445,12 +445,12 @@ Outcome:
   head.
 - Claude review threads were addressed and resolved before merge.
 
-### PR TBD: Auction custody ADR (Queue Item 8)
+### PR #23: Auction custody ADR (Queue Item 8)
 
-Status: In progress locally.
+Status: Open; waiting for CI and bot review.
 Branch: `codex/auction-custody-adr`.
-Pull request: TBD.
-Claude review request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/23`.
+Claude review request: issue comment `4666002050`.
 
 Goal:
 
@@ -558,6 +558,7 @@ Review feedback:
 | 2026-06-10 02:45 | Create auction follow-up issues | Add canonical issues for `P0-AUCT-ADR` and `P0-AUCT-001`; reuse existing issues for auction reentrancy and payment invariants |
 | 2026-06-10 02:49 | Draft auction custody ADR | ADR 0002 chooses explicit escrow custody, canonical auction states, no-bid poster settlement, and pull-payment-compatible settlement |
 | 2026-06-10 02:50 | Validate auction custody ADR locally | Heading, traceability, whitespace, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 02:52 | Open PR #23 | Auction custody ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666002050` |
 
 ## Resume Instructions
 
