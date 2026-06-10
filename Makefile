@@ -34,7 +34,7 @@ fmt-check:
 	forge fmt --check smart-contracts
 
 slither:
-	slither . --foundry-compile-all
+	slither . --config-file slither.config.json --foundry-compile-all
 
 clean:
 	$(RM_RF)

@@ -55,7 +55,8 @@ make check
 ## Tooling
 
 Tool versions and non-gating diagnostic commands are documented in
-[`docs/tooling.md`](docs/tooling.md).
+[`docs/tooling.md`](docs/tooling.md). The current Slither high/medium baseline
+is tracked in [`ops/SLITHER_BASELINE.md`](ops/SLITHER_BASELINE.md).
 
 Current pinned versions:
 
@@ -80,7 +81,9 @@ Current pinned versions:
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [`SECURITY.md`](SECURITY.md)
 - [`ops/ROADMAP.md`](ops/ROADMAP.md)
+- [`ops/SLITHER_BASELINE.md`](ops/SLITHER_BASELINE.md)
 - [`ops/AUTONOMOUS_RUN.md`](ops/AUTONOMOUS_RUN.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)
 - [`docs/tooling.md`](docs/tooling.md)
+- [`docs/slither.md`](docs/slither.md)

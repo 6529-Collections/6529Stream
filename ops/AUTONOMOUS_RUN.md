@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/characterization-test-skeleton` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/5` |
+| Active PR branch | `codex/slither-baseline` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/6` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 01:04 UTC` |
+| Last updated | `2026-06-10 01:38 UTC` |
 
 ## Packaging Notes
 
@@ -54,8 +54,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 1 | Roadmap and autonomous run control plane | Gate A / planning | `ops/ROADMAP.md`, `ops/AUTONOMOUS_RUN.md` only unless PR packaging requires small docs metadata | Merged in PR #3 |
 | 2 | Reproducible baseline tooling | Gate A | Foundry config, make/check command, bootstrap scripts, CI smoke workflow | Merged in PR #4 |
 | 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Merged in PR #5 |
-| 4 | Characterization test skeleton | Gate A | Test helpers, fixtures, mocks, and executable characterization coverage | In progress on branch `codex/characterization-test-skeleton` |
-| 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Planned |
+| 4 | Characterization test skeleton | Gate A | Test helpers, fixtures, mocks, and executable characterization coverage | Merged in PR #6 |
+| 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | In progress on branch `codex/slither-baseline` |
 
 ## Current PR Worklog
 
@@ -173,7 +173,7 @@ Outcome:
 
 ### PR #6: Characterization test skeleton (Queue Item 4)
 
-Status: PR open; latest CodeRabbit token-hash authorization comment fixed locally.
+Status: Merged.
 Branch: `codex/characterization-test-skeleton`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/6`.
 
@@ -219,12 +219,74 @@ Validation:
 - Direct `forge` is still not available on the raw PowerShell `PATH`; the
   documented `make` and PowerShell wrapper paths resolve the installed Foundry
   binary.
+- GitHub CI run `27246119762` passed on final head
+  `0e037b3b33d144cce9d381a57a5a423fc1f3d8c0`.
+- CodeRabbit completed successfully after the token-hash authorization fix.
+- Claude was explicitly pinged on the final head; no new actionable Claude
+  response arrived before merge, and prior Claude review threads were resolved
+  or outdated.
 
-Next steps:
+Outcome:
 
-1. Push the CodeRabbit token-hash authorization follow-up.
-2. Wait for refreshed CI, CodeRabbit, and Claude status.
-3. Resolve actionable review comments before merge.
+- Merged as PR #6 on `2026-06-10 01:12 UTC`.
+- Squash merge commit: `a2f0de7f70f748b81b04d7b4e6a35b20b6c2b720`.
+- Latest head before merge: `0e037b3b33d144cce9d381a57a5a423fc1f3d8c0`.
+
+### PR #7: Slither baseline appendix/config (Queue Item 5)
+
+Status: PR open; addressing CodeRabbit review follow-up.
+Branch: `codex/slither-baseline`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/7`.
+
+Goal:
+
+- Make Slither invocation reproducible through the pinned toolchain.
+- Track the current high/medium Slither baseline in reviewable Markdown.
+- Keep Slither non-gating until high/medium findings are fixed, accepted, or
+  documented as false positives.
+- Link the baseline from the roadmap, README, and tooling docs.
+
+Candidate files:
+
+- `slither.config.json`
+- `.gitattributes`
+- `.gitignore`
+- `Makefile`
+- `docs/slither.md`
+- `docs/tooling.md`
+- `docs/known-blockers.md`
+- `README.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Config-backed Slither run with pinned Slither `0.11.5` and Solidity `0.8.19`
+  produced 530 total findings: 13 High, 26 Medium, 51 Low, 434 Informational,
+  and 6 Optimization.
+- Slither returned detector JSON successfully with `success: true` and exited
+  `-1` because findings exist; this is expected before baseline acceptance.
+- `python -m json.tool slither.config.json` passed.
+- `make -n slither` prints
+  `slither . --config-file slither.config.json --foundry-compile-all`.
+- `git check-ignore` confirms Slither JSON/SARIF/triage report outputs are
+  ignored.
+- `.gitattributes` pins JSON files to LF line endings for the new Slither
+  config.
+- Markdown heading scan passed for `docs/slither.md`,
+  `ops/SLITHER_BASELINE.md`, and `ops/ROADMAP.md`.
+- `make check` passed with 17 tests and the known existing warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
+  tests and the known existing warnings.
+- `git diff --cached --check` passed.
+- CodeRabbit review follow-up added explicit `solc-select use 0.8.19`
+  instructions, marked vendored library rows as `Needs Issue` with
+  likely-false-positive/provenance wording, and assigned
+  `P0-META-001` to the dependency-script packed-encoding row.
+- Review follow-up validation passed: `python -m json.tool
+  slither.config.json`, targeted `rg` checks, Markdown heading scan,
+  `git diff --check`, and `make check`.
 
 ## Decision Log
 
@@ -257,6 +319,16 @@ Next steps:
 | 2026-06-10 00:45 | Address CodeRabbit PR #6 second-pass comment | Added the empty-batch guard before `MockStreamMinter` reads the first mint array elements |
 | 2026-06-10 00:55 | Address Claude PR #6 characterization-honesty comment | Renamed the poster rejection test and added explicit payout-address and curators-pool rejection characterization cases |
 | 2026-06-10 01:04 | Address CodeRabbit PR #6 token-hash authorization comment | Mint with a no-op randomizer before the non-randomizer `setTokenHash` assertion, then switch to the configured randomizer to prove first-set and no-overwrite behavior |
+| 2026-06-10 01:12 | Merge PR #6 | Final head was CI-clean, CodeRabbit-clean, and visible review threads were resolved or outdated |
+| 2026-06-10 01:14 | Start PR #7 | Queue Item 5 captures the Slither high/medium baseline before any detector suppressions or CI gating |
+| 2026-06-10 01:17 | Keep Slither non-gating | Slither currently exits non-zero because real findings exist; `make check` remains build/test only until baseline acceptance |
+| 2026-06-10 01:17 | Do not suppress Slither detectors yet | The config only filters generated artifact paths; findings stay visible until each high/medium row is fixed, accepted, or proved false positive |
+| 2026-06-10 01:24 | Validate config-backed Slither run | `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` returned JSON success with 530 findings and expected exit `-1` |
+| 2026-06-10 01:27 | Finish local PR #7 smoke validation | Config JSON, Makefile dry-run, ignore rules, Markdown heading scan, `make check`, and Windows `scripts/check.ps1` pass |
+| 2026-06-10 01:29 | Finish staged PR #7 validation | `git diff --cached --check` passes after staging all PR #7 files |
+| 2026-06-10 01:31 | Open PR #7 | PR packages the Slither config, tracked high/medium baseline, docs links, and durable state updates |
+| 2026-06-10 01:37 | Address CodeRabbit PR #7 review | Add compiler activation instructions, mark vendored likely false positives as `Needs Issue`, and assign `P0-META-001` to dependency-script packed encoding |
+| 2026-06-10 01:38 | Validate CodeRabbit PR #7 follow-up | JSON parse, targeted text checks, heading scan, whitespace check, and `make check` pass after review edits |
 
 ## Resume Instructions
 

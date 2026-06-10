@@ -62,5 +62,17 @@ make fmt-check
 make slither
 ```
 
+`make slither` runs:
+
+```bash
+slither . --config-file slither.config.json --foundry-compile-all
+```
+
+The current Slither high/medium baseline is tracked in
+[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). Slither exits non-zero
+while findings exist; that is expected until the baseline is accepted as a CI
+gate.
+
 Formatting and Slither have known baselines and should become gates only after
 the roadmap items for formatting triage and Slither baseline acceptance land.
+See [`docs/slither.md`](slither.md) for the full Slither workflow.
