@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/16` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 02:27 UTC` |
+| Last updated | `2026-06-10 02:33 UTC` |
 
 ## Packaging Notes
 
@@ -372,9 +372,8 @@ Outcome:
 
 ### PR #20: Drop authorization ADR (Queue Item 7)
 
-Status: Open; Claude token-data, recipient, and salt/nonce clarification
-addressed and validated; CodeRabbit timestamp feedback addressed, waiting for
-CI/bot rerun.
+Status: Open; Claude token-data, recipient, salt/nonce, and quantity
+clarifications addressed and locally validated; waiting for CI/bot rerun.
 Branch: `codex/drop-authorization-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/20`.
 Claude review request: issue comment `4665813753`.
@@ -413,6 +412,11 @@ Validation:
 - `make check` passed with 17 tests and known compiler warnings.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
   17 tests and known compiler warnings.
+- Quantity review validation: `rg` traceability for `quantity` and EIP-712
+  version-bump text passed, Markdown heading scan passed, `git diff --check`
+  passed, `make check` passed with 17 tests and known warnings, and
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 17
+  tests and known warnings.
 
 Review feedback:
 
@@ -426,7 +430,11 @@ Review feedback:
   the ADR now defines all three and adds corresponding required tests.
 - CodeRabbit follow-up requested that this file's `Last updated` field keep
   pace with the latest PR #20 decision-log entries; the timestamp is now
-  updated to `2026-06-10 02:27 UTC`.
+  updated to `2026-06-10 02:31 UTC`.
+- Claude thread `PRRT_kwDOM7REis6IV4bb` requested explicit `quantity`
+  semantics; the ADR now constrains P0 authorizations to `quantity == 1`, makes
+  `quantity != 1` a rejection case, and requires a later ADR plus EIP-712
+  version bump before batch semantics are introduced.
 
 ## Decision Log
 
@@ -481,6 +489,8 @@ Review feedback:
 | 2026-06-10 02:18 | Address CodeRabbit PR #20 review | Clarify that `nonce` is the signer-epoch opaque input and `dropId` is the derived replay/cancellation key |
 | 2026-06-10 02:24 | Address Claude PR #20 review | Define `salt` and `nonce`, require raw `tokenData` hash enforcement, and reserve auction `recipient` as zero until ADR 0002 |
 | 2026-06-10 02:27 | Address CodeRabbit PR #20 timestamp feedback | Keep durable manager state metadata in sync with the latest PR #20 decision-log entry |
+| 2026-06-10 02:31 | Address Claude PR #20 quantity review | Constrain P0 signed drop quantity to one token so the EIP-712 schema matches the one-drop-one-token invariant |
+| 2026-06-10 02:33 | Validate Claude PR #20 quantity review fix | Quantity traceability, heading scan, whitespace, `make check`, and Windows wrapper all pass |
 
 ## Resume Instructions
 

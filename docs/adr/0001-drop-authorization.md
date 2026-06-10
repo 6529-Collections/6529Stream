@@ -99,27 +99,30 @@ The public-beta target design is:
 7. For the initial P0 implementation, `payer` must equal `msg.sender` for
    payable fixed-price execution. Open relayer execution is out of scope until a
    later ADR explicitly defines reimbursement and payment semantics.
-8. `salt` is signer/integrator-chosen entropy used only in the signed payload
+8. `quantity` must equal `1` in the P0 design. The contract must reject any
+   authorization with `quantity != 1`. Batch minting or one authorization to
+   many tokens requires a later ADR and an EIP-712 version bump.
+9. `salt` is signer/integrator-chosen entropy used only in the signed payload
    and `dropId` derivation. It is not an EIP-712 domain `salt`, and the contract
    does not store or validate it separately.
-9. `nonce` is a signer-allocated opaque unique value within a `signerEpoch`, not
+10. `nonce` is a signer-allocated opaque unique value within a `signerEpoch`, not
    an on-chain monotonic counter. There is no `signerNonces` storage in the P0
    design. `dropId` is the derived replay identifier, not an independent nonce.
    After validating the signer, the contract must require:
    `dropId == keccak256(abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce, salt))`.
    The signer pipeline must not issue two live payloads with the same
    `(signer, signerEpoch, nonce, salt)` tuple.
-10. `dropId` must be globally unique and consumed in storage before any external
+11. `dropId` must be globally unique and consumed in storage before any external
    calls that can transfer ETH or invoke receiver hooks. P0 replay and
    cancellation storage is keyed by `dropId`; no separate per-epoch nonce or
    salt mapping is required unless a later implementation ADR expands the
    accounting model.
-11. `deadline` must be enforced against `block.timestamp`.
-12. `signerEpoch` must match current contract state so signer compromise or
+12. `deadline` must be enforced against `block.timestamp`.
+13. `signerEpoch` must match current contract state so signer compromise or
     rotation can invalidate outstanding payloads.
-13. Admins must be able to cancel a specific `dropId` before execution.
-14. EOA signatures and ERC-1271 contract signatures are supported.
-15. EOA signatures must reject:
+14. Admins must be able to cancel a specific `dropId` before execution.
+15. EOA signatures and ERC-1271 contract signatures are supported.
+16. EOA signature and execution validation must reject:
     - wrong signer
     - wrong domain
     - wrong chain ID
@@ -128,11 +131,12 @@ The public-beta target design is:
     - replayed drop ID
     - cancelled drop ID
     - stale signer epoch
+    - quantity other than one
     - malleable signature
     - zero-address recovered signer
-16. ERC-1271 signatures must require the standard magic value from the contract
+17. ERC-1271 signatures must require the standard magic value from the contract
     signer.
-17. EIP-2098 compact signatures are supported and normalized under the same
+18. EIP-2098 compact signatures are supported and normalized under the same
     malleability policy as 65-byte ECDSA signatures.
 
 ## Intended API Shape
@@ -314,11 +318,12 @@ P0 implementation must add tests for:
 - EIP-2098 compact signature
 - zero-address recovered signer
 - zero recipient
+- `quantity != 1`
 - raw `tokenData` substitution under a valid signed `tokenDataHash`
 - non-zero auction `recipient` before ADR 0002 defines different semantics
 - field substitution for poster, recipient, payer, collection, sale mode,
-  token data hash, price, auction reserve, auction end, salt, nonce, deadline,
-  and signer epoch
+  token data hash, price, quantity, auction reserve, auction end, salt, nonce,
+  deadline, and signer epoch
 - contract wallet execution without `tx.origin`
 - `payer != msg.sender` rejection in the initial P0 implementation
 - consumed state is written before external calls
