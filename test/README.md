@@ -123,5 +123,6 @@ epoch bindings fail before retry state changes in both adapters.
 Dependency script encoding now has P0-META-001 target-state coverage in
 `StreamMetadataEncoding.t.sol`: ambiguous chunk boundaries that render the same
 dependency JavaScript produce distinct typed content hashes, chunk hashes include
-the chunk index and byte length, and the existing rendered generative script
-output remains compatibility-preserving.
+the chunk index and byte length, zero-chunk dependency hashes are deterministic,
+and the existing rendered generative script output remains
+compatibility-preserving.

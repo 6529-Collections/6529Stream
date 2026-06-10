@@ -73,6 +73,17 @@ contract StreamMetadataEncodingTest is CharacterizationTestBase, StreamFixture {
         (firstChunkHash == secondChunkHash).assertFalse("empty chunks shared hash");
     }
 
+    function testEmptyDependencyContentHashIsDeterministic() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 dependencyKey = keccak256("zero-chunk-dependency");
+        string[] memory chunks = new string[](0);
+
+        deployed.dependencyRegistry.addDependency(dependencyKey, chunks);
+
+        deployed.dependencyRegistry.getDependencyScriptContentHash(dependencyKey)
+            .assertEq(_contentHash(dependencyKey, chunks), "zero chunk content hash");
+    }
+
     function _contentHash(bytes32 dependencyKey, string[] memory chunks)
         private
         pure

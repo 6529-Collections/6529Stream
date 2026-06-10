@@ -92,6 +92,10 @@ contract DependencyRegistry {
         return (dependencyInfo[dependencyNameAndVersion].libraryScript[index]);
     }
 
+    /// @notice Returns the typed hash of one dependency script chunk.
+    /// @param dependencyNameAndVersion Dependency key currently stored in the registry.
+    /// @param index Chunk index inside the dependency script.
+    /// @return The chunk hash, bound to chunk index, chunk byte length, and chunk contents.
     function getDependencyScriptChunkHash(bytes32 dependencyNameAndVersion, uint256 index)
         public
         view
@@ -102,6 +106,9 @@ contract DependencyRegistry {
         );
     }
 
+    /// @notice Returns the typed content hash for the current dependency script chunks.
+    /// @param dependencyNameAndVersion Dependency key currently stored in the registry.
+    /// @return The content hash for the current chunk sequence under the dependency key.
     function getDependencyScriptContentHash(bytes32 dependencyNameAndVersion)
         external
         view

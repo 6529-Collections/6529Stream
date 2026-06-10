@@ -734,6 +734,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable {
         return scripttext;
     }
 
+    /// @notice Returns the current typed dependency script content hash for a minted token.
+    /// @dev This is a current registry-content hash, not a freeze manifest or immutable
+    /// dependency-version proof.
+    /// @param tokenId Minted token whose collection dependency key should be resolved.
+    /// @return The dependency script content hash currently reported by the registry.
     function retrieveDependencyScriptContentHash(uint256 tokenId) public view returns (bytes32) {
         _requireMinted(tokenId);
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
