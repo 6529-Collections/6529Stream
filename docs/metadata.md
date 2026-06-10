@@ -13,6 +13,15 @@ Off-chain metadata is URI-based:
 - Final randomness: `collectionBaseURI + tokenId` with the token ID as a
   decimal string.
 
+The current contract does raw string concatenation and does not insert a path
+separator. Operators must include the desired separator in `collectionBaseURI`.
+For example, `collectionBaseURI = "https://example.com/collections/abc/"`
+returns `https://example.com/collections/abc/pending` before randomness and
+`https://example.com/collections/abc/123` after token `123` is finalized. Without
+the trailing slash, `collectionBaseURI = "https://example.com/collections/abc"`
+would produce `https://example.com/collections/abcpending` and
+`https://example.com/collections/abc123`.
+
 Current on-chain metadata is returned as:
 
 ```text

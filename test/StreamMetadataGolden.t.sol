@@ -6,6 +6,7 @@ import "../smart-contracts/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
+// MockRandomizer.sol also defines NoopRandomizer, used here to hold pending state.
 import "./mocks/MockRandomizer.sol";
 
 contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {

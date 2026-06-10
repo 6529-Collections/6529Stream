@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/80` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 22:31 UTC` |
+| Last updated | `2026-06-10 22:35 UTC` |
 
 ## Packaging Notes
 
@@ -92,7 +92,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
-| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | PR #81 open |
+| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | PR #81 open on `codex/metadata-golden-tests` |
 
 ## Current PR Worklog
 
@@ -3244,7 +3244,7 @@ Outcome:
 
 ### PR #81: Add metadata schema and golden-file tests (Queue Item 38)
 
-Status: PR open; CodeRabbit final-state guard fix applied locally.
+Status: PR open; CodeRabbit guard and nitpick fixes applied locally.
 Branch: `codex/metadata-golden-tests`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/81`.
 Related issue:
@@ -3320,6 +3320,10 @@ Review requests:
 - CodeRabbit review comment `4675250990` requested explicit nonzero-hash guards
   in final metadata tests. Local fix adds those guards while keeping the
   non-blocking helper-promotion note deferred.
+- Follow-up CodeRabbit nitpicks were accepted where useful: clarified raw
+  `collectionBaseURI` concatenation in metadata docs, made the queue status
+  explicitly reference PR #81 and the branch, and documented that
+  `NoopRandomizer` is defined in `MockRandomizer.sol`.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3574,6 +3578,7 @@ Review requests:
 | 2026-06-10 22:22 | Finish local Queue Item 38 validation | Metadata golden fixtures now lock current off-chain pending/final and current on-chain pending/final outputs; focused tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts |
 | 2026-06-10 22:25 | Open PR #81 | Metadata golden baseline PR opened on head `a2218e110ff5886dd94db74ead3986afcfcad0d6`; CodeRabbit requested in issue comment `4675228562`; Claude intentionally skipped per current user instruction |
 | 2026-06-10 22:31 | Apply PR #81 CodeRabbit guard fix | CodeRabbit comment `4675250990` correctly noted that the final metadata golden tests should prove they are exercising a fulfilled hash state; added explicit nonzero-hash guards and reran focused metadata tests, `make check`, Windows wrapper, and Slither baseline comparison |
+| 2026-06-10 22:35 | Apply PR #81 CodeRabbit nitpicks | Accepted low-cost follow-ups by documenting raw `collectionBaseURI` URI concatenation, making the Queue Item 38 status explicitly reference PR #81 and branch `codex/metadata-golden-tests`, and noting that `NoopRandomizer` comes from `MockRandomizer.sol` |
 
 ## Resume Instructions
 
