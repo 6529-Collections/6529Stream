@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/76` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 20:40 UTC` |
+| Last updated | `2026-06-10 20:42 UTC` |
 
 ## Packaging Notes
 
@@ -2961,9 +2961,9 @@ Outcome:
 
 ### PR TBD: Add payment invariant baseline (Queue Item 35)
 
-Status: Ready to open PR.
+Status: Open; waiting on CI and CodeRabbit.
 Branch: `codex/add-payment-invariant-baseline`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/77`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/8`
@@ -3030,7 +3030,7 @@ Validation so far:
 
 Review requests:
 
-- CodeRabbit will be requested after the PR is opened.
+- CodeRabbit was requested in issue comment `4674282933`.
 - Claude is intentionally skipped per current user instruction; use CodeRabbit
   unless risk or future user instruction changes.
 
@@ -3271,6 +3271,7 @@ Review requests:
 | 2026-06-10 20:22 | Select Queue Item 35 | P0-PAY-008 remains open for executable payment invariants after emergency-withdraw and local pull-payment work landed |
 | 2026-06-10 20:27 | Implement Queue Item 35 local draft | Added a bounded payment sequence fuzz invariant harness covering local ledgers, owed totals, reserves, withdrawals, emergency surplus, randomizer reserves, and forced-balance surplus |
 | 2026-06-10 20:40 | Finish local Queue Item 35 validation | Focused payment invariant fuzzing, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither confirmation all pass; Slither high/medium remain `4 High / 19 Medium` with the updated total at 693 findings |
+| 2026-06-10 20:42 | Open PR #77 and request CodeRabbit | Payment invariant baseline published at `https://github.com/6529-Collections/6529Stream/pull/77`; CodeRabbit review requested in issue comment `4674282933`, and Claude is skipped per current user instruction |
 
 ## Resume Instructions
 
