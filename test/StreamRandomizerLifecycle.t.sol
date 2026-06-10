@@ -161,6 +161,14 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         vrf.markStaleRequest(1);
         uint256(vrf.randomnessRequestState(1))
             .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "not stale");
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            vrf.retrieveRandomnessRequestForToken(TOKEN_ID);
+        uint256(request.state)
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "token stale"
+            );
+        uint256(vrf.randomnessRequestStateForToken(TOKEN_ID))
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Stale), "view stale");
 
         vm.expectRevert(
             abi.encodeWithSelector(
