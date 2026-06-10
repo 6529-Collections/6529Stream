@@ -32,9 +32,10 @@ The current Gate A smoke baseline proves:
   pending. They also prove `RandomizerNXT` cannot be configured as a
   production randomizer after removal of the concrete weak `XRandoms` helper
   from production source.
-- Metadata encoding tests now prove dependency chunk boundaries are included in
-  typed content hashes while preserving the existing rendered generative script
-  output.
+- Metadata tests now prove dependency chunk boundaries are included in typed
+  content hashes while preserving the existing rendered generative script
+  output, and `StreamMetadataGolden.t.sol` locks current off-chain pending/final
+  URIs plus current on-chain pending/final JSON data URIs against fixtures.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -43,9 +44,9 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 callback-after-burn policy, canonical randomizer lifecycle
 ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, signer/deployment ceremony runbooks, dependency
-version/freeze manifest work, deployment discipline, and the broader P0/P1 test
-suite.
+high/medium baseline, signer/deployment ceremony runbooks, final metadata
+schema/escaping, dependency version/freeze manifest work, deployment
+discipline, and the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.

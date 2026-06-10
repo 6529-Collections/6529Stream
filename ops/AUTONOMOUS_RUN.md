@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/add-signer-lifecycle-manager` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/78` |
+| Active PR branch | `codex/metadata-golden-tests` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/80` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 21:57 UTC` |
+| Last updated | `2026-06-10 22:22 UTC` |
 
 ## Packaging Notes
 
@@ -91,7 +91,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | Merged in PR #76 |
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
-| 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | PR #80 open |
+| 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
+| 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | In progress on `codex/metadata-golden-tests` |
 
 ## Current PR Worklog
 
@@ -3142,7 +3143,7 @@ Outcome:
 
 ### PR #80: Add signer lifecycle manager (Queue Item 37)
 
-Status: PR open; waiting for GitHub CI and CodeRabbit.
+Status: Merged.
 Branch: `codex/add-signer-lifecycle-manager`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/80`.
 Related issue:
@@ -3225,8 +3226,87 @@ Validation so far:
 Review requests:
 
 - CodeRabbit requested in issue comment `4675002714`.
+- Latest-head CodeRabbit requested in issue comment `4675011167` after the
+  state-only follow-up commit; CodeRabbit completed with green status and no
+  actionable comments in comment `4675002972`.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
+
+Outcome:
+
+- Merged as PR #80 on `2026-06-10 22:08 UTC`.
+- Merge commit `9c81f71c59357dd124d3513ca6a006ceeba9ad55`.
+- Latest head before merge `d4a13a19c19a5f609ea75a308f6defdf17c019e5`.
+- GitHub CI run `27309047754` passed on the final head.
+- CodeRabbit status was green on the final head and reported no actionable
+  comments.
+- Issue #79 closed as completed.
+
+### PR TBD: Add metadata schema and golden-file tests (Queue Item 38)
+
+Status: Local implementation validated; PR not opened yet.
+Branch: `codex/metadata-golden-tests`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/46`
+
+Goal:
+
+- Start the Gate D metadata verification track under P1-META-001.
+- Lock current off-chain pending/final `tokenURI` behavior with deterministic
+  golden expectations before deeper metadata rewrites.
+- Add on-chain JSON metadata golden coverage for the current schema where the
+  existing contract behavior permits stable fixtures.
+- Document the current schema/output policy honestly and update roadmap/test
+  matrix traceability.
+
+Candidate files:
+
+- `test/StreamMetadataGolden.t.sol`
+- `test/fixtures/metadata/`
+- `foundry.toml`
+- `test/helpers/CharacterizationTestBase.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added fixture read permissions for `test/fixtures` and exposed
+  `vm.readFile` through the local characterization cheatcode interface.
+- Added four metadata golden fixtures:
+  off-chain pending URI, off-chain final URI, current on-chain pending JSON
+  data URI, and current on-chain final JSON data URI.
+- Added `StreamMetadataGolden.t.sol` coverage that mints the same deterministic
+  token and compares live `tokenURI` output byte-for-byte against fixtures.
+- Explicitly labels current on-chain pending output as pre-beta behavior because
+  it still embeds the zero token hash; ADR 0006 public-beta work must replace
+  this with an explicit pending metadata state.
+- Added `docs/metadata.md` with current output shape, fixture purpose, and
+  public-beta target requirements.
+- Updated roadmap, status, known-blockers, and test README traceability.
+
+Validation so far:
+
+- Focused metadata golden tests passed:
+  `forge test --match-contract StreamMetadataGoldenTest -vvv` with 4 tests.
+- Full `make check` passed with 201 tests.
+- Windows wrapper passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 201 tests.
+- Formatting check passed:
+  `forge fmt --check test\StreamMetadataGolden.t.sol test\helpers\CharacterizationTestBase.sol`.
+- Markdown heading scan passed for touched docs/ops/test README files:
+  `rg -n "^#|^##|^###" ...`.
+- Metadata traceability grep passed across `foundry.toml`, `docs`, `test`, and
+  `ops`.
+- `git diff --check` passed.
+- Slither baseline comparison passed with no new detector count:
+  721 total findings, 4 High, 19 Medium, 92 Low, 595 Informational, and 11
+  Optimization.
 
 ## Decision Log
 
@@ -3474,6 +3554,9 @@ Review requests:
 | 2026-06-10 21:27 | Create issue #79 and select Queue Item 37 | The remaining signer-lifecycle test-matrix row is `In Progress`; a focused P0-ADMIN-003 issue lets the next PR separate drop-signing identity from signer-management authority without bundling deployment ceremony work |
 | 2026-06-10 21:53 | Finish local Queue Item 37 validation | Signer-manager implementation with owner-approved lifecycle targets, focused 59-test admin/drop coverage, full 197-test `make check`, Windows wrapper, formatting, whitespace, traceability grep, and Slither baseline comparison all pass; Slither high/medium counts remain unchanged at 4 High / 19 Medium |
 | 2026-06-10 21:57 | Open PR #80 | Signer lifecycle manager PR opened on head `8aab8a4cfa0442afcb6933c5ec11516a25d5a005`; CodeRabbit requested in issue comment `4675002714`; Claude intentionally skipped per current user instruction |
+| 2026-06-10 22:08 | Merge PR #80 | CI passed on final head `d4a13a19c19a5f609ea75a308f6defdf17c019e5`, CodeRabbit status was green with no actionable comments, merge commit is `9c81f71c59357dd124d3513ca6a006ceeba9ad55`, and issue #79 closed completed |
+| 2026-06-10 22:10 | Select Queue Item 38 | Next Gate D gap is P1-META-001 metadata schema and golden-file coverage because pending/final/on-chain metadata fixtures remain missing while the randomness and payment foundations are now in place |
+| 2026-06-10 22:22 | Finish local Queue Item 38 validation | Metadata golden fixtures now lock current off-chain pending/final and current on-chain pending/final outputs; focused tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts |
 
 ## Resume Instructions
 
