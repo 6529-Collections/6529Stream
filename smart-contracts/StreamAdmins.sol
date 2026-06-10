@@ -41,6 +41,8 @@ contract StreamAdmins is Ownable {
     constructor(address _tdhSigner) {
         require(_tdhSigner != address(0), "Zero tdh signer");
         tdhSigner = _tdhSigner;
+        // The signer starts as a global admin for compatibility, but registrar
+        // authority follows `authorized()` and is independent of this bypass.
         adminPermissions[tdhSigner] = true;
     }
 

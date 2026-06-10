@@ -52,6 +52,10 @@ Current source references, including the historical pre-P0-ADMIN-001 baseline:
   and function admins. P0-ADMIN-001 also lets `owner()` manage those roles as a
   root recovery path without making `owner()` an implicit operational admin on
   protected protocol contracts.
+- The constructor still seeds `tdhSigner` as a global admin for compatibility.
+  That global-admin bypass is independently revocable through
+  `registerAdmin(tdhSigner,false)`, while registrar authority remains governed
+  by `authorized()` until signer lifecycle work lands.
 - `smart-contracts/IStreamAdmins.sol`: exposes
   `retrieveCollectionAdmin(address,uint256)`. P0-ADMIN-001 implements the
   deferred path as an explicit `false` result; collection-admin mutation powers

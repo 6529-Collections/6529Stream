@@ -1803,20 +1803,24 @@ Validation:
 
 - Focused admin suite passed:
   `forge test --match-contract "Stream(Admins|AdminSelectors|CoreAdminCharacterization)Test" -vvv`
-  with 18 passing tests.
-- Full local gate passed: `make check` with 129 passing tests.
+  with 19 passing tests after CodeRabbit review fixes.
+- Full local gate passed: `make check` with 130 passing tests.
 - Windows wrapper passed:
   `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` with
-  129 passing tests.
+  130 passing tests.
 - Formatting and whitespace checks passed for touched Solidity/test files and
   `git diff --check`.
 - Markdown heading scan passed for touched roadmap/ADR files.
 - Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry `1.7.1`
   and Slither `0.11.5`; it still exits non-zero for known baseline findings,
-  but the final JSON has 647 total findings: 9 High, 29 Medium, 61 Low, 542
+  but the final JSON has 648 total findings: 9 High, 29 Medium, 61 Low, 543
   Informational, and 6 Optimization. It reports zero `arbitrary-send-eth`
   findings, zero high/medium findings involving `StreamAdmins`, and zero
   `StreamAdmins` `missing-zero-check` findings.
+- CodeRabbit comment `4670084627` requested documentation/test coverage for the
+  independently revocable `tdhSigner` global-admin bypass, explicit low-impact
+  Slither delta triage, and removal of a no-op `vm.prank(address(this))`; all
+  three were addressed before the final validation rerun.
 
 ## Decision Log
 
@@ -1976,6 +1980,7 @@ Validation:
 | 2026-06-10 11:52 | Select Queue Item 22 | Next P0 Gate C blocker is `P0-ADMIN-001`, because admin selector/target permission semantics must be fixed before pause controls and deeper randomness/admin work |
 | 2026-06-10 12:09 | Finish local Queue Item 22 validation | Focused 18-test admin suite, full 129-test `make check`, Windows wrapper, formatting, whitespace, heading scans, and Slither delta evidence pass; Slither reports no `StreamAdmins` high/medium or zero-check findings |
 | 2026-06-10 12:13 | Open PR #63 | Admin permission scoping implementation is published with local validation and Slither delta evidence |
+| 2026-06-10 12:21 | Address CodeRabbit PR #63 review | Added signer registrar/global-admin asymmetry coverage, triaged the low-impact Slither delta, removed a no-op test prank, and reran focused/full/Windows/Slither validation |
 
 ## Resume Instructions
 

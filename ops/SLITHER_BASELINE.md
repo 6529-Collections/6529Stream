@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 12:09 UTC` |
+| Last generated | `2026-06-10 12:21 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -26,9 +26,9 @@ baseline.
 | High | 9 |
 | Medium | 29 |
 | Low | 61 |
-| Informational | 542 |
+| Informational | 543 |
 | Optimization | 6 |
-| Total | 647 |
+| Total | 648 |
 
 ## Detector Counts
 
@@ -45,8 +45,18 @@ baseline.
 | `uninitialized-local` | Medium | 11 |
 | `unused-return` | Medium | 1 |
 | Low-impact findings | Low | 61 |
-| Informational findings | Informational | 542 |
+| Informational findings | Informational | 543 |
 | Optimization findings | Optimization | 6 |
+
+Low-impact delta from the previous emergency-withdrawal capture:
+
+- Net low-impact findings increased by 3.
+- `missing-zero-check` decreased from 13 to 12 because
+  `StreamAdmins.constructor(address)` now rejects a zero `tdhSigner`.
+- `reentrancy-events` increased from 17 to 21. The four new rows are test-only
+  event assertion patterns in `test/StreamAdmins.t.sol` around
+  `vm.expectEmit(...)` followed by expected role-change events. They are
+  accepted as Foundry test harness noise, not production contract findings.
 
 ## Status Semantics
 

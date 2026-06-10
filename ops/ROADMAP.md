@@ -51,7 +51,7 @@ order.
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, and randomness/pending metadata behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked but unaccepted baseline: 647 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked but unaccepted baseline: 648 total findings, including 9 High and 29 Medium | `slither . --config-file slither.config.json --foundry-compile-all` and `ops/SLITHER_BASELINE.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1842,7 +1842,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: baseline captured, not accepted as a CI gate.
-- Result: 647 findings, including 9 High and 29 Medium.
+- Result: 648 findings, including 9 High and 29 Medium.
 
 Impact summary:
 
@@ -1851,7 +1851,7 @@ Impact summary:
 | High | 9 |
 | Medium | 29 |
 | Low | 61 |
-| Informational | 542 |
+| Informational | 543 |
 | Optimization | 6 |
 
 High/medium detector summary:

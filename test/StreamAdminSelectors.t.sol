@@ -135,7 +135,6 @@ contract StreamAdminSelectorsTest is CharacterizationTestBase {
         StreamAdmins admins = new StreamAdmins(address(0xBEEF));
         DependencyRegistry registry = new DependencyRegistry(address(admins));
 
-        vm.prank(address(this));
         (bool ownerOperationalSuccess,) = address(registry)
             .call(abi.encodeWithSelector(registry.updateAdminContract.selector, address(admins)));
         ownerOperationalSuccess.assertFalse("owner was implicit operational admin");
@@ -148,6 +147,30 @@ contract StreamAdminSelectorsTest is CharacterizationTestBase {
         (bool functionAdminSuccess,) = address(registry)
             .call(abi.encodeWithSelector(registry.updateAdminContract.selector, address(admins)));
         functionAdminSuccess.assertTrue("owner could not grant function admin");
+    }
+
+    function testSignerRegistrarPowerIsIndependentFromGlobalAdminBypass() public {
+        address signer = address(0xBEEF);
+        StreamAdmins admins = new StreamAdmins(signer);
+        DependencyRegistry registry = new DependencyRegistry(address(admins));
+
+        admins.registerAdmin(signer, false);
+        admins.retrieveGlobalAdmin(signer).assertFalse("signer global admin still enabled");
+
+        vm.prank(signer);
+        (bool revokedGlobalBypassSuccess,) =
+            address(registry).call(_addDependencyCall(bytes32("no-bypass")));
+        revokedGlobalBypassSuccess.assertFalse("revoked signer global bypass still authorized");
+
+        vm.prank(signer);
+        admins.registerFunctionAdmin(
+            signer, address(registry), registry.addDependency.selector, true
+        );
+
+        vm.prank(signer);
+        (bool explicitFunctionGrantSuccess,) =
+            address(registry).call(_addDependencyCall(bytes32("function-grant")));
+        explicitFunctionGrantSuccess.assertTrue("signer registrar could not grant target role");
     }
 
     function _deployCore() private returns (StreamAdmins admins, StreamCore core) {
@@ -210,5 +233,11 @@ contract StreamAdminSelectorsTest is CharacterizationTestBase {
         return abi.encodeWithSelector(
             StreamCuratorsPool.setMultipleMerkleRoots.selector, collectionIds, roots
         );
+    }
+
+    function _addDependencyCall(bytes32 name) private pure returns (bytes memory) {
+        string[] memory scripts = new string[](1);
+        scripts[0] = "library";
+        return abi.encodeWithSelector(DependencyRegistry.addDependency.selector, name, scripts);
     }
 }
