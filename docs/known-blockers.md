@@ -59,9 +59,12 @@ contributors who start from the README.
   canonical core/coordinator lifecycle ownership.
 - Dependency script retrieval now has segment-safe typed chunk and content
   hashes, so the former packed/dynamic chunk-boundary Slither finding is fixed.
-  Remaining metadata blockers include golden-file metadata tests, collection
-  freeze manifests, immutable dependency version records, registry identity
-  pinning, ERC-4906 signaling, burn semantics, escaping, and size limits.
+  Current metadata golden fixtures now lock the pre-beta off-chain pending/final
+  URI behavior and current on-chain pending/final JSON output. Remaining
+  metadata blockers include the final schema-versioned public-beta metadata
+  implementation, collection freeze manifests, immutable dependency version
+  records, registry identity pinning, ERC-4906 signaling, burn semantics,
+  escaping, and size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

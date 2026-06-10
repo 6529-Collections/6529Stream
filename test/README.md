@@ -146,6 +146,13 @@ the chunk index and byte length, zero-chunk dependency hashes are deterministic,
 and the existing rendered generative script output remains
 compatibility-preserving.
 
+Metadata golden fixtures now have P1-META-001 characterization coverage in
+`StreamMetadataGolden.t.sol`: current off-chain pending and final token URI
+rules, current on-chain pending JSON output, and current on-chain final JSON
+output are compared byte-for-byte against `test/fixtures/metadata/`. The
+on-chain fixtures are labeled as current pre-beta behavior because ADR 0006
+still requires an explicit public-beta metadata state model.
+
 Mint-accounting state now has P0-CORE-001 target-state coverage in
 `StreamMintAccounting.t.sol`: never-written public/allowlist mint counters were
 removed from `StreamCore`, while the retained airdrop counter starts at zero,
