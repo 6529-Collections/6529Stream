@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/23` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 03:46 UTC` |
+| Last updated | `2026-06-10 03:54 UTC` |
 
 ## Packaging Notes
 
@@ -59,7 +59,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
 | 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Merged in PR #23 |
-| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Open as PR #32 |
+| 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merge-ready as PR #32 |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
 
@@ -562,7 +562,7 @@ Outcome:
 
 ### PR #32: Payment accounting ADR (Queue Item 9)
 
-Status: Open; waiting for CI and bot review.
+Status: Merge-ready under autonomous maintainer decision.
 Branch: `codex/payment-accounting-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/32`.
 Claude review request: issue comment `4666247442`.
@@ -624,10 +624,20 @@ Validation:
 - `make check` passed with 17 tests and known compiler/NatSpec warnings.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
   17 tests and known compiler/NatSpec warnings.
+- GitHub CI run `27251741547` passed on head
+  `e160bda2fb0c9898ff05b6f35f90333f86a2f479`.
 
 Review feedback:
 
-- Waiting for CI and bot review on the initial PR head.
+- CodeRabbit completed successfully on head
+  `e160bda2fb0c9898ff05b6f35f90333f86a2f479` with no actionable comments and
+  all five pre-merge checks passing.
+- Claude review was explicitly requested in issue comment `4666247442`, but
+  Claude returned `Code review skipped` because the organization's Claude Code
+  overage spend limit was reached. This is an external billing/admin condition,
+  so PR #32 proceeds under autonomous maintainer decision after local,
+  sidecar, CI, and CodeRabbit review.
+- No inline review threads are open.
 
 ## Decision Log
 
@@ -701,6 +711,7 @@ Review feedback:
 | 2026-06-10 03:44 | Revalidate payment ADR traceability | Staged whitespace, `make check`, and Windows wrapper validations pass after issue-link updates |
 | 2026-06-10 03:45 | Open PR #32 | Payment accounting ADR is published with validation evidence |
 | 2026-06-10 03:46 | Request Claude review on PR #32 | Explicit review ping added in issue comment `4666247442` because Claude may not run automatically |
+| 2026-06-10 03:54 | Mark PR #32 merge-ready | CI passed, CodeRabbit reported no actionable comments, no inline review threads are open, and Claude is unavailable due to organization overage limits |
 
 ## Resume Instructions
 
