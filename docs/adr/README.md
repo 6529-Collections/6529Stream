@@ -11,7 +11,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0003-payment-accounting.md`](0003-payment-accounting.md) | Accepted | [#24](https://github.com/6529-Collections/6529Stream/issues/24) |
 | [`0004-admin-governance.md`](0004-admin-governance.md) | Accepted | [#33](https://github.com/6529-Collections/6529Stream/issues/33) |
 | [`0005-randomness.md`](0005-randomness.md) | Accepted | [#14](https://github.com/6529-Collections/6529Stream/issues/14) |
-| `0006-metadata-freeze.md` | Missing | `P1-META-ADR` |
+| [`0006-metadata-freeze.md`](0006-metadata-freeze.md) | Accepted | [#45](https://github.com/6529-Collections/6529Stream/issues/45) |
 | `0007-upgrade-redeployment.md` | Missing | `P2-UPGRADE-ADR` |
 
 Each ADR should include problem, current behavior, intended behavior,

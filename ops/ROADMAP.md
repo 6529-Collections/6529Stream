@@ -115,10 +115,11 @@ Required evidence:
 
 ### Gate B2: Release Protocol Decisions Accepted
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
-Blocking issues: TBD.
-Evidence: TBD.
+Blocking issues: [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45),
+`P2-UPGRADE-ADR`.
+Evidence: `docs/adr/0006-metadata-freeze.md` accepted; ADR 0007 missing.
 
 Exit criteria:
 
@@ -343,7 +344,7 @@ contract changes until the relevant ADR is accepted.
 | Payment accounting | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
 | Admin/governance | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33) | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
 | Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` | Provider choice, pending state, callback validation, retries, stale callback handling |
-| Metadata/freeze | `P1-META-ADR` | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` | Pending/final metadata, frozen state, dependency immutability, burn metadata |
+| Metadata/freeze | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45) | `docs/adr/0006-metadata-freeze.md` | Gate B2, [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), `P1-META-*` | Pending/final metadata, frozen state, dependency immutability, burn metadata, ERC-4906 event policy |
 | Upgrade/redeployment | `P2-UPGRADE-ADR` | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release | Redeploy vs upgrade stance, migration expectations, versioning |
 
 Each ADR must include problem, current behavior, intended behavior, alternatives,
@@ -364,7 +365,7 @@ This is the recommended first batch of issues.
 8. [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) / P0/DESIGN: ADR for payment accounting.
 9. [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33) / P0/DESIGN: ADR for admin/governance.
 10. [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) / P0/DESIGN: ADR for randomness.
-11. `P1-META-ADR / P1/DESIGN`: ADR for metadata/freeze.
+11. [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45) / P1/DESIGN: ADR for metadata/freeze.
 12. `P2-UPGRADE-ADR / P2/DESIGN`: ADR for upgrade/redeployment.
 13. `P0-AUTH-001 / P0/CODE+TEST+DOCS`: Remove `tx.origin`.
 14. `P0-AUTH-002 / P0/CODE+TEST+DOCS`: Implement EIP-712 authorization.
@@ -1231,6 +1232,23 @@ Acceptance criteria:
 
 ### Metadata, Scripts, And Dependency Registry
 
+- Accept [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45)
+  before metadata schema, freeze, dependency, burn, or ERC-4906 implementation.
+- Resolve [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9)
+  before any production dependency-script output depends on dynamic chunk
+  composition.
+- Implement [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46):
+  metadata schema and golden-file tests.
+- Implement [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47):
+  collection freeze boundaries and immutable metadata state.
+- Implement [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48):
+  dependency registry versioning, immutability, and provenance.
+- Implement [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49):
+  ERC-4906 support and metadata update signaling.
+- Implement [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50):
+  burn metadata and supply semantics.
+- Implement [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51):
+  metadata escaping, size limits, and render-sandbox tests.
 - Add metadata schema and golden-file tests for `name`, `description`, `image`,
   `attributes`, and `animation_url`.
 - Escape quotes, backslashes, brackets, control characters, and untrusted token
@@ -1778,13 +1796,18 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness retry | Manual retry reprocesses the same provider output and cannot redraw randomness | `test/StreamRandomizerRetry.t.sol` | Missing | [`P0-RAND-006`](https://github.com/6529-Collections/6529Stream/issues/42) | Gate C | TBD |
 | Randomness seed storage | Derived seed/hash includes provider, request ID, collection, token, randomizer epoch, and raw-output hash | `test/StreamRandomizerSeed.t.sol` | Missing | [`P0-RAND-007`](https://github.com/6529-Collections/6529Stream/issues/43) | Gate C | TBD |
 | Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerProductionScope.t.sol` | Missing | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | Gate C/Gate F | TBD |
-| Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadata.t.sol` | Initial off-chain characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; on-chain pending/final and golden-file tests missing | `P1-META-*`, [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
-| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
+| Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadata.t.sol` | Initial off-chain characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; on-chain pending/final and golden-file tests missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
+| Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Missing | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |
+| Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol` | Missing | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51) | Gate D | TBD |
+| Collection freeze boundary | Frozen collections cannot mutate collection fields, base URI, metadata mode, scripts, dependency references, token data, image, attributes, final supply, or live-token metadata state | `test/StreamMetadataFreeze.t.sol` | Missing | [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47) | Gate D | TBD |
+| Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Missing | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
+| ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit only when token JSON metadata changes | `test/StreamMetadataEvents.t.sol` | Missing | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49) | Gate D | TBD |
+| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
 | Mint-accounting state | Mint counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Missing | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Missing | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsMerkle.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
-| Burn accounting | Burned-token supply and metadata follow ADR | `test/StreamCoreBurn.t.sol` | Missing | `P1-META-*` | Gate D | TBD |
+| Burn accounting | Burned-token supply, unavailable `tokenURI`, retained audit state, and callback-after-burn behavior follow ADR 0006 | `test/StreamCoreBurn.t.sol` | Missing | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate D | TBD |
 | Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamPaymentsInvariant.t.sol` | Missing | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 
 ## Appendix C: ADR Index
@@ -1796,7 +1819,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0003 Payment accounting | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24) | Accepted | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
 | 0004 Admin/governance | [`P0-ADMIN-ADR`](https://github.com/6529-Collections/6529Stream/issues/33) | Accepted | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
 | 0005 Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Accepted | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` |
-| 0006 Metadata/freeze | `P1-META-ADR` | Missing | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` |
+| 0006 Metadata/freeze | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45) | Accepted | `docs/adr/0006-metadata-freeze.md` | Gate B2, [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), `P1-META-*` |
 | 0007 Upgrade/redeployment | `P2-UPGRADE-ADR` | Missing | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release |
 
 ## Appendix D: Issue Template
