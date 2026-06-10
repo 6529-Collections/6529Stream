@@ -235,6 +235,11 @@ Tests must include adversarial strings with quotes, backslashes, brackets,
 newlines, null-like control characters, Unicode edge cases if supported, and
 large but valid inputs near each accepted limit.
 
+`P1-META-006` owns the exact numeric limits. That implementation PR must set
+explicit upper bounds for each field above and prove through gas, calldata, and
+render tests that accepted limits leave release-approved headroom for
+`tokenURI`, generated HTML, and dependency/script reads.
+
 ## Freeze Model
 
 Freeze is the public promise that a collection's metadata-significant state is
@@ -250,6 +255,12 @@ A collection may freeze only when:
 - token data, image data, and attributes for minted tokens are final
 - metadata mode and base URI are final
 - no pending admin update can change metadata-significant state
+
+For freeze eligibility, terminal randomness for a live minted token means
+`Fulfilled` under ADR 0005. `Stale` and `FailedPostProcessing` are not
+freeze-eligible for live tokens in public beta. A collection with a live token
+in one of those states must resolve the token through the accepted randomness
+recovery path or burn policy before freeze.
 
 The frozen manifest must commit to:
 
@@ -270,7 +281,19 @@ The frozen manifest must commit to:
   token metadata input records
 - randomness state root or equivalent proof that live minted tokens are
   terminal
+- generated HTML input root, or an explicit statement that the manifest relies
+  on deterministic replay from the committed dependency, script, token input,
+  and seed hashes instead of storing every rendered HTML output hash
 - freeze block number and timestamp
+
+The manifest hash must be deterministic and collision-resistant. Public-beta
+implementation will use `keccak256(abi.encode(...))` over a versioned
+`METADATA_FREEZE_MANIFEST_TYPEHASH`, collection ID, schema version, chain ID,
+core contract address, and the committed field hashes or Merkle roots listed
+above. Variable-length records such as token metadata inputs, script chunks, and
+dependency chunks must be represented by typed per-record hashes and Merkle
+roots or an equivalent length-aware structure. `abi.encodePacked` with multiple
+dynamic fields is not acceptable for manifest hashing.
 
 After freeze, these operations or stricter equivalents must revert:
 
@@ -341,11 +364,11 @@ Events should be emitted for:
 - collection script or dependency reference changes before freeze
 - collection freeze if freeze changes metadata state or finality flags
 
-Events should not be emitted merely because mint or burn happened unless the
+Events should not be emitted merely because mint happened unless the
 implementation intentionally documents that the token's JSON metadata changed
-as part of that operation. Burned-token `tokenURI` remains unavailable under
-this ADR, so burn-specific event policy should be documented separately from
-`ERC-4906` metadata updates.
+as part of mint. Burn must not emit `MetadataUpdate` merely because
+`tokenURI` becomes unavailable; indexers should detect burn through the
+standard ERC-721 transfer-to-zero event and any protocol burn event.
 
 ## Burned Tokens
 
@@ -367,9 +390,9 @@ Required public-beta behavior:
 If a valid randomness callback arrives after burn, ADR 0005 callback validation
 still applies. The accepted behavior for public beta is to record the valid
 fulfillment for audit traceability and emit an explicit event, while preserving
-burned ownership and unavailable `tokenURI`. The implementation may instead
-mark the callback stale only if the final code and tests document that stricter
-behavior before merge.
+burned ownership and unavailable `tokenURI`. Stale-only rejection for otherwise
+valid post-burn callbacks is out of scope unless a later ADR supersedes this
+decision.
 
 ## Metadata Authority
 
@@ -543,5 +566,9 @@ signal that metadata changed before freeze.
 - Build [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48).
 - Add [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49).
 - Ship [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50).
+  This issue must implement the audit-record post-burn callback behavior from
+  this ADR and document the emitted event.
 - Cover [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51).
+  This issue must set concrete field, `tokenURI`, generated HTML, calldata, and
+  gas budget limits before metadata implementation merges.
 - Reconcile final upgrade/redeployment implications with ADR 0007.

@@ -115,10 +115,11 @@ Required evidence:
 
 ### Gate B2: Release Protocol Decisions Accepted
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
-Blocking issues: TBD.
-Evidence: TBD.
+Blocking issues: [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45),
+`P2-UPGRADE-ADR`.
+Evidence: `docs/adr/0006-metadata-freeze.md` accepted; ADR 0007 missing.
 
 Exit criteria:
 
