@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/65` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 14:34 UTC` |
+| Last updated | `2026-06-10 14:38 UTC` |
 
 ## Packaging Notes
 
@@ -77,7 +77,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 22 | Fix admin selector and permission model | Gate C | Implement P0-ADMIN-001 target-scoped admin permission semantics, explicit selector tests, docs, and roadmap traceability | Merged in PR #63 |
 | 23 | Define pause and emergency controls | Gate C | Implement P0-ADMIN-002 domain-scoped pause controls, withdrawal-pause policy, emergency-control traceability, tests, docs, and roadmap state updates | Merged in PR #64 |
 | 24 | Harden randomizer requests and callbacks | Gate C | Implement P0-RAND-001 request lifecycle, provider/epoch validation, duplicate/stale callback rejection, events, tests, docs, and roadmap state updates | Merged in PR #65 |
-| 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | Locally validated on `codex/randomizer-lifecycle-views`; ready for PR |
+| 25 | Complete randomizer lifecycle views | Gate C | Finish P0-RAND-002 by exposing token-level request/state views, tests, docs, and roadmap state updates | PR #66 open; waiting for CI and bot reviews |
 
 ## Current PR Worklog
 
@@ -2061,8 +2061,9 @@ Local implementation notes:
 
 ### PR candidate: Complete randomizer lifecycle views (Queue Item 25)
 
-Status: Locally validated; ready to commit and open PR.
+Status: PR #66 open; waiting for CI and bot reviews.
 Branch: `codex/randomizer-lifecycle-views`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/66`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/38`
@@ -2102,6 +2103,12 @@ Validation completed at `2026-06-10 14:34 UTC`:
   view helpers did not expand the accepted baseline after parameter naming was
   cleaned up. Slither still exits nonzero because known baseline findings are
   present.
+
+Review requests:
+
+- Claude requested in issue comment `4671390449`; expected to skip while the org
+  overage limit remains in effect.
+- CodeRabbit latest-head review requested in issue comment `4671390698`.
 
 Validation targets retained for PR review:
 
@@ -2284,6 +2291,7 @@ Validation targets retained for PR review:
 | 2026-06-10 14:24 | Merge PR #65 | Randomizer lifecycle hardening merged as `9bf44c1e292e891f01fa4a7bc27373032e9beaaf`; CI passed, CodeRabbit was green/LGTM, Claude was unavailable due org overage, issue #37 closed completed, and issue #39 was closed with evidence |
 | 2026-06-10 14:25 | Select Queue Item 25 | Next P0 randomness child is `P0-RAND-002`; token-level lifecycle views should be explicit before moving into failed-state/retry/metadata work |
 | 2026-06-10 14:34 | Validate Queue Item 25 | Token-level randomizer lifecycle views are locally green across focused tests, `make check`, Windows wrapper, formatting, diff hygiene, docs traceability, and Slither baseline comparison |
+| 2026-06-10 14:38 | Open PR #66 | Token-level randomizer lifecycle views are published in `https://github.com/6529-Collections/6529Stream/pull/66`; Claude review requested in issue comment `4671390449` and CodeRabbit latest-head review requested in issue comment `4671390698` |
 
 ## Resume Instructions
 
