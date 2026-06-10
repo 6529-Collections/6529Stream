@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/auction-pull-credits` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/57` |
+| Active PR branch | `codex/auction-custody-state-machine` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/58` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 08:38 UTC` |
+| Last updated | `2026-06-10 09:20 UTC` |
 
 ## Packaging Notes
 
@@ -67,7 +67,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | Merged in PR #55 |
 | 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Merged in PR #56 |
 | 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Merged in PR #57 |
-| 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | In progress on `codex/auction-pull-credits` |
+| 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | Merged in PR #58 |
+| 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | In progress on `codex/auction-custody-state-machine` |
 
 ## Current PR Worklog
 
@@ -1238,7 +1239,7 @@ Outcome:
 
 ### PR #58: Fix auction bidding reentrancy and outbid refunds (Queue Item 17)
 
-Status: Open; awaiting GitHub CI and bot reviews.
+Status: Merged.
 Branch: `codex/auction-pull-credits`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/58`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/12`.
@@ -1304,6 +1305,107 @@ Review feedback:
   not full custody or protocol-wide payment ledger work.
 - PR opened on head `ca5ca09f3090b742798fd8bffc06d47090e73125`.
 - Claude review was explicitly requested in issue comment `4668219408`.
+- Claude skipped review because the organization's overage spend limit had been
+  reached.
+- CodeRabbit initially failed because the head moved during the state-file push;
+  a latest-head review was requested in issue comment `4668232366`.
+- CodeRabbit reviewed latest head `91a92f6461355ea108252c49dbd5f7db5ffc4a34`,
+  confirmed the P0-AUCT-002 accounting and reentrancy fix, and found no material
+  issues within scope.
+- CodeRabbit's commit status remained pending despite the clean review comment
+  and release-note update; autonomous merge evidence was recorded in issue
+  comment `4668268937` before merge.
+
+Outcome:
+
+- Merged as PR #58 on `2026-06-10 08:45 UTC`.
+- Squash merge commit `256cb2019c4c7c057147ee0e5f51d892b52e4f58`.
+- Latest head before merge `91a92f6461355ea108252c49dbd5f7db5ffc4a34`.
+- Issue #12 closed as completed.
+- GitHub CI passed; CodeRabbit review evidence was clean despite stale pending
+  commit status.
+- Claude unavailable due to organization overage.
+
+### PR #59: Formalize auction custody and settlement (Queue Item 18)
+
+Status: In progress; implementation drafted and local validation passing.
+Branch: `codex/auction-custody-state-machine`.
+Pull request: TBD.
+Related issue: `https://github.com/6529-Collections/6529Stream/issues/22`.
+Claude review request: TBD.
+
+Goal:
+
+- Implement the accepted ADR 0002 auction custody and state-machine semantics
+  without reopening the outbid refund issue fixed in PR #58.
+- Make token custody and settlement authority explicit and testable for bid and
+  no-bid auctions.
+- Preserve bidder credit accounting and active bid escrow invariants.
+- Add events/views/tests/docs so auction state is observable by contributors,
+  indexers, and auditors.
+
+Candidate files:
+
+- `smart-contracts/AuctionContract.sol`
+- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/IStreamAuctions.sol`
+- `docs/auction-custody.md`
+- `test/StreamAuctionCustody.t.sol`
+- `test/StreamAuctionPayments.t.sol`
+- `test/mocks/MockStreamAuctions.sol`
+- existing auction/drop characterization tests as migration tripwires
+- `docs/adr/0002-auction-custody.md`
+- `docs/adr/0003-payment-accounting.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- `StreamDrops` now requires an admin-configured auction contract before
+  auction drops mint, mints auction custody to that contract, and registers the
+  auction with drop ID, token ID, collection, poster, reserve, and end time.
+- `StreamAuctions` now implements `IERC721Receiver`, registers explicit auction
+  records, exposes ADR 0002 status views, derives active/ended states, stores
+  terminal states, and rejects bids outside `Active`.
+- No-bid settlement transfers from auction escrow to an EOA signed poster. If
+  the poster is a contract, settlement records a pending poster-controlled NFT
+  claim and leaves the NFT in escrow until the poster claims to a receiver.
+- With-bid settlement atomically records terminal state, moves active bid
+  escrow into poster, protocol, and curator pull credits, and transfers the NFT
+  from auction escrow to the highest bidder; a failed NFT transfer reverts the
+  full settlement so credits are not released without custody transfer.
+- Pre-bid cancellation is available to the signed poster or authorized auction
+  admin, and cancellation after a valid bid is rejected.
+- PR #58 bidder-credit accounting remains intact; final auction proceeds now
+  have a separate auction-local pull-credit withdrawal path.
+- Broader ADR 0003 payment accounting remains open for fixed-price payments,
+  curator rewards, randomizer reserves, and cross-contract invariants.
+
+Validation:
+
+- `forge test --match-contract 'StreamAuction(Custody|Payments)Test' -vvv`
+  passed: 20 tests, 0 failed.
+- `forge fmt --check` passed for the changed Solidity contracts and tests.
+- `git diff --check` passed.
+- Markdown heading and traceability scans passed for touched docs/state files.
+- `make check` passed with 80 tests and the known compiler/NatSpec/lint
+  warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 80
+  tests and the known compiler/NatSpec/lint warnings.
+- Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
+  on `PATH`; it returned the expected non-zero baseline-finding exit with 9
+  High, 25 Medium, 57 Low, 507 Informational, and 6 Optimization findings.
+  The current delta has no `reentrancy-no-eth` findings and no auction
+  emergency `arbitrary-send-eth` finding.
+
+Review feedback:
+
+- Contract-risk, test-strategy, and docs/state sidecars completed. Their
+  recommendations were folded into escrow-by-auction-contract custody, explicit
+  status views, no-bid pending claim tests, final proceeds credits, and
+  docs/roadmap scope wording.
 
 ## Decision Log
 
@@ -1431,6 +1533,11 @@ Review feedback:
 | 2026-06-10 08:36 | Finish local `P0-AUCT-002` validation | Full `make check` and Windows wrapper pass with 69 tests; format, whitespace, heading scan, and Slither delta evidence pass; Slither remains non-zero for unrelated baseline findings |
 | 2026-06-10 08:38 | Open PR #58 | Auction pull-credit implementation is published with local validation and Slither delta evidence |
 | 2026-06-10 08:38 | Request Claude review on PR #58 | Explicit review ping added in issue comment `4668219408` because Claude may not run automatically |
+| 2026-06-10 08:45 | Merge PR #58 | CI passed, CodeRabbit review evidence was clean despite stale pending status, the stale-status exception was documented, and Claude was unavailable due to organization overage limits |
+| 2026-06-10 08:46 | Start `P0-AUCT-001` implementation PR | Gate C next formalizes auction custody/state-machine semantics now that bid/outbid refunds use pull credits |
+| 2026-06-10 09:02 | Include auction-local final proceeds credits in `P0-AUCT-001` | ADR 0002 rejects synchronous final payout calls in auction settlement; this PR can satisfy that without claiming full ADR 0003 completion |
+| 2026-06-10 09:05 | Validate focused auction custody/payment suites | Explicit escrow custody, status derivation, no-bid pending claims, failed NFT transfer, cancellation, proceeds-credit withdrawal failure, and PR #58 bidder-credit regressions pass locally |
+| 2026-06-10 09:16 | Finish local `P0-AUCT-001` validation | Full `make check` and Windows wrapper pass with 80 tests; format, whitespace, heading/traceability scans, and Slither delta evidence pass; Slither remains non-zero for unrelated baseline findings |
 
 ## Resume Instructions
 

@@ -138,9 +138,18 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
         deployed.core.totalSupply().assertEq(0, "mint happened despite rejected curator payout");
     }
 
-    function testAuctionDropCurrentlyMintsCustodyToPayoutAndRecordsAuctionState() public {
+    function testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState() public {
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        StreamAuctions auctions = new StreamAuctions(
+            address(deployed.minter),
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.drops),
+            PAYOUT,
+            CURATORS_POOL
+        );
+        deployed.drops.updateAuctionContract(address(auctions));
         uint256 auctionEndTime = block.timestamp + 1 days;
         StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
             deployed.drops,
@@ -159,10 +168,13 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
         deployed.drops.mintDrop(authorization, "auction-data", signature);
 
         uint256 tokenId = 10_000_000_000;
-        deployed.core.ownerOf(tokenId).assertEq(PAYOUT, "auction custody recipient changed");
+        deployed.core.ownerOf(tokenId).assertEq(address(auctions), "auction custody changed");
         deployed.minter.getAuctionStatus(tokenId).assertTrue("auction status changed");
         deployed.minter.getAuctionEndTime(tokenId)
             .assertEq(auctionEndTime, "auction end time changed");
+        uint256(auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.Active), "auction lifecycle changed");
+        auctions.retrieveAuctionEndTime(tokenId).assertEq(auctionEndTime, "registered end changed");
         deployed.drops.retrieveAuctionPoster(tokenId).assertEq(POSTER, "auction poster changed");
         deployed.drops.retrieveAuctionPrice(tokenId)
             .assertEq(5 ether, "auction starting price changed");
@@ -212,6 +224,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
             PAYOUT,
             CURATORS_POOL
         );
+        deployed.drops.updateAuctionContract(address(auctions));
         uint256 auctionEndTime = block.timestamp + 1 days;
         StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
             deployed.drops,
@@ -232,13 +245,13 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
         uint256 tokenId = 10_000_000_000;
         deployed.drops.retrieveExecutionAddress(tokenId)
             .assertEq(POSTER, "no-bid execution address changed");
-        vm.prank(PAYOUT);
-        deployed.core.setApprovalForAll(address(auctions), true);
         vm.warp(auctionEndTime + 1);
 
         auctions.claimAuction(tokenId);
 
         deployed.core.ownerOf(tokenId).assertEq(POSTER, "no-bid settlement recipient changed");
+        uint256(auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledNoBid), "status not settled");
     }
 
     function testContractExecutorCanMintFixedPriceDropToExplicitRecipient() public {

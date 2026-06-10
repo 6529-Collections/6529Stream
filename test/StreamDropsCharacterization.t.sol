@@ -2,8 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/StreamDrops.sol";
+import "../smart-contracts/StreamAdmins.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/DropAuthTestHelper.sol";
+import "./mocks/MockStreamAuctions.sol";
 import "./mocks/MockStreamMinter.sol";
 
 contract StreamDropsCharacterizationTest is DropAuthTestHelper {
@@ -22,6 +24,19 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
     function deployDrops() private returns (StreamDrops drops, MockStreamMinter minter) {
         minter = new MockStreamMinter();
         drops = new StreamDrops(signerAddress(), address(minter), ADMINS, PAYOUT, CURATORS_POOL);
+    }
+
+    function deployDropsWithAuction()
+        private
+        returns (StreamDrops drops, MockStreamMinter minter, MockStreamAuctions auctions)
+    {
+        minter = new MockStreamMinter();
+        StreamAdmins admins = new StreamAdmins(address(this));
+        drops = new StreamDrops(
+            signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
+        );
+        auctions = new MockStreamAuctions();
+        drops.updateAuctionContract(address(auctions));
     }
 
     function testDomainSeparatorUsesEip712Fields() public {
@@ -124,8 +139,37 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
         drops.retrieveDrops().length.assertEq(1, "replay changed drop count");
     }
 
-    function testAuctionDropMintsCurrentCustodyToPayoutAndStoresPosterPrice() public {
+    function testAuctionDropRequiresConfiguredAuctionContract() public {
         (StreamDrops drops, MockStreamMinter minter) = deployDrops();
+        uint256 auctionEndTime = block.timestamp + 1 days;
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            drops,
+            POSTER,
+            address(0),
+            "auction-data",
+            7,
+            5 ether,
+            auctionEndTime,
+            9,
+            10,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(
+                abi.encodeWithSelector(
+                    drops.mintDrop.selector, authorization, "auction-data", signature
+                )
+            );
+
+        success.assertFalse("auction minted without configured escrow");
+        minter.lastAuctionRecipient().assertEq(address(0), "auction mint was attempted");
+    }
+
+    function testAuctionDropMintsCustodyToAuctionContractAndRegistersState() public {
+        (StreamDrops drops, MockStreamMinter minter, MockStreamAuctions auctions) =
+            deployDropsWithAuction();
         uint256 auctionEndTime = block.timestamp + 1 days;
         StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
             drops,
@@ -144,10 +188,16 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
         drops.mintDrop(authorization, "auction-data", signature);
 
         uint256 tokenId = 1_000_000_000;
-        minter.lastAuctionRecipient().assertEq(PAYOUT, "auction custody recipient changed");
+        minter.lastAuctionRecipient().assertEq(address(auctions), "auction custody changed");
         minter.lastAuctionTokenData().assertEq("auction-data", "auction token data changed");
         minter.lastAuctionCollectionId().assertEq(7, "auction collection changed");
         minter.lastAuctionEndTime().assertEq(auctionEndTime, "auction end time changed");
+        auctions.lastDropId().assertEq(authorization.dropId, "registered drop id changed");
+        auctions.lastTokenId().assertEq(tokenId, "registered token id changed");
+        auctions.lastCollectionId().assertEq(7, "registered collection changed");
+        auctions.lastPoster().assertEq(POSTER, "registered poster changed");
+        auctions.lastReservePrice().assertEq(5 ether, "registered reserve changed");
+        auctions.lastAuctionEndTime().assertEq(auctionEndTime, "registered end changed");
         drops.retrieveAuctionPoster(tokenId).assertEq(POSTER, "auction poster changed");
         drops.retrieveAuctionPrice(tokenId).assertEq(5 ether, "auction starting price changed");
         drops.retrieveDropID(tokenId).assertEq(authorization.dropId, "auction drop id changed");

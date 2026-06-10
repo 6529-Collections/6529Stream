@@ -4,10 +4,15 @@
 
 Accepted.
 
-Implementation status: P0-AUCT-002 converts auction outbid refunds to bidder
-credits and removes the bid-path push refund. Remaining ADR work includes
-explicit custody/state-machine implementation, with-bid settlement credits,
-no-bid claim fallback, cancellation policy, and emergency surplus boundaries.
+Implementation status: P0-AUCT-001 and P0-AUCT-002 implement the ADR 0002
+auction-custody path for public-beta target behavior: auction NFTs are escrowed
+by the auction contract, auction records expose the accepted state machine,
+outbid refunds use bidder credits, with-bid final proceeds use auction-local
+pull credits, no-bid contract posters get a pending NFT claim path, pre-bid
+cancellation is implemented, and auction-local emergency surplus excludes owed
+auction balances. Broader protocol-wide payment accounting, fixed-price pull
+payments, curator reward accounting, randomizer reserves, pause controls, and
+deployment rehearsal remain separate roadmap work.
 
 ## Metadata
 
@@ -37,42 +42,23 @@ Before any public beta auction path is enabled, the protocol needs to decide:
 - when auction state becomes terminal
 - how cancellation and emergency handling work
 
-## Current Behavior
+## Historical Behavior Before P0-AUCT Implementation
 
-Current source references:
+The legacy behavior that motivated this ADR was:
 
-- `smart-contracts/StreamDrops.sol#L72-L110`: `mintDrop` creates fixed-price
-  or auction drops and stores drop metadata.
-- `smart-contracts/StreamDrops.sol#L97-L100`: auction drops call
-  `mintAndAuction(payOutAddress, ...)`, then store poster and reserve price
-  data.
-- `smart-contracts/StreamDrops.sol#L147-L163`: fixed-price drops store the
-  signed recipient as execution address, and auction drops store the poster as
-  execution address.
-- `smart-contracts/StreamMinter.sol#L90-L102`: `mintAndAuction` records the
-  auction end time/status and mints the token to the supplied recipient.
-- `smart-contracts/AuctionContract.sol#L70-L86`: auction state is split across
-  highest-bid, highest-bidder, claimed, bidder-credit, total-bidder-owed, and
-  active-bid-escrow storage.
-- `smart-contracts/AuctionContract.sol#L88-L125`: bidding credits the previous
-  highest bidder and updates highest-bid and escrow state without a bid-path ETH
-  refund call.
-- `smart-contracts/AuctionContract.sol#L142-L170`: settlement marks the token
-  claimed, decrements active bid escrow for with-bid settlement, pushes ETH to
-  poster, payout, and curators, then transfers the NFT from `ownerOf(tokenId)`
-  to the winning bidder.
-- `smart-contracts/AuctionContract.sol#L231-L254`: emergency withdrawal is
-  bounded by auction-local `emergencyWithdrawable()` surplus after bidder
-  credits and active bid escrow.
-- `ops/SLITHER_BASELINE.md`: the historical auction `reentrancy-eth` row and
-  auction emergency `arbitrary-send-eth` row are fixed by P0-AUCT-002; remaining
-  payment surfaces are tracked by ADR 0003 and issue #8.
+- auction drops minted custody to `payOutAddress`
+- settlement depended on the current `ownerOf(tokenId)` and external approval
+- no-bid settlement had no contract-poster fallback
+- with-bid settlement pushed ETH before or during settlement
+- `auctionClaim[tokenId]` was the only terminal-state signal
+- auction emergency withdrawal did not have a complete owed-balance model
 
-Current characterization tests intentionally pin the known-unsafe auction
-creation path as a migration tripwire:
+Current target-state tests replace the legacy custody characterization:
 
 - `test/StreamDropsCharacterization.t.sol`
 - `test/StreamDropsIntegrationCharacterization.t.sol`
+- `test/StreamAuctionCustody.t.sol`
+- `test/StreamAuctionPayments.t.sol`
 
 ## Decision
 
@@ -109,13 +95,11 @@ The public-beta target design is:
     return the terminal status or revert with a custom already-settled error,
     but the behavior must be documented and tested.
 11. A failed NFT transfer must not mark the auction settled and must not credit
-    or release final auction proceeds. No-bid settlement must support a
-    pull-style NFT claim fallback for contract posters that cannot receive a
-    direct safe transfer. The implementation may safely transfer to the poster
-    when possible, or record a pending no-bid NFT claim for the poster. The
-    poster must be able to complete that claim to a receiver address, and
-    `SettledNoBid` must be reached only after the NFT leaves escrow through the
-    direct transfer or the claim path.
+    or release final auction proceeds. No-bid settlement must safely transfer
+    directly to an EOA poster and must use a pull-style NFT claim path for
+    contract posters. The poster must be able to complete that claim to a
+    receiver address, and `SettledNoBid` must be reached only after the NFT
+    leaves escrow through the direct transfer or the claim path.
 12. Outbid refunds and final proceeds must use pull-payment accounting. No P0
     auction implementation may keep synchronous push refunds or synchronous
     final payout calls in the bid or settlement path.
@@ -349,8 +333,8 @@ Implementation PRs must add or update tests for:
 - outbid credit creation
 - reverting previous bidder cannot block a new bid
 - no-bid settlement to poster
-- no-bid settlement to a contract poster without the ERC-721 receiver hook
-  creates a pending NFT claim instead of permanently trapping the auction
+- no-bid settlement to a contract poster creates a pending NFT claim instead
+  of relying on an immediate outbound safe transfer
 - poster-authorized no-bid NFT claim to a valid receiver completes
   `SettledNoBid`
 - with-bid settlement to highest bidder
@@ -371,20 +355,23 @@ the replacement tests prove the new custody model.
 
 ## Rollout Plan
 
-1. Merge this ADR and link it from the roadmap.
-2. Implement ADR 0003 for payment accounting before or alongside value-moving
-   auction changes.
-3. Implement `P0-AUCT-001` custody and state-machine changes.
-4. Implement `P0-AUCT-002` bid-path reentrancy and outbid-credit changes.
-5. Add the event catalog and external auction docs.
-6. Run local and CI gates, including `make check`, Windows check wrapper, and
-   targeted auction tests.
-7. Include auction creation, bid, no-bid settlement, with-bid settlement, and
-   cancellation in deployment rehearsal before public beta.
+1. Merge this ADR and link it from the roadmap. Completed.
+2. Implement `P0-AUCT-002` bid-path reentrancy and outbid-credit changes.
+   Completed.
+3. Implement `P0-AUCT-001` custody, state-machine, settlement-credit,
+   no-bid-claim, and cancellation changes. Completed for auction-local scope.
+4. Add the event catalog and external auction docs. Completed for the
+   auction-local implementation in `docs/auction-custody.md`; release-wide event
+   catalog work remains open.
+5. Run local and CI gates, including `make check`, Windows check wrapper, and
+   targeted auction tests. Local gates are required on every implementation PR;
+   CI gates are required before merge.
+6. Include auction creation, bid, no-bid settlement, with-bid settlement, and
+   cancellation in deployment rehearsal before public beta. Still open.
 
 ## Non-Goals
 
-- Defining the full payment ledger API. That belongs to ADR 0003.
+- Defining the full protocol-wide payment ledger API. That belongs to ADR 0003.
 - Defining all admin roles, multisig setup, or pause ownership. That belongs to
   ADR 0004.
 - Supporting batch auction drops in P0.
@@ -394,7 +381,10 @@ the replacement tests prove the new custody model.
 
 ## Accepted Risks
 
-- The exact withdrawal API remains open until ADR 0003.
+- The exact protocol-wide withdrawal API remains open until ADR 0003
+  implementation. Auction-local bidder and settlement-proceeds withdrawals now
+  exist, but fixed-price, curator reward, randomizer reserve, and cross-contract
+  ledger withdrawals remain open.
 - The exact admin actor for cancellation and pause remains open until ADR 0004.
 - The implementation may need to rename or split the current auction contract.
 - Gas costs for explicit auction records may be higher than the legacy mapping
