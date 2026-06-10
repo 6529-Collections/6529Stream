@@ -16,3 +16,10 @@ updated only when the corresponding roadmap fix changes the intended behavior.
 Drop execution now has EIP-712 EOA target-state coverage in
 `StreamDropsEIP712.t.sol` and ERC-1271 contract signer target-state coverage in
 `StreamDropsERC1271.t.sol`.
+
+Auction outbid refunds now have target-state coverage in
+`StreamAuctionPayments.t.sol`: rejecting previous bidders cannot block higher
+bids, previous bidders receive withdrawable credits, failed withdrawals preserve
+credits, withdrawal reentrancy cannot overdraw credits, bid thresholds are
+checked, and active bid escrow is protected from auction emergency surplus
+withdrawals, including forced surplus withdrawal without draining owed balances.

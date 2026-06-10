@@ -4,6 +4,11 @@
 
 Accepted.
 
+Implementation status: P0-AUCT-002 converts auction outbid refunds to bidder
+credits and removes the bid-path push refund. Remaining ADR work includes
+explicit custody/state-machine implementation, with-bid settlement credits,
+no-bid claim fallback, cancellation policy, and emergency surplus boundaries.
+
 ## Metadata
 
 | Field | Value |
@@ -41,23 +46,27 @@ Current source references:
 - `smart-contracts/StreamDrops.sol#L97-L100`: auction drops call
   `mintAndAuction(payOutAddress, ...)`, then store poster and reserve price
   data.
-- `smart-contracts/StreamDrops.sol#L108`: the stored execution address is
-  `tx.origin`.
+- `smart-contracts/StreamDrops.sol#L147-L163`: fixed-price drops store the
+  signed recipient as execution address, and auction drops store the poster as
+  execution address.
 - `smart-contracts/StreamMinter.sol#L90-L102`: `mintAndAuction` records the
   auction end time/status and mints the token to the supplied recipient.
-- `smart-contracts/AuctionContract.sol#L54-L61`: auction state is split across
-  highest-bid, highest-bidder, and claimed mappings.
-- `smart-contracts/AuctionContract.sol#L64-L88`: bidding refunds the previous
-  highest bidder with an external `call` before updating the highest bid and
-  highest bidder.
-- `smart-contracts/AuctionContract.sol#L91-L108`: settlement marks the token
-  claimed, pushes ETH to poster, payout, and curators, then transfers the NFT
-  from `ownerOf(tokenId)` to the winning bidder.
-- `smart-contracts/AuctionContract.sol#L146-L153`: emergency withdrawal sends
-  the full auction-contract ETH balance to the admin owner.
-- `ops/SLITHER_BASELINE.md`: high-impact `reentrancy-eth` and
-  `arbitrary-send-eth` findings are tracked for auction bidding and emergency
-  withdrawals.
+- `smart-contracts/AuctionContract.sol#L70-L86`: auction state is split across
+  highest-bid, highest-bidder, claimed, bidder-credit, total-bidder-owed, and
+  active-bid-escrow storage.
+- `smart-contracts/AuctionContract.sol#L88-L125`: bidding credits the previous
+  highest bidder and updates highest-bid and escrow state without a bid-path ETH
+  refund call.
+- `smart-contracts/AuctionContract.sol#L142-L170`: settlement marks the token
+  claimed, decrements active bid escrow for with-bid settlement, pushes ETH to
+  poster, payout, and curators, then transfers the NFT from `ownerOf(tokenId)`
+  to the winning bidder.
+- `smart-contracts/AuctionContract.sol#L231-L254`: emergency withdrawal is
+  bounded by auction-local `emergencyWithdrawable()` surplus after bidder
+  credits and active bid escrow.
+- `ops/SLITHER_BASELINE.md`: the historical auction `reentrancy-eth` row and
+  auction emergency `arbitrary-send-eth` row are fixed by P0-AUCT-002; remaining
+  payment surfaces are tracked by ADR 0003 and issue #8.
 
 Current characterization tests intentionally pin the known-unsafe auction
 creation path as a migration tripwire:

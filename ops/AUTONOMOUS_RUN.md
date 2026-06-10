@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/erc1271-drop-authorization` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/56` |
+| Active PR branch | `codex/auction-pull-credits` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/57` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 07:58 UTC` |
+| Last updated | `2026-06-10 08:36 UTC` |
 
 ## Packaging Notes
 
@@ -66,7 +66,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Merged in PR #54 |
 | 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | Merged in PR #55 |
 | 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Merged in PR #56 |
-| 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Open in PR #57 |
+| 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Merged in PR #57 |
+| 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | In progress on `codex/auction-pull-credits` |
 
 ## Current PR Worklog
 
@@ -1169,7 +1170,7 @@ Outcome:
 
 ### PR #57: Implement ERC-1271 contract signer support (Queue Item 16)
 
-Status: Open; awaiting GitHub CI and bot reviews.
+Status: Merged.
 Branch: `codex/erc1271-drop-authorization`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/57`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/19`.
@@ -1217,6 +1218,90 @@ Review feedback:
 
 - PR opened on head `73a2edf983772625f23ed92aefa1b7c542101696`.
 - Claude review was explicitly requested in issue comment `4667907301`.
+- Claude skipped review because the organization's overage spend limit had been
+  reached.
+- CodeRabbit reported 5 pre-merge checks passed and no actionable review
+  threads.
+- CodeRabbit's commit status remained pending after two explicit refresh
+  requests; autonomous merge evidence was recorded in issue comment
+  `4668031956` before merge.
+
+Outcome:
+
+- Merged as PR #57 on `2026-06-10 08:13 UTC`.
+- Squash merge commit `cc66438b72ad8f7ec7a047cab9c7b8daaef406dc`.
+- Latest head before merge `10f1c880b0572665b19cb1efeace0a697b1adda2`.
+- Issue #19 closed as completed.
+- GitHub CI passed; CodeRabbit review evidence was clean despite stale pending
+  commit status.
+- Claude unavailable due to organization overage.
+
+### PR #58: Fix auction bidding reentrancy and outbid refunds (Queue Item 17)
+
+Status: Ready to open; local validation passes.
+Branch: `codex/auction-pull-credits`.
+Pull request: TBD.
+Related issue: `https://github.com/6529-Collections/6529Stream/issues/12`.
+Claude review request: TBD.
+
+Goal:
+
+- Remove the bid-path push refund from `StreamAuctions.participateToAuction`.
+- Convert previous highest bids into withdrawable bidder credits.
+- Keep highest-bid state and active bid escrow observable at all times.
+- Add guarded bidder-credit withdrawals that preserve credit on failed transfer
+  and cannot be overdrawn through reentrancy.
+- Keep the PR scoped to issue #12; broader custody, final settlement credits,
+  fixed-price pull payments, curator reward credits, and full emergency surplus
+  boundaries remain separate P0 work.
+
+Candidate files:
+
+- `smart-contracts/AuctionContract.sol`
+- `test/StreamAuctionPayments.t.sol`
+- `test/README.md`
+- `docs/known-blockers.md`
+- `docs/adr/0002-auction-custody.md`
+- `docs/adr/0003-payment-accounting.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- `participateToAuction` is now `nonReentrant` and no longer calls the previous
+  bidder during outbid.
+- Outbid bidders accrue `auctionBidderCredits`; `totalBidderOwed`,
+  `totalAuctionBidEscrow`, `totalOwed`, and `emergencyWithdrawable` expose the
+  auction-local accounting.
+- `withdrawBidderCredit` and `withdrawBidderCreditTo` are guarded withdrawal
+  paths; failed transfers revert and preserve credit.
+- Auction emergency withdrawal can withdraw only `emergencyWithdrawable` surplus
+  and skips external calls when there is no surplus.
+
+Validation:
+
+- `forge test --match-contract StreamAuctionPaymentsTest -vvv` passed with 10
+  tests.
+- `forge test --match-contract StreamDropsIntegrationCharacterizationTest -vvv`
+  passed with 10 tests before the final doc correction pass.
+- `make check` passed with 69 tests.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed with 69 tests.
+- `forge fmt --check smart-contracts\AuctionContract.sol test\StreamAuctionPayments.t.sol`
+  passed.
+- `git diff --check` passed.
+- Markdown heading scan passed for touched docs/state files.
+- `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`
+  returned expected non-zero exit because unrelated baseline findings remain;
+  JSON showed `REENTRANCY_ETH_TOTAL=0`,
+  `TARGET_PARTICIPATE_TO_AUCTION=0`, and
+  `AUCTION_ARBITRARY_SEND_ETH=0`.
+
+Review feedback:
+
+- Sidecar review confirmed the narrow issue #12 scope: bid/outbid credits only,
+  not full custody or protocol-wide payment ledger work.
 
 ## Decision Log
 
@@ -1338,6 +1423,10 @@ Review feedback:
 | 2026-06-10 07:55 | Finish local `P0-AUTH-003` validation | ERC-1271 exact-magic staticcall validation, fail-closed malformed returns, contract-signer tests, docs, roadmap, full `make check`, and Windows wrapper all pass locally |
 | 2026-06-10 07:57 | Open PR #57 | ERC-1271 drop authorization implementation is published with local validation evidence |
 | 2026-06-10 07:58 | Request Claude review on PR #57 | Explicit review ping added in issue comment `4667907301` because Claude may not run automatically |
+| 2026-06-10 08:13 | Merge PR #57 | CI passed, CodeRabbit review evidence was clean despite stale pending status, the stale-status exception was documented, and Claude was unavailable due to organization overage limits |
+| 2026-06-10 08:18 | Start `P0-AUCT-002` implementation PR | Gate C next fixes the high-impact auction bid-path reentrancy/refund issue by converting outbid refunds to bidder pull credits |
+| 2026-06-10 08:28 | Validate focused auction payment suite | Bid/outbid pull credits, rejecting previous bidder, failed withdrawal preservation, withdrawal reentrancy, bid thresholds, emergency escrow/surplus boundaries, and settlement replay tests pass |
+| 2026-06-10 08:36 | Finish local `P0-AUCT-002` validation | Full `make check` and Windows wrapper pass with 69 tests; format, whitespace, heading scan, and Slither delta evidence pass; Slither remains non-zero for unrelated baseline findings |
 
 ## Resume Instructions
 
