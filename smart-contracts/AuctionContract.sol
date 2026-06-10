@@ -37,6 +37,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
 
     struct AuctionRecord {
         bytes32 dropId;
+        uint256 tokenId;
         uint256 collectionId;
         address poster;
         address custody;
@@ -108,6 +109,8 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         address _payOutAddress,
         address _curatorsPoolAddress
     ) {
+        require(_payOutAddress != address(0), "Zero payout");
+        require(_curatorsPoolAddress != address(0), "Zero curator");
         minterContract = IStreamMinter(_minterContract);
         gencore = _gencore;
         adminsContract = IStreamAdmins(_adminsContract);
@@ -148,6 +151,10 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     uint256 public totalProtocolOwed;
     uint256 public totalCuratorOwed;
 
+    function isStreamAuctionsContract() external pure returns (bool) {
+        return true;
+    }
+
     function registerAuction(
         bytes32 _dropId,
         uint256 _tokenid,
@@ -167,6 +174,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
 
         auctionRecords[_tokenid] = AuctionRecord({
             dropId: _dropId,
+            tokenId: _tokenid,
             collectionId: _collectionId,
             poster: _poster,
             custody: custody,
@@ -192,6 +200,8 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         if (record.terminalStatus != AuctionStatus.None) {
             return record.terminalStatus;
         }
+        // Current drop execution confirms custody atomically and enters Active
+        // directly; Created is reserved for any future non-atomic custody flow.
         if (record.custodyConfirmed == false) {
             return AuctionStatus.Created;
         }
@@ -383,6 +393,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     {
         uint256 posterCredit = _highestBid / 2;
         uint256 protocolCredit = _highestBid / 4;
+        // Integer remainders accrue to the curator credit so all wei remain owed.
         uint256 curatorCredit = _highestBid - posterCredit - protocolCredit;
 
         auctionPosterCredits[_poster] += posterCredit;
@@ -449,6 +460,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         public
         FunctionAdminRequired(this.updatePayOutAddress.selector)
     {
+        require(_payOutAddress != address(0), "Zero payout");
         payOutAddress = _payOutAddress;
     }
 
@@ -457,6 +469,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         public
         FunctionAdminRequired(this.updateCuratorsPoolAddress.selector)
     {
+        require(_curatorsPoolAddress != address(0), "Zero curator");
         curatorsPoolAddress = _curatorsPoolAddress;
     }
 

@@ -11,6 +11,10 @@ contract MockStreamAuctions is IStreamAuctions {
     uint256 public lastReservePrice;
     uint256 public lastAuctionEndTime;
 
+    function isStreamAuctionsContract() external pure returns (bool) {
+        return true;
+    }
+
     function registerAuction(
         bytes32 _dropId,
         uint256 _tokenid,

@@ -203,8 +203,12 @@ With-bid settlement must create credits instead of pushing final proceeds.
 For the current 50 / 25 / 25 economics:
 
 - poster credit is `highestBid / 2`
-- curator reserve credit is `highestBid / 4`
-- protocol credit is `highestBid - posterCredit - curatorReserveCredit`
+- protocol credit is `highestBid / 4`
+- curator credit is `highestBid - posterCredit - protocolCredit`
+
+This makes integer rounding explicit: any non-divisible remainder accrues to
+the curator credit, and
+`posterCredit + protocolCredit + curatorCredit == highestBid` must always hold.
 
 No-bid settlement must not create final payment credits unless the
 implementation records an explicit fee or refund rule in a later ADR.

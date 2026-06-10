@@ -37,6 +37,10 @@ state:
 | `SettledWithBid` | With-bid settlement completed and the NFT left escrow. |
 | `Cancelled` | Pre-bid cancellation completed. |
 
+The current drop path mints to the auction contract and registers custody in
+one transaction, so normal auction drops enter `Active` directly. `Created` is
+retained as an explicit state for any future non-atomic custody flow.
+
 Ended states are derived from time and bid state. Terminal states are stored so
 repeated settlement or cancellation cannot duplicate token transfers, credits,
 or events.
@@ -49,6 +53,9 @@ or events.
 - Outbid bidders receive withdrawable bidder credits.
 - The active highest bid remains in auction escrow until settlement.
 - Bids near the end extend the auction record and emit `AuctionExtended`.
+- After an extension, `retrieveAuctionEndTime(tokenId)` is the authoritative
+  auction end-time view. The legacy minter end-time view can still show the
+  original signed end time.
 
 ## Settlement
 
@@ -71,6 +78,8 @@ With-bid settlement:
 - If the NFT transfer reverts, the terminal state and final proceeds credits
   revert with it.
 - Poster, protocol, and curator proceeds are withdrawable pull credits.
+- The poster/protocol split uses integer division; any remainder accrues to the
+  curator credit so every wei of the highest bid remains owed.
 - A failed NFT transfer leaves the auction in `EndedWithBid`, keeps active bid
   escrow intact, and creates no proceeds credits.
 
@@ -119,5 +128,8 @@ auction-custody change.
 - `ProceedsCreditWithdrawn`
 - `ClaimAuction`
 
-Indexers should use `tokenid` plus `dropId` from the registration event and
-`retrieveAuctionStatus(tokenId)` for current state.
+Indexers should use `tokenId` plus `dropId` from the registration event and
+`retrieveAuctionStatus(tokenId)` for current state. The ERC-721 receiver hook is
+currently read-only and only validates that the incoming NFT is from the core
+contract; any future receiver-side effects should be treated as a deliberate
+interface change.

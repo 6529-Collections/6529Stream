@@ -120,9 +120,35 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
             .assertEq(uint256(StreamAuctions.AuctionStatus.SettledNoBid), "settled status");
     }
 
+    function testNoBidContractPosterClaimFailureRollsBack() public {
+        NonReceiverPoster poster = new NonReceiverPoster();
+        NonReceiverRecipient rejectingRecipient = new NonReceiverRecipient();
+        AuctionSetup memory setup = _createAuction(address(poster), block.timestamp + 1 days, 5);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        (bool success,) = address(poster)
+            .call(
+                abi.encodeWithSelector(
+                    poster.claim.selector,
+                    setup.auctions,
+                    setup.tokenId,
+                    address(rejectingRecipient)
+                )
+            );
+
+        success.assertFalse("claim to rejecting recipient succeeded");
+        setup.deployed.core.ownerOf(setup.tokenId)
+            .assertEq(address(setup.auctions), "token left escrow");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(poster), "pending claim cleared");
+        uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.EndedNoBid), "status advanced");
+    }
+
     function testWithBidSettlementFailureLeavesEscrowAndCreditsUnchanged() public {
         NonReceiverBidder bidder = new NonReceiverBidder();
-        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 1 days, 5);
+        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 1 days, 6);
         vm.deal(address(bidder), 10 ether);
 
         bidder.bid{ value: RESERVE_PRICE }(setup.auctions, setup.tokenId);
@@ -141,7 +167,7 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
     }
 
     function testCancelBeforeBidReturnsCustodyAndBlocksBids() public {
-        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 1 days, 6);
+        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 1 days, 7);
 
         vm.prank(POSTER);
         setup.auctions.cancelAuction(setup.tokenId);
@@ -159,7 +185,7 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
     }
 
     function testCancelAfterFirstBidFailsAndPreservesEscrow() public {
-        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 1 days, 7);
+        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 1 days, 8);
         vm.deal(BIDDER, 10 ether);
 
         vm.prank(BIDDER);
@@ -178,7 +204,7 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
     }
 
     function testBidNearEndExtendsAuctionRecord() public {
-        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 601, 8);
+        AuctionSetup memory setup = _createAuction(POSTER, block.timestamp + 601, 9);
         vm.deal(BIDDER, 10 ether);
         vm.warp(setup.auctionEndTime - 299);
 
@@ -246,3 +272,5 @@ contract NonReceiverBidder {
         auctions.participateToAuction{ value: msg.value }(tokenId);
     }
 }
+
+contract NonReceiverRecipient { }

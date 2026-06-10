@@ -726,6 +726,8 @@ Current behavior after P0-AUCT-001:
 - With-bid settlement atomically creates poster, protocol, and curator pull
   credits with the highest-bidder NFT transfer; a failed transfer reverts the
   credits and terminal state.
+- Auction-local proceeds rounding is explicit: poster gets half, protocol gets
+  one quarter, and the curator credit receives any integer remainder.
 
 Intended behavior:
 
@@ -760,6 +762,9 @@ Required tests:
 - Cancellation before first bid and rejection after first bid.
 - Failed NFT transfer leaves auction unsettled and credits unchanged.
 - Reverting ERC721 receiver.
+- No-bid pending-claim transfer failure rollback.
+- Non-divisible highest-bid proceeds rounding.
+- Forced ETH does not corrupt owed or emergency-surplus views.
 - Repeated settlement attempt.
 - Post-claim bid failure.
 - Auction extension updates the auction record and emits an event.

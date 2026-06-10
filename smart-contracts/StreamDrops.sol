@@ -215,6 +215,10 @@ contract StreamDrops is Ownable {
         FunctionAdminRequired(this.updateAuctionContract.selector)
     {
         require(_auctionContract != address(0), "Zero auction");
+        require(
+            IStreamAuctions(_auctionContract).isStreamAuctionsContract() == true,
+            "Contract is not Auction"
+        );
         address oldAuctionContract = auctionContract;
         auctionContract = _auctionContract;
         emit AuctionContractChanged(oldAuctionContract, _auctionContract);

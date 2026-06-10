@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/58` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 09:23 UTC` |
+| Last updated | `2026-06-10 09:46 UTC` |
 
 ## Packaging Notes
 
@@ -1328,7 +1328,9 @@ Outcome:
 
 ### PR #59: Formalize auction custody and settlement (Queue Item 18)
 
-Status: Open; waiting for CI, CodeRabbit, and Claude review.
+Status: Open; CodeRabbit review fixes are implemented and final local
+validation is passing. Remote CI and bot re-review must be checked for the
+latest pushed head.
 Branch: `codex/auction-custody-state-machine`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/59`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/22`.
@@ -1385,20 +1387,23 @@ Implementation notes:
 
 Validation:
 
-- `forge test --match-contract 'StreamAuction(Custody|Payments)Test' -vvv`
-  passed: 20 tests, 0 failed.
+- `forge test --match-contract
+  'StreamAuction(Custody|Payments)Test|StreamDropsCharacterizationTest' -vvv`
+  passed: 35 tests, 0 failed, after CodeRabbit review fixes.
 - `forge fmt --check` passed for the changed Solidity contracts and tests.
 - `git diff --check` passed.
 - Markdown heading and traceability scans passed for touched docs/state files.
-- `make check` passed with 80 tests and the known compiler/NatSpec/lint
+- `make check` passed with 85 tests and the known compiler/NatSpec/lint
   warnings.
-- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 80
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 85
   tests and the known compiler/NatSpec/lint warnings.
 - Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
-  on `PATH`; it returned the expected non-zero baseline-finding exit with 9
-  High, 25 Medium, 57 Low, 507 Informational, and 6 Optimization findings.
-  The current delta has no `reentrancy-no-eth` findings and no auction
-  emergency `arbitrary-send-eth` finding.
+  on `PATH`; it returned the expected non-zero baseline-finding exit with 10
+  High, 25 Medium, 53 Low, 511 Informational, and 6 Optimization findings. The
+  current delta has no `reentrancy-no-eth` findings and no production auction
+  emergency `arbitrary-send-eth` finding. The extra High finding is the
+  intentional test-only `ForceEth.force` `selfdestruct` helper used to prove
+  forced-ETH accounting.
 
 Review feedback:
 
@@ -1408,6 +1413,18 @@ Review feedback:
   docs/roadmap scope wording.
 - PR opened on head `dea2f05ea6d133483e9bb8765f95f02d04e32a8e`.
 - Claude review was explicitly requested in issue comment `4668570581`.
+- Claude review was skipped by `claude[bot]` because the organization overage
+  spend limit has been reached.
+- CodeRabbit review `4466455619` and inline thread `PRRT_kwDOM7REis6Ibep6`
+  requested one docs casing fix and flagged additional review nits around
+  no-bid failed-claim rollback, proceeds rounding, `Created` state docs,
+  receiver-hook forward compatibility, auction-contract interface validation,
+  `AuctionRecord.tokenId`, forced-ETH accounting, legacy minter end-time
+  divergence, and zero-address proceeds recipients.
+- Local review fixes add no-bid pending-claim rollback coverage, non-divisible
+  proceeds rounding coverage, forced-ETH surplus coverage, zero-address
+  proceeds-recipient constructor/setter guards, auction interface validation,
+  `AuctionRecord.tokenId`, and matching docs/test-matrix wording.
 
 ## Decision Log
 
@@ -1542,6 +1559,8 @@ Review feedback:
 | 2026-06-10 09:16 | Finish local `P0-AUCT-001` validation | Full `make check` and Windows wrapper pass with 80 tests; format, whitespace, heading/traceability scans, and Slither delta evidence pass; Slither remains non-zero for unrelated baseline findings |
 | 2026-06-10 09:22 | Open PR #59 | Auction custody/state-machine implementation is published with local validation and Slither delta evidence |
 | 2026-06-10 09:23 | Request Claude review on PR #59 | Explicit review ping added in issue comment `4668570581` because Claude may not run automatically |
+| 2026-06-10 09:39 | Address CodeRabbit PR #59 review | Add no-bid pending-claim rollback coverage, proceeds rounding coverage, forced-ETH accounting coverage, docs clarifications, auction interface validation, token ID storage, and zero-address proceeds-recipient guards |
+| 2026-06-10 09:46 | Validate PR #59 review fixes locally | Focused 35-test suite, full 85-test `make check`, Windows wrapper, formatting, and Slither delta evidence pass; Slither remains non-zero for baseline findings plus intentional test-only `ForceEth` selfdestruct helper |
 
 ## Resume Instructions
 

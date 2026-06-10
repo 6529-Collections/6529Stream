@@ -3,6 +3,8 @@
 pragma solidity ^0.8.19;
 
 interface IStreamAuctions {
+    function isStreamAuctionsContract() external pure returns (bool);
+
     function registerAuction(
         bytes32 _dropId,
         uint256 _tokenid,

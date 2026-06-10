@@ -337,6 +337,8 @@ Implementation PRs must add or update tests for:
   of relying on an immediate outbound safe transfer
 - poster-authorized no-bid NFT claim to a valid receiver completes
   `SettledNoBid`
+- failed no-bid NFT claim to a rejecting receiver leaves custody and pending
+  claim state unchanged
 - with-bid settlement to highest bidder
 - failed NFT transfer leaves auction unsettled and does not create final
   payment credits

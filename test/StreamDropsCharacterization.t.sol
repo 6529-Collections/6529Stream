@@ -167,6 +167,20 @@ contract StreamDropsCharacterizationTest is DropAuthTestHelper {
         minter.lastAuctionRecipient().assertEq(address(0), "auction mint was attempted");
     }
 
+    function testUpdateAuctionContractRejectsNonAuctionContract() public {
+        MockStreamMinter minter = new MockStreamMinter();
+        StreamAdmins admins = new StreamAdmins(address(this));
+        StreamDrops drops = new StreamDrops(
+            signerAddress(), address(minter), address(admins), PAYOUT, CURATORS_POOL
+        );
+
+        (bool success,) = address(drops)
+            .call(abi.encodeWithSelector(drops.updateAuctionContract.selector, address(minter)));
+
+        success.assertFalse("non-auction contract accepted");
+        drops.auctionContract().assertEq(address(0), "auction contract changed");
+    }
+
     function testAuctionDropMintsCustodyToAuctionContractAndRegistersState() public {
         (StreamDrops drops, MockStreamMinter minter, MockStreamAuctions auctions) =
             deployDropsWithAuction();
