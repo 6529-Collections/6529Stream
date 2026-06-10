@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/58` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 09:20 UTC` |
+| Last updated | `2026-06-10 09:23 UTC` |
 
 ## Packaging Notes
 
@@ -68,7 +68,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Merged in PR #56 |
 | 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | Merged in PR #57 |
 | 17 | Fix auction bidding reentrancy and outbid refunds | Gate C | Convert outbid refunds to pull credits, keep bid state consistent, add withdrawal/reentrancy tests, and update Slither/test traceability | Merged in PR #58 |
-| 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | In progress on `codex/auction-custody-state-machine` |
+| 18 | Formalize auction custody and settlement | Gate C | Implement the accepted ADR 0002 custody/state-machine semantics, settlement guards, tests, docs, and roadmap traceability | Open as PR #59 |
 
 ## Current PR Worklog
 
@@ -1328,11 +1328,11 @@ Outcome:
 
 ### PR #59: Formalize auction custody and settlement (Queue Item 18)
 
-Status: In progress; implementation drafted and local validation passing.
+Status: Open; waiting for CI, CodeRabbit, and Claude review.
 Branch: `codex/auction-custody-state-machine`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/59`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/22`.
-Claude review request: TBD.
+Claude review request: issue comment `4668570581`.
 
 Goal:
 
@@ -1406,6 +1406,8 @@ Review feedback:
   recommendations were folded into escrow-by-auction-contract custody, explicit
   status views, no-bid pending claim tests, final proceeds credits, and
   docs/roadmap scope wording.
+- PR opened on head `dea2f05ea6d133483e9bb8765f95f02d04e32a8e`.
+- Claude review was explicitly requested in issue comment `4668570581`.
 
 ## Decision Log
 
@@ -1538,6 +1540,8 @@ Review feedback:
 | 2026-06-10 09:02 | Include auction-local final proceeds credits in `P0-AUCT-001` | ADR 0002 rejects synchronous final payout calls in auction settlement; this PR can satisfy that without claiming full ADR 0003 completion |
 | 2026-06-10 09:05 | Validate focused auction custody/payment suites | Explicit escrow custody, status derivation, no-bid pending claims, failed NFT transfer, cancellation, proceeds-credit withdrawal failure, and PR #58 bidder-credit regressions pass locally |
 | 2026-06-10 09:16 | Finish local `P0-AUCT-001` validation | Full `make check` and Windows wrapper pass with 80 tests; format, whitespace, heading/traceability scans, and Slither delta evidence pass; Slither remains non-zero for unrelated baseline findings |
+| 2026-06-10 09:22 | Open PR #59 | Auction custody/state-machine implementation is published with local validation and Slither delta evidence |
+| 2026-06-10 09:23 | Request Claude review on PR #59 | Explicit review ping added in issue comment `4668570581` because Claude may not run automatically |
 
 ## Resume Instructions
 
