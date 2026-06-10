@@ -1540,10 +1540,10 @@ Outcome:
 
 Status: In progress.
 Branch: `codex/curator-claim-credits`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/61`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/29`.
-Claude review request: TBD; request explicitly after PR open because Claude may
-not run automatically.
+Claude review request: issue comment `4669369055`; requested explicitly because
+Claude may not run automatically.
 
 Goal:
 
@@ -1761,6 +1761,7 @@ Review feedback:
 | 2026-06-10 10:33 | Merge PR #60 | Fixed-price pull credits merged as `f7390f28c48f833a75e28a87995f24df27e152c3` and issue #27 closed completed |
 | 2026-06-10 10:35 | Start `P0-PAY-005` implementation PR | Gate C payment work continues by converting `StreamCuratorsPool.claimRewards` from synchronous reward payout to curator pull credits |
 | 2026-06-10 10:53 | Finish local `P0-PAY-005` validation | Curator reward claims now use pull credits, rejecting reward addresses cannot block claims, withdrawal/reentrancy/emergency-surplus tests pass, full 109-test checks pass, and Slither no longer reports `StreamCuratorsPool` in `arbitrary-send-eth` |
+| 2026-06-10 10:55 | Open PR #61 and request Claude review | Curator reward claim credit implementation is published, and Claude review was explicitly requested in issue comment `4669369055` |
 
 ## Resume Instructions
 
