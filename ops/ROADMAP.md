@@ -342,7 +342,7 @@ contract changes until the relevant ADR is accepted.
 | Auction custody | `P0-AUCT-ADR` | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` | Token custody, settlement actor, no-bid semantics, transfer method, cancellation |
 | Payment accounting | `P0-PAY-ADR` | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
 | Admin/governance | `P0-ADMIN-ADR` | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
-| Randomness | `P0-RAND-ADR` | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` | Provider choice, pending state, callback validation, retries, stale callback handling |
+| Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` | Provider choice, pending state, callback validation, retries, stale callback handling |
 | Metadata/freeze | `P1-META-ADR` | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` | Pending/final metadata, frozen state, dependency immutability, burn metadata |
 | Upgrade/redeployment | `P2-UPGRADE-ADR` | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release | Redeploy vs upgrade stance, migration expectations, versioning |
 
@@ -1030,8 +1030,8 @@ Acceptance criteria:
   location, severity, confidence, status, resolution, required test, issue,
   gate, and owner.
 - Current high/medium Slither rows are captured in `ops/SLITHER_BASELINE.md`.
-- Every `Open` or `Needs Issue` finding has an issue link or `TBD` placeholder
-  marked as blocking triage.
+- Every `Open` or `Needs Issue` finding has a canonical GitHub issue link that
+  owns fix, accepted-risk, or false-positive resolution.
 - CI fails on new high/medium findings after baseline is accepted.
 
 ## 7. P1 Protocol And Contract Workstreams
@@ -1621,18 +1621,18 @@ Impact summary:
 
 High/medium detector summary:
 
-| Detector | Impact | Count | Primary scope | Status | Required action |
-| --- | --- | ---: | --- | --- | --- |
-| `arbitrary-send-eth` | High | 4 | first-party emergency withdrawals | Open | Replace or bound with owed/surplus accounting |
-| `encode-packed-collision` | High | 3 | drop authorization and dependency/script hashing | Open | Replace ad hoc packed hashes with typed/domain-separated encoding; track dependency-script row as `P0-META-001` |
-| `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | Confirm likely false positive against pinned upstream or replace vendored library |
-| `reentrancy-eth` | High | 1 | auction bidding | Open | Move to pull credits and state-before-external-call flow |
-| `uninitialized-state` | High | 2 | mint-accounting mappings | Open | Initialize, remove, or complete design |
-| `weak-prng` | High | 2 | word pool randomness helpers | Open | Replace or explicitly scope through randomness ADR |
-| `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | Confirm likely false positive against pinned upstream or replace vendored library |
-| `locked-ether` | Medium | 1 | test-only rejection mock | Accepted | Keep scoped to test-only baseline |
-| `uninitialized-local` | Medium | 12 | first-party and test helper locals | Open for production rows | Initialize or prove Solidity zero-value intent |
-| `unused-return` | Medium | 4 | characterization tests | Accepted | Keep scoped to test-only baseline |
+| Detector | Impact | Count | Primary scope | Status | Issue | Required action |
+| --- | --- | ---: | --- | --- | --- | --- |
+| `arbitrary-send-eth` | High | 4 | first-party emergency withdrawals | Open | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Replace or bound with owed/surplus accounting |
+| `encode-packed-collision` | High | 3 | drop authorization and dependency/script hashing | Open | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Replace ad hoc packed hashes with typed/domain-separated encoding; track dependency-script row as `P0-META-001` |
+| `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
+| `reentrancy-eth` | High | 1 | auction bidding | Open | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Move to pull credits and state-before-external-call flow |
+| `uninitialized-state` | High | 2 | mint-accounting mappings | Open | [#13](https://github.com/6529-Collections/6529Stream/issues/13) | Initialize, remove, or complete design |
+| `weak-prng` | High | 2 | word pool randomness helpers | Open | [#14](https://github.com/6529-Collections/6529Stream/issues/14) | Replace or explicitly scope through randomness ADR |
+| `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | Needs Issue | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | Confirm likely false positive against pinned upstream or replace vendored library |
+| `locked-ether` | Medium | 1 | test-only rejection mock | Accepted | N/A | Keep scoped to test-only baseline |
+| `uninitialized-local` | Medium | 12 | first-party and test helper locals | Open for production rows | [#15](https://github.com/6529-Collections/6529Stream/issues/15) | Initialize or prove Solidity zero-value intent |
+| `unused-return` | Medium | 4 | characterization tests | Accepted | N/A | Keep scoped to test-only baseline |
 
 ## Appendix B: Test Matrix
 
@@ -1641,20 +1641,22 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Finding | Required test | Intended test file | Status | Issue | Gate | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
 | `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsAuth.t.sol` | Initial characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; P0 fix tests missing | `P0-AUTH-001` | Gate C | TBD |
-| Ad hoc drop authorization | EIP-712 valid, replayed, expired, wrong chain, wrong contract, wrong signer | `test/StreamDropsEIP712.t.sol` | Missing | `P0-AUTH-002` | Gate C | TBD |
+| Ad hoc drop authorization | EIP-712 valid, replayed, expired, wrong chain, wrong contract, wrong signer | `test/StreamDropsEIP712.t.sol` | Missing | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
 | ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | `P0-AUTH-003` | Gate B1/Gate C | TBD |
-| Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | `P0-AUCT-002` | Gate C | TBD |
-| Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | `P0-AUCT-002` | Gate C | TBD |
+| Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
+| Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
 | Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | `P0-ADMIN-001` | Gate C | TBD |
-| Randomizer stale callback | Replaced randomizer fulfillment rejected | `test/StreamRandomizer.t.sol` | Missing | `P0-RAND-001` | Gate C | TBD |
+| Randomizer stale callback | Replaced randomizer fulfillment rejected | `test/StreamRandomizer.t.sol` | Missing | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), `P0-RAND-001` | Gate C | TBD |
 | Pending randomness metadata | `tokenURI` pending/final behavior is deterministic | `test/StreamMetadata.t.sol` | Initial characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; golden-file tests missing | `P1-META-*` | Gate D | TBD |
-| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | `P0-META-001` | Gate C | TBD |
+| Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Missing | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
+| Mint-accounting state | Mint counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Missing | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
+| Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Missing | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsMerkle.t.sol` | Missing | `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply and metadata follow ADR | `test/StreamCoreBurn.t.sol` | Missing | `P1-META-*` | Gate D | TBD |
-| Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamPaymentsInvariant.t.sol` | Missing | `P0-PAY-008` | Gate C/Gate D | TBD |
+| Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamPaymentsInvariant.t.sol` | Missing | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 
 ## Appendix C: ADR Index
 
@@ -1664,7 +1666,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0002 Auction custody | `P0-AUCT-ADR` | Missing | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` |
 | 0003 Payment accounting | `P0-PAY-ADR` | Missing | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
 | 0004 Admin/governance | `P0-ADMIN-ADR` | Missing | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
-| 0005 Randomness | `P0-RAND-ADR` | Missing | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` |
+| 0005 Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Missing | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` |
 | 0006 Metadata/freeze | `P1-META-ADR` | Missing | `docs/adr/0006-metadata-freeze.md` | Gate B2, `P1-META-*` |
 | 0007 Upgrade/redeployment | `P2-UPGRADE-ADR` | Missing | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release |
 
