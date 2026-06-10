@@ -18,20 +18,39 @@ Accepted.
 ## Problem
 
 Drop execution needs a signer-authorized, replay-safe, wallet-compatible design
-before any public beta claim. The implementation remains intentionally
-characterized but unsafe:
+before any public beta claim. At ADR acceptance, the implementation was
+intentionally characterized but unsafe:
 
-- `StreamDrops.mintDrop` can only be called by `tdhSigner`.
-- Drop IDs are built from ad hoc string concatenation and `abi.encodePacked`.
-- Replay protection is only `dropExecuted[dropId]` for the packed drop ID.
-- There is no EIP-712 domain, deadline, signer epoch, revocation model,
+- `StreamDrops.mintDrop` could only be called by `tdhSigner`.
+- Drop IDs were built from ad hoc string concatenation and `abi.encodePacked`.
+- Replay protection was only `dropExecuted[dropId]` for the packed drop ID.
+- There was no EIP-712 domain, deadline, signer epoch, revocation model,
   signature malleability policy, or ERC-1271 contract signer stance.
 - Before `P0-AUTH-001`, fixed-price token recipient and stored execution
   address used `tx.origin`.
 
-## Baseline Behavior
+## Implementation Status
 
-Current source references:
+`P0-AUTH-001` removed executable `tx.origin` usage from drop execution.
+
+`P0-AUTH-002` replaces the packed-hash drop path with:
+
+- `DropAuthorization` EIP-712 typed data
+- domain-separated hashing with `name`, `version`, `chainId`, and
+  `verifyingContract`
+- consumed and cancelled `dropId` storage
+- `signerEpoch` rotation
+- per-drop cancellation
+- EOA signature recovery with low-`s`, valid-`v`, and zero-signer checks
+- EIP-2098 compact signature support
+- explicit rejection of contract signers until `P0-AUTH-003`
+
+`P0-AUTH-003` remains open and must add ERC-1271 contract signer validation
+before the repository can claim contract-signer-ready drop authorization.
+
+## Pre-Implementation Baseline Behavior
+
+Historical source references from the pre-EIP-712 baseline:
 
 - `smart-contracts/StreamDrops.sol#L58-L61`: `authorized` requires
   `msg.sender == tdhSigner`.
@@ -140,8 +159,11 @@ The public-beta target design is:
 16. `signerEpoch` must match current contract state so signer compromise or
     rotation can invalidate outstanding payloads.
 17. Admins must be able to cancel a specific `dropId` before execution.
-18. EOA signatures and ERC-1271 contract signatures are supported.
-19. EOA signature and execution validation must reject:
+18. EOA signatures are supported by `P0-AUTH-002`.
+19. ERC-1271 contract signatures are required before public beta, but are owned
+    by `P0-AUTH-003`. Until then, contract signer addresses must be rejected
+    explicitly.
+20. EOA signature and execution validation must reject:
     - wrong signer
     - wrong domain
     - wrong chain ID
@@ -157,9 +179,9 @@ The public-beta target design is:
     - quantity other than one
     - malleable signature
     - zero-address recovered signer
-20. ERC-1271 signatures must require the standard magic value from the contract
+21. ERC-1271 signatures must require the standard magic value from the contract
     signer.
-21. EIP-2098 compact signatures are supported and normalized under the same
+22. EIP-2098 compact signatures are supported and normalized under the same
     malleability policy as 65-byte ECDSA signatures.
 
 ## Intended API Shape
@@ -208,9 +230,8 @@ domain separator already binds `chainId` and `verifyingContract`; the derived
 epoch, nonce, and salt tuple.
 
 The legacy `mintDrop(address,address,string,uint256,uint256,uint256,uint256)`
-path may remain temporarily during migration work, but it must not be available
-as a public-beta drop execution path unless it enforces this ADR's authorization
-semantics.
+path must not be available as a public-beta drop execution path. `P0-AUTH-002`
+removes that ABI in favor of `mintDrop(DropAuthorization,string,bytes)`.
 
 ## Replay, Revocation, And Signer Compromise
 
@@ -305,7 +326,7 @@ This ADR addresses:
 - replay across calls, contracts, chains, domains, and signer epochs
 - signature malleability
 - signer rotation and compromise response
-- contract signer compatibility
+- contract signer compatibility once `P0-AUTH-003` lands
 
 This ADR does not by itself fix auction custody, push payments, emergency
 withdrawals, randomizer callbacks, or metadata finalization.
@@ -331,7 +352,8 @@ not production-ready.
 P0 implementation must add tests for:
 
 - valid EOA signature
-- valid ERC-1271 contract signature
+- explicit contract signer rejection until `P0-AUTH-003`
+- valid ERC-1271 contract signature when `P0-AUTH-003` lands
 - wrong `dropId` for the signer, `signerEpoch`, `nonce`, and `salt`
 - wrong signer
 - wrong domain name or version
@@ -372,10 +394,10 @@ must not be treated as target-state tests after the implementation lands.
 1. Merge this ADR.
 2. Implement `P0-AUTH-001`: remove `tx.origin` and use explicit
    recipient/execution fields.
-3. Implement `P0-AUTH-002`: add EIP-712 domain, typed schema, signature
-   validation, consumed-state storage, deadline checks, and replay tests.
-4. Implement `P0-AUTH-003`: add ERC-1271 validation and compact-signature
-   policy tests.
+3. Implement `P0-AUTH-002`: add EIP-712 domain, typed schema, EOA signature
+   validation, consumed-state storage, deadline checks, compact-signature
+   support, and replay tests.
+4. Implement `P0-AUTH-003`: add ERC-1271 validation and contract-signer tests.
 5. Update docs, examples, and issue links.
 6. Remove or disable unsafe legacy public execution paths before public beta.
 
