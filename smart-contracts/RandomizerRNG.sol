@@ -55,6 +55,8 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
             revert RandomizerRequestReentrancy();
         }
         randomnessRequestInProgress = true;
+        // calculateTokenHash is the canonical entry point and initializes this
+        // binding before gencore calls requestRandomWords directly.
         uint256 collectionId = tokenIdToCollection[tokenid];
         uint256 requestId =
             arrngController.requestRandomWords{ value: _ethRequired }(1, (address(this)));

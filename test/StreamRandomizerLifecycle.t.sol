@@ -188,6 +188,28 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "reentrant hash written");
     }
 
+    function testArrngZeroRequestIdFailsBeforeRecordingLifecycle() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        ZeroRequestIdArrngLifecycleController controller =
+            new ZeroRequestIdArrngLifecycleController();
+        NextGenRandomizerRNG rng = new NextGenRandomizerRNG(
+            address(deployed.core), address(deployed.admins), address(controller)
+        );
+        deployed.core.addRandomizer(COLLECTION_ID, address(rng));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.UnknownRandomnessRequest.selector, uint256(0)
+            )
+        );
+        _mintToken(deployed);
+
+        uint256(rng.randomnessRequestState(0))
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.None), "zero state");
+        rng.tokenToRequest(TOKEN_ID).assertEq(0, "token request recorded");
+        deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "hash written");
+    }
+
     function testNxtRandomizerCannotBeConfiguredForProductionCollections() public {
         DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
         NextGenRandomizerNXT nxt = new NextGenRandomizerNXT(
@@ -298,6 +320,12 @@ contract ReentrantArrngLifecycleController {
         words[0] = 123;
         NextGenRandomizerRNG(payable(msg.sender)).receiveRandomness(1, words);
         return 1;
+    }
+}
+
+contract ZeroRequestIdArrngLifecycleController {
+    function requestRandomWords(uint256, address) external pure returns (uint256 requestId) {
+        return 0;
     }
 }
 

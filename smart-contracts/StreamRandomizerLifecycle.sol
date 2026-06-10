@@ -101,6 +101,8 @@ abstract contract StreamRandomizerLifecycle {
         if (randomnessRequests[_requestId].state != RandomnessRequestState.None) {
             revert RandomnessRequestAlreadyExists(_requestId);
         }
+        // Keep tokenToRequest after fulfillment or stale marking: a token may only
+        // receive randomness once. Burn/remint redraw policy is tracked separately.
         if (tokenToRequest[_tokenId] != 0) {
             revert TokenRandomnessRequestAlreadyExists(_tokenId, tokenToRequest[_tokenId]);
         }
@@ -139,6 +141,7 @@ abstract contract StreamRandomizerLifecycle {
         if (request.state != RandomnessRequestState.Pending) {
             revert RandomnessRequestNotPending(_requestId, request.state);
         }
+        // Defense-in-depth for future shared-storage or adapter migration paths.
         if (request.provider != address(this)) {
             revert WrongRandomnessProvider(_requestId, request.provider, address(this));
         }

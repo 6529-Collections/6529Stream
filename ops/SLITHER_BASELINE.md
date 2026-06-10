@@ -121,7 +121,7 @@ backed by a regression test or accepted-risk rationale.
 
 | Detector | Scope | Status | Rationale | Required test | Issue | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| `reentrancy-eth`, `write-after-write` | `NextGenRandomizerRNG.requestRandomWords(uint256,uint256)` | Accepted scoped suppression | arRNG returns the provider request ID from an external payable call, so the adapter must record request state after that call. The function uses a local request-in-progress guard, fulfillment rejects during the guarded window, and the suppression is limited to this function. | `test/StreamRandomizerLifecycle.t.sol::testArrngControllerCannotReenterFulfillmentDuringRequest` | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | TBD |
+| `reentrancy-eth`, `write-after-write` | `NextGenRandomizerRNG.requestRandomWords(uint256,uint256)` | Accepted scoped suppression | arRNG returns the provider request ID from an external payable call, so the adapter must record request state after that call. The function uses a local request-in-progress guard, fulfillment rejects during the guarded window, and the suppression is limited to this function. | `test/StreamRandomizerLifecycle.t.sol::testArrngControllerCannotReenterFulfillmentDuringRequest`; `test/StreamRandomizerLifecycle.t.sol::testArrngZeroRequestIdFailsBeforeRecordingLifecycle` | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | TBD |
 
 ## Triage Rules
 
