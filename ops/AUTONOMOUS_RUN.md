@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/44` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 05:18 UTC` |
+| Last updated | `2026-06-10 05:25 UTC` |
 
 ## Packaging Notes
 
@@ -62,7 +62,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Merged in PR #32 |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merged in PR #36 |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Merged in PR #44 |
-| 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | In progress on `codex/metadata-freeze-adr` |
+| 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merge-ready in PR #52 |
 
 ## Current PR Worklog
 
@@ -821,7 +821,9 @@ Outcome:
 
 ### PR #52: Metadata/freeze ADR (Queue Item 12)
 
-Status: Open; waiting on CI, CodeRabbit, and Claude.
+Status: Merge-ready; CI is green, CodeRabbit is green with no actionable
+comments on the latest head, and Claude is unavailable due to organization
+overage limits.
 Branch: `codex/metadata-freeze-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/52`.
 Claude review request: issue comment `4666753358`.
@@ -881,22 +883,27 @@ Validation:
 - After CodeRabbit's style nitpick, targeted grep confirmed the repeated
   migration wording and `very careful` phrasing were removed; `git diff
   --check`, `make check`, and the Windows wrapper passed again.
-- After CodeRabbit's pre-implementation clarity review, pending local
-  validation covers freeze eligibility, manifest hash encoding, burn/ERC-4906
-  semantics, post-burn callback behavior, size-limit ownership, generated HTML
-  proofing, and Gate B2 status.
+- After CodeRabbit's pre-implementation clarity review, targeted grep confirmed
+  freeze eligibility, manifest hash encoding, burn/ERC-4906 semantics,
+  post-burn callback behavior, size-limit ownership, generated HTML proofing,
+  and Gate B2 status; `git diff --check`, `make check`, and the Windows wrapper
+  passed again on head `8058c20258c064356c3b7c3f102608f17c501978`.
 
 Review feedback:
 
-- GitHub CI passed on head `9948e251e98b58d1e3ea909d5d05712398a41c1a`;
-  rerun pending after follow-up commits.
+- GitHub CI passed on final head
+  `8058c20258c064356c3b7c3f102608f17c501978`.
 - CodeRabbit requested one optional prose nitpick in review `4464741958`; the
   nitpick was addressed in commit
   `be29ccfe006204bdafccc38b96250c4ddc52cf05`.
 - CodeRabbit then identified seven pre-implementation clarity gaps in comment
-  `4666800683`; fixes are applied locally and will be pushed in the next
-  commit.
-- Claude review was explicitly requested in issue comment `4666753358`.
+  `4666800683`; the gaps were addressed in commit
+  `8058c20258c064356c3b7c3f102608f17c501978`.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review was explicitly requested in issue comment `4666753358` and was
+  unavailable because the organization's Claude Code overage spend limit was
+  reached.
 
 ## Decision Log
 
@@ -992,6 +999,7 @@ Review feedback:
 | 2026-06-10 05:07 | Open PR #52 | Metadata/freeze ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666753358` |
 | 2026-06-10 05:14 | Address CodeRabbit PR #52 style nitpick | Varied ADR rollout verbs and replaced `very careful` with `rigorous`; whitespace, targeted grep, `make check`, and Windows wrapper validations pass |
 | 2026-06-10 05:18 | Address CodeRabbit PR #52 clarity review | ADR now pins freeze-eligible randomness to fulfilled live tokens, defines manifest hash encoding, clarifies burn/ERC-4906 behavior, chooses audit-record post-burn callbacks, delegates concrete size limits to P1-META-006, clarifies generated HTML proofing, and marks Gate B2 in progress |
+| 2026-06-10 05:25 | Mark PR #52 merge-ready | CI passed, CodeRabbit reported no actionable comments on final head `8058c20258c064356c3b7c3f102608f17c501978`, and Claude is unavailable due to organization overage limits |
 
 ## Resume Instructions
 
