@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/slither-issue-links` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/7` |
+| Active PR branch | `codex/drop-authorization-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/16` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 01:55 UTC` |
+| Last updated | `2026-06-10 02:04 UTC` |
 
 ## Packaging Notes
 
@@ -56,8 +56,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 3 | Repo maturity and contributor docs | Gate A / Gate G foundation | README status, SECURITY, CONTRIBUTING, issue/PR templates, CODEOWNERS | Merged in PR #5 |
 | 4 | Characterization test skeleton | Gate A | Test helpers, fixtures, mocks, and executable characterization coverage | Merged in PR #6 |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Merged in PR #7 |
-| 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | In progress on branch `codex/slither-issue-links` |
-| 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Pending |
+| 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
+| 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Open as PR #20 |
 | 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Pending |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Pending |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
@@ -308,7 +308,7 @@ Outcome:
 
 ### PR #8: Slither baseline issue links (Queue Item 6)
 
-Status: In progress.
+Status: Merged.
 Branch: `codex/slither-issue-links`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/16`.
 
@@ -360,6 +360,58 @@ Validation:
 - Opened PR #16 and explicitly pinged Claude for roadmap/ops-only review in
   comment `4665744494`.
 
+Outcome:
+
+- Merged as PR #16 on `2026-06-10 01:59 UTC`.
+- Squash merge commit: `60635f26d13e37c976baf99dc00f6ad973ade591`.
+- Latest head before merge: `7612152f64248934a9fca991d75a94d89fa9dcd2`.
+- GitHub CI run `27247908498` passed on the final head.
+- CodeRabbit completed successfully with no actionable comments.
+- Claude was explicitly pinged twice; no actionable Claude response arrived
+  before merge.
+
+### PR #20: Drop authorization ADR (Queue Item 7)
+
+Status: Open; waiting for CI, CodeRabbit, and Claude review.
+Branch: `codex/drop-authorization-adr`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/20`.
+Claude review request: issue comment `4665813753`.
+
+Goal:
+
+- Accept `docs/adr/0001-drop-authorization.md` before any P0 auth rewrite.
+- Decide EIP-712 schema, recipient/payer semantics, replay protection, signer
+  epoch, cancellation, signature malleability policy, ERC-1271 support, and
+  `tx.origin` removal.
+- Link the ADR from the roadmap and ADR index.
+
+Created GitHub issues:
+
+- [#17](https://github.com/6529-Collections/6529Stream/issues/17)
+  `P0-AUTH-ADR`: accept drop authorization design.
+- [#18](https://github.com/6529-Collections/6529Stream/issues/18)
+  `P0-AUTH-001`: remove `tx.origin` from drop execution.
+- [#19](https://github.com/6529-Collections/6529Stream/issues/19)
+  `P0-AUTH-003`: implement ERC-1271 contract signer support.
+
+Candidate files:
+
+- `docs/adr/0001-drop-authorization.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `rg -n "^#|^##|^###" docs\adr\0001-drop-authorization.md docs\adr\README.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+  passed.
+- `rg -n "P0-AUTH-ADR|P0-AUTH-001|P0-AUTH-002|P0-AUTH-003|0001-drop-authorization" docs\adr\0001-drop-authorization.md docs\adr\README.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+  passed.
+- `git diff --check` passed.
+- `make check` passed with 17 tests and known compiler warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
+  17 tests and known compiler warnings.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
@@ -406,6 +458,10 @@ Validation:
 | 2026-06-10 01:51 | Start PR #8 | Queue Item 6 replaces Slither `TBD` issue placeholders with real GitHub issue links before ADR implementation begins |
 | 2026-06-10 01:54 | Validate PR #8 locally | Slither issue-column check, Markdown heading scan, whitespace check, `make check`, and Windows wrapper all pass |
 | 2026-06-10 01:55 | Open PR #16 | PR packages the Slither issue-link updates and explicitly asks Claude for review |
+| 2026-06-10 01:59 | Merge PR #16 | CI and CodeRabbit were clean, no review threads were open, and Claude did not respond after two explicit review pings |
+| 2026-06-10 02:01 | Start drop authorization ADR PR | Gate B1 requires accepted auth design before `tx.origin`, EIP-712, or ERC-1271 implementation |
+| 2026-06-10 02:03 | Create auth follow-up issues | Add canonical issues for `P0-AUTH-ADR`, `P0-AUTH-001`, and `P0-AUTH-003`; `P0-AUTH-002` already exists as issue #10 |
+| 2026-06-10 02:09 | Open PR #20 | Drop authorization ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4665813753` |
 
 ## Resume Instructions
 

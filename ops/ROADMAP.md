@@ -338,7 +338,7 @@ contract changes until the relevant ADR is accepted.
 
 | ADR | Issue | File target | Blocks | Required decision |
 | --- | --- | --- | --- | --- |
-| Drop authorization | `P0-AUTH-ADR` | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` | EIP-712 schema, recipient/payer policy, nonce model, replay protection, signer rotation, ERC-1271 stance |
+| Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` | EIP-712 schema, recipient/payer policy, nonce model, replay protection, signer rotation, ERC-1271 stance |
 | Auction custody | `P0-AUCT-ADR` | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` | Token custody, settlement actor, no-bid semantics, transfer method, cancellation |
 | Payment accounting | `P0-PAY-ADR` | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
 | Admin/governance | `P0-ADMIN-ADR` | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
@@ -1640,9 +1640,9 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 
 | Finding | Required test | Intended test file | Status | Issue | Gate | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsAuth.t.sol` | Initial characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; P0 fix tests missing | `P0-AUTH-001` | Gate C | TBD |
+| `tx.origin` recipient bug | Contract wallet executes drop without `tx.origin` dependency | `test/StreamDropsAuth.t.sol` | Initial characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; P0 fix tests missing | [`P0-AUTH-001`](https://github.com/6529-Collections/6529Stream/issues/18) | Gate C | TBD |
 | Ad hoc drop authorization | EIP-712 valid, replayed, expired, wrong chain, wrong contract, wrong signer | `test/StreamDropsEIP712.t.sol` | Missing | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
-| ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | `P0-AUTH-003` | Gate B1/Gate C | TBD |
+| ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
@@ -1662,7 +1662,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 
 | ADR | Issue | Status | File | Blocks |
 | --- | --- | --- | --- | --- |
-| 0001 Drop authorization | `P0-AUTH-ADR` | Missing | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` |
+| 0001 Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | Accepted | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` |
 | 0002 Auction custody | `P0-AUCT-ADR` | Missing | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` |
 | 0003 Payment accounting | `P0-PAY-ADR` | Missing | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
 | 0004 Admin/governance | `P0-ADMIN-ADR` | Missing | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
