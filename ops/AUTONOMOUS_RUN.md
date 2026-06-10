@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/82` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 23:28 UTC` |
+| Last updated | `2026-06-10 23:30 UTC` |
 
 ## Packaging Notes
 
@@ -94,7 +94,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
 | 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
-| 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Local branch ready to commit |
+| 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | PR #83 open on `codex/metadata-schema-state` |
 
 ## Current PR Worklog
 
@@ -3453,11 +3453,11 @@ Merge:
 - Merged at `2026-06-10 23:20 UTC`.
 - Issue `#49` closed by PR merge.
 
-### PR TBD: Add schema-v1 metadata state outputs (Queue Item 40)
+### PR #83: Add schema-v1 metadata state outputs (Queue Item 40)
 
-Status: Local implementation validated and ready to commit.
+Status: PR open; state follow-up ready to push before CodeRabbit request.
 Branch: `codex/metadata-schema-state`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/83`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/46`
@@ -3527,7 +3527,8 @@ Validation so far:
 
 Review requests:
 
-- CodeRabbit will be requested after the branch is pushed and the PR is opened.
+- CodeRabbit will be requested after this state follow-up is pushed so the bot
+  reviews the final opened-PR head.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3535,6 +3536,7 @@ Review requests:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-10 23:30 | Open PR #83 | Schema-v1 metadata state outputs are published with local validation evidence; next step is state follow-up push and CodeRabbit request |
 | 2026-06-10 23:28 | Validate Queue Item 40 locally | Focused metadata tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain unchanged |
 | 2026-06-10 23:26 | Start Queue Item 40 | ADR 0006 sequencing calls for schema versioning and explicit metadata state after current-output golden files and before freeze/dependency/burn hardening |
 | 2026-06-10 23:20 | Merge PR #82 | CI passed, CodeRabbit resolved the inline thread and approved the latest head, and the stale aggregate CodeRabbit status was documented before merge |
