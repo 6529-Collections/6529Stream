@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/69` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 17:56 UTC` |
+| Last updated | `2026-06-10 17:58 UTC` |
 
 ## Packaging Notes
 
@@ -83,7 +83,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 26 | Block randomizer migration while requests are pending | Gate C | Implement P0-RAND-005 default ADR policy: lifecycle-aware pending counts, provider-migration guard, stale/fulfilled unblocking, tests, docs, and roadmap state updates | Merged in PR #67 |
 | 27 | Add failed randomness post-processing state | Gate C | Implement P0-RAND-004 failed-state path for deterministic post-processing reverts, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #68 |
 | 28 | Add bounded randomness post-processing retry | Gate C | Implement P0-RAND-006 stored-seed manual retry for deterministic failed post-processing, with VRF/arRNG tests, docs, and roadmap state updates | Merged in PR #69 |
-| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Open in PR #70; CodeRabbit response locally addressed |
+| 29 | Store raw random output hashes | Gate C | Implement P0-RAND-007 raw-output hash storage policy, domain-separated seed derivation, event/view exposure, tests, docs, and roadmap state updates | Open in PR #70; CI green, CodeRabbit clean by review comment, aggregate status stale pending |
 
 ## Current PR Worklog
 
@@ -2399,10 +2399,11 @@ Outcome:
 - Claude was not requested for this PR per user instruction; CodeRabbit was
   sufficient and reported success on the final head.
 
-### Next PR: Store raw random output hashes (Queue Item 29)
+### PR #70: Store raw random output hashes (Queue Item 29)
 
-Status: PR #70 open; CodeRabbit response locally addressed and validated, ready
-to push review-response commit.
+Status: PR #70 open and merge-ready by autonomous maintainer decision; CI is
+green, CodeRabbit's latest review comment is clean, and the aggregate CodeRabbit
+status remains stale pending as documented in prior PR cycles.
 Branch: `codex/randomizer-raw-output-hash`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/70`.
 Related issue:
@@ -2498,6 +2499,8 @@ Validation so far:
   heading scan, full `make check`, Windows `scripts\check.ps1`, and Slither
   baseline comparison. Results remained 171 tests passing and Slither unchanged
   at `total=687`, `high=9`, `medium=29`.
+- Remote CI passed on head `f8d0470b665eee2b528f95c380719014be639295` in
+  GitHub Actions run `27295049942`.
 
 Review requests:
 
@@ -2507,6 +2510,10 @@ Review requests:
 - CodeRabbit review comments `4672797859` and `4672799547` were addressed
   locally by adding interface views, arRNG provider raw-word events, retry event
   documentation, stale zero-hash coverage, and monotonic log helpers.
+- CodeRabbit latest-head re-review was requested in issue comment `4672869910`.
+- CodeRabbit comment `4672884249` verified the review fixes, marked the PR
+  clean, and left only non-blocking maintainability notes. Its aggregate commit
+  status remained stale pending despite the clean review evidence.
 
 ## Decision Log
 
@@ -2714,6 +2721,7 @@ Review requests:
 | 2026-06-10 17:46 | Open PR #70 | PR packages P0-RAND-007 raw-output hash storage, domain-separated seed derivation, event/view exposure, focused tests, full local validation evidence, and a CodeRabbit review request |
 | 2026-06-10 17:52 | Address CodeRabbit PR #70 review | Add lifecycle interface request views, arRNG provider raw-word fulfillment event, stale zero-hash coverage, monotonic log helpers, retry-event documentation, and a defense-in-depth seed guard comment |
 | 2026-06-10 17:56 | Validate CodeRabbit PR #70 review response | Focused lifecycle/retry suites, full `make check`, Windows wrapper, formatting, diff hygiene, traceability, heading scan, and Slither baseline comparison all pass with 171 tests and unchanged high/medium counts |
+| 2026-06-10 17:58 | Mark PR #70 merge-ready by review evidence | GitHub CI passed on head `f8d0470b665eee2b528f95c380719014be639295`, CodeRabbit comment `4672884249` verified the fixes and marked the PR clean, and the stale aggregate pending context is documented as non-blocking |
 
 ## Resume Instructions
 
