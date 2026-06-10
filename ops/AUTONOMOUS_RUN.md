@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/54` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 06:11 UTC` |
+| Last updated | `2026-06-10 06:19 UTC` |
 
 ## Packaging Notes
 
@@ -993,7 +993,8 @@ Outcome:
 
 Status: In progress.
 Branch: `codex/remove-tx-origin-drop-execution`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/55`.
+Claude review request: issue comment `4667155915`.
 
 Goal:
 
@@ -1048,7 +1049,7 @@ Validation:
 
 Review feedback:
 
-- Pending PR creation, CI, and bot review.
+- Pending CI and bot review.
 
 ## Decision Log
 
@@ -1153,6 +1154,8 @@ Review feedback:
 | 2026-06-10 05:43 | Request Claude review on PR #54 | Explicit review ping added in issue comment `4666936783` because Claude may not run automatically |
 | 2026-06-10 05:52 | Merge PR #54 | GitHub CI and CodeRabbit checks passed, no review threads were open, and Claude was externally unavailable due to organization overage limits |
 | 2026-06-10 05:56 | Start `P0-AUTH-001` implementation PR | Gate C starts with removing executable `tx.origin` usage and adding explicit recipient target-state tests while leaving EIP-712 work to `P0-AUTH-002` |
+| 2026-06-10 06:18 | Open PR #55 | `P0-AUTH-001` implementation is published with local build, test, formatting, whitespace, grep, and sidecar-review evidence |
+| 2026-06-10 06:19 | Request Claude review on PR #55 | Explicit review ping added in issue comment `4667155915` because Claude may not run automatically |
 
 ## Resume Instructions
 
