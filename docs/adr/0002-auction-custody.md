@@ -88,15 +88,25 @@ The public-beta target design is:
 7. Settlement is permissionless after the auction ends unless a future
    admin/governance ADR defines a pause that temporarily blocks settlement.
 8. A no-bid auction settles the NFT to the signed poster from ADR 0001. It must
-   not use `tx.origin`. If the product later needs a separate no-bid recipient,
-   that requires a signed-schema version bump or a later ADR.
+   not use `tx.origin`. The signed `recipient` field from ADR 0001 must remain
+   `address(0)` for auctions, and the contract must continue to reject non-zero
+   auction recipients. Settlement recipients are derived from `poster` and
+   `highestBidder`, not from the signed `recipient` field. If the product later
+   needs a separate no-bid recipient, that requires a signed-schema version bump
+   or a later ADR.
 9. A with-bid auction settles the NFT to the highest bidder.
 10. Settlement is idempotent: repeated settlement attempts must not duplicate
     token transfers, credits, state changes, or events. The implementation may
     return the terminal status or revert with a custom already-settled error,
     but the behavior must be documented and tested.
 11. A failed NFT transfer must not mark the auction settled and must not credit
-    or release final auction proceeds.
+    or release final auction proceeds. No-bid settlement must support a
+    pull-style NFT claim fallback for contract posters that cannot receive a
+    direct safe transfer. The implementation may safely transfer to the poster
+    when possible, or record a pending no-bid NFT claim for the poster. The
+    poster must be able to complete that claim to a receiver address, and
+    `SettledNoBid` must be reached only after the NFT leaves escrow through the
+    direct transfer or the claim path.
 12. Outbid refunds and final proceeds must use pull-payment accounting. No P0
     auction implementation may keep synchronous push refunds or synchronous
     final payout calls in the bid or settlement path.
@@ -121,7 +131,7 @@ auction ID into one of these canonical states:
 | --- | --- | --- |
 | `None` | No auction record exists. | `Created` |
 | `Created` | Auction record exists and custody assignment is expected but bidding is not active yet. | `Active`, `Cancelled` |
-| `Active` | Custody is held by the auction system and bids may be accepted until the end time. | `EndedNoBid`, `EndedWithBid`, `Cancelled` |
+| `Active` | Custody is held by the auction system and bids may be accepted until the end time. | `EndedNoBid`, `EndedWithBid`, `Cancelled` only before the first valid bid |
 | `EndedNoBid` | End time passed and there is no valid highest bidder. | `SettledNoBid` |
 | `EndedWithBid` | End time passed and there is a valid highest bidder. | `SettledWithBid` |
 | `SettledNoBid` | Terminal no-bid settlement completed. | None |
@@ -140,6 +150,11 @@ field if the intended custody address is written before receipt. When minting
 and custody confirmation happen atomically in one transaction, the auction may
 be created and activated in that transaction, but events and views must still
 make the custody-confirmed state observable.
+
+An `EndedNoBid` record with a pending no-bid NFT claim remains `EndedNoBid`
+until the token leaves escrow. `SettledNoBid` is terminal and may be recorded
+only after a successful direct transfer to the poster or a successful
+poster-authorized claim transfer.
 
 The implementation should keep the current auction-extension product behavior
 only if it can be expressed inside this state model and covered by tests. An
@@ -169,6 +184,7 @@ struct AuctionRecord {
     uint256 collectionId;
     address poster;
     address custody;
+    address pendingNoBidNftClaimant;
     address highestBidder;
     uint256 reservePrice;
     uint256 highestBid;
@@ -181,7 +197,9 @@ struct AuctionRecord {
 Derived status views may compute active and ended states from `terminalStatus`,
 `custody`, `custodyConfirmed`, `endTime`, and highest-bid fields. The stored
 record must still be sufficient to prove custody, recipient, reserve, and
-settlement behavior.
+settlement behavior. If `pendingNoBidNftClaimant != address(0)`, the status
+view must make clear that no-bid settlement is pending a poster-controlled NFT
+claim and is not yet `SettledNoBid`.
 
 ## Payment And External Interaction Policy
 
@@ -198,6 +216,8 @@ Required payment behavior for auction PRs:
 - Failed withdrawals do not erase credits.
 - Owed balances cannot be withdrawn through emergency surplus controls.
 - Direct or forced ETH cannot corrupt owed-balance accounting.
+- No-bid NFT pull claims are separate from payment credits and must preserve
+  escrow custody until a direct transfer or poster-authorized claim succeeds.
 
 The exact credit categories, surplus calculation, and withdrawal API are owned
 by ADR 0003, but auction implementation must not merge unless it satisfies the
@@ -215,6 +235,8 @@ names may change during implementation, but the event catalog must include:
 - auction extension, if extension remains supported
 - cancellation
 - no-bid settlement
+- no-bid NFT claim pending
+- no-bid NFT claim completion
 - with-bid settlement
 - final payment credit creation
 
@@ -318,9 +340,14 @@ Implementation PRs must add or update tests for:
 - outbid credit creation
 - reverting previous bidder cannot block a new bid
 - no-bid settlement to poster
+- no-bid settlement to a contract poster without the ERC-721 receiver hook
+  creates a pending NFT claim instead of permanently trapping the auction
+- poster-authorized no-bid NFT claim to a valid receiver completes
+  `SettledNoBid`
 - with-bid settlement to highest bidder
 - failed NFT transfer leaves auction unsettled and does not create final
   payment credits
+- non-zero signed auction `recipient` remains rejected after ADR 0002
 - repeated settlement attempt creates no duplicate effects
 - cancellation before first bid
 - cancellation after first bid rejected

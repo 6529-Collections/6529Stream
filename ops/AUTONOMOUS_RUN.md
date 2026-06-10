@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/20` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 03:08 UTC` |
+| Last updated | `2026-06-10 03:17 UTC` |
 
 ## Packaging Notes
 
@@ -506,6 +506,13 @@ Validation:
 - After the ADR 0002 state-machine cleanup, `git diff --check`, `make check`,
   and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed
   again with 17 tests and known compiler/NatSpec warnings.
+- Claude follow-up cleanup validation passed for no-bid NFT claim fallback
+  semantics, the auction `recipient == address(0)` cross-ADR rule, the
+  first-bid cancellation guard in the state table, and event/test traceability.
+- After the final ADR 0002 cleanup, focused traceability scans, `git diff
+  --check`, `make check`, and
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed again
+  with 17 tests and known compiler/NatSpec warnings.
 
 Review feedback:
 
@@ -521,6 +528,17 @@ Review feedback:
   custody confirmation observable through `custody != address(0)` or explicit
   `custodyConfirmed`, adds those fields to derived status inputs, and requires
   tests for activation plus bid rejection before custody is confirmed.
+- Claude thread `PRRT_kwDOM7REis6IWRh5` requested explicit no-bid outbound
+  transfer mechanics for contract posters. ADR 0002 now requires a pull-style
+  NFT claim fallback, records `pendingNoBidNftClaimant`, and requires events
+  plus tests for pending and completed no-bid NFT claims.
+- Claude thread `PRRT_kwDOM7REis6IWRh7` requested the first-bid cancellation
+  guard inside the canonical state table. The `Active` row now permits
+  `Cancelled` only before the first valid bid.
+- Claude thread `PRRT_kwDOM7REis6IWRh-` requested closure of ADR 0001's
+  deferred auction `recipient` rule. ADR 0002 now keeps auction
+  `recipient == address(0)`, rejects non-zero signed auction recipients, and
+  derives settlement recipients from `poster` and `highestBidder`.
 - Waiting for CI and bot review to rerun on the latest head.
 
 ## Decision Log
@@ -586,6 +604,7 @@ Review feedback:
 | 2026-06-10 02:52 | Open PR #23 | Auction custody ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666002050` |
 | 2026-06-10 03:03 | Address late Claude PR #20 comments in PR #23 | ADR 0001 now pins `DROP_ID_TYPEHASH` and closes remaining signed-field semantic gaps for payer, sale-mode price fields, and poster attribution |
 | 2026-06-10 03:08 | Address Claude PR #23 state-machine review | ADR 0002 now clarifies custody-confirmation trigger and `Created -> Active` derivation |
+| 2026-06-10 03:17 | Address Claude PR #23 follow-up review | ADR 0002 now specifies no-bid NFT claim fallback, auction recipient policy, and first-bid cancellation guard |
 
 ## Resume Instructions
 
