@@ -17,6 +17,21 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
 
+    event DropAuthorizationConsumed(
+        bytes32 indexed dropId,
+        address indexed signer,
+        address indexed poster,
+        address recipient,
+        address payer,
+        uint256 collectionId,
+        uint8 saleMode,
+        bytes32 tokenDataHash,
+        uint256 deadline,
+        uint256 signerEpoch
+    );
+    event DropAuthorizationCancelled(bytes32 indexed dropId, address indexed admin);
+    event SignerEpochChanged(uint256 indexed oldEpoch, uint256 indexed newEpoch);
+
     function deployDrops() private returns (StreamDrops drops) {
         MockStreamMinter minter = new MockStreamMinter();
         StreamAdmins admins = new StreamAdmins(address(this));
@@ -41,6 +56,19 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
             drops, POSTER, RECIPIENT, address(0), "data", 1, 0, 1, 2, block.timestamp + 1 days
         );
 
+        vm.expectEmit(true, true, true, true);
+        emit DropAuthorizationConsumed(
+            authorization.dropId,
+            signerAddress(),
+            POSTER,
+            RECIPIENT,
+            address(0),
+            1,
+            drops.SALE_MODE_FIXED_PRICE(),
+            keccak256(bytes("data")),
+            authorization.deadline,
+            authorization.signerEpoch
+        );
         drops.mintDrop(authorization, "data", signAuthorization(drops, authorization));
 
         drops.isDropConsumed(authorization.dropId).assertTrue("valid drop was not consumed");
@@ -135,6 +163,8 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
         );
         bytes memory signature = signAuthorization(drops, authorization);
 
+        vm.expectEmit(true, true, false, true);
+        emit DropAuthorizationCancelled(authorization.dropId, address(this));
         drops.cancelDrop(authorization.dropId);
         (bool success,) = address(drops)
             .call(abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", signature));
@@ -144,6 +174,20 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
         drops.isDropConsumed(authorization.dropId).assertFalse("cancelled drop consumed");
     }
 
+    function testDuplicateCancelDropFailsWithoutSecondEvent() public {
+        StreamDrops drops = deployDrops();
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops, POSTER, RECIPIENT, address(0), "data", 1, 0, 33, 34, block.timestamp + 1 days
+        );
+
+        drops.cancelDrop(authorization.dropId);
+        (bool success,) = address(drops)
+            .call(abi.encodeWithSelector(drops.cancelDrop.selector, authorization.dropId));
+
+        success.assertFalse("duplicate cancellation succeeded");
+        drops.isDropCancelled(authorization.dropId).assertTrue("drop cancellation was removed");
+    }
+
     function testStaleSignerEpochFailsAfterIncrement() public {
         StreamDrops drops = deployDrops();
         StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
@@ -151,6 +195,8 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
         );
         bytes memory signature = signAuthorization(drops, authorization);
 
+        vm.expectEmit(true, true, false, true);
+        emit SignerEpochChanged(1, 2);
         drops.incrementSignerEpoch();
         (bool success,) = address(drops)
             .call(abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", signature));
@@ -291,6 +337,117 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
 
         success.assertFalse("wrong payer minted");
         drops.isDropConsumed(authorization.dropId).assertFalse("wrong payer consumed drop");
+    }
+
+    function testFreeFixedPriceRequiresZeroPayer() public {
+        StreamDrops drops = deployDrops();
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops,
+            POSTER,
+            RECIPIENT,
+            address(0xCAFE),
+            "data",
+            1,
+            0,
+            35,
+            36,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", signature));
+
+        success.assertFalse("free fixed-price drop accepted non-zero payer");
+        drops.isDropConsumed(authorization.dropId).assertFalse("bad free payer consumed drop");
+    }
+
+    function testAuctionRequiresZeroPayer() public {
+        StreamDrops drops = deployDrops();
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            drops,
+            POSTER,
+            address(0),
+            "auction-data",
+            7,
+            5 ether,
+            block.timestamp + 1 days,
+            37,
+            38,
+            block.timestamp + 1 days
+        );
+        authorization.payer = address(0xCAFE);
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(
+                abi.encodeWithSelector(
+                    drops.mintDrop.selector, authorization, "auction-data", signature
+                )
+            );
+
+        success.assertFalse("auction accepted non-zero payer");
+        drops.isDropConsumed(authorization.dropId).assertFalse("bad auction payer consumed drop");
+    }
+
+    function testFixedPriceRejectsAuctionReservePrice() public {
+        StreamDrops drops = deployDrops();
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops, POSTER, RECIPIENT, address(0), "data", 1, 0, 39, 40, block.timestamp + 1 days
+        );
+        authorization.auctionReservePrice = 1 ether;
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", signature));
+
+        success.assertFalse("fixed-price drop accepted auction reserve");
+        drops.isDropConsumed(authorization.dropId)
+            .assertFalse("fixed-price auction reserve consumed drop");
+    }
+
+    function testFixedPriceRejectsAuctionEndTime() public {
+        StreamDrops drops = deployDrops();
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops, POSTER, RECIPIENT, address(0), "data", 1, 0, 41, 42, block.timestamp + 1 days
+        );
+        authorization.auctionEndTime = block.timestamp + 2 days;
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", signature));
+
+        success.assertFalse("fixed-price drop accepted auction end time");
+        drops.isDropConsumed(authorization.dropId)
+            .assertFalse("fixed-price auction end time consumed drop");
+    }
+
+    function testAuctionRejectsFixedPriceValue() public {
+        StreamDrops drops = deployDrops();
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            drops,
+            POSTER,
+            address(0),
+            "auction-data",
+            7,
+            5 ether,
+            block.timestamp + 1 days,
+            43,
+            44,
+            block.timestamp + 1 days
+        );
+        authorization.price = 1 ether;
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(
+                abi.encodeWithSelector(
+                    drops.mintDrop.selector, authorization, "auction-data", signature
+                )
+            );
+
+        success.assertFalse("auction accepted fixed-price value");
+        drops.isDropConsumed(authorization.dropId).assertFalse("bad auction price consumed drop");
     }
 
     function testContractSignerIsExplicitlyRejectedUntilErc1271Lands() public {

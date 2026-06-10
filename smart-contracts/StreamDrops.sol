@@ -180,6 +180,7 @@ contract StreamDrops is Ownable {
 
     function cancelDrop(bytes32 _dropId) public FunctionAdminRequired(this.cancelDrop.selector) {
         require(consumedDropIds[_dropId] == false, "Drop consumed");
+        require(cancelledDropIds[_dropId] == false, "Already cancelled");
         cancelledDropIds[_dropId] = true;
         emit DropAuthorizationCancelled(_dropId, msg.sender);
     }

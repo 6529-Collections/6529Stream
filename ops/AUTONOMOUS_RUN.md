@@ -1074,7 +1074,8 @@ Outcome:
 
 ### PR #56: Replace drop authorization with EIP-712 (Queue Item 15)
 
-Status: Open; merge-ready after CI and CodeRabbit review.
+Status: Open; CodeRabbit follow-up fixes implemented locally and awaiting
+remote CI/bot re-check after push.
 Branch: `codex/eip712-drop-authorization`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/56`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/10`.
@@ -1114,11 +1115,11 @@ Candidate files:
 
 Validation:
 
-- `forge test --match-contract StreamDropsEIP712Test -vvv` passed with 17
+- `forge test --match-contract StreamDropsEIP712Test -vvv` passed with 23
   tests.
 - `forge test --match-contract StreamAdminsTest -vvv` passed with 4 tests.
-- `make check` passed with 41 tests and the known Solidity warning baseline.
-- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 41
+- `make check` passed with 47 tests and the known Solidity warning baseline.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 47
   tests and the known Solidity warning baseline.
 - `forge fmt --check` passed for all touched Solidity files.
 - `git diff --check` passed.
@@ -1144,6 +1145,15 @@ Review feedback:
   command comment `4667699009` requested completion for the latest head.
 - CodeRabbit status passed and reported no actionable comments on head
   `175c24929ac76e5cc5cece64786201dd47063745`.
+- Follow-up CodeRabbit command review comment `4667722117` found duplicate
+  cancellation events, five missing sale-mode negative tests, and missing event
+  assertions.
+- Follow-up fix added an `Already cancelled` guard, `DropAuthorizationConsumed`,
+  `DropAuthorizationCancelled`, and `SignerEpochChanged` event assertions, and
+  negative tests for free fixed-price payer, auction payer, fixed-price auction
+  reserve, fixed-price auction end, and auction price field misuse.
+- Focused EIP-712 suite now passes with 23 tests; `make check` and the Windows
+  wrapper both pass with 47 tests.
 
 ## Decision Log
 
@@ -1258,6 +1268,8 @@ Review feedback:
 | 2026-06-10 07:09 | Finish local `P0-AUTH-002` validation | `make check`, Windows check, formatting, whitespace, legacy-surface grep, heading scan, and targeted Slither delta checks pass; Slither still exits non-zero for unrelated baseline findings |
 | 2026-06-10 07:11 | Open PR #56 | EIP-712 drop authorization implementation is published with local validation and Slither delta evidence |
 | 2026-06-10 07:12 | Request Claude review on PR #56 | Explicit review ping added in issue comment `4667572552` because Claude may not run automatically |
+| 2026-06-10 07:30 | Nudge CodeRabbit PR #56 | CodeRabbit had remained pending since PR open; issue comment `4667699009` requested completion for the latest head |
+| 2026-06-10 07:34 | Address CodeRabbit PR #56 command review | Added duplicate-cancel guard, sale-mode negative tests, and lifecycle event assertions; focused suite, full `make check`, and Windows wrapper pass |
 
 ## Resume Instructions
 
