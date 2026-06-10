@@ -33,7 +33,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/52` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 05:41 UTC` |
+| Last updated | `2026-06-10 05:43 UTC` |
 
 ## Packaging Notes
 
@@ -63,7 +63,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Merged in PR #36 |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Merged in PR #44 |
 | 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merged in PR #52 |
-| 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | In progress on `codex/upgrade-redeployment-adr` |
+| 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Open in PR #54 |
 
 ## Current PR Worklog
 
@@ -917,11 +917,12 @@ Outcome:
 - Claude review was unavailable because the organization's Claude Code overage
   spend limit was reached; the explicit request is recorded above.
 
-### PR TBD: Upgrade/redeployment ADR (Queue Item 13)
+### PR #54: Upgrade/redeployment ADR (Queue Item 13)
 
-Status: Local validation passed; ready to open PR.
+Status: Open; waiting for CI and bot reviews.
 Branch: `codex/upgrade-redeployment-adr`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/54`.
+Claude review request: issue comment `4666936783`.
 
 Goal:
 
@@ -971,7 +972,7 @@ Validation:
 
 Review feedback:
 
-- Pending PR review.
+- Pending CI and bot review.
 
 ## Decision Log
 
@@ -1072,6 +1073,8 @@ Review feedback:
 | 2026-06-10 05:34 | Create upgrade/redeployment ADR issue | Issue #53 anchors `P2-UPGRADE-ADR` before Gate B2 can close |
 | 2026-06-10 05:36 | Start upgrade/redeployment ADR PR | Gate B2 needs ADR 0007 accepted before deployment, release, manifest, deprecation, emergency redeployment, or proxy policy work |
 | 2026-06-10 05:41 | Validate upgrade/redeployment ADR locally | Heading, traceability, ASCII, whitespace, sidecar review, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 05:42 | Open PR #54 | Upgrade/redeployment ADR is published with validation evidence |
+| 2026-06-10 05:43 | Request Claude review on PR #54 | Explicit review ping added in issue comment `4666936783` because Claude may not run automatically |
 
 ## Resume Instructions
 
