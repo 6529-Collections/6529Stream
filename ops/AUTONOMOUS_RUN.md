@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/68` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 16:59 UTC` |
+| Last updated | `2026-06-10 17:08 UTC` |
 
 ## Packaging Notes
 
@@ -2310,7 +2310,7 @@ Outcome:
 
 ### Next PR: Add bounded randomness post-processing retry (Queue Item 28)
 
-Status: PR #69 open; awaiting CI and CodeRabbit.
+Status: PR #69 open; CI clean and awaiting CodeRabbit after review follow-up.
 Branch: `codex/randomizer-post-processing-retry`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/69`.
 Related issue:
@@ -2378,6 +2378,9 @@ Validation so far:
   contracts, tests, docs, and ops state.
 - Markdown heading scan passed for `ops/ROADMAP.md`, ADR 0005, known
   blockers, project status, and test README.
+- CodeRabbit top-level roadmap blocker wording review was addressed by removing
+  the stale deterministic randomness retry phrase from the remaining-blockers
+  summary.
 - Slither baseline comparison passed with no new high/medium or production
   reentrancy findings: `slither_exit=-1`, `total=687`, `high=9`,
   `medium=29`, `weak-prng=2`, `arbitrary-send-eth=0`, `reentrancy-eth=0`,
@@ -2581,6 +2584,7 @@ Validation so far:
 | 2026-06-10 16:43 | Expand Queue Item 28 retry validation | Added explicit retry rejection tests for changed randomizer epoch and provider, refreshed full gates to 168 passing tests, and kept Slither high/medium counts unchanged |
 | 2026-06-10 16:45 | Open PR #69 | PR packages bounded deterministic post-processing retry for VRF and arRNG adapters, closes issue #42, and records full local validation evidence |
 | 2026-06-10 16:59 | Address CodeRabbit PR #69 review | Split retry-failure state mutation from initial-failure event emission, refresh fulfillment timing on retry success, add arRNG edge-case parity, and refresh full gates to 170 passing tests with Slither high/medium counts unchanged |
+| 2026-06-10 17:08 | Address CodeRabbit PR #69 roadmap wording review | Remove stale top-level `deterministic randomness retry` remaining-blocker wording now that P0-RAND-006 is implemented and passing in the traceability matrix |
 
 ## Resume Instructions
 

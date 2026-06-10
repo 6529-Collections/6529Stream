@@ -18,9 +18,8 @@ order.
   characterization test skeleton. It does not prove protocol correctness.
 - Known remaining P0 blockers include broader payment accounting and
   cross-contract invariants, fuller randomizer reserve lifecycle accounting,
-  deterministic randomness retry and metadata state work, untriaged static
-  analysis findings, missing invariants, broader production governance, and
-  missing deployment discipline.
+  metadata state work, untriaged static analysis findings, missing invariants,
+  broader production governance, and missing deployment discipline.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
   fixed-price `StreamDrops` pull credits, and `StreamCuratorsPool` curator
