@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/78` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 21:53 UTC` |
+| Last updated | `2026-06-10 21:57 UTC` |
 
 ## Packaging Notes
 
@@ -91,7 +91,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 34 | Prove vendored library provenance | Gate F | Complete P0-LIB-001 by documenting retained OpenZeppelin utility provenance, marking vendored Slither rows as false positives with proof, and adding focused Base64/Math regressions | Merged in PR #76 |
 | 35 | Add payment invariant baseline | Gate D | Add bounded sequence fuzz coverage proving current local payment ledgers, owed totals, reserves, and emergency-withdrawable surplus remain coherent across mixed mint, bid, settlement, withdrawal, randomizer, and forced-balance operations | Merged in PR #77 |
 | 36 | Add payment ledger view aliases | Gate C/Gate D | Expose missing ADR 0003 local-ledger view names such as `totalReserved()` and `surplus()`, add category aliases where useful, assert them in payment invariants, and reconcile P0-PAY-002 roadmap state | Merged in PR #78 |
-| 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | In progress on `codex/add-signer-lifecycle-manager` |
+| 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | PR #80 open |
 
 ## Current PR Worklog
 
@@ -3140,11 +3140,11 @@ Outcome:
   fixed by commit `dc8b206`.
 - Issue #26 closed as completed.
 
-### PR TBD: Add signer lifecycle manager (Queue Item 37)
+### PR #80: Add signer lifecycle manager (Queue Item 37)
 
-Status: Local implementation and validation complete; ready to open PR.
+Status: PR open; waiting for GitHub CI and CodeRabbit.
 Branch: `codex/add-signer-lifecycle-manager`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/80`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/79`
@@ -3224,7 +3224,7 @@ Validation so far:
 
 Review requests:
 
-- Pending PR open.
+- CodeRabbit requested in issue comment `4675002714`.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3473,6 +3473,7 @@ Review requests:
 | 2026-06-10 21:25 | Merge PR #78 | Payment ledger view aliases merged as `785f9ebca5c91a18e0cdbe20b35a8b0c955bfb3f`; CI and CodeRabbit were green, the visible review nitpick was fixed, and issue #26 closed completed |
 | 2026-06-10 21:27 | Create issue #79 and select Queue Item 37 | The remaining signer-lifecycle test-matrix row is `In Progress`; a focused P0-ADMIN-003 issue lets the next PR separate drop-signing identity from signer-management authority without bundling deployment ceremony work |
 | 2026-06-10 21:53 | Finish local Queue Item 37 validation | Signer-manager implementation with owner-approved lifecycle targets, focused 59-test admin/drop coverage, full 197-test `make check`, Windows wrapper, formatting, whitespace, traceability grep, and Slither baseline comparison all pass; Slither high/medium counts remain unchanged at 4 High / 19 Medium |
+| 2026-06-10 21:57 | Open PR #80 | Signer lifecycle manager PR opened on head `8aab8a4cfa0442afcb6933c5ec11516a25d5a005`; CodeRabbit requested in issue comment `4675002714`; Claude intentionally skipped per current user instruction |
 
 ## Resume Instructions
 
