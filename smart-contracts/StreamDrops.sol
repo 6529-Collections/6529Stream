@@ -347,11 +347,31 @@ contract StreamDrops is Ownable, ReentrancyGuard {
                 + totalFixedPriceCuratorReserveOwed;
     }
 
+    function totalPosterOwed() public view returns (uint256) {
+        return totalFixedPricePosterOwed;
+    }
+
+    function totalProtocolOwed() public view returns (uint256) {
+        return totalFixedPriceProtocolOwed;
+    }
+
+    function totalCuratorReserved() public view returns (uint256) {
+        return totalFixedPriceCuratorReserveOwed;
+    }
+
+    function totalReserved() public view returns (uint256) {
+        return totalCuratorReserved();
+    }
+
     function totalOwed() public view returns (uint256) {
         return totalFixedPriceOwed();
     }
 
     function emergencyWithdrawable() public view returns (uint256) {
+        return surplus();
+    }
+
+    function surplus() public view returns (uint256) {
         uint256 balance = address(this).balance;
         uint256 owed = totalOwed();
         if (balance <= owed) {

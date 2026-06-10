@@ -147,7 +147,15 @@ contract StreamCuratorsPool is ReentrancyGuard {
         return totalCuratorOwed;
     }
 
+    function totalReserved() public pure returns (uint256) {
+        return 0;
+    }
+
     function emergencyWithdrawable() public view returns (uint256) {
+        return surplus();
+    }
+
+    function surplus() public view returns (uint256) {
         uint256 balance = address(this).balance;
         uint256 owed = totalOwed();
         if (balance <= owed) {

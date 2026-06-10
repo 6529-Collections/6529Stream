@@ -371,7 +371,10 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         _assertAuctionTotals();
         _assertCuratorTotals();
         surplusMinter.totalOwed().assertEq(0, "minter owed");
+        surplusMinter.totalReserved().assertEq(0, "minter reserved");
         randomizer.totalOwed().assertEq(randomizer.totalRandomnessReserved(), "randomizer owed");
+        randomizer.totalReserved()
+            .assertEq(randomizer.totalRandomnessReserved(), "randomizer reserved");
     }
 
     function assertContractBalancesCoverOwedAndReservedFunds() external view {
@@ -387,13 +390,18 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
             .assertEq(
                 _surplus(address(deployed.drops), deployed.drops.totalOwed()), "drops surplus"
             );
+        deployed.drops.surplus().assertEq(deployed.drops.emergencyWithdrawable(), "drops alias");
         auctions.emergencyWithdrawable()
             .assertEq(_surplus(address(auctions), auctions.totalOwed()), "auction surplus");
+        auctions.surplus().assertEq(auctions.emergencyWithdrawable(), "auction alias");
         curatorsPool.emergencyWithdrawable()
             .assertEq(_surplus(address(curatorsPool), curatorsPool.totalOwed()), "curator surplus");
+        curatorsPool.surplus().assertEq(curatorsPool.emergencyWithdrawable(), "curator alias");
         surplusMinter.emergencyWithdrawable()
             .assertEq(_surplus(address(surplusMinter), surplusMinter.totalOwed()), "minter surplus");
+        surplusMinter.surplus().assertEq(surplusMinter.emergencyWithdrawable(), "minter alias");
         randomizer.emergencyWithdrawable().assertEq(0, "randomizer surplus");
+        randomizer.surplus().assertEq(randomizer.emergencyWithdrawable(), "randomizer alias");
     }
 
     function _assertDropsTotals() private view {
@@ -404,12 +412,18 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
             deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL);
 
         posterCredits.assertEq(deployed.drops.totalFixedPricePosterOwed(), "fixed poster total");
+        posterCredits.assertEq(deployed.drops.totalPosterOwed(), "drops poster alias");
         protocolCredits.assertEq(
             deployed.drops.totalFixedPriceProtocolOwed(), "fixed protocol total"
         );
+        protocolCredits.assertEq(deployed.drops.totalProtocolOwed(), "drops protocol alias");
         curatorReserveCredits.assertEq(
             deployed.drops.totalFixedPriceCuratorReserveOwed(), "fixed curator reserve total"
         );
+        curatorReserveCredits.assertEq(
+            deployed.drops.totalCuratorReserved(), "drops curator reserve alias"
+        );
+        curatorReserveCredits.assertEq(deployed.drops.totalReserved(), "drops reserved");
         (posterCredits + protocolCredits + curatorReserveCredits)
         .assertEq(deployed.drops.totalFixedPriceOwed(), "fixed price total");
         deployed.drops.totalFixedPriceOwed().assertEq(deployed.drops.totalOwed(), "drops total");
@@ -429,6 +443,9 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         curatorCredits.assertEq(auctions.totalCuratorOwed(), "auction curator total");
         (posterCredits + protocolCredits + curatorCredits)
         .assertEq(auctions.totalProceedsOwed(), "auction proceeds total");
+        auctions.totalAuctionBidEscrow().assertEq(auctions.totalReserved(), "auction reserved");
+        auctions.totalCuratorReserved().assertEq(0, "auction curator reserve");
+        auctions.totalRandomnessReserved().assertEq(0, "auction randomness reserve");
         (bidderCredits + auctions.totalAuctionBidEscrow() + auctions.totalProceedsOwed())
         .assertEq(auctions.totalOwed(), "auction total");
     }
@@ -437,6 +454,7 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         uint256 curatorCredits =
             curatorsPool.curatorCredits(CURATOR) + curatorsPool.curatorCredits(SECOND_CURATOR);
         curatorCredits.assertEq(curatorsPool.totalCuratorOwed(), "curator total");
+        curatorsPool.totalReserved().assertEq(0, "curator reserved");
         curatorsPool.totalCuratorOwed().assertEq(curatorsPool.totalOwed(), "pool total");
     }
 

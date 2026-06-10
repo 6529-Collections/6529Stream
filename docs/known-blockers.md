@@ -13,9 +13,10 @@ contributors who start from the README.
 - Fixed-price mints now record `StreamDrops` poster, protocol, and curator
   reserve credits instead of pushing ETH during mint execution. Current local
   ledgers now have fixed scenario coverage plus bounded sequence fuzz invariants
-  for owed totals, surplus, reserves, and emergency-withdrawable views. Broader
-  shared ledger architecture and richer randomizer reserve lifecycle accounting
-  remain open before production use.
+  for owed totals, total-reserved aliases, surplus aliases, reserves, and
+  emergency-withdrawable views. Broader shared ledger architecture or
+  protocol-wide aggregation, plus richer randomizer reserve lifecycle
+  accounting, remain open before production use.
 - Curator reward claims now validate the Merkle claim and record
   `StreamCuratorsPool` curator credits instead of pushing ETH to the reward
   address. Curator pool emergency withdrawal is bounded by local curator credits
@@ -76,10 +77,11 @@ contributors who start from the README.
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback
   validation, deterministic randomizer retry, raw-output hash storage,
-  randomizer reserve-boundary regressions, and a bounded payment sequence
-  invariant baseline now exist, but metadata, dependency versioning/freeze,
-  deployment, production-governance, supply/replay/freeze invariant tests, and
-  any future shared-ledger invariants are still missing.
+  randomizer reserve-boundary regressions, local payment-ledger view aliases,
+  and a bounded payment sequence invariant baseline now exist, but metadata,
+  dependency versioning/freeze, deployment, production-governance,
+  supply/replay/freeze invariant tests, and any future shared-ledger invariants
+  are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

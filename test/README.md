@@ -72,7 +72,8 @@ auction settlement, curator claim, withdrawal, emergency withdrawal, randomizer
 reserve, and forced-balance operations are checked after every step so local
 category totals, `totalOwed()` views, balance coverage, reserves, and
 `emergencyWithdrawable()` views remain coherent for the current first-party
-payment surfaces.
+payment surfaces. The invariant suite also checks ADR-style local-ledger view
+aliases such as `totalReserved()` and `surplus()` where those surfaces apply.
 
 Admin permission tests now include P0-ADMIN-001 target-state coverage in
 `StreamAdminSelectors.t.sol` and `StreamAdmins.t.sol`: function-admin grants are

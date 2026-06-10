@@ -498,7 +498,23 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         return totalBidderOwed + totalAuctionBidEscrow + totalProceedsOwed();
     }
 
+    function totalCuratorReserved() public pure returns (uint256) {
+        return 0;
+    }
+
+    function totalRandomnessReserved() public pure returns (uint256) {
+        return 0;
+    }
+
+    function totalReserved() public view returns (uint256) {
+        return totalAuctionBidEscrow;
+    }
+
     function emergencyWithdrawable() public view returns (uint256) {
+        return surplus();
+    }
+
+    function surplus() public view returns (uint256) {
         uint256 balance = address(this).balance;
         uint256 owed = totalOwed();
         if (balance <= owed) {

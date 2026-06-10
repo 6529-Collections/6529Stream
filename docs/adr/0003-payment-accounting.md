@@ -16,8 +16,12 @@ the remaining emergency-withdrawal surfaces:
 `StreamMinter` exposes no owed balance and surplus-only emergency withdrawal,
 and `NextGenRandomizerRNG` treats its adapter balance as randomness reserve with
 zero emergency-withdrawable balance. Remaining ADR work includes protocol-wide
-ledger views, richer reserve movement, full randomizer reserve lifecycle
-accounting, and cross-contract invariants.
+aggregation or shared-ledger abstraction if the project chooses that path,
+richer reserve movement, full randomizer reserve lifecycle accounting, and
+cross-contract invariants beyond the current local-ledger baseline. Current
+local ledgers expose `totalOwed()`, `totalReserved()`, `surplus()`, and
+`emergencyWithdrawable()` views where applicable, with category aliases for the
+fixed-price `StreamDrops` ledger.
 
 ## Metadata
 
@@ -159,9 +163,15 @@ function surplus() external view returns (uint256);
 function emergencyWithdrawable() external view returns (uint256);
 ```
 
-`totalOwed` and `totalReserved` must include every withdrawable or reserved
-amount that must not be swept by emergency withdrawal. If a contract needs
-non-payment reserves, those reserves must be included in `totalReserved` and
+Current local-ledger implementations expose these names where the category is
+owned by the contract. Categories that are not owned by a contract may be
+reported as zero-valued aliases rather than stored as redundant state.
+
+`totalOwed` must include every withdrawable or reserved amount that must not be
+swept by emergency withdrawal. `totalReserved` reports the non-withdrawable
+reserve subset, such as active auction bid escrow, fixed-price curator reserve,
+or randomness provider reserve. If a contract needs non-payment reserves, those
+reserves must be included in `totalReserved`, included in `totalOwed`, and
 excluded from `emergencyWithdrawable`.
 
 ## Accounting Rules
