@@ -97,32 +97,49 @@ The public-beta target design is:
    `recipient == address(0)` and the contract must reject non-zero auction
    recipients.
 7. For the initial P0 implementation, `payer` must equal `msg.sender` for
-   payable fixed-price execution. Open relayer execution is out of scope until a
-   later ADR explicitly defines reimbursement and payment semantics.
-8. `quantity` must equal `1` in the P0 design. The contract must reject any
+   payable fixed-price execution.
+8. For free fixed-price execution, where `price == 0`, `payer` must equal
+   `address(0)`. For auction execution, `payer` must equal `address(0)` until
+   ADR 0003 defines bid-time payment semantics. Open relayer execution is out
+   of scope until a later ADR explicitly defines reimbursement and payment
+   semantics.
+9. `poster` is signed attribution and payment-routing metadata. The P0 contract
+   treats a valid signer signature as authorization for the supplied `poster`
+   and does not enforce `poster == signer`. Off-chain signer pipelines may
+   enforce poster-to-signer policy, but changing the on-chain interpretation of
+   `poster` requires a later ADR and an EIP-712 version bump.
+10. Sale-mode-specific price fields must not be silent. For fixed-price
+    execution, `price` is the fixed payment amount, and `auctionReservePrice`
+    and `auctionEndTime` must both be zero. For auction execution,
+    `auctionReservePrice` is the reserve price, `auctionEndTime` is the auction
+    end time, and `price` must be zero. Buy-now auction pricing is out of scope
+    for P0 and requires a later ADR plus an EIP-712 version bump.
+11. `quantity` must equal `1` in the P0 design. The contract must reject any
    authorization with `quantity != 1`. Batch minting or one authorization to
    many tokens requires a later ADR and an EIP-712 version bump.
-9. `salt` is signer/integrator-chosen entropy used only in the signed payload
+12. `salt` is signer/integrator-chosen entropy used only in the signed payload
    and `dropId` derivation. It is not an EIP-712 domain `salt`, and the contract
    does not store or validate it separately.
-10. `nonce` is a signer-allocated opaque unique value within a `signerEpoch`, not
+13. `nonce` is a signer-allocated opaque unique value within a `signerEpoch`, not
    an on-chain monotonic counter. There is no `signerNonces` storage in the P0
    design. `dropId` is the derived replay identifier, not an independent nonce.
    After validating the signer, the contract must require:
    `dropId == keccak256(abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce, salt))`.
+   `DROP_ID_TYPEHASH` is
+   `keccak256("DropId(address signer,uint256 signerEpoch,uint256 nonce,uint256 salt)")`.
    The signer pipeline must not issue two live payloads with the same
    `(signer, signerEpoch, nonce, salt)` tuple.
-11. `dropId` must be globally unique and consumed in storage before any external
+14. `dropId` must be globally unique and consumed in storage before any external
    calls that can transfer ETH or invoke receiver hooks. P0 replay and
    cancellation storage is keyed by `dropId`; no separate per-epoch nonce or
    salt mapping is required unless a later implementation ADR expands the
    accounting model.
-12. `deadline` must be enforced against `block.timestamp`.
-13. `signerEpoch` must match current contract state so signer compromise or
+15. `deadline` must be enforced against `block.timestamp`.
+16. `signerEpoch` must match current contract state so signer compromise or
     rotation can invalidate outstanding payloads.
-14. Admins must be able to cancel a specific `dropId` before execution.
-15. EOA signatures and ERC-1271 contract signatures are supported.
-16. EOA signature and execution validation must reject:
+17. Admins must be able to cancel a specific `dropId` before execution.
+18. EOA signatures and ERC-1271 contract signatures are supported.
+19. EOA signature and execution validation must reject:
     - wrong signer
     - wrong domain
     - wrong chain ID
@@ -131,12 +148,16 @@ The public-beta target design is:
     - replayed drop ID
     - cancelled drop ID
     - stale signer epoch
+    - zero poster
+    - sale-mode-specific payer violation
+    - fixed-price authorization with non-zero auction fields
+    - auction authorization with non-zero fixed-price field
     - quantity other than one
     - malleable signature
     - zero-address recovered signer
-17. ERC-1271 signatures must require the standard magic value from the contract
+20. ERC-1271 signatures must require the standard magic value from the contract
     signer.
-18. EIP-2098 compact signatures are supported and normalized under the same
+21. EIP-2098 compact signatures are supported and normalized under the same
     malleability policy as 65-byte ECDSA signatures.
 
 ## Intended API Shape
@@ -170,6 +191,10 @@ fixture so integrators can reproduce the digest exactly.
 The helper must also expose the `dropId` derivation:
 
 ```solidity
+DROP_ID_TYPEHASH = keccak256(
+    "DropId(address signer,uint256 signerEpoch,uint256 nonce,uint256 salt)"
+);
+
 dropId = keccak256(
     abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce, salt)
 );
@@ -317,15 +342,23 @@ P0 implementation must add tests for:
 - malleable ECDSA signature
 - EIP-2098 compact signature
 - zero-address recovered signer
+- zero poster
 - zero recipient
 - `quantity != 1`
+- payable fixed-price authorization where `payer != msg.sender`
+- free fixed-price authorization where `payer != address(0)`
+- auction authorization where `payer != address(0)`
+- fixed-price authorization where `auctionReservePrice != 0`
+- fixed-price authorization where `auctionEndTime != 0`
+- auction authorization where `price != 0`
+- `poster` attribution is preserved in emitted events and payment-accounting
+  inputs without requiring `poster == signer`
 - raw `tokenData` substitution under a valid signed `tokenDataHash`
 - non-zero auction `recipient` before ADR 0002 defines different semantics
 - field substitution for poster, recipient, payer, collection, sale mode,
   token data hash, price, quantity, auction reserve, auction end, salt, nonce,
   deadline, and signer epoch
 - contract wallet execution without `tx.origin`
-- `payer != msg.sender` rejection in the initial P0 implementation
 - consumed state is written before external calls
 - events for consumption, cancellation, and signer epoch changes
 

@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/drop-authorization-adr` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/16` |
+| Active PR branch | `codex/auction-custody-adr` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/20` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 02:33 UTC` |
+| Last updated | `2026-06-10 03:17 UTC` |
 
 ## Packaging Notes
 
@@ -57,8 +57,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 4 | Characterization test skeleton | Gate A | Test helpers, fixtures, mocks, and executable characterization coverage | Merged in PR #6 |
 | 5 | Slither baseline appendix/config | Gate A / Gate C foundation | Static analysis command/config and tracked baseline issue rows | Merged in PR #7 |
 | 6 | Slither baseline issue links | Gate C / Gate F foundation | Create canonical GitHub issues for open high/medium Slither groups and link them from roadmap/baseline docs | Merged in PR #16 |
-| 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Open as PR #20 |
-| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Pending |
+| 7 | Drop authorization ADR | Gate B1 | Accept `docs/adr/0001-drop-authorization.md` before P0 auth rewrites | Merged in PR #20 |
+| 8 | Auction custody ADR | Gate B1 | Accept `docs/adr/0002-auction-custody.md` before P0 auction rewrites | Open as PR #23 |
 | 9 | Payment accounting ADR | Gate B1 | Accept `docs/adr/0003-payment-accounting.md` before pull-payment rewrites | Pending |
 | 10 | Admin/governance ADR | Gate B1 | Accept `docs/adr/0004-admin-governance.md` before permission/pause rewrites | Pending |
 | 11 | Randomness ADR | Gate B1 | Accept `docs/adr/0005-randomness.md` before callback/randomness rewrites | Pending |
@@ -372,8 +372,7 @@ Outcome:
 
 ### PR #20: Drop authorization ADR (Queue Item 7)
 
-Status: Open; Claude token-data, recipient, salt/nonce, and quantity
-clarifications addressed and locally validated; waiting for CI/bot rerun.
+Status: Merged.
 Branch: `codex/drop-authorization-adr`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/20`.
 Claude review request: issue comment `4665813753`.
@@ -436,6 +435,112 @@ Review feedback:
   `quantity != 1` a rejection case, and requires a later ADR plus EIP-712
   version bump before batch semantics are introduced.
 
+Outcome:
+
+- Merged as PR #20 on `2026-06-10 02:40 UTC`.
+- Squash merge commit: `314cba14ffe970d95642544aac24c9c67d7d9a2d`.
+- Latest head before merge: `a92b6c4f7c1d8b16817cd311b2bd22c5e061f4f5`.
+- GitHub CI run `27249243361` passed on the final head.
+- CodeRabbit completed successfully with no actionable comments on the final
+  head.
+- Claude review threads were addressed and resolved before merge.
+
+### PR #23: Auction custody ADR (Queue Item 8)
+
+Status: Open; waiting for CI and bot review.
+Branch: `codex/auction-custody-adr`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/23`.
+Claude review request: issue comment `4666002050`.
+
+Goal:
+
+- Accept `docs/adr/0002-auction-custody.md` before any P0 auction rewrite.
+- Decide escrow custody, canonical auction state, settlement actor, no-bid
+  recipient, cancellation, payment-accounting dependency, and event/indexer
+  requirements.
+- Link the ADR from the roadmap and ADR index.
+
+Created GitHub issues:
+
+- [#21](https://github.com/6529-Collections/6529Stream/issues/21)
+  `P0-AUCT-ADR`: accept auction custody design.
+- [#22](https://github.com/6529-Collections/6529Stream/issues/22)
+  `P0-AUCT-001`: formalize auction custody, settlement, and lifecycle state
+  machine.
+
+Related existing issues:
+
+- [#12](https://github.com/6529-Collections/6529Stream/issues/12)
+  `P0-AUCT-002`: fix auction bidding reentrancy and outbid refunds.
+- [#8](https://github.com/6529-Collections/6529Stream/issues/8)
+  `P0-PAY-008`: bound emergency withdrawals and prove owed-balance invariants.
+
+Candidate files:
+
+- `docs/adr/0001-drop-authorization.md`
+- `docs/adr/0002-auction-custody.md`
+- `docs/adr/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- Markdown heading scan passed for `docs\adr\0002-auction-custody.md`,
+  `docs\adr\README.md`, `ops\ROADMAP.md`, and `ops\AUTONOMOUS_RUN.md`.
+- Auction traceability scan passed for `P0-AUCT-ADR`, `P0-AUCT-001`,
+  `P0-AUCT-002`, `0002-auction-custody`, issue links, and canonical auction
+  states.
+- `git diff --check` passed.
+- `make check` passed with 17 tests and known compiler/NatSpec warnings.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
+  17 tests and known compiler/NatSpec warnings.
+- Late Claude PR #20 cleanup validation passed for canonical
+  `DROP_ID_TYPEHASH`, sale-mode-specific payer/price/auction fields, zero
+  poster, and poster/signature semantics.
+- After the ADR 0001 cleanup, `git diff --check`, `make check`, and
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed again
+  with 17 tests and known compiler/NatSpec warnings.
+- Claude state-machine cleanup validation passed for explicit
+  `Created -> Active` trigger semantics, `custodyConfirmed` storage shape,
+  derived status inputs, and bid-before-custody rejection coverage.
+- After the ADR 0002 state-machine cleanup, `git diff --check`, `make check`,
+  and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed
+  again with 17 tests and known compiler/NatSpec warnings.
+- Claude follow-up cleanup validation passed for no-bid NFT claim fallback
+  semantics, the auction `recipient == address(0)` cross-ADR rule, the
+  first-bid cancellation guard in the state table, and event/test traceability.
+- After the final ADR 0002 cleanup, focused traceability scans, `git diff
+  --check`, `make check`, and
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed again
+  with 17 tests and known compiler/NatSpec warnings.
+
+Review feedback:
+
+- CodeRabbit completed successfully on head `16d7296` with no actionable
+  comments before the late ADR 0001 cleanup commit.
+- Late Claude threads on merged PR #20 requested a canonical
+  `DROP_ID_TYPEHASH` preimage plus explicit `payer`, sale-mode price, and
+  `poster` semantics. Those still-valid comments are addressed in this PR so
+  the accepted drop-authorization ADR remains implementation-ready.
+- Claude thread `PRRT_kwDOM7REis6IWKpg` requested an explicit
+  `Created -> Active` trigger and a storage/view shape that can distinguish
+  created auctions from custody-confirmed active auctions. ADR 0002 now makes
+  custody confirmation observable through `custody != address(0)` or explicit
+  `custodyConfirmed`, adds those fields to derived status inputs, and requires
+  tests for activation plus bid rejection before custody is confirmed.
+- Claude thread `PRRT_kwDOM7REis6IWRh5` requested explicit no-bid outbound
+  transfer mechanics for contract posters. ADR 0002 now requires a pull-style
+  NFT claim fallback, records `pendingNoBidNftClaimant`, and requires events
+  plus tests for pending and completed no-bid NFT claims.
+- Claude thread `PRRT_kwDOM7REis6IWRh7` requested the first-bid cancellation
+  guard inside the canonical state table. The `Active` row now permits
+  `Cancelled` only before the first valid bid.
+- Claude thread `PRRT_kwDOM7REis6IWRh-` requested closure of ADR 0001's
+  deferred auction `recipient` rule. ADR 0002 now keeps auction
+  `recipient == address(0)`, rejects non-zero signed auction recipients, and
+  derives settlement recipients from `poster` and `highestBidder`.
+- Waiting for CI and bot review to rerun on the latest head.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
@@ -491,6 +596,15 @@ Review feedback:
 | 2026-06-10 02:27 | Address CodeRabbit PR #20 timestamp feedback | Keep durable manager state metadata in sync with the latest PR #20 decision-log entry |
 | 2026-06-10 02:31 | Address Claude PR #20 quantity review | Constrain P0 signed drop quantity to one token so the EIP-712 schema matches the one-drop-one-token invariant |
 | 2026-06-10 02:33 | Validate Claude PR #20 quantity review fix | Quantity traceability, heading scan, whitespace, `make check`, and Windows wrapper all pass |
+| 2026-06-10 02:40 | Merge PR #20 | Final head was CI-clean, CodeRabbit-clean, and visible review threads were resolved |
+| 2026-06-10 02:45 | Start auction custody ADR PR | Gate B1 requires accepted auction custody design before custody, settlement, or bid-path rewrites |
+| 2026-06-10 02:45 | Create auction follow-up issues | Add canonical issues for `P0-AUCT-ADR` and `P0-AUCT-001`; reuse existing issues for auction reentrancy and payment invariants |
+| 2026-06-10 02:49 | Draft auction custody ADR | ADR 0002 chooses explicit escrow custody, canonical auction states, no-bid poster settlement, and pull-payment-compatible settlement |
+| 2026-06-10 02:50 | Validate auction custody ADR locally | Heading, traceability, whitespace, `make check`, and Windows wrapper validations pass |
+| 2026-06-10 02:52 | Open PR #23 | Auction custody ADR is published with validation evidence and Claude was explicitly pinged in issue comment `4666002050` |
+| 2026-06-10 03:03 | Address late Claude PR #20 comments in PR #23 | ADR 0001 now pins `DROP_ID_TYPEHASH` and closes remaining signed-field semantic gaps for payer, sale-mode price fields, and poster attribution |
+| 2026-06-10 03:08 | Address Claude PR #23 state-machine review | ADR 0002 now clarifies custody-confirmation trigger and `Created -> Active` derivation |
+| 2026-06-10 03:17 | Address Claude PR #23 follow-up review | ADR 0002 now specifies no-bid NFT claim fallback, auction recipient policy, and first-bid cancellation guard |
 
 ## Resume Instructions
 

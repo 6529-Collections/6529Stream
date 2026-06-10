@@ -339,7 +339,7 @@ contract changes until the relevant ADR is accepted.
 | ADR | Issue | File target | Blocks | Required decision |
 | --- | --- | --- | --- | --- |
 | Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` | EIP-712 schema, recipient/payer policy, nonce model, replay protection, signer rotation, ERC-1271 stance |
-| Auction custody | `P0-AUCT-ADR` | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` | Token custody, settlement actor, no-bid semantics, transfer method, cancellation |
+| Auction custody | [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` | Token custody, settlement actor, no-bid semantics, transfer method, cancellation |
 | Payment accounting | `P0-PAY-ADR` | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` | Pull credits, owed balances, surplus, withdrawals, emergency withdrawal limits |
 | Admin/governance | `P0-ADMIN-ADR` | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` | Global/function/collection roles, signer lifecycle, pause controls, multisig expectations |
 | Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` | Provider choice, pending state, callback validation, retries, stale callback handling |
@@ -360,7 +360,7 @@ This is the recommended first batch of issues.
 4. `P0/M0`: Add characterization test harness.
 5. `P0/M0`: Add Slither baseline table.
 6. `P0-AUTH-ADR / P0/DESIGN`: ADR for drop authorization.
-7. `P0-AUCT-ADR / P0/DESIGN`: ADR for auction custody.
+7. [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) / P0/DESIGN: ADR for auction custody.
 8. `P0-PAY-ADR / P0/DESIGN`: ADR for payment accounting.
 9. `P0-ADMIN-ADR / P0/DESIGN`: ADR for admin/governance.
 10. `P0-RAND-ADR / P0/DESIGN`: ADR for randomness.
@@ -369,8 +369,8 @@ This is the recommended first batch of issues.
 13. `P0-AUTH-001 / P0/CODE+TEST+DOCS`: Remove `tx.origin`.
 14. `P0-AUTH-002 / P0/CODE+TEST+DOCS`: Implement EIP-712 authorization.
 15. `P0-AUTH-003 / P0/CODE+TEST+DOCS`: Add ERC-1271 support or explicitly reject contract signers.
-16. `P0-AUCT-002 / P0/CODE+TEST+DOCS`: Refactor auction bidding to pull credits.
-17. `P0-AUCT-001 / P0/CODE+TEST+DOCS`: Formalize auction custody and settlement.
+16. [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) / P0/CODE+TEST+DOCS: Refactor auction bidding to pull credits.
+17. [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) / P0/CODE+TEST+DOCS: Formalize auction custody and settlement.
 18. `P0-ADMIN-001 / P0/CODE+TEST+DOCS`: Fix admin selector mismatch.
 19. `P0-RAND-001 / P0/CODE+TEST+DOCS`: Harden randomizer callbacks.
 20. `P1/TEST`: Add first invariant suite.
@@ -645,7 +645,8 @@ Acceptance criteria:
 
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
 - Blocks: Gate C.
-- Dependencies: `P0-AUCT-ADR`.
+- Issue: [#22](https://github.com/6529-Collections/6529Stream/issues/22).
+- Dependencies: [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21), ADR 0002.
 
 Problem:
 
@@ -705,12 +706,14 @@ Acceptance criteria:
 - Auction token custody is known and asserted in tests.
 - Settlement is idempotent.
 - Failed NFT transfer cannot trap ETH or mark settlement complete.
+- Implementation matches `docs/adr/0002-auction-custody.md`.
 
 ### P0-AUCT-002: Fix Auction Bidding Reentrancy And Refunds
 
 - Priority/severity/type: `P0 / Critical / CODE+TEST+DOCS`.
 - Blocks: Gate C.
-- Dependencies: `P0-PAY-ADR`.
+- Issue: [#12](https://github.com/6529-Collections/6529Stream/issues/12).
+- Dependencies: `P0-PAY-ADR`, ADR 0002.
 
 Problem:
 
@@ -1645,8 +1648,8 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | ERC-1271 decision | ERC-1271 mock signer passes or contract signer rejected | `test/StreamDropsERC1271.t.sol` | Missing | [`P0-AUTH-003`](https://github.com/6529-Collections/6529Stream/issues/19) | Gate B1/Gate C | TBD |
 | Auction reentrancy | Malicious bidder cannot reenter bid/withdraw flows | `test/StreamAuctionReentrancy.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
 | Outbid refund failure | Previous bidder credited even if receiver reverts | `test/StreamAuctionPayments.t.sol` | Missing | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
-| No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | `P0-AUCT-001` | Gate B1/Gate C | TBD |
+| Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Initial auction mint custody characterization exists in `test/StreamDropsCharacterization.t.sol` and `test/StreamDropsIntegrationCharacterization.t.sol`; settlement tests missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
+| No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionSettlement.t.sol` | Missing | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | Admin selector mismatch | Wrong function selector cannot authorize mutation | `test/StreamAdminSelectors.t.sol` | Initial characterization exists in `test/StreamCoreAdminCharacterization.t.sol`; P0 fix tests missing | `P0-ADMIN-001` | Gate C | TBD |
 | Randomizer stale callback | Replaced randomizer fulfillment rejected | `test/StreamRandomizer.t.sol` | Missing | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), `P0-RAND-001` | Gate C | TBD |
 | Pending randomness metadata | `tokenURI` pending/final behavior is deterministic | `test/StreamMetadata.t.sol` | Initial characterization exists in `test/StreamDropsIntegrationCharacterization.t.sol`; golden-file tests missing | `P1-META-*` | Gate D | TBD |
@@ -1663,7 +1666,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | ADR | Issue | Status | File | Blocks |
 | --- | --- | --- | --- | --- |
 | 0001 Drop authorization | [`P0-AUTH-ADR`](https://github.com/6529-Collections/6529Stream/issues/17) | Accepted | `docs/adr/0001-drop-authorization.md` | Gate B1, `P0-AUTH-*` |
-| 0002 Auction custody | `P0-AUCT-ADR` | Missing | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` |
+| 0002 Auction custody | [`P0-AUCT-ADR`](https://github.com/6529-Collections/6529Stream/issues/21) | Accepted | `docs/adr/0002-auction-custody.md` | Gate B1, `P0-AUCT-*` |
 | 0003 Payment accounting | `P0-PAY-ADR` | Missing | `docs/adr/0003-payment-accounting.md` | Gate B1, `P0-PAY-*` |
 | 0004 Admin/governance | `P0-ADMIN-ADR` | Missing | `docs/adr/0004-admin-governance.md` | Gate B1, `P0-ADMIN-*` |
 | 0005 Randomness | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Missing | `docs/adr/0005-randomness.md` | Gate B1, `P0-RAND-*` |
