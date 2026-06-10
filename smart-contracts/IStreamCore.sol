@@ -23,16 +23,6 @@ interface IStreamCore {
 
     function viewMaxAllowance(uint256 _collectionID) external view returns (uint256);
 
-    function retrieveTokensMintedALPerAddress(uint256 _collectionID, address _address)
-        external
-        view
-        returns (uint256);
-
-    function retrieveTokensMintedPublicPerAddress(uint256 _collectionID, address _address)
-        external
-        view
-        returns (uint256);
-
     function viewColIDforTokenID(uint256 _tokenid) external view returns (uint256);
 
     function viewCollectionRandomizerContract(uint256 _collectionID) external view returns (address);

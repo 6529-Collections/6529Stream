@@ -8,7 +8,7 @@ input, not an accepted security baseline.
 | Field | Value |
 | --- | --- |
 | Status | Open baseline; not accepted as a CI gate |
-| Last generated | `2026-06-10 18:18 UTC` |
+| Last generated | `2026-06-10 18:39 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -23,12 +23,12 @@ baseline.
 
 | Impact | Count |
 | --- | ---: |
-| High | 8 |
+| High | 6 |
 | Medium | 28 |
 | Low | 63 |
-| Informational | 580 |
+| Informational | 577 |
 | Optimization | 6 |
-| Total | 685 |
+| Total | 680 |
 
 ## Detector Counts
 
@@ -37,7 +37,7 @@ baseline.
 | `encode-packed-collision` | High | 0 |
 | `incorrect-exp` | High | 1 |
 | `suicidal` | High | 3 |
-| `uninitialized-state` | High | 2 |
+| `uninitialized-state` | High | 0 |
 | `weak-prng` | High | 2 |
 | `divide-before-multiply` | Medium | 9 |
 | `incorrect-equality` | Medium | 1 |
@@ -59,6 +59,13 @@ Dependency-script encoding delta from the previous tracked capture:
 - `uninitialized-local` is now 10 current findings; the
   `StreamDrops.mintDrop` and `StreamCore.retrieveDependencyScript` rows are
   fixed, while the broader `P0-INIT-001` workstream remains open.
+- Mint-accounting state delta from the previous tracked capture:
+  - High findings decreased from 8 to 6 because the two dead
+    `uninitialized-state` mint-accounting mappings were removed.
+  - Informational findings decreased from 580 to 577 because the removed
+    storage and retrieval surface no longer appears in lower-impact detectors.
+  - `uninitialized-state` is now zero current findings; the fixed rows are
+    kept below as audit traceability.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
 - Slither still exits non-zero because the remaining tracked baseline findings
   require fixes, accepted-risk rationale, or false-positive proof before audit
@@ -92,8 +99,8 @@ GitHub work item that owns that resolution.
 | `incorrect-exp` | 1 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | High | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or math regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | `suicidal` | 3 | Forced-ETH test helpers | `force(address)` | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamFixedPricePayments.t.sol` | High | Medium | Accepted | Accepted as intentional Solidity 0.8.19 `selfdestruct` helpers used only to test forced-ETH surplus accounting | Forced-ETH tests in the owning files | Accepted test-only | Gate A | TBD |
 | `reentrancy-eth` | 1 | `StreamAuctions` | `participateToAuction(uint256)` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Replaced synchronous outbid refund `call` with bidder credit accounting; highest-bid state and auction escrow accounting update before any external withdrawal path | `test/StreamAuctionPayments.t.sol` | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedPerAddress` | first-party | `smart-contracts/StreamCore.sol#L74` | High | High | Open | Initialize, remove, or complete mint-accounting design | Mint-accounting regression | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
-| `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedAllowlistAddress` | first-party | `smart-contracts/StreamCore.sol#L77` | High | High | Open | Initialize, remove, or complete mint-accounting design | Mint-accounting regression | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
+| `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedPerAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written public-sale mint-count mapping and retrieval API instead of exposing an always-zero counter with no accepted quota semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
+| `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedAllowlistAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written allowlist mint-count mapping and retrieval API because the current drop path has no allowlist phase semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | `weak-prng` | 1 | `randomPool` | `randomNumber()` | first-party | `smart-contracts/XRandoms.sol#L32-L35` | High | Medium | Open | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C | Randomness provider regression and production-scope test | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C | TBD |
 | `weak-prng` | 1 | `randomPool` | `randomWord()` | first-party | `smart-contracts/XRandoms.sol#L37-L40` | High | Medium | Open | ADR 0005 requires removal, test/demo scoping, or production-disablement before Gate C | Randomness provider regression and production-scope test | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14) | Gate C | TBD |
 | `divide-before-multiply` | 1 | `Base64` | `encode(bytes)` | vendored | `smart-contracts/Base64.sol#L20-L91` | Medium | Medium | Needs Issue | Likely false positive; confirm against pinned upstream OpenZeppelin or replace retained library with package-managed upstream before acceptance | Library provenance or precision regression | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
