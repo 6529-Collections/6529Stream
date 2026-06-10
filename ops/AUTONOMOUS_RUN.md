@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/77` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 21:12 UTC` |
+| Last updated | `2026-06-10 21:21 UTC` |
 
 ## Packaging Notes
 
@@ -3054,9 +3054,9 @@ Outcome:
   were resolved as addressed by commit `5b25559`.
 - Issue #8 closed as completed.
 
-### PR TBD: Add payment ledger view aliases (Queue Item 36)
+### PR `#78`: Add payment ledger view aliases (Queue Item 36)
 
-Status: Open; waiting for GitHub CI and CodeRabbit.
+Status: Open; applying CodeRabbit nitpick after CI success.
 Branch: `codex/add-payment-ledger-view-aliases`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/78`.
 Related issue:
@@ -3125,6 +3125,8 @@ Validation so far:
 Review requests:
 
 - CodeRabbit requested in issue comment `4674566512`.
+- CodeRabbit completed with green status and one valid nitpick in review
+  `4471658076`; accepted by updating this section header to `PR #78`.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3369,6 +3371,7 @@ Review requests:
 | 2026-06-10 20:57 | Merge PR #77 | Payment invariant baseline merged as `9f2337009114fc4263bc88bc2f26f220d17c91fc`; CI and CodeRabbit were green, all visible review threads were resolved, and issue #8 closed completed |
 | 2026-06-10 21:02 | Select Queue Item 36 | The remaining P0-PAY-002 view-surface issue can be closed conservatively by exposing ADR 0003 local-ledger aliases and asserting them in the bounded payment invariant, without introducing a riskier shared storage abstraction |
 | 2026-06-10 21:12 | Open PR #78 and request CodeRabbit | Payment ledger view aliases published at `https://github.com/6529-Collections/6529Stream/pull/78`; CodeRabbit review requested in issue comment `4674566512`, and Claude remains skipped per current user instruction |
+| 2026-06-10 21:21 | Apply PR #78 CodeRabbit nitpick | CodeRabbit status was green and CI run `27306718755` passed; the only review note was to replace the run-state section header's `PR TBD` placeholder with concrete PR `#78` |
 
 ## Resume Instructions
 
