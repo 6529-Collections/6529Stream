@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/62` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 11:52 UTC` |
+| Last updated | `2026-06-10 12:34 UTC` |
 
 ## Packaging Notes
 
@@ -1756,7 +1756,9 @@ Candidate files:
 - `smart-contracts/StreamAdmins.sol`
 - `smart-contracts/StreamCore.sol`
 - Admin-related callers using `FunctionAdminRequired`
+- `smart-contracts/StreamMinter.sol`
 - `test/StreamAdminSelectors.t.sol`
+- `test/StreamMinterValidation.t.sol`
 - Existing admin characterization tests
 - `docs/adr/0004-admin-governance.md`
 - `docs/status.md`
@@ -1795,19 +1797,22 @@ Implementation notes:
   global-admin bypass, owner/root role-management recovery, batch grants,
   zero-address rejection, zero-selector rejection, constructor signer
   validation, and the deferred collection-admin behavior.
+- Added explicit `StreamMinter.mint` batch validation for array length, empty
+  batch, and zero-quantity inputs after CodeRabbit identified panic-prone array
+  indexing in the touched minter surface.
 - Updated ADR 0004, roadmap traceability, status docs, blocker docs, and test
   README language to distinguish the implemented selector/target model from
   remaining signer-lifecycle and pause-control follow-ups.
 
 Validation:
 
-- Focused admin suite passed:
-  `forge test --match-contract "Stream(Admins|AdminSelectors|CoreAdminCharacterization)Test" -vvv`
-  with 19 passing tests after CodeRabbit review fixes.
-- Full local gate passed: `make check` with 130 passing tests.
+- Focused admin/minter suite passed:
+  `forge test --match-contract "Stream(MinterValidation|Admins|AdminSelectors|CoreAdminCharacterization)Test" -vvv`
+  with 22 passing tests after CodeRabbit review fixes.
+- Full local gate passed: `make check` with 133 passing tests.
 - Windows wrapper passed:
   `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` with
-  130 passing tests.
+  133 passing tests.
 - Formatting and whitespace checks passed for touched Solidity/test files and
   `git diff --check`.
 - Markdown heading scan passed for touched roadmap/ADR files.
@@ -1821,6 +1826,11 @@ Validation:
   independently revocable `tdhSigner` global-admin bypass, explicit low-impact
   Slither delta triage, and removal of a no-op `vm.prank(address(this))`; all
   three were addressed before the final validation rerun.
+- CodeRabbit's second review pass requested a fresh run-state timestamp and
+  explicit `StreamMinter.mint` batch validation. The follow-up adds exact revert
+  tests for array length mismatch, empty batches, and zero quantity. The Slither
+  rerun remains at 648 total findings and reports zero `unused-return` findings
+  in `test/StreamMinterValidation.t.sol`.
 
 ## Decision Log
 
@@ -1981,6 +1991,7 @@ Validation:
 | 2026-06-10 12:09 | Finish local Queue Item 22 validation | Focused 18-test admin suite, full 129-test `make check`, Windows wrapper, formatting, whitespace, heading scans, and Slither delta evidence pass; Slither reports no `StreamAdmins` high/medium or zero-check findings |
 | 2026-06-10 12:13 | Open PR #63 | Admin permission scoping implementation is published with local validation and Slither delta evidence |
 | 2026-06-10 12:21 | Address CodeRabbit PR #63 review | Added signer registrar/global-admin asymmetry coverage, triaged the low-impact Slither delta, removed a no-op test prank, and reran focused/full/Windows/Slither validation |
+| 2026-06-10 12:34 | Address CodeRabbit PR #63 second review | Updated the durable run timestamp, added explicit `StreamMinter.mint` batch guards and revert tests, reran focused/full/Windows validation, and confirmed Slither stayed at 648 findings with no minter-test `unused-return` delta |
 
 ## Resume Instructions
 

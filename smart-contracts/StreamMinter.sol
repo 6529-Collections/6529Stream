@@ -84,6 +84,12 @@ contract StreamMinter {
         uint256[] memory _numberOfTokens
     ) public streamDropRequired returns (uint256) {
         require(
+            _recipients.length == _tokenData.length && _recipients.length == _saltfun_o.length
+                && _recipients.length == _numberOfTokens.length,
+            "Array length mismatch"
+        );
+        require(_recipients.length > 0, "No recipients");
+        require(
             collectionPhases[_collectionID].publicStartTime > 0
                 && block.timestamp >= collectionPhases[_collectionID].publicStartTime,
             "Not started"
@@ -96,6 +102,7 @@ contract StreamMinter {
         uint256 collectionTokenMintIndex;
         uint256 mintIndex;
         for (uint256 y = 0; y < _recipients.length; y++) {
+            require(_numberOfTokens[y] > 0, "Zero quantity");
             collectionTokenMintIndex = gencore.viewTokensIndexMin(_collectionID)
                 + gencore.viewCirSupply(_collectionID) + _numberOfTokens[y] - 1;
             require(
