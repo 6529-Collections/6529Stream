@@ -29,11 +29,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/eip712-drop-authorization` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/55` |
+| Active PR branch | `codex/erc1271-drop-authorization` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/56` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 07:12 UTC` |
+| Last updated | `2026-06-10 07:55 UTC` |
 
 ## Packaging Notes
 
@@ -65,7 +65,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 12 | Metadata/freeze ADR | Gate B2 | Accept `docs/adr/0006-metadata-freeze.md` before metadata, dependency, freeze, burn, and ERC-4906 work | Merged in PR #52 |
 | 13 | Upgrade/redeployment ADR | Gate B2 | Accept `docs/adr/0007-upgrade-redeployment.md` before deployment, release, manifest, deprecation, and emergency redeployment work | Merged in PR #54 |
 | 14 | Remove `tx.origin` from drop execution | Gate C | Add explicit drop recipient/execution storage and target-state tests before EIP-712 authorization work | Merged in PR #55 |
-| 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Open in PR #56 |
+| 15 | Replace drop authorization with EIP-712 | Gate C | Add typed drop authorizations, consumed/cancelled drop IDs, signer epoch controls, EOA/EIP-2098 validation, and target-state tests | Merged in PR #56 |
+| 16 | Implement ERC-1271 contract signer support | Gate C | Allow contract signers to validate the same EIP-712 digest via `isValidSignature`, with target-state success and failure tests | In progress on `codex/erc1271-drop-authorization` |
 
 ## Current PR Worklog
 
@@ -1074,8 +1075,7 @@ Outcome:
 
 ### PR #56: Replace drop authorization with EIP-712 (Queue Item 15)
 
-Status: Open; CodeRabbit follow-up fixes implemented locally and awaiting
-remote CI/bot re-check after push.
+Status: Merged.
 Branch: `codex/eip712-drop-authorization`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/56`.
 Related issue: `https://github.com/6529-Collections/6529Stream/issues/10`.
@@ -1154,6 +1154,62 @@ Review feedback:
   reserve, fixed-price auction end, and auction price field misuse.
 - Focused EIP-712 suite now passes with 23 tests; `make check` and the Windows
   wrapper both pass with 47 tests.
+- Final GitHub CI run `27260907183` passed on head
+  `89af0599f2e14e3ea408170727daf75cdda93b24`.
+- CodeRabbit reported no actionable comments on the final head.
+
+Outcome:
+
+- Merged as PR #56 on `2026-06-10 07:45 UTC`.
+- Squash merge commit `a6ae314375532095f239ec90aa8a703408cf601e`.
+- Latest head before merge `89af0599f2e14e3ea408170727daf75cdda93b24`.
+- Issue #10 closed as completed.
+- GitHub CI and CodeRabbit passed.
+- Claude unavailable due to organization overage.
+
+### PR TBD: Implement ERC-1271 contract signer support (Queue Item 16)
+
+Status: Local validation complete; ready to commit and open a PR.
+Branch: `codex/erc1271-drop-authorization`.
+Related issue: `https://github.com/6529-Collections/6529Stream/issues/19`.
+
+Goal:
+
+- Extend the EIP-712 drop authorization path so contract signers can approve the
+  exact same digest through ERC-1271 `isValidSignature(bytes32,bytes)`.
+- Preserve the existing EOA and EIP-2098 validation behavior.
+- Require the ERC-1271 magic value and fail closed on invalid magic, malformed
+  returns, and reverted signature checks.
+- Add contract-signer target-state tests and update docs/roadmap state.
+
+Candidate files:
+
+- `smart-contracts/StreamDrops.sol`
+- `test/StreamDropsERC1271.t.sol`
+- `test/StreamDropsEIP712.t.sol`
+- `test/README.md`
+- `docs/known-blockers.md`
+- `docs/adr/0001-drop-authorization.md`
+- `README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation:
+
+- `forge test --match-contract StreamDropsERC1271Test -vvv` passed with 12
+  tests.
+- `forge test --match-contract StreamDropsEIP712Test -vvv` passed with 23
+  tests.
+- `make check` passed with 59 tests and the known Solidity warning baseline.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 59
+  tests and the known Solidity warning baseline.
+- `forge fmt --check` passed for `smart-contracts\StreamDrops.sol`,
+  `test\StreamDropsERC1271.t.sol`, and `test\StreamDropsEIP712.t.sol`.
+- `git diff --check` passed.
+- Markdown heading scan passed for touched README, docs, roadmap, and autonomous
+  state files.
+- Stale ERC-1271 pending-policy grep returned no active documentation or source
+  matches outside historical run-log entries.
 
 ## Decision Log
 
@@ -1270,6 +1326,9 @@ Review feedback:
 | 2026-06-10 07:12 | Request Claude review on PR #56 | Explicit review ping added in issue comment `4667572552` because Claude may not run automatically |
 | 2026-06-10 07:30 | Nudge CodeRabbit PR #56 | CodeRabbit had remained pending since PR open; issue comment `4667699009` requested completion for the latest head |
 | 2026-06-10 07:34 | Address CodeRabbit PR #56 command review | Added duplicate-cancel guard, sale-mode negative tests, and lifecycle event assertions; focused suite, full `make check`, and Windows wrapper pass |
+| 2026-06-10 07:45 | Merge PR #56 | Final head was CI-clean and CodeRabbit-clean; Claude was externally unavailable due to organization overage limits |
+| 2026-06-10 07:47 | Start `P0-AUTH-003` implementation PR | EIP-712 is merged, so Gate C can add ERC-1271 contract signer validation against the same typed-data digest |
+| 2026-06-10 07:55 | Finish local `P0-AUTH-003` validation | ERC-1271 exact-magic staticcall validation, fail-closed malformed returns, contract-signer tests, docs, roadmap, full `make check`, and Windows wrapper all pass locally |
 
 ## Resume Instructions
 

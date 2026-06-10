@@ -43,10 +43,14 @@ intentionally characterized but unsafe:
 - per-drop cancellation
 - EOA signature recovery with low-`s`, valid-`v`, and zero-signer checks
 - EIP-2098 compact signature support
-- explicit rejection of contract signers until `P0-AUTH-003`
+- explicit fail-closed behavior for contracts that do not return a valid
+  ERC-1271 response
 
-`P0-AUTH-003` remains open and must add ERC-1271 contract signer validation
-before the repository can claim contract-signer-ready drop authorization.
+`P0-AUTH-003` adds ERC-1271 contract signer validation against the same EIP-712
+digest. Contract signers must return the standard magic value from
+`isValidSignature(bytes32,bytes)`. Empty returns, short returns, invalid magic
+values, extra return data, reverts, wrong digest, and wrong signature bytes fail
+closed.
 
 ## Pre-Implementation Baseline Behavior
 
@@ -160,9 +164,7 @@ The public-beta target design is:
     rotation can invalidate outstanding payloads.
 17. Admins must be able to cancel a specific `dropId` before execution.
 18. EOA signatures are supported by `P0-AUTH-002`.
-19. ERC-1271 contract signatures are required before public beta, but are owned
-    by `P0-AUTH-003`. Until then, contract signer addresses must be rejected
-    explicitly.
+19. ERC-1271 contract signatures are supported by `P0-AUTH-003`.
 20. EOA signature and execution validation must reject:
     - wrong signer
     - wrong domain
@@ -326,7 +328,7 @@ This ADR addresses:
 - replay across calls, contracts, chains, domains, and signer epochs
 - signature malleability
 - signer rotation and compromise response
-- contract signer compatibility once `P0-AUTH-003` lands
+- contract signer compatibility through ERC-1271
 
 This ADR does not by itself fix auction custody, push payments, emergency
 withdrawals, randomizer callbacks, or metadata finalization.
@@ -352,8 +354,11 @@ not production-ready.
 P0 implementation must add tests for:
 
 - valid EOA signature
-- explicit contract signer rejection until `P0-AUTH-003`
-- valid ERC-1271 contract signature when `P0-AUTH-003` lands
+- valid ERC-1271 contract signature
+- invalid ERC-1271 magic value, reverted signature check, empty return, and
+  malformed short or extra return data
+- wrong ERC-1271 digest and wrong contract signature bytes
+- contract signer without an ERC-1271 implementation fails closed
 - wrong `dropId` for the signer, `signerEpoch`, `nonce`, and `salt`
 - wrong signer
 - wrong domain name or version

@@ -450,7 +450,7 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
         drops.isDropConsumed(authorization.dropId).assertFalse("bad auction price consumed drop");
     }
 
-    function testContractSignerIsExplicitlyRejectedUntilErc1271Lands() public {
+    function testContractWithoutErc1271ImplementationFailsClosed() public {
         MockStreamMinter minter = new MockStreamMinter();
         StreamAdmins admins = new StreamAdmins(address(this));
         ContractSignerStub contractSigner = new ContractSignerStub();
@@ -467,8 +467,9 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
                 abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", anySignature)
             );
 
-        success.assertFalse("contract signer was accepted before ERC1271 support");
-        drops.isDropConsumed(authorization.dropId).assertFalse("contract signer consumed drop");
+        success.assertFalse("contract without ERC1271 implementation minted");
+        drops.isDropConsumed(authorization.dropId)
+            .assertFalse("non-ERC1271 contract signer consumed drop");
     }
 
     function explicitEip712Digest(

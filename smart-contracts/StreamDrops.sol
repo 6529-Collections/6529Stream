@@ -14,6 +14,10 @@ import "./IStreamMinter.sol";
 import "./Ownable.sol";
 import "./IStreamAdmins.sol";
 
+interface IERC1271 {
+    function isValidSignature(bytes32 _hash, bytes memory _signature) external view returns (bytes4);
+}
+
 contract StreamDrops is Ownable {
     uint8 public constant SALE_MODE_FIXED_PRICE = 1;
     uint8 public constant SALE_MODE_AUCTION = 2;
@@ -32,6 +36,7 @@ contract StreamDrops is Ownable {
         0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     uint256 private constant SECP256K1_N_DIV_2 =
         0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0;
+    bytes4 private constant ERC1271_MAGIC_VALUE = 0x1626ba7e;
 
     struct DropAuthorization {
         bytes32 dropId;
@@ -131,9 +136,8 @@ contract StreamDrops is Ownable {
         string calldata _tokenData,
         bytes calldata _signature
     ) public payable {
-        require(tdhSigner.code.length == 0, "ERC1271 pending");
         bytes32 digest = hashDropAuthorization(_authorization);
-        address signer = _recoverEOASigner(digest, _signature);
+        address signer = _validateSigner(digest, _signature);
         _validateAuthorization(_authorization, signer, _tokenData);
 
         bytes32 dropId = _authorization.dropId;
@@ -428,6 +432,25 @@ contract StreamDrops is Ownable {
         require(v == 27 || v == 28, "Bad v");
         address signer = ecrecover(_digest, v, r, s);
         require(signer != address(0), "Zero signer");
+        return signer;
+    }
+
+    function _validateSigner(bytes32 _digest, bytes calldata _signature)
+        private
+        view
+        returns (address)
+    {
+        address signer = tdhSigner;
+        if (signer.code.length == 0) {
+            return _recoverEOASigner(_digest, _signature);
+        }
+
+        (bool success, bytes memory returnData) = signer.staticcall(
+            abi.encodeWithSelector(IERC1271.isValidSignature.selector, _digest, _signature)
+        );
+        require(success, "Bad contract sig");
+        require(returnData.length == 32, "Bad contract sig");
+        require(abi.decode(returnData, (bytes4)) == ERC1271_MAGIC_VALUE, "Bad contract sig");
         return signer;
     }
 }

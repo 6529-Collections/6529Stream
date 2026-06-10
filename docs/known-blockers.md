@@ -3,10 +3,9 @@
 This file summarizes the high-level blockers from `ops/ROADMAP.md` for
 contributors who start from the README.
 
-- Drop execution uses EIP-712 EOA authorization, but ERC-1271 contract signer
-  support remains a P0 blocker.
-- Drop authorization examples, fixtures, and external signing tooling still need
-  to be added before public beta.
+- Drop execution uses EIP-712 authorization for EOA and ERC-1271 contract
+  signers, but production signing examples, fixtures, and external tooling still
+  need to be added before public beta.
 - Auction custody and settlement need an accepted state-machine model.
 - Push payments must move to pull-payment accounting before production use.
 - Randomizer request and callback validation need production hardening.
