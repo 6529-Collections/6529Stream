@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/82` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 23:48 UTC` |
+| Last updated | `2026-06-10 23:55 UTC` |
 
 ## Packaging Notes
 
@@ -3455,7 +3455,7 @@ Merge:
 
 ### PR #83: Add schema-v1 metadata state outputs (Queue Item 40)
 
-Status: PR open; CodeRabbit zero-hash review fix ready to push and re-request.
+Status: PR open; CodeRabbit assertion-label nitpick accepted and ready to push.
 Branch: `codex/metadata-schema-state`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/83`.
 Related issue:
@@ -3535,7 +3535,9 @@ Review requests:
 
 - CodeRabbit was requested in issue comment `4675688299`.
 - CodeRabbit review thread `PRRT_kwDOM7REis6IpsTo` requested the nonzero hash
-  guard; the follow-up is ready to push and re-request.
+  guard; CodeRabbit marked it addressed in commit `3dc56d6`.
+- CodeRabbit comment `4675802795` confirmed the guard and regression are solid
+  and suggested a clearer assertion label; the label nitpick was accepted.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
 
@@ -3543,6 +3545,7 @@ Review requests:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-10 23:55 | Accept CodeRabbit PR #83 assertion-label nit | Clarified the zero-hash regression failure message after CodeRabbit confirmed the guard and coverage were solid; focused metadata tests, `make check`, Windows wrapper, formatting, and whitespace checks all pass |
 | 2026-06-10 23:48 | Address CodeRabbit PR #83 zero-hash finding | Added `setTokenHash` guard for `bytes32(0)`, added pending-sentinel regression coverage, and reran focused metadata tests, `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison |
 | 2026-06-10 23:30 | Open PR #83 | Schema-v1 metadata state outputs are published with local validation evidence; next step is state follow-up push and CodeRabbit request |
 | 2026-06-10 23:28 | Validate Queue Item 40 locally | Focused metadata tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain unchanged |

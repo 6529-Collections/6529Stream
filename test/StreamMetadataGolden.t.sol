@@ -47,7 +47,8 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         vm.expectRevert("Zero token hash");
         deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, bytes32(0));
 
-        deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "zero hash stored");
+        deployed.core.retrieveTokenHash(TOKEN_ID)
+            .assertEq(bytes32(0), "token hash should remain unset after zero-hash rejection");
         deployed.core.tokenMetadataState(TOKEN_ID)
             .assertEq("pending", "zero hash changed metadata state");
     }
