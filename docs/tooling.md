@@ -31,6 +31,8 @@ python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
+python scripts/test_address_books.py
+python scripts/generate_address_books.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -60,6 +62,12 @@ The deployment manifest step generates the local Anvil example from
 `deployments/config/anvil-6529stream-v0.1.0-001.json`, fills contract ABI and
 runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`, and
 checks that the committed example has not drifted.
+
+The address-book step projects committed deployment manifests into compact
+integrator-facing JSON under `deployments/address-books/`. Address books keep
+network/release metadata, source manifest checksums, contract addresses, source
+paths, ABI hashes, runtime bytecode hashes, and verification status without the
+full ceremony and constructor-argument details from deployment manifests.
 
 Windows contributors can run:
 
@@ -98,6 +106,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
+python scripts/generate_address_books.py
 ```
 
 The check mode is:
@@ -106,6 +115,7 @@ The check mode is:
 python scripts/generate_release_artifacts.py --check
 python scripts/check_abi_compatibility.py --check
 python scripts/generate_deployment_manifest.py --check
+python scripts/generate_address_books.py --check
 ```
 
 The generator uses `release-artifacts/contracts.json` to define the production
@@ -122,6 +132,12 @@ The deployment manifest generator uses committed inputs under
 with `release_artifacts.manifest_sha256` normalized to `sha256:` plus 64 zeroes,
 which avoids a self-referential checksum while making manifest drift
 machine-detectable.
+
+The address-book generator reads committed deployment manifests and
+`release-artifacts/latest/abi-checksums.json`. Refresh address books after
+deployment manifests change; the `--check` mode fails on stale output, invalid
+or duplicate contract addresses, missing contract metadata, or mismatch against
+the release artifact contract set.
 
 ## Non-Gating Diagnostics
 

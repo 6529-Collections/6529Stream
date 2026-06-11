@@ -92,6 +92,10 @@ The current Gate A smoke baseline proves:
   `scripts/generate_deployment_manifest.py --check` prove the local Anvil
   manifest is generated from committed inputs, references current ABI/runtime
   bytecode hashes, and carries a deterministic manifest checksum.
+- `scripts/test_address_books.py` and
+  `scripts/generate_address_books.py --check` prove the generated local Anvil
+  address book is a compact, deterministic projection of the committed
+  deployment manifest and release artifact contract metadata.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -101,7 +105,7 @@ randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
 generation from broadcast outputs, signed release checksums, ABI diff approval
-policy, address books, verified live deployment hashes, remaining generated
+policy, production address books, verified live deployment hashes, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

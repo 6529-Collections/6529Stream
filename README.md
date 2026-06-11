@@ -11,9 +11,9 @@ This repository is pre-audit and not production-ready.
 The current CI and local smoke checks prove compilation, test command execution,
 the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
-deterministic local deployment manifest checks. They do not prove protocol
-correctness or production deployment readiness. Known P0 blockers and the
-execution roadmap are tracked in
+deterministic local deployment manifest/address-book checks. They do not prove
+protocol correctness or production deployment readiness. Known P0 blockers and
+the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
 
 ## Drop Flow
@@ -45,6 +45,8 @@ python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
+python scripts/test_address_books.py
+python scripts/generate_address_books.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -66,6 +68,9 @@ removed or changed ABI entries while reporting additive entries.
 The deployment manifest step verifies the generated local Anvil manifest under
 `deployments/examples/` against committed manifest inputs and the current
 release-artifact hashes.
+
+The address-book step verifies compact generated address books under
+`deployments/address-books/` against the committed deployment manifests.
 
 On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
 with:
