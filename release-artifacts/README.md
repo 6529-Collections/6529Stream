@@ -9,6 +9,8 @@ Run after the production build profile:
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/check_abi_compatibility.py
+python scripts/generate_deployment_manifest.py
+python scripts/generate_address_books.py
 python scripts/generate_release_checksums.py
 ```
 
@@ -19,6 +21,10 @@ python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
+python scripts/test_deployment_manifest.py
+python scripts/generate_deployment_manifest.py --check
+python scripts/test_address_books.py
+python scripts/generate_address_books.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 ```
@@ -49,5 +55,11 @@ inherited `supportsInterface` or event-only declarations.
 After any covered artifact changes, refresh the checksum bundle with:
 
 ```sh
+python scripts/generate_deployment_manifest.py
+python scripts/generate_address_books.py
 python scripts/generate_release_checksums.py
 ```
+
+If only `release-artifacts/` changed, the manifest and address-book commands
+should still be safe no-ops, and their `--check` modes will catch stale
+deployment-derived inputs before the checksum bundle is refreshed.

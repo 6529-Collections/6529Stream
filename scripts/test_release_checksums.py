@@ -177,6 +177,15 @@ class ReleaseChecksumTests(unittest.TestCase):
             with self.assertRaisesRegex(generator.ChecksumError, "did not contain any files"):
                 generator.build_outputs(root, [Path("empty")], output_dir)
 
+    def test_checksum_parser_rejects_parent_directory_paths(self) -> None:
+        checksum = (
+            "0" * 64
+            + "  release-artifacts/latest/../secrets.json\n"
+        )
+
+        with self.assertRaisesRegex(generator.ChecksumError, "path traversal"):
+            generator.parse_checksum_file(checksum)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

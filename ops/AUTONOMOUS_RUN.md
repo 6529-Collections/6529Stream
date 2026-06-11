@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/100` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 10:43 UTC` |
+| Last updated | `2026-06-11 11:02 UTC` |
 
 ## Packaging Notes
 
@@ -4658,7 +4658,8 @@ Merge evidence:
 
 ### PR candidate: Add signable release checksum bundle (Queue Item 52)
 
-Status: PR open; CodeRabbit review request pending after state update push.
+Status: PR open; CodeRabbit findings fixed locally and review-fix validation
+passed; ready to push the response commit.
 Branch: `codex/release-checksum-bundle`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/102`.
 Related issue:
@@ -4715,6 +4716,12 @@ Implementation draft:
 - Added focused tests for generation, check-mode success, hash drift, deleted
   covered files, missing generated outputs, missing covered roots, output
   ordering, empty covered roots, and generated-output self-reference exclusion.
+- CodeRabbit review fix expands `release-artifacts/README.md` to show the full
+  release, deployment-manifest, address-book, and checksum refresh/check
+  sequence so checksum regeneration does not run over stale deployment-derived
+  artifacts.
+- CodeRabbit review fix also rejects parent-directory segments in committed
+  `SHA256SUMS` paths and adds focused parser coverage.
 
 Local validation:
 
@@ -4736,11 +4743,19 @@ Local validation:
 - Final rerun after the empty-covered-set edge-case fix: `make check` and
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` both passed
   with the 7-case checksum suite.
+- CodeRabbit review-fix rerun: `python scripts\test_release_checksums.py`
+  passed with 8 tests, `python scripts\generate_release_checksums.py --check`
+  passed, `python scripts\test_release_artifacts.py` passed, `make check`
+  passed, `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed,
+  `python -m py_compile scripts\generate_release_checksums.py
+  scripts\test_release_checksums.py` passed, and `git diff --check` reported
+  only known line-ending warnings for touched Python files.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 11:02 | Address CodeRabbit PR #102 review locally | Accepted both findings: `release-artifacts/README.md` now shows deployment manifest and address-book generation/checking before checksum refresh, and `parse_checksum_file` rejects parent-directory path traversal with focused regression coverage; focused/full/Windows validation passed |
 | 2026-06-11 10:43 | Open PR #102 | Release checksum bundle PR published at `https://github.com/6529-Collections/6529Stream/pull/102`; one state-only follow-up will record the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 10:42 | Validate Queue Item 52 locally | Release checksum tests/check, release artifact ownership-regression test/check, Python compile, shell/PowerShell syntax, JSON/line-format parsing, traceability grep, full `make check`, Windows wrapper, and whitespace validation all pass; release-artifact check now ignores checksum-bundle outputs so both generated artifact families can coexist, and check mode reports deleted covered files even when the regenerated covered set becomes empty |
 | 2026-06-11 10:22 | Start Queue Item 52 | Issue #101 tracks the Gate G signable checksum-bundle gap; branch `codex/release-checksum-bundle` starts from merged PR #100 and scopes to deterministic SHA256SUMS/manifest generation plus local/CI drift checks |

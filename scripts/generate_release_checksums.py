@@ -186,6 +186,8 @@ def parse_checksum_file(checksum_text: str) -> list[tuple[str, str]]:
             raise ChecksumError(f"malformed checksum line {line_number}: invalid sha256")
         if relative_path.startswith("/") or "\\" in relative_path:
             raise ChecksumError(f"malformed checksum line {line_number}: invalid path")
+        if ".." in Path(relative_path).parts:
+            raise ChecksumError(f"malformed checksum line {line_number}: path traversal")
         entries.append((digest, relative_path))
     return entries
 
