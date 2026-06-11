@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/recover-streamcore-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/114` |
+| Active PR branch | `codex/dependency-artifact-manifest` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/116` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 19:17 UTC` |
+| Last updated | `2026-06-11 19:59 UTC` |
 
 ## Packaging Notes
 
@@ -114,13 +114,65 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 58 | Add metadata render-sandbox fixture checks | Gate D | Continue P1-META-006 by validating committed metadata golden fixtures for JSON/data-URI/HTML script-boundary shape and URI scheme policy in local/CI gates, without changing production bytecode | Merged in PR #112 |
 | 59 | Add metadata token image URI policy | Gate D/Gate G support | Continue P1-META-006 by defining renderer content/script URI policy helpers and rejecting unsafe token image URI writes in production while preserving collection base URI, external library URL, structured-attributes, invalid-UTF-8, and browser-sandbox work as follow-up slices | Merged in PR #113 |
 | 60 | Add collection URI production enforcement | Gate D/Gate G support | Continue P1-META-006 by enforcing optional collection base URI and external library URL policy in production, preserving empty optional fields, using custom-error cleanup to keep `StreamCore` under EIP-170, and updating docs/artifacts/state traceability | Merged in PR #114 |
-| 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Active |
+| 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Merged in PR #116 |
+| 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Recover `StreamCore` bytecode headroom (Queue Item 61)
+### PR candidate: Add dependency artifact manifest packaging (Queue Item 62)
 
-Status: PR `#116` opened and follow-up validation complete; ready to merge.
+Status: Local validation complete; ready to commit and open PR.
+Branch: `codex/dependency-artifact-manifest`.
+Pull request: TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/117`.
+
+Goal:
+
+- Package dependency registry source artifacts in deterministic release files so
+  future drops do not rely on provenance strings alone.
+- Add a generated dependency artifact manifest under `release-artifacts/latest/`
+  and make local/CI checks fail on descriptor or generated-output drift.
+- Include the generated dependency artifact manifest in the top-level release
+  manifest and include dependency descriptor/source files in release checksums.
+- Keep this slice off the Solidity bytecode path; no contract changes are
+  planned.
+
+Candidate files:
+
+- `release-artifacts/dependencies/`
+- `release-artifacts/latest/dependency-artifact-manifest.json`
+- `scripts/generate_dependency_artifact_manifest.py`
+- `scripts/test_dependency_artifact_manifest.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/generate_release_checksums.py`
+- `scripts/test_release_checksums.py`
+- `Makefile`
+- `docs/metadata.md`
+- `docs/status.md`
+- `release-artifacts/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+
+Validation:
+
+- `python scripts\test_dependency_artifact_manifest.py` and
+  `python scripts\generate_dependency_artifact_manifest.py --check` passed.
+- Release artifact, release manifest, and release checksum focused tests/checks
+  passed.
+- `python -m py_compile` passed for touched Python scripts.
+- `make release-checksums` regenerated committed release artifacts and kept
+  `StreamCore` at 24,135 runtime bytes with 441 bytes of EIP-170 headroom.
+- `make check` passed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `bash -n scripts/check.sh` passed.
+- `git diff --check` passed, with only known Windows line-ending warnings for
+  generated/touched files such as `release-artifacts/latest/SHA256SUMS`.
+
+### PR #116: Recover `StreamCore` bytecode headroom (Queue Item 61)
+
+Status: Merged as PR `#116`.
 Branch: `codex/recover-streamcore-headroom`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/116`.
 
@@ -5489,6 +5541,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 19:59 | Validate Queue Item 62 locally | Dependency artifact generator tests/check with `.dependency.json` descriptors, release manifest/checksum checks, Python compile, full `make check`, Windows `scripts\check.ps1`, bash syntax, and whitespace checks all pass; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom, and `git diff --check` reports only known Windows line-ending warnings |
+| 2026-06-11 19:34 | Create issue #117 and start Queue Item 62 | No open issue covered dependency artifact manifest packaging, so issue #117 now tracks deterministic dependency descriptors, generated release manifest coverage, checksum coverage, and local/CI drift checks on branch `codex/dependency-artifact-manifest` |
+| 2026-06-11 19:31 | Merge PR #116 | StreamCore bytecode headroom recovery merged as `a6d9271443d73a29290ec8eddc4908eae7aa8b32`; CI run `27371917056` passed on final head `fc12bc6ec019d7bd8f4f31ee1e807f056fcf4207`, the CodeRabbit state-thread fix was resolved, and issue #115 closed completed |
 | 2026-06-11 19:17 | Validate PR #116 review fix locally | `make release-checksums`, `make check`, Windows `scripts\check.ps1`, targeted `forge fmt --check`, and `git diff --check` pass after the CodeRabbit fix; `git diff --check` reports only the known Windows line-ending warning on `release-artifacts/latest/SHA256SUMS` |
 | 2026-06-11 19:09 | Address CodeRabbit PR #116 finding | `setFinalSupply` now rejects created collections with missing collection data before final supply math, the focused suite passes with 5 tests, and the production size gate measures `StreamCore` at 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
 | 2026-06-11 18:51 | Open PR #116 | `StreamCore` bytecode headroom recovery PR published at `https://github.com/6529-Collections/6529Stream/pull/116`; state-only follow-up records the PR URL before requesting CodeRabbit on the final head |

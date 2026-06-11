@@ -29,6 +29,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_source_verification_inputs.py
 "$python_bin" scripts/generate_source_verification_inputs.py --check
+"$python_bin" scripts/test_dependency_artifact_manifest.py
+"$python_bin" scripts/generate_dependency_artifact_manifest.py --check
 "$python_bin" scripts/test_abi_compatibility.py
 "$python_bin" scripts/check_abi_compatibility.py --check
 "$python_bin" scripts/test_broadcast_manifest_input.py

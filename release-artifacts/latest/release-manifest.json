@@ -66,6 +66,12 @@
         }
       }
     },
+    "dependency_artifact_manifest": {
+      "path": "release-artifacts/latest/dependency-artifact-manifest.json",
+      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
+      "size_bytes": 1701,
+      "schema_version": "6529stream.dependency-artifact-manifest.v1"
+    },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
       "sha256": "sha256:e4b84a577ef363073f2a34f008a00156c45763755850193a71ea58a8dc625754",
@@ -225,8 +231,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:57727a255f59e1af276afd26b818ad3a531fbf6cba9fc3883a2be58951736a01",
-      "size_bytes": 5197
+      "sha256": "sha256:8c05b8a6760113dd1dd720a610e0a1f9165db734275c9f50a370334a1ff38cad",
+      "size_bytes": 5572
     },
     "governance_docs": [
       {
@@ -246,8 +252,8 @@
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:6d2eb7a1a034fd71516b864489403675e64951bae41a72429c85a02ed4c367bd",
-        "size_bytes": 10915
+        "sha256": "sha256:fe8810ac3ca38361a425cf0561bd525e7f660534c3d4351c75fea5c952f6accd",
+        "size_bytes": 11360
       }
     ]
   },

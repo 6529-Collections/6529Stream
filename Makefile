@@ -22,7 +22,7 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
 check: build test size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
 
@@ -86,10 +86,17 @@ address-books-check: deployment-manifest-check
 	$(PYTHON) scripts/test_address_books.py
 	$(PYTHON) scripts/generate_address_books.py --check
 
-release-manifest: address-books source-verification-inputs
+dependency-artifacts:
+	$(PYTHON) scripts/generate_dependency_artifact_manifest.py
+
+dependency-artifacts-check:
+	$(PYTHON) scripts/test_dependency_artifact_manifest.py
+	$(PYTHON) scripts/generate_dependency_artifact_manifest.py --check
+
+release-manifest: address-books source-verification-inputs dependency-artifacts
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check source-verification-inputs-check
+release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 

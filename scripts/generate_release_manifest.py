@@ -295,6 +295,11 @@ def build_manifest(
                 schema_required=True,
             ),
             "artifact_manifest": artifact_manifest_record(release_artifacts_dir, repo_root),
+            "dependency_artifact_manifest": file_record(
+                release_artifacts_dir / "dependency-artifact-manifest.json",
+                repo_root,
+                schema_required=True,
+            ),
             "source_verification_inputs": file_record(
                 release_artifacts_dir / "source-verification-inputs.json",
                 repo_root,

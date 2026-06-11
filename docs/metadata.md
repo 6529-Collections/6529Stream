@@ -53,8 +53,9 @@ object/array delimiters, or unquoted `]`/`}` breakout attempts. It also
 enforces the current URI policy for token images, collection base URIs, and
 external collection library URLs before storage. It does not yet solve
 semantic attribute schema validation, invalid UTF-8 policy, browser
-render-sandbox checks, dependency artifact packaging beyond registry provenance
-strings, stale randomness display, or deployment release manifests.
+render-sandbox checks, production dependency migration runbooks beyond the local
+dependency artifact manifest baseline, stale randomness display, or deployment
+release manifests.
 
 ## Escaping And Attribute Fragments
 
@@ -270,6 +271,23 @@ Nonzero dependency keys must already have a registered version before collection
 creation or explicit repinning; otherwise `StreamCore` reverts with
 `UnknownDependency(key)`.
 
+## Dependency Artifact Packaging
+
+Release-packaged dependency source files live under
+`release-artifacts/dependencies/`. Each package has a
+`6529stream.dependency-artifact.v1` descriptor that records the protocol version,
+deployment version, dependency registry key, version, registry contract label,
+provenance string, source registration path, and repo-relative source files.
+
+`scripts/generate_dependency_artifact_manifest.py` validates those descriptors,
+rejects missing files, malformed dependency keys, duplicate dependency
+identities, and paths outside `release-artifacts/dependencies/`, then emits
+`release-artifacts/latest/dependency-artifact-manifest.json` with SHA-256
+integrity records. The top-level release manifest includes that generated
+manifest, and `SHA256SUMS` covers both the generated output and the source
+descriptors/files. The first committed package covers the local Anvil rehearsal
+dependency registered by `script/RehearseDeployment.s.sol`.
+
 ## Freeze Manifest And Boundaries
 
 `StreamCore.freezeCollection(collectionId)` records the public freeze boundary
@@ -316,5 +334,5 @@ ADR 0006 requires future metadata work to add:
 - browser execution sandbox proofing for generated animation code; fixture-level
   JSON/data-URI/HTML boundary checks now exist
 - final raw-attribute schema validation or structured attributes
-- dependency artifact packaging and release manifests beyond registry
-  provenance strings
+- production dependency migration runbooks beyond the local artifact-manifest
+  baseline
