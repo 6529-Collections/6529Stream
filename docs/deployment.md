@@ -54,6 +54,20 @@ The current schema is
 `deployments/schema/deployment-manifest.schema.json`; the non-production local
 example is `deployments/examples/anvil-6529stream-v0.1.0-001.json`.
 
+ABI checksum, bytecode checksum, interface ID, and event topic catalog inputs
+are generated from the production `via-ir` Foundry artifacts:
+
+```sh
+forge build --sizes --via-ir --skip test --skip script --force
+python scripts/generate_release_artifacts.py
+python scripts/generate_release_artifacts.py --check
+```
+
+The committed baseline is under `release-artifacts/latest/`. `StreamCore`
+currently links `StreamMetadataRenderer`, so its bytecode hash entries are
+explicitly marked as `unlinked_artifact_object` until a broadcast or linked
+verification artifact supplies the final deployed bytecode.
+
 ## Admin Ceremony Checklist
 
 Before a deployment can become public-beta eligible:
@@ -73,6 +87,6 @@ Before a deployment can become public-beta eligible:
 - Retain constructor args and verification inputs.
 - Generate and checksum the deployment manifest.
 
-Fork/testnet broadcast, contract verification, ABI checksums, event topic
-catalog generation, and end-to-end dry-run mint/auction ceremonies remain Gate E
-follow-up work.
+Fork/testnet broadcast, contract verification, event topic catalog publication
+against a live deployment, and end-to-end dry-run mint/auction ceremonies remain
+Gate E follow-up work.

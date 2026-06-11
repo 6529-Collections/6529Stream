@@ -46,6 +46,8 @@ jobs:
             bash -n "$script"
           done
 
+          python3 -m py_compile scripts/generate_release_artifacts.py scripts/test_release_artifacts.py
+
       - name: PowerShell syntax
         shell: pwsh
         run: |
@@ -87,6 +89,14 @@ jobs:
           set -o pipefail
           mkdir -p ci-logs
           forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
+
+      - name: Release artifact catalog
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-tests.log
+          python3 scripts/generate_release_artifacts.py --check 2>&1 | tee ci-logs/release-artifacts-check.log
 
       - name: Deployment rehearsal
         shell: bash

@@ -76,6 +76,11 @@ The current Gate A smoke baseline proves:
   schema/example JSON artifacts.
 - `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
   executes as part of the local/CI smoke gate.
+- `scripts/test_release_artifacts.py` and
+  `scripts/generate_release_artifacts.py --check` prove the committed
+  `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
+  including ABI checksums, bytecode checksums, standard/custom interface IDs,
+  and event topic catalog entries.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -84,7 +89,8 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
-generation from broadcast outputs, ABI/event-topic checksums, remaining generated
+generation from broadcast outputs, signed release checksums, ABI diffing,
+address books, verified live deployment hashes, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

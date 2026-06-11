@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/deployment-rehearsal` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/90` |
+| Active PR branch | `codex/release-artifact-catalog` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/92` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 07:05 UTC` |
+| Last updated | `2026-06-11 08:15 UTC` |
 
 ## Packaging Notes
 
@@ -100,7 +100,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Merged in PR #87 |
 | 45 | Add animation HTML wrapper safety | Gate D | Continue P1-META-006 by hardening generated animation HTML/script boundaries, dependency-script JavaScript-string embedding, hostile `tokenData` handling, tests, docs, and roadmap traceability | Merged in PR #88 |
 | 46 | Reduce `StreamCore` deployment size | Gate E | Start P1-DEPLOY-001 by measuring the EIP-170 blocker, extracting pure metadata rendering/escaping code behind a stable library boundary where safe, preserving metadata behavior, and documenting the remaining size budget | Merged in PR #90 |
-| 47 | Add deployment rehearsal baseline | Gate E | Implement P1-DEPLOY-002 by adding a local deploy-and-wire Foundry rehearsal, manifest schema/example, deployment docs, manifest parsing/wiring tests, and check-script integration while leaving fork/testnet broadcast artifacts for follow-up | Active |
+| 47 | Add deployment rehearsal baseline | Gate E | Implement P1-DEPLOY-002 by adding a local deploy-and-wire Foundry rehearsal, manifest schema/example, deployment docs, manifest parsing/wiring tests, and check-script integration while leaving fork/testnet broadcast artifacts for follow-up | Merged in PR #92 |
+| 48 | Generate release artifact catalog | Gate G/Gate E support | Implement P1-RELEASE-001 by generating deterministic ABI checksums, bytecode checksums, interface IDs, and event topic catalog outputs from Foundry artifacts, then wire drift checks into local/CI gates and deployment docs | Active |
 
 ## Current PR Worklog
 
@@ -4209,7 +4210,7 @@ Merge:
 
 ### PR candidate: Add deployment rehearsal baseline (Queue Item 47)
 
-Status: PR open; waiting on CI and CodeRabbit.
+Status: Merged in PR #92.
 Branch: `codex/deployment-rehearsal`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/92`.
 Related issue:
@@ -4252,9 +4253,8 @@ Open follow-up boundaries:
 - Fork/testnet broadcast and verification are not implemented in this slice.
 - Real production manifest generation from broadcast outputs remains future
   Gate E work.
-- ABI checksums, event topic catalog generation, release checksum automation,
-  dry-run signed fixed-price drops, dry-run auction settlement, and emergency
-  redeployment rehearsal remain open.
+- Release checksum automation, dry-run signed fixed-price drops, dry-run
+  auction settlement, and emergency redeployment rehearsal remain open.
 
 Implementation:
 
@@ -4298,10 +4298,102 @@ Validation completed at `2026-06-11 07:14 UTC`:
   `StreamCore` remains 23,139 runtime bytes with 1,437 bytes of EIP-170
   headroom, and `StreamMetadataRenderer` remains 6,843 runtime bytes.
 
+Merge:
+
+- PR #92 merged on `2026-06-11 07:38 UTC` as
+  `eeefda163c2b727a9e3fba3922a220d184babf6c` after CI passed on final
+  head `7b1381a78898a50c8d82dda6cafc8361381cc5f7`, CodeRabbit status was
+  success, and the visible CodeRabbit review thread was resolved.
+
+### PR candidate: Generate release artifact catalog (Queue Item 48)
+
+Status: PR open; waiting on CI and CodeRabbit.
+Branch: `codex/release-artifact-catalog`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/94`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/93`
+
+Goal:
+
+- Start the Gate G machine-readable release artifact baseline without requiring
+  live RPC credentials or deployment keys.
+- Generate deterministic ABI checksum, bytecode checksum, interface ID, and
+  event topic catalog JSON from Foundry build output.
+- Wire drift detection into `make check`, Linux/Windows wrappers, and CI so ABI
+  or event-surface changes cannot silently desynchronize release metadata.
+- Feed generated ABI/bytecode hashes back into the local deployment manifest
+  example and deployment docs.
+
+Initial scope:
+
+- `scripts/generate_release_artifacts.py`
+- `scripts/test_release_artifacts.py`
+- `release-artifacts/contracts.json`
+- `release-artifacts/latest/*.json`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `README.md`
+- `docs/tooling.md`
+- `docs/deployment.md`
+- `deployments/README.md`
+- `deployments/examples/anvil-6529stream-v0.1.0-001.json`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Open follow-up boundaries:
+
+- Live fork/testnet broadcast manifests and verified deployed bytecode remain
+  Gate E follow-up work.
+- ABI diffing against a previous release, signed tags, signed checksums, and
+  source provenance attestations remain later Gate G release discipline.
+- `StreamCore` linked-library bytecode hashes are explicitly marked as
+  `unlinked_artifact_object` until a broadcast or verification artifact provides
+  final linked deployed bytecode.
+
+Implementation draft:
+
+- Added a stdlib-only Python release artifact generator that reads Foundry
+  artifacts and emits stable JSON under `release-artifacts/latest/`.
+- The generator resolves `cast` from `PATH` or `~/.foundry/bin`, uses
+  `cast sig-event` for Ethereum event topics, and uses Foundry
+  `methodIdentifiers` for function selectors.
+- Standard ERC interface IDs are configurable so ERC-721, ERC-2981, and
+  ERC-4906 use advertised standard IDs while retaining the raw computed selector
+  XOR for auditability.
+- Added focused Python tests for ABI hashing, bytecode hashing, event topic
+  generation, configured interface IDs, and drift detection.
+- Added release artifact checks to `make check`, Linux/Windows wrappers, and CI.
+- Updated deployment docs and the local example manifest to reference generated
+  ABI and bytecode hashes plus the event topic catalog path.
+
+Validation completed at `2026-06-11 08:12 UTC`:
+
+- `python scripts\test_release_artifacts.py` passed.
+- `python scripts\generate_release_artifacts.py --check` passed against the
+  production `via-ir` build artifacts.
+- `python -m py_compile scripts\generate_release_artifacts.py
+  scripts\test_release_artifacts.py` passed.
+- JSON parsing passed for the generated release artifacts and deployment
+  example.
+- `bash -n scripts/check.sh` passed.
+- PowerShell parser validation for `scripts\check.ps1` passed.
+- `make check` passed, including build, full Foundry tests, production size
+  build, release-artifact drift check, and deployment rehearsal.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `git diff --check` passed.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 08:15 | Open PR #94 and request CodeRabbit | Release artifact catalog PR published at `https://github.com/6529-Collections/6529Stream/pull/94`; CodeRabbit review requested in issue comment `4678554666`; Claude remains intentionally skipped per current user instruction |
+| 2026-06-11 08:12 | Validate Queue Item 48 locally | Release artifact generator, drift checks, JSON parsing, shell/PowerShell syntax, full `make check`, Windows wrapper, and whitespace validation all pass; release artifacts are generated from the production `via-ir` build profile |
+| 2026-06-11 07:59 | Start Queue Item 48 | Issue #93 tracks the Gate G release-artifact gap; branch `codex/release-artifact-catalog` starts from merged PR #92 and scopes to deterministic ABI/bytecode/interface/event catalog generation plus drift checks |
+| 2026-06-11 07:44 | Create release artifact issue #93 | No open issue covered ABI checksums, interface IDs, and event topic catalog generation, so a focused P1 release issue keeps the PR auditable |
+| 2026-06-11 07:38 | Merge PR #92 | Deployment rehearsal baseline merged as `eeefda163c2b727a9e3fba3922a220d184babf6c`; CI was green on final head `7b1381a78898a50c8d82dda6cafc8361381cc5f7`, CodeRabbit was green, and the only actionable thread was resolved |
 | 2026-06-11 07:29 | Address CodeRabbit PR #92 comments | Accepted both low-risk review items: normalized the `StreamMetadataRenderer` size evidence to `6,843` bytes throughout the PR #90 audit trail and changed the deployment manifest schema `$id` to a resolvable raw GitHub URL |
 | 2026-06-11 07:16 | Open PR #92 and request CodeRabbit | Deployment rehearsal baseline published at `https://github.com/6529-Collections/6529Stream/pull/92`; CodeRabbit review requested in issue comment `4678115878`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 07:14 | Revalidate Queue Item 47 after manifest expansion | Expanded the local example manifest to cover all nine deployed contracts and ABI hash placeholders, then reran focused manifest tests, `make check`, Windows wrapper, and whitespace validation successfully |
