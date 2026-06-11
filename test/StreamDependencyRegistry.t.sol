@@ -3,25 +3,17 @@ pragma solidity ^0.8.19;
 
 import "../smart-contracts/DependencyRegistry.sol";
 import "../smart-contracts/StreamCore.sol";
-import "../smart-contracts/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
+import "./helpers/TestHashingUtils.sol";
 
-contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture {
+contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture, TestHashingUtils {
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
     using Assertions for string;
     using Assertions for uint256;
-    using Strings for uint256;
-
-    bytes32 private constant DEPENDENCY_SCRIPT_CONTENT_TYPEHASH = keccak256(
-        "6529StreamDependencyScript(bytes32 dependencyNameAndVersion,uint256 chunkCount,bytes32 chunksHash)"
-    );
-    bytes32 private constant DEPENDENCY_SCRIPT_CHUNK_TYPEHASH = keccak256(
-        "6529StreamDependencyScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
-    );
 
     bytes32 private constant DEPENDENCY_VERSION_CREATED_TOPIC =
         keccak256("DependencyVersionCreated(bytes32,uint256,bytes32,address)");
@@ -535,49 +527,6 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         chunks[0] = first;
         chunks[1] = second;
         return chunks;
-    }
-
-    function _contentHash(bytes32 dependencyKey, string[] memory chunks)
-        private
-        pure
-        returns (bytes32)
-    {
-        bytes32 chunksHash = bytes32(0);
-
-        for (uint256 i = 0; i < chunks.length; i++) {
-            chunksHash = keccak256(abi.encode(chunksHash, _chunkHash(i, chunks[i])));
-        }
-
-        return keccak256(
-            abi.encode(DEPENDENCY_SCRIPT_CONTENT_TYPEHASH, dependencyKey, chunks.length, chunksHash)
-        );
-    }
-
-    function _chunkHash(uint256 index, string memory chunk) private pure returns (bytes32) {
-        bytes memory chunkBytes = bytes(chunk);
-        return keccak256(
-            abi.encode(
-                DEPENDENCY_SCRIPT_CHUNK_TYPEHASH, index, keccak256(chunkBytes), chunkBytes.length
-            )
-        );
-    }
-
-    function _expectedGenerativeScript(uint256 tokenId, bytes32 tokenHash, string memory dependency)
-        private
-        pure
-        returns (string memory)
-    {
-        return string.concat(
-            "let hash='",
-            Strings.toHexString(uint256(tokenHash), 32),
-            "';let tokenId=",
-            tokenId.toString(),
-            ";let tokenData=[1,2,3]",
-            ";let dependencyScript='",
-            dependency,
-            "';",
-            "function draw(){}"
-        );
     }
 }
 
