@@ -469,7 +469,8 @@ Public-beta implementation must:
 - replace zero-hash-only pending metadata checks with explicit randomness state
 - add pending/final on-chain metadata behavior
 - base64-encode on-chain JSON data URIs
-- escape JSON string contexts and JavaScript contexts or reject unsafe inputs
+- escape JSON string contexts and generated JavaScript/HTML wrapper contexts or
+  reject unsafe inputs
 - validate raw attribute fragments or replace them with structured attributes
 - add metadata schema docs and golden-file tests
 - add freeze manifest storage and views
@@ -495,7 +496,11 @@ P1 metadata tests must include:
   large valid values. The current first slice covers quotes, backslashes, JSON
   shorthand control characters, other ASCII control characters, and raw
   attribute breakout rejection; large valid values remain with size-limit work.
-- JavaScript and HTML escaping or rejection tests
+- JavaScript and HTML escaping or rejection tests. The current wrapper-safety
+  slice decodes final animation HTML and covers external library attribute
+  escaping, escaped `tokenData` and dependency-script JavaScript strings, and
+  closing-script neutralization inside the generated wrapper. It does not
+  sandbox artist collection scripts.
 - raw attributes validation or structured attributes serialization
 - metadata mode changes emit expected events before freeze
 - token data, image, and attribute updates emit expected events before freeze

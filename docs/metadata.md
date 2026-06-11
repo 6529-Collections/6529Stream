@@ -75,10 +75,15 @@ while still allowing brackets inside quoted JSON strings. This is a structural
 metadata safety guard, not a full JSON schema validator. Release tooling still
 needs renderer or parser checks for the final attribute schema.
 
-Generated animation HTML remains executable. `collectionLibrary`,
-`dependencyScript`, `collectionScript`, and `tokenData` are still rendered into
-the final HTML/JavaScript path and must be treated as trusted artist/operator
-code until later P1 render-sandbox and size-limit work lands.
+Generated animation HTML remains executable. The wrapper now escapes
+`collectionLibrary` for the `<script src>` attribute, escapes `tokenData` and
+dependency script content before embedding them into JavaScript string
+literals, parses `tokenData` through `JSON.parse("[" + tokenDataRaw + "]")`,
+and neutralizes literal `</script` sequences inside the generated wrapper
+script. This protects wrapper structure, but it does not sandbox artist
+`collectionScript` code or certify dependency code as safe. Release tooling
+still needs URI policy, size limits, semantic attribute validation, invalid
+UTF-8 policy, and browser render-sandbox checks before public beta.
 
 ## Golden Fixtures
 

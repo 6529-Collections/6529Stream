@@ -48,7 +48,7 @@ abstract contract TestHashingUtils {
             Strings.toHexString(uint256(tokenHash), 32),
             "';let tokenId=",
             tokenId.toString(),
-            ";let tokenData=[1,2,3]",
+            ";let tokenDataRaw='1,2,3';let tokenData=JSON.parse('['+tokenDataRaw+']')",
             ";let dependencyScript='",
             dependency,
             "';",
