@@ -81,8 +81,11 @@ literals, parses `tokenData` through `JSON.parse("[" + tokenDataRaw + "]")`,
 and neutralizes literal `</script` sequences inside the generated wrapper
 script. This protects wrapper structure, but it does not sandbox artist
 `collectionScript` code or certify dependency code as safe. Release tooling
-still needs URI policy, semantic attribute validation, invalid UTF-8 policy,
-and browser render-sandbox checks before public beta.
+now validates the committed golden fixtures for JSON/data-URI structure,
+current URI scheme policy, and generated HTML wrapper/script boundaries.
+Full browser execution sandboxing, production URI enforcement, semantic
+attribute validation, and invalid UTF-8 policy remain required before public
+beta.
 
 ## Size Limits
 
@@ -117,6 +120,15 @@ failed surface without parsing strings.
 
 The on-chain fixture names include the schema version so later schema migrations
 are reviewable and deliberate.
+
+`scripts/check_metadata_fixtures.py` validates these committed fixtures outside
+Foundry. The check strictly decodes base64 data URIs as UTF-8, parses on-chain
+metadata JSON, validates current content/script URI scheme policy, decodes the
+final `animation_url` HTML, and asserts the generated wrapper contains exactly
+one external library script and one inline generative script with no raw script
+tag breakout. `scripts/test_metadata_fixtures.py` covers the happy path and
+hostile fixture regressions, and both scripts run in `make check`, the platform
+check wrappers, and CI.
 
 ## ERC-4906 Events
 
@@ -269,7 +281,8 @@ cannot change frozen collection output.
 ADR 0006 requires future metadata work to add:
 
 - stale-state display policy
-- browser render-sandbox proofing for generated animation code
+- browser execution sandbox proofing for generated animation code; fixture-level
+  JSON/data-URI/HTML boundary checks now exist
 - final raw-attribute schema validation or structured attributes
 - dependency artifact packaging and release manifests beyond registry
   provenance strings

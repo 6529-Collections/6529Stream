@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-size-limits` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/110` |
+| Active PR branch | `codex/metadata-render-sandbox-checks` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/111` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 15:08 UTC` |
+| Last updated | `2026-06-11 15:42 UTC` |
 
 ## Packaging Notes
 
@@ -110,9 +110,65 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 54 | Generate machine-readable release manifest | Gate G support | Implement P1-RELEASE-006 by generating a deterministic top-level release manifest over committed release/deployment artifacts, governance docs, and release-ceremony status, with local/CI drift checks | Merged in PR #106 |
 | 55 | Generate source verification inputs | Gate G support | Implement P1-RELEASE-007 by generating deterministic source-verification inputs from Foundry artifacts, source files, compiler settings, and contract config, with local/CI drift checks | Merged in PR #108 |
 | 56 | Add Foundry broadcast manifest ingestion | Gate E/Gate G support | Implement P1-DEPLOY-004 by parsing sanitized Foundry broadcast output into deterministic deployment-manifest evidence with local/CI drift checks | Merged in PR #110 |
-| 57 | Add metadata size limits | Gate D/Gate G support | Continue P1-META-006 by enforcing numeric byte caps for metadata storage inputs, generated `tokenURI` output, and dependency registry metadata, with focused tests, docs, release artifact refresh, and roadmap traceability | Active |
+| 57 | Add metadata size limits | Gate D/Gate G support | Continue P1-META-006 by enforcing numeric byte caps for metadata storage inputs, generated `tokenURI` output, and dependency registry metadata, with focused tests, docs, release artifact refresh, and roadmap traceability | Merged in PR #111 |
+| 58 | Add metadata render-sandbox fixture checks | Gate D | Continue P1-META-006 by validating committed metadata golden fixtures for JSON/data-URI/HTML script-boundary shape and URI scheme policy in local/CI gates, without changing production bytecode | Active |
 
 ## Current PR Worklog
+
+### PR #112: Metadata render-sandbox fixture checks (Queue Item 58)
+
+Status: PR open; local validation passed and CodeRabbit review was requested in
+issue comment `4682324523`.
+Branch: `codex/metadata-render-sandbox-checks`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/112`.
+
+Goal:
+
+- Decode committed metadata golden fixtures and validate JSON/data-URI structure.
+- Decode final on-chain animation HTML and validate wrapper/script boundaries.
+- Assert current URI scheme policy for off-chain token URI fixtures, on-chain
+  JSON `image`, generated `animation_url`, and generated external script source.
+- Wire the fixture safety check into local and CI gates without adding runtime
+  bytecode to `StreamCore`.
+- Update docs, roadmap, changelog, and run-state traceability.
+
+Candidate files:
+
+- `scripts/check_metadata_fixtures.py`
+- `scripts/test_metadata_fixtures.py`
+- `Makefile`
+- `.github/workflows/ci.yml`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/release-checksums.json`
+- `release-artifacts/latest/SHA256SUMS`
+
+Validation:
+
+- `python scripts\test_metadata_fixtures.py` passes.
+- `python scripts\check_metadata_fixtures.py` passes.
+- `python -m py_compile scripts\check_metadata_fixtures.py scripts\test_metadata_fixtures.py` passes.
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh` passes.
+- PowerShell parser validation passes for `scripts\check.ps1` and
+  `scripts\bootstrap-windows.ps1`.
+- `python scripts\test_changelog_check.py` and
+  `python scripts\check_changelog.py` pass.
+- `git diff --check` passes.
+- `make release-checksums` refreshed the release manifest and checksum bundle.
+- Full `make check` passes.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passes.
+
+Outcome:
+
+- TBD.
 
 ### PR #4: Reproducible baseline tooling (Queue Item 2)
 
@@ -5125,10 +5181,9 @@ Validation status:
   `python scripts\test_broadcast_manifest_input.py` and
   `python scripts\generate_broadcast_manifest_input.py --check`.
 
-### PR candidate: Add metadata size limits (Queue Item 57)
+### PR #111: Add metadata size limits (Queue Item 57)
 
-Status: PR open; local validation passed and CodeRabbit review was requested in
-issue comment `4682019145`.
+Status: Merged.
 Branch: `codex/metadata-size-limits`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/111`.
 Related issue:
@@ -5183,12 +5238,26 @@ Validation status:
   `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\DependencyRegistry.sol test\StreamMetadataSizeLimits.t.sol`.
 - Full `forge fmt --check smart-contracts` still fails on existing legacy
   formatting outside this PR and remains tracked as a broader repo cleanup.
-- CI and CodeRabbit review are pending after PR open.
+- GitHub CI run `27356813758` passed.
+- CodeRabbit review finished with no actionable comments and success status.
+
+Outcome:
+
+- Merged as PR #111 on `2026-06-11 15:19 UTC`.
+- Squash commit: `f844457a2f48fc31f34c187cef72f2083cfe6b70`.
+- Issue #51 remains open for URI policy, invalid UTF-8 policy, semantic or
+  structured attributes, and browser/render-sandbox checks.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 15:58 | Validate PR #112 CodeRabbit response locally | Focused metadata fixture tests/check, Python compile, full `make check`, Windows `scripts\check.ps1`, and whitespace validation pass after the empty-image guard |
+| 2026-06-11 15:55 | Address CodeRabbit PR #112 review locally | Accepted the empty metadata image finding by making required metadata `image` URIs nonempty and adding a hostile fixture regression; skipped the optional off-chain final `/final` suffix suggestion because the committed final fixture is intentionally content-addressed as `ipfs://base/10000000000` |
+| 2026-06-11 15:42 | Open PR #112 and request CodeRabbit | Metadata fixture safety PR published at `https://github.com/6529-Collections/6529Stream/pull/112`; head is `d2f270b254d1e3a7b115817c62f2acf0a40efec9`; CodeRabbit review requested in issue comment `4682324523`; Claude intentionally skipped per current user instruction |
+| 2026-06-11 15:40 | Validate Queue Item 58 locally | Metadata fixture tests/check, Python compile, shell/PowerShell syntax, changelog gate, whitespace check, release checksum regeneration, full `make check`, and Windows wrapper all pass; production bytecode is unchanged with `StreamCore` still at 24,461 runtime bytes |
+| 2026-06-11 15:20 | Start Queue Item 58 | Next P1-META-006 slice is metadata render-sandbox fixture validation because it adds local/CI safety evidence for committed metadata outputs without consuming the remaining `StreamCore` bytecode headroom |
+| 2026-06-11 15:19 | Merge PR #111 | CI run `27356813758` passed, CodeRabbit status was success with no actionable comments, no review threads remained, and PR #111 merged as `f844457a2f48fc31f34c187cef72f2083cfe6b70`; issue #51 remains open for the rest of P1-META-006 |
 | 2026-06-11 15:08 | Open PR #111 and request CodeRabbit | Metadata size-limit PR published at `https://github.com/6529-Collections/6529Stream/pull/111`; CodeRabbit review requested in issue comment `4682019145`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 15:06 | Validate Queue Item 57 locally | Focused metadata/dependency tests, full `make check`, Windows wrapper, production size gate, release artifact generation/checks, touched-file formatting, and whitespace validation pass; full smart-contract formatting still fails on existing untouched legacy files |
 | 2026-06-11 14:53 | Start Queue Item 57 | Issue #51 remains open for P1-META-006; numeric metadata size limits are a deterministic, high-value slice after PR #87/#88 and can ship without deciding the remaining URI/schema/UTF-8/browser sandbox policies |

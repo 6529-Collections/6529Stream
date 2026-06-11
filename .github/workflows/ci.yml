@@ -49,6 +49,8 @@ jobs:
           python3 -m py_compile \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
+            scripts/check_metadata_fixtures.py \
+            scripts/test_metadata_fixtures.py \
             scripts/generate_source_verification_inputs.py \
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
@@ -107,6 +109,14 @@ jobs:
           set -o pipefail
           mkdir -p ci-logs
           forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
+
+      - name: Metadata fixture safety
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_metadata_fixtures.py 2>&1 | tee ci-logs/metadata-fixture-tests.log
+          python3 scripts/check_metadata_fixtures.py 2>&1 | tee ci-logs/metadata-fixture-check.log
 
       - name: Release artifact catalog
         shell: bash

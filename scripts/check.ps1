@@ -29,6 +29,8 @@ if (-not $pythonCommand) {
 forge build
 forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
+& $pythonCommand.Source @pythonArgs "scripts\test_metadata_fixtures.py"
+& $pythonCommand.Source @pythonArgs "scripts\check_metadata_fixtures.py"
 & $pythonCommand.Source @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_release_artifacts.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_source_verification_inputs.py"
