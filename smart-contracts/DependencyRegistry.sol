@@ -20,14 +20,35 @@ contract DependencyRegistry {
         "6529StreamDependencyScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
     );
 
-    // struct that holds a collection's info
+    error DependencyChunkIndexOutOfBounds(
+        bytes32 dependencyNameAndVersion, uint256 version, uint256 index
+    );
+    error DependencyVersionMissing(bytes32 dependencyNameAndVersion, uint256 version);
+
+    event DependencyVersionCreated(
+        bytes32 indexed dependencyNameAndVersion,
+        uint256 indexed version,
+        bytes32 indexed contentHash,
+        address admin
+    );
+    event DependencyVersionDeprecated(
+        bytes32 indexed dependencyNameAndVersion, uint256 indexed version, address indexed admin
+    );
+
     struct dependencyInfoStructure {
         bytes32 _collectionDependencyName;
         string[] libraryScript;
+        bytes32 contentHash;
+        string provenance;
+        address creator;
+        uint256 createdBlock;
+        uint256 createdTimestamp;
+        bool deprecated;
+        bool exists;
     }
 
-    // mapping of collectionInfo struct
-    mapping(bytes32 => dependencyInfoStructure) private dependencyInfo;
+    mapping(bytes32 => mapping(uint256 => dependencyInfoStructure)) private dependencyInfo;
+    mapping(bytes32 => uint256) private latestDependencyVersions;
 
     IStreamAdmins private adminsContract;
 
@@ -51,9 +72,15 @@ contract DependencyRegistry {
         public
         FunctionAdminRequired(this.addDependency.selector)
     {
-        dependencyInfo[_collectionDependencyName]._collectionDependencyName =
-        _collectionDependencyName;
-        dependencyInfo[_collectionDependencyName].libraryScript = _libraryScript;
+        _createDependencyVersion(_collectionDependencyName, _libraryScript, "");
+    }
+
+    function addDependencyWithProvenance(
+        bytes32 _collectionDependencyName,
+        string[] memory _libraryScript,
+        string memory _provenance
+    ) public FunctionAdminRequired(this.addDependencyWithProvenance.selector) {
+        _createDependencyVersion(_collectionDependencyName, _libraryScript, _provenance);
     }
 
     function addDependencyScriptIndex(
@@ -61,7 +88,29 @@ contract DependencyRegistry {
         uint256 index,
         string memory _libraryScript
     ) public FunctionAdminRequired(this.addDependencyScriptIndex.selector) {
-        dependencyInfo[_collectionDependencyName].libraryScript[index] = _libraryScript;
+        uint256 latestVersion = latestDependencyVersions[_collectionDependencyName];
+        dependencyInfoStructure storage current =
+            _dependencyVersionRecord(_collectionDependencyName, latestVersion);
+        if (index >= current.libraryScript.length) {
+            revert DependencyChunkIndexOutOfBounds(_collectionDependencyName, latestVersion, index);
+        }
+
+        string[] memory nextScript = new string[](current.libraryScript.length);
+        for (uint256 i = 0; i < current.libraryScript.length; i++) {
+            nextScript[i] = current.libraryScript[i];
+        }
+        nextScript[index] = _libraryScript;
+        _createDependencyVersion(_collectionDependencyName, nextScript, current.provenance);
+    }
+
+    function deprecateDependencyVersion(bytes32 _collectionDependencyName, uint256 version)
+        public
+        FunctionAdminRequired(this.deprecateDependencyVersion.selector)
+    {
+        dependencyInfoStructure storage record =
+            _dependencyVersionRecord(_collectionDependencyName, version);
+        record.deprecated = true;
+        emit DependencyVersionDeprecated(_collectionDependencyName, version, msg.sender);
     }
 
     // function to update admin contract
@@ -76,12 +125,93 @@ contract DependencyRegistry {
         adminsContract = IStreamAdmins(_newadminsContract);
     }
 
+    function latestDependencyVersion(bytes32 dependencyNameAndVersion)
+        external
+        view
+        returns (uint256)
+    {
+        return latestDependencyVersions[dependencyNameAndVersion];
+    }
+
+    function getDependencyVersionRecord(bytes32 dependencyNameAndVersion, uint256 version)
+        external
+        view
+        returns (bytes32, uint256, uint256, bytes32, string memory, address, uint256, uint256, bool)
+    {
+        dependencyInfoStructure storage record =
+            _dependencyVersionRecord(dependencyNameAndVersion, version);
+        return (
+            record._collectionDependencyName,
+            version,
+            record.libraryScript.length,
+            record.contentHash,
+            record.provenance,
+            record.creator,
+            record.createdBlock,
+            record.createdTimestamp,
+            record.deprecated
+        );
+    }
+
+    function getDependencyVersionProvenance(bytes32 dependencyNameAndVersion, uint256 version)
+        external
+        view
+        returns (string memory)
+    {
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).provenance;
+    }
+
+    function getDependencyVersionCreator(bytes32 dependencyNameAndVersion, uint256 version)
+        external
+        view
+        returns (address)
+    {
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).creator;
+    }
+
+    function getDependencyVersionCreatedBlock(bytes32 dependencyNameAndVersion, uint256 version)
+        external
+        view
+        returns (uint256)
+    {
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).createdBlock;
+    }
+
+    function getDependencyVersionCreatedTimestamp(bytes32 dependencyNameAndVersion, uint256 version)
+        external
+        view
+        returns (uint256)
+    {
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).createdTimestamp;
+    }
+
+    function isDependencyVersionDeprecated(bytes32 dependencyNameAndVersion, uint256 version)
+        external
+        view
+        returns (bool)
+    {
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).deprecated;
+    }
+
     function getDependencyScriptCount(bytes32 dependencyNameAndVersion)
         external
         view
         returns (uint256)
     {
-        return (dependencyInfo[dependencyNameAndVersion].libraryScript.length);
+        return getDependencyScriptCountAtVersion(
+            dependencyNameAndVersion, latestDependencyVersions[dependencyNameAndVersion]
+        );
+    }
+
+    function getDependencyScriptCountAtVersion(bytes32 dependencyNameAndVersion, uint256 version)
+        public
+        view
+        returns (uint256)
+    {
+        if (version == 0) {
+            return 0;
+        }
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).libraryScript.length;
     }
 
     function getDependencyScript(bytes32 dependencyNameAndVersion, uint256 index)
@@ -89,43 +219,130 @@ contract DependencyRegistry {
         view
         returns (string memory)
     {
-        return (dependencyInfo[dependencyNameAndVersion].libraryScript[index]);
+        return getDependencyScriptAtVersion(
+            dependencyNameAndVersion, latestDependencyVersions[dependencyNameAndVersion], index
+        );
+    }
+
+    function getDependencyScriptAtVersion(
+        bytes32 dependencyNameAndVersion,
+        uint256 version,
+        uint256 index
+    ) public view returns (string memory) {
+        dependencyInfoStructure storage record =
+            _dependencyVersionRecord(dependencyNameAndVersion, version);
+        if (index >= record.libraryScript.length) {
+            revert DependencyChunkIndexOutOfBounds(dependencyNameAndVersion, version, index);
+        }
+        return record.libraryScript[index];
     }
 
     /// @notice Returns the typed hash of one dependency script chunk.
     /// @param dependencyNameAndVersion Dependency key currently stored in the registry.
-    /// @param index Chunk index inside the dependency script.
+    /// @param index Chunk index inside the latest dependency script version.
     /// @return The chunk hash, bound to chunk index, chunk byte length, and chunk contents.
     function getDependencyScriptChunkHash(bytes32 dependencyNameAndVersion, uint256 index)
         public
         view
         returns (bytes32)
     {
-        return _hashDependencyScriptChunk(
-            index, dependencyInfo[dependencyNameAndVersion].libraryScript[index]
+        return getDependencyScriptChunkHashAtVersion(
+            dependencyNameAndVersion, latestDependencyVersions[dependencyNameAndVersion], index
         );
     }
 
-    /// @notice Returns the typed content hash for the current dependency script chunks.
+    function getDependencyScriptChunkHashAtVersion(
+        bytes32 dependencyNameAndVersion,
+        uint256 version,
+        uint256 index
+    ) public view returns (bytes32) {
+        return _hashDependencyScriptChunk(
+            index, getDependencyScriptAtVersion(dependencyNameAndVersion, version, index)
+        );
+    }
+
+    /// @notice Returns the typed content hash for the latest dependency script version.
     /// @param dependencyNameAndVersion Dependency key currently stored in the registry.
-    /// @return The content hash for the current chunk sequence under the dependency key.
+    /// @return The content hash for the latest chunk sequence under the dependency key.
     function getDependencyScriptContentHash(bytes32 dependencyNameAndVersion)
         external
         view
         returns (bytes32)
     {
-        uint256 chunkCount = dependencyInfo[dependencyNameAndVersion].libraryScript.length;
+        return getDependencyScriptContentHashAtVersion(
+            dependencyNameAndVersion, latestDependencyVersions[dependencyNameAndVersion]
+        );
+    }
+
+    function getDependencyScriptContentHashAtVersion(
+        bytes32 dependencyNameAndVersion,
+        uint256 version
+    ) public view returns (bytes32) {
+        if (version == 0) {
+            string[] memory emptyScript = new string[](0);
+            return _hashDependencyScriptContent(dependencyNameAndVersion, emptyScript);
+        }
+        return _dependencyVersionRecord(dependencyNameAndVersion, version).contentHash;
+    }
+
+    function _createDependencyVersion(
+        bytes32 _collectionDependencyName,
+        string[] memory _libraryScript,
+        string memory _provenance
+    ) private {
+        uint256 version =
+            latestDependencyVersions[_collectionDependencyName] + 1;
+        bytes32 contentHash =
+            _hashDependencyScriptContent(_collectionDependencyName, _libraryScript);
+
+        dependencyInfoStructure storage record = dependencyInfo[_collectionDependencyName][version];
+        record._collectionDependencyName = _collectionDependencyName;
+        record.contentHash = contentHash;
+        record.provenance = _provenance;
+        record.creator = msg.sender;
+        record.createdBlock = block.number;
+        // Provenance metadata only; not used for authorization, randomness, or ordering.
+        record.createdTimestamp = block.timestamp;
+        record.exists = true;
+        for (uint256 i = 0; i < _libraryScript.length; i++) {
+            record.libraryScript.push(_libraryScript[i]);
+        }
+
+        latestDependencyVersions[_collectionDependencyName] = version;
+        emit DependencyVersionCreated(_collectionDependencyName, version, contentHash, msg.sender);
+    }
+
+    // Slither maps the provenance timestamp field to this version-existence check.
+    // slither-disable-start timestamp
+    function _dependencyVersionRecord(bytes32 dependencyNameAndVersion, uint256 version)
+        private
+        view
+        returns (dependencyInfoStructure storage)
+    {
+        if (version == 0 || !dependencyInfo[dependencyNameAndVersion][version].exists) {
+            revert DependencyVersionMissing(dependencyNameAndVersion, version);
+        }
+        return dependencyInfo[dependencyNameAndVersion][version];
+    }
+    // slither-disable-end timestamp
+
+    function _hashDependencyScriptContent(bytes32 dependencyNameAndVersion, string[] memory chunks)
+        private
+        pure
+        returns (bytes32)
+    {
         bytes32 chunksHash = bytes32(0);
 
-        for (uint256 i = 0; i < chunkCount; i++) {
-            chunksHash = keccak256(
-                abi.encode(chunksHash, getDependencyScriptChunkHash(dependencyNameAndVersion, i))
-            );
+        for (uint256 i = 0; i < chunks.length; i++) {
+            chunksHash = keccak256(abi.encode(chunksHash, _hashDependencyScriptChunk(i, chunks[i])));
         }
 
         return keccak256(
             abi.encode(
-                DEPENDENCY_SCRIPT_CONTENT_TYPEHASH, dependencyNameAndVersion, chunkCount, chunksHash
+                DEPENDENCY_SCRIPT_CONTENT_TYPEHASH,
+                dependencyNameAndVersion,
+                chunks.length,
+                chunksHash
             )
         );
     }

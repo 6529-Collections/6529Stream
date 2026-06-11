@@ -47,9 +47,9 @@ base64-encoded HTML animation URL.
 `StreamCore.metadataSchemaVersion()` exposes the active schema version and
 `StreamCore.tokenMetadataState(tokenId)` exposes the current `pending` or
 `final` state for minted tokens. The current schema version does not yet solve
-JSON escaping, raw attribute validation, metadata size limits, immutable
-dependency version records, stale randomness display, or burn metadata
-semantics.
+JSON escaping, raw attribute validation, metadata size limits, dependency
+artifact packaging beyond registry provenance strings, stale randomness display,
+or burn metadata semantics.
 
 ## Golden Fixtures
 
@@ -93,9 +93,37 @@ metadata removal signal.
 
 `freezeCollection` does not change `tokenURI` bytes, so it emits the
 protocol-specific `CollectionFrozen` event rather than an ERC-4906 update.
-Dependency reference changes through `updateCollectionInfo` emit batch events;
-dependency registry content versioning and reverse collection-to-dependency
-signaling remain part of P1-META-003.
+Dependency reference changes or explicit dependency-version repins through
+`updateCollectionInfo` emit batch events. Creating, deprecating, or replacing a
+dependency registry version does not emit ERC-4906 events for collections that
+remain pinned to an earlier version, because their token output is unchanged.
+
+## Dependency Versions
+
+`DependencyRegistry` treats dependency scripts as immutable version records:
+
+- `addDependency(key, chunks)` creates the next version for `key`.
+- `addDependencyWithProvenance(key, chunks, provenance)` creates the next
+  version with an operator-supplied provenance string.
+- `addDependencyScriptIndex(key, index, chunk)` derives the next version from
+  the latest version with one chunk replaced.
+- `deprecateDependencyVersion(key, version)` marks a version as deprecated but
+  does not delete it or change collections already pinned to it.
+
+Each version records chunk count, typed content hash, provenance string, creator,
+creation block, creation timestamp, and deprecation state. Latest-version helper
+views remain for compatibility, while versioned views expose
+`getDependencyScriptCountAtVersion`, `getDependencyScriptAtVersion`,
+`getDependencyScriptChunkHashAtVersion`, and
+`getDependencyScriptContentHashAtVersion`.
+
+`StreamCore` pins each collection to a dependency key, version, content hash, and
+registry address at collection creation and whenever `updateCollectionInfo` runs
+the full collection update path. Later registry versions do not change existing
+collection output until the collection is explicitly repinned through
+`updateCollectionInfo`. `collectionDependencyVersionState(collectionId)` exposes
+the current pin, and `DependencyVersionPinned(collectionId, key, version,
+contentHash)` records each pin.
 
 ## Freeze Manifest And Boundaries
 
@@ -116,23 +144,22 @@ CollectionFrozen(collectionId, manifestHash, schemaVersion, admin)
 ```
 
 The manifest hash commits to the schema version, collection display fields,
-metadata mode, dependency key and current dependency content hash, collection
-script chunk hashes, final supply counters, burn count, the tracked live-token
-metadata aggregate, randomizer epoch/contract, dependency registry address, core
-contract address, and chain ID. The live-token aggregate is maintained as tokens
-are minted, burned, finalized by randomness, or changed through token data,
-image, and attribute writes, so freeze eligibility and manifest preview do not
-scan every minted token.
+metadata mode, dependency key, pinned dependency version, pinned dependency
+content hash, collection script chunk hashes, final supply counters, burn count,
+the tracked live-token metadata aggregate, randomizer epoch/contract, dependency
+registry address, core contract address, and chain ID. The live-token aggregate
+is maintained as tokens are minted, burned, finalized by randomness, or changed
+through token data, image, and attribute writes, so freeze eligibility and
+manifest preview do not scan every minted token.
 
 After freeze, current `StreamCore` paths cannot mint into the collection, change
 collection metadata, change metadata mode, change token data, update token image
 or attributes, change the collection randomizer, set token hashes, finalize
 supply again, or swap the dependency registry while any collection is frozen.
 
-The manifest currently pins the dependency registry address and current
-dependency content hash, but immutable dependency version records and registry
-provenance are still P1-META-003. Burn metadata and callback-after-burn
-semantics remain P1-META-005.
+The manifest now uses the collection's pinned dependency version and content
+hash, so later dependency registry versions cannot change frozen collection
+output. Burn metadata and callback-after-burn semantics remain P1-META-005.
 
 ## Public-Beta Target
 
@@ -140,5 +167,6 @@ ADR 0006 requires future metadata work to add:
 
 - stale and burned-state policy
 - JSON escaping and raw-attribute validation
-- immutable dependency version pins
+- dependency artifact packaging and release manifests beyond registry
+  provenance strings
 - burn semantics and callback-after-burn tests

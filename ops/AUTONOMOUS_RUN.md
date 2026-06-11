@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-freeze-manifest` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/83` |
+| Active PR branch | `codex/dependency-version-immutability` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/84` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 00:59 UTC` |
+| Last updated | `2026-06-11 01:40 UTC` |
 
 ## Packaging Notes
 
@@ -95,7 +95,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
-| 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Open in PR #84 on `codex/metadata-freeze-manifest` |
+| 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
+| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | In progress on `codex/dependency-version-immutability` |
 
 ## Current PR Worklog
 
@@ -3553,7 +3554,7 @@ Merge:
 
 ### PR #84: Add collection freeze manifests and guards (Queue Item 41)
 
-Status: Open.
+Status: Merged.
 Branch: `codex/metadata-freeze-manifest`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/84`.
 Related issue:
@@ -3660,10 +3661,134 @@ Validation so far:
   wrapper passed, touched-file formatting passed, diff whitespace passed, and
   Slither remained `718` total findings with high/medium unchanged at `4/19`.
 
+Merge:
+
+- Squash merge commit: `72779ca8b4ce1977e8693c35acb46d724228cfa9`.
+- Merged at `2026-06-11 01:03 UTC`.
+- Issue `#47` remains open because dependency version records/provenance,
+  burn metadata semantics, and escaping/sandbox hardening remain in the P1
+  metadata track.
+
+### PR #85: Add dependency version immutability (Queue Item 42)
+
+Status: Local implementation validated; ready to commit and open PR.
+Branch: `codex/dependency-version-immutability`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/48`
+
+Goal:
+
+- Implement the first P1-META-003 target-state slice after collection freeze
+  manifests and guards.
+- Add immutable dependency version records with content hashes, provenance,
+  creation metadata, and deprecation state.
+- Preserve compatibility for existing registry callers by keeping latest-version
+  convenience views.
+- Pin each collection to a dependency key, version, and content hash so later
+  registry updates cannot silently alter existing collection output.
+- Include dependency version in the collection freeze manifest hash and expose
+  collection dependency pinning views/events.
+- Add focused dependency registry, pinning, and frozen-output stability tests.
+- Update metadata docs, blocker/status docs, roadmap/test traceability, and this
+  durable run state.
+
+Out of scope:
+
+- P0-META-001 segment-boundary script composition remains already covered by
+  typed chunk/content hash tests and should not be reopened unless the new
+  dependency APIs regress those protections.
+- Registry migration tooling for pre-existing deployed mainnet collections
+  remains deployment/operations work.
+- Dependency source packaging beyond provenance strings and content hashes
+  remains future release-manifest work.
+
+Candidate files:
+
+- `smart-contracts/DependencyRegistry.sol`
+- `smart-contracts/IDependencyRegistry.sol`
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/IStreamCore.sol`
+- `test/StreamDependencyRegistry.t.sol`
+- `test/StreamMetadataEncoding.t.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- `DependencyRegistry.addDependency` now creates the next immutable dependency
+  version instead of replacing the existing script for that key.
+- Added `addDependencyWithProvenance`, `deprecateDependencyVersion`, full
+  version-record views, narrow provenance/creator/creation/deprecation views,
+  and versioned script/chunk/content-hash views.
+- `addDependencyScriptIndex` now derives a new version from the latest version
+  with one chunk replaced and leaves previous versions readable.
+- Latest-version helper views remain for existing callers that do not yet pass a
+  version explicitly.
+- `StreamCore` now pins each collection to a dependency key, dependency version,
+  dependency content hash, and registry address at creation and on full
+  `updateCollectionInfo` repins.
+- `retrieveDependencyScript` and `retrieveDependencyScriptContentHash` now use
+  the collection pin, so later registry versions do not silently alter existing
+  collection output.
+- Collection freeze manifests now include the pinned dependency version and
+  pinned dependency content hash.
+- Added `DependencyVersionPinned` and `collectionDependencyVersionState` for
+  release/indexer traceability.
+- Updated the P0-META-001 segment-boundary characterization to assert pinned
+  content stays stable after a newer registry version and only changes after an
+  explicit collection repin.
+- Updated metadata docs, known blockers, status, test README, and roadmap
+  traceability for the implemented P1-META-003 slice.
+- Slither initially reported the new test log helpers as three extra
+  `uninitialized-local` findings; the helpers now initialize their `found`
+  flags explicitly so the high/medium baseline is unchanged.
+- Slither also mapped the provenance-only creation timestamp to the
+  version-existence helper; that helper now carries a narrow `timestamp`
+  suppression because the timestamp is not used for authorization, randomness,
+  or ordering.
+
+Local validation:
+
+- `forge build` passed after the contract/interface edits.
+- Focused dependency version tests passed:
+  `forge test --match-contract StreamDependencyRegistryTest -vvv` with 5 tests,
+  0 failed.
+- Adjacent metadata tests passed:
+  `forge test --match-contract StreamMetadataEncodingTest -vvv` with 3 tests,
+  0 failed.
+- Adjacent freeze tests passed:
+  `forge test --match-contract StreamMetadataFreezeTest -vvv` with 7 tests,
+  0 failed.
+- Full canonical gate passed: `make check`.
+- Windows canonical gate passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- Touched-file formatting passed:
+  `forge fmt --check smart-contracts\DependencyRegistry.sol
+  smart-contracts\IDependencyRegistry.sol smart-contracts\StreamCore.sol
+  smart-contracts\IStreamCore.sol test\StreamDependencyRegistry.t.sol
+  test\StreamMetadataEncoding.t.sol`.
+- Whitespace check passed: `git diff --check`.
+- Markdown heading scan and traceability grep passed for roadmap/docs/test
+  references.
+- Slither comparison completed with accepted nonzero exit: `718` total
+  findings; high/medium unchanged at `4/19`; selected critical detectors remain
+  zero for `arbitrary-send-eth`, `reentrancy-eth`, `weak-prng`,
+  `encode-packed-collision`, and `uninitialized-state`.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 01:40 | Validate Queue Item 42 locally | Focused dependency/metadata/freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` after explicitly initializing new test helper flags and narrowly suppressing a provenance timestamp false positive |
+| 2026-06-11 01:21 | Implement Queue Item 42 local draft | Added immutable dependency registry versions, provenance/deprecation views, collection dependency pins, pinned dependency freeze manifests, focused tests, and docs/roadmap traceability; full validation remains to run |
+| 2026-06-11 01:06 | Start Queue Item 42 | PR #84 merged and main is synced; the next missing Gate D metadata row is P1-META-003 dependency registry versioning, immutability, provenance, and collection dependency pinning |
+| 2026-06-11 01:03 | Merge PR #84 | CI passed on final head `b48fbe9`, CodeRabbit reported no actionable comments after the burn/range follow-up, and issue #47 remains open for dependency, burn, and escaping work |
 | 2026-06-11 00:59 | Validate CodeRabbit PR #84 second follow-up | Focused freeze tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither comparison passed after guarding post-freeze burn and pre-mint hash range writes |
 | 2026-06-11 00:57 | Address CodeRabbit PR #84 second follow-up | Guarded `burn()` after collection freeze to keep the manifest surface immutable, added pre-mint token-range validation to `setTokenHash`, and added focused regression coverage; full gate is rerunning before push |
 | 2026-06-11 00:42 | Validate CodeRabbit PR #84 review fix | Focused freeze tests and `make check` pass after moving live-token aggregate tracking before `_safeMint`; Slither returned to the prior `718` total findings with high/medium unchanged at `4/19` |

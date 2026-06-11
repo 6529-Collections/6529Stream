@@ -143,8 +143,16 @@ Dependency script encoding now has P0-META-001 target-state coverage in
 `StreamMetadataEncoding.t.sol`: ambiguous chunk boundaries that render the same
 dependency JavaScript produce distinct typed content hashes, chunk hashes include
 the chunk index and byte length, zero-chunk dependency hashes are deterministic,
-and the existing rendered generative script output remains
-compatibility-preserving.
+and the existing rendered generative script output remains compatibility-preserving.
+
+Dependency registry versioning now has P1-META-003 target-state coverage in
+`StreamDependencyRegistry.t.sol`: registry writes create immutable dependency
+versions instead of mutating previous versions, chunk-index updates derive a new
+version, version records expose typed content hashes, provenance, creator,
+creation block/time, and deprecation state, collection metadata pins a dependency
+key/version/content hash, explicit repinning moves an unfrozen collection to the
+latest version, and frozen collection output plus freeze manifests remain stable
+after later registry versions.
 
 Metadata golden fixtures now have P1-META-001 characterization coverage in
 `StreamMetadataGolden.t.sol`: current off-chain pending and final token URI
