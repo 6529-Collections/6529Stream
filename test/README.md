@@ -184,17 +184,19 @@ dependency provenance strings accept configured boundaries and reject oversized
 inputs with structured custom errors. `scripts/test_metadata_fixtures.py` and
 `scripts/check_metadata_fixtures.py` add a non-Foundry gate over the committed
 metadata golden fixtures: the scripts strictly decode JSON/HTML data URIs,
-parse metadata JSON, validate current URI scheme policy, and assert the final
-animation wrapper has exactly one external script and one inline generative
-script with no raw script-boundary breakout. `StreamMetadataUriPolicy.t.sol`
+parse metadata JSON, reject invalid UTF-8 fixture payloads, validate semantic
+attribute shape for committed fixtures, validate current URI scheme policy, and
+assert the final animation wrapper has exactly one external script and one
+inline generative script with no raw script-boundary breakout.
+`StreamMetadataUriPolicy.t.sol`
 covers the renderer's current content/script URI policy helpers and production
 token image URI enforcement for allowed `https://`, `ipfs://`, and `ar://`
 content URIs plus rejected empty, JavaScript, hostless HTTPS, and
 whitespace-bearing image inputs. It also covers optional collection base URI and
 external library URL production enforcement, including empty optional values,
 safe content/script values, unsafe base URIs, and non-HTTPS library URLs. Full
-browser execution sandboxing, semantic attribute schema validation, and invalid
-UTF-8 policy remain future P1-META-006 work.
+browser execution sandboxing plus production semantic attribute and invalid
+UTF-8 enforcement remain future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

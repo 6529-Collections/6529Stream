@@ -51,11 +51,12 @@ fields emitted by on-chain metadata and rejects raw attribute fragments that
 contain literal control characters, unterminated strings, unbalanced
 object/array delimiters, or unquoted `]`/`}` breakout attempts. It also
 enforces the current URI policy for token images, collection base URIs, and
-external collection library URLs before storage. It does not yet solve
-semantic attribute schema validation, invalid UTF-8 policy, browser
-render-sandbox checks, production dependency migration runbooks beyond the local
-dependency artifact manifest baseline, stale randomness display, or deployment
-release manifests.
+external collection library URLs before storage. Fixture-level checks now reject
+invalid UTF-8 data URI payloads and non-semantic attribute entries in committed
+metadata golden files. Production raw-attribute schema enforcement, production
+invalid UTF-8 rejection, browser render-sandbox checks, production dependency
+migration runbooks beyond the local dependency artifact manifest baseline,
+stale randomness display, and live deployment release manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -74,8 +75,9 @@ such as newline/tab/carriage return, and other ASCII control characters through
 metadata array. `updateImagesAndAttributes` now rejects fragments that can break
 out of the enclosing array or cannot close their own strings/object delimiters,
 while still allowing brackets inside quoted JSON strings. This is a structural
-metadata safety guard, not a full JSON schema validator. Release tooling still
-needs renderer or parser checks for the final attribute schema.
+metadata safety guard, not a full JSON schema validator. Release tooling now
+checks committed fixture attributes as `trait_type` / `value` string pairs, but
+production raw-attribute schema enforcement remains future work.
 
 Generated animation HTML remains executable. The wrapper now escapes
 `collectionLibrary` for the `<script src>` attribute, escapes `tokenData` and
@@ -85,9 +87,10 @@ and neutralizes literal `</script` sequences inside the generated wrapper
 script. This protects wrapper structure, but it does not sandbox artist
 `collectionScript` code or certify dependency code as safe. Release tooling
 now validates the committed golden fixtures for JSON/data-URI structure,
-current URI scheme policy, and generated HTML wrapper/script boundaries. Full
-browser execution sandboxing, semantic attribute validation, and invalid UTF-8
-policy remain required before public beta.
+strict UTF-8 decoding, current URI scheme policy, semantic attribute shape, and
+generated HTML wrapper/script boundaries. Full browser execution sandboxing plus
+production semantic-attribute and invalid-UTF-8 enforcement remain required
+before public beta.
 
 ## URI Policy
 
@@ -156,12 +159,14 @@ are reviewable and deliberate.
 
 `scripts/check_metadata_fixtures.py` validates these committed fixtures outside
 Foundry. The check strictly decodes base64 data URIs as UTF-8, parses on-chain
-metadata JSON, validates current content/script URI scheme policy, decodes the
-final `animation_url` HTML, and asserts the generated wrapper contains exactly
-one external library script and one inline generative script with no raw script
-tag breakout. `scripts/test_metadata_fixtures.py` covers the happy path and
-hostile fixture regressions, and both scripts run in `make check`, the platform
-check wrappers, and CI.
+metadata JSON, validates current content/script URI scheme policy, validates
+fixture attributes as `trait_type` / `value` string pairs, decodes the final
+`animation_url` HTML, and asserts the generated wrapper contains exactly one
+external library script and one inline generative script with no raw script tag
+breakout. `scripts/test_metadata_fixtures.py` covers the happy path, invalid
+UTF-8 fixture payloads, semantic attribute-shape failures, and hostile wrapper
+regressions; both scripts run in `make check`, the platform check wrappers, and
+CI.
 
 ## ERC-4906 Events
 
@@ -333,6 +338,9 @@ ADR 0006 requires future metadata work to add:
 - stale-state display policy
 - browser execution sandbox proofing for generated animation code; fixture-level
   JSON/data-URI/HTML boundary checks now exist
-- final raw-attribute schema validation or structured attributes
+- production raw-attribute schema validation or structured attributes;
+  fixture-level semantic attribute checks now exist
+- production invalid UTF-8 rejection; fixture-level invalid UTF-8 checks now
+  exist
 - production dependency migration runbooks beyond the local artifact-manifest
   baseline

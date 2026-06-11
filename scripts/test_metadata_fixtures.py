@@ -25,6 +25,11 @@ def encode_data_uri(prefix: str, value: str) -> str:
     return f"{prefix}{encoded}"
 
 
+def encode_raw_data_uri(prefix: str, value: bytes) -> str:
+    encoded = base64.b64encode(value).decode("ascii")
+    return f"{prefix}{encoded}"
+
+
 def write_fixture(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8", newline="\n")
@@ -36,11 +41,16 @@ def write_fixture_set(
     offchain_pending: str = "ipfs://base/pending",
     offchain_final: str = "ipfs://base/10000000000",
     image: str = "ipfs://image/10000000000.png",
+    attributes: object | None = None,
     animation_html: str | None = None,
     malformed_pending_uri: str | None = None,
+    malformed_animation_uri: str | None = None,
 ) -> None:
     write_fixture(root / checker.OFFCHAIN_PENDING_FIXTURE, offchain_pending)
     write_fixture(root / checker.OFFCHAIN_FINAL_FIXTURE, offchain_final)
+
+    if attributes is None:
+        attributes = [{"trait_type": "Mood", "value": "Calm"}]
 
     pending_metadata = {
         "metadata_schema_version": checker.METADATA_SCHEMA_VERSION,
@@ -48,10 +58,15 @@ def write_fixture_set(
         "name": "Genesis #0",
         "description": "Description",
         "image": image,
-        "attributes": [{"trait_type": "Mood", "value": "Calm"}],
+        "attributes": attributes,
     }
-    pending_uri = malformed_pending_uri or encode_data_uri(
-        checker.JSON_DATA_URI_PREFIX, json.dumps(pending_metadata, separators=(",", ":"))
+    pending_uri = (
+        malformed_pending_uri
+        if malformed_pending_uri is not None
+        else encode_data_uri(
+            checker.JSON_DATA_URI_PREFIX,
+            json.dumps(pending_metadata, separators=(",", ":")),
+        )
     )
     write_fixture(root / checker.ONCHAIN_PENDING_FIXTURE, pending_uri)
 
@@ -65,8 +80,10 @@ def write_fixture_set(
         )
     final_metadata = dict(pending_metadata)
     final_metadata["metadata_state"] = checker.STATE_FINAL
-    final_metadata["animation_url"] = encode_data_uri(
-        checker.HTML_DATA_URI_PREFIX, animation_html
+    final_metadata["animation_url"] = (
+        malformed_animation_uri
+        if malformed_animation_uri is not None
+        else encode_data_uri(checker.HTML_DATA_URI_PREFIX, animation_html)
     )
     write_fixture(
         root / checker.ONCHAIN_FINAL_FIXTURE,
@@ -95,11 +112,59 @@ class MetadataFixtureTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.MetadataFixtureError, "invalid base64"):
                 checker.validate_fixture_set(root)
 
+    def test_rejects_invalid_utf8_metadata_data_uri(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_fixture_set(
+                root,
+                malformed_pending_uri=encode_raw_data_uri(
+                    checker.JSON_DATA_URI_PREFIX, b'{"name":"bad-\xff"}'
+                ),
+            )
+            with self.assertRaisesRegex(checker.MetadataFixtureError, "valid UTF-8"):
+                checker.validate_fixture_set(root)
+
+    def test_rejects_invalid_utf8_animation_data_uri(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_fixture_set(
+                root,
+                malformed_animation_uri=encode_raw_data_uri(
+                    checker.HTML_DATA_URI_PREFIX, b"<html>\xff</html>"
+                ),
+            )
+            with self.assertRaisesRegex(checker.MetadataFixtureError, "valid UTF-8"):
+                checker.validate_fixture_set(root)
+
     def test_rejects_empty_metadata_image(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             write_fixture_set(root, image="")
             with self.assertRaisesRegex(checker.MetadataFixtureError, "image URI must not be empty"):
+                checker.validate_fixture_set(root)
+
+    def test_rejects_attribute_with_missing_required_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_fixture_set(root, attributes=[{"trait_type": "Mood"}])
+            with self.assertRaisesRegex(checker.MetadataFixtureError, "trait_type and value"):
+                checker.validate_fixture_set(root)
+
+    def test_rejects_attribute_with_unexpected_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_fixture_set(
+                root,
+                attributes=[{"trait_type": "Level", "value": "1", "display_type": "number"}],
+            )
+            with self.assertRaisesRegex(checker.MetadataFixtureError, "trait_type and value"):
+                checker.validate_fixture_set(root)
+
+    def test_rejects_attribute_with_non_string_value(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_fixture_set(root, attributes=[{"trait_type": "Level", "value": 1}])
+            with self.assertRaisesRegex(checker.MetadataFixtureError, "values must be strings"):
                 checker.validate_fixture_set(root)
 
     def test_rejects_unexpected_animation_html_tag(self) -> None:
