@@ -105,6 +105,8 @@ def decode_data_uri(data_uri: str, prefix: str, label: str) -> str:
 
 def validate_external_uri(uri: str, *, allowed_schemes: set[str], label: str) -> None:
     if uri == "":
+        if label.endswith(" image"):
+            raise MetadataFixtureError(f"{label} URI must not be empty")
         return
     if uri != uri.strip():
         raise MetadataFixtureError(f"{label} URI has leading or trailing whitespace")

@@ -95,6 +95,13 @@ class MetadataFixtureTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.MetadataFixtureError, "invalid base64"):
                 checker.validate_fixture_set(root)
 
+    def test_rejects_empty_metadata_image(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_fixture_set(root, image="")
+            with self.assertRaisesRegex(checker.MetadataFixtureError, "image URI must not be empty"):
+                checker.validate_fixture_set(root)
+
     def test_rejects_unexpected_animation_html_tag(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

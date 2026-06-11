@@ -5252,6 +5252,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 15:58 | Validate PR #112 CodeRabbit response locally | Focused metadata fixture tests/check, Python compile, full `make check`, Windows `scripts\check.ps1`, and whitespace validation pass after the empty-image guard |
+| 2026-06-11 15:55 | Address CodeRabbit PR #112 review locally | Accepted the empty metadata image finding by making required metadata `image` URIs nonempty and adding a hostile fixture regression; skipped the optional off-chain final `/final` suffix suggestion because the committed final fixture is intentionally content-addressed as `ipfs://base/10000000000` |
 | 2026-06-11 15:42 | Open PR #112 and request CodeRabbit | Metadata fixture safety PR published at `https://github.com/6529-Collections/6529Stream/pull/112`; head is `d2f270b254d1e3a7b115817c62f2acf0a40efec9`; CodeRabbit review requested in issue comment `4682324523`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 15:40 | Validate Queue Item 58 locally | Metadata fixture tests/check, Python compile, shell/PowerShell syntax, changelog gate, whitespace check, release checksum regeneration, full `make check`, and Windows wrapper all pass; production bytecode is unchanged with `StreamCore` still at 24,461 runtime bytes |
 | 2026-06-11 15:20 | Start Queue Item 58 | Next P1-META-006 slice is metadata render-sandbox fixture validation because it adds local/CI safety evidence for committed metadata outputs without consuming the remaining `StreamCore` bytecode headroom |
