@@ -126,9 +126,12 @@ the current pin, and `DependencyVersionPinned(collectionId, key, version,
 contentHash)` records each pin.
 
 `bytes32(0)` is the explicit no-dependency sentinel and pins version `0` plus
-the typed empty-script content hash. Nonzero dependency keys must already have a
-registered version before collection creation or explicit repinning; otherwise
-`StreamCore` reverts with `UnknownDependency(key)`.
+the typed empty-script content hash. `DependencyRegistry` reserves that key for
+the sentinel and rejects dependency writes under it, and `StreamCore` treats it
+as no-dependency without consulting the registry latest-version pointer.
+Nonzero dependency keys must already have a registered version before collection
+creation or explicit repinning; otherwise `StreamCore` reverts with
+`UnknownDependency(key)`.
 
 ## Freeze Manifest And Boundaries
 

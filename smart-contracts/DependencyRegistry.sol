@@ -24,6 +24,7 @@ contract DependencyRegistry {
         bytes32 dependencyNameAndVersion, uint256 version, uint256 index
     );
     error DependencyVersionMissing(bytes32 dependencyNameAndVersion, uint256 version);
+    error DependencyKeyReserved(bytes32 dependencyNameAndVersion);
 
     event DependencyVersionCreated(
         bytes32 indexed dependencyNameAndVersion,
@@ -88,6 +89,7 @@ contract DependencyRegistry {
         uint256 index,
         string memory _libraryScript
     ) public FunctionAdminRequired(this.addDependencyScriptIndex.selector) {
+        _requireDependencyKeyNotReserved(_collectionDependencyName);
         uint256 latestVersion = latestDependencyVersions[_collectionDependencyName];
         dependencyInfoStructure storage current =
             _dependencyVersionRecord(_collectionDependencyName, latestVersion);
@@ -107,6 +109,7 @@ contract DependencyRegistry {
         public
         FunctionAdminRequired(this.deprecateDependencyVersion.selector)
     {
+        _requireDependencyKeyNotReserved(_collectionDependencyName);
         dependencyInfoStructure storage record =
             _dependencyVersionRecord(_collectionDependencyName, version);
         record.deprecated = true;
@@ -290,8 +293,8 @@ contract DependencyRegistry {
         string[] memory _libraryScript,
         string memory _provenance
     ) private {
-        uint256 version =
-            latestDependencyVersions[_collectionDependencyName] + 1;
+        _requireDependencyKeyNotReserved(_collectionDependencyName);
+        uint256 version = latestDependencyVersions[_collectionDependencyName] + 1;
         bytes32 contentHash =
             _hashDependencyScriptContent(_collectionDependencyName, _libraryScript);
 
@@ -310,6 +313,12 @@ contract DependencyRegistry {
 
         latestDependencyVersions[_collectionDependencyName] = version;
         emit DependencyVersionCreated(_collectionDependencyName, version, contentHash, msg.sender);
+    }
+
+    function _requireDependencyKeyNotReserved(bytes32 dependencyNameAndVersion) private pure {
+        if (dependencyNameAndVersion == bytes32(0)) {
+            revert DependencyKeyReserved(dependencyNameAndVersion);
+        }
     }
 
     // Slither maps the provenance timestamp field to this version-existence check.

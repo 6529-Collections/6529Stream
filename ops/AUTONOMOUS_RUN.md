@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/84` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 01:58 UTC` |
+| Last updated | `2026-06-11 02:17 UTC` |
 
 ## Packaging Notes
 
@@ -3760,12 +3760,17 @@ Implementation notes:
 - The duplicated test helper for explicit dependency repinning moved into
   `StreamFixture`, and focused coverage now includes both explicit
   no-dependency pins and nonzero unknown-key rejection.
+- CodeRabbit's latest-head follow-up identified a second-order zero-key drift:
+  a real registry version under `bytes32(0)` could change the no-dependency
+  sentinel. `DependencyRegistry` now reserves the zero key for sentinel use, and
+  `StreamCore` skips the registry latest-version lookup when pinning
+  `bytes32(0)`.
 
 Local validation:
 
 - `forge build` passed after the contract/interface edits.
 - Focused dependency version tests passed:
-  `forge test --match-contract StreamDependencyRegistryTest -vvv` with 7 tests,
+  `forge test --match-contract StreamDependencyRegistryTest -vvv` with 9 tests,
   0 failed.
 - Adjacent metadata tests passed:
   `forge test --match-contract StreamMetadataEncodingTest -vvv` with 3 tests,
@@ -3793,11 +3798,19 @@ Local validation:
   `make check`, Windows wrapper, touched-file formatting, and whitespace checks
   passed; Slither remained `718` total findings with high/medium unchanged at
   `4/19`.
+- Second CodeRabbit sentinel-drift validation passed after adding the zero-key
+  reservation and no-dependency latest-lookup bypass: focused dependency,
+  metadata encoding, and freeze tests passed; full `make check`, Windows
+  wrapper, touched-file formatting, whitespace, heading scan, traceability grep,
+  and Slither comparison passed; Slither remained `718` total findings with
+  high/medium unchanged at `4/19`.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 02:17 | Validate CodeRabbit PR #85 sentinel drift fix | Focused dependency tests now pass with 9 tests, adjacent metadata/freeze suites pass, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison pass with high/medium unchanged at `4/19` |
+| 2026-06-11 02:13 | Address CodeRabbit PR #85 sentinel drift review | Reserve `bytes32(0)` in dependency registry writes and bypass registry latest-version lookup for no-dependency pins so the sentinel cannot drift if a zero-key dependency is attempted |
 | 2026-06-11 01:58 | Address CodeRabbit PR #85 review | Fail closed for nonzero unknown dependency keys while preserving the explicit `bytes32(0)` no-dependency sentinel, move duplicate dependency-repinning test helpers into `StreamFixture`, add regression coverage, and rerun focused/full/Windows/Slither validation with high/medium unchanged at `4/19` |
 | 2026-06-11 01:42 | Open PR #85 | Dependency version immutability is published with local validation evidence; next step is CI and CodeRabbit review monitoring |
 | 2026-06-11 01:40 | Validate Queue Item 42 locally | Focused dependency/metadata/freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` after explicitly initializing new test helper flags and narrowly suppressing a provenance timestamp false positive |

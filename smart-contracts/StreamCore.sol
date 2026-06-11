@@ -546,13 +546,20 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     function _pinCollectionDependency(uint256 _collectionID, bytes32 dependencyNameAndVersion)
         private
     {
-        uint256 version = dependencyRegistry.latestDependencyVersion(dependencyNameAndVersion);
-        if (dependencyNameAndVersion != bytes32(0) && version == 0) {
-            revert UnknownDependency(dependencyNameAndVersion);
+        uint256 version = 0;
+        bytes32 contentHash;
+        if (dependencyNameAndVersion == bytes32(0)) {
+            contentHash =
+                dependencyRegistry.getDependencyScriptContentHashAtVersion(bytes32(0), version);
+        } else {
+            version = dependencyRegistry.latestDependencyVersion(dependencyNameAndVersion);
+            if (version == 0) {
+                revert UnknownDependency(dependencyNameAndVersion);
+            }
+            contentHash = dependencyRegistry.getDependencyScriptContentHashAtVersion(
+                dependencyNameAndVersion, version
+            );
         }
-        bytes32 contentHash = dependencyRegistry.getDependencyScriptContentHashAtVersion(
-            dependencyNameAndVersion, version
-        );
         collectionDependencyVersions[_collectionID] = version;
         collectionDependencyContentHashes[_collectionID] = contentHash;
         emit DependencyVersionPinned(_collectionID, dependencyNameAndVersion, version, contentHash);

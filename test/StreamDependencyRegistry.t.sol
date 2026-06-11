@@ -153,12 +153,52 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         deployed.dependencyRegistry.addDependencyScriptIndex(dependencyKey, 2, "out-of-range");
     }
 
+    function testZeroDependencyKeyIsReservedForRegistryWrites() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 zeroKey = bytes32(0);
+        string[] memory v1 = _singleChunk("zero-key-version");
+        bytes memory expectedRevert =
+            abi.encodeWithSelector(DependencyRegistry.DependencyKeyReserved.selector, zeroKey);
+
+        vm.expectRevert(expectedRevert);
+        deployed.dependencyRegistry.addDependency(zeroKey, v1);
+
+        vm.expectRevert(expectedRevert);
+        deployed.dependencyRegistry.addDependencyWithProvenance(zeroKey, v1, "ipfs://zero-key");
+
+        vm.expectRevert(expectedRevert);
+        deployed.dependencyRegistry.addDependencyScriptIndex(zeroKey, 0, "new");
+
+        vm.expectRevert(expectedRevert);
+        deployed.dependencyRegistry.deprecateDependencyVersion(zeroKey, 1);
+
+        deployed.dependencyRegistry.latestDependencyVersion(zeroKey)
+            .assertEq(0, "zero-key latest version");
+    }
+
     function testExplicitNoDependencyPinsEmptyVersion() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         bytes32 emptyHash =
             deployed.dependencyRegistry.getDependencyScriptContentHashAtVersion(bytes32(0), 0);
 
         _assertCollectionDependencyState(deployed, bytes32(0), 0, emptyHash);
+    }
+
+    function testNoDependencyPinSkipsZeroKeyLatestLookup() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 emptyHash =
+            deployed.dependencyRegistry.getDependencyScriptContentHashAtVersion(bytes32(0), 0);
+        ZeroKeyLatestRevertingRegistry replacement = new ZeroKeyLatestRevertingRegistry(emptyHash);
+
+        deployed.core.updateContracts(3, address(replacement));
+        _pinCollectionDependency(deployed, bytes32(0));
+
+        (bytes32 pinnedKey, uint256 pinnedVersion, bytes32 pinnedContentHash, address registry) =
+            deployed.core.collectionDependencyVersionState(COLLECTION_ID);
+        pinnedKey.assertEq(bytes32(0), "pinned zero key");
+        pinnedVersion.assertEq(0, "pinned zero version");
+        pinnedContentHash.assertEq(emptyHash, "pinned empty content hash");
+        registry.assertEq(address(replacement), "pinned replacement registry");
     }
 
     function testCollectionRejectsUnknownDependencyKey() public {
@@ -452,5 +492,31 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
             "';",
             "function draw(){}"
         );
+    }
+}
+
+contract ZeroKeyLatestRevertingRegistry {
+    bytes32 private immutable emptyContentHash;
+
+    constructor(bytes32 _emptyContentHash) {
+        emptyContentHash = _emptyContentHash;
+    }
+
+    function latestDependencyVersion(bytes32 dependencyNameAndVersion)
+        external
+        pure
+        returns (uint256)
+    {
+        require(dependencyNameAndVersion != bytes32(0), "zero latest lookup");
+        return 1;
+    }
+
+    function getDependencyScriptContentHashAtVersion(
+        bytes32 dependencyNameAndVersion,
+        uint256 version
+    ) external view returns (bytes32) {
+        require(dependencyNameAndVersion == bytes32(0), "unexpected dependency");
+        require(version == 0, "unexpected version");
+        return emptyContentHash;
     }
 }
