@@ -84,10 +84,13 @@ contributors who start from the README.
   `tokenURI` output, dependency scripts, and dependency provenance. Token image
   writes, collection base URI writes, and external library URL writes now reject
   unsafe URI inputs, and renderer helpers define the current content/script URI
-  scheme policy for tests and fixture checks.
+  scheme policy for tests and fixture checks. Dependency registry writes now
+  reject invalid UTF-8 dependency script chunks and provenance with typed field
+  errors while preserving size-before-UTF-8 error ordering.
   Remaining metadata blockers include deployment migration runbooks beyond
   registry provenance strings, full browser execution sandbox automation, and
-  production invalid UTF-8 policy.
+  `StreamCore` production invalid UTF-8 policy, which is size-gated under issue
+  #125.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries.

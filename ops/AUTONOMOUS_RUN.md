@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-attribute-schema` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/121` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/123` |
+| Active PR branch | `codex/metadata-utf8-production` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/123` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/126` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 22:00 UTC` |
+| Last updated | `2026-06-11 22:56 UTC` |
 
 ## Packaging Notes
 
@@ -118,13 +118,87 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Merged in PR #116 |
 | 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Merged in PR #118 |
 | 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Merged in PR #121 |
-| 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | PR #123 open |
+| 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Merged in PR #123 |
+| 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | In progress on `codex/metadata-utf8-production` |
 
 ## Current PR Worklog
 
-### PR candidate: Production raw attribute schema enforcement (Queue Item 64)
+### PR candidate: Dependency registry UTF-8 enforcement (Queue Item 65)
 
-Status: PR #123 open; CodeRabbit whitespace-only raw attribute fix passed full local validation and final artifacts are being refreshed for push.
+Status: PR #126 open; focused checks, release checksum generation, full
+`make check`, Windows wrapper, release drift checks, and diff hygiene pass
+locally.
+Branch: `codex/metadata-utf8-production`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/126`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/124`.
+Core size-gated follow-up:
+`https://github.com/6529-Collections/6529Stream/issues/125`.
+Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
+
+Goal:
+
+- Add a shared strict UTF-8 scanner for metadata safety checks.
+- Reject invalid UTF-8 dependency script chunks and provenance in
+  `DependencyRegistry` with typed field errors.
+- Preserve size-before-UTF-8 error ordering for oversized dependency fields.
+- Keep valid ASCII and valid multibyte UTF-8 dependency metadata working.
+- Record that `StreamCore` production UTF-8 enforcement remains blocked by
+  EIP-170 headroom until issue #125 recovers size or accepts a split design.
+
+Candidate files:
+
+- `smart-contracts/StreamMetadataRenderer.sol`
+- `smart-contracts/DependencyRegistry.sol`
+- `test/StreamMetadataUtf8.t.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+- release artifacts after checksum refresh
+
+Validation started at `2026-06-11 22:20 UTC`:
+
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- `forge fmt --check smart-contracts\DependencyRegistry.sol smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataUtf8.t.sol`
+- `forge test --match-path test\StreamMetadataUtf8.t.sol -vvv`
+- `forge test --match-path test\StreamDependencyRegistry.t.sol -vvv`
+- `make release-checksums`
+- `make check`
+- `make release-manifest-check`
+- `make release-checksums-check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+- `bash -n scripts/check.sh`
+
+Notes:
+
+- Initial direct `StreamCore._requireMaxBytes` UTF-8 enforcement made the
+  production size gate fail at 25,755 runtime bytes, 1,179 bytes over EIP-170.
+- Registry-backed and inlined Core experiments were also rejected locally
+  because they increased `StreamCore` runtime size further.
+- Issue #125 now tracks the required Core headroom/design work.
+- The narrowed dependency-registry slice keeps `StreamCore` unchanged at 24,135
+  runtime bytes with 441 bytes of EIP-170 headroom and linked
+  `StreamMetadataRenderer` at 8,976 runtime bytes.
+- Focused UTF-8 tests pass with 6 tests: valid ASCII/multibyte acceptance,
+  invalid lead/continuation/overlong/surrogate/out-of-range/truncated
+  rejection, dependency script/provenance rejection, and size-before-UTF-8
+  ordering.
+- `make release-checksums` refreshed release/deployment artifacts for the
+  `DependencyRegistry` ABI/custom-error delta, linked renderer bytecode delta,
+  docs/changelog/state updates, and new UTF-8 test file.
+- Full `make check` passes after the narrowed dependency-registry
+  implementation, new UTF-8 suite, docs updates, and release artifact refresh.
+- Windows `scripts\check.ps1` passes on the same narrowed slice, including the
+  6-test `StreamMetadataUtf8.t.sol` suite and release artifact drift checks.
+
+### PR #123: Production raw attribute schema enforcement (Queue Item 64)
+
+Status: Merged; CodeRabbit whitespace-only raw attribute fix passed full local
+validation and CI before merge.
 Branch: `codex/metadata-attribute-schema`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/123`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/122`.
@@ -5692,6 +5766,15 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 22:56 | Open PR #126 for Queue Item 65 | Pushed `codex/metadata-utf8-production`, opened https://github.com/6529-Collections/6529Stream/pull/126 against `main`, and linked it as part of issue #124 with Core enforcement split to issue #125 |
+| 2026-06-11 22:50 | Validate Queue Item 65 locally | Focused UTF-8 and dependency-registry tests, full `make check`, Windows `scripts\check.ps1`, release manifest/checksum drift checks, Bash syntax, and whitespace checks pass; this PR remains a dependency-registry slice with Core enforcement tracked in issue #125 |
+| 2026-06-11 22:45 | Run full Queue Item 65 local gate | `make check` passes after dependency registry UTF-8 enforcement, release artifact refresh, and the new UTF-8 suite; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
+| 2026-06-11 22:42 | Refresh Queue Item 65 release artifacts | `make release-checksums` passes after the dependency registry UTF-8 code/docs/state updates; production size gate remains green with `StreamCore` at 24,135 runtime bytes and `StreamMetadataRenderer` at 8,976 runtime bytes |
+| 2026-06-11 22:38 | Implement Queue Item 65 local draft | Added a strict UTF-8 scanner in `StreamMetadataRenderer`, enforced it for `DependencyRegistry` dependency script/provenance writes, added `StreamMetadataUtf8.t.sol`, and updated docs/roadmap/changelog/state while keeping `StreamCore` unchanged |
+| 2026-06-11 22:34 | Create issue #125 for Core UTF-8 size blocker | Direct, registry-backed, and inlined `StreamCore` UTF-8 enforcement experiments exceeded the EIP-170 production size gate, so issue #125 now tracks recovering size headroom or accepting a split design before Core-level invalid UTF-8 rejection |
+| 2026-06-11 22:29 | Narrow Queue Item 65 scope | Production UTF-8 enforcement for `DependencyRegistry` fits and passes the production size gate; `StreamCore` remains 24,135 runtime bytes with 441 bytes of headroom, while direct Core enforcement measured 25,755 bytes and failed |
+| 2026-06-11 22:12 | Start Queue Item 65 | PR #123 merged and main was synced; issue #124 starts production invalid UTF-8 work on branch `codex/metadata-utf8-production`, with CodeRabbit-only review per user instruction |
+| 2026-06-11 22:05 | Merge PR #123 | Production raw-attribute schema enforcement merged as `b4c33bfa7315373191056728d48e0d48715b6532`; CI and CodeRabbit were clean, issue #122 closed, and local main fast-forwarded before selecting the next P1-META-006 slice |
 | 2026-06-11 22:00 | Run full local gate after PR #123 review fix | `make check` passes after rejecting whitespace-only raw attributes and refreshing release artifacts, so the final push will carry both focused regression proof and the repository-wide gate |
 | 2026-06-11 21:55 | Validate CodeRabbit PR #123 whitespace-only fix | Focused metadata tests pass with the new whitespace-only regression, release manifest/checksum checks pass after artifact refresh, `git diff --check` is clean, and `StreamCore` stays at 24,135 bytes with 441 bytes of EIP-170 headroom |
 | 2026-06-11 21:51 | Accept CodeRabbit PR #123 whitespace-only finding | Whitespace-only raw attributes are nonempty and should not satisfy the production schema; keep only the zero-length fragment as the allowed empty case, add regression coverage, and refresh release artifacts |

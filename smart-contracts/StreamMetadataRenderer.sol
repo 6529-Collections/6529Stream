@@ -301,6 +301,81 @@ library StreamMetadataRenderer {
         return string(_truncateBytes(output, outputLength));
     }
 
+    function isValidUtf8(string memory raw) public pure returns (bool valid) {
+        assembly {
+            let cursor := add(raw, 0x20)
+            let end := add(cursor, mload(raw))
+            valid := 1
+
+            for { } lt(cursor, end) { cursor := add(cursor, 1) } {
+                let lead := byte(0, mload(cursor))
+
+                if iszero(lt(lead, 0x80)) {
+                    if or(lt(lead, 0xc2), gt(lead, 0xf4)) {
+                        valid := 0
+                        break
+                    }
+
+                    cursor := add(cursor, 1)
+                    if iszero(lt(cursor, end)) {
+                        valid := 0
+                        break
+                    }
+
+                    let second := byte(0, mload(cursor))
+                    if iszero(eq(and(second, 0xc0), 0x80)) {
+                        valid := 0
+                        break
+                    }
+
+                    if lt(lead, 0xe0) {
+                        continue
+                    }
+
+                    if or(
+                        and(eq(lead, 0xe0), lt(second, 0xa0)),
+                        and(eq(lead, 0xed), gt(second, 0x9f))
+                    ) {
+                        valid := 0
+                        break
+                    }
+
+                    cursor := add(cursor, 1)
+                    if iszero(lt(cursor, end)) {
+                        valid := 0
+                        break
+                    }
+                    if iszero(eq(and(byte(0, mload(cursor)), 0xc0), 0x80)) {
+                        valid := 0
+                        break
+                    }
+
+                    if lt(lead, 0xf0) {
+                        continue
+                    }
+
+                    if or(
+                        and(eq(lead, 0xf0), lt(second, 0x90)),
+                        and(eq(lead, 0xf4), gt(second, 0x8f))
+                    ) {
+                        valid := 0
+                        break
+                    }
+
+                    cursor := add(cursor, 1)
+                    if iszero(lt(cursor, end)) {
+                        valid := 0
+                        break
+                    }
+                    if iszero(eq(and(byte(0, mload(cursor)), 0xc0), 0x80)) {
+                        valid := 0
+                        break
+                    }
+                }
+            }
+        }
+    }
+
     function isSafeRawAttributes(string memory raw) public pure returns (bool) {
         bytes memory input = bytes(raw);
         if (input.length == 0) {

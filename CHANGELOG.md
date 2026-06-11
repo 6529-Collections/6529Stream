@@ -39,6 +39,10 @@ the release policy in `docs/release-policy.md`.
   payloads and non-semantic attribute entries fail the committed fixture gate.
 - Added production raw-attribute schema enforcement so token attributes must be
   empty or comma-separated objects with `trait_type` and `value` string fields.
+- Added a strict UTF-8 scanner and production dependency registry enforcement
+  for dependency script chunks and provenance, with focused invalid-sequence and
+  size-before-UTF-8 tests. `StreamCore` metadata-input UTF-8 enforcement remains
+  a size-gated follow-up.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.
@@ -81,6 +85,9 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   collection URI production enforcement and custom errors replacing legacy
   `StreamCore` revert strings on metadata, mint, randomizer, and wiring paths.
+- Gate D/G release artifacts now include the ABI, bytecode, and custom-error
+  deltas from dependency registry UTF-8 enforcement and the shared renderer
+  UTF-8 scanner.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from the
   `StreamMetadataRenderer.supportsContractMarker` helper used to keep marker
   probe hardening deployable under EIP-170.

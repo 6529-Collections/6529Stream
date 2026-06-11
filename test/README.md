@@ -195,9 +195,14 @@ token image URI enforcement for allowed `https://`, `ipfs://`, and `ar://`
 content URIs plus rejected empty, JavaScript, hostless HTTPS, and
 whitespace-bearing image inputs. It also covers optional collection base URI and
 external library URL production enforcement, including empty optional values,
-safe content/script values, unsafe base URIs, and non-HTTPS library URLs. Full
-browser execution sandboxing plus production invalid UTF-8 enforcement remain
-future P1-META-006 work.
+safe content/script values, unsafe base URIs, and non-HTTPS library URLs.
+`StreamMetadataUtf8.t.sol` covers the shared strict UTF-8 scanner, valid
+ASCII/multibyte sequences, invalid lead/continuation, overlong, surrogate,
+out-of-range, and truncated sequences, dependency script/provenance production
+rejections, and size-before-UTF-8 error ordering. Full browser execution
+sandboxing plus `StreamCore` production invalid UTF-8 enforcement remain future
+P1-META-006 work; the Core slice is tracked as a size-gated follow-up in issue
+#125.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

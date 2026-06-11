@@ -80,6 +80,11 @@ The current Gate A smoke baseline proves:
   `ipfs://`, and `ar://` content URIs plus rejected empty required token image
   URIs, JavaScript, hostless HTTPS, whitespace-bearing token image/base URI
   inputs, and non-HTTPS external library URLs.
+  `StreamMetadataUtf8.t.sol` proves the shared strict UTF-8 scanner accepts
+  valid ASCII and multibyte sequences, rejects invalid lead/continuation,
+  overlong, surrogate, out-of-range, and truncated sequences, and enforces that
+  `DependencyRegistry` rejects invalid UTF-8 dependency scripts/provenance
+  while preserving size-before-UTF-8 error ordering.
   `StreamCoreCustomErrors.t.sol` proves the typed failure selectors used to
   recover `StreamCore` bytecode headroom for function-admin authorization,
   artist-signature authorization, metadata-array length validation, and
@@ -165,11 +170,12 @@ rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening, production dependency migration
-runbooks beyond the local artifact-manifest baseline, production invalid UTF-8
-enforcement, full browser execution sandbox automation, deployment discipline,
-and the broader P0/P1 test suite. Fixture-level invalid UTF-8 regressions are
-now covered in the committed metadata fixture gate, but they do not enforce the
-remaining production UTF-8 policy.
+runbooks beyond the local artifact-manifest baseline, `StreamCore` production
+invalid UTF-8 enforcement, full browser execution sandbox automation,
+deployment discipline, and the broader P0/P1 test suite. Fixture-level invalid
+UTF-8 regressions and dependency registry production UTF-8 guards are now
+covered, but Core-level production UTF-8 enforcement remains size-gated in
+issue #125.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.
