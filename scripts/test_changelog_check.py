@@ -59,21 +59,32 @@ class ChangelogGateTests(unittest.TestCase):
         self.assertIn("CHANGELOG.md must be updated", "\n".join(errors))
 
     def test_placeholder_unreleased_entry_fails(self) -> None:
-        placeholder = """# Changelog
+        placeholder_entries = [
+            "TBD",
+            "TODO: fill later",
+            "TBD - pending",
+            "n/a",
+            "_none_",
+            "Placeholder until release",
+        ]
+
+        for placeholder_entry in placeholder_entries:
+            with self.subTest(placeholder_entry=placeholder_entry):
+                placeholder = f"""# Changelog
 
 ## Unreleased
 
 ### Added
 
-- TBD
+- {placeholder_entry}
 """
 
-        errors, _ = checker.validate_changelog_state(
-            ["CHANGELOG.md", "deployments/config/anvil.json"],
-            placeholder,
-        )
+                errors, _ = checker.validate_changelog_state(
+                    ["CHANGELOG.md", "deployments/config/anvil.json"],
+                    placeholder,
+                )
 
-        self.assertIn("non-placeholder Unreleased bullet", "\n".join(errors))
+                self.assertIn("non-placeholder Unreleased bullet", "\n".join(errors))
 
     def test_missing_unreleased_section_fails(self) -> None:
         errors, _ = checker.validate_changelog_state(

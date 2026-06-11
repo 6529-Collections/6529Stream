@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/102` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 11:34 UTC` |
+| Last updated | `2026-06-11 11:46 UTC` |
 
 ## Packaging Notes
 
@@ -4763,7 +4763,7 @@ Merge evidence:
 
 ### PR candidate: Add release change approval policy and changelog gate (Queue Item 53)
 
-Status: PR open; CI and CodeRabbit pending.
+Status: CodeRabbit findings fixed locally; review-fix validation passed.
 Branch: `codex/release-change-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/104`.
 Related issue:
@@ -4826,10 +4826,21 @@ Validation:
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 
+Review response:
+
+- Accepted CodeRabbit inline comment on placeholder bypasses: placeholder
+  detection now rejects prefix variants such as `TODO: fill later`,
+  `TBD - pending`, `n/a`, `_none_`, and placeholder-prefixed bullets.
+- Accepted CodeRabbit PR-template wording nit: release notes checklist now
+  names the required `## Unreleased` section and non-placeholder bullet.
+- Review-fix validation passed with changelog tests/check, Python compile,
+  shell/PowerShell syntax, and whitespace checks.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 11:46 | Address CodeRabbit PR #104 review locally | Accepted the placeholder-bypass finding and PR-template wording nit; focused changelog tests/check, Python compile, shell/PowerShell syntax, and whitespace checks pass |
 | 2026-06-11 11:34 | Open PR #104 | Release change policy/changelog gate PR published at `https://github.com/6529-Collections/6529Stream/pull/104`; a state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 11:33 | Validate Queue Item 53 locally | Changelog gate tests/check, Python compile, shell/PowerShell syntax, Markdown heading trace, whitespace check, full `make check`, and Windows wrapper all pass; implementation also fixed local changelog auto-detection by resolving `git` with `shutil.which()`, failing closed on required git diff errors, and including untracked files |
 | 2026-06-11 11:11 | Start Queue Item 53 | Issue #103 tracks the remaining Gate G ABI/release change approval policy gap; branch `codex/release-change-policy` starts from merged PR #102 and scopes to policy docs plus a changelog gate, excluding real signatures and production addresses |

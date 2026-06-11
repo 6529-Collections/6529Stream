@@ -47,8 +47,8 @@ Local commands run:
 
 ## Release Notes
 
-- [ ] `CHANGELOG.md` has an `Unreleased` entry, or this PR has no release-impacting paths.
-- [ ] Release-impacting ABI, metadata schema, authorization, role, deployment, or artifact changes are documented.
+- [ ] `CHANGELOG.md` has a `## Unreleased` section with at least one non-placeholder bullet, or this PR has no release-impacting paths.
+- [ ] Release-impacting ABI, metadata schema, authorization, role, deployment, or artifact changes are documented in `CHANGELOG.md`.
 
 ## Reviewer Notes
 

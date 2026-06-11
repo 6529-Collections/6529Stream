@@ -47,15 +47,17 @@ RELEASE_IMPACTING_PATHS = {
     ),
 }
 
-PLACEHOLDER_ENTRIES = {
+PLACEHOLDER_TERMS = (
     "tbd",
     "todo",
     "none",
-    "n/a",
+    r"n/?a",
     "placeholder",
-    "_tbd_",
-    "_none_",
-}
+)
+PLACEHOLDER_ENTRY_RE = re.compile(
+    r"^[\W_]*(?:" + "|".join(PLACEHOLDER_TERMS) + r")(?:\b|[\W_]|$)",
+    re.IGNORECASE,
+)
 
 UNRELEASED_RE = re.compile(r"^##\s+\[?Unreleased\]?\s*$", re.IGNORECASE)
 LEVEL_TWO_HEADING_RE = re.compile(r"^##\s+")
@@ -177,12 +179,9 @@ def unreleased_entries(changelog_text: str) -> list[str]:
         if not stripped.startswith("- "):
             continue
         entry = stripped[2:].strip()
-        normalized = entry.lower().strip(".")
         if not entry or entry.startswith("<!--"):
             continue
-        if normalized in PLACEHOLDER_ENTRIES:
-            continue
-        if "placeholder" in normalized:
+        if PLACEHOLDER_ENTRY_RE.search(entry):
             continue
         entries.append(entry)
     return entries
