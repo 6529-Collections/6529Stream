@@ -91,12 +91,16 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         uint256 collectionId, uint256 currentTimestamp, uint256 endTime
     );
     error CollectionNotCreated(uint256 collectionId);
+    error ArtistSignatureUnauthorized();
     error BurnedTokenRemintNotAllowed(uint256 tokenId);
+    error FunctionAdminUnauthorized();
     error InvalidAdminContract();
     error InvalidDependencyRegistryContract();
     error InvalidMinterContract();
     error InvalidRandomizerContract();
+    error InvalidTokenMetadataInput();
     error MetadataMutationPaused();
+    error FinalSupplyTimeNotPassed();
     error FrozenCollectionDependencyRegistry();
     error MetadataFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
     error MetadataFrozen(uint256 collectionId);
@@ -266,11 +270,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
 
     // certain functions can only be called by a global or function admin
     modifier FunctionAdminRequired(bytes4 _selector) {
-        require(
-            adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector) == true
-                || adminsContract.retrieveGlobalAdmin(msg.sender) == true,
-            "Not allowed"
-        );
+        if (
+            !adminsContract.retrieveFunctionAdmin(msg.sender, address(this), _selector)
+                && !adminsContract.retrieveGlobalAdmin(msg.sender)
+        ) {
+            revert FunctionAdminUnauthorized();
+        }
         _;
     }
 
@@ -326,32 +331,27 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         if (_collectionTotalSupply > _COLLECTION_TOKEN_RANGE) {
             revert CollectionSupplyTooLarge();
         }
-        if (collectionAdditionalData[_collectionID].collectionTotalSupply == 0) {
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        if (collectionData.collectionTotalSupply == 0) {
             if (_collectionTotalSupply == 0) {
                 revert CollectionSupplyTooLarge();
             }
-            collectionAdditionalData[_collectionID].collectionArtistAddress =
-            _collectionArtistAddress;
-            collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
-            collectionAdditionalData[_collectionID].collectionCirculationSupply = 0;
-            collectionAdditionalData[_collectionID].collectionTotalSupply = _collectionTotalSupply;
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
-            _setFinalSupplyTimeAfterMint;
-            collectionAdditionalData[_collectionID].reservedMinTokensIndex =
-            (_collectionID * _COLLECTION_TOKEN_RANGE);
-            collectionAdditionalData[_collectionID].reservedMaxTokensIndex =
+            collectionData.collectionArtistAddress = _collectionArtistAddress;
+            collectionData.maxCollectionPurchases = _maxCollectionPurchases;
+            collectionData.collectionCirculationSupply = 0;
+            collectionData.collectionTotalSupply = _collectionTotalSupply;
+            collectionData.setFinalSupplyTimeAfterMint = _setFinalSupplyTimeAfterMint;
+            collectionData.reservedMinTokensIndex = (_collectionID * _COLLECTION_TOKEN_RANGE);
+            collectionData.reservedMaxTokensIndex =
                 (_collectionID * _COLLECTION_TOKEN_RANGE) + _collectionTotalSupply - 1;
             wereDataAdded[_collectionID] = true;
-        } else if (artistSigned[_collectionID] == false) {
-            collectionAdditionalData[_collectionID].collectionArtistAddress =
-            _collectionArtistAddress;
-            collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
-            _setFinalSupplyTimeAfterMint;
         } else {
-            collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
-            _setFinalSupplyTimeAfterMint;
+            if (!artistSigned[_collectionID]) {
+                collectionData.collectionArtistAddress = _collectionArtistAddress;
+            }
+            collectionData.maxCollectionPurchases = _maxCollectionPurchases;
+            collectionData.setFinalSupplyTimeAfterMint = _setFinalSupplyTimeAfterMint;
         }
     }
 
@@ -519,11 +519,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     function artistSignature(uint256 _collectionID, string memory _signature) public {
         _requireMetadataMutationNotPaused();
         _requireCollectionNotFrozen(_collectionID);
-        require(
-            msg.sender == collectionAdditionalData[_collectionID].collectionArtistAddress
-                && artistSigned[_collectionID] == false,
-            "Not artist/Signed"
-        );
+        if (
+            msg.sender != collectionAdditionalData[_collectionID].collectionArtistAddress
+                || artistSigned[_collectionID]
+        ) {
+            revert ArtistSignatureUnauthorized();
+        }
         artistsSignatures[_collectionID] = _signature;
         artistSigned[_collectionID] = true;
     }
@@ -561,9 +562,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         string[] memory _attributes
     ) public FunctionAdminRequired(this.updateImagesAndAttributes.selector) {
         _requireMetadataMutationNotPaused();
-        require(
-            (_tokenId.length == _images.length) && (_images.length == _attributes.length), "inv len"
-        );
+        if (_tokenId.length != _images.length || _images.length != _attributes.length) {
+            revert InvalidTokenMetadataInput();
+        }
         for (uint256 x; x < _tokenId.length; x++) {
             uint256 collectionId = tokenIdsToCollectionIds[_tokenId[x]];
             _requireCollectionNotFrozen(collectionId);
@@ -647,13 +648,17 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         public
         FunctionAdminRequired(this.setFinalSupply.selector)
     {
-        _requireCollectionNotFrozen(_collectionID);
-        require(
+        _requireExistingMutableCollection(_collectionID);
+        if (!wereDataAdded[_collectionID]) {
+            revert CollectionDataMissing(_collectionID);
+        }
+        if (
             block.timestamp
-                > IStreamMinter(minterContract).getEndTime(_collectionID)
-                    + collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint,
-            "Time has not passed"
-        );
+                <= IStreamMinter(minterContract).getEndTime(_collectionID)
+                    + collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint
+        ) {
+            revert FinalSupplyTimeNotPassed();
+        }
         _finalizeCollectionSupply(_collectionID);
     }
 

@@ -7,9 +7,11 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,545 bytes,
-  leaving 31 bytes of EIP-170 headroom under the IR-optimized deployment
-  profile.
+  size gate. Current `StreamCore` production runtime size is 24,135 bytes,
+  leaving 441 bytes of EIP-170 headroom under the IR-optimized deployment
+  profile. This satisfies the current 384-byte minimum release floor; future
+  non-trivial `StreamCore` feature work should preserve at least 512 bytes of
+  warning-threshold headroom or document an explicit size-budget exception.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271
@@ -77,6 +79,11 @@ The current Gate A smoke baseline proves:
   `ipfs://`, and `ar://` content URIs plus rejected empty required token image
   URIs, JavaScript, hostless HTTPS, whitespace-bearing token image/base URI
   inputs, and non-HTTPS external library URLs.
+  `StreamCoreCustomErrors.t.sol` proves the typed failure selectors used to
+  recover `StreamCore` bytecode headroom for function-admin authorization,
+  artist-signature authorization, metadata-array length validation, and
+  final-supply timing, plus missing collection data rejection before final
+  supply math.
   `scripts/test_metadata_fixtures.py` and
   `scripts/check_metadata_fixtures.py` validate the committed metadata golden
   fixtures outside Foundry by strictly decoding JSON and HTML data URIs,
