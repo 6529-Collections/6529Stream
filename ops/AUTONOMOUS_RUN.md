@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/110` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 15:06 UTC` |
+| Last updated | `2026-06-11 15:08 UTC` |
 
 ## Packaging Notes
 
@@ -5127,10 +5127,10 @@ Validation status:
 
 ### PR candidate: Add metadata size limits (Queue Item 57)
 
-Status: Local implementation validated on branch `codex/metadata-size-limits`;
-ready to commit, push, open PR, and request CodeRabbit review.
+Status: PR open; local validation passed and CodeRabbit review was requested in
+issue comment `4682019145`.
 Branch: `codex/metadata-size-limits`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/111`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/51`
@@ -5183,12 +5183,13 @@ Validation status:
   `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\DependencyRegistry.sol test\StreamMetadataSizeLimits.t.sol`.
 - Full `forge fmt --check smart-contracts` still fails on existing legacy
   formatting outside this PR and remains tracked as a broader repo cleanup.
-- PR publication remains pending.
+- CI and CodeRabbit review are pending after PR open.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 15:08 | Open PR #111 and request CodeRabbit | Metadata size-limit PR published at `https://github.com/6529-Collections/6529Stream/pull/111`; CodeRabbit review requested in issue comment `4682019145`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 15:06 | Validate Queue Item 57 locally | Focused metadata/dependency tests, full `make check`, Windows wrapper, production size gate, release artifact generation/checks, touched-file formatting, and whitespace validation pass; full smart-contract formatting still fails on existing untouched legacy files |
 | 2026-06-11 14:53 | Start Queue Item 57 | Issue #51 remains open for P1-META-006; numeric metadata size limits are a deterministic, high-value slice after PR #87/#88 and can ship without deciding the remaining URI/schema/UTF-8/browser sandbox policies |
 | 2026-06-11 14:51 | Enforce generated response cap at `tokenURI` boundary | A separate generated-animation URI cap made `StreamCore` exceed EIP-170; enforcing the generated `tokenURI` cap preserves the external response limit while keeping production bytecode deployable |
