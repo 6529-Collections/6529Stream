@@ -42,6 +42,9 @@ FORBIDDEN_SECRET_KEYS = frozenset(
         "rpc_urls",
     }
 )
+FORBIDDEN_SECRET_KEYS_NORMALIZED = frozenset(
+    re.sub(r"[^a-z0-9]", "", key.lower()) for key in FORBIDDEN_SECRET_KEYS
+)
 
 
 class BroadcastManifestError(RuntimeError):
@@ -119,7 +122,8 @@ def normalize_tx_hash(value: Any, path: str) -> str:
 def assert_no_secret_keys(value: Any, path: str = "$") -> None:
     if isinstance(value, dict):
         for key, child in value.items():
-            if str(key) in FORBIDDEN_SECRET_KEYS:
+            normalized_key = re.sub(r"[^a-z0-9]", "", str(key).lower())
+            if normalized_key in FORBIDDEN_SECRET_KEYS_NORMALIZED:
                 raise BroadcastManifestError(f"broadcast contains forbidden secret-like key: {path}.{key}")
             assert_no_secret_keys(child, f"{path}.{key}")
     elif isinstance(value, list):

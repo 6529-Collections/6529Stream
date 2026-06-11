@@ -295,21 +295,22 @@ class BroadcastManifestInputTests(unittest.TestCase):
                 )
 
     def test_generator_rejects_secret_like_keys(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            template = template_config(root)
-            broadcast = broadcast_file(root)
-            data = generator.load_json(broadcast)
-            data["privateKey"] = "not-for-commit"
-            write_json(broadcast, data)
+        for key in ("privateKey", "PrivateKey", "private-key", "RPCURL", "RPC-URL"):
+            with self.subTest(key=key), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                template = template_config(root)
+                broadcast = broadcast_file(root)
+                data = generator.load_json(broadcast)
+                data[key] = "not-for-commit"
+                write_json(broadcast, data)
 
-            with self.assertRaisesRegex(generator.BroadcastManifestError, "forbidden"):
-                generator.build_manifest_input(
-                    template,
-                    broadcast,
-                    root / "out.json",
-                    root / "manifest.json",
-                )
+                with self.assertRaisesRegex(generator.BroadcastManifestError, "forbidden"):
+                    generator.build_manifest_input(
+                        template,
+                        broadcast,
+                        root / "out.json",
+                        root / "manifest.json",
+                    )
 
 
 if __name__ == "__main__":
