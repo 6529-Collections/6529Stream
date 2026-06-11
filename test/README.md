@@ -165,16 +165,17 @@ suite also asserts `metadataSchemaVersion()` and the token-level
 `pending`/`final` metadata state view, and pending on-chain metadata no longer
 executes the final generative HTML path with a zero token hash.
 
-Metadata escaping now has first-slice P1-META-006 coverage in
+Metadata escaping now has P1-META-006 coverage in
 `StreamMetadataEscaping.t.sol`: on-chain JSON string escaping is exercised for
 collection/name, description, and image fields before base64 encoding; decoded
 metadata is parsed through Foundry's JSON parser; raw attribute fragments allow
-brackets inside quoted JSON strings; and breakout fragments, literal control
-characters, and unterminated strings revert with the metadata attribute guard.
-The suite also decodes final animation HTML and asserts wrapper-boundary
-escaping for the external library attribute, `tokenData` JavaScript string
-embedding, dependency script JavaScript string embedding, and literal
-closing-script sequences.
+brackets inside quoted JSON strings and valid JSON escapes; and breakout
+fragments, literal control characters, unterminated strings, malformed
+separators, missing keys, duplicate keys, unexpected keys, non-string values,
+and invalid string escapes revert with the metadata attribute guard. The suite
+also decodes final animation HTML and asserts wrapper-boundary escaping for the
+external library attribute, `tokenData` JavaScript string embedding, dependency
+script JavaScript string embedding, and literal closing-script sequences.
 
 Metadata size limits now have P1-META-006 coverage in
 `StreamMetadataSizeLimits.t.sol`: collection display fields, collection script
@@ -195,8 +196,8 @@ content URIs plus rejected empty, JavaScript, hostless HTTPS, and
 whitespace-bearing image inputs. It also covers optional collection base URI and
 external library URL production enforcement, including empty optional values,
 safe content/script values, unsafe base URIs, and non-HTTPS library URLs. Full
-browser execution sandboxing plus production semantic attribute and invalid
-UTF-8 enforcement remain future P1-META-006 work.
+browser execution sandboxing plus production invalid UTF-8 enforcement remain
+future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

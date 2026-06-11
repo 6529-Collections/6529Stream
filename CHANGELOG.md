@@ -37,6 +37,8 @@ the release policy in `docs/release-policy.md`.
   drift checks for packaged dependency source files.
 - Added metadata fixture regressions proving invalid UTF-8 JSON/HTML data URI
   payloads and non-semantic attribute entries fail the committed fixture gate.
+- Added production raw-attribute schema enforcement so token attributes must be
+  empty or comma-separated objects with `trait_type` and `value` string fields.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.
@@ -88,6 +90,8 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include dependency artifact manifest coverage
   and checksum coverage for dependency descriptors/source files under
   `release-artifacts/dependencies/`.
+- Gate D/G release artifacts now include the bytecode delta from production
+  raw-attribute schema enforcement in `StreamMetadataRenderer`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   `StreamCore` size-recovery custom errors:
   `ArtistSignatureUnauthorized()`, `FunctionAdminUnauthorized()`,

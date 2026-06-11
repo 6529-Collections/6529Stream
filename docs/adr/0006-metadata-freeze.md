@@ -238,9 +238,10 @@ current URI scheme policy. The fifth slice exposes renderer URI policy helpers
 and enforces the required content URI policy for token image writes. The sixth
 slice extends deployable production enforcement to optional collection base URI
 and external library URL writes while converting older metadata-path string
-reverts to custom errors to stay under EIP-170. The remaining public-beta work
-is still to define semantic attribute schema validation or structured
-attributes, browser render-sandbox proofing for generated animation code, and
+reverts to custom errors to stay under EIP-170. The eighth slice enforces
+production raw attribute entries as empty content or comma-separated
+`trait_type` / `value` string-pair objects. The remaining public-beta work is
+browser render-sandbox proofing for generated animation code and production
 invalid UTF-8 policy.
 
 The implementation must define maximum sizes for:
@@ -490,6 +491,7 @@ Public-beta implementation must:
 - escape JSON string contexts and generated JavaScript/HTML wrapper contexts or
   reject unsafe inputs
 - validate raw attribute fragments or replace them with structured attributes
+  (current production writes enforce `trait_type` / `value` string-pair objects)
 - add metadata schema docs and golden-file tests
 - add freeze manifest storage and views
 - make freeze block all metadata-significant mutation paths
@@ -520,7 +522,9 @@ P1 metadata tests must include:
   escaping, escaped `tokenData` and dependency-script JavaScript strings, and
   closing-script neutralization inside the generated wrapper. It does not
   sandbox artist collection scripts.
-- raw attributes validation or structured attributes serialization
+- raw attributes validation or structured attributes serialization. Current
+  production tests enforce `trait_type` / `value` string-pair objects and reject
+  missing, duplicate, unexpected, and non-string fields.
 - metadata mode changes emit expected events before freeze
 - token data, image, and attribute updates emit expected events before freeze
 - `supportsInterface(0x49064906)` succeeds when `ERC-4906` is implemented
