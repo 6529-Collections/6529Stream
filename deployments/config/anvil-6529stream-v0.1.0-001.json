@@ -1,0 +1,159 @@
+{
+  "schema_version": "6529stream.deployment-manifest-input.v1",
+  "output": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+  "manifest": {
+    "protocol_version": "0.1.0",
+    "deployment_version": "anvil-6529stream-v0.1.0-001",
+    "lifecycle_state": "Rehearsed",
+    "network": {
+      "name": "anvil",
+      "chain_id": 31337,
+      "rpc_environment_variable": "ANVIL_RPC_URL",
+      "confirmation_depth": 0
+    },
+    "git": {
+      "repository": "https://github.com/6529-Collections/6529Stream",
+      "commit": "0000000000000000000000000000000000000000",
+      "source_dirty": false
+    },
+    "toolchain": {
+      "foundry_version": "v1.7.1",
+      "solidity_version": "0.8.19",
+      "profile": "default",
+      "optimizer": true,
+      "optimizer_runs": 200,
+      "via_ir": true
+    },
+    "contracts": [
+      {
+        "name": "StreamAdmins",
+        "address": "0x0000000000000000000000000000000000000001",
+        "constructor_args": ["0x0000000000000000000000000000000000006532"],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "DependencyRegistry",
+        "address": "0x0000000000000000000000000000000000000002",
+        "constructor_args": ["0x0000000000000000000000000000000000000001"],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamCore",
+        "address": "0x0000000000000000000000000000000000000003",
+        "constructor_args": [
+          "6529 Stream",
+          "STREAM",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000002"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamCuratorsPool",
+        "address": "0x0000000000000000000000000000000000000004",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000006534"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamMinter",
+        "address": "0x0000000000000000000000000000000000000005",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamDrops",
+        "address": "0x0000000000000000000000000000000000000006",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000006532",
+          "0x0000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000006533",
+          "0x0000000000000000000000000000000000000004"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamAuctions",
+        "address": "0x0000000000000000000000000000000000000007",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000006",
+          "0x0000000000000000000000000000000000006533",
+          "0x0000000000000000000000000000000000000004"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "NextGenRandomizerVRF",
+        "address": "0x0000000000000000000000000000000000000008",
+        "constructor_args": [
+          6529,
+          "0x0000000000000000000000000000000000006535",
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "NextGenRandomizerRNG",
+        "address": "0x0000000000000000000000000000000000000009",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000006536"
+        ],
+        "verification_status": "not_applicable"
+      }
+    ],
+    "admin_ceremony": {
+      "deployer": "0x0000000000000000000000000000000000006537",
+      "admin_safe": "0x0000000000000000000000000000000000006529",
+      "emergency_recipient": "0x0000000000000000000000000000000000006531",
+      "pause_guardians": ["0x0000000000000000000000000000000000006530"],
+      "unpause_admins": ["0x0000000000000000000000000000000000006529"],
+      "signer_managers": ["0x0000000000000000000000000000000000006529"],
+      "drop_signers": ["0x0000000000000000000000000000000000006532"],
+      "temporary_admins_revoked": true,
+      "ownership_transfers": [
+        {
+          "contract": "StreamAdmins",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamCore",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        }
+      ]
+    },
+    "external_dependencies": {
+      "vrf_coordinator": "0x0000000000000000000000000000000000006535",
+      "arrng_controller": "0x0000000000000000000000000000000000006536",
+      "delegation_registry": "0x0000000000000000000000000000000000006534"
+    },
+    "verification": {
+      "contract_verification": "not_applicable",
+      "constructor_args_retained": true,
+      "commands": [
+        "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir"
+      ]
+    },
+    "release_artifacts": {
+      "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
+    },
+    "rehearsal": {
+      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
+      "anvil_passed": true,
+      "fork_passed": false,
+      "notes": "Local example only. Addresses are placeholders; use broadcast outputs and checksummed ABI hashes for a real deployment."
+    }
+  }
+}

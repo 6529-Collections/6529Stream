@@ -9,10 +9,10 @@ randomness adapters.
 This repository is pre-audit and not production-ready.
 
 The current CI and local smoke checks prove compilation, test command execution,
-the production size gate, a local deployment rehearsal, and deterministic
-release-artifact catalog checks. They do not prove protocol correctness or
-production deployment readiness. Known P0 blockers and the execution roadmap are
-tracked in
+the production size gate, a local deployment rehearsal, deterministic
+release-artifact catalog checks, and deterministic local deployment manifest
+checks. They do not prove protocol correctness or production deployment
+readiness. Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
 
 ## Drop Flow
@@ -40,6 +40,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_deployment_manifest.py
+python scripts/generate_deployment_manifest.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -53,6 +55,10 @@ proves the deploy-and-wire ceremony can execute without production secrets.
 The release-artifact step verifies the committed ABI checksums, bytecode
 checksums, interface IDs, and event topic catalog under
 `release-artifacts/latest/` against the production `via-ir` build profile.
+
+The deployment manifest step verifies the generated local Anvil manifest under
+`deployments/examples/` against committed manifest inputs and the current
+release-artifact hashes.
 
 On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
 with:

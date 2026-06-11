@@ -46,7 +46,11 @@ jobs:
             bash -n "$script"
           done
 
-          python3 -m py_compile scripts/generate_release_artifacts.py scripts/test_release_artifacts.py
+          python3 -m py_compile \
+            scripts/generate_release_artifacts.py \
+            scripts/test_release_artifacts.py \
+            scripts/generate_deployment_manifest.py \
+            scripts/test_deployment_manifest.py
 
       - name: PowerShell syntax
         shell: pwsh
@@ -97,6 +101,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-tests.log
           python3 scripts/generate_release_artifacts.py --check 2>&1 | tee ci-logs/release-artifacts-check.log
+
+      - name: Deployment manifest
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_deployment_manifest.py 2>&1 | tee ci-logs/deployment-manifest-tests.log
+          python3 scripts/generate_deployment_manifest.py --check 2>&1 | tee ci-logs/deployment-manifest-check.log
 
       - name: Deployment rehearsal
         shell: bash

@@ -25,14 +25,18 @@
   "contracts": {
     "StreamAdmins": {
       "address": "0x0000000000000000000000000000000000000001",
-      "constructor_args": ["0x0000000000000000000000000000000000006532"],
+      "constructor_args": [
+        "0x0000000000000000000000000000000000006532"
+      ],
       "abi_hash": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "bytecode_hash": "sha256:7611b836cc7f52c33e7e4b865bca6bc1ab11b28cfd5aefe9e6cbbbe948e23173",
       "verification_status": "not_applicable"
     },
     "DependencyRegistry": {
       "address": "0x0000000000000000000000000000000000000002",
-      "constructor_args": ["0x0000000000000000000000000000000000000001"],
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000001"
+      ],
       "abi_hash": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
       "bytecode_hash": "sha256:f8be54e49160988379e7cb288841e2238ea8f98b92327b469854501625a58d77",
       "verification_status": "not_applicable"
@@ -125,10 +129,18 @@
     "deployer": "0x0000000000000000000000000000000000006537",
     "admin_safe": "0x0000000000000000000000000000000000006529",
     "emergency_recipient": "0x0000000000000000000000000000000000006531",
-    "pause_guardians": ["0x0000000000000000000000000000000000006530"],
-    "unpause_admins": ["0x0000000000000000000000000000000000006529"],
-    "signer_managers": ["0x0000000000000000000000000000000000006529"],
-    "drop_signers": ["0x0000000000000000000000000000000000006532"],
+    "pause_guardians": [
+      "0x0000000000000000000000000000000000006530"
+    ],
+    "unpause_admins": [
+      "0x0000000000000000000000000000000000006529"
+    ],
+    "signer_managers": [
+      "0x0000000000000000000000000000000000006529"
+    ],
+    "drop_signers": [
+      "0x0000000000000000000000000000000000006532"
+    ],
     "temporary_admins_revoked": true,
     "ownership_transfers": [
       {
@@ -154,7 +166,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "TBD",
+    "manifest_sha256": "sha256:11fbad11b81c26393253418a256421a570a83259b7fc98e4670271920fb8760e",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
