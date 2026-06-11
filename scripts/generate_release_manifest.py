@@ -21,6 +21,7 @@ DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 DEFAULT_BASELINE = Path("release-artifacts/baselines/v0.1.0/abi-surface.json")
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
+DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
 DEFAULT_ADDRESS_BOOK_DIR = Path("deployments/address-books")
 DEFAULT_DEPLOYMENT_SCHEMA_DIR = Path("deployments/schema")
@@ -234,6 +235,7 @@ def build_manifest(
     baseline_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
+    deployment_broadcast_dir: Path,
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
@@ -270,6 +272,7 @@ def build_manifest(
             "output": normalize_path(output_path, repo_root),
             "release_artifacts_dir": normalize_path(release_artifacts_dir, repo_root),
             "deployment_config_dir": normalize_path(deployment_config_dir, repo_root),
+            "deployment_broadcast_dir": normalize_path(deployment_broadcast_dir, repo_root),
             "deployment_manifest_dir": normalize_path(deployment_manifest_dir, repo_root),
             "address_book_dir": normalize_path(address_book_dir, repo_root),
             "deployment_schema_dir": normalize_path(deployment_schema_dir, repo_root),
@@ -308,6 +311,9 @@ def build_manifest(
                 file_record(path, repo_root, schema_required=True)
                 for path in json_files(deployment_config_dir)
             ],
+            "broadcasts": [
+                file_record(path, repo_root) for path in json_files(deployment_broadcast_dir)
+            ],
             "manifests": deployment_manifests,
             "address_books": address_books,
             "schemas": [
@@ -336,6 +342,7 @@ def build_output_text(
     baseline_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
+    deployment_broadcast_dir: Path,
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
@@ -349,6 +356,7 @@ def build_output_text(
         baseline_path,
         contract_config_path,
         deployment_config_dir,
+        deployment_broadcast_dir,
         deployment_manifest_dir,
         address_book_dir,
         deployment_schema_dir,
@@ -365,6 +373,7 @@ def write_output(
     baseline_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
+    deployment_broadcast_dir: Path,
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
@@ -378,6 +387,7 @@ def write_output(
         baseline_path,
         contract_config_path,
         deployment_config_dir,
+        deployment_broadcast_dir,
         deployment_manifest_dir,
         address_book_dir,
         deployment_schema_dir,
@@ -396,6 +406,7 @@ def check_output(
     baseline_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
+    deployment_broadcast_dir: Path,
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
@@ -417,6 +428,7 @@ def check_output(
         baseline_path,
         contract_config_path,
         deployment_config_dir,
+        deployment_broadcast_dir,
         deployment_manifest_dir,
         address_book_dir,
         deployment_schema_dir,
@@ -450,6 +462,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--contract-config", type=Path, default=DEFAULT_CONTRACT_CONFIG)
     parser.add_argument("--deployment-config-dir", type=Path, default=DEFAULT_DEPLOYMENT_CONFIG_DIR)
     parser.add_argument(
+        "--deployment-broadcast-dir",
+        type=Path,
+        default=DEFAULT_DEPLOYMENT_BROADCAST_DIR,
+    )
+    parser.add_argument(
         "--deployment-manifest-dir",
         type=Path,
         default=DEFAULT_DEPLOYMENT_MANIFEST_DIR,
@@ -476,6 +493,7 @@ def main(argv: list[str]) -> int:
                 args.baseline,
                 args.contract_config,
                 args.deployment_config_dir,
+                args.deployment_broadcast_dir,
                 args.deployment_manifest_dir,
                 args.address_book_dir,
                 args.deployment_schema_dir,
@@ -489,6 +507,7 @@ def main(argv: list[str]) -> int:
             args.baseline,
             args.contract_config,
             args.deployment_config_dir,
+            args.deployment_broadcast_dir,
             args.deployment_manifest_dir,
             args.address_book_dir,
             args.deployment_schema_dir,

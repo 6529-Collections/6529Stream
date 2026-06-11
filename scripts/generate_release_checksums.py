@@ -19,6 +19,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/latest"),
     Path("release-artifacts/baselines"),
+    Path("deployments/broadcasts"),
     Path("deployments/config"),
     Path("deployments/examples"),
     Path("deployments/address-books"),

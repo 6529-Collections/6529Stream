@@ -31,8 +31,11 @@ python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
+python scripts/test_broadcast_manifest_input.py
+python scripts/generate_broadcast_manifest_input.py --check
 python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
+python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_release_manifest.py
@@ -73,10 +76,18 @@ removed or changed functions, events, custom errors, constructors, fallback, or
 receive entries. Additive entries are reported as compatible for this first
 baseline so maintainers can pair them with release notes and version policy.
 
+The broadcast manifest input step parses the sanitized Foundry fixture under
+`deployments/broadcasts/`, rejects wrong-chain, failed-receipt,
+missing-contract, unexpected-contract, duplicate, invalid-address, and
+secret-like-key inputs, and checks the generated broadcast-derived config under
+`deployments/config/`.
+
 The deployment manifest step generates the local Anvil example from
 `deployments/config/anvil-6529stream-v0.1.0-001.json`, fills contract ABI and
-runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`, and
-checks that the committed example has not drifted.
+runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`,
+generates the sanitized broadcast-derived manifest from
+`deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`, and checks that
+both committed examples have not drifted.
 
 The address-book step projects committed deployment manifests into compact
 integrator-facing JSON under `deployments/address-books/`. Address books keep
@@ -146,7 +157,9 @@ forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_source_verification_inputs.py
 python scripts/check_abi_compatibility.py
+python scripts/generate_broadcast_manifest_input.py
 python scripts/generate_deployment_manifest.py
+python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
 python scripts/generate_address_books.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -159,7 +172,9 @@ The check mode is:
 python scripts/generate_release_artifacts.py --check
 python scripts/generate_source_verification_inputs.py --check
 python scripts/check_abi_compatibility.py --check
+python scripts/generate_broadcast_manifest_input.py --check
 python scripts/generate_deployment_manifest.py --check
+python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/generate_address_books.py --check
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
@@ -176,8 +191,10 @@ surface change; removed or changed entries should also update the breaking
 change documentation and release notes.
 
 The deployment manifest generator uses committed inputs under
-`deployments/config/`. Its manifest checksum is the SHA-256 of canonical JSON
-with `release_artifacts.manifest_sha256` normalized to `sha256:` plus 64 zeroes,
+`deployments/config/`. The broadcast-derived input is generated first from the
+sanitized Foundry broadcast fixture under `deployments/broadcasts/`. Manifest
+checksums are the SHA-256 of canonical JSON with
+`release_artifacts.manifest_sha256` normalized to `sha256:` plus 64 zeroes,
 which avoids a self-referential checksum while making manifest drift
 machine-detectable.
 
@@ -189,10 +206,11 @@ the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
-`deployments/config/`, `deployments/examples/`, `deployments/address-books/`,
-and `deployments/schema/`, excluding its own generated checksum files to avoid
-self-referential hashes. Refresh the release manifest before refreshing the
-checksum bundle after changing any covered artifact.
+`deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,
+`deployments/address-books/`, and `deployments/schema/`, excluding its own
+generated checksum files to avoid self-referential hashes. Refresh the release
+manifest before refreshing the checksum bundle after changing any covered
+artifact.
 
 ## Non-Gating Diagnostics
 
