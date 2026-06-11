@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/108` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 14:06 UTC` |
+| Last updated | `2026-06-11 14:10 UTC` |
 
 ## Packaging Notes
 
@@ -5064,8 +5064,10 @@ Merge evidence:
 
 ### PR candidate: Add Foundry broadcast manifest ingestion (Queue Item 56)
 
-Status: In progress locally.
+Status: PR open; CI and CodeRabbit pending.
 Branch: `codex/broadcast-manifest-ingestion`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/110`.
+Head SHA: `6e7072a9b9a436084b4116acb5a113b5ea893e36`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/109`
@@ -5121,6 +5123,7 @@ Validation status:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 14:10 | Open PR #110 | Broadcast-manifest ingestion PR published at `https://github.com/6529-Collections/6529Stream/pull/110`; state-only follow-up will push the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 14:06 | Validate Queue Item 56 locally | Focused broadcast ingestion tests/check, deployment manifest checks for both configs, address-book/release-manifest/release-checksum/changelog tests and checks, Python compile, shell/PowerShell syntax, whitespace check, full `make check`, and Windows wrapper all pass on the final parser-adjusted code |
 | 2026-06-11 13:55 | Implement Queue Item 56 local draft | Added sanitized Foundry broadcast ingestion, generated broadcast-derived deployment config/manifest/address book, wired release manifest/checksum coverage and local/CI gates, and updated docs/roadmap/run-state traceability |
 | 2026-06-11 13:32 | Start Queue Item 56 | Issue #109 tracks deterministic Foundry broadcast-manifest ingestion; branch `codex/broadcast-manifest-ingestion` starts from merged PR #108 and scopes to offline sanitized broadcast evidence |
