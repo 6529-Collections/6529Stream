@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/111` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 15:40 UTC` |
+| Last updated | `2026-06-11 15:42 UTC` |
 
 ## Packaging Notes
 
@@ -117,9 +117,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR #112: Metadata render-sandbox fixture checks (Queue Item 58)
 
-Status: Local validation passed; PR not yet opened.
+Status: PR open; local validation passed and CodeRabbit review was requested in
+issue comment `4682324523`.
 Branch: `codex/metadata-render-sandbox-checks`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/112`.
 
 Goal:
 
@@ -5251,6 +5252,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 15:42 | Open PR #112 and request CodeRabbit | Metadata fixture safety PR published at `https://github.com/6529-Collections/6529Stream/pull/112`; head is `d2f270b254d1e3a7b115817c62f2acf0a40efec9`; CodeRabbit review requested in issue comment `4682324523`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 15:40 | Validate Queue Item 58 locally | Metadata fixture tests/check, Python compile, shell/PowerShell syntax, changelog gate, whitespace check, release checksum regeneration, full `make check`, and Windows wrapper all pass; production bytecode is unchanged with `StreamCore` still at 24,461 runtime bytes |
 | 2026-06-11 15:20 | Start Queue Item 58 | Next P1-META-006 slice is metadata render-sandbox fixture validation because it adds local/CI safety evidence for committed metadata outputs without consuming the remaining `StreamCore` bytecode headroom |
 | 2026-06-11 15:19 | Merge PR #111 | CI run `27356813758` passed, CodeRabbit status was success with no actionable comments, no review threads remained, and PR #111 merged as `f844457a2f48fc31f34c187cef72f2083cfe6b70`; issue #51 remains open for the rest of P1-META-006 |
