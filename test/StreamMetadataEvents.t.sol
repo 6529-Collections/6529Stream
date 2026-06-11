@@ -12,6 +12,7 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
     using Assertions for uint256;
 
     bytes4 private constant ERC4906_INTERFACE_ID = 0x49064906;
+    bytes4 private constant ERC721_ENUMERABLE_INTERFACE_ID = 0x780e9d63;
     bytes32 private constant METADATA_UPDATE_TOPIC = keccak256("MetadataUpdate(uint256)");
     bytes32 private constant BATCH_METADATA_UPDATE_TOPIC =
         keccak256("BatchMetadataUpdate(uint256,uint256)");
@@ -23,6 +24,8 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
         deployed.core.supportsInterface(ERC4906_INTERFACE_ID).assertTrue("missing ERC-4906");
+        deployed.core.supportsInterface(ERC721_ENUMERABLE_INTERFACE_ID)
+            .assertFalse("unexpected ERC-721 Enumerable support");
         deployed.core.supportsInterface(0xffffffff).assertFalse("invalid interface supported");
     }
 

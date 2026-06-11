@@ -47,7 +47,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-10 20:01 UTC` local Windows PR candidate validation; CI TBD |
+| Last verified | `2026-06-11 06:13 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -61,8 +61,9 @@ order.
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Production size | Production deployable contracts pass the IR-optimized size gate; `StreamCore` is 23,139 runtime bytes with 1,437 bytes of EIP-170 headroom | `forge build --sizes --via-ir --skip test --force` | Production size gate passes in CI and deployment scripts use the same profile |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked high/medium baseline: 721 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -1630,10 +1631,13 @@ Acceptance criteria:
 - Replace numeric option switches with typed APIs or enums.
 - Replace magic metadata update indexes `999999` and `1000000`.
 - Add ABI and interface stability policy.
-- Review ERC721Enumerable necessity as P1 architecture, not P3 polish.
-- Review supply model versus storage model:
+- ERC721Enumerable is not part of the current `StreamCore` release surface.
+  `StreamCore` preserves live `totalSupply()` but does not advertise ERC-721
+  Enumerable or expose `tokenByIndex` / `tokenOfOwnerByIndex`.
+- Continue reviewing supply model versus storage model:
   - Collection token ranges reserve up to 10 billion token IDs per collection.
-  - ERC721Enumerable tracks every minted token globally and per owner.
+  - Optional ERC721Enumerable-style indexing should stay off-chain unless a
+    future ADR accepts the bytecode/gas cost.
   - Decide realistic collection sizes and gas targets before promising large
     ranges publicly.
 - Establish gas budgets for mint, bid, settle, curator claim, `tokenURI`, and
@@ -1770,6 +1774,10 @@ No P0 contract PR may merge without:
 - Make the Windows bootstrap usable in current and future shells.
 - Add `make.ps1` or document Makefile as Unix-only.
 - Add `make check` or documented equivalent as the canonical local gate.
+- Keep the production size gate in `make check`, Windows/Linux check scripts,
+  and CI: `forge build --sizes --via-ir --skip test --force`.
+- Treat generic all-artifact `forge build --sizes` as a diagnostic only while
+  test-only invariant handlers exceed initcode limits.
 - Add exact tool pinning for:
   - Foundry.
   - Solidity compiler.
@@ -2078,7 +2086,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: high/medium rows triaged, not accepted as a CI gate.
-- Result: 721 findings, including 4 High and 19 Medium.
+- Result: 717 findings, including 4 High and 19 Medium.
 
 Impact summary:
 

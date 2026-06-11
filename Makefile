@@ -20,15 +20,18 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test fmt-check slither clean
+.PHONY: check build test size fmt-check slither clean
 
-check: build test
+check: build test size
 
 build:
 	forge build
 
 test:
 	forge test -vvv
+
+size:
+	forge build --sizes --via-ir --skip test --force
 
 fmt-check:
 	forge fmt --check smart-contracts

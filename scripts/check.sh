@@ -13,3 +13,4 @@ fi
 
 forge build
 forge test -vvv
+forge build --sizes --via-ir --skip test --force

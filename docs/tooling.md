@@ -24,7 +24,13 @@ This runs:
 ```bash
 forge build
 forge test -vvv
+forge build --sizes --via-ir --skip test --force
 ```
+
+The size step is the production deployability gate. It skips test contracts so
+test-only invariant handlers do not pollute EIP-170/EIP-3860 evidence, and it
+uses `via_ir` because the current deployable `StreamCore` release profile needs
+the IR optimizer to fit under the runtime limit.
 
 Windows contributors can run:
 

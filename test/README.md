@@ -180,10 +180,16 @@ size-limit tests remain future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
+`supportsInterface(0x780e9d63)` for ERC-721 Enumerable fails by design,
 randomness fulfillment and token metadata input writes emit `MetadataUpdate`,
 collection-level metadata writes emit `BatchMetadataUpdate` for the minted-ever
 token range, empty collections do not emit empty batch events, and mint-only
 plus burn paths do not emit misleading ERC-4906 events.
+
+Production bytecode size is checked through the local/CI gate
+`forge build --sizes --via-ir --skip test --force`, rather than a unit test,
+because the deployable contracts use the IR-optimized release profile while
+test-only invariant handlers can exceed initcode limits.
 
 Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event
