@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/98` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 09:47 UTC` |
+| Last updated | `2026-06-11 09:49 UTC` |
 
 ## Packaging Notes
 
@@ -4563,9 +4563,9 @@ Merge evidence:
 
 ### PR candidate: Generate deployment address books (Queue Item 51)
 
-Status: Local validation complete; PR opening next.
+Status: PR open; awaiting CI and CodeRabbit.
 Branch: `codex/address-book-generator`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/100`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/99`
@@ -4637,6 +4637,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 09:49 | Open PR #100 and request CodeRabbit | Address-book generator PR published at `https://github.com/6529-Collections/6529Stream/pull/100`; CodeRabbit review requested in issue comment `4679297117`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 09:47 | Validate Queue Item 51 locally | Address-book generator tests, address-book drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass; validation tightened `source_dirty` to strict boolean parsing and records the ABI checksum source path in the generated artifact |
 | 2026-06-11 09:28 | Start Queue Item 51 | Issue #99 tracks the remaining deterministic address-book artifact gap; branch `codex/address-book-generator` starts from merged PR #98 and scopes to manifest-derived address books plus local/CI drift checks |
 | 2026-06-11 09:27 | Create address-book issue #99 | No open issue covered deterministic address books, so a focused P1 release issue keeps the Gate G PR auditable |
