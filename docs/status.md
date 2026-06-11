@@ -96,6 +96,11 @@ The current Gate A smoke baseline proves:
   `scripts/generate_address_books.py --check` prove the generated local Anvil
   address book is a compact, deterministic projection of the committed
   deployment manifest and release artifact contract metadata.
+- `scripts/test_release_checksums.py` and
+  `scripts/generate_release_checksums.py --check` prove the committed
+  `release-artifacts/latest/SHA256SUMS` and
+  `release-artifacts/latest/release-checksums.json` bundle covers the current
+  release artifact, deployment manifest, address-book, config, and schema files.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -104,8 +109,9 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
-generation from broadcast outputs, signed release checksums, ABI diff approval
-policy, production address books, verified live deployment hashes, remaining generated
+generation from broadcast outputs, detached checksum signatures, signed release
+tags, ABI diff approval policy, production address books, verified live
+deployment hashes, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

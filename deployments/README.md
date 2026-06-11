@@ -27,6 +27,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
+python scripts/generate_release_checksums.py
 ```
 
 Deployment manifests should reference those outputs, then replace any unlinked
@@ -46,3 +47,8 @@ addresses, source paths, ABI hashes, runtime bytecode hashes, and verification
 status. Address-book JSON files are generated outputs; update the source
 manifest or release artifacts, then rerun `python scripts/generate_address_books.py`
 instead of editing address books by hand.
+
+After manifest, schema, config, or address-book outputs change, regenerate
+`release-artifacts/latest/SHA256SUMS` and
+`release-artifacts/latest/release-checksums.json` with
+`python scripts/generate_release_checksums.py`.

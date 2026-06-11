@@ -37,4 +37,6 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonCommand.Source @pythonArgs "scripts\generate_deployment_manifest.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_address_books.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_address_books.py" "--check"
+& $pythonCommand.Source @pythonArgs "scripts\test_release_checksums.py"
+& $pythonCommand.Source @pythonArgs "scripts\generate_release_checksums.py" "--check"
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

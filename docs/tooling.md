@@ -33,6 +33,8 @@ python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_release_checksums.py
+python scripts/generate_release_checksums.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -70,6 +72,13 @@ paths, ABI hashes, runtime bytecode hashes, and verification status without the
 full ceremony and constructor-argument details from deployment manifests. They
 follow `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and are regenerated with `python scripts/generate_address_books.py`.
+
+The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
+`release-artifacts/latest/release-checksums.json` from the committed release
+artifact, deployment manifest, address-book, and schema outputs. This gives
+maintainers a deterministic, signable checksum bundle. Detached signatures and
+signed git tags still require a release ceremony and are not produced by the
+local smoke gate.
 
 Windows contributors can run:
 
@@ -109,6 +118,7 @@ python scripts/generate_release_artifacts.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
+python scripts/generate_release_checksums.py
 ```
 
 The check mode is:
@@ -118,6 +128,7 @@ python scripts/generate_release_artifacts.py --check
 python scripts/check_abi_compatibility.py --check
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_address_books.py --check
+python scripts/generate_release_checksums.py --check
 ```
 
 The generator uses `release-artifacts/contracts.json` to define the production
@@ -140,6 +151,12 @@ The address-book generator reads committed deployment manifests and
 deployment manifests change; the `--check` mode fails on stale output, invalid
 or duplicate contract addresses, missing contract metadata, or mismatch against
 the release artifact contract set.
+
+The release-checksum generator covers `release-artifacts/contracts.json`,
+`release-artifacts/latest/`, `release-artifacts/baselines/`,
+`deployments/config/`, `deployments/examples/`, `deployments/address-books/`,
+and `deployments/schema/`, excluding its own generated checksum files to avoid
+self-referential hashes. Refresh it after changing any covered artifact.
 
 ## Non-Gating Diagnostics
 

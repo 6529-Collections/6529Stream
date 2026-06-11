@@ -137,6 +137,21 @@ class ReleaseArtifactTests(unittest.TestCase):
                     0,
                 )
 
+            (output_dir / "SHA256SUMS").write_text(
+                "0" * 64 + "  release-artifacts/latest/abi-checksums.json\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            write_json(
+                output_dir / "release-checksums.json",
+                {"schema_version": "6529stream.release-checksums.v1"},
+            )
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                self.assertEqual(
+                    generator.check_artifacts(root, config_path, out_dir, output_dir, "cast"),
+                    0,
+                )
+
             with (output_dir / "abi-checksums.json").open("a", encoding="utf-8") as handle:
                 handle.write("\n")
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
