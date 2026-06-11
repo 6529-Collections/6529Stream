@@ -25,4 +25,6 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/test_release_artifacts.py
 "$python_bin" scripts/generate_release_artifacts.py --check
+"$python_bin" scripts/test_deployment_manifest.py
+"$python_bin" scripts/generate_deployment_manifest.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

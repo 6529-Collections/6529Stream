@@ -52,7 +52,9 @@ Deployment manifests live under `deployments/` and must include:
 
 The current schema is
 `deployments/schema/deployment-manifest.schema.json`; the non-production local
-example is `deployments/examples/anvil-6529stream-v0.1.0-001.json`.
+example is generated from
+`deployments/config/anvil-6529stream-v0.1.0-001.json` into
+`deployments/examples/anvil-6529stream-v0.1.0-001.json`.
 
 ABI checksum, bytecode checksum, interface ID, and event topic catalog inputs
 are generated from the production `via-ir` Foundry artifacts:
@@ -61,12 +63,21 @@ are generated from the production `via-ir` Foundry artifacts:
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/generate_deployment_manifest.py
+python scripts/generate_deployment_manifest.py --check
 ```
 
 The committed baseline is under `release-artifacts/latest/`. `StreamCore`
 currently links `StreamMetadataRenderer`, so its bytecode hash entries are
 explicitly marked as `unlinked_artifact_object` until a broadcast or linked
 verification artifact supplies the final deployed bytecode.
+
+Deployment manifest generation reads the committed manifest input, fills ABI and
+runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`, and
+writes `release_artifacts.manifest_sha256` as the SHA-256 of the canonical JSON
+manifest after normalizing that checksum field to `sha256:` plus 64 zeroes.
+This makes the checksum deterministic without making the manifest depend on its
+own final checksum value.
 
 ## Admin Ceremony Checklist
 

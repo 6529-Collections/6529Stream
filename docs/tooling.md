@@ -27,6 +27,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_deployment_manifest.py
+python scripts/generate_deployment_manifest.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -45,6 +47,11 @@ It verifies that `release-artifacts/latest/` matches the production `via-ir`
 Foundry build output, including ABI checksums, bytecode checksums, interface
 IDs, and the event topic catalog. The generator automatically finds Foundry's
 `cast` in `~/.foundry/bin` when the shell has not added it to `PATH`.
+
+The deployment manifest step generates the local Anvil example from
+`deployments/config/anvil-6529stream-v0.1.0-001.json`, fills contract ABI and
+runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`, and
+checks that the committed example has not drifted.
 
 Windows contributors can run:
 
@@ -81,17 +88,25 @@ build and regenerate the tracked release baseline with:
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
+python scripts/generate_deployment_manifest.py
 ```
 
 The check mode is:
 
 ```bash
 python scripts/generate_release_artifacts.py --check
+python scripts/generate_deployment_manifest.py --check
 ```
 
 The generator uses `release-artifacts/contracts.json` to define the production
 contract and interface surface. Standard ERC interface IDs are pinned there when
 the advertised ERC ID differs from a raw XOR over the artifact ABI.
+
+The deployment manifest generator uses committed inputs under
+`deployments/config/`. Its manifest checksum is the SHA-256 of canonical JSON
+with `release_artifacts.manifest_sha256` normalized to `sha256:` plus 64 zeroes,
+which avoids a self-referential checksum while making manifest drift
+machine-detectable.
 
 ## Non-Gating Diagnostics
 

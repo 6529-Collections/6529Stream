@@ -81,6 +81,10 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
   including ABI checksums, bytecode checksums, standard/custom interface IDs,
   and event topic catalog entries.
+- `scripts/test_deployment_manifest.py` and
+  `scripts/generate_deployment_manifest.py --check` prove the local Anvil
+  manifest is generated from committed inputs, references current ABI/runtime
+  bytecode hashes, and carries a deterministic manifest checksum.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
