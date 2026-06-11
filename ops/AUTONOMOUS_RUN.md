@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/85` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 03:33 UTC` |
+| Last updated | `2026-06-11 03:35 UTC` |
 
 ## Packaging Notes
 
@@ -96,7 +96,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
 | 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Merged in PR #85 |
-| 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Locally validated on `codex/burn-metadata-semantics`; ready for PR |
+| 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Open in PR #86 |
 
 ## Current PR Worklog
 
@@ -3835,9 +3835,10 @@ Merge:
 
 ### PR candidate: Add burn metadata semantics (Queue Item 43)
 
-Status: Local validation complete; ready for PR.
+Status: Open in PR #86; CI and CodeRabbit review pending.
 Branch: `codex/burn-metadata-semantics`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/86`.
+Head commit: `e0a71d3c423f87f8c0abd800f03f5e49deb180ad`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/50`
@@ -3929,6 +3930,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 03:35 | Open PR #86 | Burn metadata semantics are published with local validation evidence, close issue #50, and CodeRabbit review was requested with `@coderabbitai review` |
 | 2026-06-11 03:33 | Validate Queue Item 43 locally | Focused burn tests, adjacent metadata/randomizer suites, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 03:24 | Fix Queue Item 43 freeze regression and Slither drift | Moved non-burned token-hash freeze checks before range/collection checks so frozen collections fail closed with `MetadataFrozen`, and removed test/helper/static-analysis drift while keeping post-burn timestamps audit-only |
 | 2026-06-11 03:10 | Implement Queue Item 43 local draft | Added retained burned-token audit state, protocol burn events, request-linked post-burn randomness audit events for VRF/arRNG, freeze-safe post-burn hash recording, and focused burn tests |
