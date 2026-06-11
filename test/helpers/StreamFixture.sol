@@ -9,6 +9,8 @@ import "../../smart-contracts/StreamMinter.sol";
 import "../mocks/MockRandomizer.sol";
 
 abstract contract StreamFixture {
+    uint256 internal constant FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
+
     struct DeployedStream {
         StreamAdmins admins;
         DependencyRegistry dependencyRegistry;
@@ -62,5 +64,26 @@ abstract contract StreamFixture {
         deployed.core.setCollectionData(1, address(0xA11CE), 5, 10, 1 days);
         deployed.core.addRandomizer(1, address(deployed.randomizer));
         deployed.minter.setCollectionPhases(1, block.timestamp, block.timestamp + 30 days);
+    }
+
+    function _pinCollectionDependency(DeployedStream memory deployed, bytes32 dependencyKey)
+        internal
+    {
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
+        deployed.core
+            .updateCollectionInfo(
+                1,
+                "Genesis",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://base/",
+                "https://cdn.example/script.js",
+                dependencyKey,
+                FULL_COLLECTION_UPDATE_INDEX,
+                scripts
+            );
     }
 }

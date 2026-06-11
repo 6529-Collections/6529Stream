@@ -1543,8 +1543,8 @@ Acceptance criteria:
   before metadata schema, freeze, dependency, burn, or ERC-4906 implementation.
 - [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9)
   now provides segment-safe dependency-script rendering plus typed chunk and
-  content hashes. Immutable dependency versions, provenance, registry identity,
-  and frozen collection pinning remain with
+  content hashes. Dependency version records and collection key/version/content
+  pins are now implemented by
   [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48).
 - Implement [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46):
   metadata schema and golden-file tests. Initial characterization fixtures pin
@@ -1558,18 +1558,23 @@ Acceptance criteria:
   token metadata; stores a deterministic manifest hash; emits
   `CollectionFrozen`; finalizes supply; tightens the reserved max token ID; and
   rejects current metadata-significant `StreamCore` writes after freeze.
-  Immutable dependency version records, registry provenance, burn semantics,
-  and escaping remain with their dedicated P1-META issues.
-- Implement [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48):
-  dependency registry versioning, immutability, and provenance.
+  Dependency version pins are included in the freeze manifest; burn semantics,
+  escaping, and richer freeze invariants remain with their dedicated P1-META
+  issues.
+- [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48)
+  now implements the first dependency registry versioning slice: registry writes
+  create immutable versions with typed content hashes, provenance/deprecation
+  views, and collection key/version/content-hash/registry-address pins; later
+  registry versions or registry swaps do not change existing or frozen
+  collection output until an unfrozen collection is explicitly repinned.
 - [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49)
   now implements `StreamCore` ERC-4906 support and metadata update signaling:
   `supportsInterface(0x49064906)` succeeds, token-level metadata writes and
   randomness fulfillment emit `MetadataUpdate`, collection-level metadata
   writes emit `BatchMetadataUpdate` over the minted-ever range, and
   mint-only/burn paths do not emit misleading ERC-4906 events. Dependency
-  registry content reverse signaling remains with
-  [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48).
+  registry version creation does not emit ERC-4906 for pinned collections
+  because their output remains unchanged until explicit repinning.
 - Implement [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50):
   burn metadata and supply semantics.
 - Implement [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51):
@@ -1581,8 +1586,10 @@ Acceptance criteria:
 - On-chain metadata now uses base64 JSON data URIs for schema-v1 output.
 - Set size limits for collection scripts, dependency scripts, `tokenData`, image
   data, attributes, and `tokenURI`.
-- Define dependency creation, update, versioning, deprecation, and immutability
-  after freeze.
+- Dependency creation, update, versioning, deprecation, and freeze-time
+  immutability now have a first implementation slice. Continue with dependency
+  artifact packaging, external source manifests, and deployment migration
+  runbooks.
 - Treat generated HTML as executable code.
 - Add render sandbox tests.
 - Hash dependency chunks, full dependency output, and full collection script
@@ -2126,9 +2133,9 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Pending randomness metadata | Off-chain and on-chain `tokenURI` pending/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadataGolden.t.sol`, later `test/StreamMetadata.t.sol` | Passing for schema-v1 coverage: off-chain pending/final URIs match fixtures, on-chain pending output returns base64 JSON with `metadata_state: "pending"` and no final animation HTML, and on-chain final output returns base64 JSON with `metadata_state: "final"` and the animation URL. Stale-state display remains future metadata/randomness work. | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate C/Gate D | TBD |
 | Metadata schema golden files | Off-chain URI rules, on-chain pending JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Passing for current schema-v1 slice: `offchain-pending-token-uri.txt`, `offchain-final-token-uri.txt`, `onchain-pending-schema-v1-token-uri.txt`, and `onchain-final-schema-v1-token-uri.txt` lock output, and `metadataSchemaVersion()` plus `tokenMetadataState(tokenId)` expose the active schema and state. Escaping, freeze, and burn remain future P1-META work. | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46) | Gate D | TBD |
 | Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol` | Missing | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51) | Gate D | TBD |
-| Collection freeze boundary | Frozen collections cannot mutate collection fields, base URI, metadata mode, scripts, dependency references, token data, image, attributes, final supply, or live-token metadata state | `test/StreamMetadataFreeze.t.sol` | Passing for current `StreamCore` boundary: freeze requires ended minting, elapsed final-supply delay, and final live-token metadata; stores and exposes `collectionFreezeManifestHash`; emits `CollectionFrozen`; finalizes supply to minted-ever count; tightens the reserved max token ID; blocks dependency-registry swaps while any collection is frozen; and rejects current metadata-significant writes after freeze. Immutable dependency version records, burn semantics, escaping, and richer invariant/fork coverage remain future P1-META work. | [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47) | Gate D | TBD |
-| Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Missing | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
-| ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit from metadata write paths that can change token JSON | `test/StreamMetadataEvents.t.sol` | Passing for current `StreamCore` behavior: ERC-4906 interface support succeeds, randomness fulfillment and token metadata input writes emit `MetadataUpdate`, collection-level metadata mode/base URI/display/script/dependency-reference writes emit `BatchMetadataUpdate` over the minted-ever range, empty collections do not emit empty batch events, and mint-only plus burn paths do not emit ERC-4906. Dependency registry content reverse signaling remains future P1-META-003 work. | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
+| Collection freeze boundary | Frozen collections cannot mutate collection fields, base URI, metadata mode, scripts, dependency references, token data, image, attributes, final supply, or live-token metadata state | `test/StreamMetadataFreeze.t.sol` | Passing for current `StreamCore` boundary: freeze requires ended minting, elapsed final-supply delay, and final live-token metadata; stores and exposes `collectionFreezeManifestHash`; emits `CollectionFrozen`; finalizes supply to minted-ever count; tightens the reserved max token ID; blocks dependency-registry swaps while any collection is frozen; and rejects current metadata-significant writes after freeze. Dependency version pins are included in the freeze manifest; burn semantics, escaping, and richer invariant/fork coverage remain future P1-META work. | [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47) | Gate D | TBD |
+| Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash/registry address, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Passing: registry writes create new immutable versions, chunk-index updates derive a new version without mutating the previous one, version records expose typed content hash/provenance/creator/creation/deprecation views, collection metadata pins key/version/content hash/registry address, explicit repinning moves an unfrozen collection to the latest dependency in the current registry, output and freeze manifests stay stable after later registry versions or registry swaps until explicit repin, and segment-boundary hashes remain distinct in `test/StreamMetadataEncoding.t.sol`. Dependency artifact packaging and migration runbooks remain future operational work. | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
+| ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit from metadata write paths that can change token JSON | `test/StreamMetadataEvents.t.sol` | Passing for current `StreamCore` behavior: ERC-4906 interface support succeeds, randomness fulfillment and token metadata input writes emit `MetadataUpdate`, collection-level metadata mode/base URI/display/script/dependency-reference writes emit `BatchMetadataUpdate` over the minted-ever range, empty collections do not emit empty batch events, and mint-only plus burn paths do not emit ERC-4906. Dependency registry version creation does not emit ERC-4906 for pinned collections because their output does not change; explicit repinning goes through `updateCollectionInfo` and emits the existing collection-range update. | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Passing: typed chunk/content hashes include dependency key, chunk count, chunk index, chunk byte length, and chunk content hash; ambiguous chunk splits that render the same JavaScript produce distinct content hashes while preserving rendered-script compatibility; zero-chunk dependency hashes are deterministic | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
 | Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | Missing | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) | Gate E/Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |

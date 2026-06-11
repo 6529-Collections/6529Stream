@@ -28,6 +28,11 @@ interface IStreamCore {
         view
         returns (bytes32);
 
+    function collectionDependencyVersionState(uint256 _collectionID)
+        external
+        view
+        returns (bytes32, uint256, bytes32, address);
+
     function viewMaxAllowance(uint256 _collectionID) external view returns (uint256);
 
     function viewColIDforTokenID(uint256 _tokenid) external view returns (uint256);

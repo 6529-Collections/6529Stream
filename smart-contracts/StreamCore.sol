@@ -32,7 +32,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         "6529StreamMetadataFreezeManifest(uint256 collectionId,bytes32 schemaVersionHash,bytes32 collectionStateHash,bytes32 supplyStateHash,bytes32 liveTokenMetadataHash,bytes32 integrationStateHash,address core,uint256 chainId)"
     );
     bytes32 private constant _FREEZE_COLLECTION_STATE_TYPEHASH = keccak256(
-        "6529StreamFreezeCollectionState(bool onchainMetadata,bytes32 collectionInfoHash,bytes32 dependencyKey,bytes32 dependencyContentHash,bytes32 collectionScriptHash)"
+        "6529StreamFreezeCollectionState(bool onchainMetadata,bytes32 collectionInfoHash,bytes32 dependencyKey,uint256 dependencyVersion,bytes32 dependencyContentHash,bytes32 collectionScriptHash)"
     );
     bytes32 private constant _FREEZE_SUPPLY_STATE_TYPEHASH = keccak256(
         "6529StreamFreezeSupplyState(uint256 finalSupply,uint256 mintedEver,uint256 burnCount)"
@@ -55,6 +55,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
     string private constant _METADATA_STATE_PENDING = "pending";
     string private constant _METADATA_STATE_FINAL = "final";
+    uint256 private constant _COLLECTION_TOKEN_RANGE = 10 ** 10;
+    uint256 private constant _FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
+    uint256 private constant _BASE_URI_UPDATE_INDEX = _FULL_COLLECTION_UPDATE_INDEX - 1;
 
     error CollectionAlreadyFrozen(uint256 collectionId);
     error CollectionDataMissing(uint256 collectionId);
@@ -68,6 +71,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     error CollectionNotCreated(uint256 collectionId);
     error FrozenCollectionDependencyRegistry();
     error MetadataFrozen(uint256 collectionId);
+    error UnknownDependency(bytes32 dependencyNameAndVersion);
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -91,6 +95,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
 
     // mapping of collectionInfo struct
     mapping(uint256 => collectionInfoStructure) private collectionInfo;
+
+    // dependency version and content hash pinned for each collection
+    mapping(uint256 => IDependencyRegistry) private collectionDependencyRegistries;
+    mapping(uint256 => uint256) private collectionDependencyVersions;
+    mapping(uint256 => bytes32) private collectionDependencyContentHashes;
 
     // struct that holds a collection's additional data
     struct collectionAdditonalDataStructure {
@@ -177,6 +186,13 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         string schemaVersion,
         address indexed admin
     );
+    event DependencyVersionPinned(
+        uint256 indexed _collectionID,
+        bytes32 indexed dependencyNameAndVersion,
+        uint256 indexed version,
+        bytes32 contentHash,
+        address registry
+    );
 
     // constructor
     constructor(
@@ -224,6 +240,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         collectionInfo[newCollectionIndex].collectionDependencyScript = _collectionDependencyScript;
         collectionInfo[newCollectionIndex].collectionScript = _collectionScript;
         isCollectionCreated[newCollectionIndex] = true;
+        _pinCollectionDependency(newCollectionIndex, _collectionDependencyScript);
         emit CollectionCreated(newCollectionIndex);
         newCollectionIndex = newCollectionIndex + 1;
     }
@@ -241,7 +258,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         require(
             (isCollectionCreated[_collectionID] == true)
                 && (collectionFreeze[_collectionID] == false)
-                && (_collectionTotalSupply <= 10000000000),
+                && (_collectionTotalSupply <= _COLLECTION_TOKEN_RANGE),
             "err/freezed"
         );
         if (collectionAdditionalData[_collectionID].collectionTotalSupply == 0) {
@@ -253,9 +270,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
             _setFinalSupplyTimeAfterMint;
             collectionAdditionalData[_collectionID].reservedMinTokensIndex =
-            (_collectionID * 10000000000);
+            (_collectionID * _COLLECTION_TOKEN_RANGE);
             collectionAdditionalData[_collectionID].reservedMaxTokensIndex =
-                (_collectionID * 10000000000) + _collectionTotalSupply - 1;
+                (_collectionID * _COLLECTION_TOKEN_RANGE) + _collectionTotalSupply - 1;
             wereDataAdded[_collectionID] = true;
         } else if (artistSigned[_collectionID] == false) {
             collectionAdditionalData[_collectionID].collectionArtistAddress =
@@ -372,7 +389,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 && (collectionFreeze[_collectionID] == false),
             "Not allowed"
         );
-        if (_index == 1000000) {
+        if (_index == _FULL_COLLECTION_UPDATE_INDEX) {
             collectionInfo[_collectionID].collectionName = _newCollectionName;
             collectionInfo[_collectionID].collectionArtist = _newCollectionArtist;
             collectionInfo[_collectionID].collectionDescription = _newCollectionDescription;
@@ -382,7 +399,8 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             collectionInfo[_collectionID].collectionDependencyScript =
             _newCollectionDependencyScript;
             collectionInfo[_collectionID].collectionScript = _newCollectionScript;
-        } else if (_index == 999999) {
+            _pinCollectionDependency(_collectionID, _newCollectionDependencyScript);
+        } else if (_index == _BASE_URI_UPDATE_INDEX) {
             collectionInfo[_collectionID].collectionBaseURI = _newCollectionBaseURI;
         } else {
             collectionInfo[_collectionID].collectionScript[_index] = _newCollectionScript[0];
@@ -478,10 +496,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 && (_mintIndex <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
             "Wrong collection"
         );
-        require(
-            tokenToHash[_mintIndex]
-                == 0x0000000000000000000000000000000000000000000000000000000000000000
-        );
+        require(tokenToHash[_mintIndex] == bytes32(0));
         bool liveToken = _exists(_mintIndex);
         if (liveToken) {
             require(tokenIdsToCollectionIds[_mintIndex] == _collectionID, "Wrong collection");
@@ -528,6 +543,30 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             }
             dependencyRegistry = IDependencyRegistry(_newContract);
         }
+    }
+
+    function _pinCollectionDependency(uint256 _collectionID, bytes32 dependencyNameAndVersion)
+        private
+    {
+        IDependencyRegistry registry = dependencyRegistry;
+        uint256 version = 0;
+        bytes32 contentHash;
+        if (dependencyNameAndVersion == bytes32(0)) {
+            contentHash = registry.getDependencyScriptContentHashAtVersion(bytes32(0), version);
+        } else {
+            version = registry.latestDependencyVersion(dependencyNameAndVersion);
+            if (version == 0) {
+                revert UnknownDependency(dependencyNameAndVersion);
+            }
+            contentHash =
+                registry.getDependencyScriptContentHashAtVersion(dependencyNameAndVersion, version);
+        }
+        collectionDependencyRegistries[_collectionID] = registry;
+        collectionDependencyVersions[_collectionID] = version;
+        collectionDependencyContentHashes[_collectionID] = contentHash;
+        emit DependencyVersionPinned(
+            _collectionID, dependencyNameAndVersion, version, contentHash, address(registry)
+        );
     }
 
     function _requireMetadataMutationNotPaused() private view {
@@ -719,6 +758,19 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         return _collectionFreezeManifestHash(_collectionID);
     }
 
+    function collectionDependencyVersionState(uint256 _collectionID)
+        public
+        view
+        returns (bytes32, uint256, bytes32, address)
+    {
+        return (
+            collectionInfo[_collectionID].collectionDependencyScript,
+            collectionDependencyVersions[_collectionID],
+            collectionDependencyContentHashes[_collectionID],
+            address(collectionDependencyRegistries[_collectionID])
+        );
+    }
+
     // function to return the collection id given a token id
     function viewColIDforTokenID(uint256 _tokenid) public view returns (uint256) {
         return (tokenIdsToCollectionIds[_tokenid]);
@@ -867,30 +919,30 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     function retrieveDependencyScript(uint256 tokenId) private view returns (string memory) {
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
         bytes32 dependencyNameAndVersion = collectionInfo[collectionId].collectionDependencyScript;
+        IDependencyRegistry registry = collectionDependencyRegistries[collectionId];
+        uint256 version = collectionDependencyVersions[collectionId];
         string memory scripttext = "";
         for (
             uint256 i = 0;
-            i < dependencyRegistry.getDependencyScriptCount(dependencyNameAndVersion);
+            i < registry.getDependencyScriptCountAtVersion(dependencyNameAndVersion, version);
             i++
         ) {
             scripttext = string.concat(
-                scripttext, dependencyRegistry.getDependencyScript(dependencyNameAndVersion, i)
+                scripttext,
+                registry.getDependencyScriptAtVersion(dependencyNameAndVersion, version, i)
             );
         }
         return scripttext;
     }
 
-    /// @notice Returns the current typed dependency script content hash for a minted token.
-    /// @dev This is a current registry-content hash, not a freeze manifest or immutable
-    /// dependency-version proof.
+    /// @notice Returns the typed dependency script content hash pinned for a minted token.
+    /// @dev Later registry versions do not change this hash until collection metadata is updated.
     /// @param tokenId Minted token whose collection dependency key should be resolved.
-    /// @return The dependency script content hash currently reported by the registry.
+    /// @return The dependency script content hash pinned to the token's collection.
     function retrieveDependencyScriptContentHash(uint256 tokenId) public view returns (bytes32) {
         _requireMinted(tokenId);
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
-        return dependencyRegistry.getDependencyScriptContentHash(
-            collectionInfo[collectionId].collectionDependencyScript
-        );
+        return collectionDependencyContentHashes[collectionId];
     }
 
     function _requireCollectionNotFrozen(uint256 _collectionID) private view {
@@ -1019,7 +1071,8 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 onchainMetadata[_collectionID],
                 _collectionInfoHash(_collectionID),
                 dependencyKey,
-                dependencyRegistry.getDependencyScriptContentHash(dependencyKey),
+                collectionDependencyVersions[_collectionID],
+                collectionDependencyContentHashes[_collectionID],
                 _collectionScriptHash(_collectionID)
             )
         );
@@ -1043,7 +1096,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 _FREEZE_INTEGRATION_STATE_TYPEHASH,
                 collectionRandomizerEpoch[_collectionID],
                 collectionAdditionalData[_collectionID].randomizerContract,
-                address(dependencyRegistry)
+                address(collectionDependencyRegistries[_collectionID])
             )
         );
     }

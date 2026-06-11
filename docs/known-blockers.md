@@ -67,11 +67,14 @@ contributors who start from the README.
   semantics now cover `StreamCore` metadata mutations. Collection freeze now
   records a manifest hash/event, requires final live-token metadata and the
   final-supply boundary, finalizes supply, and rejects current `StreamCore`
-  metadata-significant writes after freeze. Dependency-registry reverse
-  signaling and immutable dependency records remain part of dependency
-  versioning work. Remaining metadata blockers include immutable dependency
-  version records, registry identity provenance, burn semantics, escaping, and
-  size limits.
+  metadata-significant writes after freeze. Dependency registry updates now
+  create immutable version records with typed content hashes, provenance strings,
+  deprecation state, and collection key/version/content-hash/registry-address
+  pins; existing and frozen collection output stays stable across later registry
+  versions or registry swaps until an unfrozen collection is explicitly
+  repinned. Remaining metadata blockers include dependency artifact packaging
+  and deployment migration runbooks beyond registry provenance strings, burn
+  semantics, escaping, and size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
@@ -89,8 +92,8 @@ contributors who start from the README.
   emergency-surplus, randomizer request lifecycle, randomizer callback
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
-  collection freeze-boundary tests, and a bounded payment sequence invariant
-  baseline now exist, but metadata escaping, dependency versioning, burn
+  collection freeze-boundary tests, dependency version/pinning tests, and a
+  bounded payment sequence invariant baseline now exist, but metadata escaping, burn
   semantics, deployment, production-governance, richer supply/replay/freeze
   invariant tests, and any future shared-ledger invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
