@@ -37,6 +37,8 @@ interface IStreamCore {
 
     function viewColIDforTokenID(uint256 _tokenid) external view returns (uint256);
 
+    function isTokenBurned(uint256 tokenId) external view returns (bool);
+
     function viewCollectionRandomizerContract(uint256 _collectionID) external view returns (address);
 
     function viewRandomizerEpoch(uint256 _collectionID) external view returns (uint256);

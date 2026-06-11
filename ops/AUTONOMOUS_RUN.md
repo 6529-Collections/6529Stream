@@ -11,9 +11,8 @@ transient conversation memory.
 - Open one PR at a time.
 - Wait for CI and bot/reviewer comments on each PR.
 - Request CodeRabbit review explicitly with `@coderabbitai review` on each PR
-  after opening. Claude review is optional while the user-approved
-  CodeRabbit-only path remains in effect, and should be requested only when the
-  PR risk or a future user instruction calls for it.
+  after opening. Do not request Claude review unless a future user instruction
+  explicitly asks for it.
 - Iterate until checks and review comments are clean.
 - Merge only after the PR is review-clean and CI-clean, or after a documented
   autonomous maintainer decision.
@@ -33,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/dependency-version-immutability` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/84` |
+| Active PR branch | `codex/burn-metadata-semantics` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/85` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 02:45 UTC` |
+| Last updated | `2026-06-11 03:54 UTC` |
 
 ## Packaging Notes
 
@@ -96,7 +95,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
-| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Addressing CodeRabbit review in PR #85 on `codex/dependency-version-immutability` |
+| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Merged in PR #85 |
+| 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Open in PR #86 |
 
 ## Current PR Worklog
 
@@ -3671,7 +3671,7 @@ Merge:
 
 ### PR #85: Add dependency version immutability (Queue Item 42)
 
-Status: Open.
+Status: Merged.
 Branch: `codex/dependency-version-immutability`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/85`.
 Related issue:
@@ -3816,11 +3816,131 @@ Local validation:
   full `make check`, Windows wrapper, touched-file formatting, whitespace,
   heading scan, traceability grep, and Slither comparison passed; Slither
   remained `718` total findings with high/medium unchanged at `4/19`.
+- Final CodeRabbit follow-up validation passed after centralizing dependency
+  hash/rendering helpers in `test/helpers/TestHashingUtils.sol` and refreshing
+  the autonomous run timestamp: focused dependency and adjacent metadata/freeze
+  suites passed, full `make check`, Windows wrapper, formatting, whitespace,
+  and duplicate-helper grep all passed.
+
+Merge:
+
+- Squash merge commit: `49f92048837dea0f15b1d0767b3710b690212d45`.
+- Merged at `2026-06-11 03:00 UTC`.
+- GitHub Actions CI run `27320421786` passed on final head
+  `1ec5147f6a79d819cc2b3c373d670e3186d96713`.
+- CodeRabbit review threads were resolved or outdated; the final aggregate
+  `CodeRabbit` context remained pending with no target URL after explicit
+  review/resume commands, so the merge used a documented stale-status
+  maintainer decision.
+
+### PR candidate: Add burn metadata semantics (Queue Item 43)
+
+Status: CodeRabbit remint finding addressed; follow-up CI and CodeRabbit rereview pending.
+Branch: `codex/burn-metadata-semantics`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/86`.
+Initial implementation commit: `e0a71d3c423f87f8c0abd800f03f5e49deb180ad`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/50`
+
+Goal:
+
+- Implement the P1-META-005 burn semantics slice accepted by ADR 0006.
+- Keep ERC-721 semantics: burned tokens have no owner and `tokenURI` remains
+  unavailable.
+- Emit a protocol burn event with collection ID, token ID, operator, and owner
+  for indexers.
+- Retain concise burned-token audit state for collection ID, owner, operator,
+  burn block/time, current token hash, and post-burn randomness recording.
+- Let valid VRF/arRNG fulfillments for already-burned pending tokens record
+  randomness for audit only, including after collection freeze, without
+  resurrecting ownership, making `tokenURI` available, or emitting ERC-4906
+  metadata update events.
+- Update metadata docs, blocker/status docs, roadmap/test traceability, and this
+  durable run state.
+
+Out of scope:
+
+- Serving burned-token metadata through `tokenURI`; ADR 0006 rejected that for
+  this release track.
+- Metadata escaping, raw-attribute validation, size limits, and render sandbox
+  tests remain P1-META-006.
+- General deployment manifests and event-topic artifact generation remain
+  ADR 0007 / Gate E-G work.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/IStreamCore.sol`
+- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/RandomizerVRF.sol`
+- `smart-contracts/RandomizerRNG.sol`
+- `test/StreamCoreBurn.t.sol`
+- `test/mocks/MockRandomizerCore.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- `StreamCore.burn` now stores retained burn audit state and emits
+  `TokenBurned(collectionId, tokenId, operator, owner)` in addition to the
+  standard ERC-721 transfer-to-zero event.
+- `StreamCore._mintProcessing` now rejects remint attempts for previously
+  burned token IDs with `BurnedTokenRemintNotAllowed(tokenId)`.
+- `StreamCore.isTokenBurned(tokenId)` and
+  `StreamCore.burnedTokenAuditState(tokenId)` expose burned-token audit state
+  without making `tokenURI` available.
+- `setTokenHash` still rejects live and pre-mint token-hash writes after freeze,
+  but allows hash recording for an already-burned token because that path updates
+  audit state only and does not change the live-token freeze manifest.
+- `StreamRandomizerLifecycle` now emits
+  `BurnedTokenRandomnessRecorded(requestId, collectionId, tokenId, provider,
+  randomizerEpoch, derivedSeed, rawOutputHash)` when an adapter successfully
+  records randomness for a burned token.
+- VRF and arRNG adapters emit the burn-audit event on both initial fulfillment
+  and deterministic retry success when the core reports that the token is
+  burned.
+- `StreamCoreBurn.t.sol` covers burn event/audit state, unavailable `ownerOf`,
+  `tokenURI`, and `tokenMetadataState`, retained token hash/collection mapping,
+  remint rejection for previously burned token IDs, no ERC-4906 burn noise, VRF
+  post-burn fulfillment after freeze with a stable freeze manifest, and arRNG
+  post-burn fulfillment parity.
+
+Local validation:
+
+- Focused burn semantics tests passed:
+  `forge test --match-contract StreamCoreBurnTest -vvv` with 4 tests, 0 failed.
+- Adjacent metadata/randomizer suites passed:
+  `forge test --match-contract "Stream(RandomizerLifecycle|RandomizerRetry|MetadataEvents|MetadataFreeze|MetadataGolden|CoreBurn)Test" -vvv`
+  with 55 tests, 0 failed.
+- `forge build` passed through `make check`.
+- `make check` passed with the full Forge suite.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with the
+  full Forge suite on Windows.
+- Touched-file formatting passed:
+  `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\IStreamCore.sol smart-contracts\StreamRandomizerLifecycle.sol smart-contracts\RandomizerVRF.sol smart-contracts\RandomizerRNG.sol test\mocks\MockRandomizerCore.sol test\StreamCoreBurn.t.sol`.
+- `git diff --check` passed.
+- Heading and traceability scans passed across roadmap, durable state, metadata
+  docs, status docs, ADRs, touched contracts, and burn tests.
+- Slither comparison passed after cleanup:
+  `718` total findings with high/medium unchanged at `4/19`.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 03:54 | Address CodeRabbit PR #86 remint finding | Added `BurnedTokenRemintNotAllowed` guard in `_mintProcessing`, covered failed remint after burn, documented terminal burned token IDs, and reran focused/adjacent/full/Windows/format/whitespace/traceability/Slither gates with high/medium unchanged at `4/19` |
+| 2026-06-11 03:35 | Open PR #86 | Burn metadata semantics are published with local validation evidence, close issue #50, and CodeRabbit review was requested with `@coderabbitai review` |
+| 2026-06-11 03:33 | Validate Queue Item 43 locally | Focused burn tests, adjacent metadata/randomizer suites, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |
+| 2026-06-11 03:24 | Fix Queue Item 43 freeze regression and Slither drift | Moved non-burned token-hash freeze checks before range/collection checks so frozen collections fail closed with `MetadataFrozen`, and removed test/helper/static-analysis drift while keeping post-burn timestamps audit-only |
+| 2026-06-11 03:10 | Implement Queue Item 43 local draft | Added retained burned-token audit state, protocol burn events, request-linked post-burn randomness audit events for VRF/arRNG, freeze-safe post-burn hash recording, and focused burn tests |
+| 2026-06-11 03:09 | Validate Queue Item 43 focused tests | `forge test --match-contract StreamCoreBurnTest -vvv` passes with 3 tests covering burn audit state, post-burn VRF fulfillment after freeze, and arRNG parity |
+| 2026-06-11 03:02 | Select Queue Item 43 | The next missing Gate D row is P1-META-005 burn metadata semantics; it is tightly scoped after freeze/dependency work and before escaping/render-safety work |
+| 2026-06-11 03:00 | Merge PR #85 | PR #85 merged as `49f9204`; CI passed, CodeRabbit review threads were resolved/outdated, and a stale pending aggregate CodeRabbit context was documented before merge |
 | 2026-06-11 02:45 | Validate CodeRabbit PR #85 registry-address fix | Focused dependency tests now pass with 10 tests including registry-swap stability, adjacent metadata/freeze suites pass, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison pass with high/medium unchanged at `4/19` |
 | 2026-06-11 02:36 | Address CodeRabbit PR #85 registry-address review | Store the dependency registry address in each collection dependency pin and use that pinned registry for script retrieval, state views, events, and freeze manifests so a global registry swap cannot alter already-pinned output |
 | 2026-06-11 02:17 | Validate CodeRabbit PR #85 sentinel drift fix | Focused dependency tests now pass with 9 tests, adjacent metadata/freeze suites pass, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison pass with high/medium unchanged at `4/19` |

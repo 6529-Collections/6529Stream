@@ -81,6 +81,9 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
         // local post-processing failure outcome.
         // slither-disable-start reentrancy-no-eth,reentrancy-events
         try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
+            if (gencoreContract.isTokenBurned(tokenId)) {
+                _confirmBurnedTokenRandomnessRecorded(id);
+            }
             _confirmRandomnessFulfillment(id);
             emit RequestFulfilled(id, numbers);
         } catch (bytes memory failureData) {
@@ -121,6 +124,9 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
         // fail closed.
         // slither-disable-start reentrancy-no-eth,reentrancy-events
         try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
+            if (gencoreContract.isTokenBurned(tokenId)) {
+                _confirmBurnedTokenRandomnessRecorded(_requestId);
+            }
             _confirmRandomnessPostProcessingRetry(_requestId, retryCount);
         } catch (bytes memory failureData) {
             _markRandomnessPostProcessingRetryFailed(_requestId, failureData, retryCount);

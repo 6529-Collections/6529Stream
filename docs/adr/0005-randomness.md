@@ -67,8 +67,8 @@ Current source references:
   production source in `P0-RAND-008` after Slither reported high-impact
   `weak-prng` findings.
 - There is no collection-level randomizer epoch, terminal request state, stale
-  callback policy, callback-after-burn policy, explicit post-processing failure
-  state, or provider migration model.
+  callback policy, explicit post-processing failure state, or provider
+  migration model.
 
 The current one-time `tokenToHash` guard is useful, but it is not enough for
 production. It prevents direct overwrites through the current randomizer path,
@@ -110,9 +110,13 @@ Current implementation status:
 - The concrete `XRandoms` helper contract has been removed from production
   source. Tests retain only an inline mock implementation to prove the
   `RandomizerNXT` legacy-only boundary.
-- Remaining implementation work includes callback-after-burn policy, richer
-  metadata state exposure, provider configuration events/runbooks, and
-  canonical core/coordinator-owned lifecycle state.
+- Burned-token callbacks now have a documented audit-only behavior: valid VRF
+  and arRNG fulfillments after burn can write the final token hash and emit a
+  burned-token randomness audit event without restoring ownership, `tokenURI`,
+  live supply, or ERC-4906 metadata state.
+- Remaining implementation work includes richer metadata state exposure,
+  provider configuration events/runbooks, and canonical core/coordinator-owned
+  lifecycle state.
 
 ## Decision
 
@@ -427,7 +431,7 @@ P0 implementation must:
   provider, and epoch
 - reject unknown, stale, mismatched, duplicate, and overwrite callbacks
 - replace zero-hash-only pending logic with explicit lifecycle state
-- define the callback-after-burn behavior and test it
+- preserve the documented callback-after-burn audit behavior and test it
 - add deterministic post-processing retry without requesting a new random
   output
 - remove, isolate, or disable weak block-derived randomness for production
@@ -458,7 +462,7 @@ P0 tests must include:
   off-chain and on-chain metadata
 - provider migration with pending requests follows this ADR
 - manual retry cannot change the random output
-- callback after burn follows the documented behavior
+- callback after burn follows the documented audit-only behavior
 - provider config updates require the right role and emit events
 - randomness reserves are not emergency-withdrawable surplus
 - weak helper contracts cannot be configured for production collections or are
@@ -539,7 +543,8 @@ fulfillment safety should come from strict validation.
 
 ## Open Follow-Ups
 
-- Define and test callback-after-burn behavior.
+- Keep callback-after-burn audit behavior covered by tests and metadata docs
+  as the broader metadata state model evolves.
 - Reconcile final metadata pending/freeze behavior with ADR 0006.
 - Add provider configuration events and production runbooks.
 - Update Slither baseline status after weak randomness code is removed, scoped,

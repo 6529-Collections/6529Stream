@@ -49,18 +49,22 @@ The current Gate A smoke baseline proves:
   ended mint window, elapsed final-supply delay, final live-token metadata,
   stored manifest hash/event, final supply tightening, and post-freeze rejection
   for current `StreamCore` metadata-significant mutation paths.
+  `StreamCoreBurn.t.sol` proves burn metadata semantics: burned tokens lose
+  ownership and `tokenURI` availability, emit protocol burn audit events, retain
+  audit state, exclude burned supply from live collection supply, reject remint
+  attempts for previously burned token IDs, and allow valid VRF/arRNG post-burn
+  fulfillment to record audit-only randomness without ERC-4906 metadata updates
+  or freeze-manifest changes.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
-callback-after-burn policy, canonical randomizer lifecycle
-ownership, lower-impact static-analysis cleanup beyond the now-triaged
+canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, signer/deployment ceremony runbooks, metadata escaping,
 dependency artifact packaging and migration runbooks beyond registry provenance
-strings, burn metadata policy, deployment discipline, and the broader P0/P1 test
-suite.
+strings, deployment discipline, and the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.
