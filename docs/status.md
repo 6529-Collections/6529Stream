@@ -81,6 +81,13 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
   including ABI checksums, bytecode checksums, standard/custom interface IDs,
   and event topic catalog entries.
+- `scripts/test_abi_compatibility.py` and
+  `scripts/check_abi_compatibility.py --check` prove the current production
+  contract ABI surface remains compatible with the committed
+  `release-artifacts/baselines/v0.1.0/abi-surface.json` baseline. The first
+  baseline fails on removed or changed functions, events, custom errors,
+  constructors, fallback, or receive entries and reports additive entries as
+  compatible.
 - `scripts/test_deployment_manifest.py` and
   `scripts/generate_deployment_manifest.py --check` prove the local Anvil
   manifest is generated from committed inputs, references current ABI/runtime
@@ -93,8 +100,8 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
-generation from broadcast outputs, signed release checksums, ABI diffing,
-address books, verified live deployment hashes, remaining generated
+generation from broadcast outputs, signed release checksums, ABI diff approval
+policy, address books, verified live deployment hashes, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

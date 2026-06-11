@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/deployment-manifest-generator` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/94` |
+| Active PR branch | `codex/abi-compatibility-checks` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/96` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 08:49 UTC` |
+| Last updated | `2026-06-11 09:17 UTC` |
 
 ## Packaging Notes
 
@@ -102,7 +102,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 46 | Reduce `StreamCore` deployment size | Gate E | Start P1-DEPLOY-001 by measuring the EIP-170 blocker, extracting pure metadata rendering/escaping code behind a stable library boundary where safe, preserving metadata behavior, and documenting the remaining size budget | Merged in PR #90 |
 | 47 | Add deployment rehearsal baseline | Gate E | Implement P1-DEPLOY-002 by adding a local deploy-and-wire Foundry rehearsal, manifest schema/example, deployment docs, manifest parsing/wiring tests, and check-script integration while leaving fork/testnet broadcast artifacts for follow-up | Merged in PR #92 |
 | 48 | Generate release artifact catalog | Gate G/Gate E support | Implement P1-RELEASE-001 by generating deterministic ABI checksums, bytecode checksums, interface IDs, and event topic catalog outputs from Foundry artifacts, then wire drift checks into local/CI gates and deployment docs | Merged in PR #94 |
-| 49 | Generate and check deployment manifests | Gate E/Gate G support | Implement P1-DEPLOY-003 by generating the Anvil manifest from committed inputs, filling current ABI/runtime bytecode hashes, adding deterministic manifest checksums, and wiring drift checks into local/CI gates and deployment docs | Active |
+| 49 | Generate and check deployment manifests | Gate E/Gate G support | Implement P1-DEPLOY-003 by generating the Anvil manifest from committed inputs, filling current ABI/runtime bytecode hashes, adding deterministic manifest checksums, and wiring drift checks into local/CI gates and deployment docs | Merged in PR #96 |
+| 50 | Add ABI compatibility checks | Gate G support | Implement P1-RELEASE-002 by committing a production ABI surface baseline, failing local/CI checks on removed or changed ABI entries, reporting additive entries, and documenting baseline refresh policy | Active |
 
 ## Current PR Worklog
 
@@ -4400,7 +4401,7 @@ Merge:
 
 ### PR candidate: Generate and check deployment manifests (Queue Item 49)
 
-Status: PR open; waiting on CI and CodeRabbit.
+Status: Merged in PR #96.
 Branch: `codex/deployment-manifest-generator`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/96`.
 Related issue:
@@ -4468,10 +4469,93 @@ Validation completed at `2026-06-11 08:47 UTC`:
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
 - `git diff --check` passed.
 
+Merge evidence:
+
+- PR #96 merged on `2026-06-11 08:58 UTC` as
+  `3d317f760de5cd2d009dd749a76551b28264c24e` after GitHub Actions CI run
+  `27335241255` passed on head
+  `578df3e6326fe145a16dde0109b75c0fd7581ca1`.
+- CodeRabbit generated the PR release notes and left no review submissions or
+  review threads, but its aggregate status remained pending. Per the autonomous
+  operating rules, the PR was merged under a documented maintainer decision
+  because CI was green, the PR was mergeable, and there were no actionable
+  CodeRabbit findings to address.
+
+### PR candidate: Add ABI compatibility checks (Queue Item 50)
+
+Status: PR open; waiting on CI and CodeRabbit.
+Branch: `codex/abi-compatibility-checks`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/98`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/97`
+
+Goal:
+
+- Commit an explicit production contract ABI surface baseline.
+- Compare current Foundry ABI output against the baseline in local and CI gates.
+- Fail on removed or changed functions, events, custom errors, constructors,
+  fallback, or receive entries.
+- Report additive ABI entries as compatible for the first release baseline.
+- Document how maintainers refresh the baseline only when a release surface
+  change is intentional.
+
+Initial scope:
+
+- `scripts/check_abi_compatibility.py`
+- `scripts/test_abi_compatibility.py`
+- `release-artifacts/baselines/v0.1.0/abi-surface.json`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `README.md`
+- `docs/tooling.md`
+- `docs/status.md`
+- `release-artifacts/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation draft:
+
+- Added a stdlib-only ABI compatibility checker with generation and `--check`
+  modes.
+- Generated the first committed production ABI surface baseline from the
+  production `via-ir` Foundry artifacts.
+- Added focused Python tests for identical, additive, removed, changed,
+  removed-contract, and check-mode drift behavior.
+- Wired ABI compatibility tests/checks into `make check`, Linux/Windows
+  wrappers, and CI.
+- Updated contributor/release docs and roadmap traceability.
+
+Validation completed at `2026-06-11 09:15 UTC`:
+
+- `python scripts\test_abi_compatibility.py` passed.
+- `python scripts\check_abi_compatibility.py --check` passed.
+- `python -m py_compile scripts\generate_release_artifacts.py
+  scripts\test_release_artifacts.py scripts\check_abi_compatibility.py
+  scripts\test_abi_compatibility.py scripts\generate_deployment_manifest.py
+  scripts\test_deployment_manifest.py` passed.
+- `bash -n scripts/check.sh` passed.
+- PowerShell parser validation for `scripts\check.ps1` passed.
+- JSON parsing passed for `release-artifacts/baselines/v0.1.0/abi-surface.json`
+  plus the existing release artifact config and ABI checksum baseline.
+- `make check` passed, including build, full Foundry tests, production size
+  build, release-artifact drift check, ABI compatibility check, deployment
+  manifest drift check, and deployment rehearsal.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `git diff --check` passed; Git printed only the existing line-ending
+  normalization warning for `scripts/check.ps1`.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 09:17 | Open PR #98 and request CodeRabbit | ABI compatibility PR published at `https://github.com/6529-Collections/6529Stream/pull/98`; CodeRabbit review requested in issue comment `4679037794`; Claude remains intentionally skipped per current user instruction |
+| 2026-06-11 09:15 | Validate Queue Item 50 locally | ABI compatibility generator/checker tests, compatibility drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass |
+| 2026-06-11 09:09 | Start Queue Item 50 | Issue #97 tracks the remaining deterministic ABI diff gate; branch `codex/abi-compatibility-checks` starts from merged PR #96 and scopes to a committed ABI surface baseline plus local/CI compatibility checks |
+| 2026-06-11 09:01 | Create ABI compatibility issue #97 | No open issue covered ABI compatibility diff checks, so a focused P1 release issue keeps the Gate G PR auditable |
+| 2026-06-11 08:58 | Merge PR #96 | Deployment manifest generator merged as `3d317f760de5cd2d009dd749a76551b28264c24e`; CI run `27335241255` passed, CodeRabbit generated release notes but left a stale pending status with no review threads, and the autonomous maintainer decision was to merge rather than stall |
 | 2026-06-11 08:49 | Open PR #96 and request CodeRabbit | Deployment manifest generator PR published at `https://github.com/6529-Collections/6529Stream/pull/96`; CodeRabbit review requested in issue comment `4678810031`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 08:47 | Validate Queue Item 49 locally | Deployment manifest generator, manifest drift checks, JSON parsing, shell/PowerShell syntax, full `make check`, Windows wrapper, and whitespace validation all pass |
 | 2026-06-11 08:35 | Start Queue Item 49 | Issue #95 tracks the remaining local manifest-generation gap; branch `codex/deployment-manifest-generator` starts from merged PR #94 and scopes to generated Anvil manifests plus drift checks |

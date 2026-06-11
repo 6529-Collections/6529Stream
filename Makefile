@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check deployment-manifests deployment-manifest-check fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check fmt-check slither clean
 
-check: build test size release-artifacts-check deployment-manifest-check deploy-rehearsal
+check: build test size release-artifacts-check abi-compatibility-check deployment-manifest-check deploy-rehearsal
 
 build:
 	forge build
@@ -44,6 +44,13 @@ release-artifacts: size
 release-artifacts-check: size
 	$(PYTHON) scripts/test_release_artifacts.py
 	$(PYTHON) scripts/generate_release_artifacts.py --check
+
+abi-compatibility: size
+	$(PYTHON) scripts/check_abi_compatibility.py
+
+abi-compatibility-check: size
+	$(PYTHON) scripts/test_abi_compatibility.py
+	$(PYTHON) scripts/check_abi_compatibility.py --check
 
 deployment-manifests: release-artifacts
 	$(PYTHON) scripts/generate_deployment_manifest.py

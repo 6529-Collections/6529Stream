@@ -8,6 +8,7 @@ Run after the production build profile:
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
+python scripts/check_abi_compatibility.py
 ```
 
 Check the committed artifacts without rewriting them:
@@ -15,11 +16,19 @@ Check the committed artifacts without rewriting them:
 ```sh
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --check
 ```
 
 The generated files under `latest/` are intentionally tracked. They give
 deployment manifests stable ABI checksum, bytecode checksum, interface ID, and
 event topic catalog inputs before any live network broadcast exists.
+
+The generated ABI compatibility baseline under `baselines/` is also tracked.
+It captures the current production contract function, event, custom error,
+constructor, fallback, and receive surface. The check fails on removed or
+changed entries and reports additive entries as compatible for this first
+release baseline.
 
 The generator uses Foundry's `cast sig-event` for Ethereum event topics and
 Foundry artifact `methodIdentifiers` for function selectors and interface IDs.
