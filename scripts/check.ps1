@@ -37,6 +37,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonCommand.Source @pythonArgs "scripts\generate_deployment_manifest.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_address_books.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_address_books.py" "--check"
+& $pythonCommand.Source @pythonArgs "scripts\test_release_manifest.py"
+& $pythonCommand.Source @pythonArgs "scripts\generate_release_manifest.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_release_checksums.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_release_checksums.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_changelog_check.py"

@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-change-policy` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/102` |
+| Active PR branch | `codex/release-manifest` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/104` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 11:46 UTC` |
+| Last updated | `2026-06-11 12:18 UTC` |
 
 ## Packaging Notes
 
@@ -106,7 +106,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 50 | Add ABI compatibility checks | Gate G support | Implement P1-RELEASE-002 by committing a production ABI surface baseline, failing local/CI checks on removed or changed ABI entries, reporting additive entries, and documenting baseline refresh policy | Merged in PR #98 |
 | 51 | Generate deployment address books | Gate G/Gate E support | Implement P1-RELEASE-003 by projecting committed deployment manifests into compact deterministic address-book artifacts for integrators, scripts, and docs, with drift checks in local/CI gates | Merged in PR #100 |
 | 52 | Add signable release checksum bundle | Gate G support | Implement P1-RELEASE-004 by generating deterministic SHA256SUMS and machine-readable checksum manifests over committed release/deployment artifacts, with drift checks in local/CI gates | Merged in PR #102 |
-| 53 | Add release change approval policy and changelog gate | Gate G support | Implement P1-RELEASE-005 by documenting ABI/schema/release change approval rules and adding a local/CI changelog gate for release-impacting paths | Active |
+| 53 | Add release change approval policy and changelog gate | Gate G support | Implement P1-RELEASE-005 by documenting ABI/schema/release change approval rules and adding a local/CI changelog gate for release-impacting paths | Merged in PR #104 |
+| 54 | Generate machine-readable release manifest | Gate G support | Implement P1-RELEASE-006 by generating a deterministic top-level release manifest over committed release/deployment artifacts, governance docs, and release-ceremony status, with local/CI drift checks | Active |
 
 ## Current PR Worklog
 
@@ -4763,7 +4764,7 @@ Merge evidence:
 
 ### PR candidate: Add release change approval policy and changelog gate (Queue Item 53)
 
-Status: CodeRabbit findings fixed locally; review-fix validation passed.
+Status: Merged.
 Branch: `codex/release-change-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/104`.
 Related issue:
@@ -4836,10 +4837,105 @@ Review response:
 - Review-fix validation passed with changelog tests/check, Python compile,
   shell/PowerShell syntax, and whitespace checks.
 
+Merge evidence:
+
+- Merged as PR #104 on `2026-06-11 11:52 UTC`.
+- Merge commit: `012bea914262c0b56601fc5824f7175d7a8218f1`.
+- Final head before merge: `172aaf2244162ff9b19cb580ec7f0b85f9102ac9`.
+- CI run `27344538408` passed.
+- CodeRabbit latest-head review finished with no actionable comments, aggregate
+  status `success`, and the prior thread resolved/outdated.
+- Issue #103 auto-closed completed.
+
+### PR candidate: Generate machine-readable release manifest (Queue Item 54)
+
+Status: Locally validated; ready to commit, push, open PR, and request
+CodeRabbit.
+Branch: `codex/release-manifest`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/105`
+
+Goal:
+
+- Generate `release-artifacts/latest/release-manifest.json` as the
+  deterministic top-level release index for Gate G.
+- Tie release artifact catalog outputs, ABI compatibility baseline, deployment
+  configs/manifests, address books, deployment schemas, changelog, governance
+  docs, and unavailable release-ceremony status together.
+- Wire manifest tests and drift checks into `make check`, Linux/Windows
+  wrappers, and CI before the release checksum gate.
+- Keep the release checksum bundle authoritative for final file digests while
+  documenting the release-manifest/checksum-bundle self-reference policy.
+
+Initial scope:
+
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/test_release_checksums.py`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `CHANGELOG.md`
+- `README.md`
+- `release-artifacts/README.md`
+- `docs/tooling.md`
+- `docs/deployment.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation summary:
+
+- Added a stdlib-only release manifest generator with deterministic output,
+  required JSON schema-version checks, release/deployment metadata extraction,
+  governance-doc hashing, and explicit unavailable release-ceremony statuses.
+- Added focused generator tests covering deterministic writes, check-mode drift,
+  missing required artifacts, required schema versions, and the checksum-bundle
+  self-reference policy.
+- Extended the release-checksum test baseline so
+  `release-artifacts/latest/release-manifest.json` is included in the signable
+  checksum bundle.
+- Wired manifest tests/checks into local make targets, Linux and Windows check
+  wrappers, and CI before release-checksum validation.
+- Taught the release-artifact catalog drift check to ignore downstream Gate G
+  outputs in the same directory, including `release-manifest.json`,
+  `SHA256SUMS`, and `release-checksums.json`, with regression coverage.
+- Updated docs, roadmap, and run-state traceability to make the manifest a
+  first-class Gate G artifact while leaving detached signatures, signed tags,
+  production address books, and verified live addresses as future work.
+
+Validation:
+
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_release_artifacts.py`
+- `python scripts\generate_release_artifacts.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\generate_release_artifacts.py scripts\test_release_artifacts.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py scripts\check_changelog.py scripts\test_changelog_check.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts/check.ps1` and
+  `scripts/bootstrap-windows.ps1`
+- `git diff --check`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 12:18 | Validate Queue Item 54 locally | Release manifest tests/check, release checksum tests/check, release artifact ownership-regression tests/check, changelog tests/check, Python compile, shell/PowerShell syntax, whitespace check, full `make check`, and Windows wrapper all pass |
+| 2026-06-11 12:06 | Start Queue Item 54 | Issue #105 tracks the machine-readable release manifest gap; branch `codex/release-manifest` starts from merged PR #104 and scopes to deterministic manifest generation plus local/CI drift checks |
+| 2026-06-11 11:54 | Create release manifest issue #105 | No open issue covered the top-level release manifest, so a focused P1 release issue keeps the Gate G PR auditable |
+| 2026-06-11 11:52 | Merge PR #104 | Release change policy/changelog gate merged as `012bea914262c0b56601fc5824f7175d7a8218f1`; CI run `27344538408` passed, CodeRabbit latest-head review finished with no actionable comments/status success, the prior thread was resolved/outdated, and issue #103 closed completed |
 | 2026-06-11 11:46 | Address CodeRabbit PR #104 review locally | Accepted the placeholder-bypass finding and PR-template wording nit; focused changelog tests/check, Python compile, shell/PowerShell syntax, and whitespace checks pass |
 | 2026-06-11 11:34 | Open PR #104 | Release change policy/changelog gate PR published at `https://github.com/6529-Collections/6529Stream/pull/104`; a state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 11:33 | Validate Queue Item 53 locally | Changelog gate tests/check, Python compile, shell/PowerShell syntax, Markdown heading trace, whitespace check, full `make check`, and Windows wrapper all pass; implementation also fixed local changelog auto-detection by resolving `git` with `shutil.which()`, failing closed on required git diff errors, and including untracked files |

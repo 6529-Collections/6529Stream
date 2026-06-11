@@ -10,11 +10,18 @@ the release policy in `docs/release-policy.md`.
 - Added release change approval policy and a local/CI changelog gate for
   release-impacting contract, deployment, artifact, and release-workflow
   changes.
+- Added a deterministic machine-readable release manifest that ties release
+  artifacts, ABI compatibility, deployment manifests, address books, governance
+  docs, and release-ceremony status together under `release-artifacts/latest/`.
 
 ### Release Impact
 
 - Gate G now requires release-impacting PRs to update this `Unreleased` section
   before merge.
+- Gate G now checks `release-artifacts/latest/release-manifest.json` before the
+  signable checksum bundle. The checksum bundle covers the release manifest, so
+  the manifest records checksum-bundle digests as self-referentially unavailable
+  rather than embedding a hash cycle.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

@@ -31,6 +31,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             output_dir = root / "release-artifacts" / "latest"
             write_text(output_dir / "event-topic-catalog.json", '{"events":[]}\n')
             write_text(output_dir / "abi-checksums.json", '{"abis":[]}\n')
+            write_text(output_dir / "release-manifest.json", '{"release":{}}\n')
             write_text(
                 root / "deployments" / "examples" / "anvil.json",
                 '{"chain":31337}\n',
@@ -54,6 +55,7 @@ class ReleaseChecksumTests(unittest.TestCase):
                     "deployments/examples/anvil.json",
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/event-topic-catalog.json",
+                    "release-artifacts/latest/release-manifest.json",
                 ],
             )
             self.assertNotIn("release-artifacts/latest/SHA256SUMS", covered_paths)
