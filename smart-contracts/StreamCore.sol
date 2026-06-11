@@ -161,6 +161,21 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     mapping(uint256 => uint256) private collectionLiveTokenMetadataAccumulators;
     mapping(uint256 => bytes32) private tokenFreezeMetadataRecordHashes;
 
+    struct BurnedTokenAudit {
+        bool burned;
+        uint256 collectionId;
+        address owner;
+        address operator;
+        uint256 burnedBlock;
+        uint256 burnedTimestamp;
+        bytes32 postBurnRandomnessHash;
+        uint256 postBurnRandomnessBlock;
+        uint256 postBurnRandomnessTimestamp;
+    }
+
+    // Retained audit state for burned tokens. tokenURI remains unavailable.
+    mapping(uint256 => BurnedTokenAudit) private burnedTokenAuditRecords;
+
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
 
@@ -192,6 +207,12 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         uint256 indexed version,
         bytes32 contentHash,
         address registry
+    );
+    event TokenBurned(
+        uint256 indexed _collectionID,
+        uint256 indexed _tokenId,
+        address indexed operator,
+        address owner
     );
 
     // constructor
@@ -346,9 +367,22 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 && (_tokenId <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
             "id err"
         );
+        address tokenOwner = ownerOf(_tokenId);
         _removeLiveTokenMetadataRecord(_collectionID, _tokenId);
+        burnedTokenAuditRecords[_tokenId] = BurnedTokenAudit({
+            burned: true,
+            collectionId: _collectionID,
+            owner: tokenOwner,
+            operator: _msgSender(),
+            burnedBlock: block.number,
+            burnedTimestamp: block.timestamp,
+            postBurnRandomnessHash: bytes32(0),
+            postBurnRandomnessBlock: 0,
+            postBurnRandomnessTimestamp: 0
+        });
         _burn(_tokenId);
         burnAmount[_collectionID] = burnAmount[_collectionID] + 1;
+        emit TokenBurned(_collectionID, _tokenId, _msgSender(), tokenOwner);
     }
 
     // mint processing
@@ -487,9 +521,14 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     }
 
     // function to set the tokenHash (this function is called only from randomizer contracts)
+    // Post-burn timestamps are audit evidence only; they do not gate protocol behavior.
+    // slither-disable-start timestamp
     function setTokenHash(uint256 _collectionID, uint256 _mintIndex, bytes32 _hash) external {
         require(msg.sender == collectionAdditionalData[_collectionID].randomizerContract);
-        _requireCollectionNotFrozen(_collectionID);
+        bool burnedToken = _isTokenBurned(_mintIndex);
+        if (!burnedToken) {
+            _requireCollectionNotFrozen(_collectionID);
+        }
         require(_hash != bytes32(0), "Zero token hash");
         require(
             (_mintIndex >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
@@ -500,6 +539,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         bool liveToken = _exists(_mintIndex);
         if (liveToken) {
             require(tokenIdsToCollectionIds[_mintIndex] == _collectionID, "Wrong collection");
+        } else if (burnedToken) {
+            BurnedTokenAudit storage audit = burnedTokenAuditRecords[_mintIndex];
+            require(audit.collectionId == _collectionID, "Wrong collection");
         }
         tokenToHash[_mintIndex] = _hash;
         // Record pre-mint callbacks, but only live tokens announce metadata changes.
@@ -507,8 +549,15 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             _markLiveTokenMetadataFinal(_collectionID, _mintIndex);
             _refreshLiveTokenMetadataRecord(_collectionID, _mintIndex);
             emit MetadataUpdate(_mintIndex);
+        } else if (burnedToken) {
+            BurnedTokenAudit storage audit = burnedTokenAuditRecords[_mintIndex];
+            audit.postBurnRandomnessHash = _hash;
+            audit.postBurnRandomnessBlock = block.number;
+            audit.postBurnRandomnessTimestamp = block.timestamp;
         }
     }
+
+    // slither-disable-end timestamp
 
     // function to set final supply, this applies only for unminted collections and will adjust totalSupply = circulatingSupply
     function setFinalSupply(uint256 _collectionID)
@@ -776,6 +825,42 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         return (tokenIdsToCollectionIds[_tokenid]);
     }
 
+    /// @notice Returns true when the token has been burned by this core contract.
+    function isTokenBurned(uint256 tokenId) public view returns (bool) {
+        return _isTokenBurned(tokenId);
+    }
+
+    /// @notice Returns retained audit state for a burned token.
+    /// @dev `tokenHash` is the current stored hash and may be recorded before or after burn.
+    function burnedTokenAuditState(uint256 tokenId)
+        public
+        view
+        returns (
+            bool burned,
+            uint256 collectionId,
+            address tokenOwner,
+            address operator,
+            uint256 burnedBlock,
+            uint256 burnedTimestamp,
+            bytes32 tokenHash,
+            bytes32 postBurnRandomnessHash,
+            uint256 postBurnRandomnessBlock,
+            uint256 postBurnRandomnessTimestamp
+        )
+    {
+        BurnedTokenAudit storage audit = burnedTokenAuditRecords[tokenId];
+        burned = audit.burned;
+        collectionId = audit.collectionId;
+        tokenOwner = audit.owner;
+        operator = audit.operator;
+        burnedBlock = audit.burnedBlock;
+        burnedTimestamp = audit.burnedTimestamp;
+        tokenHash = tokenToHash[tokenId];
+        postBurnRandomnessHash = audit.postBurnRandomnessHash;
+        postBurnRandomnessBlock = audit.postBurnRandomnessBlock;
+        postBurnRandomnessTimestamp = audit.postBurnRandomnessTimestamp;
+    }
+
     // function to return the current randomizer contract for a collection
     function viewCollectionRandomizerContract(uint256 _collectionID) public view returns (address) {
         return collectionAdditionalData[_collectionID].randomizerContract;
@@ -1010,6 +1095,10 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             collectionPendingMetadataCounts[_collectionID] =
                 collectionPendingMetadataCounts[_collectionID] - 1;
         }
+    }
+
+    function _isTokenBurned(uint256 tokenId) private view returns (bool) {
+        return burnedTokenAuditRecords[tokenId].burned;
     }
 
     function _markLiveTokenMetadataFinal(uint256 _collectionID, uint256 tokenId) private {

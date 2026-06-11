@@ -82,6 +82,9 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
         // local post-processing failure outcome.
         // slither-disable-start reentrancy-no-eth,reentrancy-events
         try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
+            if (gencoreContract.isTokenBurned(tokenId)) {
+                _confirmBurnedTokenRandomnessRecorded(_requestId);
+            }
             _confirmRandomnessFulfillment(_requestId);
             emit RequestFulfilled(_requestId, _randomWords);
         } catch (bytes memory failureData) {
@@ -122,6 +125,9 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
         // fail closed.
         // slither-disable-start reentrancy-no-eth,reentrancy-events
         try gencoreContract.setTokenHash(collectionId, tokenId, derivedSeed) {
+            if (gencoreContract.isTokenBurned(tokenId)) {
+                _confirmBurnedTokenRandomnessRecorded(_requestId);
+            }
             _confirmRandomnessPostProcessingRetry(_requestId, retryCount);
         } catch (bytes memory failureData) {
             _markRandomnessPostProcessingRetryFailed(_requestId, failureData, retryCount);

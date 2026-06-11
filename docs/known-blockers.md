@@ -54,9 +54,10 @@ contributors who start from the README.
   fulfillment, failure, and retry events without storing full provider word
   arrays. `RandomizerNXT` remains impossible to configure as a production
   randomizer, and the concrete weak `XRandoms` helper has been removed from
-  production source. Remaining randomness blockers include callback-after-burn
-  policy, richer metadata state exposure, provider configuration runbooks, and
-  canonical core/coordinator lifecycle ownership.
+  production source. Valid VRF/arRNG fulfillments after burn now record
+  audit-only randomness without restoring live metadata. Remaining randomness
+  blockers include richer stale metadata state exposure, provider configuration
+  runbooks, and canonical core/coordinator lifecycle ownership.
 - Dependency script retrieval now has segment-safe typed chunk and content
   hashes, so the former packed/dynamic chunk-boundary Slither finding is fixed.
   Current metadata golden fixtures now lock the pre-beta off-chain pending/final
@@ -72,9 +73,11 @@ contributors who start from the README.
   deprecation state, and collection key/version/content-hash/registry-address
   pins; existing and frozen collection output stays stable across later registry
   versions or registry swaps until an unfrozen collection is explicitly
-  repinned. Remaining metadata blockers include dependency artifact packaging
-  and deployment migration runbooks beyond registry provenance strings, burn
-  semantics, escaping, and size limits.
+  repinned. Burned tokens now follow ERC-721 token-existence semantics, emit a
+  protocol burn audit event, expose retained burn audit state, and can record
+  valid post-burn randomness for audit only. Remaining metadata blockers include
+  dependency artifact packaging and deployment migration runbooks beyond
+  registry provenance strings, escaping, and size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
@@ -93,8 +96,8 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist, but metadata escaping, burn
-  semantics, deployment, production-governance, richer supply/replay/freeze
+  bounded payment sequence invariant baseline now exist, but metadata escaping,
+  deployment, production-governance, richer supply/replay/freeze
   invariant tests, and any future shared-ledger invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 

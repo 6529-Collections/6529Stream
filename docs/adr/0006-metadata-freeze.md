@@ -432,7 +432,7 @@ Required events or stricter equivalents:
 - `DependencyVersionCreated(dependencyKey, version, contentHash, admin)`
 - `DependencyVersionDeprecated(dependencyKey, version, admin)`
 - `DependencyVersionPinned(collectionId, dependencyKey, version, contentHash)`
-- `BurnedTokenRandomnessRecorded(collectionId, tokenId, requestId, seed)`
+- `BurnedTokenRandomnessRecorded(requestId, collectionId, tokenId, provider, randomizerEpoch, derivedSeed, rawOutputHash)`
 - `MetadataUpdate(tokenId)` from `ERC-4906`
 - `BatchMetadataUpdate(fromTokenId, toTokenId)` from `ERC-4906`
 
@@ -577,9 +577,11 @@ signal that metadata changed before freeze.
 - Complete [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47).
 - Build [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48).
 - Add [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49).
-- Ship [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50).
-  This issue must implement the audit-record post-burn callback behavior from
-  this ADR and document the emitted event.
+- Keep [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50)
+  burn semantics covered while later metadata work evolves. The current
+  implementation keeps burned-token `tokenURI` unavailable, retains audit
+  state, records valid post-burn randomness through an audit-only event, and
+  leaves frozen live-token metadata unchanged.
 - Cover [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51).
   This issue must set concrete field, `tokenURI`, generated HTML, calldata, and
   gas budget limits before metadata implementation merges.

@@ -49,7 +49,7 @@ base64-encoded HTML animation URL.
 `final` state for minted tokens. The current schema version does not yet solve
 JSON escaping, raw attribute validation, metadata size limits, dependency
 artifact packaging beyond registry provenance strings, stale randomness display,
-or burn metadata semantics.
+or deployment release manifests.
 
 ## Golden Fixtures
 
@@ -88,7 +88,8 @@ The current event policy is:
 The current contract intentionally does not emit ERC-4906 events merely because
 a token is minted. If the configured randomizer fulfills during mint, the
 fulfillment itself emits `MetadataUpdate`. Burn also does not emit ERC-4906;
-indexers should treat the ERC-721 transfer-to-zero event as the live-token
+indexers should treat the ERC-721 transfer-to-zero event and the protocol
+`TokenBurned(collectionId, tokenId, operator, owner)` event as the live-token
 metadata removal signal.
 
 `freezeCollection` does not change `tokenURI` bytes, so it emits the
@@ -97,6 +98,35 @@ Dependency reference changes or explicit dependency-version repins through
 `updateCollectionInfo` emit batch events. Creating, deprecating, or replacing a
 dependency registry version does not emit ERC-4906 events for collections that
 remain pinned to an earlier version, because their token output is unchanged.
+
+## Burned Tokens
+
+Burned tokens follow ERC-721 token-existence semantics:
+
+- `ownerOf(tokenId)`, `tokenURI(tokenId)`, and `tokenMetadataState(tokenId)`
+  are unavailable after burn.
+- Burn emits the standard ERC-721 transfer-to-zero event and
+  `TokenBurned(collectionId, tokenId, operator, owner)`.
+- Burned tokens are excluded from live `totalSupply()` and
+  `totalSupplyOfCollection(collectionId)`.
+- `burnAmount(collectionId)` records the collection burn count.
+- `viewColIDforTokenID(tokenId)` and `retrieveTokenHash(tokenId)` retain audit
+  state, but that retention is not a public metadata availability guarantee.
+- `isTokenBurned(tokenId)` and `burnedTokenAuditState(tokenId)` expose retained
+  burn audit state for indexers and incident review.
+
+If a valid VRF or arRNG fulfillment arrives after a pending token is burned, the
+adapter records the derived seed/hash for audit only. The adapters emit:
+
+```text
+BurnedTokenRandomnessRecorded(requestId, collectionId, tokenId, provider, randomizerEpoch, derivedSeed, rawOutputHash)
+```
+
+That event is emitted only after `StreamCore.setTokenHash` accepts the
+post-burn hash. The write does not resurrect ownership, does not make
+`tokenURI` available, does not emit ERC-4906 metadata update events, and remains
+allowed after collection freeze because the frozen manifest commits only to live
+token metadata plus the burn count.
 
 ## Dependency Versions
 
@@ -165,20 +195,20 @@ freeze eligibility and manifest preview do not scan every minted token.
 
 After freeze, current `StreamCore` paths cannot mint into the collection, change
 collection metadata, change metadata mode, change token data, update token image
-or attributes, change the collection randomizer, set token hashes, finalize
-supply again, or swap the dependency registry while any collection is frozen.
+or attributes, change the collection randomizer, set live/pre-mint token hashes,
+finalize supply again, or swap the dependency registry while any collection is
+frozen. A valid post-burn randomness fulfillment may still record audit-only
+hash state for a burned token and does not change the frozen manifest.
 
 The manifest now uses the collection's pinned dependency version, content hash,
 and registry address, so later dependency registry versions or registry swaps
-cannot change frozen collection output. Burn metadata and callback-after-burn
-semantics remain P1-META-005.
+cannot change frozen collection output.
 
 ## Public-Beta Target
 
 ADR 0006 requires future metadata work to add:
 
-- stale and burned-state policy
+- stale-state display policy
 - JSON escaping and raw-attribute validation
 - dependency artifact packaging and release manifests beyond registry
   provenance strings
-- burn semantics and callback-after-burn tests

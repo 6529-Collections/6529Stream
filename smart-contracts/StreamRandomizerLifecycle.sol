@@ -121,6 +121,15 @@ abstract contract StreamRandomizerLifecycle {
         bytes32 rawOutputHash,
         bytes32 failureDataHash
     );
+    event BurnedTokenRandomnessRecorded(
+        uint256 indexed requestId,
+        uint256 indexed collectionId,
+        uint256 indexed tokenId,
+        address provider,
+        uint256 randomizerEpoch,
+        bytes32 derivedSeed,
+        bytes32 rawOutputHash
+    );
 
     function retrieveRandomnessRequest(uint256 _requestId)
         public
@@ -282,6 +291,26 @@ abstract contract StreamRandomizerLifecycle {
         }
 
         emit RandomnessFulfilled(
+            _requestId,
+            request.collectionId,
+            request.tokenId,
+            request.provider,
+            request.randomizerEpoch,
+            request.derivedSeed,
+            request.rawOutputHash
+        );
+    }
+
+    function _confirmBurnedTokenRandomnessRecorded(uint256 _requestId) internal {
+        RandomnessRequest storage request = randomnessRequests[_requestId];
+        if (request.state == RandomnessRequestState.None) {
+            revert UnknownRandomnessRequest(_requestId);
+        }
+        if (request.state != RandomnessRequestState.Fulfilled) {
+            revert RandomnessRequestNotFulfilled(_requestId, request.state);
+        }
+
+        emit BurnedTokenRandomnessRecorded(
             _requestId,
             request.collectionId,
             request.tokenId,
