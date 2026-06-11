@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/100` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 10:42 UTC` |
+| Last updated | `2026-06-11 10:43 UTC` |
 
 ## Packaging Notes
 
@@ -4658,8 +4658,9 @@ Merge evidence:
 
 ### PR candidate: Add signable release checksum bundle (Queue Item 52)
 
-Status: Local validation complete; push and open PR next.
+Status: PR open; CodeRabbit review request pending after state update push.
 Branch: `codex/release-checksum-bundle`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/102`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/101`
@@ -4740,6 +4741,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 10:43 | Open PR #102 | Release checksum bundle PR published at `https://github.com/6529-Collections/6529Stream/pull/102`; one state-only follow-up will record the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 10:42 | Validate Queue Item 52 locally | Release checksum tests/check, release artifact ownership-regression test/check, Python compile, shell/PowerShell syntax, JSON/line-format parsing, traceability grep, full `make check`, Windows wrapper, and whitespace validation all pass; release-artifact check now ignores checksum-bundle outputs so both generated artifact families can coexist, and check mode reports deleted covered files even when the regenerated covered set becomes empty |
 | 2026-06-11 10:22 | Start Queue Item 52 | Issue #101 tracks the Gate G signable checksum-bundle gap; branch `codex/release-checksum-bundle` starts from merged PR #100 and scopes to deterministic SHA256SUMS/manifest generation plus local/CI drift checks |
 | 2026-06-11 10:18 | Create release checksum issue #101 | No open issue covered deterministic release checksum bundles, so a focused P1 release issue keeps the Gate G PR auditable |
