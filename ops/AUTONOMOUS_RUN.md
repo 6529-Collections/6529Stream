@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/88` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 06:13 UTC` |
+| Last updated | `2026-06-11 06:17 UTC` |
 
 ## Packaging Notes
 
@@ -4102,9 +4102,9 @@ Merge:
 
 ### PR candidate: Reduce `StreamCore` deployment size (Queue Item 46)
 
-Status: Local validation complete; ready to commit and open PR.
+Status: Open in PR #90; awaiting CI and CodeRabbit.
 Branch: `codex/streamcore-size-reduction`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/90`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/89`
@@ -4177,6 +4177,7 @@ Validation completed at `2026-06-11 06:13 UTC`:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 06:17 | Open PR #90 | StreamCore size-reduction PR published at `https://github.com/6529-Collections/6529Stream/pull/90`; the branch proves `StreamCore` fits under EIP-170 through the production size gate, and CodeRabbit will be requested after the PR state update is pushed |
 | 2026-06-11 06:13 | Finish Queue Item 46 local validation | Full local gate set is ready for PR: `make check`, Windows wrapper, touched-file formatting, whitespace, production size gate, stale-helper grep, and Slither baseline comparison all pass; `StreamCore` is `23,139` runtime bytes with `1,437` bytes of EIP-170 headroom, and Slither high/medium remain unchanged at `4/19` |
 | 2026-06-11 06:04 | Keep only the high-value renderer library extraction | Temporary freeze/dependency/randomizer helper extractions barely changed `StreamCore` size and would have added extra linked-library calls in mint/freeze/admin paths, so they were folded back into `StreamCore`; the final local production size gate still passes with `StreamCore` at `23,139` runtime bytes and `1,437` bytes of EIP-170 headroom |
 | 2026-06-11 05:57 | Use IR-optimized production size gate | Default all-artifact `forge build --sizes` still measures test-only invariant handler initcode and default non-IR `StreamCore` bytecode; the production release gate is now explicit as `forge build --sizes --via-ir --skip test --force`, which skips tests and proves deployable contracts fit |
