@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-    "deployment_manifest_sha256": "sha256:586fa0e7ed1d9ede71c67e21dac957f2749c16eaa0698c3e751628cb8db6864e",
+    "deployment_manifest_sha256": "sha256:5356a0040a62330301ca0404dac38dea09ee5ab42a0bbc75a6e75a5385fdfe44",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -25,8 +25,8 @@
       "address": "0x0000000000000000000000000000000000000002",
       "source": "smart-contracts/DependencyRegistry.sol",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
-      "abi_hash": "sha256:8600876198d591fdae934b20c5d370490939504890944dbd8249d85ef17a6795",
-      "runtime_bytecode_hash": "sha256:8193bd7866597d9770ab4437329d55a4957870c92839e749cca16efe9409e285",
+      "abi_hash": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+      "runtime_bytecode_hash": "sha256:83c6fa047e03a73dcc7c5b2e69c5899090060d8e0b0b269fed978ed84d67e435",
       "verification_status": "not_applicable"
     },
     "NextGenRandomizerRNG": {
@@ -66,7 +66,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:ea674cbdafc9a379139e9998fd161d0cde58b82ed053f6e5cfc8d3a3653509cc",
-      "runtime_bytecode_hash": "sha256:db48ad19a69d872b82f4b1a4aa8fadaada04bd2207859caffbd51d6a2d673a0b",
+      "runtime_bytecode_hash": "sha256:f8266509aff44ff04058e9c5293f66866e827318f128efc74dcc1057871afd4f",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {

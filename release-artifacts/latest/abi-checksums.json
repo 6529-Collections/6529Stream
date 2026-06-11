@@ -6,7 +6,7 @@
     "foundry_out": "out"
   },
   "abi_hashes": {
-    "DependencyRegistry": "sha256:8600876198d591fdae934b20c5d370490939504890944dbd8249d85ef17a6795",
+    "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
     "NextGenRandomizerRNG": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
     "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
     "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
@@ -19,14 +19,14 @@
   "bytecode_hashes": {
     "DependencyRegistry": {
       "creation": {
-        "sha256": "sha256:19ea0fbe3e4fe2e23d56051f395d13309a5bf4576a8b28ce90eda3170291247b",
-        "linked": true,
-        "hash_mode": "bytes"
+        "sha256": "sha256:3c6e1213f9426363eda6c61096391d8622598c3e875037a4949981bc7a95be8f",
+        "linked": false,
+        "hash_mode": "unlinked_artifact_object"
       },
       "runtime": {
-        "sha256": "sha256:8193bd7866597d9770ab4437329d55a4957870c92839e749cca16efe9409e285",
-        "linked": true,
-        "hash_mode": "bytes"
+        "sha256": "sha256:83c6fa047e03a73dcc7c5b2e69c5899090060d8e0b0b269fed978ed84d67e435",
+        "linked": false,
+        "hash_mode": "unlinked_artifact_object"
       }
     },
     "NextGenRandomizerRNG": {
@@ -79,12 +79,12 @@
     },
     "StreamCore": {
       "creation": {
-        "sha256": "sha256:2bd8c0ec715114b3fcf7e3b79a642a4d28c763703825542254a9c7fb1ef9b49a",
+        "sha256": "sha256:6b3716bcb34d9eedccbc83d7b125d94ef5628e9ad72e2686c5d957203d05fcd4",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       },
       "runtime": {
-        "sha256": "sha256:db48ad19a69d872b82f4b1a4aa8fadaada04bd2207859caffbd51d6a2d673a0b",
+        "sha256": "sha256:f8266509aff44ff04058e9c5293f66866e827318f128efc74dcc1057871afd4f",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       }
@@ -130,14 +130,14 @@
     "DependencyRegistry": {
       "source": "smart-contracts/DependencyRegistry.sol",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
-      "abi_sha256": "sha256:8600876198d591fdae934b20c5d370490939504890944dbd8249d85ef17a6795",
-      "bytecode_sha256": "sha256:19ea0fbe3e4fe2e23d56051f395d13309a5bf4576a8b28ce90eda3170291247b",
-      "bytecode_linked": true,
-      "bytecode_hash_mode": "bytes",
-      "deployed_bytecode_sha256": "sha256:8193bd7866597d9770ab4437329d55a4957870c92839e749cca16efe9409e285",
-      "deployed_bytecode_linked": true,
-      "deployed_bytecode_hash_mode": "bytes",
-      "abi_entries": 32,
+      "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+      "bytecode_sha256": "sha256:3c6e1213f9426363eda6c61096391d8622598c3e875037a4949981bc7a95be8f",
+      "bytecode_linked": false,
+      "bytecode_hash_mode": "unlinked_artifact_object",
+      "deployed_bytecode_sha256": "sha256:83c6fa047e03a73dcc7c5b2e69c5899090060d8e0b0b269fed978ed84d67e435",
+      "deployed_bytecode_linked": false,
+      "deployed_bytecode_hash_mode": "unlinked_artifact_object",
+      "abi_entries": 33,
       "function_count": 25,
       "event_count": 2,
       "constructor_count": 1
@@ -206,10 +206,10 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_sha256": "sha256:ea674cbdafc9a379139e9998fd161d0cde58b82ed053f6e5cfc8d3a3653509cc",
-      "bytecode_sha256": "sha256:2bd8c0ec715114b3fcf7e3b79a642a4d28c763703825542254a9c7fb1ef9b49a",
+      "bytecode_sha256": "sha256:6b3716bcb34d9eedccbc83d7b125d94ef5628e9ad72e2686c5d957203d05fcd4",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
-      "deployed_bytecode_sha256": "sha256:db48ad19a69d872b82f4b1a4aa8fadaada04bd2207859caffbd51d6a2d673a0b",
+      "deployed_bytecode_sha256": "sha256:f8266509aff44ff04058e9c5293f66866e827318f128efc74dcc1057871afd4f",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "abi_entries": 118,

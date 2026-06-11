@@ -11,6 +11,7 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamAdmins.sol";
+import "./StreamMetadataRenderer.sol";
 
 contract DependencyRegistry {
     bytes32 public constant DEPENDENCY_SCRIPT_CONTENT_TYPEHASH = keccak256(
@@ -32,6 +33,7 @@ contract DependencyRegistry {
     error DependencyVersionMissing(bytes32 dependencyNameAndVersion, uint256 version);
     error DependencyKeyReserved(bytes32 dependencyNameAndVersion);
     error DependencyFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
+    error DependencyFieldInvalidUTF8(bytes32 field);
 
     event DependencyVersionCreated(
         bytes32 indexed dependencyNameAndVersion,
@@ -347,6 +349,7 @@ contract DependencyRegistry {
     function _requireMaxBytes(bytes32 field, string memory value, uint256 maximum) private pure {
         uint256 actual = bytes(value).length;
         if (actual > maximum) revert DependencyFieldTooLarge(field, actual, maximum);
+        if (!StreamMetadataRenderer.isValidUtf8(value)) revert DependencyFieldInvalidUTF8(field);
     }
 
     // Slither maps the provenance timestamp field to this version-existence check.

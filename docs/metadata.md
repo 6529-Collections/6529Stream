@@ -53,9 +53,11 @@ and `value` string fields. It also enforces the current URI policy for token
 images, collection base URIs, and external collection library URLs before
 storage. Fixture-level checks now reject invalid UTF-8 data URI payloads and
 non-semantic attribute entries in committed metadata golden files. Production
-invalid UTF-8 rejection, browser render-sandbox checks, production dependency
-migration runbooks beyond the local dependency artifact manifest baseline,
-stale randomness display, and live deployment release manifests remain open.
+dependency registry writes now reject invalid UTF-8 dependency script chunks
+and provenance before storage. `StreamCore` production invalid UTF-8 rejection,
+browser render-sandbox checks, production dependency migration runbooks beyond
+the local dependency artifact manifest baseline, stale randomness display, and
+live deployment release manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -89,7 +91,8 @@ script. This protects wrapper structure, but it does not sandbox artist
 now validates the committed golden fixtures for JSON/data-URI structure,
 strict UTF-8 decoding, current URI scheme policy, semantic attribute shape, and
 generated HTML wrapper/script boundaries. Full browser execution sandboxing plus
-production invalid UTF-8 enforcement remain required before public beta.
+`StreamCore` production invalid UTF-8 enforcement remain required before public
+beta.
 
 ## URI Policy
 
@@ -143,6 +146,25 @@ failed surface without parsing strings.
 | Dependency script chunk | 8,192 bytes |
 | Dependency script chunks per version | 32 chunks |
 | Dependency provenance | 2,048 bytes |
+
+## UTF-8 Policy
+
+`StreamMetadataRenderer.isValidUtf8(raw)` exposes the shared strict UTF-8
+scanner used by the current production registry guard. The scanner accepts
+ASCII and valid 2-, 3-, and 4-byte UTF-8 sequences, and rejects lone
+continuation bytes, invalid continuation bytes, overlong encodings, surrogate
+encodings, code points above U+10FFFF, and truncated multibyte sequences.
+
+`DependencyRegistry` applies this policy to dependency script chunks and
+dependency provenance. Oversized values still fail with
+`DependencyFieldTooLarge(field, actual, maximum)` before UTF-8 validity is
+checked; invalid in-limit values fail with
+`DependencyFieldInvalidUTF8(field)`.
+
+`StreamCore` does not yet apply the same production UTF-8 guard because the
+direct Core wiring exceeded the EIP-170 production size gate by 1,179 runtime
+bytes in local experiments. Core-level enforcement is tracked separately in
+[issue #125](https://github.com/6529-Collections/6529Stream/issues/125).
 
 ## Golden Fixtures
 
@@ -339,7 +361,8 @@ ADR 0006 requires future metadata work to add:
   JSON/data-URI/HTML boundary checks now exist
 - richer structured attributes if the protocol moves away from caller-authored
   raw fragments; production raw-attribute schema validation now exists
-- production invalid UTF-8 rejection; fixture-level invalid UTF-8 checks now
-  exist
+- production invalid UTF-8 rejection for all `StreamCore` metadata inputs;
+  dependency registry production UTF-8 checks and fixture-level invalid UTF-8
+  checks now exist
 - production dependency migration runbooks beyond the local artifact-manifest
   baseline

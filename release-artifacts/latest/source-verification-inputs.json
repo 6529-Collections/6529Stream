@@ -80,6 +80,7 @@
       "solc_keccak256": "0x01d8143592b452e8885a672152862a2144987a8a52c7817085f8ac8f7b670a8d",
       "license": "MIT",
       "used_by": [
+        "DependencyRegistry",
         "StreamCore"
       ]
     },
@@ -96,8 +97,8 @@
     },
     "smart-contracts/DependencyRegistry.sol": {
       "path": "smart-contracts/DependencyRegistry.sol",
-      "sha256": "sha256:1d4cd55206fa1e17c998b137d2ba064ebac17761e52c4758f3216d23d1adae20",
-      "solc_keccak256": "0xc03b330198ca1b39e9484ee0dd55107e80725627e239e74fca6b9be73cf03375",
+      "sha256": "sha256:beb2c655cbaf2fef56404c50485861aea209bea362a61d5c3ee6fe9d3532143c",
+      "solc_keccak256": "0xd04a0d525e560544e547be8ff03565adf4cf6571e584a2b73fcfd79a27a73e0d",
       "license": "MIT",
       "used_by": [
         "DependencyRegistry"
@@ -303,6 +304,7 @@
       "solc_keccak256": "0x4d3631d63208ca7fa63bb9791edc81b5fe11b86c16ee38bfce461b695e5fcf08",
       "license": "MIT",
       "used_by": [
+        "DependencyRegistry",
         "StreamCore"
       ]
     },
@@ -361,6 +363,7 @@
       "solc_keccak256": "0xc0986282c5ef286c179f5329f17f9d54a0407ccb4787856c201e15109844648b",
       "license": "MIT",
       "used_by": [
+        "DependencyRegistry",
         "StreamCore"
       ]
     },
@@ -402,10 +405,11 @@
     },
     "smart-contracts/StreamMetadataRenderer.sol": {
       "path": "smart-contracts/StreamMetadataRenderer.sol",
-      "sha256": "sha256:17e86cfff6e5ab7cad2089b17ab0c6c714e4808698c92fe699ad08c6a8dc9a59",
-      "solc_keccak256": "0x31bd64afcc15e21a1380737ff83e3dfd3382f6945fe815a1189c46beac2aefe9",
+      "sha256": "sha256:591572d107bdd48a222c2ca381209216878e2d002b13c2d39d1f1c6dacb19d4c",
+      "solc_keccak256": "0x215cdf34adb7e68b0366a3df89bdbce60f5c1ecc28b24b5391a9852232ad6944",
       "license": "MIT",
       "used_by": [
+        "DependencyRegistry",
         "StreamCore"
       ]
     },
@@ -450,6 +454,7 @@
       "solc_keccak256": "0xcde77448b966d0a0658338adf36d6c0c860b1e45d3db2fc3984c9e203898b6be",
       "license": "MIT",
       "used_by": [
+        "DependencyRegistry",
         "StreamCore"
       ]
     },
@@ -475,10 +480,10 @@
   "contracts": {
     "DependencyRegistry": {
       "source": "smart-contracts/DependencyRegistry.sol",
-      "source_sha256": "sha256:1d4cd55206fa1e17c998b137d2ba064ebac17761e52c4758f3216d23d1adae20",
-      "source_solc_keccak256": "0xc03b330198ca1b39e9484ee0dd55107e80725627e239e74fca6b9be73cf03375",
+      "source_sha256": "sha256:beb2c655cbaf2fef56404c50485861aea209bea362a61d5c3ee6fe9d3532143c",
+      "source_solc_keccak256": "0xd04a0d525e560544e547be8ff03565adf4cf6571e584a2b73fcfd79a27a73e0d",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
-      "artifact_sha256": "sha256:c4500eaa0428cd4aeb1256e6a3b7dcc52313833177401be4e010e8dbb7c47b17",
+      "artifact_sha256": "sha256:de487965177b3f74420619d4e6a6b798ffc465a9b13d32825a10bbd1685d3900",
       "compilation_target": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -492,19 +497,19 @@
         "metadata_bytecode_hash": "ipfs",
         "libraries": {}
       },
-      "abi_sha256": "sha256:8600876198d591fdae934b20c5d370490939504890944dbd8249d85ef17a6795",
+      "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:19ea0fbe3e4fe2e23d56051f395d13309a5bf4576a8b28ce90eda3170291247b",
-          "linked": true,
-          "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:19ea0fbe3e4fe2e23d56051f395d13309a5bf4576a8b28ce90eda3170291247b"
+          "sha256": "sha256:3c6e1213f9426363eda6c61096391d8622598c3e875037a4949981bc7a95be8f",
+          "linked": false,
+          "hash_mode": "unlinked_artifact_object",
+          "release_artifact_sha256": "sha256:3c6e1213f9426363eda6c61096391d8622598c3e875037a4949981bc7a95be8f"
         },
         "runtime": {
-          "sha256": "sha256:8193bd7866597d9770ab4437329d55a4957870c92839e749cca16efe9409e285",
-          "linked": true,
-          "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:8193bd7866597d9770ab4437329d55a4957870c92839e749cca16efe9409e285"
+          "sha256": "sha256:83c6fa047e03a73dcc7c5b2e69c5899090060d8e0b0b269fed978ed84d67e435",
+          "linked": false,
+          "hash_mode": "unlinked_artifact_object",
+          "release_artifact_sha256": "sha256:83c6fa047e03a73dcc7c5b2e69c5899090060d8e0b0b269fed978ed84d67e435"
         }
       },
       "constructor": {
@@ -525,13 +530,35 @@
         "encoded_args": "not_available_until_broadcast"
       },
       "library_linking": {
-        "requires_linking": false,
-        "creation_link_references": [],
-        "runtime_link_references": []
+        "requires_linking": true,
+        "creation_link_references": [
+          {
+            "source": "smart-contracts/StreamMetadataRenderer.sol",
+            "library": "StreamMetadataRenderer",
+            "positions": [
+              {
+                "start": 4744,
+                "length": 20
+              }
+            ]
+          }
+        ],
+        "runtime_link_references": [
+          {
+            "source": "smart-contracts/StreamMetadataRenderer.sol",
+            "library": "StreamMetadataRenderer",
+            "positions": [
+              {
+                "start": 4600,
+                "length": 20
+              }
+            ]
+          }
+        ]
       },
       "verification": {
         "live_status": "not_available_until_broadcast",
-        "template": "forge verify-contract --chain-id <chain-id> --compiler-version v0.8.19+commit.7dd6d404 --num-of-optimizations 200 --via-ir --watch <deployed-address> smart-contracts/DependencyRegistry.sol:DependencyRegistry --constructor-args <encoded-constructor-args>"
+        "template": "forge verify-contract --chain-id <chain-id> --compiler-version v0.8.19+commit.7dd6d404 --num-of-optimizations 200 --via-ir --watch <deployed-address> smart-contracts/DependencyRegistry.sol:DependencyRegistry --constructor-args <encoded-constructor-args> --libraries smart-contracts/StreamMetadataRenderer.sol:StreamMetadataRenderer:<library-address>"
       }
     },
     "NextGenRandomizerRNG": {
@@ -612,7 +639,7 @@
       "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
       "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:bde16f258ee16797b1a7a069146fa6a141be813df4fd63596b206cff9b4ad4a1",
+      "artifact_sha256": "sha256:1873fe172ca5df4a6de1a17cb1f8f626f4a60c1971e056f9a5d60d6dfa902a8d",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -843,7 +870,7 @@
       "source_sha256": "sha256:f82ac150bd1fd865b3a86b884599acc700a8ba5f2865befac746030a7d9256ae",
       "source_solc_keccak256": "0xd035331b7b57711a940c3bc8ca4d7fd0a9b600aaf550f5a1b1dd720e390c7e3c",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:7bc4429b25a79c1237184c83f360aa631260c77d9bae8454af61b5d3169df12e",
+      "artifact_sha256": "sha256:0c0c8241bb5f7febb2592bc8b9f902cc8f6b7edd9cdfe4db89c0f249a1a44a57",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -860,16 +887,16 @@
       "abi_sha256": "sha256:ea674cbdafc9a379139e9998fd161d0cde58b82ed053f6e5cfc8d3a3653509cc",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:2bd8c0ec715114b3fcf7e3b79a642a4d28c763703825542254a9c7fb1ef9b49a",
+          "sha256": "sha256:6b3716bcb34d9eedccbc83d7b125d94ef5628e9ad72e2686c5d957203d05fcd4",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:2bd8c0ec715114b3fcf7e3b79a642a4d28c763703825542254a9c7fb1ef9b49a"
+          "release_artifact_sha256": "sha256:6b3716bcb34d9eedccbc83d7b125d94ef5628e9ad72e2686c5d957203d05fcd4"
         },
         "runtime": {
-          "sha256": "sha256:db48ad19a69d872b82f4b1a4aa8fadaada04bd2207859caffbd51d6a2d673a0b",
+          "sha256": "sha256:f8266509aff44ff04058e9c5293f66866e827318f128efc74dcc1057871afd4f",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:db48ad19a69d872b82f4b1a4aa8fadaada04bd2207859caffbd51d6a2d673a0b"
+          "release_artifact_sha256": "sha256:f8266509aff44ff04058e9c5293f66866e827318f128efc74dcc1057871afd4f"
         }
       },
       "constructor": {
