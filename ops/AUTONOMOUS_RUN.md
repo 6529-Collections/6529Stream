@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/87` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 05:11 UTC` |
+| Last updated | `2026-06-11 05:17 UTC` |
 
 ## Packaging Notes
 
@@ -4058,7 +4058,8 @@ Initial scope notes:
 Implementation:
 
 - Escaped the generated animation wrapper's `collectionLibrary` value before
-  placing it in the quoted `<script src>` attribute.
+  placing it in the quoted `<script src>` attribute, including the C0 control
+  range and DEL after CodeRabbit noted the browser URL-parser edge case.
 - Escaped `tokenData` and dependency script content before embedding them in
   generated single-quoted JavaScript strings.
 - Changed generated `tokenData` construction from raw JavaScript array source
@@ -4087,7 +4088,7 @@ Validation:
 - Slither baseline comparison remained unchanged at 718 total findings: High 4,
   Medium 19, Low 93, Informational 591, Optimization 11.
 - `forge build --sizes` still fails because `StreamCore` is over EIP-170 at
-  35,281 runtime bytes with a -10,705 byte runtime margin. This is an existing
+  35,696 runtime bytes with a -11,120 byte runtime margin. This is an existing
   release/deployment blocker and is recorded for the roadmap, but the canonical
   local check for this slice remains green.
 
@@ -4095,6 +4096,7 @@ Validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 05:17 | Address CodeRabbit PR #88 control-character note | CodeRabbit found the wrapper implementation sound and noted one low-severity browser URL-parser gap for null/control characters in `collectionLibrary`; `_escapeHtmlAttribute` now entity-escapes C0 controls and DEL, the decoded HTML test covers embedded null/newline bytes, focused/adjacent/full/Windows/format/whitespace gates pass, Slither remains `718` total findings with high/medium unchanged at `4/19`, and `forge build --sizes` reports the known `StreamCore` blocker at `35,696` runtime bytes |
 | 2026-06-11 05:11 | Open PR #88 and request CodeRabbit | Animation wrapper safety is published at `https://github.com/6529-Collections/6529Stream/pull/88`; CodeRabbit review requested in issue comment `4677381075`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 05:08 | Validate Queue Item 45 locally | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison pass; Slither remains `718` total findings with high/medium unchanged at `4/19`; `forge build --sizes` continues to expose the known oversized `StreamCore` release blocker at `35,281` runtime bytes |
 | 2026-06-11 04:52 | Start Queue Item 45 | PR #87 merged, local `main` is synced, issue #51 was reopened because only the first metadata escaping slice landed, and the next tight P1-META-006 slice is generated animation HTML wrapper safety |

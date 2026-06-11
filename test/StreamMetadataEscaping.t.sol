@@ -220,6 +220,10 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
 
         string[] memory scripts = new string[](1);
         scripts[0] = "function draw(){const closing=\"</ScRiPt><img src=x>\";}";
+        string memory hostileLibrary = string.concat(
+            "https://cdn.example/lib.js\" async=\"bad\"</script><img src=x>&",
+            string(abi.encodePacked(bytes1(0), bytes1(0x0a)))
+        );
         deployed.core
             .updateCollectionInfo(
                 COLLECTION_ID,
@@ -229,7 +233,7 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
                 "https://6529.io",
                 "CC0",
                 "ipfs://base/",
-                "https://cdn.example/lib.js\" async=\"bad\"</script><img src=x>&",
+                hostileLibrary,
                 dependencyKey,
                 FULL_COLLECTION_UPDATE_INDEX,
                 scripts
@@ -260,6 +264,8 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
             .assertTrue("library attribute quote was not escaped");
         _contains(htmlBytes, bytes("&lt;/script&gt;&lt;img src=x&gt;&amp;"))
             .assertTrue("library attribute markup was not escaped");
+        _contains(htmlBytes, bytes("&#x00;&#x0a;"))
+            .assertTrue("library attribute controls were not escaped");
         _contains(
                 htmlBytes, bytes("let tokenDataRaw='1];window.injected=true;//\\x3c/script\\x3e';")
             ).assertTrue("tokenData raw string was not escaped");

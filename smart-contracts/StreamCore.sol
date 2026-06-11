@@ -810,6 +810,19 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 outputLength = _appendBytes(output, outputLength, "&lt;");
             } else if (character == 0x3e) {
                 outputLength = _appendBytes(output, outputLength, "&gt;");
+            } else if (uint8(character) < 0x20 || character == 0x7f) {
+                output[outputLength] = 0x26;
+                outputLength++;
+                output[outputLength] = 0x23;
+                outputLength++;
+                output[outputLength] = 0x78;
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) >> 4);
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
+                outputLength++;
+                output[outputLength] = 0x3b;
+                outputLength++;
             } else {
                 output[outputLength] = character;
                 outputLength++;
