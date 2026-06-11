@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/118` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 20:44 UTC` |
+| Last updated | `2026-06-11 20:50 UTC` |
 
 ## Packaging Notes
 
@@ -122,7 +122,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Metadata fixture UTF-8 and semantic attributes (Queue Item 63)
 
-Status: PR #121 open; release-manifest drift fix prepared for CI rerun.
+Status: PR #121 open; CodeRabbit follow-up fixes prepared for CI rerun.
 Branch: `codex/metadata-fixture-utf8-attributes`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/121`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/119`.
@@ -5604,6 +5604,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 20:50 | Address PR #121 CodeRabbit comments | Accepted the still-valid explicit `None` check for malformed fixture URI helpers and the roadmap wording for production raw-attribute enforcement; the stale release-manifest finding was already fixed in `ea90b91`, and artifacts will be regenerated again after this state update |
 | 2026-06-11 20:43 | Fix PR #121 release-manifest CI drift | CI correctly found that the post-open `ops/AUTONOMOUS_RUN.md` state commit changed a release-manifest-covered input; update state first, regenerate release manifest/checksums, then push without further covered-file edits |
 | 2026-06-11 20:39 | Open PR #121 and request CodeRabbit | Metadata fixture UTF-8/attribute safety PR opened at `https://github.com/6529-Collections/6529Stream/pull/121` on head `f6cc831b8837af1582d8828955da7c8d6e816cc6`; CodeRabbit review requested in issue comment `4684855824`, and Claude remains skipped per current user instruction |
 | 2026-06-11 20:34 | Validate Queue Item 63 locally | Metadata fixture UTF-8/attribute regressions, dependency artifact LF drift check, release manifest/checksum checks, changelog gate, full `make check`, Windows wrapper, `py_compile`, bash syntax, and whitespace checks all pass; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom |

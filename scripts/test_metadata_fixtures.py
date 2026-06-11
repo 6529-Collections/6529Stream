@@ -60,8 +60,13 @@ def write_fixture_set(
         "image": image,
         "attributes": attributes,
     }
-    pending_uri = malformed_pending_uri or encode_data_uri(
-        checker.JSON_DATA_URI_PREFIX, json.dumps(pending_metadata, separators=(",", ":"))
+    pending_uri = (
+        malformed_pending_uri
+        if malformed_pending_uri is not None
+        else encode_data_uri(
+            checker.JSON_DATA_URI_PREFIX,
+            json.dumps(pending_metadata, separators=(",", ":")),
+        )
     )
     write_fixture(root / checker.ONCHAIN_PENDING_FIXTURE, pending_uri)
 
@@ -75,8 +80,10 @@ def write_fixture_set(
         )
     final_metadata = dict(pending_metadata)
     final_metadata["metadata_state"] = checker.STATE_FINAL
-    final_metadata["animation_url"] = malformed_animation_uri or encode_data_uri(
-        checker.HTML_DATA_URI_PREFIX, animation_html
+    final_metadata["animation_url"] = (
+        malformed_animation_uri
+        if malformed_animation_uri is not None
+        else encode_data_uri(checker.HTML_DATA_URI_PREFIX, animation_html)
     )
     write_fixture(
         root / checker.ONCHAIN_FINAL_FIXTURE,
