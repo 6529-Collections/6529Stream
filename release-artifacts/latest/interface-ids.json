@@ -1,0 +1,581 @@
+{
+  "schema_version": "6529stream.interface-ids.v1",
+  "generated_by": "scripts/generate_release_artifacts.py:1",
+  "source": {
+    "config": "release-artifacts/contracts.json",
+    "foundry_out": "out"
+  },
+  "interface_ids": {
+    "IDependencyRegistry": "0x9dbd52e1",
+    "IERC165": "0x01ffc9a7",
+    "IERC2981": "0x2a55205a",
+    "IERC4906": "0x49064906",
+    "IERC721": "0x80ac58cd",
+    "IERC721Enumerable": "0x780e9d63",
+    "IERC721Metadata": "0x5b5e139f",
+    "IRandomizer": "0xf3eb4f44",
+    "IRandomizerLifecycle": "0xaabe1a0d",
+    "IStreamAdmins": "0x00ddd221",
+    "IStreamAuctions": "0xb109bb30",
+    "IStreamCore": "0x5f18110c",
+    "IStreamDrops": "0x0f531c31",
+    "IStreamMinter": "0x0f48ec25"
+  },
+  "interfaces": {
+    "IDependencyRegistry": {
+      "source": "smart-contracts/IDependencyRegistry.sol",
+      "artifact_path": "out/IDependencyRegistry.sol/IDependencyRegistry.json",
+      "abi_sha256": "sha256:0a37dc008896b8c45bd91ec3d6475c13312bd94f1f260f2845eeb8c78d9e418f",
+      "interface_id": "0x9dbd52e1",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x9dbd52e1",
+      "function_selectors": [
+        {
+          "signature": "getDependencyScript(bytes32,uint256)",
+          "selector": "0x518cb3df"
+        },
+        {
+          "signature": "getDependencyScriptAtVersion(bytes32,uint256,uint256)",
+          "selector": "0x7a3b9abd"
+        },
+        {
+          "signature": "getDependencyScriptChunkHash(bytes32,uint256)",
+          "selector": "0x8aaaaaad"
+        },
+        {
+          "signature": "getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)",
+          "selector": "0x79f9ad3a"
+        },
+        {
+          "signature": "getDependencyScriptContentHash(bytes32)",
+          "selector": "0x25c4dccd"
+        },
+        {
+          "signature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "selector": "0x72b2af62"
+        },
+        {
+          "signature": "getDependencyScriptCount(bytes32)",
+          "selector": "0x5668bc5e"
+        },
+        {
+          "signature": "getDependencyScriptCountAtVersion(bytes32,uint256)",
+          "selector": "0xdd201a84"
+        },
+        {
+          "signature": "getDependencyVersionCreatedBlock(bytes32,uint256)",
+          "selector": "0xbea18adc"
+        },
+        {
+          "signature": "getDependencyVersionCreatedTimestamp(bytes32,uint256)",
+          "selector": "0x2c7c4bcc"
+        },
+        {
+          "signature": "getDependencyVersionCreator(bytes32,uint256)",
+          "selector": "0x5ba0aba4"
+        },
+        {
+          "signature": "getDependencyVersionProvenance(bytes32,uint256)",
+          "selector": "0xfff01fa9"
+        },
+        {
+          "signature": "getDependencyVersionRecord(bytes32,uint256)",
+          "selector": "0xef8bd1a0"
+        },
+        {
+          "signature": "isDependencyVersionDeprecated(bytes32,uint256)",
+          "selector": "0x489108f6"
+        },
+        {
+          "signature": "latestDependencyVersion(bytes32)",
+          "selector": "0x08f0052a"
+        }
+      ]
+    },
+    "IERC165": {
+      "source": "smart-contracts/IERC165.sol",
+      "artifact_path": "out/IERC165.sol/IERC165.json",
+      "abi_sha256": "sha256:fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+      "interface_id": "0x01ffc9a7",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x01ffc9a7",
+      "function_selectors": [
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        }
+      ]
+    },
+    "IERC2981": {
+      "source": "smart-contracts/IERC2981.sol",
+      "artifact_path": "out/IERC2981.sol/IERC2981.json",
+      "abi_sha256": "sha256:aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
+      "interface_id": "0x2a55205a",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x2baae9fd",
+      "function_selectors": [
+        {
+          "signature": "royaltyInfo(uint256,uint256)",
+          "selector": "0x2a55205a"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        }
+      ]
+    },
+    "IERC4906": {
+      "source": "smart-contracts/IERC4906.sol",
+      "artifact_path": "out/IERC4906.sol/IERC4906.json",
+      "abi_sha256": "sha256:1a0ec850075a0dda86b33880a319e649251d516cbfcd35d60675a909eeb10006",
+      "interface_id": "0x49064906",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x00000000",
+      "function_selectors": []
+    },
+    "IERC721": {
+      "source": "smart-contracts/IERC721.sol",
+      "artifact_path": "out/IERC721.sol/IERC721.json",
+      "abi_sha256": "sha256:c6cb2310d6dc4368f45ae89b64a55369785d8196967a6146d663964661a97662",
+      "interface_id": "0x80ac58cd",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x8153916a",
+      "function_selectors": [
+        {
+          "signature": "approve(address,uint256)",
+          "selector": "0x095ea7b3"
+        },
+        {
+          "signature": "balanceOf(address)",
+          "selector": "0x70a08231"
+        },
+        {
+          "signature": "getApproved(uint256)",
+          "selector": "0x081812fc"
+        },
+        {
+          "signature": "isApprovedForAll(address,address)",
+          "selector": "0xe985e9c5"
+        },
+        {
+          "signature": "ownerOf(uint256)",
+          "selector": "0x6352211e"
+        },
+        {
+          "signature": "safeTransferFrom(address,address,uint256)",
+          "selector": "0x42842e0e"
+        },
+        {
+          "signature": "safeTransferFrom(address,address,uint256,bytes)",
+          "selector": "0xb88d4fde"
+        },
+        {
+          "signature": "setApprovalForAll(address,bool)",
+          "selector": "0xa22cb465"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "transferFrom(address,address,uint256)",
+          "selector": "0x23b872dd"
+        }
+      ]
+    },
+    "IERC721Enumerable": {
+      "source": "smart-contracts/IERC721Enumerable.sol",
+      "artifact_path": "out/IERC721Enumerable.sol/IERC721Enumerable.json",
+      "abi_sha256": "sha256:29401ee0adf93b0723768caad48fdbd58bf96db33ea1759e4390e7dc53850944",
+      "interface_id": "0x780e9d63",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xf95d0c09",
+      "function_selectors": [
+        {
+          "signature": "approve(address,uint256)",
+          "selector": "0x095ea7b3"
+        },
+        {
+          "signature": "balanceOf(address)",
+          "selector": "0x70a08231"
+        },
+        {
+          "signature": "getApproved(uint256)",
+          "selector": "0x081812fc"
+        },
+        {
+          "signature": "isApprovedForAll(address,address)",
+          "selector": "0xe985e9c5"
+        },
+        {
+          "signature": "ownerOf(uint256)",
+          "selector": "0x6352211e"
+        },
+        {
+          "signature": "safeTransferFrom(address,address,uint256)",
+          "selector": "0x42842e0e"
+        },
+        {
+          "signature": "safeTransferFrom(address,address,uint256,bytes)",
+          "selector": "0xb88d4fde"
+        },
+        {
+          "signature": "setApprovalForAll(address,bool)",
+          "selector": "0xa22cb465"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "tokenByIndex(uint256)",
+          "selector": "0x4f6ccce7"
+        },
+        {
+          "signature": "tokenOfOwnerByIndex(address,uint256)",
+          "selector": "0x2f745c59"
+        },
+        {
+          "signature": "totalSupply()",
+          "selector": "0x18160ddd"
+        },
+        {
+          "signature": "transferFrom(address,address,uint256)",
+          "selector": "0x23b872dd"
+        }
+      ]
+    },
+    "IERC721Metadata": {
+      "source": "smart-contracts/IERC721Metadata.sol",
+      "artifact_path": "out/IERC721Metadata.sol/IERC721Metadata.json",
+      "abi_sha256": "sha256:5ed9f3277e136284e3f9e8701131fd0fe76312b0dfa33cdb2664f571498b3f3e",
+      "interface_id": "0x5b5e139f",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xda0d82f5",
+      "function_selectors": [
+        {
+          "signature": "approve(address,uint256)",
+          "selector": "0x095ea7b3"
+        },
+        {
+          "signature": "balanceOf(address)",
+          "selector": "0x70a08231"
+        },
+        {
+          "signature": "getApproved(uint256)",
+          "selector": "0x081812fc"
+        },
+        {
+          "signature": "isApprovedForAll(address,address)",
+          "selector": "0xe985e9c5"
+        },
+        {
+          "signature": "name()",
+          "selector": "0x06fdde03"
+        },
+        {
+          "signature": "ownerOf(uint256)",
+          "selector": "0x6352211e"
+        },
+        {
+          "signature": "safeTransferFrom(address,address,uint256)",
+          "selector": "0x42842e0e"
+        },
+        {
+          "signature": "safeTransferFrom(address,address,uint256,bytes)",
+          "selector": "0xb88d4fde"
+        },
+        {
+          "signature": "setApprovalForAll(address,bool)",
+          "selector": "0xa22cb465"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "symbol()",
+          "selector": "0x95d89b41"
+        },
+        {
+          "signature": "tokenURI(uint256)",
+          "selector": "0xc87b56dd"
+        },
+        {
+          "signature": "transferFrom(address,address,uint256)",
+          "selector": "0x23b872dd"
+        }
+      ]
+    },
+    "IRandomizer": {
+      "source": "smart-contracts/IRandomizer.sol",
+      "artifact_path": "out/IRandomizer.sol/IRandomizer.json",
+      "abi_sha256": "sha256:69476ee0c7139c273afae875e9349fbeb34e9ae9fd314d45c888450b762ab7a4",
+      "interface_id": "0xf3eb4f44",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xf3eb4f44",
+      "function_selectors": [
+        {
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "selector": "0xbf1b89d3"
+        },
+        {
+          "signature": "isRandomizerContract()",
+          "selector": "0x4cf0c697"
+        }
+      ]
+    },
+    "IRandomizerLifecycle": {
+      "source": "smart-contracts/IRandomizerLifecycle.sol",
+      "artifact_path": "out/IRandomizerLifecycle.sol/IRandomizerLifecycle.json",
+      "abi_sha256": "sha256:b061cd96b3d60300538484f68c97409c99b953440495001f8d5f142e38e1710a",
+      "interface_id": "0xaabe1a0d",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xaabe1a0d",
+      "function_selectors": [
+        {
+          "signature": "pendingRandomnessRequests(uint256)",
+          "selector": "0xdd26bdd1"
+        },
+        {
+          "signature": "randomnessRequestState(uint256)",
+          "selector": "0xba73a1d8"
+        },
+        {
+          "signature": "randomnessRequestStateForToken(uint256)",
+          "selector": "0x841940f9"
+        },
+        {
+          "signature": "requestToToken(uint256)",
+          "selector": "0x1370ba38"
+        },
+        {
+          "signature": "retrieveRandomnessRequest(uint256)",
+          "selector": "0x677e25c7"
+        },
+        {
+          "signature": "retrieveRandomnessRequestForToken(uint256)",
+          "selector": "0x60e26604"
+        },
+        {
+          "signature": "supportsRandomizerLifecycle()",
+          "selector": "0x81d673e0"
+        },
+        {
+          "signature": "tokenIdToCollection(uint256)",
+          "selector": "0x94b8ae9d"
+        },
+        {
+          "signature": "tokenToRequest(uint256)",
+          "selector": "0xaa419ba4"
+        },
+        {
+          "signature": "totalPendingRandomnessRequests()",
+          "selector": "0xe231f9df"
+        }
+      ]
+    },
+    "IStreamAdmins": {
+      "source": "smart-contracts/IStreamAdmins.sol",
+      "artifact_path": "out/IStreamAdmins.sol/IStreamAdmins.json",
+      "abi_sha256": "sha256:b94c95898b38bda7deaf60046c0261a53659aee577e5bae4046088feeeb873c6",
+      "interface_id": "0x00ddd221",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x00ddd221",
+      "function_selectors": [
+        {
+          "signature": "emergencyRecipient()",
+          "selector": "0xbe9ee11f"
+        },
+        {
+          "signature": "isAdminContract()",
+          "selector": "0x9068edac"
+        },
+        {
+          "signature": "isPaused(bytes32)",
+          "selector": "0x241b71bb"
+        },
+        {
+          "signature": "owner()",
+          "selector": "0x8da5cb5b"
+        },
+        {
+          "signature": "retrieveCollectionAdmin(address,uint256)",
+          "selector": "0x6558aee8"
+        },
+        {
+          "signature": "retrieveFunctionAdmin(address,address,bytes4)",
+          "selector": "0x51caa7cf"
+        },
+        {
+          "signature": "retrieveGlobalAdmin(address)",
+          "selector": "0xb3076d55"
+        }
+      ]
+    },
+    "IStreamAuctions": {
+      "source": "smart-contracts/IStreamAuctions.sol",
+      "artifact_path": "out/IStreamAuctions.sol/IStreamAuctions.json",
+      "abi_sha256": "sha256:449284cbe3ae9f0744769204c9157e74bf0d9f89868dae34073586a51cf8f400",
+      "interface_id": "0xb109bb30",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xb109bb30",
+      "function_selectors": [
+        {
+          "signature": "isStreamAuctionsContract()",
+          "selector": "0x38d4f6f6"
+        },
+        {
+          "signature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "selector": "0x89dd4dc6"
+        }
+      ]
+    },
+    "IStreamCore": {
+      "source": "smart-contracts/IStreamCore.sol",
+      "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
+      "abi_sha256": "sha256:134c5092d689660352a344323ce8d24a52fd6f6b65da1e92b13917927d45ce2c",
+      "interface_id": "0x5f18110c",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x5f18110c",
+      "function_selectors": [
+        {
+          "signature": "collectionDependencyVersionState(uint256)",
+          "selector": "0xb01db570"
+        },
+        {
+          "signature": "collectionFreezeManifestHash(uint256)",
+          "selector": "0x518ba53c"
+        },
+        {
+          "signature": "collectionFreezeStatus(uint256)",
+          "selector": "0x2ed330f7"
+        },
+        {
+          "signature": "isTokenBurned(uint256)",
+          "selector": "0x3a87d454"
+        },
+        {
+          "signature": "mint(uint256,address,string,uint256,uint256)",
+          "selector": "0xdabb57ca"
+        },
+        {
+          "signature": "previewCollectionFreezeManifestHash(uint256)",
+          "selector": "0x3987be73"
+        },
+        {
+          "signature": "retrieveArtistAddress(uint256)",
+          "selector": "0xb9902968"
+        },
+        {
+          "signature": "retrieveTokenHash(uint256)",
+          "selector": "0x4ab6897c"
+        },
+        {
+          "signature": "retrievewereDataAdded(uint256)",
+          "selector": "0xd3741000"
+        },
+        {
+          "signature": "setTokenHash(uint256,uint256,bytes32)",
+          "selector": "0x9cac0f1f"
+        },
+        {
+          "signature": "viewCirSupply(uint256)",
+          "selector": "0xaf569fd4"
+        },
+        {
+          "signature": "viewColIDforTokenID(uint256)",
+          "selector": "0xfa92668a"
+        },
+        {
+          "signature": "viewCollectionRandomizerContract(uint256)",
+          "selector": "0x63f06da4"
+        },
+        {
+          "signature": "viewMaxAllowance(uint256)",
+          "selector": "0x945e549b"
+        },
+        {
+          "signature": "viewRandomizerEpoch(uint256)",
+          "selector": "0xd2af7046"
+        },
+        {
+          "signature": "viewTokensIndexMax(uint256)",
+          "selector": "0x6c6aab16"
+        },
+        {
+          "signature": "viewTokensIndexMin(uint256)",
+          "selector": "0xe9b7a860"
+        }
+      ]
+    },
+    "IStreamDrops": {
+      "source": "smart-contracts/IStreamDrops.sol",
+      "artifact_path": "out/IStreamDrops.sol/IStreamDrops.json",
+      "abi_sha256": "sha256:5a087ae1f095ff8c9d66babd2aaa2b76453f03c5a7c8791da13c9d33d4e8a416",
+      "interface_id": "0x0f531c31",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x0f531c31",
+      "function_selectors": [
+        {
+          "signature": "retrieveAuctionPoster(uint256)",
+          "selector": "0x73a9542c"
+        },
+        {
+          "signature": "retrieveAuctionPrice(uint256)",
+          "selector": "0xd63f7c10"
+        },
+        {
+          "signature": "retrieveDropID(uint256)",
+          "selector": "0x7ca98332"
+        },
+        {
+          "signature": "retrieveExecutionAddress(uint256)",
+          "selector": "0x96f448ce"
+        },
+        {
+          "signature": "retrieveTokenID(bytes32)",
+          "selector": "0x4098fff1"
+        }
+      ]
+    },
+    "IStreamMinter": {
+      "source": "smart-contracts/IStreamMinter.sol",
+      "artifact_path": "out/IStreamMinter.sol/IStreamMinter.json",
+      "abi_sha256": "sha256:649d9216a2db37e90086197519c338afd3344a311d86336726fce30694ad851c",
+      "interface_id": "0x0f48ec25",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x0f48ec25",
+      "function_selectors": [
+        {
+          "signature": "getAuctionEndTime(uint256)",
+          "selector": "0x930e79f1"
+        },
+        {
+          "signature": "getAuctionStatus(uint256)",
+          "selector": "0x7765c52c"
+        },
+        {
+          "signature": "getEndTime(uint256)",
+          "selector": "0x9067b677"
+        },
+        {
+          "signature": "isMinterContract()",
+          "selector": "0xfb9422ff"
+        },
+        {
+          "signature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "selector": "0x1f14ec74"
+        },
+        {
+          "signature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "selector": "0x46372ba6"
+        },
+        {
+          "signature": "updateAuctionEndTime(uint256,uint256)",
+          "selector": "0xd9f303a2"
+        }
+      ]
+    }
+  }
+}

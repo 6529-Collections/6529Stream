@@ -1,4 +1,5 @@
 ifeq ($(OS),Windows_NT)
+PYTHON ?= python
 ifdef MSYSTEM
 FOUNDRY_BIN := $(HOME)/.foundry/bin
 REPO_ROOT := $(shell pwd)
@@ -12,6 +13,7 @@ RM_RF := powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item -Re
 endif
 VENV_BIN := .venv-tools/Scripts
 else
+PYTHON ?= python3
 FOUNDRY_BIN := $(HOME)/.foundry/bin
 REPO_ROOT := $(CURDIR)
 PATH_SEPARATOR := :
@@ -20,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check fmt-check slither clean
 
-check: build test size deploy-rehearsal
+check: build test size release-artifacts-check deploy-rehearsal
 
 build:
 	forge build
@@ -35,6 +37,13 @@ size:
 
 deploy-rehearsal:
 	forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+
+release-artifacts: size
+	$(PYTHON) scripts/generate_release_artifacts.py
+
+release-artifacts-check: size
+	$(PYTHON) scripts/test_release_artifacts.py
+	$(PYTHON) scripts/generate_release_artifacts.py --check
 
 fmt-check:
 	forge fmt --check smart-contracts

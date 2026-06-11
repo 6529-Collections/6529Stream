@@ -1,0 +1,105 @@
+{
+  "schema_version": "6529stream.release-artifact-contracts.v1",
+  "production_contracts": [
+    {
+      "name": "DependencyRegistry",
+      "source": "smart-contracts/DependencyRegistry.sol"
+    },
+    {
+      "name": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol"
+    },
+    {
+      "name": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol"
+    },
+    {
+      "name": "StreamAdmins",
+      "source": "smart-contracts/StreamAdmins.sol"
+    },
+    {
+      "name": "StreamAuctions",
+      "source": "smart-contracts/AuctionContract.sol"
+    },
+    {
+      "name": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol"
+    },
+    {
+      "name": "StreamCuratorsPool",
+      "source": "smart-contracts/StreamCuratorsPool.sol"
+    },
+    {
+      "name": "StreamDrops",
+      "source": "smart-contracts/StreamDrops.sol"
+    },
+    {
+      "name": "StreamMinter",
+      "source": "smart-contracts/StreamMinter.sol"
+    }
+  ],
+  "interfaces": [
+    {
+      "name": "IDependencyRegistry",
+      "source": "smart-contracts/IDependencyRegistry.sol"
+    },
+    {
+      "name": "IERC165",
+      "source": "smart-contracts/IERC165.sol",
+      "interface_id": "0x01ffc9a7"
+    },
+    {
+      "name": "IERC2981",
+      "source": "smart-contracts/IERC2981.sol",
+      "interface_id": "0x2a55205a"
+    },
+    {
+      "name": "IERC4906",
+      "source": "smart-contracts/IERC4906.sol",
+      "interface_id": "0x49064906"
+    },
+    {
+      "name": "IERC721",
+      "source": "smart-contracts/IERC721.sol",
+      "interface_id": "0x80ac58cd"
+    },
+    {
+      "name": "IERC721Enumerable",
+      "source": "smart-contracts/IERC721Enumerable.sol",
+      "interface_id": "0x780e9d63"
+    },
+    {
+      "name": "IERC721Metadata",
+      "source": "smart-contracts/IERC721Metadata.sol",
+      "interface_id": "0x5b5e139f"
+    },
+    {
+      "name": "IRandomizer",
+      "source": "smart-contracts/IRandomizer.sol"
+    },
+    {
+      "name": "IRandomizerLifecycle",
+      "source": "smart-contracts/IRandomizerLifecycle.sol"
+    },
+    {
+      "name": "IStreamAdmins",
+      "source": "smart-contracts/IStreamAdmins.sol"
+    },
+    {
+      "name": "IStreamAuctions",
+      "source": "smart-contracts/IStreamAuctions.sol"
+    },
+    {
+      "name": "IStreamCore",
+      "source": "smart-contracts/IStreamCore.sol"
+    },
+    {
+      "name": "IStreamDrops",
+      "source": "smart-contracts/IStreamDrops.sol"
+    },
+    {
+      "name": "IStreamMinter",
+      "source": "smart-contracts/IStreamMinter.sol"
+    }
+  ]
+}

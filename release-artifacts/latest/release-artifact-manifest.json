@@ -1,0 +1,22 @@
+{
+  "schema_version": "6529stream.release-artifact-manifest.v1",
+  "generated_by": "scripts/generate_release_artifacts.py:1",
+  "source": {
+    "config": "release-artifacts/contracts.json",
+    "foundry_out": "out"
+  },
+  "artifacts": {
+    "abi-checksums.json": {
+      "path": "abi-checksums.json",
+      "sha256": "sha256:066510f354a53db1dcf0fe74cff6d3f7bb2eebe73cb4721bdd3ef9069c9dde64"
+    },
+    "event-topic-catalog.json": {
+      "path": "event-topic-catalog.json",
+      "sha256": "sha256:6dd5190f816fd3ab72adcc6f1ae761aadf900dd24f0bd0f7bebc1697fed423af"
+    },
+    "interface-ids.json": {
+      "path": "interface-ids.json",
+      "sha256": "sha256:8a8a41d89757d3d16f0718638d1175290dcd00cfea86204665cd525f608d7c1a"
+    }
+  }
+}

@@ -1,0 +1,4545 @@
+{
+  "schema_version": "6529stream.event-topic-catalog.v1",
+  "generated_by": "scripts/generate_release_artifacts.py:1",
+  "source": {
+    "config": "release-artifacts/contracts.json",
+    "foundry_out": "out"
+  },
+  "topics": [
+    {
+      "topic0": "0x02a6a2be713fedf52f113c0a759f1c1a23a113476d9b1b1a2a453c910660de4e",
+      "signature": "Reward(address,uint256,uint256)",
+      "name": "Reward",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "amount",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCuratorsPool"
+      ]
+    },
+    {
+      "topic0": "0x10ac9f0bb365b5d22d7bec500408692f23fdf83eadfec71615ef88b4c1134f0e",
+      "signature": "AuctionCancelled(uint256,address)",
+      "name": "AuctionCancelled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "poster",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x12db910fa60ef039515b76713fbb4da7e0fed98d5d0d206a875fcfc4baef4f40",
+      "signature": "AuctionProceedsCreditCreated(address,uint256,uint8,uint256)",
+      "name": "AuctionProceedsCreditCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "creditType",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 3,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x16debb77644999724cf3499d2c3fd8ac65383bc44cc1bf5303185410bc5254ef",
+      "signature": "GlobalAdminUpdated(address,bool,address)",
+      "name": "GlobalAdminUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
+      "signature": "ApprovalForAll(address,address,bool)",
+      "name": "ApprovalForAll",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "owner",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "operator",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "approved",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x1b2e3e02488d0ee2574d346826579185aa1d05cec0e8a560ce5c5fb8269c9b65",
+      "signature": "FixedPriceCreditWithdrawn(address,address,uint8,uint256)",
+      "name": "FixedPriceCreditWithdrawn",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "_recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "creditType",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 3,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0x25cd81c3ce872bde5f7e7ddd309cd91c6091c1f6a2719c7c25c01b9f55fa1aec",
+      "signature": "DependencyVersionPinned(uint256,bytes32,uint256,bytes32,address)",
+      "name": "DependencyVersionPinned",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "version",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "contentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "registry",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x301e99f83c934f6f0766cd151931e3b38ac1abe70e9d956b6eb0b7eef7aff13c",
+      "signature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+      "name": "RandomnessPostProcessingFailed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "derivedSeed",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "rawOutputHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 7,
+          "name": "failureDataHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0x3461786944225de8cc849c302bebf0425a4cd695c03ad61acb07131c3960e1bb",
+      "signature": "FunctionAdminUpdated(address,address,bytes4,bool,address)",
+      "name": "FunctionAdminUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "target",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "selector",
+          "type": "bytes4",
+          "indexed": true,
+          "internal_type": "bytes4"
+        },
+        {
+          "index": 3,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 4,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0x34d961dd081f0e1374d78d8a001d5e6b994d0c8a958d6cd0bb911a8e20f8fd4e",
+      "signature": "AuctionStatusChanged(uint256,uint8)",
+      "name": "AuctionStatusChanged",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "status",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x37ca1f7963b73babbc4bb8bdfd3fa3b8b7dec419d2630078944729c090206b13",
+      "signature": "EmergencyRecipientUpdated(address,address,address)",
+      "name": "EmergencyRecipientUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "oldRecipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "newRecipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0x3850baa46c5379f1523fd73eabc21a2d4832913719b2dc88e0c8a9d588f0dc66",
+      "signature": "ClaimAuction(uint256,uint256)",
+      "name": "ClaimAuction",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "bid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x3bba831784668765a4bf4d687020f37a478866bd644c140557d4ddac9227fbfe",
+      "signature": "SignerEpochChanged(uint256,uint256)",
+      "name": "SignerEpochChanged",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "oldEpoch",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "newEpoch",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0x3f8729566a11fa4d9d7a96b1c030f775c0f1b9156d228a35ba90583747e7b8af",
+      "signature": "BidderCreditWithdrawn(address,address,uint256)",
+      "name": "BidderCreditWithdrawn",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "_recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
+      "signature": "Withdraw(address,bool,uint256)",
+      "name": "Withdraw",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "status",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "StreamAuctions",
+        "StreamCuratorsPool",
+        "StreamMinter"
+      ]
+    },
+    {
+      "topic0": "0x4dd68c3d3b4fe85a1bb1d02c49f9c3e99963314aedff0d58ef155634fc9dd118",
+      "signature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+      "name": "RandomnessRequested",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0x5aa381c998833b1dd4263e146e2e5e8098b463f9f975bb0f9c6d167c0d44a323",
+      "signature": "AuctionExtended(uint256,uint256,uint256)",
+      "name": "AuctionExtended",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "oldEndTime",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "newEndTime",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x5b16bd75ceb0b733d214fecb07582e485ce277ce23f069e5192f6ed499a7e32a",
+      "signature": "AuctionCustodyConfirmed(uint256,address)",
+      "name": "AuctionCustodyConfirmed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "custody",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x5baee347cce9899b119eb4f42984958a6e25dc5b505f4f1ab8f3837120cf241f",
+      "signature": "CollectionCreated(uint256)",
+      "name": "CollectionCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c",
+      "signature": "BatchMetadataUpdate(uint256,uint256)",
+      "name": "BatchMetadataUpdate",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_fromTokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "_toTokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x6f01a0cedce9278095ee0c1d3a2efb2baf918ca0fd4a9f31465334986c96a0be",
+      "signature": "PauseGuardianUpdated(address,bool,address)",
+      "name": "PauseGuardianUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0x77c6d21474f6f6813fde8949bd7651f09078a0dd6c1e886847baae6f5c97d717",
+      "signature": "PauseUpdated(bytes32,bool,address,bytes32)",
+      "name": "PauseUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "domain",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "paused",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "reason",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0x7965a79edbbe8f2445202cb9d12fb0d9c7049a41ea1def1c77e96577610dfc4b",
+      "signature": "CollectionFrozen(uint256,bytes32,string,address)",
+      "name": "CollectionFrozen",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "manifestHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "schemaVersion",
+          "type": "string",
+          "indexed": false,
+          "internal_type": "string"
+        },
+        {
+          "index": 3,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab",
+      "signature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+      "name": "DropAuthorizationConsumed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "dropId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "signer",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "poster",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "recipient",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "payer",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 5,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 6,
+          "name": "saleMode",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 7,
+          "name": "tokenDataHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 8,
+          "name": "deadline",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 9,
+          "name": "signerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0x7ea730944eaf7b45eb63a5f4a1085439c3d63730f8ce0aa640f18cfc2e3a1e5a",
+      "signature": "DropAuthorizationCancelled(bytes32,address)",
+      "name": "DropAuthorizationCancelled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "dropId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0x88e4cc622e8085aee6ea05a4954b24e3bc91085a6b1cc3d037904a1259a43708",
+      "signature": "TokenBurned(uint256,uint256,address,address)",
+      "name": "TokenBurned",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "_tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "operator",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "owner",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x8b95e28fc0b0046cb36fa662019eae9a1eb5713ee9a99e7de565a74f98e87a1d",
+      "signature": "NoBidTokenClaimed(uint256,address,address)",
+      "name": "NoBidTokenClaimed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "claimant",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+      "signature": "OwnershipTransferred(address,address)",
+      "name": "OwnershipTransferred",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "previousOwner",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "newOwner",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins",
+        "StreamCore",
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+      "signature": "Approval(address,address,uint256)",
+      "name": "Approval",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "owner",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "approved",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x95aac5389bb9506e202e041d95e1b1096a1925d0f8595b83ea609b1d372f22bf",
+      "signature": "CollectionRandomizerUpdated(uint256,address,address,uint256)",
+      "name": "CollectionRandomizerUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "oldRandomizer",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "newRandomizer",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0xa0832d6e62676625182a1febdc060aa89f73ed108c5cab3727c80c7b8bb0f2c5",
+      "signature": "UnpauseAdminUpdated(address,bool,address)",
+      "name": "UnpauseAdminUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8",
+      "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+      "name": "EmergencyWithdrawal",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "_recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "_domain",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 4,
+          "name": "resultingSurplus",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions",
+        "StreamCuratorsPool",
+        "StreamMinter"
+      ]
+    },
+    {
+      "topic0": "0xa62de0ee279b35939225cc4e1aafec044ace6a06b5ae5d6e326dc85cf1c3dc99",
+      "signature": "NoBidSettlementPending(uint256,address)",
+      "name": "NoBidSettlementPending",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "claimant",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0",
+      "signature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+      "name": "RandomnessRequestMarkedStale",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xb22000b34eb49815cf860dc85ff53b0eb8fdf77e8b9f72efbb75d278586e6c44",
+      "signature": "OutbidCreditCreated(address,uint256,uint256)",
+      "name": "OutbidCreditCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "credit",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0xb95c78d8a41e773c8a1d707cb7e529da07505432bbd3cf05bcc3d094eec4a7da",
+      "signature": "DropSignerChanged(address,address,uint256)",
+      "name": "DropSignerChanged",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "oldSigner",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "newSigner",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "signerEpoch",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xb9a3a7afb6923ec79a669c79f05b4dd60e7c5c9e5b068c4365c7039e251adbff",
+      "signature": "CuratorCreditWithdrawn(address,address,uint256)",
+      "name": "CuratorCreditWithdrawn",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "_recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCuratorsPool"
+      ]
+    },
+    {
+      "topic0": "0xc11e913ac38116ce1ad83f1578d7f0a97637ad09a6cb66fbcf5029e99d2852c6",
+      "signature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+      "name": "RandomnessPostProcessingRetryFailed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "retryCount",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 6,
+          "name": "derivedSeed",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 7,
+          "name": "rawOutputHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 8,
+          "name": "failureDataHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773",
+      "signature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+      "name": "RandomnessPostProcessingRetried",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "retryCount",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 6,
+          "name": "derivedSeed",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 7,
+          "name": "rawOutputHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xd2775dd7621cecc5f3799d293e90e8ccde35a11535a788c55d57da0b52f625f8",
+      "signature": "AuctionRegistered(bytes32,uint256,uint256,address,address,uint256,uint256)",
+      "name": "AuctionRegistered",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "dropId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "poster",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "custody",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 5,
+          "name": "reservePrice",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 6,
+          "name": "endTime",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0xd792dc8007c9bdf7d5e4c1d523d5be3928cf69e240eac259be132006fda3db05",
+      "signature": "DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+      "name": "DependencyVersionCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "version",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "contentHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "DependencyRegistry"
+      ]
+    },
+    {
+      "topic0": "0xdcdb9a658a53bd78a90653ac5ee29db1e12f35a1c4a28f060b53b6615ad85d21",
+      "signature": "SignerLifecycleTargetUpdated(address,bool,address)",
+      "name": "SignerLifecycleTargetUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "target",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "signature": "Transfer(address,address,uint256)",
+      "name": "Transfer",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "from",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "to",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0xe3953455107491f84de0679688cd0fe0ace0c03cfb528d3773616b8d3d12b3ae",
+      "signature": "ProceedsCreditWithdrawn(address,address,uint256)",
+      "name": "ProceedsCreditWithdrawn",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "_recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0xe5d872b77edd25a2fd807931354c6190b8716c647db98623ff27ff4f93f77759",
+      "signature": "SignerManagerUpdated(address,bool,address)",
+      "name": "SignerManagerUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAdmins"
+      ]
+    },
+    {
+      "topic0": "0xe93ec9a06e5333819ff91c7118e0ba48094f8bc805e37319b6ef16f5d6121138",
+      "signature": "DependencyVersionDeprecated(bytes32,uint256,address)",
+      "name": "DependencyVersionDeprecated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "version",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "DependencyRegistry"
+      ]
+    },
+    {
+      "topic0": "0xed5a80d57e86051fa6af452e8509124711acd649df4f972309adbdb4419c5465",
+      "signature": "CuratorCreditCreated(address,uint256,uint256)",
+      "name": "CuratorCreditCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCuratorsPool"
+      ]
+    },
+    {
+      "topic0": "0xf124881df3a53a6bea02106455f1d1ba5794ff409958c440b2097442f9a76f19",
+      "signature": "FixedPriceCreditCreated(address,bytes32,uint8,uint256)",
+      "name": "FixedPriceCreditCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "dropId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "creditType",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 3,
+          "name": "funds",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xf4768419d2610749f64344d257d34fbc48fd4e825bf1884f7cafacf687158209",
+      "signature": "AuctionContractChanged(address,address)",
+      "name": "AuctionContractChanged",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "oldAuctionContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "newAuctionContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7",
+      "signature": "MetadataUpdate(uint256)",
+      "name": "MetadataUpdate",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_tokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0xfd85cce4bf4d4f47a0065961da09b066c83ecec24be36440988898305b8db17c",
+      "signature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+      "name": "RandomnessFulfilled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "derivedSeed",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "rawOutputHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xfde245e26e3b5b676c8c9c34f0b1b92b8d8f2f14e91c619303c1f48f99838694",
+      "signature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+      "name": "BurnedTokenRandomnessRecorded",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "provider",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "randomizerEpoch",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "derivedSeed",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "rawOutputHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xfe2e2d779dba245964d4e3ef9b994be63856fd568bf7d3ca9e224755cb1bd54d",
+      "signature": "RequestFulfilled(uint256,uint256[])",
+      "name": "RequestFulfilled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "randomWords",
+          "type": "uint256[]",
+          "indexed": false,
+          "internal_type": "uint256[]"
+        }
+      ],
+      "emitted_by": [
+        "NextGenRandomizerRNG",
+        "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xfe85789374f996e0a134e187beae4b2d8ff423bb23269afd8b092e6e23598654",
+      "signature": "Participate(address,uint256,uint256)",
+      "name": "Participate",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "_add",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "tokenid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "bid",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions"
+      ]
+    }
+  ],
+  "contracts": {
+    "DependencyRegistry": {
+      "source": "smart-contracts/DependencyRegistry.sol",
+      "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
+      "events": [
+        {
+          "name": "DependencyVersionCreated",
+          "signature": "DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+          "topic0": "0xd792dc8007c9bdf7d5e4c1d523d5be3928cf69e240eac259be132006fda3db05",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "contentHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "DependencyVersionDeprecated",
+          "signature": "DependencyVersionDeprecated(bytes32,uint256,address)",
+          "topic0": "0xe93ec9a06e5333819ff91c7118e0ba48094f8bc805e37319b6ef16f5d6121138",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
+    "NextGenRandomizerRNG": {
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+      "events": [
+        {
+          "name": "BurnedTokenRandomnessRecorded",
+          "signature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfde245e26e3b5b676c8c9c34f0b1b92b8d8f2f14e91c619303c1f48f99838694",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessFulfilled",
+          "signature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfd85cce4bf4d4f47a0065961da09b066c83ecec24be36440988898305b8db17c",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessPostProcessingFailed",
+          "signature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0x301e99f83c934f6f0766cd151931e3b38ac1abe70e9d956b6eb0b7eef7aff13c",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "failureDataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessPostProcessingRetried",
+          "signature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "retryCount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessPostProcessingRetryFailed",
+          "signature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0xc11e913ac38116ce1ad83f1578d7f0a97637ad09a6cb66fbcf5029e99d2852c6",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "retryCount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "failureDataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessRequestMarkedStale",
+          "signature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessRequested",
+          "signature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0x4dd68c3d3b4fe85a1bb1d02c49f9c3e99963314aedff0d58ef155634fc9dd118",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "RequestFulfilled",
+          "signature": "RequestFulfilled(uint256,uint256[])",
+          "topic0": "0xfe2e2d779dba245964d4e3ef9b994be63856fd568bf7d3ca9e224755cb1bd54d",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomWords",
+              "type": "uint256[]",
+              "indexed": false,
+              "internal_type": "uint256[]"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "NextGenRandomizerVRF": {
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+      "events": [
+        {
+          "name": "BurnedTokenRandomnessRecorded",
+          "signature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfde245e26e3b5b676c8c9c34f0b1b92b8d8f2f14e91c619303c1f48f99838694",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessFulfilled",
+          "signature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfd85cce4bf4d4f47a0065961da09b066c83ecec24be36440988898305b8db17c",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessPostProcessingFailed",
+          "signature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0x301e99f83c934f6f0766cd151931e3b38ac1abe70e9d956b6eb0b7eef7aff13c",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "failureDataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessPostProcessingRetried",
+          "signature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "retryCount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessPostProcessingRetryFailed",
+          "signature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0xc11e913ac38116ce1ad83f1578d7f0a97637ad09a6cb66fbcf5029e99d2852c6",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "retryCount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "derivedSeed",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "rawOutputHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "failureDataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessRequestMarkedStale",
+          "signature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "RandomnessRequested",
+          "signature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0x4dd68c3d3b4fe85a1bb1d02c49f9c3e99963314aedff0d58ef155634fc9dd118",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "RequestFulfilled",
+          "signature": "RequestFulfilled(uint256,uint256[])",
+          "topic0": "0xfe2e2d779dba245964d4e3ef9b994be63856fd568bf7d3ca9e224755cb1bd54d",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomWords",
+              "type": "uint256[]",
+              "indexed": false,
+              "internal_type": "uint256[]"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamAdmins": {
+      "source": "smart-contracts/StreamAdmins.sol",
+      "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json",
+      "events": [
+        {
+          "name": "EmergencyRecipientUpdated",
+          "signature": "EmergencyRecipientUpdated(address,address,address)",
+          "topic0": "0x37ca1f7963b73babbc4bb8bdfd3fa3b8b7dec419d2630078944729c090206b13",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldRecipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newRecipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "FunctionAdminUpdated",
+          "signature": "FunctionAdminUpdated(address,address,bytes4,bool,address)",
+          "topic0": "0x3461786944225de8cc849c302bebf0425a4cd695c03ad61acb07131c3960e1bb",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "selector",
+              "type": "bytes4",
+              "indexed": true,
+              "internal_type": "bytes4"
+            },
+            {
+              "index": 3,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 4,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "GlobalAdminUpdated",
+          "signature": "GlobalAdminUpdated(address,bool,address)",
+          "topic0": "0x16debb77644999724cf3499d2c3fd8ac65383bc44cc1bf5303185410bc5254ef",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PauseGuardianUpdated",
+          "signature": "PauseGuardianUpdated(address,bool,address)",
+          "topic0": "0x6f01a0cedce9278095ee0c1d3a2efb2baf918ca0fd4a9f31465334986c96a0be",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PauseUpdated",
+          "signature": "PauseUpdated(bytes32,bool,address,bytes32)",
+          "topic0": "0x77c6d21474f6f6813fde8949bd7651f09078a0dd6c1e886847baae6f5c97d717",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "domain",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "paused",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "reason",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "SignerLifecycleTargetUpdated",
+          "signature": "SignerLifecycleTargetUpdated(address,bool,address)",
+          "topic0": "0xdcdb9a658a53bd78a90653ac5ee29db1e12f35a1c4a28f060b53b6615ad85d21",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "SignerManagerUpdated",
+          "signature": "SignerManagerUpdated(address,bool,address)",
+          "topic0": "0xe5d872b77edd25a2fd807931354c6190b8716c647db98623ff27ff4f93f77759",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "UnpauseAdminUpdated",
+          "signature": "UnpauseAdminUpdated(address,bool,address)",
+          "topic0": "0xa0832d6e62676625182a1febdc060aa89f73ed108c5cab3727c80c7b8bb0f2c5",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamAuctions": {
+      "source": "smart-contracts/AuctionContract.sol",
+      "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
+      "events": [
+        {
+          "name": "AuctionCancelled",
+          "signature": "AuctionCancelled(uint256,address)",
+          "topic0": "0x10ac9f0bb365b5d22d7bec500408692f23fdf83eadfec71615ef88b4c1134f0e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "poster",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "AuctionCustodyConfirmed",
+          "signature": "AuctionCustodyConfirmed(uint256,address)",
+          "topic0": "0x5b16bd75ceb0b733d214fecb07582e485ce277ce23f069e5192f6ed499a7e32a",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "custody",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "AuctionExtended",
+          "signature": "AuctionExtended(uint256,uint256,uint256)",
+          "topic0": "0x5aa381c998833b1dd4263e146e2e5e8098b463f9f975bb0f9c6d167c0d44a323",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "oldEndTime",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "newEndTime",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "AuctionProceedsCreditCreated",
+          "signature": "AuctionProceedsCreditCreated(address,uint256,uint8,uint256)",
+          "topic0": "0x12db910fa60ef039515b76713fbb4da7e0fed98d5d0d206a875fcfc4baef4f40",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "creditType",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "AuctionRegistered",
+          "signature": "AuctionRegistered(bytes32,uint256,uint256,address,address,uint256,uint256)",
+          "topic0": "0xd2775dd7621cecc5f3799d293e90e8ccde35a11535a788c55d57da0b52f625f8",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dropId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "poster",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "custody",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 5,
+              "name": "reservePrice",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "endTime",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "AuctionStatusChanged",
+          "signature": "AuctionStatusChanged(uint256,uint8)",
+          "topic0": "0x34d961dd081f0e1374d78d8a001d5e6b994d0c8a958d6cd0bb911a8e20f8fd4e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "BidderCreditWithdrawn",
+          "signature": "BidderCreditWithdrawn(address,address,uint256)",
+          "topic0": "0x3f8729566a11fa4d9d7a96b1c030f775c0f1b9156d228a35ba90583747e7b8af",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "ClaimAuction",
+          "signature": "ClaimAuction(uint256,uint256)",
+          "topic0": "0x3850baa46c5379f1523fd73eabc21a2d4832913719b2dc88e0c8a9d588f0dc66",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "bid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "EmergencyWithdrawal",
+          "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_domain",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "resultingSurplus",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "NoBidSettlementPending",
+          "signature": "NoBidSettlementPending(uint256,address)",
+          "topic0": "0xa62de0ee279b35939225cc4e1aafec044ace6a06b5ae5d6e326dc85cf1c3dc99",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "claimant",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "NoBidTokenClaimed",
+          "signature": "NoBidTokenClaimed(uint256,address,address)",
+          "topic0": "0x8b95e28fc0b0046cb36fa662019eae9a1eb5713ee9a99e7de565a74f98e87a1d",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "claimant",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "OutbidCreditCreated",
+          "signature": "OutbidCreditCreated(address,uint256,uint256)",
+          "topic0": "0xb22000b34eb49815cf860dc85ff53b0eb8fdf77e8b9f72efbb75d278586e6c44",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "credit",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Participate",
+          "signature": "Participate(address,uint256,uint256)",
+          "topic0": "0xfe85789374f996e0a134e187beae4b2d8ff423bb23269afd8b092e6e23598654",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "bid",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "ProceedsCreditWithdrawn",
+          "signature": "ProceedsCreditWithdrawn(address,address,uint256)",
+          "topic0": "0xe3953455107491f84de0679688cd0fe0ace0c03cfb528d3773616b8d3d12b3ae",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamCore": {
+      "source": "smart-contracts/StreamCore.sol",
+      "artifact_path": "out/StreamCore.sol/StreamCore.json",
+      "events": [
+        {
+          "name": "Approval",
+          "signature": "Approval(address,address,uint256)",
+          "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "approved",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "ApprovalForAll",
+          "signature": "ApprovalForAll(address,address,bool)",
+          "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "operator",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "approved",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "BatchMetadataUpdate",
+          "signature": "BatchMetadataUpdate(uint256,uint256)",
+          "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_fromTokenId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_toTokenId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "CollectionCreated",
+          "signature": "CollectionCreated(uint256)",
+          "topic0": "0x5baee347cce9899b119eb4f42984958a6e25dc5b505f4f1ab8f3837120cf241f",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "CollectionFrozen",
+          "signature": "CollectionFrozen(uint256,bytes32,string,address)",
+          "topic0": "0x7965a79edbbe8f2445202cb9d12fb0d9c7049a41ea1def1c77e96577610dfc4b",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "manifestHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "schemaVersion",
+              "type": "string",
+              "indexed": false,
+              "internal_type": "string"
+            },
+            {
+              "index": 3,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "CollectionRandomizerUpdated",
+          "signature": "CollectionRandomizerUpdated(uint256,address,address,uint256)",
+          "topic0": "0x95aac5389bb9506e202e041d95e1b1096a1925d0f8595b83ea609b1d372f22bf",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "oldRandomizer",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "newRandomizer",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "randomizerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "DependencyVersionPinned",
+          "signature": "DependencyVersionPinned(uint256,bytes32,uint256,bytes32,address)",
+          "topic0": "0x25cd81c3ce872bde5f7e7ddd309cd91c6091c1f6a2719c7c25c01b9f55fa1aec",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "version",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "contentHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "registry",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "MetadataUpdate",
+          "signature": "MetadataUpdate(uint256)",
+          "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "TokenBurned",
+          "signature": "TokenBurned(uint256,uint256,address,address)",
+          "topic0": "0x88e4cc622e8085aee6ea05a4954b24e3bc91085a6b1cc3d037904a1259a43708",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "operator",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "owner",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "Transfer",
+          "signature": "Transfer(address,address,uint256)",
+          "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamCuratorsPool": {
+      "source": "smart-contracts/StreamCuratorsPool.sol",
+      "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
+      "events": [
+        {
+          "name": "CuratorCreditCreated",
+          "signature": "CuratorCreditCreated(address,uint256,uint256)",
+          "topic0": "0xed5a80d57e86051fa6af452e8509124711acd649df4f972309adbdb4419c5465",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "CuratorCreditWithdrawn",
+          "signature": "CuratorCreditWithdrawn(address,address,uint256)",
+          "topic0": "0xb9a3a7afb6923ec79a669c79f05b4dd60e7c5c9e5b068c4365c7039e251adbff",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "EmergencyWithdrawal",
+          "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_domain",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "resultingSurplus",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Reward",
+          "signature": "Reward(address,uint256,uint256)",
+          "topic0": "0x02a6a2be713fedf52f113c0a759f1c1a23a113476d9b1b1a2a453c910660de4e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamDrops": {
+      "source": "smart-contracts/StreamDrops.sol",
+      "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
+      "events": [
+        {
+          "name": "AuctionContractChanged",
+          "signature": "AuctionContractChanged(address,address)",
+          "topic0": "0xf4768419d2610749f64344d257d34fbc48fd4e825bf1884f7cafacf687158209",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldAuctionContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newAuctionContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "DropAuthorizationCancelled",
+          "signature": "DropAuthorizationCancelled(bytes32,address)",
+          "topic0": "0x7ea730944eaf7b45eb63a5f4a1085439c3d63730f8ce0aa640f18cfc2e3a1e5a",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dropId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "DropAuthorizationConsumed",
+          "signature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+          "topic0": "0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dropId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "signer",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "poster",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "recipient",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "payer",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 5,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "saleMode",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 7,
+              "name": "tokenDataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "deadline",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "signerEpoch",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "DropSignerChanged",
+          "signature": "DropSignerChanged(address,address,uint256)",
+          "topic0": "0xb95c78d8a41e773c8a1d707cb7e529da07505432bbd3cf05bcc3d094eec4a7da",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldSigner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newSigner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "signerEpoch",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "FixedPriceCreditCreated",
+          "signature": "FixedPriceCreditCreated(address,bytes32,uint8,uint256)",
+          "topic0": "0xf124881df3a53a6bea02106455f1d1ba5794ff409958c440b2097442f9a76f19",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "dropId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "creditType",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "FixedPriceCreditWithdrawn",
+          "signature": "FixedPriceCreditWithdrawn(address,address,uint8,uint256)",
+          "topic0": "0x1b2e3e02488d0ee2574d346826579185aa1d05cec0e8a560ce5c5fb8269c9b65",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "creditType",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "SignerEpochChanged",
+          "signature": "SignerEpochChanged(uint256,uint256)",
+          "topic0": "0x3bba831784668765a4bf4d687020f37a478866bd644c140557d4ddac9227fbfe",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldEpoch",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "newEpoch",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamMinter": {
+      "source": "smart-contracts/StreamMinter.sol",
+      "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
+      "events": [
+        {
+          "name": "EmergencyWithdrawal",
+          "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_domain",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "resultingSurplus",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_add",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "funds",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

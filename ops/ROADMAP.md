@@ -66,9 +66,9 @@ order.
 | Production size | Production deployable contracts pass the IR-optimized size gate; `StreamCore` is 23,139 runtime bytes with 1,437 bytes of EIP-170 headroom | `forge build --sizes --via-ir --skip test --skip script --force` | Production size gate passes in CI and deployment scripts use the same profile |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High, 19 Medium, and 93 Low; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
-| Deployment | Partial local baseline: deploy-and-wire rehearsal script, manifest schema/example, and manifest parsing test exist; fork/testnet rehearsal and production manifest generation remain missing | `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `test/StreamDeploymentManifest.t.sol`, and `deployments/schema/deployment-manifest.schema.json` | Anvil deployment and fork rehearsal pass |
+| Deployment | Partial local baseline: deploy-and-wire rehearsal script, manifest schema/example, manifest parsing test, and generated ABI/bytecode checksum inputs exist; fork/testnet rehearsal and production manifest generation remain missing | `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `test/StreamDeploymentManifest.t.sol`, `deployments/schema/deployment-manifest.schema.json`, and `release-artifacts/latest/abi-checksums.json` | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
-| Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
+| Release artifacts | Partial deterministic baseline: ABI checksums, bytecode checksums, interface IDs, and event topic catalog are generated from Foundry output; address books, ABI diffing, signed checksums, release tags, and verified live addresses remain missing | `python scripts/generate_release_artifacts.py --check`, `release-artifacts/latest/` | ABIs, manifests, checksums, and verified addresses published |
 | Windows setup | Foundry installed under `~/.foundry/bin`, but current shell may not resolve `forge` from `PATH` | direct binary invocation | Bootstrap works in current and future shells, or limitation documented |
 
 ## 1. Launch Gates
@@ -409,6 +409,7 @@ This is the recommended first batch of issues.
 22. `P1/TEST`: Add first invariant suite.
 23. `P1/DOCS`: Add protocol spec and threat model.
 24. [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91) / P1/OPS+TEST+DOCS: Add deployment scripts, manifest schema, and local rehearsal gate.
+25. [`P1-RELEASE-001`](https://github.com/6529-Collections/6529Stream/issues/93) / P1/OPS+TEST+DOCS: Generate ABI checksums, bytecode checksums, interface IDs, and event topic catalog.
 
 ## 5. Best-Practice Checklist
 
@@ -1975,7 +1976,8 @@ No P0 contract PR may merge without:
 - Add build provenance attestation where practical.
 - Add machine-readable release manifest.
 - Add ABI diff checks for every release.
-- Add interface ID catalog.
+- Add interface ID catalog. Initial deterministic interface ID catalog exists
+  under `release-artifacts/latest/`; ABI diffing remains future work.
 - Add storage layout snapshots if upgradeability is ever introduced.
 - Add source verification artifact retention.
 
@@ -1986,7 +1988,8 @@ No P0 contract PR may merge without:
 - Gas snapshot accepted.
 - Deployment rehearsal complete.
 - Manifests generated.
-- ABIs checksummed.
+- ABIs checksummed. Initial ABI and bytecode checksum baseline exists under
+  `release-artifacts/latest/`; signed checksums remain future work.
 - Contracts verified.
 - Changelog written.
 - Security docs updated.
@@ -2006,8 +2009,10 @@ No P0 contract PR may merge without:
 - ABI JSON.
 - Address book JSON per network.
 - Deployment manifest JSON.
-- Interface IDs.
-- Event topic catalog.
+- Interface IDs. Initial generated catalog exists under
+  `release-artifacts/latest/interface-ids.json`.
+- Event topic catalog. Initial generated catalog exists under
+  `release-artifacts/latest/event-topic-catalog.json`.
 - Fixed-price mint client.
 - Auction bid client.
 - Auction settlement client.
@@ -2157,7 +2162,8 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash/registry address, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Passing: registry writes create new immutable versions, chunk-index updates derive a new version without mutating the previous one, version records expose typed content hash/provenance/creator/creation/deprecation views, collection metadata pins key/version/content hash/registry address, explicit repinning moves an unfrozen collection to the latest dependency in the current registry, output and freeze manifests stay stable after later registry versions or registry swaps until explicit repin, and segment-boundary hashes remain distinct in `test/StreamMetadataEncoding.t.sol`. Dependency artifact packaging and migration runbooks remain future operational work. | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit from metadata write paths that can change token JSON | `test/StreamMetadataEvents.t.sol` | Passing for current `StreamCore` behavior: ERC-4906 interface support succeeds, randomness fulfillment and token metadata input writes emit `MetadataUpdate`, collection-level metadata mode/base URI/display/script/dependency-reference writes emit `BatchMetadataUpdate` over the minted-ever range, empty collections do not emit empty batch events, and mint-only plus burn paths do not emit ERC-4906. Dependency registry version creation does not emit ERC-4906 for pinned collections because their output does not change; explicit repinning goes through `updateCollectionInfo` and emits the existing collection-range update. | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Passing: typed chunk/content hashes include dependency key, chunk count, chunk index, chunk byte length, and chunk content hash; ambiguous chunk splits that render the same JavaScript produce distinct content hashes while preserving rendered-script compatibility; zero-chunk dependency hashes are deterministic | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
-| Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | In Progress: local deploy-and-wire rehearsal, Safe-placeholder ownership transfer, temporary admin revocation, manifest schema/example parsing, and default check-script gate added; fork rehearsal, real broadcast manifest generation, ABI/event-topic checksums, verification artifacts, dry-run mint/auction ceremonies, and emergency redeployment rehearsal remain open | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53), [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91) | Gate E/Gate G | TBD |
+| Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol`, `script/RehearseDeployment.s.sol`, `scripts/generate_release_artifacts.py`, and `scripts/test_release_artifacts.py` | In Progress: local deploy-and-wire rehearsal, Safe-placeholder ownership transfer, temporary admin revocation, manifest schema/example parsing, generated ABI/bytecode checksum baseline, generated interface ID catalog, generated event topic catalog, and default check-script gate added; fork rehearsal, real broadcast manifest generation, verification artifacts, dry-run mint/auction ceremonies, signed checksums, and emergency redeployment rehearsal remain open | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53), [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91), [`P1-RELEASE-001`](https://github.com/6529-Collections/6529Stream/issues/93) | Gate E/Gate G | TBD |
+| Release artifact catalog | ABI checksums, bytecode checksums, standard/custom interface IDs, and event topics are generated deterministically from current Foundry artifacts | `scripts/generate_release_artifacts.py`, `scripts/test_release_artifacts.py`, and `release-artifacts/latest/` | Passing locally for the first deterministic baseline: generator self-tests cover ABI hashing, bytecode hashing, event topic generation, configured standard interface IDs, computed selector XOR traceability, and drift detection; `make check`, Linux/Windows wrappers, and CI now include `--check`. Address books, ABI diffing, signed checksum files, signed tags, and verified live deployment hashes remain future Gate G work | [`P1-RELEASE-001`](https://github.com/6529-Collections/6529Stream/issues/93) | Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Passing: Bytes32 character counts, missing/matching delegation lookups, subdelegation register/revoke gates, empty-script generative rendering, and multi-recipient minter return indexes cover the remaining first-party production rows; Slither now reports only one accepted test-only `uninitialized-local` row | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | Vendored library Slither findings | Retained OpenZeppelin utility files have provenance, local delta notes, and regressions for flagged math/encoding behavior | `test/StreamVendoredLibraries.t.sol` | Passing: Base64 golden/padding vectors, `Math.mulDiv` full-precision boundaries, rounding-up behavior, overflow, and zero-denominator reverts cover the current vendored false-positive rows | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |

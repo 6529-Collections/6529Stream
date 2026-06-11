@@ -25,6 +25,8 @@ This runs:
 forge build
 forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_artifacts.py
+python scripts/generate_release_artifacts.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -37,6 +39,12 @@ The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
 minter/drops/auction/randomizer surfaces, transfers Ownable control to the Safe
 placeholder, and leaves fork/testnet broadcasting for later Gate E work.
+
+The release artifact step is the first Gate G machine-readable artifact gate.
+It verifies that `release-artifacts/latest/` matches the production `via-ir`
+Foundry build output, including ABI checksums, bytecode checksums, interface
+IDs, and the event topic catalog. The generator automatically finds Foundry's
+`cast` in `~/.foundry/bin` when the shell has not added it to `PATH`.
 
 Windows contributors can run:
 
@@ -64,6 +72,26 @@ powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
 Windows bootstrap requires Python 3.8+ or the `py` launcher for the local
 Slither and `solc-select` tool environment. Foundry itself is downloaded from
 the pinned release asset and verified with SHA256 before extraction.
+
+## Release Artifacts
+
+After changing any production contract ABI or event surface, run the production
+build and regenerate the tracked release baseline with:
+
+```bash
+forge build --sizes --via-ir --skip test --skip script --force
+python scripts/generate_release_artifacts.py
+```
+
+The check mode is:
+
+```bash
+python scripts/generate_release_artifacts.py --check
+```
+
+The generator uses `release-artifacts/contracts.json` to define the production
+contract and interface surface. Standard ERC interface IDs are pinned there when
+the advertised ERC ID differs from a raw XOR over the artifact ABI.
 
 ## Non-Gating Diagnostics
 
