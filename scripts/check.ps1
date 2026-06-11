@@ -35,6 +35,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonCommand.Source @pythonArgs "scripts\generate_release_artifacts.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_source_verification_inputs.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_source_verification_inputs.py" "--check"
+& $pythonCommand.Source @pythonArgs "scripts\test_dependency_artifact_manifest.py"
+& $pythonCommand.Source @pythonArgs "scripts\generate_dependency_artifact_manifest.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_abi_compatibility.py"
 & $pythonCommand.Source @pythonArgs "scripts\check_abi_compatibility.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_broadcast_manifest_input.py"

@@ -134,6 +134,14 @@ jobs:
           python3 scripts/test_source_verification_inputs.py 2>&1 | tee ci-logs/source-verification-tests.log
           python3 scripts/generate_source_verification_inputs.py --check 2>&1 | tee ci-logs/source-verification-check.log
 
+      - name: Dependency artifacts
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_dependency_artifact_manifest.py 2>&1 | tee ci-logs/dependency-artifact-tests.log
+          python3 scripts/generate_dependency_artifact_manifest.py --check 2>&1 | tee ci-logs/dependency-artifact-check.log
+
       - name: ABI compatibility
         shell: bash
         run: |

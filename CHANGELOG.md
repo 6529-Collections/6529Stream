@@ -32,6 +32,9 @@ the release policy in `docs/release-policy.md`.
 - Added focused `StreamCore` custom-error regressions covering function-admin
   authorization, artist signatures, metadata array lengths, and final-supply
   timing.
+- Added deterministic dependency artifact descriptors and
+  `release-artifacts/latest/dependency-artifact-manifest.json`, with local/CI
+  drift checks for packaged dependency source files.
 
 ### Fixed
 
@@ -77,6 +80,9 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   explicit initial zero-supply rejection and dependency registry target
   validation.
+- Gate D/G release artifacts now include dependency artifact manifest coverage
+  and checksum coverage for dependency descriptors/source files under
+  `release-artifacts/dependencies/`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   `StreamCore` size-recovery custom errors:
   `ArtistSignatureUnauthorized()`, `FunctionAdminUnauthorized()`,

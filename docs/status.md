@@ -106,6 +106,12 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/source-verification-inputs.json` retains production
   contract source hashes, compiler settings, constructor ABI, bytecode/linking
   status, and verification command templates from the current Foundry artifacts.
+- `scripts/test_dependency_artifact_manifest.py` and
+  `scripts/generate_dependency_artifact_manifest.py --check` prove committed
+  dependency artifact descriptors under `release-artifacts/dependencies/`
+  resolve only to packaged dependency files, reject malformed keys and duplicate
+  identities, and keep
+  `release-artifacts/latest/dependency-artifact-manifest.json` current.
 - `scripts/test_abi_compatibility.py` and
   `scripts/check_abi_compatibility.py --check` prove the current production
   contract ABI surface remains compatible with the committed
@@ -131,15 +137,16 @@ The current Gate A smoke baseline proves:
   contract metadata.
 - `scripts/test_release_manifest.py` and
   `scripts/generate_release_manifest.py --check` prove the generated top-level
-  release manifest ties the release artifact catalog, ABI compatibility
-  baseline, deployment manifests, address books, schemas, changelog, governance
-  docs, and unavailable release-ceremony outputs together without drift.
+  release manifest ties the release artifact catalog, dependency artifact
+  manifest, ABI compatibility baseline, deployment manifests, address books,
+  schemas, changelog, governance docs, and unavailable release-ceremony outputs
+  together without drift.
 - `scripts/test_release_checksums.py` and
   `scripts/generate_release_checksums.py --check` prove the committed
   `release-artifacts/latest/SHA256SUMS` and
   `release-artifacts/latest/release-checksums.json` bundle covers the current
-  release artifact, broadcast fixture, deployment manifest, address-book,
-  config, schema, and release-manifest files.
+  release artifact, dependency artifact source, broadcast fixture, deployment
+  manifest, address-book, config, schema, and release-manifest files.
 - `scripts/test_changelog_check.py` and `scripts/check_changelog.py` prove
   release-impacting branch changes include a non-placeholder `Unreleased`
   changelog entry before they can pass the local/CI gate.
@@ -153,10 +160,10 @@ canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
 beyond the now-triaged high/medium baseline, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
-verified live deployment hashes and explorer submissions, remaining generated
-HTML/JavaScript render-sandbox hardening, dependency artifact packaging and
-migration runbooks beyond registry provenance strings, semantic attribute schema
-validation, invalid UTF-8 policy, full browser execution sandbox automation,
+  verified live deployment hashes and explorer submissions, remaining generated
+  HTML/JavaScript render-sandbox hardening, production dependency migration
+  runbooks beyond the local artifact-manifest baseline, semantic attribute schema
+  validation, invalid UTF-8 policy, full browser execution sandbox automation,
 deployment discipline, and
 the broader P0/P1 test suite.
 

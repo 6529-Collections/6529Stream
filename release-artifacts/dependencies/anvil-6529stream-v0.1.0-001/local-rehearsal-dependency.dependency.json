@@ -1,0 +1,24 @@
+{
+  "schema_version": "6529stream.dependency-artifact.v1",
+  "protocol_version": "0.1.0",
+  "deployment_version": "anvil-6529stream-v0.1.0-001",
+  "dependency": {
+    "name": "local-rehearsal-dependency",
+    "key": "0x25b8a42e532276effa1c2a1cbe01226a9a4a0426f51e5894791359b3a5c088df",
+    "key_preimage": "6529Stream.local.rehearsal.dependency.v1",
+    "version": 1,
+    "registry_contract": "DependencyRegistry",
+    "provenance": "local-anvil-rehearsal"
+  },
+  "source": {
+    "registered_by": "script/RehearseDeployment.s.sol:_createSampleCollection",
+    "notes": "Local rehearsal dependency registered by the deterministic Anvil deployment rehearsal."
+  },
+  "files": [
+    {
+      "path": "release-artifacts/dependencies/anvil-6529stream-v0.1.0-001/local-rehearsal-dependency.js",
+      "role": "script",
+      "media_type": "application/javascript"
+    }
+  ]
+}
