@@ -259,6 +259,8 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         _mintToken(deployed);
 
+        _expectUnsafeRawAttributes(deployed.core, " ");
+        _expectUnsafeRawAttributes(deployed.core, "   ");
         _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Mood\"}");
         _expectUnsafeRawAttributes(deployed.core, "{\"value\":\"Calm\"}");
         _expectUnsafeRawAttributes(

@@ -303,9 +303,12 @@ library StreamMetadataRenderer {
 
     function isSafeRawAttributes(string memory raw) public pure returns (bool) {
         bytes memory input = bytes(raw);
+        if (input.length == 0) {
+            return true;
+        }
         uint256 index = _skipRawAttributeSpaces(input, 0);
         if (index == input.length) {
-            return true;
+            return false;
         }
 
         while (index < input.length) {

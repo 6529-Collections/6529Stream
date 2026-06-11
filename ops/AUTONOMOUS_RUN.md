@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/123` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 21:42 UTC` |
+| Last updated | `2026-06-11 22:00 UTC` |
 
 ## Packaging Notes
 
@@ -124,7 +124,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Production raw attribute schema enforcement (Queue Item 64)
 
-Status: PR #123 open; waiting for CI and CodeRabbit after final state-artifact push.
+Status: PR #123 open; CodeRabbit whitespace-only raw attribute fix passed full local validation and final artifacts are being refreshed for push.
 Branch: `codex/metadata-attribute-schema`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/123`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/122`.
@@ -195,6 +195,18 @@ Notes:
   `make release-manifest-check`, and `make release-checksums-check` were rerun
   sequentially. The sequential artifact checks passed without the transient
   Foundry cache access warning produced by an earlier parallel local invocation.
+- CodeRabbit found that whitespace-only nonempty raw attributes still passed
+  because the parser skipped spaces before the empty-input decision. The
+  follow-up keeps the true empty fragment allowed, rejects whitespace-only
+  nonempty fragments, and adds regression coverage before refreshing artifacts.
+- The CodeRabbit follow-up passes `forge fmt --check`, the focused
+  `test/StreamMetadataEscaping.t.sol` suite with 15 tests, `make
+  release-manifest-check`, `make release-checksums-check`, and
+  `git diff --check`. `StreamCore` remains 24,135 runtime bytes with 441 bytes
+  of headroom; linked `StreamMetadataRenderer` is now 8,591 runtime bytes with
+  15,985 bytes of headroom.
+- A full `make check` also passed after the CodeRabbit fix and refreshed
+  artifacts.
 
 ### PR candidate: Metadata fixture UTF-8 and semantic attributes (Queue Item 63)
 
@@ -5680,6 +5692,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 22:00 | Run full local gate after PR #123 review fix | `make check` passes after rejecting whitespace-only raw attributes and refreshing release artifacts, so the final push will carry both focused regression proof and the repository-wide gate |
+| 2026-06-11 21:55 | Validate CodeRabbit PR #123 whitespace-only fix | Focused metadata tests pass with the new whitespace-only regression, release manifest/checksum checks pass after artifact refresh, `git diff --check` is clean, and `StreamCore` stays at 24,135 bytes with 441 bytes of EIP-170 headroom |
+| 2026-06-11 21:51 | Accept CodeRabbit PR #123 whitespace-only finding | Whitespace-only raw attributes are nonempty and should not satisfy the production schema; keep only the zero-length fragment as the allowed empty case, add regression coverage, and refresh release artifacts |
 | 2026-06-11 21:42 | Open PR #123 for Queue Item 64 | Pushed `codex/metadata-attribute-schema`, opened https://github.com/6529-Collections/6529Stream/pull/123 against `main`, and will request CodeRabbit after this durable state update is regenerated into the release artifacts and pushed |
 | 2026-06-11 21:34 | Rerun artifact checks sequentially | The release-manifest and release-checksum targets both pass after the state update when run one at a time, avoiding the earlier parallel Foundry cache warning |
 | 2026-06-11 21:31 | Validate Queue Item 64 locally | Focused metadata escaping tests, full `make check`, Windows `scripts\check.ps1`, release manifest/checksum checks, bash syntax, and whitespace checks pass; final artifact checks will be rerun sequentially after this covered state-file update |
