@@ -171,6 +171,25 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
 
+    function testRawAttributesRejectMismatchedDelimiters() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        _mintToken(deployed);
+
+        uint256[] memory tokenIds = new uint256[](1);
+        string[] memory images = new string[](1);
+        string[] memory attributes = new string[](1);
+        tokenIds[0] = TOKEN_ID;
+        images[0] = "ipfs://image.png";
+
+        attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Calm\"]";
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeRawAttributes.selector, TOKEN_ID));
+        deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
+
+        attributes[0] = "[{\"trait_type\":\"Mood\",\"value\":\"Calm\"}}";
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeRawAttributes.selector, TOKEN_ID));
+        deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
+    }
+
     function testRawAttributesRejectTopLevelLiteralAndTrailingComma() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         _mintToken(deployed);

@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/86` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 04:35 UTC` |
+| Last updated | `2026-06-11 04:42 UTC` |
 
 ## Packaging Notes
 
@@ -3940,8 +3940,8 @@ Merge:
 
 ### PR candidate: Add metadata escaping and render-safety baseline (Queue Item 44)
 
-Status: CodeRabbit non-blocking positive-test suggestions addressed locally;
-follow-up commit/push pending.
+Status: CodeRabbit delimiter-type finding addressed locally; follow-up
+commit/push pending.
 Branch: `codex/metadata-escaping-safety`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/87`.
 Initial implementation commit: `d9a4a1af3bf3f56bf5e913f2db4b9ba070b924df`.
@@ -4006,11 +4006,18 @@ Validation so far:
   multi-object positive-path tests. Those two tests now pass in the focused
   8-test `StreamMetadataEscapingTest` suite, full `make check`, Windows wrapper,
   touched-file formatting, whitespace, and Slither baseline comparison.
+- CodeRabbit inline comment `3393290836` correctly flagged that the raw
+  attribute parser tracked nesting depth but not container type. The local fix
+  adds a compact container-kind bitset, rejects mismatched `{]` and `[}`
+  delimiters, and refreshes the focused 9-test metadata escaping suite, full
+  `make check`, Windows wrapper, touched-file formatting, whitespace, and
+  Slither baseline comparison.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 04:42 | Address CodeRabbit PR #87 delimiter finding | Added container-kind tracking to the raw-attribute parser so object and array closers must match their opener, covered mismatched `{]` and `[}` delimiters, and refreshed focused 9-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 04:35 | Address CodeRabbit PR #87 positive-test suggestions | Added empty-attributes and multiple-top-level-object acceptance tests, refreshed focused 8-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 04:28 | Open PR #87 and request CodeRabbit | Metadata escaping safety baseline published at `https://github.com/6529-Collections/6529Stream/pull/87`; CodeRabbit review requested in issue comment `4677178780`, and Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 04:26 | Finish Queue Item 44 local validation | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading/traceability scans, and Slither baseline comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |

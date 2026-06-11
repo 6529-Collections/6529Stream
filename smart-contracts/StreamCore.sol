@@ -180,6 +180,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
 
     struct RawAttributeValidationState {
         uint256 depth;
+        uint256 containerKinds;
         bool inString;
         bool escaped;
         bool sawTopLevelValue;
@@ -860,6 +861,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         bytes memory input = bytes(raw);
         RawAttributeValidationState memory state = RawAttributeValidationState({
             depth: 0,
+            containerKinds: 0,
             inString: false,
             escaped: false,
             sawTopLevelValue: false,
@@ -911,18 +913,22 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             }
             state.inString = true;
         } else if (character == 0x7b || character == 0x5b) {
-            _openRawAttributeContainer(tokenId, state);
+            _openRawAttributeContainer(tokenId, state, character);
         } else if (character == 0x7d || character == 0x5d) {
-            _closeRawAttributeContainer(tokenId, state);
+            _closeRawAttributeContainer(tokenId, state, character);
         } else if (state.depth == 0) {
             _advanceRawAttributeTopLevelSeparator(tokenId, state, character);
         }
     }
 
-    function _openRawAttributeContainer(uint256 tokenId, RawAttributeValidationState memory state)
-        private
-        pure
-    {
+    function _openRawAttributeContainer(
+        uint256 tokenId,
+        RawAttributeValidationState memory state,
+        bytes1 opener
+    ) private pure {
+        if (state.depth >= 256) {
+            revert UnsafeRawAttributes(tokenId);
+        }
         if (state.depth == 0) {
             if (!state.expectingTopLevelValue) {
                 revert UnsafeRawAttributes(tokenId);
@@ -930,17 +936,29 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             state.sawTopLevelValue = true;
             state.expectingTopLevelValue = false;
         }
+        if (opener == 0x7b) {
+            state.containerKinds |= uint256(1) << state.depth;
+        } else {
+            state.containerKinds &= ~(uint256(1) << state.depth);
+        }
         state.depth++;
     }
 
-    function _closeRawAttributeContainer(uint256 tokenId, RawAttributeValidationState memory state)
-        private
-        pure
-    {
+    function _closeRawAttributeContainer(
+        uint256 tokenId,
+        RawAttributeValidationState memory state,
+        bytes1 closer
+    ) private pure {
         if (state.depth == 0) {
             revert UnsafeRawAttributes(tokenId);
         }
-        state.depth--;
+        uint256 depthIndex = state.depth - 1;
+        bool expectsObjectClose = ((state.containerKinds >> depthIndex) & 1) == 1;
+        if ((closer == 0x7d) != expectsObjectClose) {
+            revert UnsafeRawAttributes(tokenId);
+        }
+        state.containerKinds &= ~(uint256(1) << depthIndex);
+        state.depth = depthIndex;
         if (state.depth == 0) {
             state.expectingTopLevelValue = false;
         }
