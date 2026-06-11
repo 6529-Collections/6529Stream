@@ -73,9 +73,10 @@ The current Gate A smoke baseline proves:
   data, token images, token raw attributes, generated `tokenURI` output,
   dependency script chunks and counts, and dependency provenance strings.
   `StreamMetadataUriPolicy.t.sol` proves the renderer content/script URI
-  policy helpers and the production token image URI guard for allowed
-  `https://`, `ipfs://`, and `ar://` content URIs plus rejected empty,
-  JavaScript, hostless HTTPS, and whitespace-bearing token image inputs.
+  policy helpers and the production URI guards for allowed `https://`,
+  `ipfs://`, and `ar://` content URIs plus rejected empty required token image
+  URIs, JavaScript, hostless HTTPS, whitespace-bearing token image/base URI
+  inputs, and non-HTTPS external library URLs.
   `scripts/test_metadata_fixtures.py` and
   `scripts/check_metadata_fixtures.py` validate the committed metadata golden
   fixtures outside Foundry by strictly decoding JSON and HTML data URIs,
@@ -141,16 +142,15 @@ The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
-canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, fork/testnet deployment rehearsals, production manifest
-generation from live broadcast outputs, detached checksum signatures, signed
-release tags, production address books, verified live
-deployment hashes and explorer submissions, remaining generated
-HTML/JavaScript render-sandbox hardening, dependency
-artifact packaging and migration runbooks beyond registry provenance strings,
-semantic attribute schema validation, collection base URI and external library
-URL production enforcement, invalid UTF-8 policy, full browser execution
-sandbox automation, deployment discipline, and
+canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
+beyond the now-triaged high/medium baseline, fork/testnet deployment
+rehearsals, production manifest generation from live broadcast outputs,
+detached checksum signatures, signed release tags, production address books,
+verified live deployment hashes and explorer submissions, remaining generated
+HTML/JavaScript render-sandbox hardening, dependency artifact packaging and
+migration runbooks beyond registry provenance strings, semantic attribute schema
+validation, invalid UTF-8 policy, full browser execution sandbox automation,
+deployment discipline, and
 the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and

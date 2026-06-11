@@ -83,9 +83,10 @@ Current source references:
   wrapper closing-script boundaries now have first-slice escaping or rejection
   coverage. Numeric byte limits now cover collection display fields, collection
   scripts, token data, token images, token attributes, generated `tokenURI`
-  output, dependency scripts, and dependency provenance. Semantic attribute
-  schema validation, URI policy, invalid UTF-8 policy, and browser
-  render-sandbox automation remain open under P1-META-006.
+  output, dependency scripts, and dependency provenance. Token image,
+  collection base URI, and external library URL writes now enforce the current
+  URI policy before storage. Semantic attribute schema validation, invalid UTF-8
+  policy, and browser render-sandbox automation remain open under P1-META-006.
 
 The current behavior is useful as characterization, but it is not a production
 metadata promise.
@@ -234,11 +235,13 @@ sequences. The third slice defines numeric byte limits for stored metadata
 inputs and generated `tokenURI` output. The fourth slice validates committed
 metadata fixtures outside Foundry for JSON/data-URI/HTML boundaries and the
 current URI scheme policy. The fifth slice exposes renderer URI policy helpers
-and enforces the required content URI policy for token image writes. The
-remaining public-beta work is still to define semantic attribute schema
-validation or structured attributes, browser render-sandbox proofing for
-generated animation code, collection base URI and external library URL
-production URI checks, and invalid UTF-8 policy.
+and enforces the required content URI policy for token image writes. The sixth
+slice extends deployable production enforcement to optional collection base URI
+and external library URL writes while converting older metadata-path string
+reverts to custom errors to stay under EIP-170. The remaining public-beta work
+is still to define semantic attribute schema validation or structured
+attributes, browser render-sandbox proofing for generated animation code, and
+invalid UTF-8 policy.
 
 The implementation must define maximum sizes for:
 
@@ -496,7 +499,8 @@ Public-beta implementation must:
 - implement `ERC-4906` support and event emissions
 - document and test burn metadata semantics
 - replace magic metadata update indexes
-- add custom errors for security-relevant metadata and freeze failures
+- continue replacing ambiguous revert strings with documented custom errors for
+  security-relevant metadata and freeze failures
 - update Slither baseline status for dependency encoding after code resolution
 
 ## Tests Required

@@ -27,6 +27,8 @@ the release policy in `docs/release-policy.md`.
   validation in local and CI gates.
 - Added renderer URI policy helpers and production token image URI validation
   for required metadata image inputs.
+- Added production collection base URI and external library URL validation,
+  keeping those fields optional while rejecting unsafe non-empty URI values.
 
 ### Release Impact
 
@@ -48,6 +50,9 @@ the release policy in `docs/release-policy.md`.
   platform check wrappers.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from the
   metadata URI policy helper functions and `UnsafeMetadataURI()` custom error.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  collection URI production enforcement and custom errors replacing legacy
+  `StreamCore` revert strings on metadata, mint, randomizer, and wiring paths.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

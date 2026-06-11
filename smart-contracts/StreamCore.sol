@@ -81,6 +81,8 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
 
     error CollectionAlreadyFrozen(uint256 collectionId);
     error CollectionDataMissing(uint256 collectionId);
+    error CollectionSupplyReached();
+    error CollectionSupplyTooLarge();
     error CollectionFinalSupplyWindowActive(
         uint256 collectionId, uint256 currentTimestamp, uint256 finalSupplyTimestamp
     );
@@ -90,12 +92,19 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     );
     error CollectionNotCreated(uint256 collectionId);
     error BurnedTokenRemintNotAllowed(uint256 tokenId);
+    error InvalidAdminContract();
+    error InvalidMinterContract();
+    error InvalidRandomizerContract();
+    error MetadataMutationPaused();
     error FrozenCollectionDependencyRegistry();
     error MetadataFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
     error MetadataFrozen(uint256 collectionId);
+    error NotMinterContract();
+    error TokenOutsideCollectionRange();
     error UnsafeMetadataURI();
     error UnsafeRawAttributes(uint256 tokenId);
     error UnknownDependency(bytes32 dependencyNameAndVersion);
+    error ZeroTokenHash();
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -312,12 +321,10 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         uint256 _setFinalSupplyTimeAfterMint
     ) public FunctionAdminRequired(this.setCollectionData.selector) {
         _requireMetadataMutationNotPaused();
-        require(
-            (isCollectionCreated[_collectionID] == true)
-                && (collectionFreeze[_collectionID] == false)
-                && (_collectionTotalSupply <= _COLLECTION_TOKEN_RANGE),
-            "err/freezed"
-        );
+        _requireExistingMutableCollection(_collectionID);
+        if (_collectionTotalSupply > _COLLECTION_TOKEN_RANGE) {
+            revert CollectionSupplyTooLarge();
+        }
         if (collectionAdditionalData[_collectionID].collectionTotalSupply == 0) {
             collectionAdditionalData[_collectionID].collectionArtistAddress =
             _collectionArtistAddress;
@@ -349,10 +356,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         public
         FunctionAdminRequired(this.addRandomizer.selector)
     {
-        require(
-            IRandomizer(_randomizerContract).isRandomizerContract() == true,
-            "Contract is not Randomizer"
-        );
+        if (!IRandomizer(_randomizerContract).isRandomizerContract()) {
+            revert InvalidRandomizerContract();
+        }
         _requireCollectionNotFrozen(_collectionID);
         address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
         _requireNoPendingRandomnessRequests(_collectionID, oldRandomizer);
@@ -375,7 +381,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         uint256 _saltfun_o,
         uint256 _collectionID
     ) external {
-        require(msg.sender == minterContract, "Caller is not the Minter Contract");
+        if (msg.sender != minterContract) {
+            revert NotMinterContract();
+        }
         _requireCollectionNotFrozen(_collectionID);
         _requireMaxBytes(_FIELD_TOKEN_DATA, _tokenData, MAX_TOKEN_DATA_BYTES);
         collectionAdditionalData[_collectionID].collectionCirculationSupply =
@@ -388,7 +396,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
                 tokensAirdropPerAddress[_collectionID][_recipient] + 1;
             _mintProcessing(mintIndex, _recipient, _tokenData, _collectionID, _saltfun_o);
         } else {
-            revert("Supply reached");
+            revert CollectionSupplyReached();
         }
     }
 
@@ -399,11 +407,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
             "ERC721: caller is not token owner or approved"
         );
         _requireCollectionNotFrozen(_collectionID);
-        require(
-            (_tokenId >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
-                && (_tokenId <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
-            "id err"
-        );
+        if (
+            _tokenId < collectionAdditionalData[_collectionID].reservedMinTokensIndex
+                || _tokenId > collectionAdditionalData[_collectionID].reservedMaxTokensIndex
+        ) {
+            revert TokenOutsideCollectionRange();
+        }
         address tokenOwner = ownerOf(_tokenId);
         _removeLiveTokenMetadataRecord(_collectionID, _tokenId);
         burnedTokenAuditRecords[_tokenId] = BurnedTokenAudit({
@@ -460,11 +469,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         string[] memory _newCollectionScript
     ) public FunctionAdminRequired(this.updateCollectionInfo.selector) {
         _requireMetadataMutationNotPaused();
-        require(
-            (isCollectionCreated[_collectionID] == true)
-                && (collectionFreeze[_collectionID] == false),
-            "Not allowed"
-        );
+        _requireExistingMutableCollection(_collectionID);
         if (_index == _FULL_COLLECTION_UPDATE_INDEX) {
             _requireCollectionInfoLimits(
                 _newCollectionName,
@@ -490,6 +495,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
             _requireMaxBytes(
                 _FIELD_COLLECTION_BASE_URI, _newCollectionBaseURI, MAX_COLLECTION_TEXT_BYTES
             );
+            if (!StreamMetadataRenderer.isSafeContentUri(_newCollectionBaseURI, true)) {
+                revert UnsafeMetadataURI();
+            }
             collectionInfo[_collectionID].collectionBaseURI = _newCollectionBaseURI;
         } else {
             _requireMaxBytes(
@@ -519,11 +527,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         FunctionAdminRequired(this.changeMetadataView.selector)
     {
         _requireMetadataMutationNotPaused();
-        require(
-            (isCollectionCreated[_collectionID] == true)
-                && (collectionFreeze[_collectionID] == false),
-            "Not allowed"
-        );
+        _requireExistingMutableCollection(_collectionID);
         onchainMetadata[_collectionID] = _status;
         _emitCollectionMetadataUpdate(_collectionID);
     }
@@ -594,19 +598,26 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         if (!burnedToken) {
             _requireCollectionNotFrozen(_collectionID);
         }
-        require(_hash != bytes32(0), "Zero token hash");
-        require(
-            (_mintIndex >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
-                && (_mintIndex <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
-            "Wrong collection"
-        );
+        if (_hash == bytes32(0)) {
+            revert ZeroTokenHash();
+        }
+        if (
+            _mintIndex < collectionAdditionalData[_collectionID].reservedMinTokensIndex
+                || _mintIndex > collectionAdditionalData[_collectionID].reservedMaxTokensIndex
+        ) {
+            revert TokenOutsideCollectionRange();
+        }
         require(tokenToHash[_mintIndex] == bytes32(0));
         bool liveToken = _exists(_mintIndex);
         if (liveToken) {
-            require(tokenIdsToCollectionIds[_mintIndex] == _collectionID, "Wrong collection");
+            if (tokenIdsToCollectionIds[_mintIndex] != _collectionID) {
+                revert TokenOutsideCollectionRange();
+            }
         } else if (burnedToken) {
             BurnedTokenAudit storage audit = burnedTokenAuditRecords[_mintIndex];
-            require(audit.collectionId == _collectionID, "Wrong collection");
+            if (audit.collectionId != _collectionID) {
+                revert TokenOutsideCollectionRange();
+            }
         }
         tokenToHash[_mintIndex] = _hash;
         // Record pre-mint callbacks, but only live tokens announce metadata changes.
@@ -646,10 +657,14 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         FunctionAdminRequired(this.updateContracts.selector)
     {
         if (_opt == 1) {
-            require(IStreamAdmins(_newContract).isAdminContract() == true, "Not Admin");
+            if (!IStreamAdmins(_newContract).isAdminContract()) {
+                revert InvalidAdminContract();
+            }
             adminsContract = IStreamAdmins(_newContract);
         } else if (_opt == 2) {
-            require(IStreamMinter(_newContract).isMinterContract() == true, "Not Minter");
+            if (!IStreamMinter(_newContract).isMinterContract()) {
+                revert InvalidMinterContract();
+            }
             minterContract = _newContract;
         } else if (_opt == 3) {
             if (frozenCollectionCount != 0) {
@@ -684,10 +699,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     }
 
     function _requireMetadataMutationNotPaused() private view {
-        require(
-            adminsContract.isPaused(StreamPauseDomains.METADATA_MUTATION) == false,
-            "Metadata paused"
-        );
+        if (adminsContract.isPaused(StreamPauseDomains.METADATA_MUTATION)) {
+            revert MetadataMutationPaused();
+        }
     }
 
     // Retrieve Functions
@@ -822,6 +836,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         _requireMaxBytes(_FIELD_COLLECTION_LICENSE, license, MAX_COLLECTION_TEXT_BYTES);
         _requireMaxBytes(_FIELD_COLLECTION_BASE_URI, baseURI, MAX_COLLECTION_TEXT_BYTES);
         _requireMaxBytes(_FIELD_COLLECTION_LIBRARY, libraryUrl, MAX_COLLECTION_TEXT_BYTES);
+        if (!StreamMetadataRenderer.areSafeCollectionUris(baseURI, libraryUrl)) {
+            revert UnsafeMetadataURI();
+        }
         if (script.length > MAX_COLLECTION_SCRIPT_CHUNKS) {
             revert MetadataFieldTooLarge(
                 _FIELD_COLLECTION_SCRIPT_COUNT, script.length, MAX_COLLECTION_SCRIPT_CHUNKS
@@ -1087,6 +1104,13 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         if (collectionFreeze[_collectionID]) {
             revert MetadataFrozen(_collectionID);
         }
+    }
+
+    function _requireExistingMutableCollection(uint256 _collectionID) private view {
+        if (!isCollectionCreated[_collectionID]) {
+            revert CollectionNotCreated(_collectionID);
+        }
+        _requireCollectionNotFrozen(_collectionID);
     }
 
     function _requireFreezeEligible(uint256 _collectionID) private view {

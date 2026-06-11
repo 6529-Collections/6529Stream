@@ -32,8 +32,62 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
             .assertFalse("whitespace uri accepted");
         StreamMetadataRenderer.isSafeScriptUri("https://cdn.example/script.js")
             .assertTrue("https script uri rejected");
+        StreamMetadataRenderer.isSafeScriptUri("", true)
+            .assertTrue("empty optional script rejected");
+        StreamMetadataRenderer.isSafeScriptUri("", false).assertFalse("empty script accepted");
         StreamMetadataRenderer.isSafeScriptUri("ipfs://dependency/script.js")
             .assertFalse("ipfs script uri accepted");
+    }
+
+    function testProductionCollectionUriPolicyAcceptsAllowedOptionalUris() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "Genesis",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "",
+                "",
+                bytes32(0),
+                FULL_COLLECTION_UPDATE_INDEX,
+                scripts
+            );
+
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "Genesis",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "https://metadata.example/base/",
+                "https://cdn.example/script.js",
+                bytes32(0),
+                FULL_COLLECTION_UPDATE_INDEX,
+                scripts
+            );
+
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "ar://metadata-base/",
+                "",
+                bytes32(0),
+                FULL_COLLECTION_UPDATE_INDEX - 1,
+                scripts
+            );
     }
 
     function testProductionTokenImagePolicyAcceptsAllowedUris() public {
@@ -57,6 +111,86 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeMetadataURI.selector));
         _updateTokenImage(deployed.core, "https://image.example/bad path.png");
+    }
+
+    function testCollectionBaseUriRejectsUnsafeProductionUris() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeMetadataURI.selector));
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "javascript:alert(1)",
+                "",
+                bytes32(0),
+                FULL_COLLECTION_UPDATE_INDEX - 1,
+                scripts
+            );
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeMetadataURI.selector));
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "Genesis",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "https://metadata.example/bad path/",
+                "https://cdn.example/script.js",
+                bytes32(0),
+                FULL_COLLECTION_UPDATE_INDEX,
+                scripts
+            );
+    }
+
+    function testCollectionLibraryRejectsUnsafeProductionUris() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeMetadataURI.selector));
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "Genesis",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://base/",
+                "ipfs://dependency/script.js",
+                bytes32(0),
+                FULL_COLLECTION_UPDATE_INDEX,
+                scripts
+            );
+    }
+
+    function testCreateCollectionRejectsUnsafeProductionUris() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeMetadataURI.selector));
+        deployed.core
+            .createCollection(
+                "Unsafe",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://base/",
+                "javascript:alert(1)",
+                bytes32(0),
+                scripts
+            );
     }
 
     function _mintToken(DeployedStream memory deployed) private {

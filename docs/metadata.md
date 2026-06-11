@@ -49,9 +49,10 @@ base64-encoded HTML animation URL.
 `final` state for minted tokens. The current schema version escapes JSON string
 fields emitted by on-chain metadata and rejects raw attribute fragments that
 contain literal control characters, unterminated strings, unbalanced
-object/array delimiters, or unquoted `]`/`}` breakout attempts. It does not yet
-solve semantic attribute schema validation, collection base URI or external
-library URL production enforcement, invalid UTF-8 policy, browser
+object/array delimiters, or unquoted `]`/`}` breakout attempts. It also
+enforces the current URI policy for token images, collection base URIs, and
+external collection library URLs before storage. It does not yet solve
+semantic attribute schema validation, invalid UTF-8 policy, browser
 render-sandbox checks, dependency artifact packaging beyond registry provenance
 strings, stale randomness display, or deployment release manifests.
 
@@ -83,10 +84,9 @@ and neutralizes literal `</script` sequences inside the generated wrapper
 script. This protects wrapper structure, but it does not sandbox artist
 `collectionScript` code or certify dependency code as safe. Release tooling
 now validates the committed golden fixtures for JSON/data-URI structure,
-current URI scheme policy, and generated HTML wrapper/script boundaries.
-Full browser execution sandboxing, collection base URI and external library URL
-production enforcement, semantic attribute validation, and invalid UTF-8 policy
-remain required before public beta.
+current URI scheme policy, and generated HTML wrapper/script boundaries. Full
+browser execution sandboxing, semantic attribute validation, and invalid UTF-8
+policy remain required before public beta.
 
 ## URI Policy
 
@@ -96,18 +96,28 @@ and fixture checks:
 - Content URIs allow `https://`, `ipfs://`, and `ar://` values.
 - Required content URIs must be nonempty.
 - Optional content URIs may be empty when the caller explicitly allows it.
-- Script URIs allow only nonempty `https://` values.
+- Script URIs allow only `https://` values. Empty script URIs are allowed only
+  when the caller explicitly treats the field as optional.
 - `https://` URIs must include a host byte after the scheme.
 - URI values containing ASCII whitespace, other ASCII control characters, or
   DEL are rejected.
 
-`StreamCore.updateImagesAndAttributes` now enforces the required content URI
-policy for token image inputs before storing them, reverting with
-`UnsafeMetadataURI()` on failure. Collection base URI and external library URL
-production enforcement remain open because `StreamCore` is close to the
-EIP-170 bytecode limit; those surfaces are still covered only by size limits,
-fixture checks, docs, and release review until a later implementation slice
-adds deployable enforcement.
+`StreamCore` now enforces this policy before storing token image inputs,
+collection base URIs, and external collection library URLs, reverting with
+`UnsafeMetadataURI()` on failure. Token images are required content URIs.
+Collection base URIs and external library URLs are optional fields, so empty
+values remain valid, but any nonempty collection base URI must be a safe content
+URI and any nonempty library URL must be a safe script URI.
+
+This slice also replaces several older `StreamCore` string reverts on
+metadata-adjacent mint, randomizer, pause, and contract-wiring paths with
+custom errors so the production URI checks fit under EIP-170 and integrations
+can match selectors deterministically. New custom errors include
+`CollectionSupplyReached()`, `CollectionSupplyTooLarge()`,
+`InvalidAdminContract()`, `InvalidMinterContract()`,
+`InvalidRandomizerContract()`, `MetadataMutationPaused()`,
+`NotMinterContract()`, `TokenOutsideCollectionRange()`, and
+`ZeroTokenHash()`.
 
 ## Size Limits
 
