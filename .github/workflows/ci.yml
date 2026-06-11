@@ -56,7 +56,9 @@ jobs:
             scripts/generate_address_books.py \
             scripts/test_address_books.py \
             scripts/generate_release_checksums.py \
-            scripts/test_release_checksums.py
+            scripts/test_release_checksums.py \
+            scripts/check_changelog.py \
+            scripts/test_changelog_check.py
 
       - name: PowerShell syntax
         shell: pwsh
@@ -139,6 +141,27 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_checksums.py 2>&1 | tee ci-logs/release-checksum-tests.log
           python3 scripts/generate_release_checksums.py --check 2>&1 | tee ci-logs/release-checksums-check.log
+
+      - name: Changelog gate
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_changelog_check.py 2>&1 | tee ci-logs/changelog-tests.log
+
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            base_ref="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            base_ref="${{ github.event.before }}"
+          else
+            base_ref=""
+          fi
+
+          if [ -n "$base_ref" ]; then
+            python3 scripts/check_changelog.py --base-ref "$base_ref" 2>&1 | tee ci-logs/changelog-check.log
+          else
+            python3 scripts/check_changelog.py 2>&1 | tee ci-logs/changelog-check.log
+          fi
 
       - name: Deployment rehearsal
         shell: bash

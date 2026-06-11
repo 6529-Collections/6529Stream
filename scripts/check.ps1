@@ -39,4 +39,6 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonCommand.Source @pythonArgs "scripts\generate_address_books.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_release_checksums.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_release_checksums.py" "--check"
+& $pythonCommand.Source @pythonArgs "scripts\test_changelog_check.py"
+& $pythonCommand.Source @pythonArgs "scripts\check_changelog.py"
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
