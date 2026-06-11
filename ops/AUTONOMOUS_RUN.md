@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/108` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 14:23 UTC` |
+| Last updated | `2026-06-11 14:30 UTC` |
 
 ## Packaging Notes
 
@@ -5064,11 +5064,12 @@ Merge evidence:
 
 ### PR candidate: Add Foundry broadcast manifest ingestion (Queue Item 56)
 
-Status: PR open; CI passed on the pre-review head, CodeRabbit posted one
-secret-key normalization finding, and the fix is validated locally for push.
+Status: PR open; CI and local `make check` passed on the review-fix code head,
+CodeRabbit resolved the secret-key normalization thread, and this state-only
+follow-up replaces a non-auditable head placeholder.
 Branch: `codex/broadcast-manifest-ingestion`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/110`.
-Head SHA: latest branch head after CodeRabbit-response push.
+Review-fix code head SHA: `29412bd342c8c3676265599b33e4eaab8caa2e9b`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/109`
@@ -5127,6 +5128,7 @@ Validation status:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 14:30 | Address CodeRabbit PR #110 state-log nitpick locally | Replaced the non-deterministic head placeholder with concrete review-fix code head `29412bd342c8c3676265599b33e4eaab8caa2e9b`; this follow-up is state-only and exists to keep the durable run log auditable |
 | 2026-06-11 14:23 | Address CodeRabbit PR #110 finding locally | Accepted the secret-key normalization finding; forbidden-key checks now lowercase and strip non-alphanumerics before comparison, regression tests cover mixed-case and separator variants, and focused generator tests/check pass |
 | 2026-06-11 14:10 | Open PR #110 | Broadcast-manifest ingestion PR published at `https://github.com/6529-Collections/6529Stream/pull/110`; state-only follow-up will push the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 14:06 | Validate Queue Item 56 locally | Focused broadcast ingestion tests/check, deployment manifest checks for both configs, address-book/release-manifest/release-checksum/changelog tests and checks, Python compile, shell/PowerShell syntax, whitespace check, full `make check`, and Windows wrapper all pass on the final parser-adjusted code |
