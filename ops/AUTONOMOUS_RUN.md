@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/116` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 19:59 UTC` |
+| Last updated | `2026-06-11 20:01 UTC` |
 
 ## Packaging Notes
 
@@ -121,9 +121,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add dependency artifact manifest packaging (Queue Item 62)
 
-Status: Local validation complete; ready to commit and open PR.
+Status: PR #118 open; CI and CodeRabbit review pending.
 Branch: `codex/dependency-artifact-manifest`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/118`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/117`.
 
 Goal:
@@ -5541,6 +5541,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 20:01 | Open PR #118 for Queue Item 62 | Pushed `codex/dependency-artifact-manifest`, opened https://github.com/6529-Collections/6529Stream/pull/118, and requested CodeRabbit review |
 | 2026-06-11 19:59 | Validate Queue Item 62 locally | Dependency artifact generator tests/check with `.dependency.json` descriptors, release manifest/checksum checks, Python compile, full `make check`, Windows `scripts\check.ps1`, bash syntax, and whitespace checks all pass; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom, and `git diff --check` reports only known Windows line-ending warnings |
 | 2026-06-11 19:34 | Create issue #117 and start Queue Item 62 | No open issue covered dependency artifact manifest packaging, so issue #117 now tracks deterministic dependency descriptors, generated release manifest coverage, checksum coverage, and local/CI drift checks on branch `codex/dependency-artifact-manifest` |
 | 2026-06-11 19:31 | Merge PR #116 | StreamCore bytecode headroom recovery merged as `a6d9271443d73a29290ec8eddc4908eae7aa8b32`; CI run `27371917056` passed on final head `fc12bc6ec019d7bd8f4f31ee1e807f056fcf4207`, the CodeRabbit state-thread fix was resolved, and issue #115 closed completed |
