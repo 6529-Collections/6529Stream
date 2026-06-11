@@ -83,9 +83,11 @@ contributors who start from the README.
   collection scripts, token data, token images, token attributes, generated
   `tokenURI` output, dependency scripts, and dependency provenance. Remaining
   metadata blockers include dependency artifact packaging and deployment
-  migration runbooks beyond registry provenance strings, browser render-sandbox
-  automation, semantic attribute schema validation, URI policy, and invalid
-  UTF-8 policy.
+  migration runbooks beyond registry provenance strings, full browser execution
+  sandbox automation, semantic attribute schema validation, production URI
+  enforcement, and invalid UTF-8 policy. Committed metadata fixtures now have
+  Python checks for JSON/data-URI decoding, current URI scheme policy, and final
+  animation HTML wrapper/script boundaries.
 - `StreamCore` now uses a linked metadata renderer library, removes optional
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:

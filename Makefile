@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test size release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
+check: build test size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
@@ -37,6 +37,10 @@ size:
 
 deploy-rehearsal:
 	forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+
+metadata-fixtures-check:
+	$(PYTHON) scripts/test_metadata_fixtures.py
+	$(PYTHON) scripts/check_metadata_fixtures.py
 
 release-artifacts: size
 	$(PYTHON) scripts/generate_release_artifacts.py

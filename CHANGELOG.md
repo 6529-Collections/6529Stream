@@ -22,6 +22,9 @@ the release policy in `docs/release-policy.md`.
 - Added contract-enforced metadata byte limits for collection display fields,
   collection scripts, token data, token images, token attributes, generated
   `tokenURI` output, dependency scripts, and dependency provenance strings.
+- Added metadata golden-fixture safety checks for JSON/data-URI decoding,
+  current URI scheme policy, and generated animation HTML script-boundary
+  validation in local and CI gates.
 
 ### Release Impact
 
@@ -39,6 +42,8 @@ the release policy in `docs/release-policy.md`.
   considered current.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from the
   metadata size-limit custom errors and public limit constants.
+- Gate D now runs metadata fixture safety checks in `make check`, CI, and the
+  platform check wrappers.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

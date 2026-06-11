@@ -181,9 +181,14 @@ Metadata size limits now have P1-META-006 coverage in
 chunks and chunk counts, token data, token images, token raw attributes,
 generated `tokenURI` output, dependency script chunks and chunk counts, and
 dependency provenance strings accept configured boundaries and reject oversized
-inputs with structured custom errors. Browser-level render-sandbox tests, URI
-policy, semantic attribute schema validation, and invalid UTF-8 policy remain
-future P1-META-006 work.
+inputs with structured custom errors. `scripts/test_metadata_fixtures.py` and
+`scripts/check_metadata_fixtures.py` add a non-Foundry gate over the committed
+metadata golden fixtures: the scripts strictly decode JSON/HTML data URIs,
+parse metadata JSON, validate current URI scheme policy, and assert the final
+animation wrapper has exactly one external script and one inline generative
+script with no raw script-boundary breakout. Full browser execution sandboxing,
+production URI enforcement, semantic attribute schema validation, and invalid
+UTF-8 policy remain future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
