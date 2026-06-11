@@ -20,7 +20,11 @@ EVENT_CATALOG_SCHEMA = "6529stream.event-topic-catalog.v1"
 INTERFACE_ID_SCHEMA = "6529stream.interface-ids.v1"
 MANIFEST_SCHEMA = "6529stream.release-artifact-manifest.v1"
 GENERATOR_VERSION = "1"
-CHECKSUM_BUNDLE_FILES = {"SHA256SUMS", "release-checksums.json"}
+DOWNSTREAM_RELEASE_FILES = {
+    "SHA256SUMS",
+    "release-checksums.json",
+    "release-manifest.json",
+}
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out")
@@ -471,7 +475,7 @@ def generated_files(root: Path) -> list[Path]:
     return sorted(
         path.relative_to(root)
         for path in root.rglob("*")
-        if path.is_file() and path.name not in CHECKSUM_BUNDLE_FILES
+        if path.is_file() and path.name not in DOWNSTREAM_RELEASE_FILES
     )
 
 

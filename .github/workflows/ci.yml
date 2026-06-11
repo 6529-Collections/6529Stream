@@ -55,6 +55,8 @@ jobs:
             scripts/test_deployment_manifest.py \
             scripts/generate_address_books.py \
             scripts/test_address_books.py \
+            scripts/generate_release_manifest.py \
+            scripts/test_release_manifest.py \
             scripts/generate_release_checksums.py \
             scripts/test_release_checksums.py \
             scripts/check_changelog.py \
@@ -133,6 +135,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_address_books.py 2>&1 | tee ci-logs/address-book-tests.log
           python3 scripts/generate_address_books.py --check 2>&1 | tee ci-logs/address-books-check.log
+
+      - name: Release manifest
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_release_manifest.py 2>&1 | tee ci-logs/release-manifest-tests.log
+          python3 scripts/generate_release_manifest.py --check 2>&1 | tee ci-logs/release-manifest-check.log
 
       - name: Release checksums
         shell: bash

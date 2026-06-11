@@ -96,11 +96,17 @@ The current Gate A smoke baseline proves:
   `scripts/generate_address_books.py --check` prove the generated local Anvil
   address book is a compact, deterministic projection of the committed
   deployment manifest and release artifact contract metadata.
+- `scripts/test_release_manifest.py` and
+  `scripts/generate_release_manifest.py --check` prove the generated top-level
+  release manifest ties the release artifact catalog, ABI compatibility
+  baseline, deployment manifests, address books, schemas, changelog, governance
+  docs, and unavailable release-ceremony outputs together without drift.
 - `scripts/test_release_checksums.py` and
   `scripts/generate_release_checksums.py --check` prove the committed
   `release-artifacts/latest/SHA256SUMS` and
   `release-artifacts/latest/release-checksums.json` bundle covers the current
-  release artifact, deployment manifest, address-book, config, and schema files.
+  release artifact, deployment manifest, address-book, config, schema, and
+  release-manifest files.
 - `scripts/test_changelog_check.py` and `scripts/check_changelog.py` prove
   release-impacting branch changes include a non-placeholder `Unreleased`
   changelog entry before they can pass the local/CI gate.

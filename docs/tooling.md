@@ -33,6 +33,8 @@ python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_release_manifest.py
+python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/test_changelog_check.py
@@ -75,12 +77,22 @@ full ceremony and constructor-argument details from deployment manifests. They
 follow `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and are regenerated with `python scripts/generate_address_books.py`.
 
+The release-manifest step builds
+`release-artifacts/latest/release-manifest.json`, a deterministic top-level
+index over the committed release artifact catalog, ABI compatibility baseline,
+deployment manifests, address books, deployment schemas, changelog, governance
+docs, and unavailable release-ceremony artifacts. It is regenerated with
+`python scripts/generate_release_manifest.py` after any covered input changes.
+
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
-artifact, deployment manifest, address-book, and schema outputs. This gives
-maintainers a deterministic, signable checksum bundle. Detached signatures and
-signed git tags still require a release ceremony and are not produced by the
-local smoke gate.
+artifact, deployment manifest, address-book, schema, and release-manifest
+outputs. This gives maintainers a deterministic, signable checksum bundle. The
+release manifest intentionally marks checksum-bundle digests as
+`not_available_self_referential` because the checksum bundle covers
+`release-manifest.json`; embedding the final bundle digest in that covered file
+would create a hash cycle. Detached signatures and signed git tags still
+require a release ceremony and are not produced by the local smoke gate.
 
 The changelog gate checks release-impacting paths against `CHANGELOG.md`. If a
 branch changes contract surfaces, release artifacts, deployment artifacts, or
@@ -126,6 +138,7 @@ python scripts/generate_release_artifacts.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
+python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
 ```
@@ -137,6 +150,7 @@ python scripts/generate_release_artifacts.py --check
 python scripts/check_abi_compatibility.py --check
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_address_books.py --check
+python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
 ```
@@ -166,7 +180,8 @@ The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/config/`, `deployments/examples/`, `deployments/address-books/`,
 and `deployments/schema/`, excluding its own generated checksum files to avoid
-self-referential hashes. Refresh it after changing any covered artifact.
+self-referential hashes. Refresh the release manifest before refreshing the
+checksum bundle after changing any covered artifact.
 
 ## Non-Gating Diagnostics
 

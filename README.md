@@ -12,7 +12,8 @@ The current CI and local smoke checks prove compilation, test command execution,
 the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
 deterministic local deployment manifest/address-book/checksum-bundle checks,
-plus a changelog gate for release-impacting changes.
+plus a machine-readable release manifest and changelog gate for
+release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
 Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
@@ -48,6 +49,8 @@ python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_release_manifest.py
+python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/test_changelog_check.py
@@ -77,10 +80,19 @@ release-artifact hashes.
 The address-book step verifies compact generated address books under
 `deployments/address-books/` against the committed deployment manifests.
 
+The release-manifest step verifies a deterministic top-level release manifest
+under `release-artifacts/latest/release-manifest.json`. The manifest ties the
+release-artifact catalog, ABI compatibility baseline, deployment manifests,
+address books, governance docs, and release-ceremony status together for
+integrators and maintainers.
+
 The release-checksum step verifies the signable checksum bundle under
 `release-artifacts/latest/` against the committed release artifacts,
-deployment manifests, address books, and artifact schemas. Detached signatures
-and signed tags remain a release-ceremony follow-up.
+deployment manifests, address books, artifact schemas, and release manifest.
+The checksum bundle covers `release-manifest.json`; the manifest therefore
+lists checksum-bundle digests as self-referentially unavailable instead of
+embedding an impossible hash cycle. Detached signatures and signed tags remain
+a release-ceremony follow-up.
 
 The changelog step requires release-impacting PRs to update `CHANGELOG.md`
 under `Unreleased`; see [`docs/release-policy.md`](docs/release-policy.md).
@@ -122,7 +134,7 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, ABI compatibility baseline, and release checksum bundle |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, ABI compatibility baseline, release manifest, and release checksum bundle |
 | `docs/` | Project, security, ADR, and operational docs |
 | `ops/` | Roadmap and execution state |
 
