@@ -86,6 +86,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         },
     )
     write_json(
+        latest / "source-verification-inputs.json",
+        {"schema_version": "6529stream.source-verification-inputs.v1", "contracts": {}},
+    )
+    write_json(
         baseline,
         {"schema_version": "6529stream.abi-surface.v1", "contracts": {}},
     )
@@ -188,6 +192,10 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["abi_checksums"]["sha256"],
                 generator.file_sha256(paths["latest"] / "abi-checksums.json"),
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["source_verification_inputs"]["schema_version"],
+                "6529stream.source-verification-inputs.v1",
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["manifests"][0]["contracts"],

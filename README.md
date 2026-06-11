@@ -12,8 +12,8 @@ The current CI and local smoke checks prove compilation, test command execution,
 the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
 deterministic local deployment manifest/address-book/checksum-bundle checks,
-plus a machine-readable release manifest and changelog gate for
-release-impacting changes.
+plus retained source-verification inputs, a machine-readable release manifest,
+and changelog gate for release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
 Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
@@ -43,6 +43,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_source_verification_inputs.py
+python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
@@ -68,6 +70,12 @@ proves the deploy-and-wire ceremony can execute without production secrets.
 The release-artifact step verifies the committed ABI checksums, bytecode
 checksums, interface IDs, and event topic catalog under
 `release-artifacts/latest/` against the production `via-ir` build profile.
+
+The source-verification step verifies
+`release-artifacts/latest/source-verification-inputs.json`, which retains
+production contract source hashes, compiler settings, constructor ABI,
+bytecode/linking status, and verification command templates for future live
+deployment verification.
 
 The ABI compatibility step compares the current production contract ABI surface
 against the committed baseline under `release-artifacts/baselines/` and fails on
@@ -134,7 +142,7 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, ABI compatibility baseline, release manifest, and release checksum bundle |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, release manifest, and release checksum bundle |
 | `docs/` | Project, security, ADR, and operational docs |
 | `ops/` | Roadmap and execution state |
 

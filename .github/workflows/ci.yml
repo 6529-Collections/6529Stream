@@ -49,6 +49,8 @@ jobs:
           python3 -m py_compile \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
+            scripts/generate_source_verification_inputs.py \
+            scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
             scripts/test_abi_compatibility.py \
             scripts/generate_deployment_manifest.py \
@@ -111,6 +113,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-tests.log
           python3 scripts/generate_release_artifacts.py --check 2>&1 | tee ci-logs/release-artifacts-check.log
+
+      - name: Source verification inputs
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_source_verification_inputs.py 2>&1 | tee ci-logs/source-verification-tests.log
+          python3 scripts/generate_source_verification_inputs.py --check 2>&1 | tee ci-logs/source-verification-check.log
 
       - name: ABI compatibility
         shell: bash

@@ -8,6 +8,7 @@ Run after the production build profile:
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
+python scripts/generate_source_verification_inputs.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
@@ -20,6 +21,8 @@ Check the committed artifacts without rewriting them:
 ```sh
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_source_verification_inputs.py
+python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
@@ -35,6 +38,13 @@ python scripts/generate_release_checksums.py --check
 The generated files under `latest/` are intentionally tracked. They give
 deployment manifests stable ABI checksum, bytecode checksum, interface ID, and
 event topic catalog inputs before any live network broadcast exists.
+
+`latest/source-verification-inputs.json` is generated from the production
+Foundry artifacts, source files, compiler settings, and contract config. It
+retains source hashes, compiler settings, constructor ABI, bytecode/linking
+status, and `forge verify-contract` command templates so live deployment
+verification can be checked against committed release inputs once broadcast
+addresses and encoded constructor args exist.
 
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
@@ -71,6 +81,7 @@ After any covered artifact changes, refresh the checksum bundle with:
 ```sh
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
+python scripts/generate_source_verification_inputs.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```

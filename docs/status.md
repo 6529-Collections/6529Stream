@@ -81,6 +81,11 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
   including ABI checksums, bytecode checksums, standard/custom interface IDs,
   and event topic catalog entries.
+- `scripts/test_source_verification_inputs.py` and
+  `scripts/generate_source_verification_inputs.py --check` prove the committed
+  `release-artifacts/latest/source-verification-inputs.json` retains production
+  contract source hashes, compiler settings, constructor ABI, bytecode/linking
+  status, and verification command templates from the current Foundry artifacts.
 - `scripts/test_abi_compatibility.py` and
   `scripts/check_abi_compatibility.py --check` prove the current production
   contract ABI surface remains compatible with the committed
@@ -120,7 +125,7 @@ canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup b
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
 generation from broadcast outputs, detached checksum signatures, signed release
 tags, production address books, verified live
-deployment hashes, remaining generated
+deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

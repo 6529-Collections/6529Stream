@@ -71,6 +71,8 @@ are generated from the production `via-ir` Foundry artifacts:
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/generate_source_verification_inputs.py
+python scripts/generate_source_verification_inputs.py --check
 python scripts/generate_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_address_books.py
@@ -96,6 +98,14 @@ own final checksum value.
 Address book generation validates the deployment manifest contract set against
 the release artifact baseline, rejects invalid or duplicate deployed contract
 addresses, and fails check mode when the committed address-book JSON drifts.
+
+Source verification input generation writes
+`release-artifacts/latest/source-verification-inputs.json` from the production
+Foundry artifacts, Solidity source files, compiler settings, ABI/bytecode
+checksums, constructor ABI, and link references. It retains verification
+command templates for each production contract without claiming live explorer
+verification before a broadcast deployment supplies real addresses, linked
+library addresses, and encoded constructor args.
 
 Release manifest generation writes
 `release-artifacts/latest/release-manifest.json` as the top-level machine-readable
@@ -130,6 +140,7 @@ Before a deployment can become public-beta eligible:
 - Run a dry-run fixed-price mint.
 - Run a dry-run auction drop, bid, settlement, and withdrawal.
 - Retain constructor args and verification inputs.
+- Generate and check source verification inputs.
 - Generate and checksum the deployment manifest.
 - Generate and check the address book.
 - Generate and check the release manifest.

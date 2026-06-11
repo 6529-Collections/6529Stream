@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test size release-artifacts-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
+check: build test size release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
@@ -44,6 +44,13 @@ release-artifacts: size
 release-artifacts-check: size
 	$(PYTHON) scripts/test_release_artifacts.py
 	$(PYTHON) scripts/generate_release_artifacts.py --check
+
+source-verification-inputs: release-artifacts
+	$(PYTHON) scripts/generate_source_verification_inputs.py
+
+source-verification-inputs-check: release-artifacts-check
+	$(PYTHON) scripts/test_source_verification_inputs.py
+	$(PYTHON) scripts/generate_source_verification_inputs.py --check
 
 abi-compatibility: size
 	$(PYTHON) scripts/check_abi_compatibility.py
@@ -66,10 +73,10 @@ address-books-check: deployment-manifest-check
 	$(PYTHON) scripts/test_address_books.py
 	$(PYTHON) scripts/generate_address_books.py --check
 
-release-manifest: address-books
+release-manifest: address-books source-verification-inputs
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check
+release-manifest-check: address-books-check source-verification-inputs-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 
