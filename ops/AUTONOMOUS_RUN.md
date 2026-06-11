@@ -120,7 +120,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Recover `StreamCore` bytecode headroom (Queue Item 61)
 
-Status: CodeRabbit review fix validated locally; ready to push PR update.
+Status: PR `#116` opened and follow-up validation complete; ready to merge.
 Branch: `codex/recover-streamcore-headroom`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/116`.
 
