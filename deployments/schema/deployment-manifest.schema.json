@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/deployment-manifest.schema.json",
+  "title": "6529Stream Deployment Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_schema_version",
+    "protocol_version",
+    "deployment_version",
+    "lifecycle_state",
+    "network",
+    "git",
+    "toolchain",
+    "contracts",
+    "admin_ceremony",
+    "external_dependencies",
+    "verification",
+    "release_artifacts",
+    "rehearsal"
+  ],
+  "properties": {
+    "manifest_schema_version": {
+      "const": "6529stream.deployment-manifest.v1"
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "enum": [
+        "Planned",
+        "Rehearsed",
+        "Active",
+        "Deprecated",
+        "EmergencySuperseded",
+        "Retired",
+        "Cancelled"
+      ]
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "chain_id"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "chain_id": { "type": "integer", "minimum": 1 },
+        "rpc_environment_variable": { "type": "string" },
+        "confirmation_depth": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-fA-F]{40}$" },
+        "source_dirty": { "type": "boolean" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["foundry_version", "solidity_version", "profile", "optimizer", "via_ir"],
+      "properties": {
+        "foundry_version": { "type": "string", "minLength": 1 },
+        "solidity_version": { "type": "string", "minLength": 1 },
+        "profile": { "type": "string", "minLength": 1 },
+        "optimizer": { "type": "boolean" },
+        "optimizer_runs": { "type": "integer", "minimum": 0 },
+        "via_ir": { "type": "boolean" }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/contract" }
+    },
+    "admin_ceremony": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployer",
+        "admin_safe",
+        "emergency_recipient",
+        "pause_guardians",
+        "unpause_admins",
+        "signer_managers",
+        "drop_signers",
+        "temporary_admins_revoked",
+        "ownership_transfers"
+      ],
+      "properties": {
+        "deployer": { "$ref": "#/$defs/address" },
+        "admin_safe": { "$ref": "#/$defs/address" },
+        "emergency_recipient": { "$ref": "#/$defs/address" },
+        "pause_guardians": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/address" }
+        },
+        "unpause_admins": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/address" }
+        },
+        "signer_managers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/address" }
+        },
+        "drop_signers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/address" }
+        },
+        "temporary_admins_revoked": { "type": "boolean" },
+        "ownership_transfers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["contract", "new_owner"],
+            "properties": {
+              "contract": { "type": "string", "minLength": 1 },
+              "new_owner": { "$ref": "#/$defs/address" }
+            }
+          }
+        }
+      }
+    },
+    "external_dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vrf_coordinator", "arrng_controller", "delegation_registry"],
+      "properties": {
+        "vrf_coordinator": { "$ref": "#/$defs/address" },
+        "arrng_controller": { "$ref": "#/$defs/address" },
+        "delegation_registry": { "$ref": "#/$defs/address" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_verification", "constructor_args_retained", "commands"],
+      "properties": {
+        "contract_verification": {
+          "enum": ["not_started", "submitted", "verified", "not_applicable"]
+        },
+        "constructor_args_retained": { "type": "boolean" },
+        "commands": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "release_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest_sha256", "abi_hashes", "event_topic_catalog"],
+      "properties": {
+        "manifest_sha256": { "type": "string" },
+        "abi_hashes": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "event_topic_catalog": { "type": "string" }
+      }
+    },
+    "rehearsal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "anvil_passed", "fork_passed", "notes"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "anvil_passed": { "type": "boolean" },
+        "fork_passed": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "constructor_args", "abi_hash", "bytecode_hash"],
+      "properties": {
+        "address": { "$ref": "#/$defs/address" },
+        "constructor_args": {
+          "type": "array",
+          "items": {}
+        },
+        "abi_hash": { "type": "string" },
+        "bytecode_hash": { "type": "string" },
+        "verification_status": {
+          "enum": ["not_started", "submitted", "verified", "not_applicable"]
+        }
+      }
+    }
+  }
+}

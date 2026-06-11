@@ -19,7 +19,7 @@ order.
 - Known remaining P0 blockers include broader payment accounting and
   cross-contract invariants, fuller randomizer reserve lifecycle accounting,
   metadata state work, remaining static analysis findings, missing invariants,
-  broader production governance, and missing deployment discipline.
+  broader production governance, and incomplete deployment discipline.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
   fixed-price `StreamDrops` pull credits, and `StreamCuratorsPool` curator
@@ -39,7 +39,9 @@ order.
   encoding now has typed chunk/content hash coverage, and P0-CORE-001 removed
   dead always-zero public/allowlist mint-accounting state. P1-META-004
   `StreamCore` ERC-4906 metadata update signaling now has implementation and
-  target-state test coverage.
+  target-state test coverage. Gate E now has a first local deployment rehearsal
+  script, manifest schema/example, and manifest parsing test, while fork/testnet
+  rehearsals and production artifact generation remain open.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -47,7 +49,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-11 06:13 UTC` local Windows PR candidate validation; CI TBD |
+| Last verified | `2026-06-11 07:05 UTC` local Windows PR candidate validation; CI TBD |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
@@ -61,10 +63,10 @@ order.
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
-| Production size | Production deployable contracts pass the IR-optimized size gate; `StreamCore` is 23,139 runtime bytes with 1,437 bytes of EIP-170 headroom | `forge build --sizes --via-ir --skip test --force` | Production size gate passes in CI and deployment scripts use the same profile |
+| Production size | Production deployable contracts pass the IR-optimized size gate; `StreamCore` is 23,139 runtime bytes with 1,437 bytes of EIP-170 headroom | `forge build --sizes --via-ir --skip test --skip script --force` | Production size gate passes in CI and deployment scripts use the same profile |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High, 19 Medium, and 93 Low; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
-| Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
+| Deployment | Partial local baseline: deploy-and-wire rehearsal script, manifest schema/example, and manifest parsing test exist; fork/testnet rehearsal and production manifest generation remain missing | `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `test/StreamDeploymentManifest.t.sol`, and `deployments/schema/deployment-manifest.schema.json` | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
 | Windows setup | Foundry installed under `~/.foundry/bin`, but current shell may not resolve `forge` from `PATH` | direct binary invocation | Bootstrap works in current and future shells, or limitation documented |
@@ -213,10 +215,11 @@ Required evidence:
 
 ### Gate E: Deployment Rehearsal Complete
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
-Blocking issues: TBD.
-Evidence: TBD.
+Blocking issues: [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91).
+Evidence: local deployment rehearsal script, manifest schema/example, manifest
+parsing/wiring test, `make check`, and Windows wrapper pass; CI evidence TBD.
 
 Exit criteria:
 
@@ -405,7 +408,7 @@ This is the recommended first batch of issues.
 21. [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) / P0/CODE+TEST+DOCS: Harden randomizer callbacks.
 22. `P1/TEST`: Add first invariant suite.
 23. `P1/DOCS`: Add protocol spec and threat model.
-24. `P2/OPS`: Add deployment scripts and manifest schema.
+24. [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91) / P1/OPS+TEST+DOCS: Add deployment scripts, manifest schema, and local rehearsal gate.
 
 ## 5. Best-Practice Checklist
 
@@ -1775,7 +1778,7 @@ No P0 contract PR may merge without:
 - Add `make.ps1` or document Makefile as Unix-only.
 - Add `make check` or documented equivalent as the canonical local gate.
 - Keep the production size gate in `make check`, Windows/Linux check scripts,
-  and CI: `forge build --sizes --via-ir --skip test --force`.
+  and CI: `forge build --sizes --via-ir --skip test --skip script --force`.
 - Treat generic all-artifact `forge build --sizes` as a diagnostic only while
   test-only invariant handlers exceed initcode limits.
 - Add exact tool pinning for:
@@ -1821,10 +1824,11 @@ No P0 contract PR may merge without:
 
 ### Deployment Scripts And Manifests
 
-- Add Foundry deployment scripts for local/anvil, testnet, and fork dry runs.
+- Maintain Foundry deployment scripts for local/anvil rehearsal and add testnet
+  and fork dry-run coverage.
 - Add post-deploy wiring for admins, minter, drops, auctions, randomizers,
   dependency registry, payout, and curator pool.
-- Add deployment manifest schema and JSON example with network, chain ID,
+- Maintain deployment manifest schema and JSON example with network, chain ID,
   addresses, constructor args, git commit, compiler version, Foundry version,
   ABI hashes, admin multisig addresses, and external dependencies.
 - Make deployment rehearsal a release blocker.
@@ -2153,7 +2157,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash/registry address, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol` | Passing: registry writes create new immutable versions, chunk-index updates derive a new version without mutating the previous one, version records expose typed content hash/provenance/creator/creation/deprecation views, collection metadata pins key/version/content hash/registry address, explicit repinning moves an unfrozen collection to the latest dependency in the current registry, output and freeze manifests stay stable after later registry versions or registry swaps until explicit repin, and segment-boundary hashes remain distinct in `test/StreamMetadataEncoding.t.sol`. Dependency artifact packaging and migration runbooks remain future operational work. | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit from metadata write paths that can change token JSON | `test/StreamMetadataEvents.t.sol` | Passing for current `StreamCore` behavior: ERC-4906 interface support succeeds, randomness fulfillment and token metadata input writes emit `MetadataUpdate`, collection-level metadata mode/base URI/display/script/dependency-reference writes emit `BatchMetadataUpdate` over the minted-ever range, empty collections do not emit empty batch events, and mint-only plus burn paths do not emit ERC-4906. Dependency registry version creation does not emit ERC-4906 for pinned collections because their output does not change; explicit repinning goes through `updateCollectionInfo` and emits the existing collection-range update. | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Passing: typed chunk/content hashes include dependency key, chunk count, chunk index, chunk byte length, and chunk content hash; ambiguous chunk splits that render the same JavaScript produce distinct content hashes while preserving rendered-script compatibility; zero-chunk dependency hashes are deterministic | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
-| Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | Missing | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) | Gate E/Gate G | TBD |
+| Deployment redeployment rehearsal | Deployment manifests, ABI hashes, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol` and `script/RehearseDeployment.s.sol` | In Progress: local deploy-and-wire rehearsal, Safe-placeholder ownership transfer, temporary admin revocation, manifest schema/example parsing, and default check-script gate added; fork rehearsal, real broadcast manifest generation, ABI/event-topic checksums, verification artifacts, dry-run mint/auction ceremonies, and emergency redeployment rehearsal remain open | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53), [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91) | Gate E/Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Passing: Bytes32 character counts, missing/matching delegation lookups, subdelegation register/revoke gates, empty-script generative rendering, and multi-recipient minter return indexes cover the remaining first-party production rows; Slither now reports only one accepted test-only `uninitialized-local` row | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
 | Vendored library Slither findings | Retained OpenZeppelin utility files have provenance, local delta notes, and regressions for flagged math/encoding behavior | `test/StreamVendoredLibraries.t.sol` | Passing: Base64 golden/padding vectors, `Math.mulDiv` full-precision boundaries, rounding-up behavior, overflow, and zero-denominator reverts cover the current vendored false-positive rows | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |

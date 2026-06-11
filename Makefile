@@ -20,9 +20,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal fmt-check slither clean
 
-check: build test size
+check: build test size deploy-rehearsal
 
 build:
 	forge build
@@ -31,7 +31,10 @@ test:
 	forge test -vvv
 
 size:
-	forge build --sizes --via-ir --skip test --force
+	forge build --sizes --via-ir --skip test --skip script --force
+
+deploy-rehearsal:
+	forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 
 fmt-check:
 	forge fmt --check smart-contracts

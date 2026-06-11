@@ -24,13 +24,19 @@ This runs:
 ```bash
 forge build
 forge test -vvv
-forge build --sizes --via-ir --skip test --force
+forge build --sizes --via-ir --skip test --skip script --force
+forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
-The size step is the production deployability gate. It skips test contracts so
-test-only invariant handlers do not pollute EIP-170/EIP-3860 evidence, and it
-uses `via_ir` because the current deployable `StreamCore` release profile needs
-the IR optimizer to fit under the runtime limit.
+The size step is the production deployability gate. It skips test and script
+contracts so non-production artifacts do not pollute EIP-170/EIP-3860 evidence,
+and it uses `via_ir` because the current deployable `StreamCore` release profile
+needs the IR optimizer to fit under the runtime limit.
+
+The deployment rehearsal step is the first Gate E local ceremony gate. It uses
+non-secret placeholder addresses, deploys the current contract stack, wires the
+minter/drops/auction/randomizer surfaces, transfers Ownable control to the Safe
+placeholder, and leaves fork/testnet broadcasting for later Gate E work.
 
 Windows contributors can run:
 
