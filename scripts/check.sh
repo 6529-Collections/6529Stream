@@ -29,4 +29,6 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_abi_compatibility.py --check
 "$python_bin" scripts/test_deployment_manifest.py
 "$python_bin" scripts/generate_deployment_manifest.py --check
+"$python_bin" scripts/test_address_books.py
+"$python_bin" scripts/generate_address_books.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

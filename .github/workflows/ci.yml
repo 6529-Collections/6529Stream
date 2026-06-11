@@ -52,7 +52,9 @@ jobs:
             scripts/check_abi_compatibility.py \
             scripts/test_abi_compatibility.py \
             scripts/generate_deployment_manifest.py \
-            scripts/test_deployment_manifest.py
+            scripts/test_deployment_manifest.py \
+            scripts/generate_address_books.py \
+            scripts/test_address_books.py
 
       - name: PowerShell syntax
         shell: pwsh
@@ -119,6 +121,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_deployment_manifest.py 2>&1 | tee ci-logs/deployment-manifest-tests.log
           python3 scripts/generate_deployment_manifest.py --check 2>&1 | tee ci-logs/deployment-manifest-check.log
+
+      - name: Address books
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_address_books.py 2>&1 | tee ci-logs/address-book-tests.log
+          python3 scripts/generate_address_books.py --check 2>&1 | tee ci-logs/address-books-check.log
 
       - name: Deployment rehearsal
         shell: bash

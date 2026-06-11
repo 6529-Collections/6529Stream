@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/abi-compatibility-checks` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/96` |
+| Active PR branch | `codex/address-book-generator` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/98` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 09:17 UTC` |
+| Last updated | `2026-06-11 10:08 UTC` |
 
 ## Packaging Notes
 
@@ -103,7 +103,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 47 | Add deployment rehearsal baseline | Gate E | Implement P1-DEPLOY-002 by adding a local deploy-and-wire Foundry rehearsal, manifest schema/example, deployment docs, manifest parsing/wiring tests, and check-script integration while leaving fork/testnet broadcast artifacts for follow-up | Merged in PR #92 |
 | 48 | Generate release artifact catalog | Gate G/Gate E support | Implement P1-RELEASE-001 by generating deterministic ABI checksums, bytecode checksums, interface IDs, and event topic catalog outputs from Foundry artifacts, then wire drift checks into local/CI gates and deployment docs | Merged in PR #94 |
 | 49 | Generate and check deployment manifests | Gate E/Gate G support | Implement P1-DEPLOY-003 by generating the Anvil manifest from committed inputs, filling current ABI/runtime bytecode hashes, adding deterministic manifest checksums, and wiring drift checks into local/CI gates and deployment docs | Merged in PR #96 |
-| 50 | Add ABI compatibility checks | Gate G support | Implement P1-RELEASE-002 by committing a production ABI surface baseline, failing local/CI checks on removed or changed ABI entries, reporting additive entries, and documenting baseline refresh policy | Active |
+| 50 | Add ABI compatibility checks | Gate G support | Implement P1-RELEASE-002 by committing a production ABI surface baseline, failing local/CI checks on removed or changed ABI entries, reporting additive entries, and documenting baseline refresh policy | Merged in PR #98 |
+| 51 | Generate deployment address books | Gate G/Gate E support | Implement P1-RELEASE-003 by projecting committed deployment manifests into compact deterministic address-book artifacts for integrators, scripts, and docs, with drift checks in local/CI gates | Active |
 
 ## Current PR Worklog
 
@@ -4483,7 +4484,7 @@ Merge evidence:
 
 ### PR candidate: Add ABI compatibility checks (Queue Item 50)
 
-Status: PR open; waiting on CI and CodeRabbit.
+Status: Merged in PR #98.
 Branch: `codex/abi-compatibility-checks`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/98`.
 Related issue:
@@ -4547,10 +4548,110 @@ Validation completed at `2026-06-11 09:15 UTC`:
 - `git diff --check` passed; Git printed only the existing line-ending
   normalization warning for `scripts/check.ps1`.
 
+Merge evidence:
+
+- PR #98 merged on `2026-06-11 09:25 UTC` as
+  `5646761344b5387f280aa928a158e4a6ac1e9711` after GitHub Actions CI run
+  `27336811054` passed on head
+  `a9abd0e8d2aba272b494a811f9368e19a2cda83b`.
+- CodeRabbit was explicitly requested and acknowledged the review command, then
+  injected release notes into the PR body. No review submissions or review
+  threads appeared, and its aggregate status remained pending. Per the
+  autonomous operating rules, the PR was merged under a documented maintainer
+  decision because CI was green, the PR was mergeable, and there were no
+  actionable CodeRabbit findings to address.
+
+### PR candidate: Generate deployment address books (Queue Item 51)
+
+Status: Second CodeRabbit finding addressed locally; push and re-review next.
+Branch: `codex/address-book-generator`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/100`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/99`
+
+Goal:
+
+- Generate compact address-book JSON artifacts from committed deployment
+  manifests.
+- Include release/network metadata, source manifest path, manifest checksum,
+  contract addresses, source paths, ABI hashes, runtime bytecode hashes, and
+  verification status.
+- Reject invalid addresses, duplicate deployed addresses, and missing required
+  contract metadata.
+- Wire address-book drift checks into `make check`, Linux/Windows wrappers, and
+  CI.
+- Document how address books differ from full deployment manifests.
+
+Initial scope:
+
+- `scripts/generate_address_books.py`
+- `scripts/test_address_books.py`
+- `deployments/address-books/anvil-6529stream-v0.1.0-001.json`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `README.md`
+- `docs/tooling.md`
+- `docs/status.md`
+- `docs/deployment.md`
+- `deployments/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation draft:
+
+- Added a stdlib-only address-book generator that projects committed
+  deployment manifests into compact integration artifacts.
+- Added the generated local Anvil address book at
+  `deployments/address-books/anvil-6529stream-v0.1.0-001.json`.
+- Validated manifest schema, exact release contract set, nonzero 20-byte
+  addresses, duplicate deployed addresses, ABI/runtime bytecode hashes,
+  verification status, source manifest checksum, and strict `source_dirty`
+  typing.
+- Added focused tests for deterministic generation, drift detection, missing
+  output directories, duplicate addresses, invalid addresses, invalid
+  `source_dirty`, invalid chain IDs, invalid lifecycle state, invalid git
+  commit hashes, invalid verification status, invalid hash format, missing
+  contract metadata, missing release contracts, and unknown contracts.
+- Added `deployments/schema/address-book.schema.json`, deterministic lowercase
+  address normalization, `sha256:` hash-format validation, and verification
+  status enum validation while addressing CodeRabbit review.
+- Tightened address-book manifest validation to reject boolean integers,
+  nonpositive chain IDs, invalid lifecycle states, and malformed git commit
+  hashes.
+- Wired address-book tests and `--check` drift detection into `make check`,
+  `scripts/check.sh`, `scripts/check.ps1`, and GitHub Actions.
+- Updated README, tooling, deployment, status, deployment artifact, roadmap,
+  and run-state documentation to distinguish address books from full deployment
+  manifests.
+
+Local validation:
+
+- `python scripts\test_address_books.py`
+- `python scripts\generate_address_books.py --check`
+- `python -m py_compile scripts\generate_release_artifacts.py scripts\test_release_artifacts.py scripts\check_abi_compatibility.py scripts\test_abi_compatibility.py scripts\generate_deployment_manifest.py scripts\test_deployment_manifest.py scripts\generate_address_books.py scripts\test_address_books.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser validation for `scripts\check.ps1`
+- Per-file JSON parsing for the generated address book, deployment manifest,
+  address-book schema, and ABI checksums
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check` reported only the known `scripts/check.ps1` line-ending
+  warning.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 10:08 | Address CodeRabbit PR #100 integer validator finding locally | Accepted CodeRabbit inline comment `3394948002`: `require_int` now rejects booleans, chain IDs must be positive, git commits must be 40-character hashes, lifecycle states are constrained to the deployment schema enum, address-book tests now cover 14 cases including missing output directory and unknown contracts, and focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation pass |
+| 2026-06-11 10:00 | Address CodeRabbit PR #100 findings locally | Accepted CodeRabbit comment `4679312734`: removed duplicate Makefile execution, added an explicit generated-output docs note, added `deployments/schema/address-book.schema.json`, normalized generated addresses to lowercase, constrained `verification_status`, validated `sha256:` hash formats, expanded address-book tests to 8 cases, and reran focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation successfully |
+| 2026-06-11 09:49 | Open PR #100 and request CodeRabbit | Address-book generator PR published at `https://github.com/6529-Collections/6529Stream/pull/100`; CodeRabbit review requested in issue comment `4679297117`; Claude remains intentionally skipped per current user instruction |
+| 2026-06-11 09:47 | Validate Queue Item 51 locally | Address-book generator tests, address-book drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass; validation tightened `source_dirty` to strict boolean parsing and records the ABI checksum source path in the generated artifact |
+| 2026-06-11 09:28 | Start Queue Item 51 | Issue #99 tracks the remaining deterministic address-book artifact gap; branch `codex/address-book-generator` starts from merged PR #98 and scopes to manifest-derived address books plus local/CI drift checks |
+| 2026-06-11 09:27 | Create address-book issue #99 | No open issue covered deterministic address books, so a focused P1 release issue keeps the Gate G PR auditable |
+| 2026-06-11 09:25 | Merge PR #98 | ABI compatibility checks merged as `5646761344b5387f280aa928a158e4a6ac1e9711`; CI run `27336811054` passed, CodeRabbit injected release notes but left a stale pending status with no review threads, and the autonomous maintainer decision was to merge rather than stall |
 | 2026-06-11 09:17 | Open PR #98 and request CodeRabbit | ABI compatibility PR published at `https://github.com/6529-Collections/6529Stream/pull/98`; CodeRabbit review requested in issue comment `4679037794`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 09:15 | Validate Queue Item 50 locally | ABI compatibility generator/checker tests, compatibility drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass |
 | 2026-06-11 09:09 | Start Queue Item 50 | Issue #97 tracks the remaining deterministic ABI diff gate; branch `codex/abi-compatibility-checks` starts from merged PR #96 and scopes to a committed ABI surface baseline plus local/CI compatibility checks |

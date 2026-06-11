@@ -8,9 +8,12 @@ external dependencies to a specific git commit and chain.
 The current baseline includes:
 
 - `schema/deployment-manifest.schema.json`: the required manifest shape.
+- `schema/address-book.schema.json`: the compact address-book shape.
 - `config/anvil-6529stream-v0.1.0-001.json`: the source input for the
   generated local example.
 - `examples/anvil-6529stream-v0.1.0-001.json`: a non-production local example.
+- `address-books/anvil-6529stream-v0.1.0-001.json`: a compact address-book
+  projection of the local example for scripts, docs, wallets, and indexers.
 
 Do not commit private keys, RPC credentials, unreleased drop payloads, or signer
 material in this directory. Public deployment manifests, ABI hashes, checksums,
@@ -23,6 +26,7 @@ baseline is generated under `release-artifacts/latest/` with:
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_deployment_manifest.py
+python scripts/generate_address_books.py
 ```
 
 Deployment manifests should reference those outputs, then replace any unlinked
@@ -33,3 +37,12 @@ deployment exists.
 manifest with that field normalized to `sha256:` followed by 64 zeroes. This
 avoids a self-referential checksum loop while still making any manifest drift
 machine-detectable.
+
+Address books are generated from committed deployment manifests and
+`release-artifacts/latest/abi-checksums.json`. They intentionally omit
+constructor arguments, admin ceremony details, and verification commands while
+retaining network/release metadata, the source manifest checksum, contract
+addresses, source paths, ABI hashes, runtime bytecode hashes, and verification
+status. Address-book JSON files are generated outputs; update the source
+manifest or release artifacts, then rerun `python scripts/generate_address_books.py`
+instead of editing address books by hand.
