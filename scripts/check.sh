@@ -33,4 +33,6 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_address_books.py --check
 "$python_bin" scripts/test_release_checksums.py
 "$python_bin" scripts/generate_release_checksums.py --check
+"$python_bin" scripts/test_changelog_check.py
+"$python_bin" scripts/check_changelog.py
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

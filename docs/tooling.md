@@ -35,6 +35,8 @@ python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
+python scripts/test_changelog_check.py
+python scripts/check_changelog.py
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -80,6 +82,12 @@ maintainers a deterministic, signable checksum bundle. Detached signatures and
 signed git tags still require a release ceremony and are not produced by the
 local smoke gate.
 
+The changelog gate checks release-impacting paths against `CHANGELOG.md`. If a
+branch changes contract surfaces, release artifacts, deployment artifacts, or
+release workflow files, `CHANGELOG.md` must be part of the change and its
+`Unreleased` section must contain a non-placeholder bullet. The release-impact
+rules are documented in [`release-policy.md`](release-policy.md).
+
 Windows contributors can run:
 
 ```powershell
@@ -119,6 +127,7 @@ python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
 python scripts/generate_release_checksums.py
+python scripts/check_changelog.py
 ```
 
 The check mode is:
@@ -129,6 +138,7 @@ python scripts/check_abi_compatibility.py --check
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_address_books.py --check
 python scripts/generate_release_checksums.py --check
+python scripts/check_changelog.py
 ```
 
 The generator uses `release-artifacts/contracts.json` to define the production

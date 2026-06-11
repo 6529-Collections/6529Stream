@@ -40,7 +40,15 @@ Local commands run:
 
 - Test impact:
 - Docs impact:
+- Release impact:
+- Version impact: none / patch / minor / major / operational
+- Breaking-change approval issue or ADR:
 - Known limitations or follow-up issues:
+
+## Release Notes
+
+- [ ] `CHANGELOG.md` has an `Unreleased` entry, or this PR has no release-impacting paths.
+- [ ] Release-impacting ABI, metadata schema, authorization, role, deployment, or artifact changes are documented.
 
 ## Reviewer Notes
 

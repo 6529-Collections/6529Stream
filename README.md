@@ -11,7 +11,8 @@ This repository is pre-audit and not production-ready.
 The current CI and local smoke checks prove compilation, test command execution,
 the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
-deterministic local deployment manifest/address-book/checksum-bundle checks.
+deterministic local deployment manifest/address-book/checksum-bundle checks,
+plus a changelog gate for release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
 Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
@@ -49,6 +50,8 @@ python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
+python scripts/test_changelog_check.py
+python scripts/check_changelog.py
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -78,6 +81,9 @@ The release-checksum step verifies the signable checksum bundle under
 `release-artifacts/latest/` against the committed release artifacts,
 deployment manifests, address books, and artifact schemas. Detached signatures
 and signed tags remain a release-ceremony follow-up.
+
+The changelog step requires release-impacting PRs to update `CHANGELOG.md`
+under `Unreleased`; see [`docs/release-policy.md`](docs/release-policy.md).
 
 On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
 with:
@@ -131,4 +137,5 @@ Current pinned versions:
 - [`docs/known-blockers.md`](docs/known-blockers.md)
 - [`docs/tooling.md`](docs/tooling.md)
 - [`docs/deployment.md`](docs/deployment.md)
+- [`docs/release-policy.md`](docs/release-policy.md)
 - [`docs/slither.md`](docs/slither.md)

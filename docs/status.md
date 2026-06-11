@@ -101,6 +101,9 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/SHA256SUMS` and
   `release-artifacts/latest/release-checksums.json` bundle covers the current
   release artifact, deployment manifest, address-book, config, and schema files.
+- `scripts/test_changelog_check.py` and `scripts/check_changelog.py` prove
+  release-impacting branch changes include a non-placeholder `Unreleased`
+  changelog entry before they can pass the local/CI gate.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -110,7 +113,7 @@ randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
 generation from broadcast outputs, detached checksum signatures, signed release
-tags, ABI diff approval policy, production address books, verified live
+tags, production address books, verified live
 deployment hashes, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,

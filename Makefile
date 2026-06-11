@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check address-books address-books-check release-checksums release-checksums-check fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check address-books address-books-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test size release-artifacts-check abi-compatibility-check release-checksums-check deploy-rehearsal
+check: build test size release-artifacts-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
@@ -72,6 +72,10 @@ release-checksums: address-books
 release-checksums-check: address-books-check
 	$(PYTHON) scripts/test_release_checksums.py
 	$(PYTHON) scripts/generate_release_checksums.py --check
+
+changelog-check:
+	$(PYTHON) scripts/test_changelog_check.py
+	$(PYTHON) scripts/check_changelog.py
 
 fmt-check:
 	forge fmt --check smart-contracts
