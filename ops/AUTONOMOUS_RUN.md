@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/114` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 18:48 UTC` |
+| Last updated | `2026-06-11 18:51 UTC` |
 
 ## Packaging Notes
 
@@ -120,10 +120,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Recover `StreamCore` bytecode headroom (Queue Item 61)
 
-Status: local implementation validated; ready to commit, push, open PR, and
-request CodeRabbit review.
+Status: PR opened; awaiting CI and CodeRabbit review.
 Branch: `codex/recover-streamcore-headroom`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/116`.
 
 Goal:
 
@@ -5483,6 +5482,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 18:51 | Open PR #116 | `StreamCore` bytecode headroom recovery PR published at `https://github.com/6529-Collections/6529Stream/pull/116`; state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 18:48 | Validate Queue Item 61 locally | Focused custom-error regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` is 24,143 runtime bytes with 433 bytes of EIP-170 headroom |
 | 2026-06-11 18:39 | Set interim `StreamCore` size policy | The local P1-SIZE-001 pass measures `StreamCore` at 24,143 runtime bytes with 433 bytes of EIP-170 headroom, so the repo now documents a 384-byte minimum release floor and a 512-byte warning threshold for future non-trivial Core work |
 | 2026-06-11 18:37 | Drop burn custom-error experiment | Replacing the `burn` owner/approval string revert with a custom error increased `StreamCore` runtime by 20 bytes versus the narrower pass, so the change was abandoned before documentation and tests |
