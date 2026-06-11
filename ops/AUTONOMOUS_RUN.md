@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-render-sandbox-checks` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/111` |
+| Active PR branch | `codex/metadata-uri-policy` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/112` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 15:42 UTC` |
+| Last updated | `2026-06-11 16:32 UTC` |
 
 ## Packaging Notes
 
@@ -111,14 +111,82 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 55 | Generate source verification inputs | Gate G support | Implement P1-RELEASE-007 by generating deterministic source-verification inputs from Foundry artifacts, source files, compiler settings, and contract config, with local/CI drift checks | Merged in PR #108 |
 | 56 | Add Foundry broadcast manifest ingestion | Gate E/Gate G support | Implement P1-DEPLOY-004 by parsing sanitized Foundry broadcast output into deterministic deployment-manifest evidence with local/CI drift checks | Merged in PR #110 |
 | 57 | Add metadata size limits | Gate D/Gate G support | Continue P1-META-006 by enforcing numeric byte caps for metadata storage inputs, generated `tokenURI` output, and dependency registry metadata, with focused tests, docs, release artifact refresh, and roadmap traceability | Merged in PR #111 |
-| 58 | Add metadata render-sandbox fixture checks | Gate D | Continue P1-META-006 by validating committed metadata golden fixtures for JSON/data-URI/HTML script-boundary shape and URI scheme policy in local/CI gates, without changing production bytecode | Active |
+| 58 | Add metadata render-sandbox fixture checks | Gate D | Continue P1-META-006 by validating committed metadata golden fixtures for JSON/data-URI/HTML script-boundary shape and URI scheme policy in local/CI gates, without changing production bytecode | Merged in PR #112 |
+| 59 | Add metadata token image URI policy | Gate D/Gate G support | Continue P1-META-006 by defining renderer content/script URI policy helpers and rejecting unsafe token image URI writes in production while preserving collection base URI, external library URL, structured-attributes, invalid-UTF-8, and browser-sandbox work as follow-up slices | Active |
 
 ## Current PR Worklog
 
+### PR candidate: Metadata token image URI policy (Queue Item 59)
+
+Status: Local implementation in progress.
+Branch: `codex/metadata-uri-policy`.
+Pull request: TBD.
+
+Goal:
+
+- Define reusable renderer helpers for the current safe content/script URI
+  policy rather than keeping the policy only in Python fixture checks.
+- Reject unsafe required token image URI inputs in `StreamCore` before storage.
+- Record that collection base URI and external animation library URL production
+  enforcement exceeded the current `StreamCore` EIP-170 budget in the first
+  local implementation attempt and must remain a follow-up slice unless more
+  production bytecode is freed.
+- Keep this slice tightly scoped to URI policy so invalid UTF-8 handling,
+  semantic/structured attributes, and full browser execution sandboxing remain
+  separate P1-META-006 follow-up work.
+- Verify the change does not break the tight `StreamCore` EIP-170 size budget.
+- Update docs, roadmap, changelog, and run-state traceability.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/StreamMetadataRenderer.sol`
+- `test/StreamMetadataUriPolicy.t.sol`
+- `docs/metadata.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `docs/adr/0006-metadata-freeze.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+
+Validation:
+
+- `forge test --match-path test/StreamMetadataUriPolicy.t.sol -vvv` passed.
+- `forge test --match-path test/StreamMetadataEscaping.t.sol -vvv` passed.
+- `forge test --match-path test/StreamMetadataSizeLimits.t.sol -vvv` passed
+  after the accepted boundary image fixture was updated to a valid exact-length
+  `ipfs://` URI.
+- `forge build --sizes --via-ir --skip test --skip script --force` passed with
+  `StreamCore` runtime size 24,508 bytes and 68 bytes of EIP-170 headroom.
+- `make release-checksums` passed and regenerated release/deployment artifacts.
+- `make check` passed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- Targeted `forge fmt --check` passed for this PR's touched Solidity files.
+- `git diff --check` passed, with only the existing Windows line-ending warning
+  for `release-artifacts/latest/SHA256SUMS`.
+
+Notes:
+
+- A first local implementation also enforced collection base URI and external
+  animation library URL writes, but pushed `StreamCore` over EIP-170 by 468
+  bytes. The deployable scope was narrowed to token image production enforcement
+  plus renderer helpers; the remaining collection/library surfaces stay queued
+  for a later bytecode-saving slice.
+- Broad `forge fmt --check smart-contracts` still reports pre-existing
+  formatting drift in vendored/support contracts outside this PR's touched
+  files; the full project check gate does not currently include that broad
+  formatter target.
+
+Outcome:
+
+- TBD.
+
 ### PR #112: Metadata render-sandbox fixture checks (Queue Item 58)
 
-Status: PR open; local validation passed and CodeRabbit review was requested in
-issue comment `4682324523`.
+Status: Merged in PR #112 as
+`419fb1db67cd329afeea7f9c17ccd67c3b4b477c`.
 Branch: `codex/metadata-render-sandbox-checks`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/112`.
 
@@ -168,7 +236,8 @@ Validation:
 
 Outcome:
 
-- TBD.
+- CI run `27359975388` passed, CodeRabbit status was success, and the only
+  actionable review thread was resolved after the empty-image regression fix.
 
 ### PR #4: Reproducible baseline tooling (Queue Item 2)
 

@@ -7,8 +7,8 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,461 bytes,
-  leaving 115 bytes of EIP-170 headroom under the IR-optimized deployment
+  size gate. Current `StreamCore` production runtime size is 24,508 bytes,
+  leaving 68 bytes of EIP-170 headroom under the IR-optimized deployment
   profile.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
@@ -72,6 +72,10 @@ The current Gate A smoke baseline proves:
   for collection display fields, collection script chunks and counts, token
   data, token images, token raw attributes, generated `tokenURI` output,
   dependency script chunks and counts, and dependency provenance strings.
+  `StreamMetadataUriPolicy.t.sol` proves the renderer content/script URI
+  policy helpers and the production token image URI guard for allowed
+  `https://`, `ipfs://`, and `ar://` content URIs plus rejected empty,
+  JavaScript, hostless HTTPS, and whitespace-bearing token image inputs.
   `scripts/test_metadata_fixtures.py` and
   `scripts/check_metadata_fixtures.py` validate the committed metadata golden
   fixtures outside Foundry by strictly decoding JSON and HTML data URIs,
@@ -144,8 +148,9 @@ release tags, production address books, verified live
 deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
-semantic attribute schema validation, production URI enforcement, invalid UTF-8
-policy, full browser execution sandbox automation, deployment discipline, and
+semantic attribute schema validation, collection base URI and external library
+URL production enforcement, invalid UTF-8 policy, full browser execution
+sandbox automation, deployment discipline, and
 the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and

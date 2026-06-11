@@ -231,10 +231,14 @@ strings. The second slice hardens generated animation wrapper boundaries by
 escaping the external library attribute, embedding `tokenData` and dependency
 scripts through escaped JavaScript strings, and neutralizing closing-script
 sequences. The third slice defines numeric byte limits for stored metadata
-inputs and generated `tokenURI` output. The remaining public-beta work is still
-to define semantic attribute schema validation or structured attributes,
-browser render-sandbox proofing for generated animation code, URI policy checks,
-and invalid UTF-8 policy.
+inputs and generated `tokenURI` output. The fourth slice validates committed
+metadata fixtures outside Foundry for JSON/data-URI/HTML boundaries and the
+current URI scheme policy. The fifth slice exposes renderer URI policy helpers
+and enforces the required content URI policy for token image writes. The
+remaining public-beta work is still to define semantic attribute schema
+validation or structured attributes, browser render-sandbox proofing for
+generated animation code, collection base URI and external library URL
+production URI checks, and invalid UTF-8 policy.
 
 The implementation must define maximum sizes for:
 
