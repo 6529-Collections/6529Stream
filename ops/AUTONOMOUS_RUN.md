@@ -118,9 +118,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Metadata token image URI policy (Queue Item 59)
 
-Status: Local implementation in progress.
+Status: PR open; awaiting CI and CodeRabbit.
 Branch: `codex/metadata-uri-policy`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/113`.
 
 Goal:
 
@@ -181,7 +181,7 @@ Notes:
 
 Outcome:
 
-- TBD.
+- Awaiting CI and CodeRabbit.
 
 ### PR #112: Metadata render-sandbox fixture checks (Queue Item 58)
 
