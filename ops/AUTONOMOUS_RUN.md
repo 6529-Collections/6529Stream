@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/92` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 08:12 UTC` |
+| Last updated | `2026-06-11 08:15 UTC` |
 
 ## Packaging Notes
 
@@ -4307,8 +4307,9 @@ Merge:
 
 ### PR candidate: Generate release artifact catalog (Queue Item 48)
 
-Status: Local draft in progress.
+Status: PR open; waiting on CI and CodeRabbit.
 Branch: `codex/release-artifact-catalog`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/94`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/93`
@@ -4388,6 +4389,7 @@ Validation completed at `2026-06-11 08:12 UTC`:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 08:15 | Open PR #94 and request CodeRabbit | Release artifact catalog PR published at `https://github.com/6529-Collections/6529Stream/pull/94`; CodeRabbit review requested in issue comment `4678554666`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 08:12 | Validate Queue Item 48 locally | Release artifact generator, drift checks, JSON parsing, shell/PowerShell syntax, full `make check`, Windows wrapper, and whitespace validation all pass; release artifacts are generated from the production `via-ir` build profile |
 | 2026-06-11 07:59 | Start Queue Item 48 | Issue #93 tracks the Gate G release-artifact gap; branch `codex/release-artifact-catalog` starts from merged PR #92 and scopes to deterministic ABI/bytecode/interface/event catalog generation plus drift checks |
 | 2026-06-11 07:44 | Create release artifact issue #93 | No open issue covered ABI checksums, interface IDs, and event topic catalog generation, so a focused P1 release issue keeps the PR auditable |
