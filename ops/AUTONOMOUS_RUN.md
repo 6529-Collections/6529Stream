@@ -4209,9 +4209,9 @@ Merge:
 
 ### PR candidate: Add deployment rehearsal baseline (Queue Item 47)
 
-Status: Local validation complete; ready to open PR.
+Status: PR open; waiting on CI and CodeRabbit.
 Branch: `codex/deployment-rehearsal`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/92`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/91`
@@ -4302,6 +4302,7 @@ Validation completed at `2026-06-11 07:14 UTC`:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 07:16 | Open PR #92 and request CodeRabbit | Deployment rehearsal baseline published at `https://github.com/6529-Collections/6529Stream/pull/92`; CodeRabbit review requested in issue comment `4678115878`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 07:14 | Revalidate Queue Item 47 after manifest expansion | Expanded the local example manifest to cover all nine deployed contracts and ABI hash placeholders, then reran focused manifest tests, `make check`, Windows wrapper, and whitespace validation successfully |
 | 2026-06-11 07:05 | Finish Queue Item 47 local validation | Full local and Windows gates pass after adding the local deployment rehearsal, manifest schema/example, manifest parsing/wiring tests, CI workflow rehearsal step, and production size command narrowed to skip both test and script artifacts |
 | 2026-06-11 06:57 | Exclude scripts from production size gate | `forge build --sizes --via-ir --skip test` measured the new rehearsal script bytecode as if it were production deployable bytecode; the release gate now uses `--skip test --skip script` and CI has a separate deployment rehearsal step |
