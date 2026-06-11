@@ -27,6 +27,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
@@ -47,6 +49,12 @@ It verifies that `release-artifacts/latest/` matches the production `via-ir`
 Foundry build output, including ABI checksums, bytecode checksums, interface
 IDs, and the event topic catalog. The generator automatically finds Foundry's
 `cast` in `~/.foundry/bin` when the shell has not added it to `PATH`.
+
+The ABI compatibility step compares the current production contract ABI surface
+against `release-artifacts/baselines/v0.1.0/abi-surface.json`. It fails on
+removed or changed functions, events, custom errors, constructors, fallback, or
+receive entries. Additive entries are reported as compatible for this first
+baseline so maintainers can pair them with release notes and version policy.
 
 The deployment manifest step generates the local Anvil example from
 `deployments/config/anvil-6529stream-v0.1.0-001.json`, fills contract ABI and
@@ -88,6 +96,7 @@ build and regenerate the tracked release baseline with:
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
+python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 ```
 
@@ -95,12 +104,18 @@ The check mode is:
 
 ```bash
 python scripts/generate_release_artifacts.py --check
+python scripts/check_abi_compatibility.py --check
 python scripts/generate_deployment_manifest.py --check
 ```
 
 The generator uses `release-artifacts/contracts.json` to define the production
 contract and interface surface. Standard ERC interface IDs are pinned there when
 the advertised ERC ID differs from a raw XOR over the artifact ABI.
+
+The ABI compatibility baseline uses the production contract set from the same
+config file. Refresh it only when maintainers intentionally accept a release
+surface change; removed or changed entries should also update the breaking
+change documentation and release notes.
 
 The deployment manifest generator uses committed inputs under
 `deployments/config/`. Its manifest checksum is the SHA-256 of canonical JSON

@@ -31,6 +31,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 & $pythonCommand.Source @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_release_artifacts.py" "--check"
+& $pythonCommand.Source @pythonArgs "scripts\test_abi_compatibility.py"
+& $pythonCommand.Source @pythonArgs "scripts\check_abi_compatibility.py" "--check"
 & $pythonCommand.Source @pythonArgs "scripts\test_deployment_manifest.py"
 & $pythonCommand.Source @pythonArgs "scripts\generate_deployment_manifest.py" "--check"
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

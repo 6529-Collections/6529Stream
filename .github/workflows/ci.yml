@@ -49,6 +49,8 @@ jobs:
           python3 -m py_compile \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
+            scripts/check_abi_compatibility.py \
+            scripts/test_abi_compatibility.py \
             scripts/generate_deployment_manifest.py \
             scripts/test_deployment_manifest.py
 
@@ -101,6 +103,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-tests.log
           python3 scripts/generate_release_artifacts.py --check 2>&1 | tee ci-logs/release-artifacts-check.log
+
+      - name: ABI compatibility
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_abi_compatibility.py 2>&1 | tee ci-logs/abi-compatibility-tests.log
+          python3 scripts/check_abi_compatibility.py --check 2>&1 | tee ci-logs/abi-compatibility-check.log
 
       - name: Deployment manifest
         shell: bash
