@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/88` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 06:17 UTC` |
+| Last updated | `2026-06-11 06:31 UTC` |
 
 ## Packaging Notes
 
@@ -4102,7 +4102,8 @@ Merge:
 
 ### PR candidate: Reduce `StreamCore` deployment size (Queue Item 46)
 
-Status: Open in PR #90; awaiting CI and CodeRabbit.
+Status: Open in PR #90; CodeRabbit review fixes pushed; awaiting CI and
+CodeRabbit rerun.
 Branch: `codex/streamcore-size-reduction`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/90`.
 Related issue:
@@ -4151,7 +4152,8 @@ Current local size evidence:
 - `forge build --sizes --via-ir --skip test --force` passes.
 - `StreamCore` runtime size: 23,139 bytes.
 - `StreamCore` EIP-170 runtime headroom: 1,437 bytes.
-- `StreamMetadataRenderer` runtime size: 6,817 bytes.
+- `StreamMetadataRenderer` runtime size: 6,843 bytes after the CodeRabbit escape
+  fix.
 
 Validation completed at `2026-06-11 06:13 UTC`:
 
@@ -4173,10 +4175,36 @@ Validation completed at `2026-06-11 06:13 UTC`:
 - Stale helper grep found no references to the temporary helper-library
   experiments that were folded back into `StreamCore`.
 
+CodeRabbit response completed locally at `2026-06-11 06:31 UTC`:
+
+- Fixed CodeRabbit's renderer-library finding by escaping public
+  `schemaVersion` and `metadataState` inputs before JSON assembly.
+- Added `StreamMetadataEscapingTest.testRendererEscapesSchemaAndStateFields` to
+  lock the library-level behavior.
+- Fixed CodeRabbit's roadmap traceability finding by adding the `93 Low`
+  Slither count to the static-analysis row and correcting the appendix impact
+  table to `Low=93`, `Informational=590`.
+- Validation after the review fixes:
+  - `forge fmt --check smart-contracts\StreamMetadataRenderer.sol
+    test\StreamMetadataEscaping.t.sol` passed.
+  - `forge test --match-contract 'StreamMetadata(Escaping|Golden|Events)Test'
+    -vvv` passed with 26 tests.
+  - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+  - `git diff --check` passed.
+  - `forge build --sizes --via-ir --skip test --force` passed with
+    `StreamCore` still at `23,139` runtime bytes and `1,437` bytes of runtime
+    headroom; `StreamMetadataRenderer` is now `6,843` runtime bytes.
+  - Slither baseline comparison remained unchanged:
+    `slither_exit=-1`, `total=717`, `high=4`, `medium=19`, `low=93`,
+    `informational=590`, `optimization=11`, `arbitrary-send-eth=0`,
+    `reentrancy-eth=0`, `weak-prng=0`, `uninitialized-state=0`,
+    `encode-packed-collision=0`.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 06:31 | Address CodeRabbit PR #90 comments locally | Accepted both CodeRabbit quick wins: escape public renderer `schemaVersion`/`metadataState` inputs, add direct library regression coverage, and align roadmap Slither low/informational counts; focused metadata tests, Windows wrapper, size gate, whitespace, and Slither comparison all pass |
 | 2026-06-11 06:17 | Open PR #90 | StreamCore size-reduction PR published at `https://github.com/6529-Collections/6529Stream/pull/90`; the branch proves `StreamCore` fits under EIP-170 through the production size gate, and CodeRabbit will be requested after the PR state update is pushed |
 | 2026-06-11 06:13 | Finish Queue Item 46 local validation | Full local gate set is ready for PR: `make check`, Windows wrapper, touched-file formatting, whitespace, production size gate, stale-helper grep, and Slither baseline comparison all pass; `StreamCore` is `23,139` runtime bytes with `1,437` bytes of EIP-170 headroom, and Slither high/medium remain unchanged at `4/19` |
 | 2026-06-11 06:04 | Keep only the high-value renderer library extraction | Temporary freeze/dependency/randomizer helper extractions barely changed `StreamCore` size and would have added extra linked-library calls in mint/freeze/admin paths, so they were folded back into `StreamCore`; the final local production size gate still passes with `StreamCore` at `23,139` runtime bytes and `1,437` bytes of EIP-170 headroom |

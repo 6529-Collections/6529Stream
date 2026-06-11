@@ -75,9 +75,9 @@ library StreamMetadataRenderer {
         return string(
             abi.encodePacked(
                 "{\"metadata_schema_version\":\"",
-                schemaVersion,
+                escapeJsonString(schemaVersion),
                 "\",\"metadata_state\":\"",
-                metadataState,
+                escapeJsonString(metadataState),
                 "\",\"name\":\"",
                 escapeJsonString(name),
                 "\",\"description\":\"",

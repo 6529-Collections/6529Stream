@@ -63,7 +63,7 @@ order.
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Production size | Production deployable contracts pass the IR-optimized size gate; `StreamCore` is 23,139 runtime bytes with 1,437 bytes of EIP-170 headroom | `forge build --sizes --via-ir --skip test --force` | Production size gate passes in CI and deployment scripts use the same profile |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
-| Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High and 19 Medium; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High, 19 Medium, and 93 Low; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Missing | no meaningful `script/`/manifest process | Anvil deployment and fork rehearsal pass |
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Missing | no ABI/address/manifest release process | ABIs, manifests, checksums, and verified addresses published |
@@ -2086,7 +2086,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
 - Status: high/medium rows triaged, not accepted as a CI gate.
-- Result: 717 findings, including 4 High and 19 Medium.
+- Result: 717 findings, including 4 High, 19 Medium, and 93 Low.
 
 Impact summary:
 
@@ -2094,8 +2094,8 @@ Impact summary:
 | --- | ---: |
 | High | 4 |
 | Medium | 19 |
-| Low | 92 |
-| Informational | 595 |
+| Low | 93 |
+| Informational | 590 |
 | Optimization | 11 |
 
 High/medium detector summary:
