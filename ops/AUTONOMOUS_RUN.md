@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/113` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 17:17 UTC` |
+| Last updated | `2026-06-11 17:20 UTC` |
 
 ## Packaging Notes
 
@@ -119,9 +119,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Collection URI production enforcement (Queue Item 60)
 
-Status: Local implementation validated; ready to commit and open PR.
+Status: PR open; CodeRabbit request pending on final state-recorded head.
 Branch: `codex/metadata-collection-uri-policy`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/114`.
 
 Goal:
 
@@ -5384,6 +5384,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 17:20 | Open PR #114 | Collection metadata URI policy PR published at `https://github.com/6529-Collections/6529Stream/pull/114`; this state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 17:17 | Validate Queue Item 60 locally | Collection URI policy tests, metadata freeze/golden regressions, release artifact regeneration, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, whitespace validation, and the production size gate pass; final validation regenerated release artifacts after a docs checksum drift and `StreamCore` is 24,348 runtime bytes with 228 bytes of EIP-170 headroom |
 | 2026-06-11 16:55 | Use custom-error cleanup to keep queue item 60 deployable | Direct collection base/library URI enforcement exceeded EIP-170; replacing old `StreamCore` string reverts on metadata, mint, randomizer, and wiring paths made production enforcement fit and improved revert traceability |
 | 2026-06-11 16:47 | Start Queue Item 60 | PR #113 intentionally left collection base URI and external library URL production enforcement as follow-up because the first attempt exceeded EIP-170; this is the next highest-value P1-META-006 slice |
