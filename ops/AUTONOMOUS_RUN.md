@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/94` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 08:47 UTC` |
+| Last updated | `2026-06-11 08:49 UTC` |
 
 ## Packaging Notes
 
@@ -4400,8 +4400,9 @@ Merge:
 
 ### PR candidate: Generate and check deployment manifests (Queue Item 49)
 
-Status: Local draft in progress.
+Status: PR open; waiting on CI and CodeRabbit.
 Branch: `codex/deployment-manifest-generator`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/96`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/95`
@@ -4471,6 +4472,7 @@ Validation completed at `2026-06-11 08:47 UTC`:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 08:49 | Open PR #96 and request CodeRabbit | Deployment manifest generator PR published at `https://github.com/6529-Collections/6529Stream/pull/96`; CodeRabbit review requested in issue comment `4678810031`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 08:47 | Validate Queue Item 49 locally | Deployment manifest generator, manifest drift checks, JSON parsing, shell/PowerShell syntax, full `make check`, Windows wrapper, and whitespace validation all pass |
 | 2026-06-11 08:35 | Start Queue Item 49 | Issue #95 tracks the remaining local manifest-generation gap; branch `codex/deployment-manifest-generator` starts from merged PR #94 and scopes to generated Anvil manifests plus drift checks |
 | 2026-06-11 08:26 | Create deployment manifest issue #95 | No open issue covered deterministic deployment manifest generation/checking from committed inputs, so a focused P1 deployment issue keeps the PR auditable |
