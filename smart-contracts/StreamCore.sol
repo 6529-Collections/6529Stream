@@ -72,6 +72,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     error BurnedTokenRemintNotAllowed(uint256 tokenId);
     error FrozenCollectionDependencyRegistry();
     error MetadataFrozen(uint256 collectionId);
+    error UnsafeRawAttributes(uint256 tokenId);
     error UnknownDependency(bytes32 dependencyNameAndVersion);
 
     error PendingRandomnessRequests(
@@ -176,6 +177,15 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
 
     // Retained audit state for burned tokens. tokenURI remains unavailable.
     mapping(uint256 => BurnedTokenAudit) private burnedTokenAuditRecords;
+
+    struct RawAttributeValidationState {
+        uint256 depth;
+        uint256 containerKinds;
+        bool inString;
+        bool escaped;
+        bool sawTopLevelValue;
+        bool expectingTopLevelValue;
+    }
 
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
@@ -502,6 +512,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             uint256 collectionId = tokenIdsToCollectionIds[_tokenId[x]];
             require(collectionFreeze[collectionId] == false, "Data frozen");
             _requireMinted(_tokenId[x]);
+            _requireSafeRawAttributes(_tokenId[x], _attributes[x]);
             tokenImageAndAttributes[_tokenId[x]][0] = _images[x];
             tokenImageAndAttributes[_tokenId[x]][1] = _attributes[x];
             _refreshLiveTokenMetadataRecord(collectionId, _tokenId[x]);
@@ -733,7 +744,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         if (finalMetadata) {
             animationField = string(
                 abi.encodePacked(
-                    ",\"animation_url\":\"", _onchainAnimationURI(tokenId, collectionId), "\""
+                    ",\"animation_url\":\"",
+                    _escapeJsonString(_onchainAnimationURI(tokenId, collectionId)),
+                    "\""
                 )
             );
         }
@@ -745,11 +758,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 "\",\"metadata_state\":\"",
                 finalMetadata ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING,
                 "\",\"name\":\"",
-                getTokenName(tokenId),
+                _escapeJsonString(getTokenName(tokenId)),
                 "\",\"description\":\"",
-                collectionInfo[collectionId].collectionDescription,
+                _escapeJsonString(collectionInfo[collectionId].collectionDescription),
                 "\",\"image\":\"",
-                tokenImageAndAttributes[tokenId][0],
+                _escapeJsonString(tokenImageAndAttributes[tokenId][0]),
                 "\",\"attributes\":[",
                 tokenImageAndAttributes[tokenId][1],
                 "]",
@@ -778,6 +791,208 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 )
             )
         );
+    }
+
+    function _escapeJsonString(string memory raw) private pure returns (string memory) {
+        bytes memory input = bytes(raw);
+        bytes memory output = new bytes(input.length * 6);
+        uint256 outputLength = 0;
+
+        for (uint256 i = 0; i < input.length; i++) {
+            bytes1 character = input[i];
+            if (character == 0x22) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x22;
+                outputLength++;
+            } else if (character == 0x5c) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x5c;
+                outputLength++;
+            } else if (character == 0x08) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x62;
+                outputLength++;
+            } else if (character == 0x0c) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x66;
+                outputLength++;
+            } else if (character == 0x0a) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x6e;
+                outputLength++;
+            } else if (character == 0x0d) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x72;
+                outputLength++;
+            } else if (character == 0x09) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x74;
+                outputLength++;
+            } else if (uint8(character) < 0x20) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x75;
+                outputLength++;
+                output[outputLength] = 0x30;
+                outputLength++;
+                output[outputLength] = 0x30;
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) >> 4);
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
+                outputLength++;
+            } else {
+                output[outputLength] = character;
+                outputLength++;
+            }
+        }
+
+        return string(_truncateBytes(output, outputLength));
+    }
+
+    function _requireSafeRawAttributes(uint256 tokenId, string memory raw) private pure {
+        bytes memory input = bytes(raw);
+        RawAttributeValidationState memory state = RawAttributeValidationState({
+            depth: 0,
+            containerKinds: 0,
+            inString: false,
+            escaped: false,
+            sawTopLevelValue: false,
+            expectingTopLevelValue: true
+        });
+
+        for (uint256 i = 0; i < input.length; i++) {
+            bytes1 character = input[i];
+            if (uint8(character) < 0x20) {
+                revert UnsafeRawAttributes(tokenId);
+            }
+
+            if (state.inString) {
+                _advanceRawAttributeStringState(state, character);
+            } else {
+                _advanceRawAttributeStructuralState(tokenId, state, character);
+            }
+        }
+
+        if (
+            state.inString || state.escaped || state.depth != 0
+                || (state.sawTopLevelValue && state.expectingTopLevelValue)
+        ) {
+            revert UnsafeRawAttributes(tokenId);
+        }
+    }
+
+    function _advanceRawAttributeStringState(
+        RawAttributeValidationState memory state,
+        bytes1 character
+    ) private pure {
+        if (state.escaped) {
+            state.escaped = false;
+        } else if (character == 0x5c) {
+            state.escaped = true;
+        } else if (character == 0x22) {
+            state.inString = false;
+        }
+    }
+
+    function _advanceRawAttributeStructuralState(
+        uint256 tokenId,
+        RawAttributeValidationState memory state,
+        bytes1 character
+    ) private pure {
+        if (character == 0x22) {
+            if (state.depth == 0) {
+                revert UnsafeRawAttributes(tokenId);
+            }
+            state.inString = true;
+        } else if (character == 0x7b || character == 0x5b) {
+            _openRawAttributeContainer(tokenId, state, character);
+        } else if (character == 0x7d || character == 0x5d) {
+            _closeRawAttributeContainer(tokenId, state, character);
+        } else if (state.depth == 0) {
+            _advanceRawAttributeTopLevelSeparator(tokenId, state, character);
+        }
+    }
+
+    function _openRawAttributeContainer(
+        uint256 tokenId,
+        RawAttributeValidationState memory state,
+        bytes1 opener
+    ) private pure {
+        if (state.depth >= 256) {
+            revert UnsafeRawAttributes(tokenId);
+        }
+        if (state.depth == 0) {
+            if (!state.expectingTopLevelValue) {
+                revert UnsafeRawAttributes(tokenId);
+            }
+            state.sawTopLevelValue = true;
+            state.expectingTopLevelValue = false;
+        }
+        if (opener == 0x7b) {
+            state.containerKinds |= uint256(1) << state.depth;
+        } else {
+            state.containerKinds &= ~(uint256(1) << state.depth);
+        }
+        state.depth++;
+    }
+
+    function _closeRawAttributeContainer(
+        uint256 tokenId,
+        RawAttributeValidationState memory state,
+        bytes1 closer
+    ) private pure {
+        if (state.depth == 0) {
+            revert UnsafeRawAttributes(tokenId);
+        }
+        uint256 depthIndex = state.depth - 1;
+        bool expectsObjectClose = ((state.containerKinds >> depthIndex) & 1) == 1;
+        if ((closer == 0x7d) != expectsObjectClose) {
+            revert UnsafeRawAttributes(tokenId);
+        }
+        state.containerKinds &= ~(uint256(1) << depthIndex);
+        state.depth = depthIndex;
+        if (state.depth == 0) {
+            state.expectingTopLevelValue = false;
+        }
+    }
+
+    function _advanceRawAttributeTopLevelSeparator(
+        uint256 tokenId,
+        RawAttributeValidationState memory state,
+        bytes1 character
+    ) private pure {
+        if (character == 0x2c) {
+            if (!state.sawTopLevelValue || state.expectingTopLevelValue) {
+                revert UnsafeRawAttributes(tokenId);
+            }
+            state.expectingTopLevelValue = true;
+        } else if (character != 0x20) {
+            revert UnsafeRawAttributes(tokenId);
+        }
+    }
+
+    function _truncateBytes(bytes memory input, uint256 length)
+        private
+        pure
+        returns (bytes memory)
+    {
+        bytes memory output = new bytes(length);
+        for (uint256 i = 0; i < length; i++) {
+            output[i] = input[i];
+        }
+        return output;
+    }
+
+    function _hexNibble(uint8 value) private pure returns (bytes1) {
+        return bytes1(value < 10 ? value + 0x30 : value + 0x57);
     }
 
     // function to retrieve the name attribute

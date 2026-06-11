@@ -75,9 +75,12 @@ contributors who start from the README.
   versions or registry swaps until an unfrozen collection is explicitly
   repinned. Burned tokens now follow ERC-721 token-existence semantics, emit a
   protocol burn audit event, expose retained burn audit state, and can record
-  valid post-burn randomness for audit only. Remaining metadata blockers include
-  dependency artifact packaging and deployment migration runbooks beyond
-  registry provenance strings, escaping, and size limits.
+  valid post-burn randomness for audit only. On-chain metadata now escapes JSON
+  string fields and rejects raw attribute fragments that can break out of the
+  enclosing attribute array. Remaining metadata blockers include dependency
+  artifact packaging and deployment migration runbooks beyond registry
+  provenance strings, generated HTML/JavaScript escaping or rejection, semantic
+  attribute schema validation, and size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
@@ -96,9 +99,10 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist, but metadata escaping,
-  deployment, production-governance, richer supply/replay/freeze
-  invariant tests, and any future shared-ledger invariants are still missing.
+  bounded payment sequence invariant baseline now exist, but generated metadata
+  render-sandbox tests, metadata size-limit tests, deployment,
+  production-governance, richer supply/replay/freeze invariant tests, and any
+  future shared-ledger invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

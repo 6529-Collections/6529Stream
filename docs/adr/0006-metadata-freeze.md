@@ -217,6 +217,16 @@ context where it is used:
 - raw attribute fragments
 - dependency and collection script chunks
 
+The first `P1-META-006` implementation slice escapes on-chain JSON string
+fields (`name`, `description`, `image`, and `animation_url`) and adds a
+structural guard for raw attribute fragments. That guard rejects literal control
+characters, unterminated strings, unbalanced object/array delimiters, and
+unquoted `]`/`}` breakout attempts while preserving brackets inside quoted JSON
+strings. The remaining public-beta work is still to define semantic attribute
+schema validation or structured attributes, HTML/JavaScript escaping or
+rejection for generated animation code, URI policy checks, invalid UTF-8 policy,
+and numeric size limits.
+
 The implementation must define maximum sizes for:
 
 - collection name
@@ -459,7 +469,7 @@ Public-beta implementation must:
 - replace zero-hash-only pending metadata checks with explicit randomness state
 - add pending/final on-chain metadata behavior
 - base64-encode on-chain JSON data URIs
-- escape JSON and JavaScript contexts or reject unsafe inputs
+- escape JSON string contexts and JavaScript contexts or reject unsafe inputs
 - validate raw attribute fragments or replace them with structured attributes
 - add metadata schema docs and golden-file tests
 - add freeze manifest storage and views
@@ -482,7 +492,9 @@ P1 metadata tests must include:
 - on-chain final metadata golden file
 - off-chain URI concatenation rules
 - JSON escaping for quotes, backslashes, brackets, control characters, and
-  large valid values
+  large valid values. The current first slice covers quotes, backslashes, JSON
+  shorthand control characters, other ASCII control characters, and raw
+  attribute breakout rejection; large valid values remain with size-limit work.
 - JavaScript and HTML escaping or rejection tests
 - raw attributes validation or structured attributes serialization
 - metadata mode changes emit expected events before freeze

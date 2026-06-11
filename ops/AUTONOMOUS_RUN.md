@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/burn-metadata-semantics` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/85` |
+| Active PR branch | `codex/metadata-escaping-safety` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/86` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 03:54 UTC` |
+| Last updated | `2026-06-11 04:45 UTC` |
 
 ## Packaging Notes
 
@@ -96,7 +96,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
 | 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Merged in PR #85 |
-| 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Open in PR #86 |
+| 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Merged in PR #86 |
+| 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Open in PR #87 |
 
 ## Current PR Worklog
 
@@ -3835,10 +3836,11 @@ Merge:
 
 ### PR candidate: Add burn metadata semantics (Queue Item 43)
 
-Status: CodeRabbit remint finding addressed; follow-up CI and CodeRabbit rereview pending.
+Status: Merged in PR #86.
 Branch: `codex/burn-metadata-semantics`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/86`.
 Initial implementation commit: `e0a71d3c423f87f8c0abd800f03f5e49deb180ad`.
+Merge commit: `d637d372cf55b5b844697e2b4baabe265a9c8c9f`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/50`
@@ -3929,10 +3931,100 @@ Local validation:
 - Slither comparison passed after cleanup:
   `718` total findings with high/medium unchanged at `4/19`.
 
+Merge:
+
+- PR #86 merged on 2026-06-11 after CI succeeded on head
+  `37c361ac8251d973094cac0827787fe3dcfdb61d`, CodeRabbit reported no
+  actionable comments on the follow-up review, and the remint thread was
+  resolved by CodeRabbit.
+
+### PR candidate: Add metadata escaping and render-safety baseline (Queue Item 44)
+
+Status: Merge-ready; CI is green, CodeRabbit is green, and all visible review
+threads are resolved.
+Branch: `codex/metadata-escaping-safety`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/87`.
+Initial implementation commit: `d9a4a1af3bf3f56bf5e913f2db4b9ba070b924df`.
+CodeRabbit review request comment: `4677178780`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/51`
+
+Goal:
+
+- Implement the first P1-META-006 metadata safety slice accepted by ADR 0006.
+- Escape JSON string fields emitted by on-chain metadata so quotes,
+  backslashes, brackets, and control characters cannot break JSON structure.
+- Add parser/golden tests for hostile collection and token metadata inputs.
+- Document render safety and executable generated HTML risk.
+- Update roadmap/test traceability and this durable run state.
+
+Initial scope notes:
+
+- Prioritize deterministic JSON escaping and generated metadata parser tests.
+- Keep size-limit enforcement conservative until exact blast radius is inspected;
+  if enforcement is too broad for one PR, document the accepted risk and leave a
+  narrower issue-ready follow-up.
+- Do not open a second PR until PR #86 is already merged and main is synced.
+
+Implemented locally:
+
+- Added `StreamCore._escapeJsonString` and applied it to on-chain metadata
+  string fields: `name`, `description`, `image`, and `animation_url`.
+- Added `StreamCore.UnsafeRawAttributes` and a structural raw-attribute guard
+  in `updateImagesAndAttributes` that rejects literal control characters,
+  unterminated strings, unbalanced delimiters, top-level literal/trailing-comma
+  fragments, and unquoted array/object breakout attempts while preserving
+  brackets inside quoted JSON strings.
+- Added `test/StreamMetadataEscaping.t.sol` with a test-only base64 decoder so
+  schema-v1 `tokenURI` JSON can be decoded, parsed through Foundry's JSON
+  parser, and compared against expected escaped output.
+- Updated metadata/status/blocker docs, ADR 0006, test README, and roadmap test
+  traceability to mark the JSON/attribute-guard slice as partial and keep
+  generated HTML/JavaScript escaping, URI policy, invalid UTF-8 policy, size
+  limits, and render-sandbox tests as remaining P1-META-006 work.
+
+Validation so far:
+
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test/StreamMetadataEscaping.t.sol -vvv`
+  passed with 6 tests.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt smart-contracts\StreamCore.sol test\helpers\CharacterizationTestBase.sol test\StreamMetadataEscaping.t.sol`
+  applied the required formatting.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path 'test/StreamMetadata*.t.sol' -vvv`
+  passed with 31 metadata tests.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; make check` passed with the full
+  Foundry build/test gate.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with the
+  Windows contributor gate, including the 6-test metadata escaping suite.
+- `$env:Path="$HOME\.foundry\bin;$PWD\.venv-tools\Scripts;$env:Path"; slither . --config-file slither.config.json --foundry-compile-all`
+  produced the known non-zero baseline of 718 findings with high/medium counts
+  unchanged at `4/19`.
+- `forge fmt --check` on touched Solidity files, `git diff --check`, heading
+  scans, and P1-META-006 traceability greps pass.
+- CodeRabbit comment `4677192409` reported the implementation correct and
+  well-scoped, with only non-blocking suggestions to add empty-attributes and
+  multi-object positive-path tests. Those two tests now pass in the focused
+  8-test `StreamMetadataEscapingTest` suite, full `make check`, Windows wrapper,
+  touched-file formatting, whitespace, and Slither baseline comparison.
+- CodeRabbit inline comment `3393290836` correctly flagged that the raw
+  attribute parser tracked nesting depth but not container type. The local fix
+  adds a compact container-kind bitset, rejects mismatched `{]` and `[}`
+  delimiters, and refreshes the focused 9-test metadata escaping suite, full
+  `make check`, Windows wrapper, touched-file formatting, whitespace, and
+  Slither baseline comparison.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 04:45 | Mark PR #87 merge-ready | CI run `27324323091` passed on head `1daa794be32809f582d9398f39b5f62bb6c25f79`, CodeRabbit status is success with final clean comment `4677250565`, and the only visible inline review thread was resolved by CodeRabbit |
+| 2026-06-11 04:42 | Address CodeRabbit PR #87 delimiter finding | Added container-kind tracking to the raw-attribute parser so object and array closers must match their opener, covered mismatched `{]` and `[}` delimiters, and refreshed focused 9-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
+| 2026-06-11 04:35 | Address CodeRabbit PR #87 positive-test suggestions | Added empty-attributes and multiple-top-level-object acceptance tests, refreshed focused 8-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
+| 2026-06-11 04:28 | Open PR #87 and request CodeRabbit | Metadata escaping safety baseline published at `https://github.com/6529-Collections/6529Stream/pull/87`; CodeRabbit review requested in issue comment `4677178780`, and Claude remains intentionally skipped per current user instruction |
+| 2026-06-11 04:26 | Finish Queue Item 44 local validation | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading/traceability scans, and Slither baseline comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |
+| 2026-06-11 04:09 | Implement Queue Item 44 local draft | Added JSON string escaping, raw attribute structural guards, parser-backed metadata escaping tests, adjacent metadata validation, and docs/roadmap traceability while leaving generated HTML/JavaScript escaping, URI policy, invalid UTF-8 policy, size limits, and render-sandbox tests as explicit follow-up work under issue #51 |
+| 2026-06-11 03:59 | Start Queue Item 44 | PR #86 merged and main is synced; issue #51 is the next Gate D metadata row covering JSON escaping, size policy, render-sandbox tests, and executable metadata docs |
+| 2026-06-11 03:58 | Merge PR #86 | CI passed, CodeRabbit confirmed the remint fix and reported no actionable follow-up comments, the review thread was resolved by CodeRabbit, and issue #50 was closed by the squash merge |
 | 2026-06-11 03:54 | Address CodeRabbit PR #86 remint finding | Added `BurnedTokenRemintNotAllowed` guard in `_mintProcessing`, covered failed remint after burn, documented terminal burned token IDs, and reran focused/adjacent/full/Windows/format/whitespace/traceability/Slither gates with high/medium unchanged at `4/19` |
 | 2026-06-11 03:35 | Open PR #86 | Burn metadata semantics are published with local validation evidence, close issue #50, and CodeRabbit review was requested with `@coderabbitai review` |
 | 2026-06-11 03:33 | Validate Queue Item 43 locally | Focused burn tests, adjacent metadata/randomizer suites, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |

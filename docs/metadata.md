@@ -46,10 +46,39 @@ base64-encoded HTML animation URL.
 
 `StreamCore.metadataSchemaVersion()` exposes the active schema version and
 `StreamCore.tokenMetadataState(tokenId)` exposes the current `pending` or
-`final` state for minted tokens. The current schema version does not yet solve
-JSON escaping, raw attribute validation, metadata size limits, dependency
-artifact packaging beyond registry provenance strings, stale randomness display,
-or deployment release manifests.
+`final` state for minted tokens. The current schema version escapes JSON string
+fields emitted by on-chain metadata and rejects raw attribute fragments that
+contain literal control characters, unterminated strings, unbalanced
+object/array delimiters, or unquoted `]`/`}` breakout attempts. It does not yet
+solve HTML/JavaScript escaping for generated animation code, semantic attribute
+schema validation, metadata size limits, dependency artifact packaging beyond
+registry provenance strings, stale randomness display, or deployment release
+manifests.
+
+## Escaping And Attribute Fragments
+
+On-chain JSON string fields are escaped before base64 encoding:
+
+- `name`
+- `description`
+- `image`
+- `animation_url`
+
+The escape policy covers quotes, backslashes, JSON shorthand control characters
+such as newline/tab/carriage return, and other ASCII control characters through
+`\u00XX`.
+
+`attributes` remains a caller-authored raw JSON fragment inserted inside the
+metadata array. `updateImagesAndAttributes` now rejects fragments that can break
+out of the enclosing array or cannot close their own strings/object delimiters,
+while still allowing brackets inside quoted JSON strings. This is a structural
+metadata safety guard, not a full JSON schema validator. Release tooling still
+needs renderer or parser checks for the final attribute schema.
+
+Generated animation HTML remains executable. `collectionLibrary`,
+`dependencyScript`, `collectionScript`, and `tokenData` are still rendered into
+the final HTML/JavaScript path and must be treated as trusted artist/operator
+code until later P1 render-sandbox and size-limit work lands.
 
 ## Golden Fixtures
 
@@ -210,6 +239,8 @@ cannot change frozen collection output.
 ADR 0006 requires future metadata work to add:
 
 - stale-state display policy
-- JSON escaping and raw-attribute validation
+- HTML/JavaScript escaping or rejection for generated animation code
+- final raw-attribute schema validation or structured attributes
+- numeric size limits for metadata fields and generated outputs
 - dependency artifact packaging and release manifests beyond registry
   provenance strings
