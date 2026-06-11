@@ -22,7 +22,7 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
 check: build test size release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
 
@@ -59,12 +59,21 @@ abi-compatibility-check: size
 	$(PYTHON) scripts/test_abi_compatibility.py
 	$(PYTHON) scripts/check_abi_compatibility.py --check
 
-deployment-manifests: release-artifacts
-	$(PYTHON) scripts/generate_deployment_manifest.py
+broadcast-manifest-inputs:
+	$(PYTHON) scripts/generate_broadcast_manifest_input.py
 
-deployment-manifest-check:
+broadcast-manifest-inputs-check:
+	$(PYTHON) scripts/test_broadcast_manifest_input.py
+	$(PYTHON) scripts/generate_broadcast_manifest_input.py --check
+
+deployment-manifests: release-artifacts broadcast-manifest-inputs
+	$(PYTHON) scripts/generate_deployment_manifest.py
+	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
+
+deployment-manifest-check: broadcast-manifest-inputs-check
 	$(PYTHON) scripts/test_deployment_manifest.py
 	$(PYTHON) scripts/generate_deployment_manifest.py --check
+	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 
 address-books: deployment-manifests
 	$(PYTHON) scripts/generate_address_books.py

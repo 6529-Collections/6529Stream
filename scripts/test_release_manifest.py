@@ -36,6 +36,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     baseline = root / "release-artifacts" / "baselines" / "v0.1.0" / "abi-surface.json"
     contract_config = root / "release-artifacts" / "contracts.json"
     deployment_config_dir = root / "deployments" / "config"
+    deployment_broadcast_dir = root / "deployments" / "broadcasts"
     deployment_manifest_dir = root / "deployments" / "examples"
     address_book_dir = root / "deployments" / "address-books"
     deployment_schema_dir = root / "deployments" / "schema"
@@ -98,6 +99,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {"schema_version": "6529stream.deployment-manifest-input.v1"},
     )
     write_json(
+        deployment_broadcast_dir / "run-latest.json",
+        {"chain": 31337, "transactions": [], "receipts": []},
+    )
+    write_json(
         deployment_manifest_dir / "anvil.json",
         {
             "manifest_schema_version": "6529stream.deployment-manifest.v1",
@@ -141,6 +146,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "baseline": baseline,
         "contract_config": contract_config,
         "deployment_config_dir": deployment_config_dir,
+        "deployment_broadcast_dir": deployment_broadcast_dir,
         "deployment_manifest_dir": deployment_manifest_dir,
         "address_book_dir": address_book_dir,
         "deployment_schema_dir": deployment_schema_dir,
@@ -163,6 +169,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["baseline"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
@@ -177,6 +184,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["baseline"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
@@ -196,6 +204,10 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["source_verification_inputs"]["schema_version"],
                 "6529stream.source-verification-inputs.v1",
+            )
+            self.assertEqual(
+                manifest["deployment_artifacts"]["broadcasts"][0]["path"],
+                "deployments/broadcasts/run-latest.json",
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["manifests"][0]["contracts"],
@@ -222,6 +234,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["baseline"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
@@ -237,6 +250,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["baseline"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
@@ -256,6 +270,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["baseline"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
@@ -273,6 +288,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["baseline"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
@@ -299,6 +315,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["baseline"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
@@ -320,6 +337,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["baseline"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],

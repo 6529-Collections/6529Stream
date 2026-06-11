@@ -16,6 +16,9 @@ the release policy in `docs/release-policy.md`.
 - Added deterministic source-verification input generation under
   `release-artifacts/latest/`, including source hashes, compiler settings,
   constructor ABI, bytecode/linking status, and verification command templates.
+- Added deterministic Foundry broadcast manifest-input ingestion from sanitized
+  broadcast JSON, with generated broadcast-derived deployment manifest and
+  address-book artifacts covered by release manifest and checksum gates.
 
 ### Release Impact
 
@@ -28,6 +31,9 @@ the release policy in `docs/release-policy.md`.
 - Gate G now checks `release-artifacts/latest/source-verification-inputs.json`
   before the release manifest so retained verification inputs are covered by
   both the top-level manifest and the signable checksum bundle.
+- Gate E/G now checks sanitized broadcast-derived deployment evidence before
+  deployment manifests, address books, release manifests, and checksums are
+  considered current.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

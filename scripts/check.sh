@@ -29,8 +29,11 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_source_verification_inputs.py --check
 "$python_bin" scripts/test_abi_compatibility.py
 "$python_bin" scripts/check_abi_compatibility.py --check
+"$python_bin" scripts/test_broadcast_manifest_input.py
+"$python_bin" scripts/generate_broadcast_manifest_input.py --check
 "$python_bin" scripts/test_deployment_manifest.py
 "$python_bin" scripts/generate_deployment_manifest.py --check
+"$python_bin" scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 "$python_bin" scripts/test_address_books.py
 "$python_bin" scripts/generate_address_books.py --check
 "$python_bin" scripts/test_release_manifest.py

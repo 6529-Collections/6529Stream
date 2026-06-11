@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/source-verification-inputs` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/106` |
+| Active PR branch | `codex/broadcast-manifest-ingestion` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/108` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 13:23 UTC` |
+| Last updated | `2026-06-11 14:06 UTC` |
 
 ## Packaging Notes
 
@@ -108,7 +108,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 52 | Add signable release checksum bundle | Gate G support | Implement P1-RELEASE-004 by generating deterministic SHA256SUMS and machine-readable checksum manifests over committed release/deployment artifacts, with drift checks in local/CI gates | Merged in PR #102 |
 | 53 | Add release change approval policy and changelog gate | Gate G support | Implement P1-RELEASE-005 by documenting ABI/schema/release change approval rules and adding a local/CI changelog gate for release-impacting paths | Merged in PR #104 |
 | 54 | Generate machine-readable release manifest | Gate G support | Implement P1-RELEASE-006 by generating a deterministic top-level release manifest over committed release/deployment artifacts, governance docs, and release-ceremony status, with local/CI drift checks | Merged in PR #106 |
-| 55 | Generate source verification inputs | Gate G support | Implement P1-RELEASE-007 by generating deterministic source-verification inputs from Foundry artifacts, source files, compiler settings, and contract config, with local/CI drift checks | Active |
+| 55 | Generate source verification inputs | Gate G support | Implement P1-RELEASE-007 by generating deterministic source-verification inputs from Foundry artifacts, source files, compiler settings, and contract config, with local/CI drift checks | Merged in PR #108 |
+| 56 | Add Foundry broadcast manifest ingestion | Gate E/Gate G support | Implement P1-DEPLOY-004 by parsing sanitized Foundry broadcast output into deterministic deployment-manifest evidence with local/CI drift checks | Active |
 
 ## Current PR Worklog
 
@@ -4258,8 +4259,8 @@ Initial scope:
 Open follow-up boundaries:
 
 - Fork/testnet broadcast and verification are not implemented in this slice.
-- Real production manifest generation from broadcast outputs remains future
-  Gate E work.
+- Live production manifest generation from live broadcast outputs remains
+  future Gate E work.
 - Release checksum automation, dry-run signed fixed-price drops, dry-run
   auction settlement, and emergency redeployment rehearsal remain open.
 
@@ -4952,7 +4953,7 @@ Merge evidence:
 
 ### PR candidate: Generate source verification inputs (Queue Item 55)
 
-Status: PR open; CodeRabbit review fix applied locally.
+Status: Merged.
 Branch: `codex/source-verification-inputs`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/108`.
 Related issue:
@@ -5050,10 +5051,80 @@ Validation:
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 
+Merge evidence:
+
+- Merged as PR #108 on `2026-06-11 13:29 UTC`.
+- Squash merge commit: `98696bf2953b93aeade4265a3c8a35201589b2ef`.
+- Final head before merge: `fa43b1c9951d853ee076ded06c3f40277bbf4e8c`.
+- CI run `27349988458` passed.
+- CodeRabbit latest-head status was `success`; the only review thread was
+  resolved/outdated by CodeRabbit after the duplicate library-placeholder fix.
+- Claude was not requested per the current CodeRabbit-only user instruction.
+- Issue #107 auto-closed completed.
+
+### PR candidate: Add Foundry broadcast manifest ingestion (Queue Item 56)
+
+Status: In progress locally.
+Branch: `codex/broadcast-manifest-ingestion`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/109`
+
+Goal:
+
+- Add deterministic, offline ingestion for sanitized Foundry
+  `broadcast/.../run-latest.json` output.
+- Validate broadcast chain ID, deployment transaction names, contract
+  addresses, transaction hashes, receipt success, duplicate deployments,
+  missing deployments, and unexpected deployments.
+- Produce or validate committed manifest-input evidence that can feed the
+  existing deployment manifest, address-book, release-manifest, and checksum
+  pipeline without requiring live network access in CI.
+- Keep live fork/testnet broadcasting, explorer submission, private keys, RPC
+  URLs, detached signatures, and signed tags out of this PR.
+
+Initial scope:
+
+- `scripts/generate_broadcast_manifest_input.py`
+- `scripts/test_broadcast_manifest_input.py`
+- sanitized fixture/config output under `deployments/`
+- deployment/release docs and roadmap/run-state traceability
+- local/CI check wiring if the output is deterministic
+
+Implementation so far:
+
+- Added a strict offline generator for sanitized Foundry `run-latest.json`
+  output.
+- Added a committed sanitized Anvil broadcast fixture under
+  `deployments/broadcasts/`.
+- Generated a broadcast-derived deployment-manifest input, deployment manifest,
+  and address book.
+- Added the broadcast fixture and generated outputs to the release manifest and
+  checksum bundle.
+- Wired local, Windows, Makefile, and CI checks for the broadcast input plus the
+  broadcast-derived deployment manifest.
+- Updated deployment, tooling, status, release policy, changelog, roadmap, and
+  durable run-state docs.
+
+Validation status:
+
+- Focused broadcast manifest-input tests/check pass locally.
+- Deployment-manifest tests/check pass for the default and broadcast-derived
+  configs.
+- Address-book tests/check, release-manifest tests/check,
+  release-checksum tests/check, changelog tests/check, Python compile,
+  Bash syntax, PowerShell syntax, `git diff --check`, full `make check`, and
+  Windows `scripts\check.ps1` pass locally.
+- CI validation pending after PR open.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 14:06 | Validate Queue Item 56 locally | Focused broadcast ingestion tests/check, deployment manifest checks for both configs, address-book/release-manifest/release-checksum/changelog tests and checks, Python compile, shell/PowerShell syntax, whitespace check, full `make check`, and Windows wrapper all pass on the final parser-adjusted code |
+| 2026-06-11 13:55 | Implement Queue Item 56 local draft | Added sanitized Foundry broadcast ingestion, generated broadcast-derived deployment config/manifest/address book, wired release manifest/checksum coverage and local/CI gates, and updated docs/roadmap/run-state traceability |
+| 2026-06-11 13:32 | Start Queue Item 56 | Issue #109 tracks deterministic Foundry broadcast-manifest ingestion; branch `codex/broadcast-manifest-ingestion` starts from merged PR #108 and scopes to offline sanitized broadcast evidence |
+| 2026-06-11 13:29 | Merge PR #108 | Source verification inputs merged as `98696bf2953b93aeade4265a3c8a35201589b2ef`; CI run `27349988458` passed, CodeRabbit latest-head status was success, the review thread was resolved/outdated, and issue #107 closed completed |
 | 2026-06-11 13:23 | Validate CodeRabbit PR #108 fix locally | Source-verification regression, drift checks, manifest/checksum checks, Python compile, whitespace check, full `make check`, and Windows wrapper all pass after deduplicating library placeholders |
 | 2026-06-11 13:17 | Address CodeRabbit PR #108 finding locally | Accepted the duplicate-library-placeholder review finding, added regression coverage for different creation/runtime link offsets, regenerated source-verification and release checksum artifacts, and prepared for focused/full validation before pushing |
 | 2026-06-11 13:04 | Open PR #108 and request CodeRabbit | Source verification input PR published at `https://github.com/6529-Collections/6529Stream/pull/108`; CodeRabbit review requested in issue comment `4680853110`; Claude intentionally skipped per current user instruction |

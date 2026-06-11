@@ -56,6 +56,18 @@ example is generated from
 `deployments/config/anvil-6529stream-v0.1.0-001.json` into
 `deployments/examples/anvil-6529stream-v0.1.0-001.json`.
 
+The first broadcast-ingestion baseline is generated from the sanitized Foundry
+fixture at `deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json`.
+`scripts/generate_broadcast_manifest_input.py` validates the fixture chain ID,
+expected contract names, deployed addresses, transaction hashes, receipt
+success, duplicate deployments, missing deployments, unexpected deployments,
+and secret-like keys, then writes
+`deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`. That generated
+config produces `deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json`.
+This is deterministic public test evidence only; a live fork/testnet or
+production broadcast must still be run and retained during the deployment
+ceremony.
+
 Compact address books live under `deployments/address-books/` and are generated
 from committed deployment manifests. They are meant for integrators and scripts
 that need network, release, manifest checksum, contract address, source path,
@@ -73,8 +85,12 @@ python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
+python scripts/generate_broadcast_manifest_input.py
+python scripts/generate_broadcast_manifest_input.py --check
 python scripts/generate_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
+python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
+python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/generate_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/generate_release_manifest.py
@@ -98,6 +114,8 @@ own final checksum value.
 Address book generation validates the deployment manifest contract set against
 the release artifact baseline, rejects invalid or duplicate deployed contract
 addresses, and fails check mode when the committed address-book JSON drifts.
+The default address-book set includes both the placeholder Anvil manifest and
+the sanitized broadcast-derived manifest.
 
 Source verification input generation writes
 `release-artifacts/latest/source-verification-inputs.json` from the production
@@ -141,11 +159,13 @@ Before a deployment can become public-beta eligible:
 - Run a dry-run auction drop, bid, settlement, and withdrawal.
 - Retain constructor args and verification inputs.
 - Generate and check source verification inputs.
+- Generate and check broadcast-derived manifest input from sanitized Foundry
+  output.
 - Generate and checksum the deployment manifest.
 - Generate and check the address book.
 - Generate and check the release manifest.
 - Generate and check the release checksum bundle.
 
-Fork/testnet broadcast, contract verification, event topic catalog publication
-against a live deployment, and end-to-end dry-run mint/auction ceremonies remain
-Gate E follow-up work.
+Live fork/testnet broadcast, production broadcast retention, contract
+verification, event topic catalog publication against a live deployment, and
+end-to-end dry-run mint/auction ceremonies remain Gate E follow-up work.

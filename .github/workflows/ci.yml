@@ -53,6 +53,8 @@ jobs:
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
             scripts/test_abi_compatibility.py \
+            scripts/generate_broadcast_manifest_input.py \
+            scripts/test_broadcast_manifest_input.py \
             scripts/generate_deployment_manifest.py \
             scripts/test_deployment_manifest.py \
             scripts/generate_address_books.py \
@@ -135,8 +137,11 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs
+          python3 scripts/test_broadcast_manifest_input.py 2>&1 | tee ci-logs/broadcast-manifest-input-tests.log
+          python3 scripts/generate_broadcast_manifest_input.py --check 2>&1 | tee ci-logs/broadcast-manifest-input-check.log
           python3 scripts/test_deployment_manifest.py 2>&1 | tee ci-logs/deployment-manifest-tests.log
           python3 scripts/generate_deployment_manifest.py --check 2>&1 | tee ci-logs/deployment-manifest-check.log
+          python3 scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check 2>&1 | tee ci-logs/deployment-manifest-broadcast-check.log
 
       - name: Address books
         shell: bash

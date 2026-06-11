@@ -93,14 +93,22 @@ The current Gate A smoke baseline proves:
   baseline fails on removed or changed functions, events, custom errors,
   constructors, fallback, or receive entries and reports additive entries as
   compatible.
+- `scripts/test_broadcast_manifest_input.py` and
+  `scripts/generate_broadcast_manifest_input.py --check` prove the sanitized
+  Foundry broadcast fixture maps exactly to the expected Anvil deployment
+  contract set, chain ID, transaction hashes, successful receipts, and
+  non-duplicate deployed addresses without committing secret-like keys.
 - `scripts/test_deployment_manifest.py` and
   `scripts/generate_deployment_manifest.py --check` prove the local Anvil
-  manifest is generated from committed inputs, references current ABI/runtime
-  bytecode hashes, and carries a deterministic manifest checksum.
+  placeholder manifest is generated from committed inputs, references current
+  ABI/runtime bytecode hashes, and carries a deterministic manifest checksum.
+  The same generator also checks the sanitized broadcast-derived manifest input
+  with `--config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`.
 - `scripts/test_address_books.py` and
   `scripts/generate_address_books.py --check` prove the generated local Anvil
-  address book is a compact, deterministic projection of the committed
-  deployment manifest and release artifact contract metadata.
+  address books are compact, deterministic projections of the committed
+  placeholder and broadcast-derived deployment manifests plus release artifact
+  contract metadata.
 - `scripts/test_release_manifest.py` and
   `scripts/generate_release_manifest.py --check` prove the generated top-level
   release manifest ties the release artifact catalog, ABI compatibility
@@ -110,8 +118,8 @@ The current Gate A smoke baseline proves:
   `scripts/generate_release_checksums.py --check` prove the committed
   `release-artifacts/latest/SHA256SUMS` and
   `release-artifacts/latest/release-checksums.json` bundle covers the current
-  release artifact, deployment manifest, address-book, config, schema, and
-  release-manifest files.
+  release artifact, broadcast fixture, deployment manifest, address-book,
+  config, schema, and release-manifest files.
 - `scripts/test_changelog_check.py` and `scripts/check_changelog.py` prove
   release-impacting branch changes include a non-placeholder `Unreleased`
   changelog entry before they can pass the local/CI gate.
@@ -123,8 +131,8 @@ pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, fork/testnet deployment rehearsals, production manifest
-generation from broadcast outputs, detached checksum signatures, signed release
-tags, production address books, verified live
+generation from live broadcast outputs, detached checksum signatures, signed
+release tags, production address books, verified live
 deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,

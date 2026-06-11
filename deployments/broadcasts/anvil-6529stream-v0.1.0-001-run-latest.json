@@ -1,0 +1,124 @@
+{
+  "chain": 31337,
+  "commit": "0000000000000000000000000000000000000000",
+  "dryRun": true,
+  "timestamp": 1781185200,
+  "transactions": [
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamAdmins",
+      "contractAddress": "0x1000000000000000000000000000000000000001",
+      "hash": "0x0101010101010101010101010101010101010101010101010101010101010101"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "DependencyRegistry",
+      "contractAddress": "0x1000000000000000000000000000000000000002",
+      "hash": "0x0202020202020202020202020202020202020202020202020202020202020202"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamCore",
+      "contractAddress": "0x1000000000000000000000000000000000000003",
+      "hash": "0x0303030303030303030303030303030303030303030303030303030303030303"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamCuratorsPool",
+      "contractAddress": "0x1000000000000000000000000000000000000004",
+      "hash": "0x0404040404040404040404040404040404040404040404040404040404040404"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamMinter",
+      "contractAddress": "0x1000000000000000000000000000000000000005",
+      "hash": "0x0505050505050505050505050505050505050505050505050505050505050505"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamDrops",
+      "contractAddress": "0x1000000000000000000000000000000000000006",
+      "hash": "0x0606060606060606060606060606060606060606060606060606060606060606"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamAuctions",
+      "contractAddress": "0x1000000000000000000000000000000000000007",
+      "hash": "0x0707070707070707070707070707070707070707070707070707070707070707"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "NextGenRandomizerVRF",
+      "contractAddress": "0x1000000000000000000000000000000000000008",
+      "hash": "0x0808080808080808080808080808080808080808080808080808080808080808"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "NextGenRandomizerRNG",
+      "contractAddress": "0x1000000000000000000000000000000000000009",
+      "hash": "0x0909090909090909090909090909090909090909090909090909090909090909"
+    },
+    {
+      "transactionType": "CALL",
+      "contractName": "",
+      "contractAddress": "",
+      "hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "receipts": [
+    {
+      "transactionHash": "0x0101010101010101010101010101010101010101010101010101010101010101",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000001",
+      "blockNumber": "0x1"
+    },
+    {
+      "transactionHash": "0x0202020202020202020202020202020202020202020202020202020202020202",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000002",
+      "blockNumber": "0x2"
+    },
+    {
+      "transactionHash": "0x0303030303030303030303030303030303030303030303030303030303030303",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000003",
+      "blockNumber": "0x3"
+    },
+    {
+      "transactionHash": "0x0404040404040404040404040404040404040404040404040404040404040404",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000004",
+      "blockNumber": "0x4"
+    },
+    {
+      "transactionHash": "0x0505050505050505050505050505050505050505050505050505050505050505",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000005",
+      "blockNumber": "0x5"
+    },
+    {
+      "transactionHash": "0x0606060606060606060606060606060606060606060606060606060606060606",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000006",
+      "blockNumber": "0x6"
+    },
+    {
+      "transactionHash": "0x0707070707070707070707070707070707070707070707070707070707070707",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000007",
+      "blockNumber": "0x7"
+    },
+    {
+      "transactionHash": "0x0808080808080808080808080808080808080808080808080808080808080808",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000008",
+      "blockNumber": "0x8"
+    },
+    {
+      "transactionHash": "0x0909090909090909090909090909090909090909090909090909090909090909",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000009",
+      "blockNumber": "0x9"
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "manifest_schema_version": "6529stream.deployment-manifest.v1",
+  "protocol_version": "0.1.0",
+  "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+  "lifecycle_state": "Rehearsed",
+  "network": {
+    "name": "anvil",
+    "chain_id": 31337,
+    "rpc_environment_variable": "ANVIL_RPC_URL",
+    "confirmation_depth": 0
+  },
+  "git": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false
+  },
+  "toolchain": {
+    "foundry_version": "v1.7.1",
+    "solidity_version": "0.8.19",
+    "profile": "default",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "via_ir": true
+  },
+  "contracts": {
+    "StreamAdmins": {
+      "address": "0x1000000000000000000000000000000000000001",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000006532"
+      ],
+      "abi_hash": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+      "bytecode_hash": "sha256:7611b836cc7f52c33e7e4b865bca6bc1ab11b28cfd5aefe9e6cbbbe948e23173",
+      "verification_status": "not_applicable"
+    },
+    "DependencyRegistry": {
+      "address": "0x1000000000000000000000000000000000000002",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000001"
+      ],
+      "abi_hash": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
+      "bytecode_hash": "sha256:f8be54e49160988379e7cb288841e2238ea8f98b92327b469854501625a58d77",
+      "verification_status": "not_applicable"
+    },
+    "StreamCore": {
+      "address": "0x1000000000000000000000000000000000000003",
+      "constructor_args": [
+        "6529 Stream",
+        "STREAM",
+        "0x0000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000002"
+      ],
+      "abi_hash": "sha256:979bb597afe287b0b05d057849ceaa154bc566d361502fe7d7bd5591107f79d1",
+      "bytecode_hash": "sha256:06bbdbf40027f33f1260eb0b53b1bc9ec8fa2110c19ae4832e37397f97cac802",
+      "verification_status": "not_applicable"
+    },
+    "StreamCuratorsPool": {
+      "address": "0x1000000000000000000000000000000000000004",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000006534"
+      ],
+      "abi_hash": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
+      "bytecode_hash": "sha256:22eca98b3ca54dfb581536890db8a350045c3b3fe37ef2f5844dd896b8a0da9b",
+      "verification_status": "not_applicable"
+    },
+    "StreamMinter": {
+      "address": "0x1000000000000000000000000000000000000005",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000003",
+        "0x0000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "abi_hash": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
+      "bytecode_hash": "sha256:5ed37a2f19a2b5067ac9f444ff869a1dc072190c46810785475febb6af023518",
+      "verification_status": "not_applicable"
+    },
+    "StreamDrops": {
+      "address": "0x1000000000000000000000000000000000000006",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000006532",
+        "0x0000000000000000000000000000000000000005",
+        "0x0000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000006533",
+        "0x0000000000000000000000000000000000000004"
+      ],
+      "abi_hash": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
+      "bytecode_hash": "sha256:667c471aa08207931d8c0dae1133f39537585df4ffba498084ae60c8156ad75a",
+      "verification_status": "not_applicable"
+    },
+    "StreamAuctions": {
+      "address": "0x1000000000000000000000000000000000000007",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000005",
+        "0x0000000000000000000000000000000000000003",
+        "0x0000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000006",
+        "0x0000000000000000000000000000000000006533",
+        "0x0000000000000000000000000000000000000004"
+      ],
+      "abi_hash": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
+      "bytecode_hash": "sha256:80ba0faf189dd5be498533e62c424c4935eaf2ea6ab69b0272e3b4ef63e4d3b8",
+      "verification_status": "not_applicable"
+    },
+    "NextGenRandomizerVRF": {
+      "address": "0x1000000000000000000000000000000000000008",
+      "constructor_args": [
+        6529,
+        "0x0000000000000000000000000000000000006535",
+        "0x0000000000000000000000000000000000000003",
+        "0x0000000000000000000000000000000000000001"
+      ],
+      "abi_hash": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
+      "bytecode_hash": "sha256:b0c23adf734c5f2f1cdbbb57554f04e7099f0538162acadfcffa5f170acb76b3",
+      "verification_status": "not_applicable"
+    },
+    "NextGenRandomizerRNG": {
+      "address": "0x1000000000000000000000000000000000000009",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000003",
+        "0x0000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000006536"
+      ],
+      "abi_hash": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
+      "bytecode_hash": "sha256:2019f1007ca7f9c64044ade75cb78e04a1b08e05dd6fd2ad5f90b4a8f9f0b7f8",
+      "verification_status": "not_applicable"
+    }
+  },
+  "admin_ceremony": {
+    "deployer": "0x0000000000000000000000000000000000006537",
+    "admin_safe": "0x0000000000000000000000000000000000006529",
+    "emergency_recipient": "0x0000000000000000000000000000000000006531",
+    "pause_guardians": [
+      "0x0000000000000000000000000000000000006530"
+    ],
+    "unpause_admins": [
+      "0x0000000000000000000000000000000000006529"
+    ],
+    "signer_managers": [
+      "0x0000000000000000000000000000000000006529"
+    ],
+    "drop_signers": [
+      "0x0000000000000000000000000000000000006532"
+    ],
+    "temporary_admins_revoked": true,
+    "ownership_transfers": [
+      {
+        "contract": "StreamAdmins",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamCore",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      }
+    ]
+  },
+  "external_dependencies": {
+    "vrf_coordinator": "0x0000000000000000000000000000000000006535",
+    "arrng_controller": "0x0000000000000000000000000000000000006536",
+    "delegation_registry": "0x0000000000000000000000000000000000006534"
+  },
+  "verification": {
+    "contract_verification": "not_applicable",
+    "constructor_args_retained": true,
+    "commands": [
+      "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir"
+    ]
+  },
+  "release_artifacts": {
+    "manifest_sha256": "sha256:a8555744a59f68afec24c43fb02e0f5b6fc5f2102e455556368e1f061429ddd0",
+    "abi_hashes": {
+      "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+      "DependencyRegistry": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
+      "StreamCore": "sha256:979bb597afe287b0b05d057849ceaa154bc566d361502fe7d7bd5591107f79d1",
+      "StreamCuratorsPool": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
+      "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
+      "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
+      "StreamAuctions": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
+      "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
+      "NextGenRandomizerRNG": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf"
+    },
+    "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
+  },
+  "rehearsal": {
+    "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
+    "anvil_passed": true,
+    "fork_passed": false,
+    "notes": "Generated from a sanitized Foundry broadcast fixture. The fixture contains public deployment evidence only; it is not a live production broadcast."
+  }
+}

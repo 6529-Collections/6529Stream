@@ -17,7 +17,10 @@ ADDRESS_BOOK_SCHEMA = "6529stream.address-book.v1"
 DEPLOYMENT_MANIFEST_SCHEMA = "6529stream.deployment-manifest.v1"
 GENERATOR_VERSION = "1"
 
-DEFAULT_MANIFESTS = [Path("deployments/examples/anvil-6529stream-v0.1.0-001.json")]
+DEFAULT_MANIFESTS = [
+    Path("deployments/examples/anvil-6529stream-v0.1.0-001.json"),
+    Path("deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json"),
+]
 DEFAULT_OUTPUT_DIR = Path("deployments/address-books")
 DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 
