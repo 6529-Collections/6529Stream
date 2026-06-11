@@ -7,8 +7,8 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,508 bytes,
-  leaving 68 bytes of EIP-170 headroom under the IR-optimized deployment
+  size gate. Current `StreamCore` production runtime size is 24,545 bytes,
+  leaving 31 bytes of EIP-170 headroom under the IR-optimized deployment
   profile.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,

@@ -35,6 +35,9 @@ the release policy in `docs/release-policy.md`.
 - Persisted collection base URI values during full collection metadata updates
   and hardened admin, minter, and randomizer marker probes so invalid targets
   revert with typed custom errors.
+- Rejected initial zero collection supply with a typed supply error instead of
+  arithmetic panic, and rejected dependency registry swaps to non-contract
+  addresses with `InvalidDependencyRegistryContract()`.
 
 ### Release Impact
 
@@ -62,6 +65,9 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from the
   `StreamMetadataRenderer.supportsContractMarker` helper used to keep marker
   probe hardening deployable under EIP-170.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  explicit initial zero-supply rejection and dependency registry target
+  validation.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

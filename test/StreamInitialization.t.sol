@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../smart-contracts/Bytes32Strings.sol";
 import "../smart-contracts/NFTdelegation.sol";
+import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
@@ -146,6 +147,27 @@ contract StreamInitializationTest is CharacterizationTestBase, StreamFixture {
                 _expectedGenerativeScript(tokenId, collectionId, salt),
                 "empty script render changed"
             );
+    }
+
+    function testSetCollectionDataRejectsInitialZeroSupplyWithTypedError() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        string[] memory emptyScripts = new string[](0);
+
+        deployed.core
+            .createCollection(
+                "Zero Supply",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://zero-supply/",
+                "https://cdn.example/script.js",
+                bytes32(0),
+                emptyScripts
+            );
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.CollectionSupplyTooLarge.selector));
+        deployed.core.setCollectionData(2, address(0xA11CE), 5, 0, 1 days);
     }
 
     function testMinterReturnsLastMintedIndexFromExplicitZeroStart() public {

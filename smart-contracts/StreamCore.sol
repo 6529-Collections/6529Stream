@@ -93,6 +93,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     error CollectionNotCreated(uint256 collectionId);
     error BurnedTokenRemintNotAllowed(uint256 tokenId);
     error InvalidAdminContract();
+    error InvalidDependencyRegistryContract();
     error InvalidMinterContract();
     error InvalidRandomizerContract();
     error MetadataMutationPaused();
@@ -326,6 +327,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
             revert CollectionSupplyTooLarge();
         }
         if (collectionAdditionalData[_collectionID].collectionTotalSupply == 0) {
+            if (_collectionTotalSupply == 0) {
+                revert CollectionSupplyTooLarge();
+            }
             collectionAdditionalData[_collectionID].collectionArtistAddress =
             _collectionArtistAddress;
             collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
@@ -676,6 +680,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         } else if (_opt == 3) {
             if (frozenCollectionCount != 0) {
                 revert FrozenCollectionDependencyRegistry();
+            }
+            if (_newContract.code.length == 0) {
+                revert InvalidDependencyRegistryContract();
             }
             dependencyRegistry = IDependencyRegistry(_newContract);
         }

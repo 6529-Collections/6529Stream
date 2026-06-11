@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/113` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 18:00 UTC` |
+| Last updated | `2026-06-11 18:22 UTC` |
 
 ## Packaging Notes
 
@@ -119,8 +119,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Collection URI production enforcement (Queue Item 60)
 
-Status: CodeRabbit review fixes pushed; CI is green on the review-fix head;
-bytecode-headroom roadmap follow-up validated locally and ready to push.
+Status: CodeRabbit outside-diff follow-up implemented and validated locally;
+ready to commit, push, and request CodeRabbit review.
 Branch: `codex/metadata-collection-uri-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/114`.
 
@@ -142,6 +142,8 @@ Candidate files:
 - `smart-contracts/StreamCore.sol`
 - `smart-contracts/StreamMetadataRenderer.sol`
 - `test/StreamMetadataUriPolicy.t.sol`
+- `test/StreamInitialization.t.sol`
+- `test/StreamDependencyRegistry.t.sol`
 - `test/StreamMetadataFreeze.t.sol`
 - `test/StreamMetadataGolden.t.sol`
 - `docs/metadata.md`
@@ -195,6 +197,22 @@ Validation:
 - Documentation-only bytecode-headroom follow-up validation passed:
   `make release-checksums` and `make check`; release artifacts did not drift
   from the `ops/ROADMAP.md` / `ops/AUTONOMOUS_RUN.md` edits.
+- CodeRabbit's outside-diff comments were rechecked against current head and
+  accepted as valid. The local follow-up rejects first-time zero collection
+  supply before `reservedMaxTokensIndex` arithmetic, rejects dependency registry
+  swaps to non-contract targets with `InvalidDependencyRegistryContract()`, and
+  adds focused regressions in `test\StreamInitialization.t.sol` and
+  `test\StreamDependencyRegistry.t.sol`.
+- Outside-diff follow-up focused validation passed:
+  `forge test --match-path test\StreamInitialization.t.sol -vvv`,
+  `forge test --match-path test\StreamDependencyRegistry.t.sol -vvv`, and
+  `forge build --sizes --via-ir --skip test --skip script --force`. Current
+  `StreamCore` runtime size is 24,545 bytes with 31 bytes of EIP-170 headroom.
+- Outside-diff follow-up release/full validation passed:
+  `make release-checksums`, `make check`,
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`, targeted
+  `forge fmt --check`, and `git diff --check` with only the known Windows
+  line-ending warning for `release-artifacts/latest/SHA256SUMS`.
 
 Notes:
 
@@ -5412,6 +5430,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 18:22 | Validate PR #114 outside-diff follow-up locally | Focused regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` remains deployable at 24,545 bytes with 31 bytes of EIP-170 headroom |
+| 2026-06-11 18:15 | Accept CodeRabbit PR #114 outside-diff findings | The zero-supply path still reverted via arithmetic panic on first initialization, and dependency registry swaps still accepted EOAs or zero addresses; both are fixed locally with typed errors/regressions while keeping `StreamCore` deployable at 24,545 bytes and 31 bytes of EIP-170 headroom |
 | 2026-06-11 18:00 | Track PR #114 bytecode headroom risk | CodeRabbit correctly highlighted that `StreamCore` has only 61 bytes of EIP-170 margin after the review fix, so issue #115 and the roadmap now track recovering sustainable Core headroom before further non-trivial Core feature work |
 | 2026-06-11 17:52 | Validate PR #114 CodeRabbit fixes | Focused metadata/randomizer lifecycle regressions, the EIP-170 size gate, release artifact regeneration, full `make check`, Windows wrapper, formatting, and whitespace gates passed after persisting full-update base URIs and hardening marker probes |
 | 2026-06-11 17:44 | Accept CodeRabbit PR #114 findings | The base URI persistence finding was a real storage bug, and the marker-probe finding was valid for invalid targets; moving the low-level marker probe into `StreamMetadataRenderer` keeps `StreamCore` deployable with 61 bytes of EIP-170 headroom while preserving typed errors |

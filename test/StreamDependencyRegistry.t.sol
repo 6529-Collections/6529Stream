@@ -193,6 +193,20 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         registry.assertEq(address(replacement), "pinned replacement registry");
     }
 
+    function testDependencyRegistrySwapRejectsNonContracts() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamCore.InvalidDependencyRegistryContract.selector)
+        );
+        deployed.core.updateContracts(3, address(0));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamCore.InvalidDependencyRegistryContract.selector)
+        );
+        deployed.core.updateContracts(3, address(0x1234));
+    }
+
     function testCollectionRejectsUnknownDependencyKey() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         bytes32 unknownDependencyKey = keccak256("unknown-library");
