@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/84` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 01:42 UTC` |
+| Last updated | `2026-06-11 01:58 UTC` |
 
 ## Packaging Notes
 
@@ -96,7 +96,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
-| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Open in PR #85 on `codex/dependency-version-immutability` |
+| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Addressing CodeRabbit review in PR #85 on `codex/dependency-version-immutability` |
 
 ## Current PR Worklog
 
@@ -3752,12 +3752,20 @@ Implementation notes:
   version-existence helper; that helper now carries a narrow `timestamp`
   suppression because the timestamp is not used for authorization, randomness,
   or ordering.
+- CodeRabbit correctly identified that a nonzero dependency key with no
+  registered version could otherwise pin version zero and the empty-script
+  content hash. `StreamCore` now preserves `bytes32(0)` as the explicit
+  no-dependency sentinel while rejecting nonzero unknown dependency keys with
+  `UnknownDependency(key)`.
+- The duplicated test helper for explicit dependency repinning moved into
+  `StreamFixture`, and focused coverage now includes both explicit
+  no-dependency pins and nonzero unknown-key rejection.
 
 Local validation:
 
 - `forge build` passed after the contract/interface edits.
 - Focused dependency version tests passed:
-  `forge test --match-contract StreamDependencyRegistryTest -vvv` with 5 tests,
+  `forge test --match-contract StreamDependencyRegistryTest -vvv` with 7 tests,
   0 failed.
 - Adjacent metadata tests passed:
   `forge test --match-contract StreamMetadataEncodingTest -vvv` with 3 tests,
@@ -3780,11 +3788,17 @@ Local validation:
   findings; high/medium unchanged at `4/19`; selected critical detectors remain
   zero for `arbitrary-send-eth`, `reentrancy-eth`, `weak-prng`,
   `encode-packed-collision`, and `uninitialized-state`.
+- CodeRabbit review-fix validation passed after the unknown-key guard and helper
+  dedupe: focused dependency, metadata encoding, and freeze tests passed; full
+  `make check`, Windows wrapper, touched-file formatting, and whitespace checks
+  passed; Slither remained `718` total findings with high/medium unchanged at
+  `4/19`.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 01:58 | Address CodeRabbit PR #85 review | Fail closed for nonzero unknown dependency keys while preserving the explicit `bytes32(0)` no-dependency sentinel, move duplicate dependency-repinning test helpers into `StreamFixture`, add regression coverage, and rerun focused/full/Windows/Slither validation with high/medium unchanged at `4/19` |
 | 2026-06-11 01:42 | Open PR #85 | Dependency version immutability is published with local validation evidence; next step is CI and CodeRabbit review monitoring |
 | 2026-06-11 01:40 | Validate Queue Item 42 locally | Focused dependency/metadata/freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` after explicitly initializing new test helper flags and narrowly suppressing a provenance timestamp false positive |
 | 2026-06-11 01:21 | Implement Queue Item 42 local draft | Added immutable dependency registry versions, provenance/deprecation views, collection dependency pins, pinned dependency freeze manifests, focused tests, and docs/roadmap traceability; full validation remains to run |

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/DependencyRegistry.sol";
+import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
@@ -31,7 +32,6 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant TOKEN_ID = 10_000_000_000;
-    uint256 private constant FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testDependencyVersionsAreImmutableAndExposeProvenance() public {
@@ -151,6 +151,36 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
             )
         );
         deployed.dependencyRegistry.addDependencyScriptIndex(dependencyKey, 2, "out-of-range");
+    }
+
+    function testExplicitNoDependencyPinsEmptyVersion() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 emptyHash =
+            deployed.dependencyRegistry.getDependencyScriptContentHashAtVersion(bytes32(0), 0);
+
+        _assertCollectionDependencyState(deployed, bytes32(0), 0, emptyHash);
+    }
+
+    function testCollectionRejectsUnknownDependencyKey() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 unknownDependencyKey = keccak256("unknown-library");
+        string[] memory scripts = _singleChunk("function draw(){}");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamCore.UnknownDependency.selector, unknownDependencyKey)
+        );
+        deployed.core
+            .createCollection(
+                "Unknown",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://unknown/",
+                "https://cdn.example/script.js",
+                unknownDependencyKey,
+                scripts
+            );
     }
 
     function testCollectionPinsDependencyVersionUntilExplicitRepin() public {
@@ -353,27 +383,6 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         (registry.isDependencyVersionDeprecated(dependencyKey, expectedVersion)
                 == expectedDeprecated)
         .assertTrue("record deprecated");
-    }
-
-    function _pinCollectionDependency(DeployedStream memory deployed, bytes32 dependencyKey)
-        private
-    {
-        string[] memory scripts = new string[](1);
-        scripts[0] = "function draw(){}";
-        deployed.core
-            .updateCollectionInfo(
-                COLLECTION_ID,
-                "Genesis",
-                "6529",
-                "Description",
-                "https://6529.io",
-                "CC0",
-                "ipfs://base/",
-                "https://cdn.example/script.js",
-                dependencyKey,
-                FULL_COLLECTION_UPDATE_INDEX,
-                scripts
-            );
     }
 
     function _mintToken(DeployedStream memory deployed, uint256 tokenId, uint256 salt) private {

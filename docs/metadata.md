@@ -125,6 +125,11 @@ collection output until the collection is explicitly repinned through
 the current pin, and `DependencyVersionPinned(collectionId, key, version,
 contentHash)` records each pin.
 
+`bytes32(0)` is the explicit no-dependency sentinel and pins version `0` plus
+the typed empty-script content hash. Nonzero dependency keys must already have a
+registered version before collection creation or explicit repinning; otherwise
+`StreamCore` reverts with `UnknownDependency(key)`.
+
 ## Freeze Manifest And Boundaries
 
 `StreamCore.freezeCollection(collectionId)` records the public freeze boundary

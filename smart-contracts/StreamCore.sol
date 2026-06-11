@@ -71,6 +71,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     error CollectionNotCreated(uint256 collectionId);
     error FrozenCollectionDependencyRegistry();
     error MetadataFrozen(uint256 collectionId);
+    error UnknownDependency(bytes32 dependencyNameAndVersion);
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -546,6 +547,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         private
     {
         uint256 version = dependencyRegistry.latestDependencyVersion(dependencyNameAndVersion);
+        if (dependencyNameAndVersion != bytes32(0) && version == 0) {
+            revert UnknownDependency(dependencyNameAndVersion);
+        }
         bytes32 contentHash = dependencyRegistry.getDependencyScriptContentHashAtVersion(
             dependencyNameAndVersion, version
         );

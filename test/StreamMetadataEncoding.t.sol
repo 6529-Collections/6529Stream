@@ -18,7 +18,6 @@ contract StreamMetadataEncodingTest is CharacterizationTestBase, StreamFixture {
     bytes32 private constant DEPENDENCY_SCRIPT_CHUNK_TYPEHASH = keccak256(
         "6529StreamDependencyScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
     );
-    uint256 private constant FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
 
     function testDependencyScriptHashSeparatesAmbiguousChunkBoundaries() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
@@ -116,27 +115,6 @@ contract StreamMetadataEncodingTest is CharacterizationTestBase, StreamFixture {
                 DEPENDENCY_SCRIPT_CHUNK_TYPEHASH, index, keccak256(chunkBytes), chunkBytes.length
             )
         );
-    }
-
-    function _pinCollectionDependency(DeployedStream memory deployed, bytes32 dependencyKey)
-        private
-    {
-        string[] memory scripts = new string[](1);
-        scripts[0] = "function draw(){}";
-        deployed.core
-            .updateCollectionInfo(
-                1,
-                "Genesis",
-                "6529",
-                "Description",
-                "https://6529.io",
-                "CC0",
-                "ipfs://base/",
-                "https://cdn.example/script.js",
-                dependencyKey,
-                FULL_COLLECTION_UPDATE_INDEX,
-                scripts
-            );
     }
 
     function _expectedGenerativeScript(uint256 tokenId, bytes32 tokenHash, string memory dependency)
