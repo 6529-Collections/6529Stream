@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/86` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 04:26 UTC` |
+| Last updated | `2026-06-11 04:28 UTC` |
 
 ## Packaging Notes
 
@@ -97,7 +97,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
 | 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Merged in PR #85 |
 | 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Merged in PR #86 |
-| 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | In progress on `codex/metadata-escaping-safety` |
+| 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Open in PR #87 |
 
 ## Current PR Worklog
 
@@ -3940,10 +3940,11 @@ Merge:
 
 ### PR candidate: Add metadata escaping and render-safety baseline (Queue Item 44)
 
-Status: Local implementation complete; final local gates pass and PR creation is
-next.
+Status: Open in PR #87; CI and CodeRabbit review pending.
 Branch: `codex/metadata-escaping-safety`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/87`.
+Initial implementation commit: `d9a4a1af3bf3f56bf5e913f2db4b9ba070b924df`.
+CodeRabbit review request comment: `4677178780`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/51`
@@ -4004,6 +4005,7 @@ Validation so far:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 04:28 | Open PR #87 and request CodeRabbit | Metadata escaping safety baseline published at `https://github.com/6529-Collections/6529Stream/pull/87`; CodeRabbit review requested in issue comment `4677178780`, and Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 04:26 | Finish Queue Item 44 local validation | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading/traceability scans, and Slither baseline comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 04:09 | Implement Queue Item 44 local draft | Added JSON string escaping, raw attribute structural guards, parser-backed metadata escaping tests, adjacent metadata validation, and docs/roadmap traceability while leaving generated HTML/JavaScript escaping, URI policy, invalid UTF-8 policy, size limits, and render-sandbox tests as explicit follow-up work under issue #51 |
 | 2026-06-11 03:59 | Start Queue Item 44 | PR #86 merged and main is synced; issue #51 is the next Gate D metadata row covering JSON escaping, size policy, render-sandbox tests, and executable metadata docs |
