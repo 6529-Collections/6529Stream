@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/address-book.schema.json",
+  "title": "6529Stream Address Book",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_by",
+    "source",
+    "protocol_version",
+    "deployment_version",
+    "lifecycle_state",
+    "network",
+    "git",
+    "contracts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.address-book.v1"
+    },
+    "generated_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployment_manifest",
+        "deployment_manifest_sha256",
+        "release_artifacts",
+        "abi_checksums",
+        "event_topic_catalog"
+      ],
+      "properties": {
+        "deployment_manifest": { "type": "string", "minLength": 1 },
+        "deployment_manifest_sha256": { "$ref": "#/$defs/sha256" },
+        "release_artifacts": { "type": "string", "minLength": 1 },
+        "abi_checksums": { "type": "string", "minLength": 1 },
+        "event_topic_catalog": { "type": "string", "minLength": 1 }
+      }
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "enum": [
+        "Planned",
+        "Rehearsed",
+        "Active",
+        "Deprecated",
+        "EmergencySuperseded",
+        "Retired",
+        "Cancelled"
+      ]
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "chain_id"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "chain_id": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "source_dirty"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-fA-F]{40}$" },
+        "source_dirty": { "type": "boolean" }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/contract" }
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{40}$"
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "source",
+        "artifact_path",
+        "abi_hash",
+        "runtime_bytecode_hash",
+        "verification_status"
+      ],
+      "properties": {
+        "address": { "$ref": "#/$defs/address" },
+        "source": { "type": "string", "minLength": 1 },
+        "artifact_path": { "type": "string", "minLength": 1 },
+        "abi_hash": { "$ref": "#/$defs/sha256" },
+        "runtime_bytecode_hash": { "$ref": "#/$defs/sha256" },
+        "verification_status": {
+          "enum": ["not_started", "submitted", "verified", "not_applicable"]
+        }
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

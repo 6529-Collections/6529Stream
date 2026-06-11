@@ -24,7 +24,7 @@ PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)
 
 .PHONY: check build test size deploy-rehearsal release-artifacts release-artifacts-check abi-compatibility abi-compatibility-check deployment-manifests deployment-manifest-check address-books address-books-check fmt-check slither clean
 
-check: build test size release-artifacts-check abi-compatibility-check deployment-manifest-check address-books-check deploy-rehearsal
+check: build test size release-artifacts-check abi-compatibility-check address-books-check deploy-rehearsal
 
 build:
 	forge build

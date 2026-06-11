@@ -60,7 +60,9 @@ Compact address books live under `deployments/address-books/` and are generated
 from committed deployment manifests. They are meant for integrators and scripts
 that need network, release, manifest checksum, contract address, source path,
 ABI hash, runtime bytecode hash, and verification-status data without parsing
-constructor arguments or admin ceremony details.
+constructor arguments or admin ceremony details. They follow
+`deployments/schema/address-book.schema.json`, normalize addresses to
+lowercase, and should be regenerated from manifests rather than edited by hand.
 
 ABI checksum, bytecode checksum, interface ID, and event topic catalog inputs
 are generated from the production `via-ir` Foundry artifacts:

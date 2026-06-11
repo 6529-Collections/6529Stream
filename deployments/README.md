@@ -8,6 +8,7 @@ external dependencies to a specific git commit and chain.
 The current baseline includes:
 
 - `schema/deployment-manifest.schema.json`: the required manifest shape.
+- `schema/address-book.schema.json`: the compact address-book shape.
 - `config/anvil-6529stream-v0.1.0-001.json`: the source input for the
   generated local example.
 - `examples/anvil-6529stream-v0.1.0-001.json`: a non-production local example.
@@ -42,4 +43,6 @@ Address books are generated from committed deployment manifests and
 constructor arguments, admin ceremony details, and verification commands while
 retaining network/release metadata, the source manifest checksum, contract
 addresses, source paths, ABI hashes, runtime bytecode hashes, and verification
-status.
+status. Address-book JSON files are generated outputs; update the source
+manifest or release artifacts, then rerun `python scripts/generate_address_books.py`
+instead of editing address books by hand.

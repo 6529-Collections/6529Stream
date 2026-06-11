@@ -74,7 +74,7 @@ def deployment_manifest(root: Path) -> Path:
                     "verification_status": "not_applicable",
                 },
                 "Beta": {
-                    "address": "0x0000000000000000000000000000000000000002",
+                    "address": "0x000000000000000000000000000000000000000B",
                     "abi_hash": "sha256:" + ("b" * 64),
                     "bytecode_hash": "sha256:" + ("2" * 64),
                     "verification_status": "verified",
@@ -120,6 +120,10 @@ class AddressBookTests(unittest.TestCase):
             self.assertEqual(
                 address_book["contracts"]["Beta"]["runtime_bytecode_hash"],
                 "sha256:" + ("2" * 64),
+            )
+            self.assertEqual(
+                address_book["contracts"]["Beta"]["address"],
+                "0x000000000000000000000000000000000000000b",
             )
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
@@ -182,6 +186,30 @@ class AddressBookTests(unittest.TestCase):
             write_json(manifest_path, manifest)
 
             with self.assertRaisesRegex(generator.AddressBookError, "source_dirty"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_generator_rejects_invalid_verification_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["contracts"]["Alpha"]["verification_status"] = "verifed"
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "verification_status"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_generator_rejects_invalid_hash_format(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["contracts"]["Alpha"]["abi_hash"] = "notahash"
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "sha256"):
                 generator.build_address_book(manifest_path, release_dir, root)
 
     def test_generator_rejects_missing_release_contract(self) -> None:

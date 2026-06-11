@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/98` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 09:49 UTC` |
+| Last updated | `2026-06-11 10:00 UTC` |
 
 ## Packaging Notes
 
@@ -4563,7 +4563,7 @@ Merge evidence:
 
 ### PR candidate: Generate deployment address books (Queue Item 51)
 
-Status: PR open; awaiting CI and CodeRabbit.
+Status: CodeRabbit findings addressed locally; push and re-review next.
 Branch: `codex/address-book-generator`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/100`.
 Related issue:
@@ -4613,6 +4613,9 @@ Implementation draft:
 - Added focused tests for deterministic generation, drift detection, duplicate
   addresses, invalid addresses, invalid `source_dirty`, missing contract
   metadata, and missing release contracts.
+- Added `deployments/schema/address-book.schema.json`, deterministic lowercase
+  address normalization, `sha256:` hash-format validation, and verification
+  status enum validation while addressing CodeRabbit review.
 - Wired address-book tests and `--check` drift detection into `make check`,
   `scripts/check.sh`, `scripts/check.ps1`, and GitHub Actions.
 - Updated README, tooling, deployment, status, deployment artifact, roadmap,
@@ -4627,7 +4630,7 @@ Local validation:
 - `bash -n scripts/check.sh`
 - PowerShell parser validation for `scripts\check.ps1`
 - Per-file JSON parsing for the generated address book, deployment manifest,
-  and ABI checksums
+  address-book schema, and ABI checksums
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 - `git diff --check` reported only the known `scripts/check.ps1` line-ending
@@ -4637,6 +4640,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 10:00 | Address CodeRabbit PR #100 findings locally | Accepted CodeRabbit comment `4679312734`: removed duplicate Makefile execution, added an explicit generated-output docs note, added `deployments/schema/address-book.schema.json`, normalized generated addresses to lowercase, constrained `verification_status`, validated `sha256:` hash formats, expanded address-book tests to 8 cases, and reran focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation successfully |
 | 2026-06-11 09:49 | Open PR #100 and request CodeRabbit | Address-book generator PR published at `https://github.com/6529-Collections/6529Stream/pull/100`; CodeRabbit review requested in issue comment `4679297117`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 09:47 | Validate Queue Item 51 locally | Address-book generator tests, address-book drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass; validation tightened `source_dirty` to strict boolean parsing and records the ABI checksum source path in the generated artifact |
 | 2026-06-11 09:28 | Start Queue Item 51 | Issue #99 tracks the remaining deterministic address-book artifact gap; branch `codex/address-book-generator` starts from merged PR #98 and scopes to manifest-derived address books plus local/CI drift checks |

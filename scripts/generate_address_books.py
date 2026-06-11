@@ -22,7 +22,16 @@ DEFAULT_OUTPUT_DIR = Path("deployments/address-books")
 DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
+SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 ZERO_ADDRESS = "0x" + ("0" * 40)
+VERIFICATION_STATUSES = frozenset(
+    {
+        "not_started",
+        "submitted",
+        "verified",
+        "not_applicable",
+    }
+)
 
 
 class AddressBookError(RuntimeError):
@@ -59,6 +68,21 @@ def require_string(value: Any, path: str) -> str:
     return value
 
 
+def require_enum(value: Any, path: str, choices: frozenset[str]) -> str:
+    text = require_string(value, path)
+    if text not in choices:
+        expected = ", ".join(sorted(choices))
+        raise AddressBookError(f"{path} must be one of: {expected}")
+    return text
+
+
+def require_sha256(value: Any, path: str) -> str:
+    digest = require_string(value, path)
+    if not SHA256_RE.match(digest):
+        raise AddressBookError(f"{path} must be a sha256: hash")
+    return digest
+
+
 def require_int(value: Any, path: str) -> int:
     if not isinstance(value, int):
         raise AddressBookError(f"{path} must be an integer")
@@ -83,7 +107,7 @@ def normalize_address(value: Any, path: str) -> str:
         raise AddressBookError(f"{path} must be a 20-byte hex address")
     if address.lower() == ZERO_ADDRESS:
         raise AddressBookError(f"{path} cannot be the zero address")
-    return address
+    return address.lower()
 
 
 def load_release_contract_metadata(release_artifacts_dir: Path) -> dict[str, Any]:
@@ -100,11 +124,11 @@ def load_release_contract_metadata(release_artifacts_dir: Path) -> dict[str, Any
                 contract_data.get("artifact_path"),
                 f"abi-checksums.contracts.{name}.artifact_path",
             ),
-            "abi_sha256": require_string(
+            "abi_sha256": require_sha256(
                 contract_data.get("abi_sha256"),
                 f"abi-checksums.contracts.{name}.abi_sha256",
             ),
-            "deployed_bytecode_sha256": require_string(
+            "deployed_bytecode_sha256": require_sha256(
                 contract_data.get("deployed_bytecode_sha256"),
                 f"abi-checksums.contracts.{name}.deployed_bytecode_sha256",
             ),
@@ -148,8 +172,8 @@ def build_contracts(
             )
         seen_addresses[address.lower()] = name
 
-        abi_hash = require_string(manifest_contract.get("abi_hash"), f"contracts.{name}.abi_hash")
-        runtime_hash = require_string(
+        abi_hash = require_sha256(manifest_contract.get("abi_hash"), f"contracts.{name}.abi_hash")
+        runtime_hash = require_sha256(
             manifest_contract.get("bytecode_hash"), f"contracts.{name}.bytecode_hash"
         )
         expected_abi_hash = release_contract["abi_sha256"]
@@ -169,9 +193,10 @@ def build_contracts(
             "artifact_path": release_contract["artifact_path"],
             "abi_hash": abi_hash,
             "runtime_bytecode_hash": runtime_hash,
-            "verification_status": require_string(
+            "verification_status": require_enum(
                 manifest_contract.get("verification_status"),
                 f"contracts.{name}.verification_status",
+                VERIFICATION_STATUSES,
             ),
         }
     return contracts
@@ -194,7 +219,7 @@ def build_address_book(
     release_artifacts = require_dict(
         manifest.get("release_artifacts"), "manifest.release_artifacts"
     )
-    source_manifest_checksum = require_string(
+    source_manifest_checksum = require_sha256(
         release_artifacts.get("manifest_sha256"),
         "manifest.release_artifacts.manifest_sha256",
     )

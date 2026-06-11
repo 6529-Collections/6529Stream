@@ -67,7 +67,9 @@ The address-book step projects committed deployment manifests into compact
 integrator-facing JSON under `deployments/address-books/`. Address books keep
 network/release metadata, source manifest checksums, contract addresses, source
 paths, ABI hashes, runtime bytecode hashes, and verification status without the
-full ceremony and constructor-argument details from deployment manifests.
+full ceremony and constructor-argument details from deployment manifests. They
+follow `deployments/schema/address-book.schema.json`, normalize addresses to
+lowercase, and are regenerated with `python scripts/generate_address_books.py`.
 
 Windows contributors can run:
 
