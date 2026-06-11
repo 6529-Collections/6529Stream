@@ -63,14 +63,15 @@ The current Gate A smoke baseline proves:
   attempts for previously burned token IDs, and allow valid VRF/arRNG post-burn
   fulfillment to record audit-only randomness without ERC-4906 metadata updates
   or freeze-manifest changes. `StreamMetadataEscaping.t.sol` proves the current
-  on-chain JSON string escaping and raw attribute structural guard: escaped
+  on-chain JSON string escaping and raw attribute schema guard: escaped
   collection/image fields decode to parseable JSON, brackets inside quoted
-  attribute values remain valid, and breakout/control-character/unterminated
-  attribute fragments revert. It also decodes final animation HTML and proves
-  the wrapper escapes the external library attribute, embeds `tokenData` and
-  dependency script content through escaped JavaScript strings, and neutralizes
-  closing-script sequences so hostile metadata inputs do not create extra raw
-  wrapper `</script>` tags. `StreamMetadataSizeLimits.t.sol` proves byte caps
+  attribute values remain valid, valid JSON string escapes are accepted, and
+  breakout/control-character/unterminated/malformed semantic attribute fragments
+  revert. It also decodes final animation HTML and proves the wrapper escapes
+  the external library attribute, embeds `tokenData` and dependency script
+  content through escaped JavaScript strings, and neutralizes closing-script
+  sequences so hostile metadata inputs do not create extra raw wrapper
+  `</script>` tags. `StreamMetadataSizeLimits.t.sol` proves byte caps
   for collection display fields, collection script chunks and counts, token
   data, token images, token raw attributes, generated `tokenURI` output,
   dependency script chunks and counts, and dependency provenance strings.
@@ -87,8 +88,10 @@ The current Gate A smoke baseline proves:
   `scripts/test_metadata_fixtures.py` and
   `scripts/check_metadata_fixtures.py` validate the committed metadata golden
   fixtures outside Foundry by strictly decoding JSON and HTML data URIs,
-  parsing metadata JSON, checking current URI scheme policy, and asserting the
-  generated final animation wrapper has exactly the expected script boundaries.
+  parsing metadata JSON, rejecting invalid UTF-8 fixture payloads, validating
+  semantic attribute shape, checking current URI scheme policy, and asserting
+  the generated final animation wrapper has exactly the expected script
+  boundaries.
 - `StreamDeploymentManifest.t.sol` proves the first Gate E local deployment
   rehearsal can deploy and wire the stack, configure sample admin/pause/signer
   ceremony state, transfer Ownable control to the configured Safe placeholder,
@@ -162,12 +165,11 @@ rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening, production dependency migration
-runbooks beyond the local artifact-manifest baseline, production semantic
-attribute schema validation, production invalid UTF-8 enforcement, full browser
-execution sandbox automation, deployment discipline, and the broader P0/P1 test
-suite. Fixture-level semantic attribute and invalid UTF-8 regressions are now
-covered in the committed metadata fixture gate, but they do not enforce
-production raw-attribute writes.
+runbooks beyond the local artifact-manifest baseline, production invalid UTF-8
+enforcement, full browser execution sandbox automation, deployment discipline,
+and the broader P0/P1 test suite. Fixture-level invalid UTF-8 regressions are
+now covered in the committed metadata fixture gate, but they do not enforce the
+remaining production UTF-8 policy.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.

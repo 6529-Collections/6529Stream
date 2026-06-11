@@ -76,19 +76,18 @@ contributors who start from the README.
   repinned. Burned tokens now follow ERC-721 token-existence semantics, emit a
   protocol burn audit event, expose retained burn audit state, and can record
   valid post-burn randomness for audit only. On-chain metadata now escapes JSON
-  string fields, rejects raw attribute fragments that can break out of the
-  enclosing attribute array, escapes generated animation wrapper fields, parses
-  `tokenData` from an escaped string, and neutralizes closing-script sequences
-  in generated HTML. Numeric byte limits now cover collection display fields,
+  string fields, enforces raw attribute entries as `trait_type` / `value` string
+  pairs, escapes generated animation wrapper fields, parses `tokenData` from an
+  escaped string, and neutralizes closing-script sequences in generated HTML.
+  Numeric byte limits now cover collection display fields,
   collection scripts, token data, token images, token attributes, generated
   `tokenURI` output, dependency scripts, and dependency provenance. Token image
   writes, collection base URI writes, and external library URL writes now reject
   unsafe URI inputs, and renderer helpers define the current content/script URI
   scheme policy for tests and fixture checks.
-  Remaining metadata blockers include dependency artifact packaging and deployment
-  migration runbooks beyond registry provenance strings, full browser execution
-  sandbox automation, semantic attribute schema validation, and invalid UTF-8
-  policy.
+  Remaining metadata blockers include deployment migration runbooks beyond
+  registry provenance strings, full browser execution sandbox automation, and
+  production invalid UTF-8 policy.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries.

@@ -8,14 +8,8 @@ import "./Strings.sol";
 library StreamMetadataRenderer {
     using Strings for uint256;
 
-    struct RawAttributeValidationState {
-        uint256 depth;
-        uint256 containerKinds;
-        bool inString;
-        bool escaped;
-        bool sawTopLevelValue;
-        bool expectingTopLevelValue;
-    }
+    uint8 private constant _RAW_ATTRIBUTE_TRAIT_TYPE_KEY = 1;
+    uint8 private constant _RAW_ATTRIBUTE_VALUE_KEY = 2;
 
     function onchainTokenURI(
         string memory schemaVersion,
@@ -309,30 +303,32 @@ library StreamMetadataRenderer {
 
     function isSafeRawAttributes(string memory raw) public pure returns (bool) {
         bytes memory input = bytes(raw);
-        RawAttributeValidationState memory state = RawAttributeValidationState({
-            depth: 0,
-            containerKinds: 0,
-            inString: false,
-            escaped: false,
-            sawTopLevelValue: false,
-            expectingTopLevelValue: true
-        });
+        uint256 index = _skipRawAttributeSpaces(input, 0);
+        if (index == input.length) {
+            return true;
+        }
 
-        for (uint256 i = 0; i < input.length; i++) {
-            bytes1 character = input[i];
-            if (uint8(character) < 0x20) {
+        while (index < input.length) {
+            bool ok;
+            (ok, index) = _parseRawAttributeObject(input, index);
+            if (!ok) {
                 return false;
             }
 
-            if (state.inString) {
-                _advanceRawAttributeStringState(state, character);
-            } else if (!_advanceRawAttributeStructuralState(state, character)) {
+            index = _skipRawAttributeSpaces(input, index);
+            if (index == input.length) {
+                return true;
+            }
+            if (input[index] != 0x2c) {
+                return false;
+            }
+            index = _skipRawAttributeSpaces(input, index + 1);
+            if (index == input.length) {
                 return false;
             }
         }
 
-        return !(state.inString || state.escaped || state.depth != 0
-                || (state.sawTopLevelValue && state.expectingTopLevelValue));
+        return true;
     }
 
     function isSafeContentUri(string memory uri, bool allowEmpty) public pure returns (bool) {
@@ -385,96 +381,168 @@ library StreamMetadataRenderer {
         }
     }
 
-    function _advanceRawAttributeStringState(
-        RawAttributeValidationState memory state,
-        bytes1 character
-    ) private pure {
-        if (state.escaped) {
-            state.escaped = false;
-        } else if (character == 0x5c) {
-            state.escaped = true;
-        } else if (character == 0x22) {
-            state.inString = false;
+    function _parseRawAttributeObject(bytes memory input, uint256 index)
+        private
+        pure
+        returns (bool, uint256)
+    {
+        if (index >= input.length || input[index] != 0x7b) {
+            return (false, index);
         }
+
+        index = _skipRawAttributeSpaces(input, index + 1);
+        uint8 seenKeys = 0;
+        bool ok;
+        uint8 key;
+        (ok, index, key) = _parseRawAttributePair(input, index, seenKeys);
+        if (!ok) {
+            return (false, index);
+        }
+        seenKeys |= key;
+
+        index = _skipRawAttributeSpaces(input, index);
+        if (index >= input.length || input[index] != 0x2c) {
+            return (false, index);
+        }
+
+        index = _skipRawAttributeSpaces(input, index + 1);
+        (ok, index, key) = _parseRawAttributePair(input, index, seenKeys);
+        if (!ok) {
+            return (false, index);
+        }
+        seenKeys |= key;
+
+        index = _skipRawAttributeSpaces(input, index);
+        if (seenKeys != (_RAW_ATTRIBUTE_TRAIT_TYPE_KEY | _RAW_ATTRIBUTE_VALUE_KEY)) {
+            return (false, index);
+        }
+        if (index >= input.length || input[index] != 0x7d) {
+            return (false, index);
+        }
+        return (true, index + 1);
     }
 
-    function _advanceRawAttributeStructuralState(
-        RawAttributeValidationState memory state,
-        bytes1 character
-    ) private pure returns (bool) {
-        if (character == 0x22) {
-            if (state.depth == 0) {
-                return false;
+    function _parseRawAttributePair(bytes memory input, uint256 index, uint8 seenKeys)
+        private
+        pure
+        returns (bool, uint256, uint8)
+    {
+        bool ok;
+        uint8 key;
+        (ok, index, key) = _parseRawAttributeKey(input, index);
+        if (!ok || (seenKeys & key) != 0) {
+            return (false, index, 0);
+        }
+
+        index = _skipRawAttributeSpaces(input, index);
+        if (index >= input.length || input[index] != 0x3a) {
+            return (false, index, 0);
+        }
+
+        index = _skipRawAttributeSpaces(input, index + 1);
+        (ok, index) = _parseJsonStringValue(input, index);
+        if (!ok) {
+            return (false, index, 0);
+        }
+        return (true, index, key);
+    }
+
+    function _parseRawAttributeKey(bytes memory input, uint256 index)
+        private
+        pure
+        returns (bool, uint256, uint8)
+    {
+        if (_matches(input, index, "\"trait_type\"")) {
+            return (true, index + 12, _RAW_ATTRIBUTE_TRAIT_TYPE_KEY);
+        }
+        if (_matches(input, index, "\"value\"")) {
+            return (true, index + 7, _RAW_ATTRIBUTE_VALUE_KEY);
+        }
+        return (false, index, 0);
+    }
+
+    function _parseJsonStringValue(bytes memory input, uint256 index)
+        private
+        pure
+        returns (bool, uint256)
+    {
+        if (index >= input.length || input[index] != 0x22) {
+            return (false, index);
+        }
+
+        index++;
+        while (index < input.length) {
+            uint8 value = uint8(input[index]);
+            if (value < 0x20) {
+                return (false, index);
             }
-            state.inString = true;
-        } else if (character == 0x7b || character == 0x5b) {
-            return _openRawAttributeContainer(state, character);
-        } else if (character == 0x7d || character == 0x5d) {
-            return _closeRawAttributeContainer(state, character);
-        } else if (state.depth == 0) {
-            return _advanceRawAttributeTopLevelSeparator(state, character);
+            if (value == 0x22) {
+                return (true, index + 1);
+            }
+            if (value == 0x5c) {
+                index++;
+                if (index >= input.length) {
+                    return (false, index);
+                }
+                if (input[index] == 0x75) {
+                    if (index + 4 >= input.length) {
+                        return (false, index);
+                    }
+                    for (uint256 offset = 1; offset <= 4; offset++) {
+                        if (!_isHexDigit(input[index + offset])) {
+                            return (false, index);
+                        }
+                    }
+                    index += 5;
+                } else if (_isSimpleJsonEscape(input[index])) {
+                    index++;
+                } else {
+                    return (false, index);
+                }
+            } else {
+                index++;
+            }
         }
-        return true;
+
+        return (false, index);
     }
 
-    function _openRawAttributeContainer(RawAttributeValidationState memory state, bytes1 opener)
+    function _skipRawAttributeSpaces(bytes memory input, uint256 index)
+        private
+        pure
+        returns (uint256)
+    {
+        while (index < input.length && input[index] == 0x20) {
+            index++;
+        }
+        return index;
+    }
+
+    function _matches(bytes memory input, uint256 index, string memory raw)
         private
         pure
         returns (bool)
     {
-        if (state.depth >= 256) {
+        bytes memory expected = bytes(raw);
+        if (index + expected.length > input.length) {
             return false;
         }
-        if (state.depth == 0) {
-            if (!state.expectingTopLevelValue) {
+        for (uint256 i = 0; i < expected.length; i++) {
+            if (input[index + i] != expected[i]) {
                 return false;
             }
-            state.sawTopLevelValue = true;
-            state.expectingTopLevelValue = false;
-        }
-        if (opener == 0x7b) {
-            state.containerKinds |= uint256(1) << state.depth;
-        } else {
-            state.containerKinds &= ~(uint256(1) << state.depth);
-        }
-        state.depth++;
-        return true;
-    }
-
-    function _closeRawAttributeContainer(RawAttributeValidationState memory state, bytes1 closer)
-        private
-        pure
-        returns (bool)
-    {
-        if (state.depth == 0) {
-            return false;
-        }
-        uint256 depthIndex = state.depth - 1;
-        bool expectsObjectClose = ((state.containerKinds >> depthIndex) & 1) == 1;
-        if ((closer == 0x7d) != expectsObjectClose) {
-            return false;
-        }
-        state.containerKinds &= ~(uint256(1) << depthIndex);
-        state.depth = depthIndex;
-        if (state.depth == 0) {
-            state.expectingTopLevelValue = false;
         }
         return true;
     }
 
-    function _advanceRawAttributeTopLevelSeparator(
-        RawAttributeValidationState memory state,
-        bytes1 character
-    ) private pure returns (bool) {
-        if (character == 0x2c) {
-            if (!state.sawTopLevelValue || state.expectingTopLevelValue) {
-                return false;
-            }
-            state.expectingTopLevelValue = true;
-        } else if (character != 0x20) {
-            return false;
-        }
-        return true;
+    function _isSimpleJsonEscape(bytes1 character) private pure returns (bool) {
+        return character == 0x22 || character == 0x5c || character == 0x2f || character == 0x62
+            || character == 0x66 || character == 0x6e || character == 0x72 || character == 0x74;
+    }
+
+    function _isHexDigit(bytes1 character) private pure returns (bool) {
+        return (character >= 0x30 && character <= 0x39) || (character >= 0x41 && character <= 0x46)
+            || (character >= 0x61 && character <= 0x66);
     }
 
     function _isScriptEndTagStart(bytes memory input, uint256 index) private pure returns (bool) {

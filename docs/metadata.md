@@ -47,13 +47,12 @@ base64-encoded HTML animation URL.
 `StreamCore.metadataSchemaVersion()` exposes the active schema version and
 `StreamCore.tokenMetadataState(tokenId)` exposes the current `pending` or
 `final` state for minted tokens. The current schema version escapes JSON string
-fields emitted by on-chain metadata and rejects raw attribute fragments that
-contain literal control characters, unterminated strings, unbalanced
-object/array delimiters, or unquoted `]`/`}` breakout attempts. It also
-enforces the current URI policy for token images, collection base URIs, and
-external collection library URLs before storage. Fixture-level checks now reject
-invalid UTF-8 data URI payloads and non-semantic attribute entries in committed
-metadata golden files. Production raw-attribute schema enforcement, production
+fields emitted by on-chain metadata and rejects raw attribute fragments that do
+not encode empty content or comma-separated objects with exactly `trait_type`
+and `value` string fields. It also enforces the current URI policy for token
+images, collection base URIs, and external collection library URLs before
+storage. Fixture-level checks now reject invalid UTF-8 data URI payloads and
+non-semantic attribute entries in committed metadata golden files. Production
 invalid UTF-8 rejection, browser render-sandbox checks, production dependency
 migration runbooks beyond the local dependency artifact manifest baseline,
 stale randomness display, and live deployment release manifests remain open.
@@ -72,12 +71,13 @@ such as newline/tab/carriage return, and other ASCII control characters through
 `\u00XX`.
 
 `attributes` remains a caller-authored raw JSON fragment inserted inside the
-metadata array. `updateImagesAndAttributes` now rejects fragments that can break
-out of the enclosing array or cannot close their own strings/object delimiters,
-while still allowing brackets inside quoted JSON strings. This is a structural
-metadata safety guard, not a full JSON schema validator. Release tooling now
-checks committed fixture attributes as `trait_type` / `value` string pairs, but
-production raw-attribute schema enforcement remains future work.
+metadata array. `updateImagesAndAttributes` accepts an empty fragment or a
+comma-separated sequence of objects whose only keys are `trait_type` and
+`value`, with both values encoded as JSON strings. The production guard rejects
+missing keys, duplicate keys, unexpected keys, non-string values, invalid JSON
+string escapes, control characters, malformed separators, and attempts to break
+out of the enclosing `attributes` array, while still allowing brackets inside
+quoted JSON strings.
 
 Generated animation HTML remains executable. The wrapper now escapes
 `collectionLibrary` for the `<script src>` attribute, escapes `tokenData` and
@@ -89,8 +89,7 @@ script. This protects wrapper structure, but it does not sandbox artist
 now validates the committed golden fixtures for JSON/data-URI structure,
 strict UTF-8 decoding, current URI scheme policy, semantic attribute shape, and
 generated HTML wrapper/script boundaries. Full browser execution sandboxing plus
-production semantic-attribute and invalid-UTF-8 enforcement remain required
-before public beta.
+production invalid UTF-8 enforcement remain required before public beta.
 
 ## URI Policy
 
@@ -338,8 +337,8 @@ ADR 0006 requires future metadata work to add:
 - stale-state display policy
 - browser execution sandbox proofing for generated animation code; fixture-level
   JSON/data-URI/HTML boundary checks now exist
-- production raw-attribute schema validation or structured attributes;
-  fixture-level semantic attribute checks now exist
+- richer structured attributes if the protocol moves away from caller-authored
+  raw fragments; production raw-attribute schema validation now exists
 - production invalid UTF-8 rejection; fixture-level invalid UTF-8 checks now
   exist
 - production dependency migration runbooks beyond the local artifact-manifest

@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-fixture-utf8-attributes` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/118` |
+| Active PR branch | `codex/metadata-attribute-schema` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/121` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 20:50 UTC` |
+| Last updated | `2026-06-11 21:34 UTC` |
 
 ## Packaging Notes
 
@@ -116,13 +116,87 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 60 | Add collection URI production enforcement | Gate D/Gate G support | Continue P1-META-006 by enforcing optional collection base URI and external library URL policy in production, preserving empty optional fields, using custom-error cleanup to keep `StreamCore` under EIP-170, and updating docs/artifacts/state traceability | Merged in PR #114 |
 | 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Merged in PR #116 |
 | 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Merged in PR #118 |
-| 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Active |
+| 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Merged in PR #121 |
+| 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Active |
 
 ## Current PR Worklog
 
+### PR candidate: Production raw attribute schema enforcement (Queue Item 64)
+
+Status: Local validation complete; PR packaging next.
+Branch: `codex/metadata-attribute-schema`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/122`.
+Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
+
+Goal:
+
+- Close the production raw-attribute enforcement gap left after the fixture-only
+  semantic attribute checks in PR #121.
+- Preserve the existing empty-fragment and comma-separated object fragment
+  format used by on-chain metadata.
+- Require every nonempty production raw attribute object to contain exactly
+  `trait_type` and `value` keys with JSON string values.
+- Reject missing keys, unexpected keys, duplicate keys, non-string values,
+  invalid JSON string escapes, malformed separators, controls, unterminated
+  strings, and array/object breakout attempts with `UnsafeRawAttributes`.
+- Keep production invalid UTF-8 policy and full browser execution sandboxing as
+  separate P1-META-006 follow-up work.
+
+Candidate files:
+
+- `smart-contracts/StreamMetadataRenderer.sol`
+- `test/StreamMetadataEscaping.t.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/abi-checksums.json`
+- `release-artifacts/latest/release-artifact-manifest.json`
+- `release-artifacts/latest/release-checksums.json`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/source-verification-inputs.json`
+- `deployments/address-books/anvil-6529stream-v0.1.0-001.json`
+- `deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json`
+- `deployments/examples/anvil-6529stream-v0.1.0-001.json`
+- `deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json`
+
+Validation started at `2026-06-11 21:16 UTC`:
+
+- Bootstrapped pinned Foundry `v1.7.1` locally with
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1`
+  after direct `forge` commands were missing from PATH.
+- `forge fmt smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataEscaping.t.sol`
+- `forge fmt --check smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataEscaping.t.sol`
+- `forge test --match-path test\StreamMetadataEscaping.t.sol -vvv`
+- `make release-checksums`
+- `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+- `bash -n scripts/check.sh`
+- `make release-manifest-check`
+- `make release-checksums-check`
+
+Notes:
+
+- The first focused test run found that the drafted "trailing backslash" fixture
+  was actually valid escaped JSON. The test was corrected to a short Unicode
+  escape case, and the focused metadata suite then passed with 15 tests.
+- `make release-checksums` reports `StreamCore` unchanged at 24,135 runtime
+  bytes with 441 bytes of EIP-170 headroom. The linked
+  `StreamMetadataRenderer` grows to 8,584 runtime bytes, and release/deployment
+  artifacts were regenerated for the bytecode/docs/changelog/state delta.
+- After this state update, `make release-checksums`,
+  `make release-manifest-check`, and `make release-checksums-check` were rerun
+  sequentially. The sequential artifact checks passed without the transient
+  Foundry cache access warning produced by an earlier parallel local invocation.
+
 ### PR candidate: Metadata fixture UTF-8 and semantic attributes (Queue Item 63)
 
-Status: PR #121 open; CodeRabbit follow-up fixes prepared for CI rerun.
+Status: Merged in PR #121 at `2026-06-11 21:01 UTC`.
 Branch: `codex/metadata-fixture-utf8-attributes`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/121`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/119`.
@@ -137,7 +211,7 @@ Goal:
 - Add semantic attribute-shape tests proving unexpected keys and non-string
   values fail fixture validation.
 - Update docs, roadmap, and this state file to distinguish fixture-level
-  semantic validation from still-open production raw-attribute and browser
+  semantic validation from the then-open production raw-attribute and browser
   execution work.
 - Pin release-artifact, JavaScript, and Python text files to LF in
   `.gitattributes` so dependency artifact source hashes and generated release
@@ -5604,6 +5678,13 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 21:34 | Rerun artifact checks sequentially | The release-manifest and release-checksum targets both pass after the state update when run one at a time, avoiding the earlier parallel Foundry cache warning |
+| 2026-06-11 21:31 | Validate Queue Item 64 locally | Focused metadata escaping tests, full `make check`, Windows `scripts\check.ps1`, release manifest/checksum checks, bash syntax, and whitespace checks pass; final artifact checks will be rerun sequentially after this covered state-file update |
+| 2026-06-11 21:22 | Regenerate release artifacts for Queue Item 64 | Production raw-attribute parser changes alter linked `StreamMetadataRenderer` bytecode and docs/changelog hashes; `make release-checksums` refreshed ABI/source-verification/deployment/address-book/release checksum artifacts while `StreamCore` stayed at 24,135 bytes with 441 bytes of headroom |
+| 2026-06-11 21:16 | Start Queue Item 64 | PR #121 merged cleanly, leaving production raw-attribute enforcement, production invalid UTF-8 policy, and browser execution sandboxing as the remaining P1-META-006 work; issue #122 scopes production raw attributes as the next smallest safe Solidity slice |
+| 2026-06-11 21:16 | Bootstrap local Foundry | Direct `forge` commands were missing from PATH in this shell, so the pinned `scripts\bootstrap-windows.ps1` setup was run before Solidity validation |
+| 2026-06-11 21:04 | Create issue #122 | The broad P1-META-006 issue #51 should remain open, but production raw-attribute schema enforcement deserves an issue-sized PR with exact tests and acceptance criteria |
+| 2026-06-11 21:01 | Merge PR #121 | CI passed, CodeRabbit re-reviewed latest head `98094a5` and marked it good to merge, and the only visible review thread was resolved/outdated |
 | 2026-06-11 20:50 | Address PR #121 CodeRabbit comments | Accepted the still-valid explicit `None` check for malformed fixture URI helpers and the roadmap wording for production raw-attribute enforcement; the stale release-manifest finding was already fixed in `ea90b91`, and artifacts will be regenerated again after this state update |
 | 2026-06-11 20:43 | Fix PR #121 release-manifest CI drift | CI correctly found that the post-open `ops/AUTONOMOUS_RUN.md` state commit changed a release-manifest-covered input; update state first, regenerate release manifest/checksums, then push without further covered-file edits |
 | 2026-06-11 20:39 | Open PR #121 and request CodeRabbit | Metadata fixture UTF-8/attribute safety PR opened at `https://github.com/6529-Collections/6529Stream/pull/121` on head `f6cc831b8837af1582d8828955da7c8d6e816cc6`; CodeRabbit review requested in issue comment `4684855824`, and Claude remains skipped per current user instruction |

@@ -152,6 +152,24 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         );
     }
 
+    function testRawAttributesAcceptSemanticPairsWithEitherOrderAndEscapes() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintToken(deployed);
+        string memory rawAttributes = string.concat(
+            "{\"value\":\"Calm\",\"trait_type\":\"Mood\"},",
+            "{\"trait_type\":\"Quote\",\"value\":\"Line\\n\\\"kept\\\" slash\\/ unicode\\u003c\"}"
+        );
+        _setImageAndAttributes(deployed.core, "ipfs://image.png", rawAttributes);
+        deployed.core.changeMetadataView(COLLECTION_ID, true);
+
+        string memory decodedJson = _decodeJsonDataUri(deployed.core.tokenURI(TOKEN_ID));
+        _assertJsonParses(decodedJson);
+        _contains(bytes(decodedJson), bytes(rawAttributes))
+            .assertTrue("semantic attribute pairs were not preserved");
+    }
+
     function testRawAttributesRejectBreakoutFragment() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         _mintToken(deployed);
@@ -235,6 +253,46 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Calm\"},";
         vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeRawAttributes.selector, TOKEN_ID));
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
+    }
+
+    function testRawAttributesRejectMissingUnexpectedOrDuplicateKeys() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        _mintToken(deployed);
+
+        _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Mood\"}");
+        _expectUnsafeRawAttributes(deployed.core, "{\"value\":\"Calm\"}");
+        _expectUnsafeRawAttributes(
+            deployed.core, "{\"trait_type\":\"Level\",\"value\":\"1\",\"display_type\":\"number\"}"
+        );
+        _expectUnsafeRawAttributes(
+            deployed.core, "{\"trait_type\":\"Mood\",\"trait_type\":\"Other\"}"
+        );
+    }
+
+    function testRawAttributesRejectNonStringSemanticValues() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        _mintToken(deployed);
+
+        _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Level\",\"value\":1}");
+        _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Level\",\"value\":true}");
+        _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Level\",\"value\":null}");
+        _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Level\",\"value\":[]}");
+        _expectUnsafeRawAttributes(deployed.core, "{\"trait_type\":\"Level\",\"value\":{}}");
+    }
+
+    function testRawAttributesRejectInvalidJsonStringEscapes() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        _mintToken(deployed);
+
+        _expectUnsafeRawAttributes(
+            deployed.core, "{\"trait_type\":\"Mood\",\"value\":\"bad\\xescape\"}"
+        );
+        _expectUnsafeRawAttributes(
+            deployed.core, "{\"trait_type\":\"Mood\",\"value\":\"bad\\u12x4\"}"
+        );
+        _expectUnsafeRawAttributes(
+            deployed.core, "{\"trait_type\":\"Mood\",\"value\":\"short\\u123\"}"
+        );
     }
 
     function testAnimationHtmlEscapesWrapperBoundaries() public {
@@ -345,6 +403,17 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         tokenIds[0] = TOKEN_ID;
         images[0] = image;
         attributeValues[0] = attributes;
+        core.updateImagesAndAttributes(tokenIds, images, attributeValues);
+    }
+
+    function _expectUnsafeRawAttributes(StreamCore core, string memory attributes) private {
+        uint256[] memory tokenIds = new uint256[](1);
+        string[] memory images = new string[](1);
+        string[] memory attributeValues = new string[](1);
+        tokenIds[0] = TOKEN_ID;
+        images[0] = "ipfs://image.png";
+        attributeValues[0] = attributes;
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.UnsafeRawAttributes.selector, TOKEN_ID));
         core.updateImagesAndAttributes(tokenIds, images, attributeValues);
     }
 
