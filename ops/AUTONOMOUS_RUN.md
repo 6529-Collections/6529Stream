@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-collection-uri-policy` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/113` |
+| Active PR branch | `codex/recover-streamcore-headroom` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/114` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 18:22 UTC` |
+| Last updated | `2026-06-11 18:48 UTC` |
 
 ## Packaging Notes
 
@@ -113,14 +113,67 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 57 | Add metadata size limits | Gate D/Gate G support | Continue P1-META-006 by enforcing numeric byte caps for metadata storage inputs, generated `tokenURI` output, and dependency registry metadata, with focused tests, docs, release artifact refresh, and roadmap traceability | Merged in PR #111 |
 | 58 | Add metadata render-sandbox fixture checks | Gate D | Continue P1-META-006 by validating committed metadata golden fixtures for JSON/data-URI/HTML script-boundary shape and URI scheme policy in local/CI gates, without changing production bytecode | Merged in PR #112 |
 | 59 | Add metadata token image URI policy | Gate D/Gate G support | Continue P1-META-006 by defining renderer content/script URI policy helpers and rejecting unsafe token image URI writes in production while preserving collection base URI, external library URL, structured-attributes, invalid-UTF-8, and browser-sandbox work as follow-up slices | Merged in PR #113 |
-| 60 | Add collection URI production enforcement | Gate D/Gate G support | Continue P1-META-006 by enforcing optional collection base URI and external library URL policy in production, preserving empty optional fields, using custom-error cleanup to keep `StreamCore` under EIP-170, and updating docs/artifacts/state traceability | Active |
+| 60 | Add collection URI production enforcement | Gate D/Gate G support | Continue P1-META-006 by enforcing optional collection base URI and external library URL policy in production, preserving empty optional fields, using custom-error cleanup to keep `StreamCore` under EIP-170, and updating docs/artifacts/state traceability | Merged in PR #114 |
+| 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Collection URI production enforcement (Queue Item 60)
+### PR candidate: Recover `StreamCore` bytecode headroom (Queue Item 61)
 
-Status: CodeRabbit outside-diff follow-up implemented and validated locally;
-ready to commit, push, and request CodeRabbit review.
+Status: local implementation validated; ready to commit, push, open PR, and
+request CodeRabbit review.
+Branch: `codex/recover-streamcore-headroom`.
+Pull request: TBD.
+
+Goal:
+
+- Recover sustainable `StreamCore` runtime bytecode margin before further
+  non-trivial Core feature work.
+- Preserve public success behavior and ABI compatibility while documenting the
+  intentional revert-data change from selected string reverts to typed custom
+  errors.
+- Set the current Core size policy in repo docs: 384 bytes is the minimum
+  release floor under the production IR size gate, and 512 bytes is the warning
+  threshold for future non-trivial Core work.
+- Regenerate release artifacts because the `StreamCore` ABI and bytecode change.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `test/StreamCoreCustomErrors.t.sol`
+- `docs/status.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+- `release-artifacts/latest/`
+
+Validation:
+
+- `forge test --match-contract StreamCoreCustomErrorsTest -vvv` passed with
+  4 tests covering `FunctionAdminUnauthorized()`,
+  `ArtistSignatureUnauthorized()`, `InvalidTokenMetadataInput()`, and
+  `FinalSupplyTimeNotPassed()`.
+- `forge build --sizes --via-ir --skip test --skip script --force` passed;
+  final measured `StreamCore` runtime size is 24,143 bytes with 433 bytes of
+  EIP-170 headroom.
+- `make release-checksums` passed and regenerated release/deployment artifacts.
+- `make check` passed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `forge fmt --check smart-contracts\StreamCore.sol
+  test\StreamCoreCustomErrors.t.sol` passed.
+- `git diff --check` passed, with only the known Windows line-ending warning
+  for `release-artifacts/latest/SHA256SUMS`.
+
+Notes:
+
+- A separate `burn` authorization custom-error experiment increased runtime
+  size by 20 bytes versus the first pass, so it was intentionally dropped.
+- The recovery is intentionally narrow: no contract state layout, external
+  function signatures, event signatures, or successful-path behavior changed.
+
+### PR #114: Collection URI production enforcement (Queue Item 60)
+
+Status: Merged in PR #114.
 Branch: `codex/metadata-collection-uri-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/114`.
 
@@ -5430,6 +5483,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 18:48 | Validate Queue Item 61 locally | Focused custom-error regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` is 24,143 runtime bytes with 433 bytes of EIP-170 headroom |
+| 2026-06-11 18:39 | Set interim `StreamCore` size policy | The local P1-SIZE-001 pass measures `StreamCore` at 24,143 runtime bytes with 433 bytes of EIP-170 headroom, so the repo now documents a 384-byte minimum release floor and a 512-byte warning threshold for future non-trivial Core work |
+| 2026-06-11 18:37 | Drop burn custom-error experiment | Replacing the `burn` owner/approval string revert with a custom error increased `StreamCore` runtime by 20 bytes versus the narrower pass, so the change was abandoned before documentation and tests |
 | 2026-06-11 18:22 | Validate PR #114 outside-diff follow-up locally | Focused regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` remains deployable at 24,545 bytes with 31 bytes of EIP-170 headroom |
 | 2026-06-11 18:15 | Accept CodeRabbit PR #114 outside-diff findings | The zero-supply path still reverted via arithmetic panic on first initialization, and dependency registry swaps still accepted EOAs or zero addresses; both are fixed locally with typed errors/regressions while keeping `StreamCore` deployable at 24,545 bytes and 31 bytes of EIP-170 headroom |
 | 2026-06-11 18:00 | Track PR #114 bytecode headroom risk | CodeRabbit correctly highlighted that `StreamCore` has only 61 bytes of EIP-170 margin after the review fix, so issue #115 and the roadmap now track recovering sustainable Core headroom before further non-trivial Core feature work |

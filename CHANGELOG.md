@@ -29,6 +29,9 @@ the release policy in `docs/release-policy.md`.
   for required metadata image inputs.
 - Added production collection base URI and external library URL validation,
   keeping those fields optional while rejecting unsafe non-empty URI values.
+- Added focused `StreamCore` custom-error regressions covering function-admin
+  authorization, artist signatures, metadata array lengths, and final-supply
+  timing.
 
 ### Fixed
 
@@ -38,6 +41,9 @@ the release policy in `docs/release-policy.md`.
 - Rejected initial zero collection supply with a typed supply error instead of
   arithmetic panic, and rejected dependency registry swaps to non-contract
   addresses with `InvalidDependencyRegistryContract()`.
+- Recovered `StreamCore` runtime bytecode headroom by replacing selected legacy
+  string reverts with typed custom errors, bringing the production IR-optimized
+  runtime to 24,143 bytes with 433 bytes of EIP-170 headroom.
 
 ### Release Impact
 
@@ -68,6 +74,10 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   explicit initial zero-supply rejection and dependency registry target
   validation.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  `StreamCore` size-recovery custom errors:
+  `ArtistSignatureUnauthorized()`, `FunctionAdminUnauthorized()`,
+  `InvalidTokenMetadataInput()`, and `FinalSupplyTimeNotPassed()`.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 
