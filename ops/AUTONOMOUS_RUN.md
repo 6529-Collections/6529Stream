@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/106` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 13:02 UTC` |
+| Last updated | `2026-06-11 13:04 UTC` |
 
 ## Packaging Notes
 
@@ -4949,9 +4949,9 @@ Merge evidence:
 
 ### PR candidate: Generate source verification inputs (Queue Item 55)
 
-Status: Local validation passed; ready to commit and open PR.
+Status: PR open; CodeRabbit review requested.
 Branch: `codex/source-verification-inputs`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/108`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/107`
@@ -5039,6 +5039,7 @@ Validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 13:04 | Open PR #108 and request CodeRabbit | Source verification input PR published at `https://github.com/6529-Collections/6529Stream/pull/108`; CodeRabbit review requested in issue comment `4680853110`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 13:02 | Validate Queue Item 55 locally | Source-verification tests/check, release-artifact ownership regression, release manifest/checksum checks, changelog checks, Python compile, shell/PowerShell syntax, whitespace, full `make check`, and Windows wrapper all pass |
 | 2026-06-11 12:52 | Implement source verification bundle | Added generator, tests, tracked artifact, release-manifest/checksum integration, local/CI gate wiring, docs, roadmap, changelog, and durable state updates |
 | 2026-06-11 12:41 | Start Queue Item 55 | Issue #107 tracks deterministic source verification input retention; branch `codex/source-verification-inputs` starts from merged PR #106 and scopes to generated verification inputs plus local/CI drift checks |
