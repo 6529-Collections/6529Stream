@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/87` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 05:08 UTC` |
+| Last updated | `2026-06-11 05:11 UTC` |
 
 ## Packaging Notes
 
@@ -4022,9 +4022,9 @@ Merge:
 
 ### PR candidate: Add animation HTML wrapper safety (Queue Item 45)
 
-Status: Active local implementation.
+Status: Open in PR #88; awaiting CI and CodeRabbit.
 Branch: `codex/metadata-animation-safety`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/88`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/51`
@@ -4095,6 +4095,7 @@ Validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 05:11 | Open PR #88 and request CodeRabbit | Animation wrapper safety is published at `https://github.com/6529-Collections/6529Stream/pull/88`; CodeRabbit review requested in issue comment `4677381075`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 05:08 | Validate Queue Item 45 locally | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison pass; Slither remains `718` total findings with high/medium unchanged at `4/19`; `forge build --sizes` continues to expose the known oversized `StreamCore` release blocker at `35,281` runtime bytes |
 | 2026-06-11 04:52 | Start Queue Item 45 | PR #87 merged, local `main` is synced, issue #51 was reopened because only the first metadata escaping slice landed, and the next tight P1-META-006 slice is generated animation HTML wrapper safety |
 | 2026-06-11 04:51 | Reopen issue #51 | PR #87 intentionally left generated HTML/JavaScript escaping or rejection, semantic attribute schema/structured attributes, URI policy, invalid UTF-8 policy, size limits, and render-sandbox tests open, so the issue should continue tracking the remaining P1-META-006 acceptance criteria |
