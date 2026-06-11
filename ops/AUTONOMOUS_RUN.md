@@ -34,9 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/metadata-attribute-schema` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/121` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/123` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 21:34 UTC` |
+| Last updated | `2026-06-11 21:42 UTC` |
 
 ## Packaging Notes
 
@@ -117,14 +118,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Merged in PR #116 |
 | 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Merged in PR #118 |
 | 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Merged in PR #121 |
-| 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Active |
+| 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | PR #123 open |
 
 ## Current PR Worklog
 
 ### PR candidate: Production raw attribute schema enforcement (Queue Item 64)
 
-Status: Local validation complete; PR packaging next.
+Status: PR #123 open; waiting for CI and CodeRabbit after final state-artifact push.
 Branch: `codex/metadata-attribute-schema`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/123`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/122`.
 Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
 
@@ -5678,6 +5680,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 21:42 | Open PR #123 for Queue Item 64 | Pushed `codex/metadata-attribute-schema`, opened https://github.com/6529-Collections/6529Stream/pull/123 against `main`, and will request CodeRabbit after this durable state update is regenerated into the release artifacts and pushed |
 | 2026-06-11 21:34 | Rerun artifact checks sequentially | The release-manifest and release-checksum targets both pass after the state update when run one at a time, avoiding the earlier parallel Foundry cache warning |
 | 2026-06-11 21:31 | Validate Queue Item 64 locally | Focused metadata escaping tests, full `make check`, Windows `scripts\check.ps1`, release manifest/checksum checks, bash syntax, and whitespace checks pass; final artifact checks will be rerun sequentially after this covered state-file update |
 | 2026-06-11 21:22 | Regenerate release artifacts for Queue Item 64 | Production raw-attribute parser changes alter linked `StreamMetadataRenderer` bytecode and docs/changelog hashes; `make release-checksums` refreshed ABI/source-verification/deployment/address-book/release checksum artifacts while `StreamCore` stayed at 24,135 bytes with 441 bytes of headroom |
