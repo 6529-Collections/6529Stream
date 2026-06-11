@@ -37,8 +37,8 @@
       "constructor_args": [
         "0x0000000000000000000000000000000000000001"
       ],
-      "abi_hash": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
-      "bytecode_hash": "sha256:f8be54e49160988379e7cb288841e2238ea8f98b92327b469854501625a58d77",
+      "abi_hash": "sha256:8600876198d591fdae934b20c5d370490939504890944dbd8249d85ef17a6795",
+      "bytecode_hash": "sha256:8193bd7866597d9770ab4437329d55a4957870c92839e749cca16efe9409e285",
       "verification_status": "not_applicable"
     },
     "StreamCore": {
@@ -49,8 +49,8 @@
         "0x0000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000002"
       ],
-      "abi_hash": "sha256:979bb597afe287b0b05d057849ceaa154bc566d361502fe7d7bd5591107f79d1",
-      "bytecode_hash": "sha256:06bbdbf40027f33f1260eb0b53b1bc9ec8fa2110c19ae4832e37397f97cac802",
+      "abi_hash": "sha256:820f6962c8e27c7e73ac51e18fdfddd81c517f58101a3b28335fcdbba5f7d4b3",
+      "bytecode_hash": "sha256:db8cc579c656c43f09acc0fb6ee3d74ad2bc1b0877fc71f0c0737116556e7977",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -166,11 +166,11 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:a8555744a59f68afec24c43fb02e0f5b6fc5f2102e455556368e1f061429ddd0",
+    "manifest_sha256": "sha256:79a0530da77ce6653198a15ccccf2a2deb023765f7a6d14b5a3f28300e19785e",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
-      "DependencyRegistry": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
-      "StreamCore": "sha256:979bb597afe287b0b05d057849ceaa154bc566d361502fe7d7bd5591107f79d1",
+      "DependencyRegistry": "sha256:8600876198d591fdae934b20c5d370490939504890944dbd8249d85ef17a6795",
+      "StreamCore": "sha256:820f6962c8e27c7e73ac51e18fdfddd81c517f58101a3b28335fcdbba5f7d4b3",
       "StreamCuratorsPool": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
       "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
       "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",

@@ -81,9 +81,11 @@ Current source references:
 - JSON string fields, raw attribute fragments, generated animation wrapper
   fields, `tokenData`, dependency scripts embedded in JavaScript strings, and
   wrapper closing-script boundaries now have first-slice escaping or rejection
-  coverage. Semantic attribute schema validation, URI policy, invalid UTF-8
-  policy, browser render-sandbox automation, and numeric size limits remain
-  open under P1-META-006.
+  coverage. Numeric byte limits now cover collection display fields, collection
+  scripts, token data, token images, token attributes, generated `tokenURI`
+  output, dependency scripts, and dependency provenance. Semantic attribute
+  schema validation, URI policy, invalid UTF-8 policy, and browser
+  render-sandbox automation remain open under P1-META-006.
 
 The current behavior is useful as characterization, but it is not a production
 metadata promise.
@@ -225,10 +227,14 @@ fields (`name`, `description`, `image`, and `animation_url`) and adds a
 structural guard for raw attribute fragments. That guard rejects literal control
 characters, unterminated strings, unbalanced object/array delimiters, and
 unquoted `]`/`}` breakout attempts while preserving brackets inside quoted JSON
-strings. The remaining public-beta work is still to define semantic attribute
-schema validation or structured attributes, HTML/JavaScript escaping or
-rejection for generated animation code, URI policy checks, invalid UTF-8 policy,
-and numeric size limits.
+strings. The second slice hardens generated animation wrapper boundaries by
+escaping the external library attribute, embedding `tokenData` and dependency
+scripts through escaped JavaScript strings, and neutralizing closing-script
+sequences. The third slice defines numeric byte limits for stored metadata
+inputs and generated `tokenURI` output. The remaining public-beta work is still
+to define semantic attribute schema validation or structured attributes,
+browser render-sandbox proofing for generated animation code, URI policy checks,
+and invalid UTF-8 policy.
 
 The implementation must define maximum sizes for:
 
@@ -245,16 +251,18 @@ The implementation must define maximum sizes for:
 - collection script chunks
 - dependency script chunks
 - generated `tokenURI`
-- generated HTML
+- dedicated generated HTML render budgets, if separate from the generated
+  `tokenURI` response cap
 
 Tests must include adversarial strings with quotes, backslashes, brackets,
 newlines, null-like control characters, Unicode edge cases if supported, and
 large but valid inputs near each accepted limit.
 
-`P1-META-006` owns the exact numeric limits. That implementation PR must set
-explicit upper bounds for each field above and prove through gas, calldata, and
-render tests that accepted limits leave release-approved headroom for
-`tokenURI`, generated HTML, and dependency/script reads.
+`P1-META-006` owns the exact numeric limits. The current size-limit slice sets
+explicit upper bounds for stored metadata fields, dependency registry metadata,
+and generated `tokenURI` output. Remaining render-sandbox work must prove
+through gas, calldata, and browser/render tests that accepted limits leave
+release-approved headroom for generated HTML and dependency/script reads.
 
 ## Freeze Model
 
