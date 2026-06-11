@@ -349,9 +349,40 @@ library StreamMetadataRenderer {
     }
 
     function isSafeScriptUri(string memory uri) public pure returns (bool) {
+        return isSafeScriptUri(uri, false);
+    }
+
+    function isSafeScriptUri(string memory uri, bool allowEmpty) public pure returns (bool) {
         bytes memory input = bytes(uri);
-        return input.length > 0 && _hasNoUriWhitespaceOrControls(input)
-            && _startsWith(input, "https://") && _hasHttpsHost(input);
+        if (input.length == 0) {
+            return allowEmpty;
+        }
+        return _hasNoUriWhitespaceOrControls(input) && _startsWith(input, "https://")
+            && _hasHttpsHost(input);
+    }
+
+    function areSafeCollectionUris(string memory baseURI, string memory libraryUrl)
+        public
+        pure
+        returns (bool)
+    {
+        return isSafeContentUri(baseURI, true) && isSafeScriptUri(libraryUrl, true);
+    }
+
+    function supportsContractMarker(address target, bytes4 selector)
+        public
+        view
+        returns (bool supported)
+    {
+        if (target.code.length == 0) {
+            return false;
+        }
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, selector)
+            let success := staticcall(gas(), target, ptr, 4, ptr, 32)
+            supported := and(and(success, gt(returndatasize(), 31)), eq(mload(ptr), 1))
+        }
     }
 
     function _advanceRawAttributeStringState(

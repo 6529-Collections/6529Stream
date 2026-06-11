@@ -44,7 +44,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         _mintGoldenToken(deployed);
 
         vm.prank(address(noopRandomizer));
-        vm.expectRevert("Zero token hash");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.ZeroTokenHash.selector));
         deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, bytes32(0));
 
         deployed.core.retrieveTokenHash(TOKEN_ID)

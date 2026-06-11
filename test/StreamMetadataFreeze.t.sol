@@ -166,15 +166,15 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         vm.prank(address(0xA11CE));
         deployed.core.artistSignature(COLLECTION_ID, "artist-signature");
 
-        vm.expectRevert("err/freezed");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         deployed.core.setCollectionData(COLLECTION_ID, address(0xA11CE), 5, 10, 1 days);
 
-        vm.expectRevert("Not allowed");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         deployed.core.changeMetadataView(COLLECTION_ID, true);
 
         string[] memory scripts = new string[](1);
         scripts[0] = "function draw(){return 1;}";
-        vm.expectRevert("Not allowed");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         deployed.core
             .updateCollectionInfo(
                 COLLECTION_ID,
@@ -207,7 +207,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
     function testSetTokenHashRejectsPremintTokenOutsideCollectionRange() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
-        vm.expectRevert("Wrong collection");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
         vm.prank(address(deployed.randomizer));
         deployed.core
             .setTokenHash(

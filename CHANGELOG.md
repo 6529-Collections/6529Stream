@@ -27,6 +27,17 @@ the release policy in `docs/release-policy.md`.
   validation in local and CI gates.
 - Added renderer URI policy helpers and production token image URI validation
   for required metadata image inputs.
+- Added production collection base URI and external library URL validation,
+  keeping those fields optional while rejecting unsafe non-empty URI values.
+
+### Fixed
+
+- Persisted collection base URI values during full collection metadata updates
+  and hardened admin, minter, and randomizer marker probes so invalid targets
+  revert with typed custom errors.
+- Rejected initial zero collection supply with a typed supply error instead of
+  arithmetic panic, and rejected dependency registry swaps to non-contract
+  addresses with `InvalidDependencyRegistryContract()`.
 
 ### Release Impact
 
@@ -48,6 +59,15 @@ the release policy in `docs/release-policy.md`.
   platform check wrappers.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from the
   metadata URI policy helper functions and `UnsafeMetadataURI()` custom error.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  collection URI production enforcement and custom errors replacing legacy
+  `StreamCore` revert strings on metadata, mint, randomizer, and wiring paths.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  `StreamMetadataRenderer.supportsContractMarker` helper used to keep marker
+  probe hardening deployable under EIP-170.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  explicit initial zero-supply rejection and dependency registry target
+  validation.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

@@ -190,9 +190,11 @@ script with no raw script-boundary breakout. `StreamMetadataUriPolicy.t.sol`
 covers the renderer's current content/script URI policy helpers and production
 token image URI enforcement for allowed `https://`, `ipfs://`, and `ar://`
 content URIs plus rejected empty, JavaScript, hostless HTTPS, and
-whitespace-bearing image inputs. Full browser execution sandboxing, collection
-base URI and external library URL production enforcement, semantic attribute
-schema validation, and invalid UTF-8 policy remain future P1-META-006 work.
+whitespace-bearing image inputs. It also covers optional collection base URI and
+external library URL production enforcement, including empty optional values,
+safe content/script values, unsafe base URIs, and non-HTTPS library URLs. Full
+browser execution sandboxing, semantic attribute schema validation, and invalid
+UTF-8 policy remain future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

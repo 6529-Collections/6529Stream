@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-uri-policy` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/112` |
+| Active PR branch | `codex/metadata-collection-uri-policy` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/113` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 16:32 UTC` |
+| Last updated | `2026-06-11 18:22 UTC` |
 
 ## Packaging Notes
 
@@ -112,13 +112,122 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 56 | Add Foundry broadcast manifest ingestion | Gate E/Gate G support | Implement P1-DEPLOY-004 by parsing sanitized Foundry broadcast output into deterministic deployment-manifest evidence with local/CI drift checks | Merged in PR #110 |
 | 57 | Add metadata size limits | Gate D/Gate G support | Continue P1-META-006 by enforcing numeric byte caps for metadata storage inputs, generated `tokenURI` output, and dependency registry metadata, with focused tests, docs, release artifact refresh, and roadmap traceability | Merged in PR #111 |
 | 58 | Add metadata render-sandbox fixture checks | Gate D | Continue P1-META-006 by validating committed metadata golden fixtures for JSON/data-URI/HTML script-boundary shape and URI scheme policy in local/CI gates, without changing production bytecode | Merged in PR #112 |
-| 59 | Add metadata token image URI policy | Gate D/Gate G support | Continue P1-META-006 by defining renderer content/script URI policy helpers and rejecting unsafe token image URI writes in production while preserving collection base URI, external library URL, structured-attributes, invalid-UTF-8, and browser-sandbox work as follow-up slices | Active |
+| 59 | Add metadata token image URI policy | Gate D/Gate G support | Continue P1-META-006 by defining renderer content/script URI policy helpers and rejecting unsafe token image URI writes in production while preserving collection base URI, external library URL, structured-attributes, invalid-UTF-8, and browser-sandbox work as follow-up slices | Merged in PR #113 |
+| 60 | Add collection URI production enforcement | Gate D/Gate G support | Continue P1-META-006 by enforcing optional collection base URI and external library URL policy in production, preserving empty optional fields, using custom-error cleanup to keep `StreamCore` under EIP-170, and updating docs/artifacts/state traceability | Active |
 
 ## Current PR Worklog
 
+### PR candidate: Collection URI production enforcement (Queue Item 60)
+
+Status: CodeRabbit outside-diff follow-up implemented and validated locally;
+ready to commit, push, and request CodeRabbit review.
+Branch: `codex/metadata-collection-uri-policy`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/114`.
+
+Goal:
+
+- Enforce the renderer content/script URI policy for collection base URI and
+  external collection library URL writes in `StreamCore` production paths.
+- Preserve existing optional-field behavior: empty collection base URI and empty
+  external library URL remain valid, but unsafe non-empty values revert with
+  `UnsafeMetadataURI()`.
+- Keep the change deployable under EIP-170. A direct policy-only implementation
+  exceeded the runtime size limit, so this slice also replaces older
+  security-relevant `StreamCore` string reverts with custom errors.
+- Update metadata docs, roadmap, changelog, tests, release artifacts, and run
+  state to make the new boundary auditable.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/StreamMetadataRenderer.sol`
+- `test/StreamMetadataUriPolicy.t.sol`
+- `test/StreamInitialization.t.sol`
+- `test/StreamDependencyRegistry.t.sol`
+- `test/StreamMetadataFreeze.t.sol`
+- `test/StreamMetadataGolden.t.sol`
+- `docs/metadata.md`
+- `docs/known-blockers.md`
+- `docs/status.md`
+- `docs/adr/0006-metadata-freeze.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+
+Validation:
+
+- `forge build --sizes --via-ir --skip test --skip script --force` passed with
+  `StreamCore` runtime size 24,348 bytes and 228 bytes of EIP-170 headroom.
+- `forge test --match-path test\StreamMetadataUriPolicy.t.sol -vvv` passed.
+- `forge test --match-path test\StreamMetadataFreeze.t.sol -vvv` passed.
+- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv` passed.
+- `make release-checksums` passed and regenerated release/deployment artifacts.
+- First post-doc-polish `make check` caught release-manifest checksum drift;
+  reran `make release-checksums` and committed the regenerated artifacts.
+- Final `make check` passed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- Targeted `forge fmt --check` passed for touched Solidity files.
+- `git diff --check` passed, with only the existing Windows line-ending warning
+  for `release-artifacts/latest/SHA256SUMS`.
+- CodeRabbit PR #114 review found two valid issues: full collection metadata
+  updates validated but did not persist `collectionBaseURI`, and direct
+  high-level marker probes could bypass typed errors for EOAs or non-conforming
+  contracts. The local fix persists base URI on full updates, moves a compact
+  marker `staticcall` helper into `StreamMetadataRenderer` to preserve Core
+  bytecode headroom, and adds focused regressions in
+  `test/StreamMetadataUriPolicy.t.sol`.
+- Review-fix focused validation passed:
+  `forge test --match-path test\StreamMetadataUriPolicy.t.sol -vvv`,
+  `forge test --match-path test\StreamMetadataFreeze.t.sol -vvv`,
+  `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`,
+  `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`, and
+  `forge build --sizes --via-ir --skip test --skip script --force`; after the
+  fix `StreamCore` is 24,515 runtime bytes with 61 bytes of EIP-170 headroom.
+- Review-fix release validation passed before this final state refresh:
+  `make release-checksums`, `make check`,
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`, targeted
+  `forge fmt --check`, and `git diff --check` with only the existing Windows
+  line-ending warning for `release-artifacts/latest/SHA256SUMS`.
+- CI run `27366884724` passed on head `857e1f9`. CodeRabbit acknowledged the
+  review fixes and raised the now-small `StreamCore` EIP-170 margin as a
+  near-term tracking risk; issue
+  [`#115`](https://github.com/6529-Collections/6529Stream/issues/115) now tracks
+  bytecode headroom recovery, and `ops/ROADMAP.md` records the release risk.
+- Documentation-only bytecode-headroom follow-up validation passed:
+  `make release-checksums` and `make check`; release artifacts did not drift
+  from the `ops/ROADMAP.md` / `ops/AUTONOMOUS_RUN.md` edits.
+- CodeRabbit's outside-diff comments were rechecked against current head and
+  accepted as valid. The local follow-up rejects first-time zero collection
+  supply before `reservedMaxTokensIndex` arithmetic, rejects dependency registry
+  swaps to non-contract targets with `InvalidDependencyRegistryContract()`, and
+  adds focused regressions in `test\StreamInitialization.t.sol` and
+  `test\StreamDependencyRegistry.t.sol`.
+- Outside-diff follow-up focused validation passed:
+  `forge test --match-path test\StreamInitialization.t.sol -vvv`,
+  `forge test --match-path test\StreamDependencyRegistry.t.sol -vvv`, and
+  `forge build --sizes --via-ir --skip test --skip script --force`. Current
+  `StreamCore` runtime size is 24,545 bytes with 31 bytes of EIP-170 headroom.
+- Outside-diff follow-up release/full validation passed:
+  `make release-checksums`, `make check`,
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`, targeted
+  `forge fmt --check`, and `git diff --check` with only the known Windows
+  line-ending warning for `release-artifacts/latest/SHA256SUMS`.
+
+Notes:
+
+- The first local queue-item 60 implementation exceeded EIP-170 by 331 bytes
+  after collapsing the full collection URI check into the renderer helper.
+  Replacing old `StreamCore` metadata/mint/randomizer/wiring string reverts
+  with custom errors made the enforcement deployable and improved revert
+  traceability.
+- Remaining P1-META-006 work after this slice: semantic/structured attributes,
+  invalid UTF-8 policy, full browser execution sandboxing, stale-state display
+  policy, and dependency artifact/migration runbooks.
+
 ### PR candidate: Metadata token image URI policy (Queue Item 59)
 
-Status: PR open; awaiting CI and CodeRabbit.
+Status: Merged in PR #113.
 Branch: `codex/metadata-uri-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/113`.
 
@@ -5321,6 +5430,17 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 18:22 | Validate PR #114 outside-diff follow-up locally | Focused regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` remains deployable at 24,545 bytes with 31 bytes of EIP-170 headroom |
+| 2026-06-11 18:15 | Accept CodeRabbit PR #114 outside-diff findings | The zero-supply path still reverted via arithmetic panic on first initialization, and dependency registry swaps still accepted EOAs or zero addresses; both are fixed locally with typed errors/regressions while keeping `StreamCore` deployable at 24,545 bytes and 31 bytes of EIP-170 headroom |
+| 2026-06-11 18:00 | Track PR #114 bytecode headroom risk | CodeRabbit correctly highlighted that `StreamCore` has only 61 bytes of EIP-170 margin after the review fix, so issue #115 and the roadmap now track recovering sustainable Core headroom before further non-trivial Core feature work |
+| 2026-06-11 17:52 | Validate PR #114 CodeRabbit fixes | Focused metadata/randomizer lifecycle regressions, the EIP-170 size gate, release artifact regeneration, full `make check`, Windows wrapper, formatting, and whitespace gates passed after persisting full-update base URIs and hardening marker probes |
+| 2026-06-11 17:44 | Accept CodeRabbit PR #114 findings | The base URI persistence finding was a real storage bug, and the marker-probe finding was valid for invalid targets; moving the low-level marker probe into `StreamMetadataRenderer` keeps `StreamCore` deployable with 61 bytes of EIP-170 headroom while preserving typed errors |
+| 2026-06-11 17:21 | Request CodeRabbit on PR #114 | CodeRabbit review requested in issue comment `4683145207`; Claude intentionally skipped per current user instruction |
+| 2026-06-11 17:20 | Open PR #114 | Collection metadata URI policy PR published at `https://github.com/6529-Collections/6529Stream/pull/114`; this state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
+| 2026-06-11 17:17 | Validate Queue Item 60 locally | Collection URI policy tests, metadata freeze/golden regressions, release artifact regeneration, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, whitespace validation, and the production size gate pass; final validation regenerated release artifacts after a docs checksum drift and `StreamCore` is 24,348 runtime bytes with 228 bytes of EIP-170 headroom |
+| 2026-06-11 16:55 | Use custom-error cleanup to keep queue item 60 deployable | Direct collection base/library URI enforcement exceeded EIP-170; replacing old `StreamCore` string reverts on metadata, mint, randomizer, and wiring paths made production enforcement fit and improved revert traceability |
+| 2026-06-11 16:47 | Start Queue Item 60 | PR #113 intentionally left collection base URI and external library URL production enforcement as follow-up because the first attempt exceeded EIP-170; this is the next highest-value P1-META-006 slice |
+| 2026-06-11 16:45 | Merge PR #113 | CI run `27362208606` passed, CodeRabbit status was success with no actionable comments, no review threads remained, and PR #113 merged as `ae5fcee4639de8d51f8fe380e0c72606090da137` |
 | 2026-06-11 15:58 | Validate PR #112 CodeRabbit response locally | Focused metadata fixture tests/check, Python compile, full `make check`, Windows `scripts\check.ps1`, and whitespace validation pass after the empty-image guard |
 | 2026-06-11 15:55 | Address CodeRabbit PR #112 review locally | Accepted the empty metadata image finding by making required metadata `image` URIs nonempty and adding a hostile fixture regression; skipped the optional off-chain final `/final` suffix suggestion because the committed final fixture is intentionally content-addressed as `ipfs://base/10000000000` |
 | 2026-06-11 15:42 | Open PR #112 and request CodeRabbit | Metadata fixture safety PR published at `https://github.com/6529-Collections/6529Stream/pull/112`; head is `d2f270b254d1e3a7b115817c62f2acf0a40efec9`; CodeRabbit review requested in issue comment `4682324523`; Claude intentionally skipped per current user instruction |

@@ -82,12 +82,13 @@ contributors who start from the README.
   in generated HTML. Numeric byte limits now cover collection display fields,
   collection scripts, token data, token images, token attributes, generated
   `tokenURI` output, dependency scripts, and dependency provenance. Token image
-  writes now reject unsafe content URI inputs, and renderer helpers define the
-  current content/script URI scheme policy for tests and fixture checks.
+  writes, collection base URI writes, and external library URL writes now reject
+  unsafe URI inputs, and renderer helpers define the current content/script URI
+  scheme policy for tests and fixture checks.
   Remaining metadata blockers include dependency artifact packaging and deployment
   migration runbooks beyond registry provenance strings, full browser execution
-  sandbox automation, semantic attribute schema validation, collection base URI
-  and external library URL production enforcement, and invalid UTF-8 policy.
+  sandbox automation, semantic attribute schema validation, and invalid UTF-8
+  policy.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries.
