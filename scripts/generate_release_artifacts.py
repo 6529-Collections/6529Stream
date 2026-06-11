@@ -24,6 +24,7 @@ DOWNSTREAM_RELEASE_FILES = {
     "SHA256SUMS",
     "release-checksums.json",
     "release-manifest.json",
+    "source-verification-inputs.json",
 }
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")

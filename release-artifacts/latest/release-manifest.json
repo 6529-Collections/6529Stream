@@ -64,6 +64,12 @@
         }
       }
     },
+    "source_verification_inputs": {
+      "path": "release-artifacts/latest/source-verification-inputs.json",
+      "sha256": "sha256:ce113f10fdce218eb16a4f4b6e91165863467fa22d34878b6bddc959ccf0cce6",
+      "size_bytes": 45397,
+      "schema_version": "6529stream.source-verification-inputs.v1"
+    },
     "abi_compatibility_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
       "sha256": "sha256:44e97807c70ed606edb985cca85eace493a893a62c345212c18e7834ba6c08be",
@@ -153,29 +159,29 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:9a83e173ec169b87056d2b32ecb76baa70f2ee2751ade59f37e7efbb3eb4cdf5",
-      "size_bytes": 1408
+      "sha256": "sha256:2f2bc29738e51ca9fe1a04e6e38737c6878a42a1a919a9ff0ed3fcc8cf74a7ed",
+      "size_bytes": 1848
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:a3eb8d45b9fb9ec277678f6b868f6f99517d2abd2a0f8804985d50b51c2e83ed",
-        "size_bytes": 5568
+        "sha256": "sha256:31621416fc38066dd6c54bafa52e7ca2ec11375a882105b9611f5804e1e8976e",
+        "size_bytes": 5624
       },
       {
         "path": "docs/deployment.md",
-        "sha256": "sha256:a8ae28713cf6210785b29388a0d22d7fbc0370e8f26ec70b3428d3eecdd8a76c",
-        "size_bytes": 6193
+        "sha256": "sha256:b8b0aa4e8a34c4e9390526136762369c79a960b40561582b3d9198ed9a515208",
+        "size_bytes": 6831
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:8148fc24156d5df1ff07c4da222695d8c82b2bf36a511ac1fad481dac63bca66",
-        "size_bytes": 8613
+        "sha256": "sha256:71987ae9a0c9f5273040d63d960b617ad13e5f7e631209fc4ecdbc12cf824479",
+        "size_bytes": 9240
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:39ad32ee18f2a72c6d50baeccd580b5cdd47d428b08007bade10b3160b7c4266",
-        "size_bytes": 8465
+        "sha256": "sha256:303acd1b65e14a93dd01dd6bb0b6b33c93f492eea247be803d4407f53bfa1273",
+        "size_bytes": 8860
       }
     ]
   },

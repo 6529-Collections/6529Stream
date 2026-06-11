@@ -13,6 +13,9 @@ the release policy in `docs/release-policy.md`.
 - Added a deterministic machine-readable release manifest that ties release
   artifacts, ABI compatibility, deployment manifests, address books, governance
   docs, and release-ceremony status together under `release-artifacts/latest/`.
+- Added deterministic source-verification input generation under
+  `release-artifacts/latest/`, including source hashes, compiler settings,
+  constructor ABI, bytecode/linking status, and verification command templates.
 
 ### Release Impact
 
@@ -22,6 +25,9 @@ the release policy in `docs/release-policy.md`.
   signable checksum bundle. The checksum bundle covers the release manifest, so
   the manifest records checksum-bundle digests as self-referentially unavailable
   rather than embedding a hash cycle.
+- Gate G now checks `release-artifacts/latest/source-verification-inputs.json`
+  before the release manifest so retained verification inputs are covered by
+  both the top-level manifest and the signable checksum bundle.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

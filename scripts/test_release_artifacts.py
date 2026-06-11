@@ -150,6 +150,10 @@ class ReleaseArtifactTests(unittest.TestCase):
                 output_dir / "release-manifest.json",
                 {"schema_version": "6529stream.release-manifest.v1"},
             )
+            write_json(
+                output_dir / "source-verification-inputs.json",
+                {"schema_version": "6529stream.source-verification-inputs.v1"},
+            )
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
                 self.assertEqual(
                     generator.check_artifacts(root, config_path, out_dir, output_dir, "cast"),

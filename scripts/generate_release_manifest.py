@@ -292,6 +292,11 @@ def build_manifest(
                 schema_required=True,
             ),
             "artifact_manifest": artifact_manifest_record(release_artifacts_dir, repo_root),
+            "source_verification_inputs": file_record(
+                release_artifacts_dir / "source-verification-inputs.json",
+                repo_root,
+                schema_required=True,
+            ),
             "abi_compatibility_baseline": file_record(
                 baseline_path,
                 repo_root,

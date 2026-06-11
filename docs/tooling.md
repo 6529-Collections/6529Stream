@@ -27,6 +27,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_source_verification_inputs.py
+python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
@@ -57,6 +59,13 @@ It verifies that `release-artifacts/latest/` matches the production `via-ir`
 Foundry build output, including ABI checksums, bytecode checksums, interface
 IDs, and the event topic catalog. The generator automatically finds Foundry's
 `cast` in `~/.foundry/bin` when the shell has not added it to `PATH`.
+
+The source-verification step generates and checks
+`release-artifacts/latest/source-verification-inputs.json` from the production
+Foundry artifacts, source files, compiler settings, and contract config. It
+retains source hashes, constructor ABI, bytecode/linking status, and
+`forge verify-contract` command templates without claiming live explorer
+verification before a broadcast deployment exists.
 
 The ABI compatibility step compares the current production contract ABI surface
 against `release-artifacts/baselines/v0.1.0/abi-surface.json`. It fails on
@@ -135,6 +144,7 @@ build and regenerate the tracked release baseline with:
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
+python scripts/generate_source_verification_inputs.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
@@ -147,6 +157,7 @@ The check mode is:
 
 ```bash
 python scripts/generate_release_artifacts.py --check
+python scripts/generate_source_verification_inputs.py --check
 python scripts/check_abi_compatibility.py --check
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_address_books.py --check

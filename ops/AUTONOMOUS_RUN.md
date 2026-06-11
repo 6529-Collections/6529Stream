@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-manifest` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/104` |
+| Active PR branch | `codex/source-verification-inputs` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/106` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 12:34 UTC` |
+| Last updated | `2026-06-11 13:23 UTC` |
 
 ## Packaging Notes
 
@@ -107,7 +107,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 51 | Generate deployment address books | Gate G/Gate E support | Implement P1-RELEASE-003 by projecting committed deployment manifests into compact deterministic address-book artifacts for integrators, scripts, and docs, with drift checks in local/CI gates | Merged in PR #100 |
 | 52 | Add signable release checksum bundle | Gate G support | Implement P1-RELEASE-004 by generating deterministic SHA256SUMS and machine-readable checksum manifests over committed release/deployment artifacts, with drift checks in local/CI gates | Merged in PR #102 |
 | 53 | Add release change approval policy and changelog gate | Gate G support | Implement P1-RELEASE-005 by documenting ABI/schema/release change approval rules and adding a local/CI changelog gate for release-impacting paths | Merged in PR #104 |
-| 54 | Generate machine-readable release manifest | Gate G support | Implement P1-RELEASE-006 by generating a deterministic top-level release manifest over committed release/deployment artifacts, governance docs, and release-ceremony status, with local/CI drift checks | Active |
+| 54 | Generate machine-readable release manifest | Gate G support | Implement P1-RELEASE-006 by generating a deterministic top-level release manifest over committed release/deployment artifacts, governance docs, and release-ceremony status, with local/CI drift checks | Merged in PR #106 |
+| 55 | Generate source verification inputs | Gate G support | Implement P1-RELEASE-007 by generating deterministic source-verification inputs from Foundry artifacts, source files, compiler settings, and contract config, with local/CI drift checks | Active |
 
 ## Current PR Worklog
 
@@ -4826,6 +4827,9 @@ Validation:
 - `git diff --check`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- Review-fix validation repeated source-verification tests/check, release
+  manifest tests/check, release checksum tests/check, Python compile, `git diff
+  --check`, `make check`, and the Windows wrapper.
 
 Review response:
 
@@ -4847,9 +4851,9 @@ Merge evidence:
   status `success`, and the prior thread resolved/outdated.
 - Issue #103 auto-closed completed.
 
-### PR candidate: Generate machine-readable release manifest (Queue Item 54)
+### PR #106: Generate machine-readable release manifest (Queue Item 54)
 
-Status: CodeRabbit nitpick fixed locally; review-fix validation passed.
+Status: Merged.
 Branch: `codex/release-manifest`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/106`.
 Related issue:
@@ -4936,10 +4940,128 @@ Review response:
 - Review-fix validation passed with manifest tests/check, changelog check,
   Python compile, and whitespace check.
 
+Merge evidence:
+
+- Merged as PR #106 on `2026-06-11 12:38 UTC`.
+- Merge commit: `30bbf4baabd689bf6243c5a8ec41051aff02060f`.
+- Final head before merge: `7af47ba56d09498d46dbea3278740b5edc456084`.
+- CI run `27347108379` passed.
+- CodeRabbit latest-head status was `success`; no review threads were open.
+- Claude was not requested per the current CodeRabbit-only user instruction.
+- Issue #105 auto-closed completed.
+
+### PR candidate: Generate source verification inputs (Queue Item 55)
+
+Status: PR open; CodeRabbit review fix applied locally.
+Branch: `codex/source-verification-inputs`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/108`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/107`
+
+Goal:
+
+- Generate `release-artifacts/latest/source-verification-inputs.json` as a
+  deterministic Gate G artifact for retained verification inputs.
+- Tie production contract source hashes, Foundry artifact paths, ABI hashes,
+  bytecode hashes, compiler settings, constructor ABI, linked-bytecode status,
+  and verification command templates together for reviewers.
+- Wire source-verification tests and drift checks into `make check`,
+  Linux/Windows wrappers, and CI before the top-level release manifest gate.
+- Keep live explorer verification, production broadcast manifests, detached
+  signatures, and signed tags as separate release-ceremony work.
+
+Initial scope:
+
+- `scripts/generate_source_verification_inputs.py`
+- `scripts/test_source_verification_inputs.py`
+- `release-artifacts/latest/source-verification-inputs.json`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `CHANGELOG.md`
+- `README.md`
+- `release-artifacts/README.md`
+- `docs/deployment.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `docs/tooling.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation summary:
+
+- Added `scripts/generate_source_verification_inputs.py`, a stdlib-only
+  generator that builds `release-artifacts/latest/source-verification-inputs.json`
+  from production contract config, Foundry artifacts, Solidity source files,
+  compiler settings, and ABI/bytecode checksum outputs.
+- The generated bundle records production contract source hashes, Solidity
+  metadata source hashes, compiler versions, optimizer/via-IR settings,
+  constructor ABI, bytecode/linking status, link references, and
+  `forge verify-contract` command templates without claiming live explorer
+  verification before broadcast artifacts exist.
+- Added `scripts/test_source_verification_inputs.py` covering deterministic
+  generation, check-mode drift, missing source and artifact failures,
+  linked-bytecode reporting, constructor ABI retention, verification command
+  templates, and ABI checksum mismatch failures.
+- Taught the release-artifact catalog check to ignore this downstream Gate G
+  output, and added release-manifest coverage so source-verification inputs are
+  listed in `release-artifacts/latest/release-manifest.json`.
+- Wired source-verification tests/checks into `make check`, `scripts/check.sh`,
+  `scripts/check.ps1`, and CI before release manifest and checksum validation.
+- Regenerated the source-verification artifact, release manifest, and release
+  checksum bundle.
+- Updated README, release-artifact docs, tooling docs, deployment docs, release
+  policy, project status, changelog, roadmap, and run-state traceability.
+
+Review response:
+
+- Accepted CodeRabbit's library-placeholder finding: verification command
+  templates now deduplicate linked libraries by `(source, library)` while
+  retaining distinct creation/runtime link-reference details in the generated
+  artifact.
+- Added regression coverage for creation and runtime bytecode referencing the
+  same library at different positions, proving the verification command keeps a
+  single `--libraries` placeholder.
+- Regenerated `release-artifacts/latest/source-verification-inputs.json`, the
+  release manifest, and the checksum bundle after the generator fix.
+
+Validation:
+
+- `python scripts\test_source_verification_inputs.py`
+- `python scripts\generate_source_verification_inputs.py --check`
+- `python scripts\test_release_artifacts.py`
+- `python scripts\generate_release_artifacts.py --check`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\generate_release_artifacts.py scripts\test_release_artifacts.py scripts\generate_source_verification_inputs.py scripts\test_source_verification_inputs.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py scripts\check_changelog.py scripts\test_changelog_check.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts/check.ps1` and
+  `scripts/bootstrap-windows.ps1`
+- `git diff --check`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 13:23 | Validate CodeRabbit PR #108 fix locally | Source-verification regression, drift checks, manifest/checksum checks, Python compile, whitespace check, full `make check`, and Windows wrapper all pass after deduplicating library placeholders |
+| 2026-06-11 13:17 | Address CodeRabbit PR #108 finding locally | Accepted the duplicate-library-placeholder review finding, added regression coverage for different creation/runtime link offsets, regenerated source-verification and release checksum artifacts, and prepared for focused/full validation before pushing |
+| 2026-06-11 13:04 | Open PR #108 and request CodeRabbit | Source verification input PR published at `https://github.com/6529-Collections/6529Stream/pull/108`; CodeRabbit review requested in issue comment `4680853110`; Claude intentionally skipped per current user instruction |
+| 2026-06-11 13:02 | Validate Queue Item 55 locally | Source-verification tests/check, release-artifact ownership regression, release manifest/checksum checks, changelog checks, Python compile, shell/PowerShell syntax, whitespace, full `make check`, and Windows wrapper all pass |
+| 2026-06-11 12:52 | Implement source verification bundle | Added generator, tests, tracked artifact, release-manifest/checksum integration, local/CI gate wiring, docs, roadmap, changelog, and durable state updates |
+| 2026-06-11 12:41 | Start Queue Item 55 | Issue #107 tracks deterministic source verification input retention; branch `codex/source-verification-inputs` starts from merged PR #106 and scopes to generated verification inputs plus local/CI drift checks |
+| 2026-06-11 12:40 | Create source verification issue #107 | No open issue covered retained source verification inputs, so a focused P1 release issue keeps the Gate G PR auditable |
+| 2026-06-11 12:38 | Merge PR #106 | Release manifest merged as `30bbf4baabd689bf6243c5a8ec41051aff02060f`; CI run `27347108379` passed, CodeRabbit latest-head status was success, no review threads remained, and issue #105 closed completed |
 | 2026-06-11 12:34 | Validate PR #106 review fix locally | Manifest tests/check, changelog check, Python compile, and whitespace check pass after accepting the CodeRabbit consistency nitpick |
 | 2026-06-11 12:33 | Address CodeRabbit PR #106 nitpick locally | Accepted the consistency suggestion for `scripts/test_release_manifest.py`; focused validation will run before pushing the review fix |
 | 2026-06-11 12:20 | Open PR #106 | Release manifest PR published at `https://github.com/6529-Collections/6529Stream/pull/106`; this state-only follow-up records the PR URL before requesting CodeRabbit on the final head |

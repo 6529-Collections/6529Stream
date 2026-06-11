@@ -91,9 +91,9 @@ The ABI compatibility gate compares the current production ABI surface against
   changelog entry when they are part of a release-impacting PR.
 - Baseline refreshes must happen in the same PR as the contract or artifact
   change, or in a follow-up PR linked from the original approval issue.
-- Event topic, interface ID, deployment manifest, address book, release
-  manifest, and checksum outputs must be regenerated before merge when their
-  covered inputs change.
+- Event topic, interface ID, source verification input, deployment manifest,
+  address book, release manifest, and checksum outputs must be regenerated
+  before merge when their covered inputs change.
 
 ## Changelog Gate
 
@@ -122,7 +122,8 @@ Before a public release tag:
 - Gas and size snapshots are accepted.
 - Deployment rehearsal passes.
 - ABI, bytecode, interface ID, event topic, deployment manifest, address book,
-  release manifest, and checksum artifacts are generated and checked.
+  source verification input, release manifest, and checksum artifacts are
+  generated and checked.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.
