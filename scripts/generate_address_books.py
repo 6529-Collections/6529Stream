@@ -23,7 +23,19 @@ DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 ZERO_ADDRESS = "0x" + ("0" * 40)
+LIFECYCLE_STATES = frozenset(
+    {
+        "Planned",
+        "Rehearsed",
+        "Active",
+        "Deprecated",
+        "EmergencySuperseded",
+        "Retired",
+        "Cancelled",
+    }
+)
 VERIFICATION_STATUSES = frozenset(
     {
         "not_started",
@@ -84,9 +96,23 @@ def require_sha256(value: Any, path: str) -> str:
 
 
 def require_int(value: Any, path: str) -> int:
-    if not isinstance(value, int):
+    if not isinstance(value, int) or isinstance(value, bool):
         raise AddressBookError(f"{path} must be an integer")
     return value
+
+
+def require_positive_int(value: Any, path: str) -> int:
+    number = require_int(value, path)
+    if number < 1:
+        raise AddressBookError(f"{path} must be greater than zero")
+    return number
+
+
+def require_git_commit(value: Any, path: str) -> str:
+    commit = require_string(value, path)
+    if not GIT_COMMIT_RE.match(commit):
+        raise AddressBookError(f"{path} must be a 40-character git commit hash")
+    return commit
 
 
 def require_bool(value: Any, path: str) -> bool:
@@ -248,16 +274,20 @@ def build_address_book(
         "deployment_version": require_string(
             manifest.get("deployment_version"), "manifest.deployment_version"
         ),
-        "lifecycle_state": require_string(
-            manifest.get("lifecycle_state"), "manifest.lifecycle_state"
+        "lifecycle_state": require_enum(
+            manifest.get("lifecycle_state"),
+            "manifest.lifecycle_state",
+            LIFECYCLE_STATES,
         ),
         "network": {
             "name": require_string(network.get("name"), "manifest.network.name"),
-            "chain_id": require_int(network.get("chain_id"), "manifest.network.chain_id"),
+            "chain_id": require_positive_int(
+                network.get("chain_id"), "manifest.network.chain_id"
+            ),
         },
         "git": {
             "repository": require_string(git.get("repository"), "manifest.git.repository"),
-            "commit": require_string(git.get("commit"), "manifest.git.commit"),
+            "commit": require_git_commit(git.get("commit"), "manifest.git.commit"),
             "source_dirty": require_bool(
                 git.get("source_dirty"), "manifest.git.source_dirty"
             ),

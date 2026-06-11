@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/98` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 10:00 UTC` |
+| Last updated | `2026-06-11 10:08 UTC` |
 
 ## Packaging Notes
 
@@ -4563,7 +4563,7 @@ Merge evidence:
 
 ### PR candidate: Generate deployment address books (Queue Item 51)
 
-Status: CodeRabbit findings addressed locally; push and re-review next.
+Status: Second CodeRabbit finding addressed locally; push and re-review next.
 Branch: `codex/address-book-generator`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/100`.
 Related issue:
@@ -4610,12 +4610,17 @@ Implementation draft:
   addresses, duplicate deployed addresses, ABI/runtime bytecode hashes,
   verification status, source manifest checksum, and strict `source_dirty`
   typing.
-- Added focused tests for deterministic generation, drift detection, duplicate
-  addresses, invalid addresses, invalid `source_dirty`, missing contract
-  metadata, and missing release contracts.
+- Added focused tests for deterministic generation, drift detection, missing
+  output directories, duplicate addresses, invalid addresses, invalid
+  `source_dirty`, invalid chain IDs, invalid lifecycle state, invalid git
+  commit hashes, invalid verification status, invalid hash format, missing
+  contract metadata, missing release contracts, and unknown contracts.
 - Added `deployments/schema/address-book.schema.json`, deterministic lowercase
   address normalization, `sha256:` hash-format validation, and verification
   status enum validation while addressing CodeRabbit review.
+- Tightened address-book manifest validation to reject boolean integers,
+  nonpositive chain IDs, invalid lifecycle states, and malformed git commit
+  hashes.
 - Wired address-book tests and `--check` drift detection into `make check`,
   `scripts/check.sh`, `scripts/check.ps1`, and GitHub Actions.
 - Updated README, tooling, deployment, status, deployment artifact, roadmap,
@@ -4640,6 +4645,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 10:08 | Address CodeRabbit PR #100 integer validator finding locally | Accepted CodeRabbit inline comment `3394948002`: `require_int` now rejects booleans, chain IDs must be positive, git commits must be 40-character hashes, lifecycle states are constrained to the deployment schema enum, address-book tests now cover 14 cases including missing output directory and unknown contracts, and focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation pass |
 | 2026-06-11 10:00 | Address CodeRabbit PR #100 findings locally | Accepted CodeRabbit comment `4679312734`: removed duplicate Makefile execution, added an explicit generated-output docs note, added `deployments/schema/address-book.schema.json`, normalized generated addresses to lowercase, constrained `verification_status`, validated `sha256:` hash formats, expanded address-book tests to 8 cases, and reran focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation successfully |
 | 2026-06-11 09:49 | Open PR #100 and request CodeRabbit | Address-book generator PR published at `https://github.com/6529-Collections/6529Stream/pull/100`; CodeRabbit review requested in issue comment `4679297117`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 09:47 | Validate Queue Item 51 locally | Address-book generator tests, address-book drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass; validation tightened `source_dirty` to strict boolean parsing and records the ABI checksum source path in the generated artifact |

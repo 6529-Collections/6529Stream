@@ -188,6 +188,54 @@ class AddressBookTests(unittest.TestCase):
             with self.assertRaisesRegex(generator.AddressBookError, "source_dirty"):
                 generator.build_address_book(manifest_path, release_dir, root)
 
+    def test_generator_rejects_boolean_chain_id(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["network"]["chain_id"] = True
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "chain_id"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_generator_rejects_nonpositive_chain_id(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["network"]["chain_id"] = 0
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "greater than zero"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_generator_rejects_invalid_git_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["git"]["commit"] = "main"
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "git commit"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_generator_rejects_invalid_lifecycle_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["lifecycle_state"] = "Broadcast"
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "lifecycle_state"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
     def test_generator_rejects_invalid_verification_status(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -223,6 +271,36 @@ class AddressBookTests(unittest.TestCase):
 
             with self.assertRaisesRegex(generator.AddressBookError, "omits release contracts"):
                 generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_generator_rejects_unknown_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            manifest = generator.load_json(manifest_path)
+            manifest["contracts"]["Gamma"] = {
+                "address": "0x0000000000000000000000000000000000000003",
+                "abi_hash": "sha256:" + ("c" * 64),
+                "bytecode_hash": "sha256:" + ("3" * 64),
+                "verification_status": "not_applicable",
+            }
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.AddressBookError, "unknown contracts"):
+                generator.build_address_book(manifest_path, release_dir, root)
+
+    def test_check_mode_rejects_missing_output_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            output_dir = root / "deployments" / "address-books"
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                self.assertEqual(
+                    generator.check_address_books([manifest_path], release_dir, output_dir, root),
+                    1,
+                )
 
 
 if __name__ == "__main__":
