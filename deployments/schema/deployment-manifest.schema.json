@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/6529-Collections/6529Stream/deployments/schema/deployment-manifest.schema.json",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/deployment-manifest.schema.json",
   "title": "6529Stream Deployment Manifest",
   "type": "object",
   "additionalProperties": false,

@@ -4165,7 +4165,7 @@ Validation completed at `2026-06-11 06:13 UTC`:
 - `git diff --check` passed.
 - `forge build --sizes --via-ir --skip test --skip script --force` passed and reports
   `StreamCore` at `23,139` runtime bytes with `1,437` bytes of runtime
-  headroom; `StreamMetadataRenderer` reports `6,817` runtime bytes.
+  headroom; `StreamMetadataRenderer` reports `6,843` runtime bytes.
 - Slither baseline comparison ran through `.venv-tools\Scripts\slither.exe`
   with Foundry on `PATH`; it returned the expected non-zero baseline exit with
   `717` total findings, High `4`, Medium `19`, Low `93`, Informational `590`,
@@ -4302,6 +4302,7 @@ Validation completed at `2026-06-11 07:14 UTC`:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 07:29 | Address CodeRabbit PR #92 comments | Accepted both low-risk review items: normalized the `StreamMetadataRenderer` size evidence to `6,843` bytes throughout the PR #90 audit trail and changed the deployment manifest schema `$id` to a resolvable raw GitHub URL |
 | 2026-06-11 07:16 | Open PR #92 and request CodeRabbit | Deployment rehearsal baseline published at `https://github.com/6529-Collections/6529Stream/pull/92`; CodeRabbit review requested in issue comment `4678115878`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 07:14 | Revalidate Queue Item 47 after manifest expansion | Expanded the local example manifest to cover all nine deployed contracts and ABI hash placeholders, then reran focused manifest tests, `make check`, Windows wrapper, and whitespace validation successfully |
 | 2026-06-11 07:05 | Finish Queue Item 47 local validation | Full local and Windows gates pass after adding the local deployment rehearsal, manifest schema/example, manifest parsing/wiring tests, CI workflow rehearsal step, and production size command narrowed to skip both test and script artifacts |
