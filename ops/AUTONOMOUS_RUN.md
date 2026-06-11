@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/96` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 09:15 UTC` |
+| Last updated | `2026-06-11 09:17 UTC` |
 
 ## Packaging Notes
 
@@ -4483,9 +4483,9 @@ Merge evidence:
 
 ### PR candidate: Add ABI compatibility checks (Queue Item 50)
 
-Status: Local implementation in progress.
+Status: PR open; waiting on CI and CodeRabbit.
 Branch: `codex/abi-compatibility-checks`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/98`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/97`
@@ -4551,6 +4551,7 @@ Validation completed at `2026-06-11 09:15 UTC`:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 09:17 | Open PR #98 and request CodeRabbit | ABI compatibility PR published at `https://github.com/6529-Collections/6529Stream/pull/98`; CodeRabbit review requested in issue comment `4679037794`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 09:15 | Validate Queue Item 50 locally | ABI compatibility generator/checker tests, compatibility drift check, Python compile, shell/PowerShell syntax, JSON parsing, full `make check`, Windows wrapper, and whitespace validation all pass |
 | 2026-06-11 09:09 | Start Queue Item 50 | Issue #97 tracks the remaining deterministic ABI diff gate; branch `codex/abi-compatibility-checks` starts from merged PR #96 and scopes to a committed ABI surface baseline plus local/CI compatibility checks |
 | 2026-06-11 09:01 | Create ABI compatibility issue #97 | No open issue covered ABI compatibility diff checks, so a focused P1 release issue keeps the Gate G PR auditable |
