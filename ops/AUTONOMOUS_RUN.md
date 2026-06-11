@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/86` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 04:42 UTC` |
+| Last updated | `2026-06-11 04:45 UTC` |
 
 ## Packaging Notes
 
@@ -3940,8 +3940,8 @@ Merge:
 
 ### PR candidate: Add metadata escaping and render-safety baseline (Queue Item 44)
 
-Status: CodeRabbit delimiter-type finding addressed locally; follow-up
-commit/push pending.
+Status: Merge-ready; CI is green, CodeRabbit is green, and all visible review
+threads are resolved.
 Branch: `codex/metadata-escaping-safety`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/87`.
 Initial implementation commit: `d9a4a1af3bf3f56bf5e913f2db4b9ba070b924df`.
@@ -4017,6 +4017,7 @@ Validation so far:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 04:45 | Mark PR #87 merge-ready | CI run `27324323091` passed on head `1daa794be32809f582d9398f39b5f62bb6c25f79`, CodeRabbit status is success with final clean comment `4677250565`, and the only visible inline review thread was resolved by CodeRabbit |
 | 2026-06-11 04:42 | Address CodeRabbit PR #87 delimiter finding | Added container-kind tracking to the raw-attribute parser so object and array closers must match their opener, covered mismatched `{]` and `[}` delimiters, and refreshed focused 9-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 04:35 | Address CodeRabbit PR #87 positive-test suggestions | Added empty-attributes and multiple-top-level-object acceptance tests, refreshed focused 8-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 04:28 | Open PR #87 and request CodeRabbit | Metadata escaping safety baseline published at `https://github.com/6529-Collections/6529Stream/pull/87`; CodeRabbit review requested in issue comment `4677178780`, and Claude remains intentionally skipped per current user instruction |
