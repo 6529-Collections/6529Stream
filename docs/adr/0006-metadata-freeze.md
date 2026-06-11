@@ -74,13 +74,16 @@ Current source references:
 - `burn(collectionId, tokenId)` burns the ERC-721 token and increments
   `burnAmount[collectionId]`. After burn, `tokenURI(tokenId)` reverts through
   `_requireMinted`, while internal token mappings remain in storage.
-- `StreamCore.supportsInterface` reports support inherited from
-  `ERC721Enumerable` and `ERC2981`. It does not report
-  `ERC-4906` interface ID `0x49064906`, and no `MetadataUpdate` or
-  `BatchMetadataUpdate` events are emitted.
-- JSON, HTML, JavaScript, token data, image data, attributes, script chunks, and
-  URLs are concatenated without a schema version, escaping policy, or size
-  limits.
+- `StreamCore.supportsInterface` reports ERC-721, ERC-721 Metadata, ERC-2981,
+  and ERC-4906 support. It intentionally does not report ERC-721 Enumerable
+  support; the optional enumerable extension was removed for production
+  deployability while preserving a live `totalSupply()` view.
+- JSON string fields, raw attribute fragments, generated animation wrapper
+  fields, `tokenData`, dependency scripts embedded in JavaScript strings, and
+  wrapper closing-script boundaries now have first-slice escaping or rejection
+  coverage. Semantic attribute schema validation, URI policy, invalid UTF-8
+  policy, browser render-sandbox automation, and numeric size limits remain
+  open under P1-META-006.
 
 The current behavior is useful as characterization, but it is not a production
 metadata promise.

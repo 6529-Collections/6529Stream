@@ -83,6 +83,12 @@ contributors who start from the README.
   packaging and deployment migration runbooks beyond registry provenance
   strings, browser render-sandbox automation, semantic attribute schema
   validation, URI policy, invalid UTF-8 policy, and size limits.
+- `StreamCore` now uses a linked metadata renderer library, removes optional
+  ERC-721 Enumerable support, preserves a live `totalSupply()`
+  view, and has a production-only size gate:
+  `forge build --sizes --via-ir --skip test --force`. That gate currently shows
+  `StreamCore` under EIP-170 with deployment headroom, but deployment scripts,
+  manifests, and rehearsals still need to use this production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

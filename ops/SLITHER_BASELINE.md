@@ -9,7 +9,7 @@ positive; this is still not a full security baseline for public launch.
 | Field | Value |
 | --- | --- |
 | Status | High/medium rows triaged; not accepted as a CI gate |
-| Last generated | `2026-06-10 21:53 UTC` |
+| Last generated | `2026-06-11 06:13 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
@@ -26,10 +26,10 @@ baseline and lower-impact findings are handled.
 | --- | ---: |
 | High | 4 |
 | Medium | 19 |
-| Low | 92 |
-| Informational | 595 |
+| Low | 93 |
+| Informational | 590 |
 | Optimization | 11 |
-| Total | 721 |
+| Total | 717 |
 
 ## Detector Counts
 
@@ -45,8 +45,8 @@ baseline and lower-impact findings are handled.
 | `locked-ether` | Medium | 7 |
 | `uninitialized-local` | Medium | 1 |
 | `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 92 |
-| Informational findings | Informational | 595 |
+| Low-impact findings | Low | 93 |
+| Informational findings | Informational | 590 |
 | Optimization findings | Optimization | 11 |
 
 Dependency-script encoding delta from the previous tracked capture:
@@ -114,6 +114,14 @@ Dependency-script encoding delta from the previous tracked capture:
     from 716 to 721 after adding owner-approved signer-lifecycle targets and
     their event/test coverage.
 - `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
+- StreamCore size-reduction delta from the previous tracked capture:
+  - High and Medium counts remain unchanged at 4 and 19.
+  - Low findings increased from 92 to 93, Informational findings decreased from
+    595 to 590, Optimization findings remain 11, and total findings decreased
+    from 721 to 717 after removing optional ERC-721 Enumerable inheritance and
+    moving pure metadata rendering into `StreamMetadataRenderer`.
+  - `arbitrary-send-eth`, `reentrancy-eth`, `encode-packed-collision`,
+    `weak-prng`, and `uninitialized-state` remain at zero findings.
 - Slither still exits non-zero because accepted test-only and vendored
   false-positive rows remain visible, plus lower-impact findings are not yet a
   CI gate.

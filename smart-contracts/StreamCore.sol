@@ -10,9 +10,8 @@
 
 pragma solidity ^0.8.19;
 
-import "./ERC721Enumerable.sol";
+import "./ERC721.sol";
 import "./Strings.sol";
-import "./Base64.sol";
 import "./IRandomizer.sol";
 import "./IRandomizerLifecycle.sol";
 import "./IStreamAdmins.sol";
@@ -21,9 +20,10 @@ import "./ERC2981.sol";
 import "./Ownable.sol";
 import "./IDependencyRegistry.sol";
 import "./IERC4906.sol";
+import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
 
-contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
+contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     using Strings for uint256;
 
     bytes4 private constant _INTERFACE_ID_ERC4906 = 0x49064906;
@@ -178,14 +178,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     // Retained audit state for burned tokens. tokenURI remains unavailable.
     mapping(uint256 => BurnedTokenAudit) private burnedTokenAuditRecords;
 
-    struct RawAttributeValidationState {
-        uint256 depth;
-        uint256 containerKinds;
-        bool inString;
-        bool escaped;
-        bool sawTopLevelValue;
-        bool expectingTopLevelValue;
-    }
+    uint256 private _liveTokenSupply;
 
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
@@ -392,6 +385,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             postBurnRandomnessTimestamp: 0
         });
         _burn(_tokenId);
+        _liveTokenSupply = _liveTokenSupply - 1;
         burnAmount[_collectionID] = burnAmount[_collectionID] + 1;
         emit TokenBurned(_collectionID, _tokenId, _msgSender(), tokenOwner);
     }
@@ -410,6 +404,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         tokenData[_mintIndex] = _tokenData;
         tokenIdsToCollectionIds[_mintIndex] = _collectionID;
         _addLiveTokenMetadataRecord(_collectionID, _mintIndex);
+        _liveTokenSupply = _liveTokenSupply + 1;
         _safeMint(_recipient, _mintIndex);
         collectionAdditionalData[_collectionID].randomizer
             .calculateTokenHash(_collectionID, _mintIndex, _saltfun_o);
@@ -647,10 +642,14 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         public
         view
         virtual
-        override(ERC721Enumerable, ERC2981)
+        override(ERC721, ERC2981)
         returns (bool)
     {
         return interfaceId == _INTERFACE_ID_ERC4906 || super.supportsInterface(interfaceId);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _liveTokenSupply;
     }
 
     function _emitCollectionMetadataUpdate(uint256 _collectionID) private {
@@ -727,407 +726,26 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         view
         returns (string memory)
     {
-        return string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(bytes(_onchainMetadataJson(tokenId, collectionId, finalMetadata)))
-            )
-        );
-    }
-
-    function _onchainMetadataJson(uint256 tokenId, uint256 collectionId, bool finalMetadata)
-        private
-        view
-        returns (string memory)
-    {
-        string memory animationField = "";
+        string memory animationScript = "";
         if (finalMetadata) {
-            animationField = string(
-                abi.encodePacked(
-                    ",\"animation_url\":\"",
-                    _escapeJsonString(_onchainAnimationURI(tokenId, collectionId)),
-                    "\""
-                )
-            );
+            animationScript = retrieveGenerativeScript(tokenId);
         }
 
-        return string(
-            abi.encodePacked(
-                "{\"metadata_schema_version\":\"",
-                METADATA_SCHEMA_VERSION,
-                "\",\"metadata_state\":\"",
-                finalMetadata ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING,
-                "\",\"name\":\"",
-                _escapeJsonString(getTokenName(tokenId)),
-                "\",\"description\":\"",
-                _escapeJsonString(collectionInfo[collectionId].collectionDescription),
-                "\",\"image\":\"",
-                _escapeJsonString(tokenImageAndAttributes[tokenId][0]),
-                "\",\"attributes\":[",
-                tokenImageAndAttributes[tokenId][1],
-                "]",
-                animationField,
-                "}"
-            )
+        return StreamMetadataRenderer.onchainTokenURI(
+            METADATA_SCHEMA_VERSION,
+            finalMetadata ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING,
+            getTokenName(tokenId),
+            collectionInfo[collectionId].collectionDescription,
+            tokenImageAndAttributes[tokenId][0],
+            tokenImageAndAttributes[tokenId][1],
+            collectionInfo[collectionId].collectionLibrary,
+            animationScript,
+            finalMetadata
         );
-    }
-
-    function _onchainAnimationURI(uint256 tokenId, uint256 collectionId)
-        private
-        view
-        returns (string memory)
-    {
-        return string(
-            abi.encodePacked(
-                "data:text/html;base64,",
-                Base64.encode(
-                    abi.encodePacked(
-                        "<html><head></head><body><script src=\"",
-                        _escapeHtmlAttribute(collectionInfo[collectionId].collectionLibrary),
-                        "\"></script><script>",
-                        _escapeScriptElementEndTags(retrieveGenerativeScript(tokenId)),
-                        "</script></body></html>"
-                    )
-                )
-            )
-        );
-    }
-
-    function _escapeHtmlAttribute(string memory raw) private pure returns (string memory) {
-        bytes memory input = bytes(raw);
-        bytes memory output = new bytes(input.length * 6);
-        uint256 outputLength = 0;
-
-        for (uint256 i = 0; i < input.length; i++) {
-            bytes1 character = input[i];
-            if (character == 0x26) {
-                outputLength = _appendBytes(output, outputLength, "&amp;");
-            } else if (character == 0x22) {
-                outputLength = _appendBytes(output, outputLength, "&quot;");
-            } else if (character == 0x27) {
-                outputLength = _appendBytes(output, outputLength, "&#39;");
-            } else if (character == 0x3c) {
-                outputLength = _appendBytes(output, outputLength, "&lt;");
-            } else if (character == 0x3e) {
-                outputLength = _appendBytes(output, outputLength, "&gt;");
-            } else if (uint8(character) < 0x20 || character == 0x7f) {
-                output[outputLength] = 0x26;
-                outputLength++;
-                output[outputLength] = 0x23;
-                outputLength++;
-                output[outputLength] = 0x78;
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) >> 4);
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
-                outputLength++;
-                output[outputLength] = 0x3b;
-                outputLength++;
-            } else {
-                output[outputLength] = character;
-                outputLength++;
-            }
-        }
-
-        return string(_truncateBytes(output, outputLength));
-    }
-
-    function _escapeJavaScriptSingleQuotedString(string memory raw)
-        private
-        pure
-        returns (string memory)
-    {
-        bytes memory input = bytes(raw);
-        bytes memory output = new bytes(input.length * 6);
-        uint256 outputLength = 0;
-
-        for (uint256 i = 0; i < input.length; i++) {
-            bytes1 character = input[i];
-            if (character == 0x27 || character == 0x5c) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = character;
-                outputLength++;
-            } else if (character == 0x0a) {
-                outputLength = _appendBytes(output, outputLength, "\\n");
-            } else if (character == 0x0d) {
-                outputLength = _appendBytes(output, outputLength, "\\r");
-            } else if (character == 0x09) {
-                outputLength = _appendBytes(output, outputLength, "\\t");
-            } else if (
-                uint8(character) < 0x20 || character == 0x3c || character == 0x3e
-                    || character == 0x26
-            ) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x78;
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) >> 4);
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
-                outputLength++;
-            } else {
-                output[outputLength] = character;
-                outputLength++;
-            }
-        }
-
-        return string(_truncateBytes(output, outputLength));
-    }
-
-    function _escapeScriptElementEndTags(string memory raw) private pure returns (string memory) {
-        bytes memory input = bytes(raw);
-        bytes memory output = new bytes(input.length * 2);
-        uint256 outputLength = 0;
-
-        for (uint256 i = 0; i < input.length; i++) {
-            if (_isScriptEndTagStart(input, i)) {
-                output[outputLength] = 0x3c;
-                outputLength++;
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x2f;
-                outputLength++;
-                i++;
-            } else {
-                output[outputLength] = input[i];
-                outputLength++;
-            }
-        }
-
-        return string(_truncateBytes(output, outputLength));
-    }
-
-    function _isScriptEndTagStart(bytes memory input, uint256 index) private pure returns (bool) {
-        if (index + 7 >= input.length || input[index] != 0x3c || input[index + 1] != 0x2f) {
-            return false;
-        }
-
-        return _lowerAscii(input[index + 2]) == 0x73 && _lowerAscii(input[index + 3]) == 0x63
-            && _lowerAscii(input[index + 4]) == 0x72 && _lowerAscii(input[index + 5]) == 0x69
-            && _lowerAscii(input[index + 6]) == 0x70 && _lowerAscii(input[index + 7]) == 0x74;
-    }
-
-    function _lowerAscii(bytes1 character) private pure returns (bytes1) {
-        if (character >= 0x41 && character <= 0x5a) {
-            return bytes1(uint8(character) + 32);
-        }
-        return character;
-    }
-
-    function _escapeJsonString(string memory raw) private pure returns (string memory) {
-        bytes memory input = bytes(raw);
-        bytes memory output = new bytes(input.length * 6);
-        uint256 outputLength = 0;
-
-        for (uint256 i = 0; i < input.length; i++) {
-            bytes1 character = input[i];
-            if (character == 0x22) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x22;
-                outputLength++;
-            } else if (character == 0x5c) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x5c;
-                outputLength++;
-            } else if (character == 0x08) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x62;
-                outputLength++;
-            } else if (character == 0x0c) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x66;
-                outputLength++;
-            } else if (character == 0x0a) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x6e;
-                outputLength++;
-            } else if (character == 0x0d) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x72;
-                outputLength++;
-            } else if (character == 0x09) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x74;
-                outputLength++;
-            } else if (uint8(character) < 0x20) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x75;
-                outputLength++;
-                output[outputLength] = 0x30;
-                outputLength++;
-                output[outputLength] = 0x30;
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) >> 4);
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
-                outputLength++;
-            } else {
-                output[outputLength] = character;
-                outputLength++;
-            }
-        }
-
-        return string(_truncateBytes(output, outputLength));
     }
 
     function _requireSafeRawAttributes(uint256 tokenId, string memory raw) private pure {
-        bytes memory input = bytes(raw);
-        RawAttributeValidationState memory state = RawAttributeValidationState({
-            depth: 0,
-            containerKinds: 0,
-            inString: false,
-            escaped: false,
-            sawTopLevelValue: false,
-            expectingTopLevelValue: true
-        });
-
-        for (uint256 i = 0; i < input.length; i++) {
-            bytes1 character = input[i];
-            if (uint8(character) < 0x20) {
-                revert UnsafeRawAttributes(tokenId);
-            }
-
-            if (state.inString) {
-                _advanceRawAttributeStringState(state, character);
-            } else {
-                _advanceRawAttributeStructuralState(tokenId, state, character);
-            }
-        }
-
-        if (
-            state.inString || state.escaped || state.depth != 0
-                || (state.sawTopLevelValue && state.expectingTopLevelValue)
-        ) {
-            revert UnsafeRawAttributes(tokenId);
-        }
-    }
-
-    function _advanceRawAttributeStringState(
-        RawAttributeValidationState memory state,
-        bytes1 character
-    ) private pure {
-        if (state.escaped) {
-            state.escaped = false;
-        } else if (character == 0x5c) {
-            state.escaped = true;
-        } else if (character == 0x22) {
-            state.inString = false;
-        }
-    }
-
-    function _advanceRawAttributeStructuralState(
-        uint256 tokenId,
-        RawAttributeValidationState memory state,
-        bytes1 character
-    ) private pure {
-        if (character == 0x22) {
-            if (state.depth == 0) {
-                revert UnsafeRawAttributes(tokenId);
-            }
-            state.inString = true;
-        } else if (character == 0x7b || character == 0x5b) {
-            _openRawAttributeContainer(tokenId, state, character);
-        } else if (character == 0x7d || character == 0x5d) {
-            _closeRawAttributeContainer(tokenId, state, character);
-        } else if (state.depth == 0) {
-            _advanceRawAttributeTopLevelSeparator(tokenId, state, character);
-        }
-    }
-
-    function _openRawAttributeContainer(
-        uint256 tokenId,
-        RawAttributeValidationState memory state,
-        bytes1 opener
-    ) private pure {
-        if (state.depth >= 256) {
-            revert UnsafeRawAttributes(tokenId);
-        }
-        if (state.depth == 0) {
-            if (!state.expectingTopLevelValue) {
-                revert UnsafeRawAttributes(tokenId);
-            }
-            state.sawTopLevelValue = true;
-            state.expectingTopLevelValue = false;
-        }
-        if (opener == 0x7b) {
-            state.containerKinds |= uint256(1) << state.depth;
-        } else {
-            state.containerKinds &= ~(uint256(1) << state.depth);
-        }
-        state.depth++;
-    }
-
-    function _closeRawAttributeContainer(
-        uint256 tokenId,
-        RawAttributeValidationState memory state,
-        bytes1 closer
-    ) private pure {
-        if (state.depth == 0) {
-            revert UnsafeRawAttributes(tokenId);
-        }
-        uint256 depthIndex = state.depth - 1;
-        bool expectsObjectClose = ((state.containerKinds >> depthIndex) & 1) == 1;
-        if ((closer == 0x7d) != expectsObjectClose) {
-            revert UnsafeRawAttributes(tokenId);
-        }
-        state.containerKinds &= ~(uint256(1) << depthIndex);
-        state.depth = depthIndex;
-        if (state.depth == 0) {
-            state.expectingTopLevelValue = false;
-        }
-    }
-
-    function _advanceRawAttributeTopLevelSeparator(
-        uint256 tokenId,
-        RawAttributeValidationState memory state,
-        bytes1 character
-    ) private pure {
-        if (character == 0x2c) {
-            if (!state.sawTopLevelValue || state.expectingTopLevelValue) {
-                revert UnsafeRawAttributes(tokenId);
-            }
-            state.expectingTopLevelValue = true;
-        } else if (character != 0x20) {
-            revert UnsafeRawAttributes(tokenId);
-        }
-    }
-
-    function _truncateBytes(bytes memory input, uint256 length)
-        private
-        pure
-        returns (bytes memory)
-    {
-        bytes memory output = new bytes(length);
-        for (uint256 i = 0; i < length; i++) {
-            output[i] = input[i];
-        }
-        return output;
-    }
-
-    function _appendBytes(bytes memory output, uint256 outputLength, string memory raw)
-        private
-        pure
-        returns (uint256)
-    {
-        bytes memory input = bytes(raw);
-        for (uint256 i = 0; i < input.length; i++) {
-            output[outputLength] = input[i];
-            outputLength++;
-        }
-        return outputLength;
-    }
-
-    function _hexNibble(uint8 value) private pure returns (bytes1) {
-        return bytes1(value < 10 ? value + 0x30 : value + 0x57);
+        if (!StreamMetadataRenderer.isSafeRawAttributes(raw)) revert UnsafeRawAttributes(tokenId);
     }
 
     // function to retrieve the name attribute
@@ -1337,20 +955,12 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 )
             );
         }
-        return string(
-            abi.encodePacked(
-                "let hash='",
-                Strings.toHexString(uint256(tokenToHash[tokenId]), 32),
-                "';let tokenId=",
-                tokenId.toString(),
-                ";let tokenDataRaw='",
-                _escapeJavaScriptSingleQuotedString(tokenData[tokenId]),
-                "';let tokenData=JSON.parse('['+tokenDataRaw+']')",
-                ";let dependencyScript='",
-                _escapeJavaScriptSingleQuotedString(retrieveDependencyScript(tokenId)),
-                "';",
-                scripttext
-            )
+        return StreamMetadataRenderer.generativeScript(
+            tokenToHash[tokenId],
+            tokenId,
+            tokenData[tokenId],
+            retrieveDependencyScript(tokenId),
+            scripttext
         );
     }
 

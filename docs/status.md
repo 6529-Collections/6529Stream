@@ -6,6 +6,10 @@ The current Gate A smoke baseline proves:
 
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
+- `forge build --sizes --via-ir --skip test --force` runs as the production
+  size gate. Current `StreamCore` production runtime size is 23,139 bytes,
+  leaving 1,437 bytes of EIP-170 headroom under the IR-optimized deployment
+  profile.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271
@@ -43,7 +47,9 @@ The current Gate A smoke baseline proves:
   on-chain schema exposes `metadata_schema_version` and `metadata_state`, and
   pending on-chain metadata no longer runs final generative HTML with a zero
   token hash. `StreamMetadataEvents.t.sol` proves ERC-4906 interface support and
-  current metadata update event semantics for token-level updates,
+  current metadata update event semantics for token-level updates, and it now
+  proves optional ERC-721 Enumerable support is not advertised while the
+  contract preserves a live `totalSupply()` view.
   collection-range updates, randomness fulfillment, mint-only paths, and burn.
   `StreamMetadataFreeze.t.sol` proves the current collection freeze boundary:
   ended mint window, elapsed final-supply delay, final live-token metadata,
@@ -70,7 +76,8 @@ blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, signer/deployment ceremony runbooks, remaining generated
+high/medium baseline, signer/deployment ceremony runbooks, deployment scripts
+and manifests that use the production size profile, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

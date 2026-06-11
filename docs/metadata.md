@@ -50,10 +50,9 @@ base64-encoded HTML animation URL.
 fields emitted by on-chain metadata and rejects raw attribute fragments that
 contain literal control characters, unterminated strings, unbalanced
 object/array delimiters, or unquoted `]`/`}` breakout attempts. It does not yet
-solve HTML/JavaScript escaping for generated animation code, semantic attribute
-schema validation, metadata size limits, dependency artifact packaging beyond
-registry provenance strings, stale randomness display, or deployment release
-manifests.
+solve semantic attribute schema validation, metadata size limits, dependency
+artifact packaging beyond registry provenance strings, stale randomness display,
+or deployment release manifests.
 
 ## Escaping And Attribute Fragments
 
@@ -100,6 +99,10 @@ are reviewable and deliberate.
 ## ERC-4906 Events
 
 `StreamCore` supports ERC-4906 through `supportsInterface(0x49064906)`.
+It does not advertise ERC-721 Enumerable support. The optional enumerable
+extension was removed from `StreamCore` to keep production bytecode deployable;
+the contract preserves a live `totalSupply()` view but does not expose
+`tokenByIndex` or `tokenOfOwnerByIndex`.
 
 The current event policy is:
 

@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-animation-safety` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/87` |
+| Active PR branch | `codex/streamcore-size-reduction` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/88` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 05:17 UTC` |
+| Last updated | `2026-06-11 06:31 UTC` |
 
 ## Packaging Notes
 
@@ -98,7 +98,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Merged in PR #85 |
 | 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Merged in PR #86 |
 | 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Merged in PR #87 |
-| 45 | Add animation HTML wrapper safety | Gate D | Continue P1-META-006 by hardening generated animation HTML/script boundaries, dependency-script JavaScript-string embedding, hostile `tokenData` handling, tests, docs, and roadmap traceability | Active |
+| 45 | Add animation HTML wrapper safety | Gate D | Continue P1-META-006 by hardening generated animation HTML/script boundaries, dependency-script JavaScript-string embedding, hostile `tokenData` handling, tests, docs, and roadmap traceability | Merged in PR #88 |
+| 46 | Reduce `StreamCore` deployment size | Gate E | Start P1-DEPLOY-001 by measuring the EIP-170 blocker, extracting pure metadata rendering/escaping code behind a stable library boundary where safe, preserving metadata behavior, and documenting the remaining size budget | Active |
 
 ## Current PR Worklog
 
@@ -4020,9 +4021,9 @@ Merge:
   actionable comments for the state-only follow-up, and the only visible review
   thread was resolved by CodeRabbit.
 
-### PR candidate: Add animation HTML wrapper safety (Queue Item 45)
+### PR #88: Add animation HTML wrapper safety (Queue Item 45)
 
-Status: Open in PR #88; awaiting CI and CodeRabbit.
+Status: Merged.
 Branch: `codex/metadata-animation-safety`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/88`.
 Related issue:
@@ -4092,10 +4093,125 @@ Validation:
   release/deployment blocker and is recorded for the roadmap, but the canonical
   local check for this slice remains green.
 
+Merge:
+
+- PR #88 merged on 2026-06-11 after CI passed on final head
+  `e4302ff88fe5f90f74fde31ab91e7cdaf546758c`, the actionable CodeRabbit
+  control-character note was fixed, no review threads remained open, and the
+  stale aggregate CodeRabbit status context was documented as non-blocking.
+
+### PR candidate: Reduce `StreamCore` deployment size (Queue Item 46)
+
+Status: Open in PR #90; CodeRabbit review fixes pushed; awaiting CI and
+CodeRabbit rerun.
+Branch: `codex/streamcore-size-reduction`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/90`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/89`
+
+Goal:
+
+- Turn the repeated `forge build --sizes` failure into a tracked deployment
+  blocker instead of letting it hide behind metadata work.
+- Reduce `StreamCore` runtime bytecode without changing the public metadata
+  behavior that PRs #81-#88 just locked with golden and escaping tests.
+- Prefer low-risk extraction of pure metadata rendering/escaping helpers into a
+  linked library before considering larger architectural splits.
+- Keep issue #51 open for the remaining metadata policy work; this queue item
+  is about deployment viability and contract-size headroom.
+
+Initial scope notes:
+
+- Current `main` evidence after PR #88: `StreamCore` runtime bytecode is
+  35,696 bytes, which is 11,120 bytes over the EIP-170 runtime limit.
+- `forge build --sizes --via-ir` did not complete within the initial local
+  timeout, so optimizer-mode changes are not treated as a proven fix.
+- If this first extraction slice does not get below EIP-170 by itself, the PR
+  should still document the exact reduction, remaining gap, and next split
+  candidates.
+
+Implementation:
+
+- Moved pure on-chain metadata rendering, animation wrapper rendering, JSON
+  escaping, HTML attribute escaping, JavaScript string escaping, closing-script
+  neutralization, and raw-attribute structural validation into
+  `StreamMetadataRenderer`.
+- Removed optional `ERC721Enumerable` inheritance from `StreamCore`, preserved
+  a live `totalSupply()` view with explicit mint/burn accounting, and added a
+  regression that `supportsInterface(0x780e9d63)` is false while ERC-4906 stays
+  true.
+- Added a production-only size gate to `make check`, Windows/Linux check
+  scripts, and CI: `forge build --sizes --via-ir --skip test --force`.
+- Documented that the generic all-artifact `forge build --sizes` remains a
+  diagnostic because test-only invariant handlers can exceed initcode limits;
+  production deployability is measured by the skip-test IR gate.
+
+Current local size evidence:
+
+- `forge build --sizes --via-ir --skip test --force` passes.
+- `StreamCore` runtime size: 23,139 bytes.
+- `StreamCore` EIP-170 runtime headroom: 1,437 bytes.
+- `StreamMetadataRenderer` runtime size: 6,843 bytes after the CodeRabbit escape
+  fix.
+
+Validation completed at `2026-06-11 06:13 UTC`:
+
+- `make check` passed locally after adding the production size gate.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt --check
+  smart-contracts\StreamCore.sol smart-contracts\StreamMetadataRenderer.sol
+  test\StreamMetadataEvents.t.sol` passed.
+- `git diff --check` passed.
+- `forge build --sizes --via-ir --skip test --force` passed and reports
+  `StreamCore` at `23,139` runtime bytes with `1,437` bytes of runtime
+  headroom; `StreamMetadataRenderer` reports `6,817` runtime bytes.
+- Slither baseline comparison ran through `.venv-tools\Scripts\slither.exe`
+  with Foundry on `PATH`; it returned the expected non-zero baseline exit with
+  `717` total findings, High `4`, Medium `19`, Low `93`, Informational `590`,
+  Optimization `11`, and target detector counts unchanged:
+  `arbitrary-send-eth=0`, `reentrancy-eth=0`, `weak-prng=0`,
+  `uninitialized-state=0`, `encode-packed-collision=0`.
+- Stale helper grep found no references to the temporary helper-library
+  experiments that were folded back into `StreamCore`.
+
+CodeRabbit response completed locally at `2026-06-11 06:31 UTC`:
+
+- Fixed CodeRabbit's renderer-library finding by escaping public
+  `schemaVersion` and `metadataState` inputs before JSON assembly.
+- Added `StreamMetadataEscapingTest.testRendererEscapesSchemaAndStateFields` to
+  lock the library-level behavior.
+- Fixed CodeRabbit's roadmap traceability finding by adding the `93 Low`
+  Slither count to the static-analysis row and correcting the appendix impact
+  table to `Low=93`, `Informational=590`.
+- Validation after the review fixes:
+  - `forge fmt --check smart-contracts\StreamMetadataRenderer.sol
+    test\StreamMetadataEscaping.t.sol` passed.
+  - `forge test --match-contract 'StreamMetadata(Escaping|Golden|Events)Test'
+    -vvv` passed with 26 tests.
+  - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+  - `git diff --check` passed.
+  - `forge build --sizes --via-ir --skip test --force` passed with
+    `StreamCore` still at `23,139` runtime bytes and `1,437` bytes of runtime
+    headroom; `StreamMetadataRenderer` is now `6,843` runtime bytes.
+  - Slither baseline comparison remained unchanged:
+    `slither_exit=-1`, `total=717`, `high=4`, `medium=19`, `low=93`,
+    `informational=590`, `optimization=11`, `arbitrary-send-eth=0`,
+    `reentrancy-eth=0`, `weak-prng=0`, `uninitialized-state=0`,
+    `encode-packed-collision=0`.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 06:31 | Address CodeRabbit PR #90 comments locally | Accepted both CodeRabbit quick wins: escape public renderer `schemaVersion`/`metadataState` inputs, add direct library regression coverage, and align roadmap Slither low/informational counts; focused metadata tests, Windows wrapper, size gate, whitespace, and Slither comparison all pass |
+| 2026-06-11 06:17 | Open PR #90 | StreamCore size-reduction PR published at `https://github.com/6529-Collections/6529Stream/pull/90`; the branch proves `StreamCore` fits under EIP-170 through the production size gate, and CodeRabbit will be requested after the PR state update is pushed |
+| 2026-06-11 06:13 | Finish Queue Item 46 local validation | Full local gate set is ready for PR: `make check`, Windows wrapper, touched-file formatting, whitespace, production size gate, stale-helper grep, and Slither baseline comparison all pass; `StreamCore` is `23,139` runtime bytes with `1,437` bytes of EIP-170 headroom, and Slither high/medium remain unchanged at `4/19` |
+| 2026-06-11 06:04 | Keep only the high-value renderer library extraction | Temporary freeze/dependency/randomizer helper extractions barely changed `StreamCore` size and would have added extra linked-library calls in mint/freeze/admin paths, so they were folded back into `StreamCore`; the final local production size gate still passes with `StreamCore` at `23,139` runtime bytes and `1,437` bytes of EIP-170 headroom |
+| 2026-06-11 05:57 | Use IR-optimized production size gate | Default all-artifact `forge build --sizes` still measures test-only invariant handler initcode and default non-IR `StreamCore` bytecode; the production release gate is now explicit as `forge build --sizes --via-ir --skip test --force`, which skips tests and proves deployable contracts fit |
+| 2026-06-11 05:48 | Remove optional ERC721Enumerable support | The roadmap already identified ERC721Enumerable as a P1 architecture concern; `StreamCore` only needs live supply locally, so the optional enumerable interface was removed, live `totalSupply()` was preserved, and interface support is now explicitly tested |
+| 2026-06-11 05:31 | Start Queue Item 46 | PR #88 is merged and `forge build --sizes` now shows an explicit `StreamCore` deployment blocker, so issue #89 tracks P1-DEPLOY-001 and branch `codex/streamcore-size-reduction` starts with low-risk metadata renderer/escaper extraction |
+| 2026-06-11 05:29 | Create issue #89 for EIP-170 blocker | P1-META-006 still owns metadata escaping/size/render policy, but `StreamCore` exceeding EIP-170 is a separate release/deployment blocker that needs its own acceptance criteria and size-budget evidence |
 | 2026-06-11 05:17 | Address CodeRabbit PR #88 control-character note | CodeRabbit found the wrapper implementation sound and noted one low-severity browser URL-parser gap for null/control characters in `collectionLibrary`; `_escapeHtmlAttribute` now entity-escapes C0 controls and DEL, the decoded HTML test covers embedded null/newline bytes, focused/adjacent/full/Windows/format/whitespace gates pass, Slither remains `718` total findings with high/medium unchanged at `4/19`, and `forge build --sizes` reports the known `StreamCore` blocker at `35,696` runtime bytes |
 | 2026-06-11 05:11 | Open PR #88 and request CodeRabbit | Animation wrapper safety is published at `https://github.com/6529-Collections/6529Stream/pull/88`; CodeRabbit review requested in issue comment `4677381075`; Claude remains intentionally skipped per current user instruction |
 | 2026-06-11 05:08 | Validate Queue Item 45 locally | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison pass; Slither remains `718` total findings with high/medium unchanged at `4/19`; `forge build --sizes` continues to expose the known oversized `StreamCore` release blocker at `35,281` runtime bytes |

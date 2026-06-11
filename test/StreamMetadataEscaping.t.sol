@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/StreamCore.sol";
+import "../smart-contracts/StreamMetadataRenderer.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
@@ -20,6 +21,31 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
     uint256 private constant TOKEN_SALT = 7;
     string private constant JSON_DATA_URI_PREFIX = "data:application/json;base64,";
     string private constant HTML_DATA_URI_PREFIX = "data:text/html;base64,";
+
+    function testRendererEscapesSchemaAndStateFields() public pure {
+        string memory decodedJson = StreamMetadataRenderer.onchainMetadataJson(
+            string(abi.encodePacked("schema", bytes1(0x22), bytes1(0x5c), "v")),
+            string(abi.encodePacked("pending", bytes1(0x22), bytes1(0x5c), "state")),
+            "Name",
+            "Description",
+            "ipfs://image.png",
+            "",
+            "",
+            "",
+            false
+        );
+
+        _assertJsonParses(decodedJson);
+        decodedJson.assertEq(
+            string.concat(
+                "{\"metadata_schema_version\":\"schema\\\"\\\\v\",",
+                "\"metadata_state\":\"pending\\\"\\\\state\",",
+                "\"name\":\"Name\",\"description\":\"Description\",",
+                "\"image\":\"ipfs://image.png\",\"attributes\":[]}"
+            ),
+            "schema and state fields were not escaped"
+        );
+    }
 
     function testOnchainJsonEscapesCollectionAndImageStrings() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));

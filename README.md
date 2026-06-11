@@ -35,7 +35,11 @@ The canonical smoke check runs:
 ```bash
 forge build
 forge test -vvv
+forge build --sizes --via-ir --skip test --force
 ```
+
+The size step is production-only: it skips Foundry test contracts, compiles via
+IR, and fails if deployable contracts exceed EIP-170/EIP-3860 limits.
 
 On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
 with:
