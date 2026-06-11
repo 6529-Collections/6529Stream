@@ -76,11 +76,13 @@ contributors who start from the README.
   repinned. Burned tokens now follow ERC-721 token-existence semantics, emit a
   protocol burn audit event, expose retained burn audit state, and can record
   valid post-burn randomness for audit only. On-chain metadata now escapes JSON
-  string fields and rejects raw attribute fragments that can break out of the
-  enclosing attribute array. Remaining metadata blockers include dependency
-  artifact packaging and deployment migration runbooks beyond registry
-  provenance strings, generated HTML/JavaScript escaping or rejection, semantic
-  attribute schema validation, and size limits.
+  string fields, rejects raw attribute fragments that can break out of the
+  enclosing attribute array, escapes generated animation wrapper fields, parses
+  `tokenData` from an escaped string, and neutralizes closing-script sequences
+  in generated HTML. Remaining metadata blockers include dependency artifact
+  packaging and deployment migration runbooks beyond registry provenance
+  strings, browser render-sandbox automation, semantic attribute schema
+  validation, URI policy, invalid UTF-8 policy, and size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
@@ -99,8 +101,8 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist, but generated metadata
-  render-sandbox tests, metadata size-limit tests, deployment,
+  bounded payment sequence invariant baseline now exist, but browser-level
+  generated metadata render-sandbox tests, metadata size-limit tests, deployment,
   production-governance, richer supply/replay/freeze invariant tests, and any
   future shared-ledger invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.

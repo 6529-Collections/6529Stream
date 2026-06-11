@@ -181,7 +181,7 @@ contract StreamInitializationTest is CharacterizationTestBase, StreamFixture {
             Strings.toHexString(uint256(tokenHash), 32),
             "';let tokenId=",
             tokenId.toString(),
-            ";let tokenData=[4,5]",
+            ";let tokenDataRaw='4,5';let tokenData=JSON.parse('['+tokenDataRaw+']')",
             ";let dependencyScript='';"
         );
     }

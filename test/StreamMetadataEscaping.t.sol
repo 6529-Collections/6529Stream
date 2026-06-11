@@ -11,6 +11,7 @@ import "./mocks/MockRandomizer.sol";
 contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
     using Assertions for bool;
     using Assertions for string;
+    using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant TOKEN_ID = 10_000_000_000;
@@ -18,6 +19,7 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
     string private constant TOKEN_DATA = "1,2,3";
     uint256 private constant TOKEN_SALT = 7;
     string private constant JSON_DATA_URI_PREFIX = "data:application/json;base64,";
+    string private constant HTML_DATA_URI_PREFIX = "data:text/html;base64,";
 
     function testOnchainJsonEscapesCollectionAndImageStrings() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
@@ -209,6 +211,72 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
 
+    function testAnimationHtmlEscapesWrapperBoundaries() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 dependencyKey = keccak256("hostile-dependency");
+        string[] memory dependencyChunks = new string[](1);
+        dependencyChunks[0] = "const dependency='</script>';window.dep=\"quoted\";\\";
+        deployed.dependencyRegistry.addDependency(dependencyKey, dependencyChunks);
+
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){const closing=\"</ScRiPt><img src=x>\";}";
+        string memory hostileLibrary = string.concat(
+            "https://cdn.example/lib.js\" async=\"bad\"</script><img src=x>&",
+            string(abi.encodePacked(bytes1(0), bytes1(0x0a)))
+        );
+        deployed.core
+            .updateCollectionInfo(
+                COLLECTION_ID,
+                "Genesis",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://base/",
+                hostileLibrary,
+                dependencyKey,
+                FULL_COLLECTION_UPDATE_INDEX,
+                scripts
+            );
+
+        vm.prank(address(deployed.minter));
+        deployed.core
+            .mint(
+                TOKEN_ID,
+                RECIPIENT,
+                "1];window.injected=true;//</script>",
+                TOKEN_SALT,
+                COLLECTION_ID
+            );
+        _setImageAndAttributes(
+            deployed.core, "ipfs://image.png", "{\"trait_type\":\"Mood\",\"value\":\"Calm\"}"
+        );
+        deployed.core.changeMetadataView(COLLECTION_ID, true);
+
+        string memory decodedJson = _decodeJsonDataUri(deployed.core.tokenURI(TOKEN_ID));
+        _assertJsonParses(decodedJson);
+        string memory html = _decodeHtmlDataUri(_extractAnimationDataUri(decodedJson));
+        bytes memory htmlBytes = bytes(html);
+
+        _countOccurrences(htmlBytes, bytes("</script>"))
+            .assertEq(2, "unexpected raw script close count");
+        _contains(htmlBytes, bytes("src=\"https://cdn.example/lib.js&quot; async=&quot;bad&quot;"))
+            .assertTrue("library attribute quote was not escaped");
+        _contains(htmlBytes, bytes("&lt;/script&gt;&lt;img src=x&gt;&amp;"))
+            .assertTrue("library attribute markup was not escaped");
+        _contains(htmlBytes, bytes("&#x00;&#x0a;"))
+            .assertTrue("library attribute controls were not escaped");
+        _contains(
+                htmlBytes, bytes("let tokenDataRaw='1];window.injected=true;//\\x3c/script\\x3e';")
+            ).assertTrue("tokenData raw string was not escaped");
+        _contains(htmlBytes, bytes("let tokenData=JSON.parse('['+tokenDataRaw+']')"))
+            .assertTrue("tokenData parse wrapper missing");
+        _contains(htmlBytes, bytes("const dependency=\\'\\x3c/script\\x3e\\'"))
+            .assertTrue("dependency closing tag was not escaped");
+        _contains(htmlBytes, bytes("<\\/ScRiPt><img src=x>"))
+            .assertTrue("collection script closing tag was not neutralized");
+    }
+
     function _setCollectionStringsWithJsonMetacharacters(StreamCore core) private {
         string[] memory scripts = new string[](1);
         scripts[0] = "function draw(){}";
@@ -249,8 +317,20 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
     }
 
     function _decodeJsonDataUri(string memory tokenUri) private pure returns (string memory) {
-        bytes memory uri = bytes(tokenUri);
-        bytes memory prefix = bytes(JSON_DATA_URI_PREFIX);
+        return _decodeDataUri(tokenUri, JSON_DATA_URI_PREFIX);
+    }
+
+    function _decodeHtmlDataUri(string memory htmlUri) private pure returns (string memory) {
+        return _decodeDataUri(htmlUri, HTML_DATA_URI_PREFIX);
+    }
+
+    function _decodeDataUri(string memory dataUri, string memory expectedPrefix)
+        private
+        pure
+        returns (string memory)
+    {
+        bytes memory uri = bytes(dataUri);
+        bytes memory prefix = bytes(expectedPrefix);
         require(uri.length >= prefix.length, "short data uri");
 
         for (uint256 i = 0; i < prefix.length; i++) {
@@ -263,6 +343,96 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         }
 
         return string(_decodeBase64(encoded));
+    }
+
+    function _extractAnimationDataUri(string memory json) private pure returns (string memory) {
+        bytes memory input = bytes(json);
+        bytes memory prefix = bytes("\"animation_url\":\"");
+        uint256 start = _findBytes(input, prefix) + prefix.length;
+        uint256 end = start;
+        while (end < input.length && input[end] != 0x22) {
+            end++;
+        }
+        require(end < input.length, "animation url missing close");
+        return string(_sliceBytes(input, start, end));
+    }
+
+    function _findBytes(bytes memory input, bytes memory needle) private pure returns (uint256) {
+        require(needle.length != 0 && input.length >= needle.length, "needle missing");
+        for (uint256 i = 0; i <= input.length - needle.length; i++) {
+            bool matchesNeedle = true;
+            for (uint256 j = 0; j < needle.length; j++) {
+                if (input[i + j] != needle[j]) {
+                    matchesNeedle = false;
+                    break;
+                }
+            }
+            if (matchesNeedle) {
+                return i;
+            }
+        }
+        revert("needle not found");
+    }
+
+    function _sliceBytes(bytes memory input, uint256 start, uint256 end)
+        private
+        pure
+        returns (bytes memory)
+    {
+        require(end >= start && end <= input.length, "bad slice");
+        bytes memory output = new bytes(end - start);
+        for (uint256 i = 0; i < output.length; i++) {
+            output[i] = input[start + i];
+        }
+        return output;
+    }
+
+    function _contains(bytes memory input, bytes memory needle) private pure returns (bool) {
+        if (needle.length == 0) {
+            return true;
+        }
+        if (input.length < needle.length) {
+            return false;
+        }
+        for (uint256 i = 0; i <= input.length - needle.length; i++) {
+            bool matchesNeedle = true;
+            for (uint256 j = 0; j < needle.length; j++) {
+                if (input[i + j] != needle[j]) {
+                    matchesNeedle = false;
+                    break;
+                }
+            }
+            if (matchesNeedle) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function _countOccurrences(bytes memory input, bytes memory needle)
+        private
+        pure
+        returns (uint256)
+    {
+        if (needle.length == 0 || input.length < needle.length) {
+            return 0;
+        }
+
+        uint256 count = 0;
+        for (uint256 i = 0; i <= input.length - needle.length; i++) {
+            bool matchesNeedle = true;
+            for (uint256 j = 0; j < needle.length; j++) {
+                if (input[i + j] != needle[j]) {
+                    matchesNeedle = false;
+                    break;
+                }
+            }
+            if (matchesNeedle) {
+                count++;
+                i += needle.length - 1;
+            }
+        }
+        return count;
     }
 
     function _assertJsonParses(string memory json) private pure {

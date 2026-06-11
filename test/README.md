@@ -171,8 +171,12 @@ collection/name, description, and image fields before base64 encoding; decoded
 metadata is parsed through Foundry's JSON parser; raw attribute fragments allow
 brackets inside quoted JSON strings; and breakout fragments, literal control
 characters, and unterminated strings revert with the metadata attribute guard.
-Generated HTML/JavaScript sandbox tests and numeric size-limit tests remain
-future P1-META-006 work.
+The suite also decodes final animation HTML and asserts wrapper-boundary
+escaping for the external library attribute, `tokenData` JavaScript string
+embedding, dependency script JavaScript string embedding, and literal
+closing-script sequences. Browser-level render-sandbox tests, URI policy,
+semantic attribute schema validation, invalid UTF-8 policy, and numeric
+size-limit tests remain future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

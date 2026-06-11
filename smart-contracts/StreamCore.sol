@@ -783,14 +783,136 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 Base64.encode(
                     abi.encodePacked(
                         "<html><head></head><body><script src=\"",
-                        collectionInfo[collectionId].collectionLibrary,
+                        _escapeHtmlAttribute(collectionInfo[collectionId].collectionLibrary),
                         "\"></script><script>",
-                        retrieveGenerativeScript(tokenId),
+                        _escapeScriptElementEndTags(retrieveGenerativeScript(tokenId)),
                         "</script></body></html>"
                     )
                 )
             )
         );
+    }
+
+    function _escapeHtmlAttribute(string memory raw) private pure returns (string memory) {
+        bytes memory input = bytes(raw);
+        bytes memory output = new bytes(input.length * 6);
+        uint256 outputLength = 0;
+
+        for (uint256 i = 0; i < input.length; i++) {
+            bytes1 character = input[i];
+            if (character == 0x26) {
+                outputLength = _appendBytes(output, outputLength, "&amp;");
+            } else if (character == 0x22) {
+                outputLength = _appendBytes(output, outputLength, "&quot;");
+            } else if (character == 0x27) {
+                outputLength = _appendBytes(output, outputLength, "&#39;");
+            } else if (character == 0x3c) {
+                outputLength = _appendBytes(output, outputLength, "&lt;");
+            } else if (character == 0x3e) {
+                outputLength = _appendBytes(output, outputLength, "&gt;");
+            } else if (uint8(character) < 0x20 || character == 0x7f) {
+                output[outputLength] = 0x26;
+                outputLength++;
+                output[outputLength] = 0x23;
+                outputLength++;
+                output[outputLength] = 0x78;
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) >> 4);
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
+                outputLength++;
+                output[outputLength] = 0x3b;
+                outputLength++;
+            } else {
+                output[outputLength] = character;
+                outputLength++;
+            }
+        }
+
+        return string(_truncateBytes(output, outputLength));
+    }
+
+    function _escapeJavaScriptSingleQuotedString(string memory raw)
+        private
+        pure
+        returns (string memory)
+    {
+        bytes memory input = bytes(raw);
+        bytes memory output = new bytes(input.length * 6);
+        uint256 outputLength = 0;
+
+        for (uint256 i = 0; i < input.length; i++) {
+            bytes1 character = input[i];
+            if (character == 0x27 || character == 0x5c) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = character;
+                outputLength++;
+            } else if (character == 0x0a) {
+                outputLength = _appendBytes(output, outputLength, "\\n");
+            } else if (character == 0x0d) {
+                outputLength = _appendBytes(output, outputLength, "\\r");
+            } else if (character == 0x09) {
+                outputLength = _appendBytes(output, outputLength, "\\t");
+            } else if (
+                uint8(character) < 0x20 || character == 0x3c || character == 0x3e
+                    || character == 0x26
+            ) {
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x78;
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) >> 4);
+                outputLength++;
+                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
+                outputLength++;
+            } else {
+                output[outputLength] = character;
+                outputLength++;
+            }
+        }
+
+        return string(_truncateBytes(output, outputLength));
+    }
+
+    function _escapeScriptElementEndTags(string memory raw) private pure returns (string memory) {
+        bytes memory input = bytes(raw);
+        bytes memory output = new bytes(input.length * 2);
+        uint256 outputLength = 0;
+
+        for (uint256 i = 0; i < input.length; i++) {
+            if (_isScriptEndTagStart(input, i)) {
+                output[outputLength] = 0x3c;
+                outputLength++;
+                output[outputLength] = 0x5c;
+                outputLength++;
+                output[outputLength] = 0x2f;
+                outputLength++;
+                i++;
+            } else {
+                output[outputLength] = input[i];
+                outputLength++;
+            }
+        }
+
+        return string(_truncateBytes(output, outputLength));
+    }
+
+    function _isScriptEndTagStart(bytes memory input, uint256 index) private pure returns (bool) {
+        if (index + 7 >= input.length || input[index] != 0x3c || input[index + 1] != 0x2f) {
+            return false;
+        }
+
+        return _lowerAscii(input[index + 2]) == 0x73 && _lowerAscii(input[index + 3]) == 0x63
+            && _lowerAscii(input[index + 4]) == 0x72 && _lowerAscii(input[index + 5]) == 0x69
+            && _lowerAscii(input[index + 6]) == 0x70 && _lowerAscii(input[index + 7]) == 0x74;
+    }
+
+    function _lowerAscii(bytes1 character) private pure returns (bytes1) {
+        if (character >= 0x41 && character <= 0x5a) {
+            return bytes1(uint8(character) + 32);
+        }
+        return character;
     }
 
     function _escapeJsonString(string memory raw) private pure returns (string memory) {
@@ -989,6 +1111,19 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             output[i] = input[i];
         }
         return output;
+    }
+
+    function _appendBytes(bytes memory output, uint256 outputLength, string memory raw)
+        private
+        pure
+        returns (uint256)
+    {
+        bytes memory input = bytes(raw);
+        for (uint256 i = 0; i < input.length; i++) {
+            output[outputLength] = input[i];
+            outputLength++;
+        }
+        return outputLength;
     }
 
     function _hexNibble(uint8 value) private pure returns (bytes1) {
@@ -1208,11 +1343,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 Strings.toHexString(uint256(tokenToHash[tokenId]), 32),
                 "';let tokenId=",
                 tokenId.toString(),
-                ";let tokenData=[",
-                tokenData[tokenId],
-                "]",
+                ";let tokenDataRaw='",
+                _escapeJavaScriptSingleQuotedString(tokenData[tokenId]),
+                "';let tokenData=JSON.parse('['+tokenDataRaw+']')",
                 ";let dependencyScript='",
-                retrieveDependencyScript(tokenId),
+                _escapeJavaScriptSingleQuotedString(retrieveDependencyScript(tokenId)),
                 "';",
                 scripttext
             )

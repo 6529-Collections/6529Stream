@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-escaping-safety` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/86` |
+| Active PR branch | `codex/metadata-animation-safety` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/87` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 04:45 UTC` |
+| Last updated | `2026-06-11 05:17 UTC` |
 
 ## Packaging Notes
 
@@ -97,7 +97,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
 | 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Merged in PR #85 |
 | 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Merged in PR #86 |
-| 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Open in PR #87 |
+| 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Merged in PR #87 |
+| 45 | Add animation HTML wrapper safety | Gate D | Continue P1-META-006 by hardening generated animation HTML/script boundaries, dependency-script JavaScript-string embedding, hostile `tokenData` handling, tests, docs, and roadmap traceability | Active |
 
 ## Current PR Worklog
 
@@ -3940,8 +3941,7 @@ Merge:
 
 ### PR candidate: Add metadata escaping and render-safety baseline (Queue Item 44)
 
-Status: Merge-ready; CI is green, CodeRabbit is green, and all visible review
-threads are resolved.
+Status: Merged in PR #87.
 Branch: `codex/metadata-escaping-safety`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/87`.
 Initial implementation commit: `d9a4a1af3bf3f56bf5e913f2db4b9ba070b924df`.
@@ -4013,10 +4013,95 @@ Validation so far:
   `make check`, Windows wrapper, touched-file formatting, whitespace, and
   Slither baseline comparison.
 
+Merge:
+
+- PR #87 merged on 2026-06-11 after CI succeeded on final head
+  `1c50f7a0d4703c2712e714789f7d32d3543f490d`, CodeRabbit reported no
+  actionable comments for the state-only follow-up, and the only visible review
+  thread was resolved by CodeRabbit.
+
+### PR candidate: Add animation HTML wrapper safety (Queue Item 45)
+
+Status: Open in PR #88; awaiting CI and CodeRabbit.
+Branch: `codex/metadata-animation-safety`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/88`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/51`
+
+Goal:
+
+- Continue the remaining P1-META-006 metadata safety work after PR #87.
+- Harden the generated animation HTML wrapper so metadata inputs cannot break
+  out of the intended `<script src>` or wrapper `<script>` elements.
+- Escape dependency-script content when it is embedded into the generated
+  JavaScript string.
+- Prevent hostile `tokenData` from closing the generated JavaScript array and
+  injecting arbitrary wrapper code before parsing.
+- Add focused tests that decode the final `animation_url` HTML and assert the
+  wrapper remains structurally intact for hostile inputs.
+- Update metadata docs, ADR 0006, roadmap/test traceability, and this durable
+  state file.
+
+Initial scope notes:
+
+- Collection scripts remain executable artist/operator code by design; this PR
+  protects the protocol wrapper boundary rather than claiming sandboxed artist
+  JavaScript.
+- Size limits, URI allowlists, semantic attribute schema validation, invalid
+  UTF-8 policy, and browser-level render-sandbox automation remain future
+  P1-META-006 slices unless a small local change falls naturally out of this
+  work.
+- Issue #51 was reopened after PR #87 because #87 was only the first slice and
+  intentionally left HTML/JavaScript, size, URI, and sandbox requirements open.
+
+Implementation:
+
+- Escaped the generated animation wrapper's `collectionLibrary` value before
+  placing it in the quoted `<script src>` attribute, including the C0 control
+  range and DEL after CodeRabbit noted the browser URL-parser edge case.
+- Escaped `tokenData` and dependency script content before embedding them in
+  generated single-quoted JavaScript strings.
+- Changed generated `tokenData` construction from raw JavaScript array source
+  to `tokenDataRaw` plus `JSON.parse("[" + tokenDataRaw + "]")`, so hostile
+  token data cannot execute before parsing.
+- Neutralized literal case-insensitive `</script` sequences in the generated
+  wrapper script body so stored collection/dependency/token fields cannot
+  create extra raw closing tags.
+- Added decoded final `animation_url` HTML assertions for hostile library,
+  tokenData, dependency, and collection-script inputs.
+- Updated metadata docs, status/blocker docs, ADR 0006, test README, roadmap
+  traceability, and the schema-v1 golden fixture.
+
+Validation:
+
+- `forge test --match-contract StreamMetadataEscapingTest -vvv` passed with 10
+  tests.
+- `forge test --match-path 'test/StreamMetadata*.t.sol' -vvv` passed with 35
+  metadata tests.
+- `make check` passed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `forge fmt --check smart-contracts\StreamCore.sol
+  test\StreamMetadataEscaping.t.sol test\StreamInitialization.t.sol
+  test\helpers\TestHashingUtils.sol` passed.
+- `git diff --check` passed.
+- Slither baseline comparison remained unchanged at 718 total findings: High 4,
+  Medium 19, Low 93, Informational 591, Optimization 11.
+- `forge build --sizes` still fails because `StreamCore` is over EIP-170 at
+  35,696 runtime bytes with a -11,120 byte runtime margin. This is an existing
+  release/deployment blocker and is recorded for the roadmap, but the canonical
+  local check for this slice remains green.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 05:17 | Address CodeRabbit PR #88 control-character note | CodeRabbit found the wrapper implementation sound and noted one low-severity browser URL-parser gap for null/control characters in `collectionLibrary`; `_escapeHtmlAttribute` now entity-escapes C0 controls and DEL, the decoded HTML test covers embedded null/newline bytes, focused/adjacent/full/Windows/format/whitespace gates pass, Slither remains `718` total findings with high/medium unchanged at `4/19`, and `forge build --sizes` reports the known `StreamCore` blocker at `35,696` runtime bytes |
+| 2026-06-11 05:11 | Open PR #88 and request CodeRabbit | Animation wrapper safety is published at `https://github.com/6529-Collections/6529Stream/pull/88`; CodeRabbit review requested in issue comment `4677381075`; Claude remains intentionally skipped per current user instruction |
+| 2026-06-11 05:08 | Validate Queue Item 45 locally | Focused metadata escaping tests, adjacent metadata suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison pass; Slither remains `718` total findings with high/medium unchanged at `4/19`; `forge build --sizes` continues to expose the known oversized `StreamCore` release blocker at `35,281` runtime bytes |
+| 2026-06-11 04:52 | Start Queue Item 45 | PR #87 merged, local `main` is synced, issue #51 was reopened because only the first metadata escaping slice landed, and the next tight P1-META-006 slice is generated animation HTML wrapper safety |
+| 2026-06-11 04:51 | Reopen issue #51 | PR #87 intentionally left generated HTML/JavaScript escaping or rejection, semantic attribute schema/structured attributes, URI policy, invalid UTF-8 policy, size limits, and render-sandbox tests open, so the issue should continue tracking the remaining P1-META-006 acceptance criteria |
+| 2026-06-11 04:49 | Merge PR #87 | Final head `1c50f7a0d4703c2712e714789f7d32d3543f490d` was CI-clean, CodeRabbit success, no actionable comments were generated for the state-only follow-up, and the visible delimiter review thread was resolved |
 | 2026-06-11 04:45 | Mark PR #87 merge-ready | CI run `27324323091` passed on head `1daa794be32809f582d9398f39b5f62bb6c25f79`, CodeRabbit status is success with final clean comment `4677250565`, and the only visible inline review thread was resolved by CodeRabbit |
 | 2026-06-11 04:42 | Address CodeRabbit PR #87 delimiter finding | Added container-kind tracking to the raw-attribute parser so object and array closers must match their opener, covered mismatched `{]` and `[}` delimiters, and refreshed focused 9-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 04:35 | Address CodeRabbit PR #87 positive-test suggestions | Added empty-attributes and multiple-top-level-object acceptance tests, refreshed focused 8-test metadata escaping suite, full `make check`, Windows wrapper, touched-file formatting, whitespace, and Slither baseline comparison; Slither remains `718` total findings with high/medium unchanged at `4/19` |
