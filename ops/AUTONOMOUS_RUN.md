@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/84` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 01:40 UTC` |
+| Last updated | `2026-06-11 01:42 UTC` |
 
 ## Packaging Notes
 
@@ -96,7 +96,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
 | 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Merged in PR #84 |
-| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | In progress on `codex/dependency-version-immutability` |
+| 42 | Add dependency version immutability | Gate D | Implement P1-META-003 dependency registry version records, content-hash/provenance views, deprecation events, collection dependency pinning, frozen-output stability tests, docs, and roadmap traceability | Open in PR #85 on `codex/dependency-version-immutability` |
 
 ## Current PR Worklog
 
@@ -3671,9 +3671,9 @@ Merge:
 
 ### PR #85: Add dependency version immutability (Queue Item 42)
 
-Status: Local implementation validated; ready to commit and open PR.
+Status: Open.
 Branch: `codex/dependency-version-immutability`.
-Pull request: TBD.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/85`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/48`
@@ -3785,6 +3785,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 01:42 | Open PR #85 | Dependency version immutability is published with local validation evidence; next step is CI and CodeRabbit review monitoring |
 | 2026-06-11 01:40 | Validate Queue Item 42 locally | Focused dependency/metadata/freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` after explicitly initializing new test helper flags and narrowly suppressing a provenance timestamp false positive |
 | 2026-06-11 01:21 | Implement Queue Item 42 local draft | Added immutable dependency registry versions, provenance/deprecation views, collection dependency pins, pinned dependency freeze manifests, focused tests, and docs/roadmap traceability; full validation remains to run |
 | 2026-06-11 01:06 | Start Queue Item 42 | PR #84 merged and main is synced; the next missing Gate D metadata row is P1-META-003 dependency registry versioning, immutability, provenance, and collection dependency pinning |
