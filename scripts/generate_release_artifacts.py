@@ -20,6 +20,7 @@ EVENT_CATALOG_SCHEMA = "6529stream.event-topic-catalog.v1"
 INTERFACE_ID_SCHEMA = "6529stream.interface-ids.v1"
 MANIFEST_SCHEMA = "6529stream.release-artifact-manifest.v1"
 GENERATOR_VERSION = "1"
+CHECKSUM_BUNDLE_FILES = {"SHA256SUMS", "release-checksums.json"}
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out")
@@ -466,10 +467,18 @@ def generate_artifacts(
     return written
 
 
+def generated_files(root: Path) -> list[Path]:
+    return sorted(
+        path.relative_to(root)
+        for path in root.rglob("*")
+        if path.is_file() and path.name not in CHECKSUM_BUNDLE_FILES
+    )
+
+
 def compare_directories(expected: Path, actual: Path) -> list[str]:
     mismatches: list[str] = []
-    expected_files = sorted(path.relative_to(expected) for path in expected.rglob("*") if path.is_file())
-    actual_files = sorted(path.relative_to(actual) for path in actual.rglob("*") if path.is_file())
+    expected_files = generated_files(expected)
+    actual_files = generated_files(actual)
 
     missing = sorted(set(expected_files) - set(actual_files))
     extra = sorted(set(actual_files) - set(expected_files))

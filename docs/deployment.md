@@ -75,6 +75,8 @@ python scripts/generate_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/generate_release_checksums.py
+python scripts/generate_release_checksums.py --check
 ```
 
 The committed baseline is under `release-artifacts/latest/`. `StreamCore`
@@ -92,6 +94,13 @@ own final checksum value.
 Address book generation validates the deployment manifest contract set against
 the release artifact baseline, rejects invalid or duplicate deployed contract
 addresses, and fails check mode when the committed address-book JSON drifts.
+
+Release checksum generation writes `release-artifacts/latest/SHA256SUMS` and
+`release-artifacts/latest/release-checksums.json` over the committed release
+artifact, deployment manifest, address-book, config, and schema files. These
+checksums are the deterministic source for future detached signatures; this
+repo does not commit maintainer private-key material or produce signatures in
+the local gate.
 
 ## Admin Ceremony Checklist
 
@@ -112,6 +121,7 @@ Before a deployment can become public-beta eligible:
 - Retain constructor args and verification inputs.
 - Generate and checksum the deployment manifest.
 - Generate and check the address book.
+- Generate and check the release checksum bundle.
 
 Fork/testnet broadcast, contract verification, event topic catalog publication
 against a live deployment, and end-to-end dry-run mint/auction ceremonies remain

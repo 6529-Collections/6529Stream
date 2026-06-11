@@ -11,9 +11,9 @@ This repository is pre-audit and not production-ready.
 The current CI and local smoke checks prove compilation, test command execution,
 the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
-deterministic local deployment manifest/address-book checks. They do not prove
-protocol correctness or production deployment readiness. Known P0 blockers and
-the execution roadmap are tracked in
+deterministic local deployment manifest/address-book/checksum-bundle checks.
+They do not prove protocol correctness or production deployment readiness.
+Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
 
 ## Drop Flow
@@ -47,6 +47,8 @@ python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_release_checksums.py
+python scripts/generate_release_checksums.py --check
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
@@ -71,6 +73,11 @@ release-artifact hashes.
 
 The address-book step verifies compact generated address books under
 `deployments/address-books/` against the committed deployment manifests.
+
+The release-checksum step verifies the signable checksum bundle under
+`release-artifacts/latest/` against the committed release artifacts,
+deployment manifests, address books, and artifact schemas. Detached signatures
+and signed tags remain a release-ceremony follow-up.
 
 On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
 with:
@@ -109,7 +116,7 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, and ABI compatibility baselines |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, ABI compatibility baseline, and release checksum bundle |
 | `docs/` | Project, security, ADR, and operational docs |
 | `ops/` | Roadmap and execution state |
 

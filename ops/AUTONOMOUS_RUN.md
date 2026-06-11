@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/address-book-generator` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/98` |
+| Active PR branch | `codex/release-checksum-bundle` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/100` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 10:08 UTC` |
+| Last updated | `2026-06-11 11:02 UTC` |
 
 ## Packaging Notes
 
@@ -104,7 +104,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 48 | Generate release artifact catalog | Gate G/Gate E support | Implement P1-RELEASE-001 by generating deterministic ABI checksums, bytecode checksums, interface IDs, and event topic catalog outputs from Foundry artifacts, then wire drift checks into local/CI gates and deployment docs | Merged in PR #94 |
 | 49 | Generate and check deployment manifests | Gate E/Gate G support | Implement P1-DEPLOY-003 by generating the Anvil manifest from committed inputs, filling current ABI/runtime bytecode hashes, adding deterministic manifest checksums, and wiring drift checks into local/CI gates and deployment docs | Merged in PR #96 |
 | 50 | Add ABI compatibility checks | Gate G support | Implement P1-RELEASE-002 by committing a production ABI surface baseline, failing local/CI checks on removed or changed ABI entries, reporting additive entries, and documenting baseline refresh policy | Merged in PR #98 |
-| 51 | Generate deployment address books | Gate G/Gate E support | Implement P1-RELEASE-003 by projecting committed deployment manifests into compact deterministic address-book artifacts for integrators, scripts, and docs, with drift checks in local/CI gates | Active |
+| 51 | Generate deployment address books | Gate G/Gate E support | Implement P1-RELEASE-003 by projecting committed deployment manifests into compact deterministic address-book artifacts for integrators, scripts, and docs, with drift checks in local/CI gates | Merged in PR #100 |
+| 52 | Add signable release checksum bundle | Gate G support | Implement P1-RELEASE-004 by generating deterministic SHA256SUMS and machine-readable checksum manifests over committed release/deployment artifacts, with drift checks in local/CI gates | Active |
 
 ## Current PR Worklog
 
@@ -4563,7 +4564,7 @@ Merge evidence:
 
 ### PR candidate: Generate deployment address books (Queue Item 51)
 
-Status: Second CodeRabbit finding addressed locally; push and re-review next.
+Status: Merged.
 Branch: `codex/address-book-generator`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/100`.
 Related issue:
@@ -4641,10 +4642,125 @@ Local validation:
 - `git diff --check` reported only the known `scripts/check.ps1` line-ending
   warning.
 
+Merge evidence:
+
+- PR #100 merged on `2026-06-11 10:15 UTC` as
+  `ad6deea8b6ba33e90703da1d7bd105f29eb7a24f` after GitHub Actions CI run
+  `27339627582` passed on head
+  `ef5f5e6e1c5841f2fd3a63281b2c1e065808812f`.
+- CodeRabbit final re-check comment `4679472288` stated there were no
+  remaining open findings and the implementation was ready to merge.
+- The only CodeRabbit inline review thread was resolved. CodeRabbit's aggregate
+  commit status remained stale/pending with no target URL, matching prior
+  stale-status behavior, so merge decision comment `4679490149` documented the
+  autonomous maintainer decision before merge.
+- Claude was intentionally not requested per current user instruction.
+
+### PR candidate: Add signable release checksum bundle (Queue Item 52)
+
+Status: PR open; CodeRabbit findings fixed locally and review-fix validation
+passed; ready to push the response commit.
+Branch: `codex/release-checksum-bundle`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/102`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/101`
+
+Goal:
+
+- Generate a deterministic `SHA256SUMS`-style file over committed release and
+  deployment artifacts.
+- Generate a machine-readable checksum manifest with schema, generator,
+  covered paths, output path, text-checksum hash, and per-file `sha256:`
+  entries.
+- Exclude generated checksum outputs from their own covered set to avoid
+  self-referential hashes.
+- Wire checksum-bundle tests and `--check` drift detection into `make check`,
+  Linux/Windows wrappers, and CI.
+- Document that the checksum bundle is signable release material; detached
+  signatures and signed tags remain future release-ceremony work.
+
+Initial scope:
+
+- `scripts/generate_release_checksums.py`
+- `scripts/test_release_checksums.py`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `README.md`
+- `docs/tooling.md`
+- `docs/status.md`
+- `docs/deployment.md`
+- `deployments/README.md`
+- `release-artifacts/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation draft:
+
+- Added a stdlib-only release-checksum generator with write and `--check`
+  modes.
+- Covers `release-artifacts/contracts.json`, `release-artifacts/latest/`,
+  `release-artifacts/baselines/`, `deployments/config/`,
+  `deployments/examples/`, `deployments/address-books/`, and
+  `deployments/schema/`.
+- Writes sorted `release-artifacts/latest/SHA256SUMS` entries and
+  `release-artifacts/latest/release-checksums.json`.
+- Verifies committed checksum entries against current files before comparing
+  regenerated outputs so deleted covered files and hash drift are reported
+  directly, and still reports those details if the regenerated covered set is
+  empty.
+- Added focused tests for generation, check-mode success, hash drift, deleted
+  covered files, missing generated outputs, missing covered roots, output
+  ordering, empty covered roots, and generated-output self-reference exclusion.
+- CodeRabbit review fix expands `release-artifacts/README.md` to show the full
+  release, deployment-manifest, address-book, and checksum refresh/check
+  sequence so checksum regeneration does not run over stale deployment-derived
+  artifacts.
+- CodeRabbit review fix also rejects parent-directory segments in committed
+  `SHA256SUMS` paths and adds focused parser coverage.
+
+Local validation:
+
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_release_artifacts.py`
+- `python scripts\generate_release_artifacts.py --check`
+- `python -m py_compile scripts\generate_release_artifacts.py scripts\test_release_artifacts.py scripts\check_abi_compatibility.py scripts\test_abi_compatibility.py scripts\generate_deployment_manifest.py scripts\test_deployment_manifest.py scripts\generate_address_books.py scripts\test_address_books.py scripts\generate_release_checksums.py scripts\test_release_checksums.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser validation for `scripts\check.ps1`
+- JSON parse and line-format validation for
+  `release-artifacts\latest\release-checksums.json` and
+  `release-artifacts\latest\SHA256SUMS`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `rg` traceability check for `P1-RELEASE-004`, `generate_release_checksums`,
+  `SHA256SUMS`, and release-signature boundary wording
+- `git diff --check` reported only line-ending warnings for touched scripts.
+- Final rerun after the empty-covered-set edge-case fix: `make check` and
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` both passed
+  with the 7-case checksum suite.
+- CodeRabbit review-fix rerun: `python scripts\test_release_checksums.py`
+  passed with 8 tests, `python scripts\generate_release_checksums.py --check`
+  passed, `python scripts\test_release_artifacts.py` passed, `make check`
+  passed, `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed,
+  `python -m py_compile scripts\generate_release_checksums.py
+  scripts\test_release_checksums.py` passed, and `git diff --check` reported
+  only known line-ending warnings for touched Python files.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 11:02 | Address CodeRabbit PR #102 review locally | Accepted both findings: `release-artifacts/README.md` now shows deployment manifest and address-book generation/checking before checksum refresh, and `parse_checksum_file` rejects parent-directory path traversal with focused regression coverage; focused/full/Windows validation passed |
+| 2026-06-11 10:43 | Open PR #102 | Release checksum bundle PR published at `https://github.com/6529-Collections/6529Stream/pull/102`; one state-only follow-up will record the PR URL before requesting CodeRabbit on the final head |
+| 2026-06-11 10:42 | Validate Queue Item 52 locally | Release checksum tests/check, release artifact ownership-regression test/check, Python compile, shell/PowerShell syntax, JSON/line-format parsing, traceability grep, full `make check`, Windows wrapper, and whitespace validation all pass; release-artifact check now ignores checksum-bundle outputs so both generated artifact families can coexist, and check mode reports deleted covered files even when the regenerated covered set becomes empty |
+| 2026-06-11 10:22 | Start Queue Item 52 | Issue #101 tracks the Gate G signable checksum-bundle gap; branch `codex/release-checksum-bundle` starts from merged PR #100 and scopes to deterministic SHA256SUMS/manifest generation plus local/CI drift checks |
+| 2026-06-11 10:18 | Create release checksum issue #101 | No open issue covered deterministic release checksum bundles, so a focused P1 release issue keeps the Gate G PR auditable |
+| 2026-06-11 10:15 | Merge PR #100 | Address-book generator merged as `ad6deea8b6ba33e90703da1d7bd105f29eb7a24f`; CI run `27339627582` passed, CodeRabbit final re-check comment `4679472288` was clean, the only review thread was resolved, and stale aggregate CodeRabbit status was documented in merge decision comment `4679490149` |
 | 2026-06-11 10:08 | Address CodeRabbit PR #100 integer validator finding locally | Accepted CodeRabbit inline comment `3394948002`: `require_int` now rejects booleans, chain IDs must be positive, git commits must be 40-character hashes, lifecycle states are constrained to the deployment schema enum, address-book tests now cover 14 cases including missing output directory and unknown contracts, and focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation pass |
 | 2026-06-11 10:00 | Address CodeRabbit PR #100 findings locally | Accepted CodeRabbit comment `4679312734`: removed duplicate Makefile execution, added an explicit generated-output docs note, added `deployments/schema/address-book.schema.json`, normalized generated addresses to lowercase, constrained `verification_status`, validated `sha256:` hash formats, expanded address-book tests to 8 cases, and reran focused checks, full `make check`, Windows wrapper, JSON parsing, and whitespace validation successfully |
 | 2026-06-11 09:49 | Open PR #100 and request CodeRabbit | Address-book generator PR published at `https://github.com/6529-Collections/6529Stream/pull/100`; CodeRabbit review requested in issue comment `4679297117`; Claude remains intentionally skipped per current user instruction |
