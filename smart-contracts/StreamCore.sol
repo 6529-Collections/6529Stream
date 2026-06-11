@@ -69,6 +69,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         uint256 collectionId, uint256 currentTimestamp, uint256 endTime
     );
     error CollectionNotCreated(uint256 collectionId);
+    error BurnedTokenRemintNotAllowed(uint256 tokenId);
     error FrozenCollectionDependencyRegistry();
     error MetadataFrozen(uint256 collectionId);
     error UnknownDependency(bytes32 dependencyNameAndVersion);
@@ -393,6 +394,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         uint256 _collectionID,
         uint256 _saltfun_o
     ) internal {
+        if (burnedTokenAuditRecords[_mintIndex].burned) {
+            revert BurnedTokenRemintNotAllowed(_mintIndex);
+        }
         tokenData[_mintIndex] = _tokenData;
         tokenIdsToCollectionIds[_mintIndex] = _collectionID;
         _addLiveTokenMetadataRecord(_collectionID, _mintIndex);

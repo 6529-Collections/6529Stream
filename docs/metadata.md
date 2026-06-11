@@ -114,6 +114,7 @@ Burned tokens follow ERC-721 token-existence semantics:
   state, but that retention is not a public metadata availability guarantee.
 - `isTokenBurned(tokenId)` and `burnedTokenAuditState(tokenId)` expose retained
   burn audit state for indexers and incident review.
+- Burned token IDs are terminal and cannot be reminted in this release track.
 
 If a valid VRF or arRNG fulfillment arrives after a pending token is burned, the
 adapter records the derived seed/hash for audit only. The adapters emit:

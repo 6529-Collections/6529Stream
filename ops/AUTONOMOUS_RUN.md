@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/85` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 03:35 UTC` |
+| Last updated | `2026-06-11 03:54 UTC` |
 
 ## Packaging Notes
 
@@ -3835,7 +3835,7 @@ Merge:
 
 ### PR candidate: Add burn metadata semantics (Queue Item 43)
 
-Status: Open in PR #86; CI and CodeRabbit review pending.
+Status: CodeRabbit remint finding addressed; follow-up CI and CodeRabbit rereview pending.
 Branch: `codex/burn-metadata-semantics`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/86`.
 Initial implementation commit: `e0a71d3c423f87f8c0abd800f03f5e49deb180ad`.
@@ -3889,6 +3889,8 @@ Implementation notes:
 - `StreamCore.burn` now stores retained burn audit state and emits
   `TokenBurned(collectionId, tokenId, operator, owner)` in addition to the
   standard ERC-721 transfer-to-zero event.
+- `StreamCore._mintProcessing` now rejects remint attempts for previously
+  burned token IDs with `BurnedTokenRemintNotAllowed(tokenId)`.
 - `StreamCore.isTokenBurned(tokenId)` and
   `StreamCore.burnedTokenAuditState(tokenId)` expose burned-token audit state
   without making `tokenURI` available.
@@ -3904,16 +3906,17 @@ Implementation notes:
   burned.
 - `StreamCoreBurn.t.sol` covers burn event/audit state, unavailable `ownerOf`,
   `tokenURI`, and `tokenMetadataState`, retained token hash/collection mapping,
-  no ERC-4906 burn noise, VRF post-burn fulfillment after freeze with a stable
-  freeze manifest, and arRNG post-burn fulfillment parity.
+  remint rejection for previously burned token IDs, no ERC-4906 burn noise, VRF
+  post-burn fulfillment after freeze with a stable freeze manifest, and arRNG
+  post-burn fulfillment parity.
 
 Local validation:
 
 - Focused burn semantics tests passed:
-  `forge test --match-contract StreamCoreBurnTest -vvv` with 3 tests, 0 failed.
+  `forge test --match-contract StreamCoreBurnTest -vvv` with 4 tests, 0 failed.
 - Adjacent metadata/randomizer suites passed:
   `forge test --match-contract "Stream(RandomizerLifecycle|RandomizerRetry|MetadataEvents|MetadataFreeze|MetadataGolden|CoreBurn)Test" -vvv`
-  with 54 tests, 0 failed.
+  with 55 tests, 0 failed.
 - `forge build` passed through `make check`.
 - `make check` passed with the full Forge suite.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with the
@@ -3930,6 +3933,7 @@ Local validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 03:54 | Address CodeRabbit PR #86 remint finding | Added `BurnedTokenRemintNotAllowed` guard in `_mintProcessing`, covered failed remint after burn, documented terminal burned token IDs, and reran focused/adjacent/full/Windows/format/whitespace/traceability/Slither gates with high/medium unchanged at `4/19` |
 | 2026-06-11 03:35 | Open PR #86 | Burn metadata semantics are published with local validation evidence, close issue #50, and CodeRabbit review was requested with `@coderabbitai review` |
 | 2026-06-11 03:33 | Validate Queue Item 43 locally | Focused burn tests, adjacent metadata/randomizer suites, full `make check`, Windows wrapper, touched-file formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither remains `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 03:24 | Fix Queue Item 43 freeze regression and Slither drift | Moved non-burned token-hash freeze checks before range/collection checks so frozen collections fail closed with `MetadataFrozen`, and removed test/helper/static-analysis drift while keeping post-burn timestamps audit-only |

@@ -176,8 +176,9 @@ Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event
 plus `TokenBurned`, removes ownership and `tokenURI`/`tokenMetadataState`
 availability, excludes burned tokens from live supply while retaining audit
-state, and records valid VRF/arRNG post-burn randomness as audit-only state
-without ERC-4906 metadata updates or freeze-manifest changes.
+state, rejects remint attempts for previously burned token IDs, and records
+valid VRF/arRNG post-burn randomness as audit-only state without ERC-4906
+metadata updates or freeze-manifest changes.
 
 Collection freeze boundaries now have P1-META-002 target-state coverage in
 `StreamMetadataFreeze.t.sol`: freeze requires the mint window and final-supply

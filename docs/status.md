@@ -51,9 +51,10 @@ The current Gate A smoke baseline proves:
   for current `StreamCore` metadata-significant mutation paths.
   `StreamCoreBurn.t.sol` proves burn metadata semantics: burned tokens lose
   ownership and `tokenURI` availability, emit protocol burn audit events, retain
-  audit state, exclude burned supply from live collection supply, and allow valid
-  VRF/arRNG post-burn fulfillment to record audit-only randomness without
-  ERC-4906 metadata updates or freeze-manifest changes.
+  audit state, exclude burned supply from live collection supply, reject remint
+  attempts for previously burned token IDs, and allow valid VRF/arRNG post-burn
+  fulfillment to record audit-only randomness without ERC-4906 metadata updates
+  or freeze-manifest changes.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known

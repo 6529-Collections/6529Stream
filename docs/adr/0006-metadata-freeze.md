@@ -389,6 +389,7 @@ Required public-beta behavior:
 - burned tokens are excluded from live `totalSupply()` and live collection
   supply views.
 - minted-ever counters and collection token ID allocation remain monotonic.
+- burned token IDs are terminal and cannot be reminted in this release track.
 - internal token-to-collection and token input records may be retained for
   audits, but they are not a public metadata availability guarantee.
 - burn emits the standard ERC-721 transfer-to-zero event and any protocol burn

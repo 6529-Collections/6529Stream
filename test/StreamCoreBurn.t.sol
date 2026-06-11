@@ -101,6 +101,25 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
         );
     }
 
+    function testBurnedTokenIdCannotBeReminted() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        _mintToken(deployed, TOKEN_ID, 7);
+
+        vm.prank(RECIPIENT);
+        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamCore.BurnedTokenRemintNotAllowed.selector, TOKEN_ID)
+        );
+        vm.prank(address(deployed.minter));
+        deployed.core.mint(TOKEN_ID, RECIPIENT, "data", 8, COLLECTION_ID);
+
+        deployed.core.totalSupply().assertEq(0, "global supply after failed remint");
+        deployed.core.totalSupplyOfCollection(COLLECTION_ID).assertEq(0, "collection supply");
+        deployed.core.burnAmount(COLLECTION_ID).assertEq(1, "burn count after failed remint");
+        deployed.core.isTokenBurned(TOKEN_ID).assertTrue("burn predicate after failed remint");
+    }
+
     function testPostBurnVrfFulfillmentAfterFreezeRecordsAuditWithoutMetadata() public {
         (
             DeployedStream memory deployed,
