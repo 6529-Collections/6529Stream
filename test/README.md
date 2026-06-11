@@ -199,10 +199,10 @@ safe content/script values, unsafe base URIs, and non-HTTPS library URLs.
 `StreamMetadataUtf8.t.sol` covers the shared strict UTF-8 scanner, valid
 ASCII/multibyte sequences, invalid lead/continuation, overlong, surrogate,
 out-of-range, and truncated sequences, dependency script/provenance production
-rejections, and size-before-UTF-8 error ordering. Full browser execution
-sandboxing plus `StreamCore` production invalid UTF-8 enforcement remain future
-P1-META-006 work; the Core slice is tracked as a size-gated follow-up in issue
-#125.
+rejections, `StreamCore` production rejections for collection fields,
+collection script chunks, token data, token image URIs, and token raw
+attributes, plus size-before-UTF-8 error ordering. Full browser execution
+sandboxing remains future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
@@ -215,7 +215,9 @@ plus burn paths do not emit misleading ERC-4906 events.
 Production bytecode size is checked through the local/CI gate
 `forge build --sizes --via-ir --skip test --skip script --force`, rather than a unit test,
 because the deployable contracts use the IR-optimized release profile while
-test-only invariant handlers can exceed initcode limits.
+test-only invariant handlers can exceed initcode limits. The current Core UTF-8
+slice keeps `StreamCore` at 24,160 runtime bytes with 416 bytes of EIP-170
+headroom, above the 384-byte release floor.
 
 Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event
