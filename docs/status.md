@@ -54,7 +54,11 @@ The current Gate A smoke baseline proves:
   audit state, exclude burned supply from live collection supply, reject remint
   attempts for previously burned token IDs, and allow valid VRF/arRNG post-burn
   fulfillment to record audit-only randomness without ERC-4906 metadata updates
-  or freeze-manifest changes.
+  or freeze-manifest changes. `StreamMetadataEscaping.t.sol` proves the current
+  on-chain JSON string escaping and raw attribute structural guard: escaped
+  collection/image fields decode to parseable JSON, brackets inside quoted
+  attribute values remain valid, and breakout/control-character/unterminated
+  attribute fragments revert.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -62,9 +66,10 @@ blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, signer/deployment ceremony runbooks, metadata escaping,
-dependency artifact packaging and migration runbooks beyond registry provenance
-strings, deployment discipline, and the broader P0/P1 test suite.
+high/medium baseline, signer/deployment ceremony runbooks, generated
+HTML/JavaScript metadata escaping or rejection, metadata size limits, dependency
+artifact packaging and migration runbooks beyond registry provenance strings,
+deployment discipline, and the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.

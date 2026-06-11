@@ -23,6 +23,7 @@ interface Vm {
     function expectRevert() external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
+    function parseJson(string calldata json) external pure returns (bytes memory);
     function readFile(string calldata path) external view returns (string memory);
 }
 

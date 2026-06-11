@@ -165,6 +165,15 @@ suite also asserts `metadataSchemaVersion()` and the token-level
 `pending`/`final` metadata state view, and pending on-chain metadata no longer
 executes the final generative HTML path with a zero token hash.
 
+Metadata escaping now has first-slice P1-META-006 coverage in
+`StreamMetadataEscaping.t.sol`: on-chain JSON string escaping is exercised for
+collection/name, description, and image fields before base64 encoding; decoded
+metadata is parsed through Foundry's JSON parser; raw attribute fragments allow
+brackets inside quoted JSON strings; and breakout fragments, literal control
+characters, and unterminated strings revert with the metadata attribute guard.
+Generated HTML/JavaScript sandbox tests and numeric size-limit tests remain
+future P1-META-006 work.
+
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
 randomness fulfillment and token metadata input writes emit `MetadataUpdate`,
