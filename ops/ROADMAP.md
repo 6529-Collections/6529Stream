@@ -45,7 +45,10 @@ order.
   generated local and broadcast-derived address books, generated source
   verification input bundle, generated release manifest, and release checksum
   bundle, while live fork/testnet rehearsals, production broadcast retention,
-  and live artifact verification remain open.
+  and live artifact verification remain open. Near-term `StreamCore` bytecode
+  headroom is now a tracked release risk: PR #114 leaves 61 bytes of EIP-170
+  margin, so future non-trivial Core work should recover headroom or explicitly
+  spend an approved size budget first.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -67,7 +70,7 @@ order.
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness/pending metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
-| Production size | Production deployable contracts pass the IR-optimized size gate; `StreamCore` is 24,461 runtime bytes with 115 bytes of EIP-170 headroom | `forge build --sizes --via-ir --skip test --skip script --force` | Production size gate passes in CI and deployment scripts use the same profile |
+| Production size | Production deployable contracts pass the IR-optimized size gate; after PR #114 review fixes, `StreamCore` is 24,515 runtime bytes with 61 bytes of EIP-170 headroom; [`P1-SIZE-001`](https://github.com/6529-Collections/6529Stream/issues/115) tracks recovering sustainable Core bytecode margin before further feature work | `forge build --sizes --via-ir --skip test --skip script --force` | Production size gate passes in CI and deployment scripts use the same profile, with an agreed minimum `StreamCore` margin |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High, 19 Medium, and 93 Low; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
 | Deployment | Partial local baseline: deploy-and-wire rehearsal script, manifest schema, address-book schema, generated Anvil manifest config/example, sanitized Foundry broadcast fixture ingestion, generated Anvil and broadcast-derived address books, manifest parsing test, and generated ABI/bytecode checksum inputs exist; live fork/testnet rehearsal and production broadcast retention remain missing | `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `test/StreamDeploymentManifest.t.sol`, `scripts/generate_broadcast_manifest_input.py --check`, `scripts/generate_deployment_manifest.py --check`, `scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_address_books.py --check`, `deployments/broadcasts/`, `deployments/schema/deployment-manifest.schema.json`, `deployments/schema/address-book.schema.json`, `deployments/address-books/`, and `release-artifacts/latest/abi-checksums.json` | Anvil deployment and fork rehearsal pass |
@@ -429,6 +432,7 @@ This is the recommended first batch of issues.
 31. [`P1-RELEASE-006`](https://github.com/6529-Collections/6529Stream/issues/105) / P1/OPS+TEST+DOCS: Generate a machine-readable release manifest tying release artifacts, deployment artifacts, governance docs, and release-ceremony status together.
 32. [`P1-RELEASE-007`](https://github.com/6529-Collections/6529Stream/issues/107) / P1/OPS+TEST+DOCS: Generate source verification inputs from production Foundry artifacts, source files, compiler settings, and contract config.
 33. [`P1-DEPLOY-004`](https://github.com/6529-Collections/6529Stream/issues/109) / P1/OPS+TEST+DOCS: Ingest sanitized Foundry broadcast output into deterministic deployment-manifest evidence.
+34. [`P1-SIZE-001`](https://github.com/6529-Collections/6529Stream/issues/115) / P1/CODE+TEST+OPS: Recover sustainable `StreamCore` bytecode headroom or define an explicit size budget before adding further non-trivial Core feature work.
 
 ## 5. Best-Practice Checklist
 
@@ -1812,6 +1816,10 @@ No P0 contract PR may merge without:
 - Add `make check` or documented equivalent as the canonical local gate.
 - Keep the production size gate in `make check`, Windows/Linux check scripts,
   and CI: `forge build --sizes --via-ir --skip test --skip script --force`.
+- Track `StreamCore` size as a release risk while headroom is below the agreed
+  minimum. [`P1-SIZE-001`](https://github.com/6529-Collections/6529Stream/issues/115)
+  blocks further non-trivial Core feature work unless the PR recovers headroom
+  or documents an explicit size-budget exception.
 - Treat generic all-artifact `forge build --sizes` as a diagnostic only while
   test-only invariant handlers exceed initcode limits.
 - Add exact tool pinning for:

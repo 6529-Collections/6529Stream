@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/113` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 17:52 UTC` |
+| Last updated | `2026-06-11 18:00 UTC` |
 
 ## Packaging Notes
 
@@ -119,8 +119,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Collection URI production enforcement (Queue Item 60)
 
-Status: CodeRabbit review fixes validated locally; ready to push and request
-latest-head CodeRabbit review.
+Status: CodeRabbit review fixes pushed; CI is green on the review-fix head;
+bytecode-headroom roadmap follow-up validated locally and ready to push.
 Branch: `codex/metadata-collection-uri-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/114`.
 
@@ -187,6 +187,14 @@ Validation:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`, targeted
   `forge fmt --check`, and `git diff --check` with only the existing Windows
   line-ending warning for `release-artifacts/latest/SHA256SUMS`.
+- CI run `27366884724` passed on head `857e1f9`. CodeRabbit acknowledged the
+  review fixes and raised the now-small `StreamCore` EIP-170 margin as a
+  near-term tracking risk; issue
+  [`#115`](https://github.com/6529-Collections/6529Stream/issues/115) now tracks
+  bytecode headroom recovery, and `ops/ROADMAP.md` records the release risk.
+- Documentation-only bytecode-headroom follow-up validation passed:
+  `make release-checksums` and `make check`; release artifacts did not drift
+  from the `ops/ROADMAP.md` / `ops/AUTONOMOUS_RUN.md` edits.
 
 Notes:
 
@@ -5404,6 +5412,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 18:00 | Track PR #114 bytecode headroom risk | CodeRabbit correctly highlighted that `StreamCore` has only 61 bytes of EIP-170 margin after the review fix, so issue #115 and the roadmap now track recovering sustainable Core headroom before further non-trivial Core feature work |
 | 2026-06-11 17:52 | Validate PR #114 CodeRabbit fixes | Focused metadata/randomizer lifecycle regressions, the EIP-170 size gate, release artifact regeneration, full `make check`, Windows wrapper, formatting, and whitespace gates passed after persisting full-update base URIs and hardening marker probes |
 | 2026-06-11 17:44 | Accept CodeRabbit PR #114 findings | The base URI persistence finding was a real storage bug, and the marker-probe finding was valid for invalid targets; moving the low-level marker probe into `StreamMetadataRenderer` keeps `StreamCore` deployable with 61 bytes of EIP-170 headroom while preserving typed errors |
 | 2026-06-11 17:21 | Request CodeRabbit on PR #114 | CodeRabbit review requested in issue comment `4683145207`; Claude intentionally skipped per current user instruction |
