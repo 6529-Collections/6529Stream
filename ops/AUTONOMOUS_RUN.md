@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/metadata-utf8-production` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/123` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/126` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 22:50 UTC` |
+| Last updated | `2026-06-11 22:56 UTC` |
 
 ## Packaging Notes
 
@@ -125,11 +125,11 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Dependency registry UTF-8 enforcement (Queue Item 65)
 
-Status: ready to package after final checksum refresh; focused checks, release
-checksum generation, full `make check`, Windows wrapper, release drift checks,
-and diff hygiene pass locally.
+Status: PR #126 open; focused checks, release checksum generation, full
+`make check`, Windows wrapper, release drift checks, and diff hygiene pass
+locally.
 Branch: `codex/metadata-utf8-production`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/126`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/124`.
 Core size-gated follow-up:
 `https://github.com/6529-Collections/6529Stream/issues/125`.
@@ -5766,6 +5766,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 22:56 | Open PR #126 for Queue Item 65 | Pushed `codex/metadata-utf8-production`, opened https://github.com/6529-Collections/6529Stream/pull/126 against `main`, and linked it as part of issue #124 with Core enforcement split to issue #125 |
 | 2026-06-11 22:50 | Validate Queue Item 65 locally | Focused UTF-8 and dependency-registry tests, full `make check`, Windows `scripts\check.ps1`, release manifest/checksum drift checks, Bash syntax, and whitespace checks pass; this PR remains a dependency-registry slice with Core enforcement tracked in issue #125 |
 | 2026-06-11 22:45 | Run full Queue Item 65 local gate | `make check` passes after dependency registry UTF-8 enforcement, release artifact refresh, and the new UTF-8 suite; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
 | 2026-06-11 22:42 | Refresh Queue Item 65 release artifacts | `make release-checksums` passes after the dependency registry UTF-8 code/docs/state updates; production size gate remains green with `StreamCore` at 24,135 runtime bytes and `StreamMetadataRenderer` at 8,976 runtime bytes |
