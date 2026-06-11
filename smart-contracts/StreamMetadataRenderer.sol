@@ -335,6 +335,25 @@ library StreamMetadataRenderer {
                 || (state.sawTopLevelValue && state.expectingTopLevelValue));
     }
 
+    function isSafeContentUri(string memory uri, bool allowEmpty) public pure returns (bool) {
+        bytes memory input = bytes(uri);
+        if (input.length == 0) {
+            return allowEmpty;
+        }
+        if (!_hasNoUriWhitespaceOrControls(input)) {
+            return false;
+        }
+        return (_startsWith(input, "https://") && _hasHttpsHost(input))
+            || (_startsWith(input, "ipfs://") && input.length > 7)
+            || (_startsWith(input, "ar://") && input.length > 5);
+    }
+
+    function isSafeScriptUri(string memory uri) public pure returns (bool) {
+        bytes memory input = bytes(uri);
+        return input.length > 0 && _hasNoUriWhitespaceOrControls(input)
+            && _startsWith(input, "https://") && _hasHttpsHost(input);
+    }
+
     function _advanceRawAttributeStringState(
         RawAttributeValidationState memory state,
         bytes1 character
@@ -435,6 +454,37 @@ library StreamMetadataRenderer {
         return _lowerAscii(input[index + 2]) == 0x73 && _lowerAscii(input[index + 3]) == 0x63
             && _lowerAscii(input[index + 4]) == 0x72 && _lowerAscii(input[index + 5]) == 0x69
             && _lowerAscii(input[index + 6]) == 0x70 && _lowerAscii(input[index + 7]) == 0x74;
+    }
+
+    function _hasNoUriWhitespaceOrControls(bytes memory input) private pure returns (bool) {
+        for (uint256 i = 0; i < input.length; i++) {
+            uint8 value = uint8(input[i]);
+            if (value <= 0x20 || value == 0x7f) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function _hasHttpsHost(bytes memory input) private pure returns (bool) {
+        if (input.length <= 8) {
+            return false;
+        }
+        bytes1 firstHostByte = input[8];
+        return firstHostByte != 0x2f && firstHostByte != 0x3f && firstHostByte != 0x23;
+    }
+
+    function _startsWith(bytes memory input, string memory rawPrefix) private pure returns (bool) {
+        bytes memory prefix = bytes(rawPrefix);
+        if (input.length < prefix.length) {
+            return false;
+        }
+        for (uint256 i = 0; i < prefix.length; i++) {
+            if (input[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function _lowerAscii(bytes1 character) private pure returns (bytes1) {

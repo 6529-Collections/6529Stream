@@ -28,7 +28,9 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
             string(abi.encodePacked("pending", bytes1(0x22), bytes1(0x5c), "state")),
             "Name",
             "Description",
-            "ipfs://image.png",
+            string(
+                abi.encodePacked("ipfs://image/quote\"", bytes1(0x5c), "line", bytes1(0x0a), ".png")
+            ),
             "",
             "",
             "",
@@ -41,7 +43,7 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
                 "{\"metadata_schema_version\":\"schema\\\"\\\\v\",",
                 "\"metadata_state\":\"pending\\\"\\\\state\",",
                 "\"name\":\"Name\",\"description\":\"Description\",",
-                "\"image\":\"ipfs://image.png\",\"attributes\":[]}"
+                "\"image\":\"ipfs://image/quote\\\"\\\\line\\n.png\",\"attributes\":[]}"
             ),
             "schema and state fields were not escaped"
         );
@@ -55,9 +57,7 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed);
         _setImageAndAttributes(
             deployed.core,
-            string(
-                abi.encodePacked("ipfs://image/quote\"", bytes1(0x5c), "line", bytes1(0x0a), ".png")
-            ),
+            "ipfs://image/escaped-safe.png",
             "{\"trait_type\":\"Mood\",\"value\":\"Calm\"}"
         );
         deployed.core.changeMetadataView(COLLECTION_ID, true);
@@ -70,7 +70,7 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
                 "{\"metadata_schema_version\":\"6529stream-v1\",\"metadata_state\":\"pending\",",
                 "\"name\":\"Genesis \\\"Alpha\\\"\\\\Beta #0\",",
                 "\"description\":\"Line 1\\nTabbed\\tUnit\\u0001\\\"\\\\\",",
-                "\"image\":\"ipfs://image/quote\\\"\\\\line\\n.png\",",
+                "\"image\":\"ipfs://image/escaped-safe.png\",",
                 "\"attributes\":[{\"trait_type\":\"Mood\",\"value\":\"Calm\"}]}"
             ),
             "escaped metadata JSON changed"
@@ -250,6 +250,18 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
             "https://cdn.example/lib.js\" async=\"bad\"</script><img src=x>&",
             string(abi.encodePacked(bytes1(0), bytes1(0x0a)))
         );
+        string memory hostileLibraryHtml =
+            _decodeHtmlDataUri(StreamMetadataRenderer.onchainAnimationURI(hostileLibrary, ""));
+        bytes memory hostileLibraryBytes = bytes(hostileLibraryHtml);
+        _contains(
+                hostileLibraryBytes,
+                bytes("src=\"https://cdn.example/lib.js&quot; async=&quot;bad&quot;")
+            ).assertTrue("library attribute quote was not escaped");
+        _contains(hostileLibraryBytes, bytes("&lt;/script&gt;&lt;img src=x&gt;&amp;"))
+            .assertTrue("library attribute markup was not escaped");
+        _contains(hostileLibraryBytes, bytes("&#x00;&#x0a;"))
+            .assertTrue("library attribute controls were not escaped");
+
         deployed.core
             .updateCollectionInfo(
                 COLLECTION_ID,
@@ -259,7 +271,7 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
                 "https://6529.io",
                 "CC0",
                 "ipfs://base/",
-                hostileLibrary,
+                "https://cdn.example/lib.js",
                 dependencyKey,
                 FULL_COLLECTION_UPDATE_INDEX,
                 scripts
@@ -286,12 +298,6 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
 
         _countOccurrences(htmlBytes, bytes("</script>"))
             .assertEq(2, "unexpected raw script close count");
-        _contains(htmlBytes, bytes("src=\"https://cdn.example/lib.js&quot; async=&quot;bad&quot;"))
-            .assertTrue("library attribute quote was not escaped");
-        _contains(htmlBytes, bytes("&lt;/script&gt;&lt;img src=x&gt;&amp;"))
-            .assertTrue("library attribute markup was not escaped");
-        _contains(htmlBytes, bytes("&#x00;&#x0a;"))
-            .assertTrue("library attribute controls were not escaped");
         _contains(
                 htmlBytes, bytes("let tokenDataRaw='1];window.injected=true;//\\x3c/script\\x3e';")
             ).assertTrue("tokenData raw string was not escaped");

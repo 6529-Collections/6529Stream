@@ -25,6 +25,8 @@ the release policy in `docs/release-policy.md`.
 - Added metadata golden-fixture safety checks for JSON/data-URI decoding,
   current URI scheme policy, and generated animation HTML script-boundary
   validation in local and CI gates.
+- Added renderer URI policy helpers and production token image URI validation
+  for required metadata image inputs.
 
 ### Release Impact
 
@@ -44,6 +46,8 @@ the release policy in `docs/release-policy.md`.
   metadata size-limit custom errors and public limit constants.
 - Gate D now runs metadata fixture safety checks in `make check`, CI, and the
   platform check wrappers.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  metadata URI policy helper functions and `UnsafeMetadataURI()` custom error.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

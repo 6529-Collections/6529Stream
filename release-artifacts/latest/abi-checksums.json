@@ -11,7 +11,7 @@
     "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
     "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
     "StreamAuctions": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
-    "StreamCore": "sha256:820f6962c8e27c7e73ac51e18fdfddd81c517f58101a3b28335fcdbba5f7d4b3",
+    "StreamCore": "sha256:3738c2bf120feb5bb300a05cb19553829c65b76b2526a70e880e181027d49627",
     "StreamCuratorsPool": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
     "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
     "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e"
@@ -79,12 +79,12 @@
     },
     "StreamCore": {
       "creation": {
-        "sha256": "sha256:58bedaea826f8c8e965a8d627e36ed5114a18c5f481be00205b4cf949dc9c28f",
+        "sha256": "sha256:2c88742e6981ac1d5ca90ccffadca1e3951dca1b324169936f2b88c426e835e3",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       },
       "runtime": {
-        "sha256": "sha256:db8cc579c656c43f09acc0fb6ee3d74ad2bc1b0877fc71f0c0737116556e7977",
+        "sha256": "sha256:5a16fdc2550ebfd91c705e6fe790836c86d1b5600f07d46f21db5603fccaa156",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       }
@@ -205,14 +205,14 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:820f6962c8e27c7e73ac51e18fdfddd81c517f58101a3b28335fcdbba5f7d4b3",
-      "bytecode_sha256": "sha256:58bedaea826f8c8e965a8d627e36ed5114a18c5f481be00205b4cf949dc9c28f",
+      "abi_sha256": "sha256:3738c2bf120feb5bb300a05cb19553829c65b76b2526a70e880e181027d49627",
+      "bytecode_sha256": "sha256:2c88742e6981ac1d5ca90ccffadca1e3951dca1b324169936f2b88c426e835e3",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
-      "deployed_bytecode_sha256": "sha256:db8cc579c656c43f09acc0fb6ee3d74ad2bc1b0877fc71f0c0737116556e7977",
+      "deployed_bytecode_sha256": "sha256:5a16fdc2550ebfd91c705e6fe790836c86d1b5600f07d46f21db5603fccaa156",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
-      "abi_entries": 103,
+      "abi_entries": 104,
       "function_count": 74,
       "event_count": 11,
       "constructor_count": 1

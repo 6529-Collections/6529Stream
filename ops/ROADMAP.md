@@ -1617,11 +1617,15 @@ Acceptance criteria:
   fourth slice validates committed metadata golden fixtures outside Foundry by
   decoding JSON and HTML data URIs, parsing metadata JSON, checking current URI
   scheme policy, and asserting final animation HTML wrapper/script boundaries.
+  The fifth slice defines renderer content/script URI policy helpers and
+  rejects unsafe token image URI writes in `StreamCore` while keeping the
+  production contract under EIP-170.
 - Add metadata schema and golden-file tests for `name`, `description`, `image`,
   `attributes`, and `animation_url`.
 - Complete the remaining render-safety work for full browser execution
-  sandboxing, production URI enforcement, invalid UTF-8 policy, and structured
-  attributes or semantic attribute schema validation.
+  sandboxing, collection base URI and external library URL production
+  enforcement, invalid UTF-8 policy, and structured attributes or semantic
+  attribute schema validation.
 - On-chain metadata now uses base64 JSON data URIs for schema-v1 output.
 - Numeric byte limits are now set for collection scripts, dependency scripts,
   `tokenData`, image data, attributes, dependency provenance, and generated

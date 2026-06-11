@@ -190,7 +190,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
                 scripts
             );
 
-        vm.expectRevert("Data frozen");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         deployed.core.changeTokenData(TOKEN_ID, "4,5,6");
 
         uint256[] memory tokenIds = new uint256[](1);
@@ -200,7 +200,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         images[0] = "ipfs://image/updated.png";
         attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Locked\"}";
 
-        vm.expectRevert("Data frozen");
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
 

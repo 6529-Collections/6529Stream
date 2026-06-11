@@ -93,6 +93,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     error FrozenCollectionDependencyRegistry();
     error MetadataFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
     error MetadataFrozen(uint256 collectionId);
+    error UnsafeMetadataURI();
     error UnsafeRawAttributes(uint256 tokenId);
     error UnknownDependency(bytes32 dependencyNameAndVersion);
 
@@ -534,7 +535,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     {
         _requireMetadataMutationNotPaused();
         uint256 collectionId = tokenIdsToCollectionIds[_tokenId];
-        require(collectionFreeze[collectionId] == false, "Data frozen");
+        _requireCollectionNotFrozen(collectionId);
         _requireMinted(_tokenId);
         _requireMaxBytes(_FIELD_TOKEN_DATA, newData, MAX_TOKEN_DATA_BYTES);
         tokenData[_tokenId] = newData;
@@ -554,10 +555,13 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         );
         for (uint256 x; x < _tokenId.length; x++) {
             uint256 collectionId = tokenIdsToCollectionIds[_tokenId[x]];
-            require(collectionFreeze[collectionId] == false, "Data frozen");
+            _requireCollectionNotFrozen(collectionId);
             _requireMinted(_tokenId[x]);
             _requireMaxBytes(_FIELD_TOKEN_IMAGE, _images[x], MAX_TOKEN_IMAGE_BYTES);
             _requireMaxBytes(_FIELD_TOKEN_ATTRIBUTES, _attributes[x], MAX_TOKEN_ATTRIBUTES_BYTES);
+            if (!StreamMetadataRenderer.isSafeContentUri(_images[x], false)) {
+                revert UnsafeMetadataURI();
+            }
             _requireSafeRawAttributes(_tokenId[x], _attributes[x]);
             tokenImageAndAttributes[_tokenId[x]][0] = _images[x];
             tokenImageAndAttributes[_tokenId[x]][1] = _attributes[x];

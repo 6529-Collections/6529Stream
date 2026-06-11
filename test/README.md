@@ -186,9 +186,13 @@ inputs with structured custom errors. `scripts/test_metadata_fixtures.py` and
 metadata golden fixtures: the scripts strictly decode JSON/HTML data URIs,
 parse metadata JSON, validate current URI scheme policy, and assert the final
 animation wrapper has exactly one external script and one inline generative
-script with no raw script-boundary breakout. Full browser execution sandboxing,
-production URI enforcement, semantic attribute schema validation, and invalid
-UTF-8 policy remain future P1-META-006 work.
+script with no raw script-boundary breakout. `StreamMetadataUriPolicy.t.sol`
+covers the renderer's current content/script URI policy helpers and production
+token image URI enforcement for allowed `https://`, `ipfs://`, and `ar://`
+content URIs plus rejected empty, JavaScript, hostless HTTPS, and
+whitespace-bearing image inputs. Full browser execution sandboxing, collection
+base URI and external library URL production enforcement, semantic attribute
+schema validation, and invalid UTF-8 policy remain future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

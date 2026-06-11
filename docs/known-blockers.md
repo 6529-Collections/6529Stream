@@ -81,18 +81,21 @@ contributors who start from the README.
   `tokenData` from an escaped string, and neutralizes closing-script sequences
   in generated HTML. Numeric byte limits now cover collection display fields,
   collection scripts, token data, token images, token attributes, generated
-  `tokenURI` output, dependency scripts, and dependency provenance. Remaining
-  metadata blockers include dependency artifact packaging and deployment
+  `tokenURI` output, dependency scripts, and dependency provenance. Token image
+  writes now reject unsafe content URI inputs, and renderer helpers define the
+  current content/script URI scheme policy for tests and fixture checks.
+  Remaining metadata blockers include dependency artifact packaging and deployment
   migration runbooks beyond registry provenance strings, full browser execution
-  sandbox automation, semantic attribute schema validation, production URI
-  enforcement, and invalid UTF-8 policy. Committed metadata fixtures now have
+  sandbox automation, semantic attribute schema validation, collection base URI
+  and external library URL production enforcement, and invalid UTF-8 policy.
+  Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries.
 - `StreamCore` now uses a linked metadata renderer library, removes optional
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
-  `StreamCore` under EIP-170 with deployment headroom, but deployment scripts,
+  `StreamCore` under EIP-170 with narrow deployment headroom, but deployment scripts,
   manifests, and rehearsals still need to use this production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression

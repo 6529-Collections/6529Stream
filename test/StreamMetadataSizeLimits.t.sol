@@ -47,7 +47,8 @@ contract StreamMetadataSizeLimitsTest is CharacterizationTestBase, StreamFixture
         string[] memory images = new string[](1);
         string[] memory attributes = new string[](1);
         tokenIds[0] = TOKEN_ID;
-        images[0] = _repeat("i", maxImage);
+        images[0] = _ipfsUriWithSize(maxImage);
+        bytes(images[0]).length.assertEq(maxImage, "image fixture length");
         attributes[0] = _attributeWithValueSize(maxAttributes);
         bytes(attributes[0]).length.assertEq(maxAttributes, "attribute fixture length");
 
@@ -305,6 +306,12 @@ contract StreamMetadataSizeLimitsTest is CharacterizationTestBase, StreamFixture
         return string.concat(
             prefix, _repeat("a", size - bytes(prefix).length - bytes(suffix).length), suffix
         );
+    }
+
+    function _ipfsUriWithSize(uint256 size) private pure returns (string memory) {
+        string memory prefix = "ipfs://";
+        require(size > bytes(prefix).length, "size too small");
+        return string.concat(prefix, _repeat("i", size - bytes(prefix).length));
     }
 
     function _chunkArray(uint256 count, string memory value)
