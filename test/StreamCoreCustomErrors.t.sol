@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/StreamCore.sol";
+import "../smart-contracts/DependencyRegistry.sol";
+import "../smart-contracts/StreamAdmins.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
 
@@ -47,5 +49,35 @@ contract StreamCoreCustomErrorsTest is CharacterizationTestBase, StreamFixture {
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.FinalSupplyTimeNotPassed.selector));
         deployed.core.setFinalSupply(COLLECTION_ID);
+    }
+
+    function testSetFinalSupplyUsesCustomErrorWhenCollectionDataIsMissing() public {
+        StreamCore core = _deployCoreWithCollectionInfoOnly();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamCore.CollectionDataMissing.selector, COLLECTION_ID)
+        );
+        core.setFinalSupply(COLLECTION_ID);
+    }
+
+    function _deployCoreWithCollectionInfoOnly() private returns (StreamCore core) {
+        StreamAdmins admins = new StreamAdmins(address(this));
+        admins.registerAdmin(address(this), true);
+        DependencyRegistry dependencyRegistry = new DependencyRegistry(address(admins));
+        core = new StreamCore("6529 Stream", "STREAM", address(admins), address(dependencyRegistry));
+
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
+        core.createCollection(
+            "Genesis",
+            "6529",
+            "Description",
+            "https://6529.io",
+            "CC0",
+            "ipfs://base/",
+            "https://cdn.example/script.js",
+            bytes32(0),
+            scripts
+        );
     }
 }

@@ -79,12 +79,12 @@
     },
     "StreamCore": {
       "creation": {
-        "sha256": "sha256:b4dff26f761549ee3e635f099803d789fb3ec2a009e12b6b55a85ab4eea5d46c",
+        "sha256": "sha256:f183d07e38a80cde9b0d186acaab77798a2ca7e67ee0e007de3dfdda0da03b12",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       },
       "runtime": {
-        "sha256": "sha256:044cc12683a6132b7bfa566b6a9125d011e7cb01d40ceb215d30dca7201edd90",
+        "sha256": "sha256:909d5b85f9600b8550dda40ef08dded3a8a141d05d97a53e4bac2692130d469c",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       }
@@ -206,10 +206,10 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_sha256": "sha256:ea674cbdafc9a379139e9998fd161d0cde58b82ed053f6e5cfc8d3a3653509cc",
-      "bytecode_sha256": "sha256:b4dff26f761549ee3e635f099803d789fb3ec2a009e12b6b55a85ab4eea5d46c",
+      "bytecode_sha256": "sha256:f183d07e38a80cde9b0d186acaab77798a2ca7e67ee0e007de3dfdda0da03b12",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
-      "deployed_bytecode_sha256": "sha256:044cc12683a6132b7bfa566b6a9125d011e7cb01d40ceb215d30dca7201edd90",
+      "deployed_bytecode_sha256": "sha256:909d5b85f9600b8550dda40ef08dded3a8a141d05d97a53e4bac2692130d469c",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "abi_entries": 118,

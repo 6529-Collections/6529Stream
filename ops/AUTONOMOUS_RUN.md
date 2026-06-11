@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/114` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 18:51 UTC` |
+| Last updated | `2026-06-11 19:17 UTC` |
 
 ## Packaging Notes
 
@@ -120,7 +120,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Recover `StreamCore` bytecode headroom (Queue Item 61)
 
-Status: PR opened; awaiting CI and CodeRabbit review.
+Status: CodeRabbit review fix validated locally; ready to push PR update.
 Branch: `codex/recover-streamcore-headroom`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/116`.
 
@@ -149,11 +149,12 @@ Candidate files:
 Validation:
 
 - `forge test --match-contract StreamCoreCustomErrorsTest -vvv` passed with
-  4 tests covering `FunctionAdminUnauthorized()`,
+  5 tests covering `FunctionAdminUnauthorized()`,
   `ArtistSignatureUnauthorized()`, `InvalidTokenMetadataInput()`, and
-  `FinalSupplyTimeNotPassed()`.
+  `FinalSupplyTimeNotPassed()`, plus `setFinalSupply` rejection when collection
+  data is missing.
 - `forge build --sizes --via-ir --skip test --skip script --force` passed;
-  final measured `StreamCore` runtime size is 24,143 bytes with 433 bytes of
+  final measured `StreamCore` runtime size is 24,135 bytes with 441 bytes of
   EIP-170 headroom.
 - `make release-checksums` passed and regenerated release/deployment artifacts.
 - `make check` passed.
@@ -167,6 +168,12 @@ Notes:
 
 - A separate `burn` authorization custom-error experiment increased runtime
   size by 20 bytes versus the first pass, so it was intentionally dropped.
+- CodeRabbit found that `setFinalSupply` could reach final supply math for a
+  created collection with missing collection data. The fix now checks the
+  existing mutable collection boundary, rejects missing data with
+  `CollectionDataMissing(collectionId)`, and keeps the size floor above 384
+  bytes by collapsing duplicated `setCollectionData` writes through a storage
+  pointer.
 - The recovery is intentionally narrow: no contract state layout, external
   function signatures, event signatures, or successful-path behavior changed.
 
@@ -5482,9 +5489,11 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 19:17 | Validate PR #116 review fix locally | `make release-checksums`, `make check`, Windows `scripts\check.ps1`, targeted `forge fmt --check`, and `git diff --check` pass after the CodeRabbit fix; `git diff --check` reports only the known Windows line-ending warning on `release-artifacts/latest/SHA256SUMS` |
+| 2026-06-11 19:09 | Address CodeRabbit PR #116 finding | `setFinalSupply` now rejects created collections with missing collection data before final supply math, the focused suite passes with 5 tests, and the production size gate measures `StreamCore` at 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
 | 2026-06-11 18:51 | Open PR #116 | `StreamCore` bytecode headroom recovery PR published at `https://github.com/6529-Collections/6529Stream/pull/116`; state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
-| 2026-06-11 18:48 | Validate Queue Item 61 locally | Focused custom-error regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` is 24,143 runtime bytes with 433 bytes of EIP-170 headroom |
-| 2026-06-11 18:39 | Set interim `StreamCore` size policy | The local P1-SIZE-001 pass measures `StreamCore` at 24,143 runtime bytes with 433 bytes of EIP-170 headroom, so the repo now documents a 384-byte minimum release floor and a 512-byte warning threshold for future non-trivial Core work |
+| 2026-06-11 18:48 | Validate Queue Item 61 locally | Focused custom-error regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; the final review-fix pass records `StreamCore` at 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
+| 2026-06-11 18:39 | Set interim `StreamCore` size policy | The local P1-SIZE-001 pass established a repo policy of 384 bytes as the minimum release floor and 512 bytes as the warning threshold for future non-trivial Core work; final review-fix measurement is 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
 | 2026-06-11 18:37 | Drop burn custom-error experiment | Replacing the `burn` owner/approval string revert with a custom error increased `StreamCore` runtime by 20 bytes versus the narrower pass, so the change was abandoned before documentation and tests |
 | 2026-06-11 18:22 | Validate PR #114 outside-diff follow-up locally | Focused regressions, production size gate, regenerated release artifacts, full `make check`, Windows wrapper, targeted formatting, and whitespace checks all pass; `StreamCore` remains deployable at 24,545 bytes with 31 bytes of EIP-170 headroom |
 | 2026-06-11 18:15 | Accept CodeRabbit PR #114 outside-diff findings | The zero-supply path still reverted via arithmetic panic on first initialization, and dependency registry swaps still accepted EOAs or zero addresses; both are fixed locally with typed errors/regressions while keeping `StreamCore` deployable at 24,545 bytes and 31 bytes of EIP-170 headroom |

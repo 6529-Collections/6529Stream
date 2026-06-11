@@ -42,8 +42,11 @@ the release policy in `docs/release-policy.md`.
   arithmetic panic, and rejected dependency registry swaps to non-contract
   addresses with `InvalidDependencyRegistryContract()`.
 - Recovered `StreamCore` runtime bytecode headroom by replacing selected legacy
-  string reverts with typed custom errors, bringing the production IR-optimized
-  runtime to 24,143 bytes with 433 bytes of EIP-170 headroom.
+  string reverts with typed custom errors and tightening repeated
+  `setCollectionData` storage access, bringing the production IR-optimized
+  runtime to 24,135 bytes with 441 bytes of EIP-170 headroom.
+- Rejected `setFinalSupply` for collections with missing collection data using
+  `CollectionDataMissing(collectionId)` before final supply math can underflow.
 
 ### Release Impact
 

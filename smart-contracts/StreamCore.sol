@@ -331,32 +331,27 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         if (_collectionTotalSupply > _COLLECTION_TOKEN_RANGE) {
             revert CollectionSupplyTooLarge();
         }
-        if (collectionAdditionalData[_collectionID].collectionTotalSupply == 0) {
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        if (collectionData.collectionTotalSupply == 0) {
             if (_collectionTotalSupply == 0) {
                 revert CollectionSupplyTooLarge();
             }
-            collectionAdditionalData[_collectionID].collectionArtistAddress =
-            _collectionArtistAddress;
-            collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
-            collectionAdditionalData[_collectionID].collectionCirculationSupply = 0;
-            collectionAdditionalData[_collectionID].collectionTotalSupply = _collectionTotalSupply;
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
-            _setFinalSupplyTimeAfterMint;
-            collectionAdditionalData[_collectionID].reservedMinTokensIndex =
-            (_collectionID * _COLLECTION_TOKEN_RANGE);
-            collectionAdditionalData[_collectionID].reservedMaxTokensIndex =
+            collectionData.collectionArtistAddress = _collectionArtistAddress;
+            collectionData.maxCollectionPurchases = _maxCollectionPurchases;
+            collectionData.collectionCirculationSupply = 0;
+            collectionData.collectionTotalSupply = _collectionTotalSupply;
+            collectionData.setFinalSupplyTimeAfterMint = _setFinalSupplyTimeAfterMint;
+            collectionData.reservedMinTokensIndex = (_collectionID * _COLLECTION_TOKEN_RANGE);
+            collectionData.reservedMaxTokensIndex =
                 (_collectionID * _COLLECTION_TOKEN_RANGE) + _collectionTotalSupply - 1;
             wereDataAdded[_collectionID] = true;
-        } else if (artistSigned[_collectionID] == false) {
-            collectionAdditionalData[_collectionID].collectionArtistAddress =
-            _collectionArtistAddress;
-            collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
-            _setFinalSupplyTimeAfterMint;
         } else {
-            collectionAdditionalData[_collectionID].maxCollectionPurchases = _maxCollectionPurchases;
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint =
-            _setFinalSupplyTimeAfterMint;
+            if (!artistSigned[_collectionID]) {
+                collectionData.collectionArtistAddress = _collectionArtistAddress;
+            }
+            collectionData.maxCollectionPurchases = _maxCollectionPurchases;
+            collectionData.setFinalSupplyTimeAfterMint = _setFinalSupplyTimeAfterMint;
         }
     }
 
@@ -653,7 +648,10 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         public
         FunctionAdminRequired(this.setFinalSupply.selector)
     {
-        _requireCollectionNotFrozen(_collectionID);
+        _requireExistingMutableCollection(_collectionID);
+        if (!wereDataAdded[_collectionID]) {
+            revert CollectionDataMissing(_collectionID);
+        }
         if (
             block.timestamp
                 <= IStreamMinter(minterContract).getEndTime(_collectionID)
