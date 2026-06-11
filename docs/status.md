@@ -160,12 +160,14 @@ canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
 beyond the now-triaged high/medium baseline, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
-  verified live deployment hashes and explorer submissions, remaining generated
-  HTML/JavaScript render-sandbox hardening, production dependency migration
-  runbooks beyond the local artifact-manifest baseline, semantic attribute schema
-  validation, invalid UTF-8 policy, full browser execution sandbox automation,
-deployment discipline, and
-the broader P0/P1 test suite.
+verified live deployment hashes and explorer submissions, remaining generated
+HTML/JavaScript render-sandbox hardening, production dependency migration
+runbooks beyond the local artifact-manifest baseline, production semantic
+attribute schema validation, production invalid UTF-8 enforcement, full browser
+execution sandbox automation, deployment discipline, and the broader P0/P1 test
+suite. Fixture-level semantic attribute and invalid UTF-8 regressions are now
+covered in the committed metadata fixture gate, but they do not enforce
+production raw-attribute writes.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.

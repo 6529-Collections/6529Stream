@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/dependency-artifact-manifest` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/116` |
+| Active PR branch | `codex/metadata-fixture-utf8-attributes` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/118` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 20:01 UTC` |
+| Last updated | `2026-06-11 20:34 UTC` |
 
 ## Packaging Notes
 
@@ -115,13 +115,76 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 59 | Add metadata token image URI policy | Gate D/Gate G support | Continue P1-META-006 by defining renderer content/script URI policy helpers and rejecting unsafe token image URI writes in production while preserving collection base URI, external library URL, structured-attributes, invalid-UTF-8, and browser-sandbox work as follow-up slices | Merged in PR #113 |
 | 60 | Add collection URI production enforcement | Gate D/Gate G support | Continue P1-META-006 by enforcing optional collection base URI and external library URL policy in production, preserving empty optional fields, using custom-error cleanup to keep `StreamCore` under EIP-170, and updating docs/artifacts/state traceability | Merged in PR #114 |
 | 61 | Recover `StreamCore` bytecode headroom | Gate D/Gate G support | Implement P1-SIZE-001 by replacing selected legacy `StreamCore` string reverts with typed custom errors, adding focused selector regressions, documenting the minimum size floor and warning threshold, and refreshing release artifacts | Merged in PR #116 |
-| 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Active |
+| 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Merged in PR #118 |
+| 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Add dependency artifact manifest packaging (Queue Item 62)
+### PR candidate: Metadata fixture UTF-8 and semantic attributes (Queue Item 63)
 
-Status: PR #118 open; CI and CodeRabbit review pending.
+Status: Local validation complete; ready to commit and open PR.
+Branch: `codex/metadata-fixture-utf8-attributes`.
+Pull request: TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/119`.
+Attached issue: `https://github.com/6529-Collections/6529Stream/issues/120`.
+
+Goal:
+
+- Harden the committed metadata fixture gate for remaining `P1-META-006`
+  safety gaps that do not require production bytecode changes.
+- Add focused negative tests proving invalid UTF-8 JSON/HTML data URI payloads
+  fail fixture validation.
+- Add semantic attribute-shape tests proving unexpected keys and non-string
+  values fail fixture validation.
+- Update docs, roadmap, and this state file to distinguish fixture-level
+  semantic validation from still-open production raw-attribute and browser
+  execution work.
+- Pin release-artifact, JavaScript, and Python text files to LF in
+  `.gitattributes` so dependency artifact source hashes and generated release
+  files remain deterministic on Windows and Linux checkouts.
+
+Candidate files:
+
+- `.gitattributes`
+- `scripts/test_metadata_fixtures.py`
+- `docs/metadata.md`
+- `docs/status.md`
+- `test/README.md`
+- `release-artifacts/README.md`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `release-artifacts/latest/release-manifest.json`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+
+Validation completed at `2026-06-11 20:34 UTC`:
+
+- `python scripts\test_metadata_fixtures.py`
+- `python scripts\check_metadata_fixtures.py`
+- `make metadata-fixtures-check`
+- `python scripts\generate_dependency_artifact_manifest.py --check`
+- `python scripts\test_dependency_artifact_manifest.py`
+- `python -m py_compile scripts\check_metadata_fixtures.py scripts\test_metadata_fixtures.py scripts\generate_dependency_artifact_manifest.py scripts\test_dependency_artifact_manifest.py`
+- `make release-checksums`
+- `make release-manifest-check`
+- `make release-checksums-check`
+- `python scripts\check_changelog.py`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `bash -n scripts/check.sh`
+- `git diff --check`
+
+Notes:
+
+- `StreamCore` remains at 24,135 runtime bytes with 441 bytes of EIP-170
+  headroom.
+- The full local gate passes with existing compiler, natspec, and lint warnings;
+  no Solidity source or bytecode changes are included in this slice.
+
+### PR #118: Add dependency artifact manifest packaging (Queue Item 62)
+
+Status: Merged.
 Branch: `codex/dependency-artifact-manifest`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/118`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/117`.
@@ -5541,6 +5604,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 20:34 | Validate Queue Item 63 locally | Metadata fixture UTF-8/attribute regressions, dependency artifact LF drift check, release manifest/checksum checks, changelog gate, full `make check`, Windows wrapper, `py_compile`, bash syntax, and whitespace checks all pass; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom |
+| 2026-06-11 20:21 | Attach issue #120 to Queue Item 63 | Full `make check` found that Windows `core.autocrlf=true` changed packaged dependency `.js` bytes and made `dependency-artifact-manifest.json` drift; `.gitattributes` must pin `.js`/`.py` line endings before the metadata fixture PR can be considered cross-platform clean |
+| 2026-06-11 20:13 | Select Queue Item 63 | PR #118 merged cleanly, and the next remaining `P1-META-006` gap that avoids the tight `StreamCore` bytecode budget is fixture-level invalid UTF-8 and semantic attribute-shape regression coverage tracked in issue #119 |
+| 2026-06-11 20:11 | Merge PR #118 | Dependency artifact manifest packaging merged as `97ea7aecd0f6dc3614d0087528c25856b9f94594`; CI and CodeRabbit were green with no actionable review comments, and issue #117 closed completed |
 | 2026-06-11 20:01 | Open PR #118 for Queue Item 62 | Pushed `codex/dependency-artifact-manifest`, opened https://github.com/6529-Collections/6529Stream/pull/118, and requested CodeRabbit review |
 | 2026-06-11 19:59 | Validate Queue Item 62 locally | Dependency artifact generator tests/check with `.dependency.json` descriptors, release manifest/checksum checks, Python compile, full `make check`, Windows `scripts\check.ps1`, bash syntax, and whitespace checks all pass; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom, and `git diff --check` reports only known Windows line-ending warnings |
 | 2026-06-11 19:34 | Create issue #117 and start Queue Item 62 | No open issue covered dependency artifact manifest packaging, so issue #117 now tracks deterministic dependency descriptors, generated release manifest coverage, checksum coverage, and local/CI drift checks on branch `codex/dependency-artifact-manifest` |

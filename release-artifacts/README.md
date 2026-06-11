@@ -53,6 +53,10 @@ addresses and encoded constructor args exist.
 `dependencies/`. It records release-packaged dependency source files, dependency
 registry key/version metadata, provenance, and SHA-256 file integrity so the
 release bundle does not depend on registry provenance strings alone.
+Dependency artifact source files are hashed byte-for-byte, so `.gitattributes`
+pins JavaScript and other release text artifacts to LF line endings. Keep new
+packaged dependency files under that policy so Windows and Linux checkouts
+produce the same manifest hashes.
 
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline

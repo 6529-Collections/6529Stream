@@ -35,6 +35,11 @@ the release policy in `docs/release-policy.md`.
 - Added deterministic dependency artifact descriptors and
   `release-artifacts/latest/dependency-artifact-manifest.json`, with local/CI
   drift checks for packaged dependency source files.
+- Added metadata fixture regressions proving invalid UTF-8 JSON/HTML data URI
+  payloads and non-semantic attribute entries fail the committed fixture gate.
+- Pinned release-artifact, JavaScript, and Python text files to LF line endings
+  so dependency artifact source hashes stay deterministic across Windows and
+  Linux checkouts.
 
 ### Fixed
 
