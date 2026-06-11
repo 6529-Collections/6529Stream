@@ -120,15 +120,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Merged in PR #121 |
 | 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Merged in PR #123 |
 | 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | Merged in PR #126 |
-| 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Local implementation validating on `codex/core-utf8-headroom` |
+| 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Open in PR #127 |
 
 ## Current PR Worklog
 
 ### PR candidate: Core UTF-8 enforcement headroom (Queue Item 66)
 
-Status: local implementation validated; opening PR next.
+Status: PR #127 open; CI and CodeRabbit pending.
 Branch: `codex/core-utf8-headroom`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/127`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/125`.
 Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
 
@@ -5838,6 +5838,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 23:54 | Open PR #127 for Queue Item 66 | Pushed `codex/core-utf8-headroom`, opened https://github.com/6529-Collections/6529Stream/pull/127 against `main`, linked it with `Closes #125`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-11 23:50 | Validate Queue Item 66 locally | Focused UTF-8/custom-error/URI-policy tests, release checksum regeneration, full `make check`, Windows `scripts\check.ps1`, touched-file `forge fmt --check`, and `git diff --check` pass; `StreamCore` remains 24,160 runtime bytes with 416 bytes of EIP-170 headroom |
 | 2026-06-11 23:46 | Fix selector-preserving renderer helper reverts | Full test coverage caught that reverting from offset `0x1c` returned the wrong selector for `bytes4` values already positioned for calldata; reverting from `0x00` restores the existing `Invalid*Contract()` and `MetadataMutationPaused()` typed selectors without changing Core size |
 | 2026-06-11 23:31 | Validate focused Queue Item 66 tests | The Core UTF-8 path now passes `forge test --match-path test/StreamMetadataUtf8.t.sol -vvv` with 12 tests and `forge test --match-path test/StreamCoreCustomErrors.t.sol -vvv` with 6 tests before the full local gate |
