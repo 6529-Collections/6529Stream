@@ -51,6 +51,8 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     bytes32 private constant _TOKEN_METADATA_RECORD_TYPEHASH = keccak256(
         "6529StreamTokenMetadataRecord(uint256 tokenId,bytes32 tokenDataHash,bytes32 tokenImageHash,bytes32 tokenAttributesHash,bytes32 tokenHash)"
     );
+    bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
+        keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
     string private constant _METADATA_STATE_PENDING = "pending";
     string private constant _METADATA_STATE_FINAL = "final";
 
@@ -59,7 +61,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     error CollectionFinalSupplyWindowActive(
         uint256 collectionId, uint256 currentTimestamp, uint256 finalSupplyTimestamp
     );
-    error CollectionHasPendingTokenMetadata(uint256 collectionId, uint256 tokenId);
+    error CollectionHasPendingTokenMetadata(uint256 collectionId, uint256 pendingCount);
     error CollectionMintWindowActive(
         uint256 collectionId, uint256 currentTimestamp, uint256 endTime
     );
@@ -144,6 +146,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
 
     // immutable manifest hash recorded when a collection is frozen
     mapping(uint256 => bytes32) private collectionFreezeManifestHashes;
+
+    // live-token metadata aggregate state used by freeze eligibility and manifests
+    mapping(uint256 => uint256) private collectionPendingMetadataCounts;
+    mapping(uint256 => uint256) private collectionLiveTokenMetadataAccumulators;
+    mapping(uint256 => bytes32) private tokenFreezeMetadataRecordHashes;
 
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
@@ -321,6 +328,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 && (_tokenId <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
             "id err"
         );
+        _removeLiveTokenMetadataRecord(_collectionID, _tokenId);
         _burn(_tokenId);
         burnAmount[_collectionID] = burnAmount[_collectionID] + 1;
     }
@@ -335,6 +343,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     ) internal {
         tokenData[_mintIndex] = _tokenData;
         tokenIdsToCollectionIds[_mintIndex] = _collectionID;
+        _addLiveTokenMetadataRecord(_collectionID, _mintIndex);
         _safeMint(_recipient, _mintIndex);
         collectionAdditionalData[_collectionID].randomizer
             .calculateTokenHash(_collectionID, _mintIndex, _saltfun_o);
@@ -414,9 +423,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         FunctionAdminRequired(this.changeTokenData.selector)
     {
         _requireMetadataMutationNotPaused();
-        require(collectionFreeze[tokenIdsToCollectionIds[_tokenId]] == false, "Data frozen");
+        uint256 collectionId = tokenIdsToCollectionIds[_tokenId];
+        require(collectionFreeze[collectionId] == false, "Data frozen");
         _requireMinted(_tokenId);
         tokenData[_tokenId] = newData;
+        _refreshLiveTokenMetadataRecord(collectionId, _tokenId);
         emit MetadataUpdate(_tokenId);
     }
 
@@ -431,10 +442,12 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             (_tokenId.length == _images.length) && (_images.length == _attributes.length), "inv len"
         );
         for (uint256 x; x < _tokenId.length; x++) {
-            require(collectionFreeze[tokenIdsToCollectionIds[_tokenId[x]]] == false, "Data frozen");
+            uint256 collectionId = tokenIdsToCollectionIds[_tokenId[x]];
+            require(collectionFreeze[collectionId] == false, "Data frozen");
             _requireMinted(_tokenId[x]);
             tokenImageAndAttributes[_tokenId[x]][0] = _images[x];
             tokenImageAndAttributes[_tokenId[x]][1] = _attributes[x];
+            _refreshLiveTokenMetadataRecord(collectionId, _tokenId[x]);
             emit MetadataUpdate(_tokenId[x]);
         }
     }
@@ -463,9 +476,15 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             tokenToHash[_mintIndex]
                 == 0x0000000000000000000000000000000000000000000000000000000000000000
         );
+        bool liveToken = _exists(_mintIndex);
+        if (liveToken) {
+            require(tokenIdsToCollectionIds[_mintIndex] == _collectionID, "Wrong collection");
+        }
         tokenToHash[_mintIndex] = _hash;
         // Record pre-mint callbacks, but only live tokens announce metadata changes.
-        if (_exists(_mintIndex)) {
+        if (liveToken) {
+            _markLiveTokenMetadataFinal(_collectionID, _mintIndex);
+            _refreshLiveTokenMetadataRecord(_collectionID, _mintIndex);
             emit MetadataUpdate(_mintIndex);
         }
     }
@@ -902,15 +921,64 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     }
 
     function _requireLiveTokenMetadataFinal(uint256 _collectionID) private view {
-        uint256 mintedCount = collectionAdditionalData[_collectionID].collectionCirculationSupply;
-        uint256 firstTokenId = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
-
-        for (uint256 i = 0; i < mintedCount; i++) {
-            uint256 tokenId = firstTokenId + i;
-            if (_exists(tokenId) && tokenToHash[tokenId] == bytes32(0)) {
-                revert CollectionHasPendingTokenMetadata(_collectionID, tokenId);
-            }
+        uint256 pendingCount = collectionPendingMetadataCounts[_collectionID];
+        if (pendingCount != 0) {
+            revert CollectionHasPendingTokenMetadata(_collectionID, pendingCount);
         }
+    }
+
+    function _addLiveTokenMetadataRecord(uint256 _collectionID, uint256 tokenId) private {
+        bytes32 recordHash = _tokenMetadataRecordHash(tokenId);
+        tokenFreezeMetadataRecordHashes[tokenId] = recordHash;
+        collectionLiveTokenMetadataAccumulators[_collectionID] =
+            collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(recordHash);
+
+        if (tokenToHash[tokenId] == bytes32(0)) {
+            collectionPendingMetadataCounts[_collectionID] =
+                collectionPendingMetadataCounts[_collectionID] + 1;
+        }
+    }
+
+    function _removeLiveTokenMetadataRecord(uint256 _collectionID, uint256 tokenId) private {
+        bytes32 recordHash = tokenFreezeMetadataRecordHashes[tokenId];
+        collectionLiveTokenMetadataAccumulators[_collectionID] =
+            collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(recordHash);
+        delete tokenFreezeMetadataRecordHashes[tokenId];
+
+        if (
+            tokenToHash[tokenId] == bytes32(0)
+                && collectionPendingMetadataCounts[_collectionID] != 0
+        ) {
+            collectionPendingMetadataCounts[_collectionID] =
+                collectionPendingMetadataCounts[_collectionID] - 1;
+        }
+    }
+
+    function _markLiveTokenMetadataFinal(uint256 _collectionID, uint256 tokenId) private {
+        if (
+            tokenToHash[tokenId] != bytes32(0)
+                && collectionPendingMetadataCounts[_collectionID] != 0
+        ) {
+            collectionPendingMetadataCounts[_collectionID] =
+                collectionPendingMetadataCounts[_collectionID] - 1;
+        }
+    }
+
+    function _refreshLiveTokenMetadataRecord(uint256 _collectionID, uint256 tokenId) private {
+        if (!_exists(tokenId)) {
+            return;
+        }
+
+        bytes32 previousRecordHash = tokenFreezeMetadataRecordHashes[tokenId];
+        bytes32 nextRecordHash = _tokenMetadataRecordHash(tokenId);
+        if (previousRecordHash == nextRecordHash) {
+            return;
+        }
+
+        collectionLiveTokenMetadataAccumulators[_collectionID] =
+            collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(previousRecordHash)
+                ^ uint256(nextRecordHash);
+        tokenFreezeMetadataRecordHashes[tokenId] = nextRecordHash;
     }
 
     function _finalizeCollectionSupply(uint256 _collectionID) private {
@@ -1006,19 +1074,13 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     }
 
     function _liveTokenMetadataHash(uint256 _collectionID) private view returns (bytes32) {
-        uint256 mintedCount = collectionAdditionalData[_collectionID].collectionCirculationSupply;
-        uint256 firstTokenId = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
-        bytes32 liveTokenHash = bytes32(0);
-
-        for (uint256 i = 0; i < mintedCount; i++) {
-            uint256 tokenId = firstTokenId + i;
-            if (_exists(tokenId)) {
-                liveTokenHash =
-                    keccak256(abi.encode(liveTokenHash, _tokenMetadataRecordHash(tokenId)));
-            }
-        }
-
-        return liveTokenHash;
+        return keccak256(
+            abi.encode(
+                _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH,
+                bytes32(collectionLiveTokenMetadataAccumulators[_collectionID]),
+                totalSupplyOfCollection(_collectionID)
+            )
+        );
     }
 
     function _tokenMetadataRecordHash(uint256 tokenId) private view returns (bytes32) {

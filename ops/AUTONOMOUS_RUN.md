@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/83` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 00:16 UTC` |
+| Last updated | `2026-06-11 00:42 UTC` |
 
 ## Packaging Notes
 
@@ -95,7 +95,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
 | 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
-| 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | In progress on `codex/metadata-freeze-manifest` |
+| 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Open in PR #84 on `codex/metadata-freeze-manifest` |
 
 ## Current PR Worklog
 
@@ -3551,10 +3551,11 @@ Merge:
 - Issue `#46` remains open because freeze, burn, and future schema-migration
   state coverage remain in the P1 metadata track.
 
-### PR candidate: Add collection freeze manifests and guards (Queue Item 41)
+### PR #84: Add collection freeze manifests and guards (Queue Item 41)
 
-Status: In progress.
+Status: Open.
 Branch: `codex/metadata-freeze-manifest`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/84`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/47`
@@ -3607,6 +3608,9 @@ Implementation notes:
 - Added `METADATA_FREEZE_MANIFEST_TYPEHASH` plus typed component hashes for
   collection state, supply state, integration state, collection script chunks,
   collection display fields, and live token metadata records.
+- CodeRabbit follow-up replaced freeze-time live-token scans with tracked
+  per-collection pending metadata counts and a live-token metadata accumulator
+  maintained by mint, burn, token-hash, token-data, image, and attribute writes.
 - Added `collectionFreezeManifestHash(collectionId)` and
   `previewCollectionFreezeManifestHash(collectionId)` views.
 - `freezeCollection` now requires created collection data, ended mint window,
@@ -3626,22 +3630,23 @@ Implementation notes:
 Validation so far:
 
 - Focused freeze tests passed:
-  `forge test --match-contract StreamMetadataFreezeTest -vvv` with 5 tests,
+  `forge test --match-contract StreamMetadataFreezeTest -vvv` with 6 tests,
   0 failed.
 - Full canonical local gate passed: `make check` with the new freeze suite
   included.
 - Windows wrapper passed:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
 - Touched-file formatting passed:
-  `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\IStreamCore.sol test\StreamMetadataFreeze.t.sol`.
+  `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataFreeze.t.sol`.
 - Diff whitespace check passed: `git diff --check`.
 - Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
   `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
   `ops\AUTONOMOUS_RUN.md`.
 - Traceability grep passed for `P1-META-002`, `CollectionFrozen`,
   `collectionFreezeManifestHash`, `METADATA_FREEZE_MANIFEST_TYPEHASH`,
-  `StreamMetadataFreeze`, `codex/metadata-freeze-manifest`, `Queue Item 41`,
-  and `FrozenCollectionDependencyRegistry`.
+  `_LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH`, `StreamMetadataFreeze`,
+  `codex/metadata-freeze-manifest`, `Queue Item 41`, PR `#84`, and
+  `FrozenCollectionDependencyRegistry`.
 - Slither baseline comparison remains non-blocking and high/medium unchanged:
   `718` total findings, `4` High, `19` Medium, `93` Low, `591`
   Informational, `11` Optimization. The first Slither run found one new
@@ -3653,6 +3658,8 @@ Validation so far:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 00:42 | Validate CodeRabbit PR #84 review fix | Focused freeze tests and `make check` pass after moving live-token aggregate tracking before `_safeMint`; Slither returned to the prior `718` total findings with high/medium unchanged at `4/19` |
+| 2026-06-11 00:32 | Address CodeRabbit PR #84 review | Durable state now records open PR #84; freeze eligibility and manifest preview use tracked pending metadata counts plus a live-token metadata accumulator instead of full-range token scans; freeze tests now assert exact revert reasons and cover burned pending tokens |
 | 2026-06-11 00:16 | Validate Queue Item 41 locally | Focused freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain `4/19` after fixing the initial test-only unused-return row |
 | 2026-06-11 00:12 | Keep the Queue Item 41 PR as a reference to issue #47, not a closure | Issue #47 includes dependency content immutability acceptance criteria; this PR implements the `StreamCore` freeze-manifest and current mutation-guard slice while leaving registry versioning/provenance to issue #48 |
 | 2026-06-11 00:08 | Implement Queue Item 41 local draft | Added typed freeze manifest hashes, manifest/event/views, final-supply freeze boundary, terminal live-token metadata eligibility, current `StreamCore` post-freeze guards, focused freeze tests, and docs/roadmap traceability |

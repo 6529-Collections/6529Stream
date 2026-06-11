@@ -31,7 +31,21 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID + 1, 8);
         _warpPastFinalSupplyWindow();
 
+        bytes32 beforeMetadataUpdate =
+            deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
+        deployed.core.changeTokenData(TOKEN_ID, "4,5,6");
+
+        uint256[] memory tokenIds = new uint256[](1);
+        string[] memory images = new string[](1);
+        string[] memory attributes = new string[](1);
+        tokenIds[0] = TOKEN_ID;
+        images[0] = "ipfs://image/updated.png";
+        attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Ready\"}";
+        deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
+
         bytes32 expectedManifest = deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
+        (expectedManifest != beforeMetadataUpdate)
+        .assertTrue("manifest did not track metadata update");
 
         vm.expectEmit(true, true, true, true);
         emit CollectionFrozen(
@@ -99,10 +113,27 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                StreamCore.CollectionHasPendingTokenMetadata.selector, COLLECTION_ID, TOKEN_ID
+                StreamCore.CollectionHasPendingTokenMetadata.selector, COLLECTION_ID, 1
             )
         );
         deployed.core.freezeCollection(COLLECTION_ID);
+    }
+
+    function testFreezeIgnoresBurnedPendingTokenMetadata() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintToken(deployed, TOKEN_ID, 7);
+
+        vm.prank(RECIPIENT);
+        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+
+        _warpPastFinalSupplyWindow();
+        deployed.core.freezeCollection(COLLECTION_ID);
+
+        deployed.core.collectionFreezeStatus(COLLECTION_ID).assertTrue("collection not frozen");
+        deployed.core.totalSupplyOfCollection(COLLECTION_ID)
+            .assertEq(0, "burned token counted live");
     }
 
     function testFrozenCollectionRejectsMetadataSignificantWrites() public {
@@ -130,15 +161,15 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         vm.prank(address(0xA11CE));
         deployed.core.artistSignature(COLLECTION_ID, "artist-signature");
 
-        vm.expectRevert();
+        vm.expectRevert("err/freezed");
         deployed.core.setCollectionData(COLLECTION_ID, address(0xA11CE), 5, 10, 1 days);
 
-        vm.expectRevert();
+        vm.expectRevert("Not allowed");
         deployed.core.changeMetadataView(COLLECTION_ID, true);
 
         string[] memory scripts = new string[](1);
         scripts[0] = "function draw(){return 1;}";
-        vm.expectRevert();
+        vm.expectRevert("Not allowed");
         deployed.core
             .updateCollectionInfo(
                 COLLECTION_ID,
@@ -154,7 +185,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
                 scripts
             );
 
-        vm.expectRevert();
+        vm.expectRevert("Data frozen");
         deployed.core.changeTokenData(TOKEN_ID, "4,5,6");
 
         uint256[] memory tokenIds = new uint256[](1);
@@ -164,7 +195,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         images[0] = "ipfs://image/updated.png";
         attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Locked\"}";
 
-        vm.expectRevert();
+        vm.expectRevert("Data frozen");
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
 

@@ -117,9 +117,12 @@ CollectionFrozen(collectionId, manifestHash, schemaVersion, admin)
 
 The manifest hash commits to the schema version, collection display fields,
 metadata mode, dependency key and current dependency content hash, collection
-script chunk hashes, final supply counters, burn count, live token metadata
-input hashes, randomizer epoch/contract, dependency registry address, core
-contract address, and chain ID.
+script chunk hashes, final supply counters, burn count, the tracked live-token
+metadata aggregate, randomizer epoch/contract, dependency registry address, core
+contract address, and chain ID. The live-token aggregate is maintained as tokens
+are minted, burned, finalized by randomness, or changed through token data,
+image, and attribute writes, so freeze eligibility and manifest preview do not
+scan every minted token.
 
 After freeze, current `StreamCore` paths cannot mint into the collection, change
 collection metadata, change metadata mode, change token data, update token image
