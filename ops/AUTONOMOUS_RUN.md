@@ -3838,7 +3838,7 @@ Merge:
 Status: Open in PR #86; CI and CodeRabbit review pending.
 Branch: `codex/burn-metadata-semantics`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/86`.
-Head commit: `e0a71d3c423f87f8c0abd800f03f5e49deb180ad`.
+Initial implementation commit: `e0a71d3c423f87f8c0abd800f03f5e49deb180ad`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/50`
