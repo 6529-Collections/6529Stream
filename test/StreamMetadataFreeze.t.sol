@@ -23,6 +23,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant OTHER_COLLECTION_TOKEN_ID = 20_000_000_000;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testFreezeStoresManifestEventAndFinalizesSupply() public {
@@ -158,6 +159,10 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID + 1, keccak256("late hash"));
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
+        vm.prank(RECIPIENT);
+        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         vm.prank(address(0xA11CE));
         deployed.core.artistSignature(COLLECTION_ID, "artist-signature");
 
@@ -197,6 +202,17 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
 
         vm.expectRevert("Data frozen");
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
+    }
+
+    function testSetTokenHashRejectsPremintTokenOutsideCollectionRange() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        vm.expectRevert("Wrong collection");
+        vm.prank(address(deployed.randomizer));
+        deployed.core
+            .setTokenHash(
+                COLLECTION_ID, OTHER_COLLECTION_TOKEN_ID, keccak256("wrong collection hash")
+            );
     }
 
     function testFrozenCollectionBlocksDependencyRegistrySwap() public {

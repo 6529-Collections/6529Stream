@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/83` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 00:42 UTC` |
+| Last updated | `2026-06-11 00:59 UTC` |
 
 ## Packaging Notes
 
@@ -3611,6 +3611,8 @@ Implementation notes:
 - CodeRabbit follow-up replaced freeze-time live-token scans with tracked
   per-collection pending metadata counts and a live-token metadata accumulator
   maintained by mint, burn, token-hash, token-data, image, and attribute writes.
+- CodeRabbit second follow-up now guards post-freeze burns and rejects pre-mint
+  token-hash writes outside the target collection's reserved token range.
 - Added `collectionFreezeManifestHash(collectionId)` and
   `previewCollectionFreezeManifestHash(collectionId)` views.
 - `freezeCollection` now requires created collection data, ended mint window,
@@ -3630,7 +3632,7 @@ Implementation notes:
 Validation so far:
 
 - Focused freeze tests passed:
-  `forge test --match-contract StreamMetadataFreezeTest -vvv` with 6 tests,
+  `forge test --match-contract StreamMetadataFreezeTest -vvv` with 7 tests,
   0 failed.
 - Full canonical local gate passed: `make check` with the new freeze suite
   included.
@@ -3653,11 +3655,17 @@ Validation so far:
   test-only `unused-return` medium row in `StreamMetadataFreeze.t.sol`; the test
   now asserts the full tuple and the rerun returned to the `4/19` high/medium
   baseline.
+- Second CodeRabbit follow-up validation passed after the burn/range guard patch:
+  focused freeze tests now cover 7 cases, full `make check` passed, Windows
+  wrapper passed, touched-file formatting passed, diff whitespace passed, and
+  Slither remained `718` total findings with high/medium unchanged at `4/19`.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 00:59 | Validate CodeRabbit PR #84 second follow-up | Focused freeze tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither comparison passed after guarding post-freeze burn and pre-mint hash range writes |
+| 2026-06-11 00:57 | Address CodeRabbit PR #84 second follow-up | Guarded `burn()` after collection freeze to keep the manifest surface immutable, added pre-mint token-range validation to `setTokenHash`, and added focused regression coverage; full gate is rerunning before push |
 | 2026-06-11 00:42 | Validate CodeRabbit PR #84 review fix | Focused freeze tests and `make check` pass after moving live-token aggregate tracking before `_safeMint`; Slither returned to the prior `718` total findings with high/medium unchanged at `4/19` |
 | 2026-06-11 00:32 | Address CodeRabbit PR #84 review | Durable state now records open PR #84; freeze eligibility and manifest preview use tracked pending metadata counts plus a live-token metadata accumulator instead of full-range token scans; freeze tests now assert exact revert reasons and cover burned pending tokens |
 | 2026-06-11 00:16 | Validate Queue Item 41 locally | Focused freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain `4/19` after fixing the initial test-only unused-return row |

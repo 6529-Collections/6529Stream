@@ -323,6 +323,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             _isApprovedOrOwner(_msgSender(), _tokenId),
             "ERC721: caller is not token owner or approved"
         );
+        _requireCollectionNotFrozen(_collectionID);
         require(
             (_tokenId >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
                 && (_tokenId <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
@@ -472,6 +473,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         require(msg.sender == collectionAdditionalData[_collectionID].randomizerContract);
         _requireCollectionNotFrozen(_collectionID);
         require(_hash != bytes32(0), "Zero token hash");
+        require(
+            (_mintIndex >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
+                && (_mintIndex <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
+            "Wrong collection"
+        );
         require(
             tokenToHash[_mintIndex]
                 == 0x0000000000000000000000000000000000000000000000000000000000000000
