@@ -72,6 +72,58 @@ contract StreamMetadataEscapingTest is CharacterizationTestBase, StreamFixture {
         );
     }
 
+    function testRawAttributesAcceptEmptyFragment() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintToken(deployed);
+        _setImageAndAttributes(deployed.core, "ipfs://image.png", "");
+        deployed.core.changeMetadataView(COLLECTION_ID, true);
+
+        string memory decodedJson = _decodeJsonDataUri(deployed.core.tokenURI(TOKEN_ID));
+        _assertJsonParses(decodedJson);
+        decodedJson.assertEq(
+            string.concat(
+                "{\"metadata_schema_version\":\"6529stream-v1\",\"metadata_state\":\"pending\",",
+                "\"name\":\"Genesis #0\",\"description\":\"Description\",",
+                "\"image\":\"ipfs://image.png\",",
+                "\"attributes\":[]}"
+            ),
+            "empty attribute fragment changed"
+        );
+    }
+
+    function testRawAttributesAcceptMultipleTopLevelObjects() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _mintToken(deployed);
+        _setImageAndAttributes(
+            deployed.core,
+            "ipfs://image.png",
+            string.concat(
+                "{\"trait_type\":\"Mood\",\"value\":\"Calm\"},",
+                "{\"trait_type\":\"Rarity\",\"value\":\"Rare\"}"
+            )
+        );
+        deployed.core.changeMetadataView(COLLECTION_ID, true);
+
+        string memory decodedJson = _decodeJsonDataUri(deployed.core.tokenURI(TOKEN_ID));
+        _assertJsonParses(decodedJson);
+        decodedJson.assertEq(
+            string.concat(
+                "{\"metadata_schema_version\":\"6529stream-v1\",\"metadata_state\":\"pending\",",
+                "\"name\":\"Genesis #0\",\"description\":\"Description\",",
+                "\"image\":\"ipfs://image.png\",",
+                "\"attributes\":[",
+                "{\"trait_type\":\"Mood\",\"value\":\"Calm\"},",
+                "{\"trait_type\":\"Rarity\",\"value\":\"Rare\"}",
+                "]}"
+            ),
+            "multi-object attribute fragment changed"
+        );
+    }
+
     function testRawAttributesRejectBreakoutFragment() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         _mintToken(deployed);
