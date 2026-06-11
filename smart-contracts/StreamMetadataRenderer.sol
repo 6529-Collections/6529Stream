@@ -369,6 +369,22 @@ library StreamMetadataRenderer {
         return isSafeContentUri(baseURI, true) && isSafeScriptUri(libraryUrl, true);
     }
 
+    function supportsContractMarker(address target, bytes4 selector)
+        public
+        view
+        returns (bool supported)
+    {
+        if (target.code.length == 0) {
+            return false;
+        }
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, selector)
+            let success := staticcall(gas(), target, ptr, 4, ptr, 32)
+            supported := and(and(success, gt(returndatasize(), 31)), eq(mload(ptr), 1))
+        }
+    }
+
     function _advanceRawAttributeStringState(
         RawAttributeValidationState memory state,
         bytes1 character

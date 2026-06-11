@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/113` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 17:21 UTC` |
+| Last updated | `2026-06-11 17:52 UTC` |
 
 ## Packaging Notes
 
@@ -119,7 +119,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Collection URI production enforcement (Queue Item 60)
 
-Status: PR open; CodeRabbit review requested.
+Status: CodeRabbit review fixes validated locally; ready to push and request
+latest-head CodeRabbit review.
 Branch: `codex/metadata-collection-uri-policy`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/114`.
 
@@ -167,6 +168,25 @@ Validation:
 - Targeted `forge fmt --check` passed for touched Solidity files.
 - `git diff --check` passed, with only the existing Windows line-ending warning
   for `release-artifacts/latest/SHA256SUMS`.
+- CodeRabbit PR #114 review found two valid issues: full collection metadata
+  updates validated but did not persist `collectionBaseURI`, and direct
+  high-level marker probes could bypass typed errors for EOAs or non-conforming
+  contracts. The local fix persists base URI on full updates, moves a compact
+  marker `staticcall` helper into `StreamMetadataRenderer` to preserve Core
+  bytecode headroom, and adds focused regressions in
+  `test/StreamMetadataUriPolicy.t.sol`.
+- Review-fix focused validation passed:
+  `forge test --match-path test\StreamMetadataUriPolicy.t.sol -vvv`,
+  `forge test --match-path test\StreamMetadataFreeze.t.sol -vvv`,
+  `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`,
+  `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`, and
+  `forge build --sizes --via-ir --skip test --skip script --force`; after the
+  fix `StreamCore` is 24,515 runtime bytes with 61 bytes of EIP-170 headroom.
+- Review-fix release validation passed before this final state refresh:
+  `make release-checksums`, `make check`,
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`, targeted
+  `forge fmt --check`, and `git diff --check` with only the existing Windows
+  line-ending warning for `release-artifacts/latest/SHA256SUMS`.
 
 Notes:
 
@@ -5384,6 +5404,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 17:52 | Validate PR #114 CodeRabbit fixes | Focused metadata/randomizer lifecycle regressions, the EIP-170 size gate, release artifact regeneration, full `make check`, Windows wrapper, formatting, and whitespace gates passed after persisting full-update base URIs and hardening marker probes |
+| 2026-06-11 17:44 | Accept CodeRabbit PR #114 findings | The base URI persistence finding was a real storage bug, and the marker-probe finding was valid for invalid targets; moving the low-level marker probe into `StreamMetadataRenderer` keeps `StreamCore` deployable with 61 bytes of EIP-170 headroom while preserving typed errors |
 | 2026-06-11 17:21 | Request CodeRabbit on PR #114 | CodeRabbit review requested in issue comment `4683145207`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 17:20 | Open PR #114 | Collection metadata URI policy PR published at `https://github.com/6529-Collections/6529Stream/pull/114`; this state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 17:17 | Validate Queue Item 60 locally | Collection URI policy tests, metadata freeze/golden regressions, release artifact regeneration, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, whitespace validation, and the production size gate pass; final validation regenerated release artifacts after a docs checksum drift and `StreamCore` is 24,348 runtime bytes with 228 bytes of EIP-170 headroom |

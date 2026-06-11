@@ -9,6 +9,7 @@ import "./helpers/StreamFixture.sol";
 
 contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture {
     using Assertions for bool;
+    using Assertions for string;
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant TOKEN_ID = 10_000_000_000;
@@ -73,6 +74,10 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
                 FULL_COLLECTION_UPDATE_INDEX,
                 scripts
             );
+        (,,,,, string memory storedBaseURI) = deployed.core.retrieveCollectionInfo(COLLECTION_ID);
+        storedBaseURI.assertEq(
+            "https://metadata.example/base/", "full collection update did not store base URI"
+        );
 
         deployed.core
             .updateCollectionInfo(
@@ -88,6 +93,8 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
                 FULL_COLLECTION_UPDATE_INDEX - 1,
                 scripts
             );
+        (,,,,, storedBaseURI) = deployed.core.retrieveCollectionInfo(COLLECTION_ID);
+        storedBaseURI.assertEq("ar://metadata-base/", "base URI-only update not stored");
     }
 
     function testProductionTokenImagePolicyAcceptsAllowedUris() public {
@@ -193,6 +200,30 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
             );
     }
 
+    function testContractMarkerProbesRejectInvalidTargetsWithTypedErrors() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        EmptyMarker emptyMarker = new EmptyMarker();
+        address eoa = address(0x1234);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.InvalidRandomizerContract.selector));
+        deployed.core.addRandomizer(COLLECTION_ID, eoa);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.InvalidRandomizerContract.selector));
+        deployed.core.addRandomizer(COLLECTION_ID, address(emptyMarker));
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.InvalidAdminContract.selector));
+        deployed.core.updateContracts(1, eoa);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.InvalidAdminContract.selector));
+        deployed.core.updateContracts(1, address(emptyMarker));
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.InvalidMinterContract.selector));
+        deployed.core.updateContracts(2, eoa);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.InvalidMinterContract.selector));
+        deployed.core.updateContracts(2, address(emptyMarker));
+    }
+
     function _mintToken(DeployedStream memory deployed) private {
         vm.prank(address(deployed.minter));
         deployed.core.mint(TOKEN_ID, RECIPIENT, "1,2,3", 7, COLLECTION_ID);
@@ -207,4 +238,8 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
         attributes[0] = "{\"trait_type\":\"Mood\",\"value\":\"Calm\"}";
         core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
+}
+
+contract EmptyMarker {
+    fallback() external { }
 }

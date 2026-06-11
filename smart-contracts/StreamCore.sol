@@ -356,7 +356,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         public
         FunctionAdminRequired(this.addRandomizer.selector)
     {
-        if (!IRandomizer(_randomizerContract).isRandomizerContract()) {
+        if (!StreamMetadataRenderer.supportsContractMarker(
+                _randomizerContract, IRandomizer.isRandomizerContract.selector
+            )) {
             revert InvalidRandomizerContract();
         }
         _requireCollectionNotFrozen(_collectionID);
@@ -486,6 +488,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
             collectionInfo[_collectionID].collectionDescription = _newCollectionDescription;
             collectionInfo[_collectionID].collectionWebsite = _newCollectionWebsite;
             collectionInfo[_collectionID].collectionLicense = _newCollectionLicense;
+            collectionInfo[_collectionID].collectionBaseURI = _newCollectionBaseURI;
             collectionInfo[_collectionID].collectionLibrary = _newCollectionLibrary;
             collectionInfo[_collectionID].collectionDependencyScript =
             _newCollectionDependencyScript;
@@ -657,12 +660,16 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         FunctionAdminRequired(this.updateContracts.selector)
     {
         if (_opt == 1) {
-            if (!IStreamAdmins(_newContract).isAdminContract()) {
+            if (!StreamMetadataRenderer.supportsContractMarker(
+                    _newContract, IStreamAdmins.isAdminContract.selector
+                )) {
                 revert InvalidAdminContract();
             }
             adminsContract = IStreamAdmins(_newContract);
         } else if (_opt == 2) {
-            if (!IStreamMinter(_newContract).isMinterContract()) {
+            if (!StreamMetadataRenderer.supportsContractMarker(
+                    _newContract, IStreamMinter.isMinterContract.selector
+                )) {
                 revert InvalidMinterContract();
             }
             minterContract = _newContract;

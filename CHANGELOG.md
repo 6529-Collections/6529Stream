@@ -30,6 +30,12 @@ the release policy in `docs/release-policy.md`.
 - Added production collection base URI and external library URL validation,
   keeping those fields optional while rejecting unsafe non-empty URI values.
 
+### Fixed
+
+- Persisted collection base URI values during full collection metadata updates
+  and hardened admin, minter, and randomizer marker probes so invalid targets
+  revert with typed custom errors.
+
 ### Release Impact
 
 - Gate G now requires release-impacting PRs to update this `Unreleased` section
@@ -53,6 +59,9 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   collection URI production enforcement and custom errors replacing legacy
   `StreamCore` revert strings on metadata, mint, randomizer, and wiring paths.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  `StreamMetadataRenderer.supportsContractMarker` helper used to keep marker
+  probe hardening deployable under EIP-170.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 
