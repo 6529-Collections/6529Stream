@@ -249,6 +249,17 @@ def library_template(references: list[dict[str, Any]]) -> str:
     return " --libraries " + ",".join(libraries)
 
 
+def unique_library_references(
+    creation_links: list[dict[str, Any]],
+    runtime_links: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    references_by_library: dict[tuple[str, str], dict[str, Any]] = {}
+    for reference in creation_links + runtime_links:
+        key = (reference["source"], reference["library"])
+        references_by_library.setdefault(key, reference)
+    return [references_by_library[key] for key in sorted(references_by_library)]
+
+
 def verification_command_template(
     source: str,
     name: str,
@@ -368,10 +379,7 @@ def artifact_record(
     runtime_links = normalize_link_references(
         artifact.get("deployedBytecode", {}).get("linkReferences")
     )
-    all_links = sorted(
-        {json.dumps(reference, sort_keys=True) for reference in creation_links + runtime_links}
-    )
-    verification_links = [json.loads(reference) for reference in all_links]
+    verification_links = unique_library_references(creation_links, runtime_links)
     optimizer_runs = optimizer.get("runs")
     if not isinstance(optimizer_runs, int):
         optimizer_runs = None

@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/106` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 13:04 UTC` |
+| Last updated | `2026-06-11 13:23 UTC` |
 
 ## Packaging Notes
 
@@ -4827,6 +4827,9 @@ Validation:
 - `git diff --check`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- Review-fix validation repeated source-verification tests/check, release
+  manifest tests/check, release checksum tests/check, Python compile, `git diff
+  --check`, `make check`, and the Windows wrapper.
 
 Review response:
 
@@ -4949,7 +4952,7 @@ Merge evidence:
 
 ### PR candidate: Generate source verification inputs (Queue Item 55)
 
-Status: PR open; CodeRabbit review requested.
+Status: PR open; CodeRabbit review fix applied locally.
 Branch: `codex/source-verification-inputs`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/108`.
 Related issue:
@@ -5015,6 +5018,18 @@ Implementation summary:
 - Updated README, release-artifact docs, tooling docs, deployment docs, release
   policy, project status, changelog, roadmap, and run-state traceability.
 
+Review response:
+
+- Accepted CodeRabbit's library-placeholder finding: verification command
+  templates now deduplicate linked libraries by `(source, library)` while
+  retaining distinct creation/runtime link-reference details in the generated
+  artifact.
+- Added regression coverage for creation and runtime bytecode referencing the
+  same library at different positions, proving the verification command keeps a
+  single `--libraries` placeholder.
+- Regenerated `release-artifacts/latest/source-verification-inputs.json`, the
+  release manifest, and the checksum bundle after the generator fix.
+
 Validation:
 
 - `python scripts\test_source_verification_inputs.py`
@@ -5039,6 +5054,8 @@ Validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 13:23 | Validate CodeRabbit PR #108 fix locally | Source-verification regression, drift checks, manifest/checksum checks, Python compile, whitespace check, full `make check`, and Windows wrapper all pass after deduplicating library placeholders |
+| 2026-06-11 13:17 | Address CodeRabbit PR #108 finding locally | Accepted the duplicate-library-placeholder review finding, added regression coverage for different creation/runtime link offsets, regenerated source-verification and release checksum artifacts, and prepared for focused/full validation before pushing |
 | 2026-06-11 13:04 | Open PR #108 and request CodeRabbit | Source verification input PR published at `https://github.com/6529-Collections/6529Stream/pull/108`; CodeRabbit review requested in issue comment `4680853110`; Claude intentionally skipped per current user instruction |
 | 2026-06-11 13:02 | Validate Queue Item 55 locally | Source-verification tests/check, release-artifact ownership regression, release manifest/checksum checks, changelog checks, Python compile, shell/PowerShell syntax, whitespace, full `make check`, and Windows wrapper all pass |
 | 2026-06-11 12:52 | Implement source verification bundle | Added generator, tests, tracked artifact, release-manifest/checksum integration, local/CI gate wiring, docs, roadmap, changelog, and durable state updates |

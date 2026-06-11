@@ -66,8 +66,8 @@
     },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:3cbef5e75b8dbd6667ff1624eb788d7eaad643d1d19677970d4112f59163f48b",
-      "size_bytes": 45481,
+      "sha256": "sha256:ce113f10fdce218eb16a4f4b6e91165863467fa22d34878b6bddc959ccf0cce6",
+      "size_bytes": 45397,
       "schema_version": "6529stream.source-verification-inputs.v1"
     },
     "abi_compatibility_baseline": {
