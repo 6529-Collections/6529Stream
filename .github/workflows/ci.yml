@@ -86,7 +86,14 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          forge build --sizes --via-ir --skip test --force 2>&1 | tee ci-logs/forge-size.log
+          forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
+
+      - name: Deployment rehearsal
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir 2>&1 | tee ci-logs/forge-deployment-rehearsal.log
 
       - name: Upload Foundry logs
         if: always()

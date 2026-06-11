@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-size-reduction` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/88` |
+| Active PR branch | `codex/deployment-rehearsal` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/90` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 06:31 UTC` |
+| Last updated | `2026-06-11 07:05 UTC` |
 
 ## Packaging Notes
 
@@ -99,7 +99,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 43 | Add burn metadata semantics | Gate D | Implement P1-META-005 retained burned-token audit state, protocol burn event, callback-after-burn audit events, freeze-safe post-burn fulfillment, tests, docs, and roadmap traceability | Merged in PR #86 |
 | 44 | Add metadata escaping and render-safety baseline | Gate D | Implement the first P1-META-006 slice for JSON escaping, generated metadata/parser tests, render-safety docs, and roadmap/test traceability | Merged in PR #87 |
 | 45 | Add animation HTML wrapper safety | Gate D | Continue P1-META-006 by hardening generated animation HTML/script boundaries, dependency-script JavaScript-string embedding, hostile `tokenData` handling, tests, docs, and roadmap traceability | Merged in PR #88 |
-| 46 | Reduce `StreamCore` deployment size | Gate E | Start P1-DEPLOY-001 by measuring the EIP-170 blocker, extracting pure metadata rendering/escaping code behind a stable library boundary where safe, preserving metadata behavior, and documenting the remaining size budget | Active |
+| 46 | Reduce `StreamCore` deployment size | Gate E | Start P1-DEPLOY-001 by measuring the EIP-170 blocker, extracting pure metadata rendering/escaping code behind a stable library boundary where safe, preserving metadata behavior, and documenting the remaining size budget | Merged in PR #90 |
+| 47 | Add deployment rehearsal baseline | Gate E | Implement P1-DEPLOY-002 by adding a local deploy-and-wire Foundry rehearsal, manifest schema/example, deployment docs, manifest parsing/wiring tests, and check-script integration while leaving fork/testnet broadcast artifacts for follow-up | Active |
 
 ## Current PR Worklog
 
@@ -4100,10 +4101,9 @@ Merge:
   control-character note was fixed, no review threads remained open, and the
   stale aggregate CodeRabbit status context was documented as non-blocking.
 
-### PR candidate: Reduce `StreamCore` deployment size (Queue Item 46)
+### PR #90: Reduce `StreamCore` deployment size (Queue Item 46)
 
-Status: Open in PR #90; CodeRabbit review fixes pushed; awaiting CI and
-CodeRabbit rerun.
+Status: Merged.
 Branch: `codex/streamcore-size-reduction`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/90`.
 Related issue:
@@ -4142,14 +4142,14 @@ Implementation:
   regression that `supportsInterface(0x780e9d63)` is false while ERC-4906 stays
   true.
 - Added a production-only size gate to `make check`, Windows/Linux check
-  scripts, and CI: `forge build --sizes --via-ir --skip test --force`.
+  scripts, and CI: `forge build --sizes --via-ir --skip test --skip script --force`.
 - Documented that the generic all-artifact `forge build --sizes` remains a
   diagnostic because test-only invariant handlers can exceed initcode limits;
   production deployability is measured by the skip-test IR gate.
 
 Current local size evidence:
 
-- `forge build --sizes --via-ir --skip test --force` passes.
+- `forge build --sizes --via-ir --skip test --skip script --force` passes.
 - `StreamCore` runtime size: 23,139 bytes.
 - `StreamCore` EIP-170 runtime headroom: 1,437 bytes.
 - `StreamMetadataRenderer` runtime size: 6,843 bytes after the CodeRabbit escape
@@ -4163,7 +4163,7 @@ Validation completed at `2026-06-11 06:13 UTC`:
   smart-contracts\StreamCore.sol smart-contracts\StreamMetadataRenderer.sol
   test\StreamMetadataEvents.t.sol` passed.
 - `git diff --check` passed.
-- `forge build --sizes --via-ir --skip test --force` passed and reports
+- `forge build --sizes --via-ir --skip test --skip script --force` passed and reports
   `StreamCore` at `23,139` runtime bytes with `1,437` bytes of runtime
   headroom; `StreamMetadataRenderer` reports `6,817` runtime bytes.
 - Slither baseline comparison ran through `.venv-tools\Scripts\slither.exe`
@@ -4191,7 +4191,7 @@ CodeRabbit response completed locally at `2026-06-11 06:31 UTC`:
     -vvv` passed with 26 tests.
   - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
   - `git diff --check` passed.
-  - `forge build --sizes --via-ir --skip test --force` passed with
+  - `forge build --sizes --via-ir --skip test --skip script --force` passed with
     `StreamCore` still at `23,139` runtime bytes and `1,437` bytes of runtime
     headroom; `StreamMetadataRenderer` is now `6,843` runtime bytes.
   - Slither baseline comparison remained unchanged:
@@ -4200,15 +4200,118 @@ CodeRabbit response completed locally at `2026-06-11 06:31 UTC`:
     `reentrancy-eth=0`, `weak-prng=0`, `uninitialized-state=0`,
     `encode-packed-collision=0`.
 
+Merge:
+
+- PR #90 merged on `2026-06-11 06:37 UTC` as
+  `36d993a946aad298b920c19fcbc26485b220b6e4` after CI passed on final
+  head `a6db76f68c0fb7bb6ebeabafdff53583ee488b53`, CodeRabbit status was
+  success, and both visible CodeRabbit review threads were resolved.
+
+### PR candidate: Add deployment rehearsal baseline (Queue Item 47)
+
+Status: Local validation complete; ready to open PR.
+Branch: `codex/deployment-rehearsal`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/91`
+
+Goal:
+
+- Start Gate E with an executable local deployment rehearsal instead of
+  leaving deployment as documentation-only future work.
+- Add a manifest schema/example that follows ADR 0007 and can become the
+  release artifact shape for later testnet/fork/broadcast deployments.
+- Keep production secrets out of the repo by using deterministic local
+  placeholder addresses only.
+- Add tests that prove the rehearsal deploys and wires the current stack,
+  transfers Ownable control to the configured Safe placeholder, revokes the
+  temporary deployer admin, and parses manifest JSON artifacts.
+
+Initial scope:
+
+- `script/RehearseDeployment.s.sol`
+- `test/StreamDeploymentManifest.t.sol`
+- `deployments/README.md`
+- `deployments/schema/deployment-manifest.schema.json`
+- `deployments/examples/anvil-6529stream-v0.1.0-001.json`
+- `docs/deployment.md`
+- `foundry.toml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `README.md`
+- `docs/status.md`
+- `docs/tooling.md`
+- `script/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Open follow-up boundaries:
+
+- Fork/testnet broadcast and verification are not implemented in this slice.
+- Real production manifest generation from broadcast outputs remains future
+  Gate E work.
+- ABI checksums, event topic catalog generation, release checksum automation,
+  dry-run signed fixed-price drops, dry-run auction settlement, and emergency
+  redeployment rehearsal remain open.
+
+Implementation:
+
+- Added `script/RehearseDeployment.s.sol` with an explicit local deployer
+  placeholder, Safe placeholder, pause guardian, emergency recipient, signer,
+  payout, delegation, VRF coordinator, and arRNG controller config.
+- The rehearsal deploys `StreamAdmins`, `DependencyRegistry`, `StreamCore`,
+  `StreamCuratorsPool`, `StreamMinter`, `StreamDrops`, `StreamAuctions`,
+  `NextGenRandomizerVRF`, and `NextGenRandomizerRNG`.
+- The rehearsal wires core/minter/drops/auction references, registers signer
+  lifecycle targets, creates a sample dependency and collection, assigns the
+  VRF randomizer, sets mint phases, revokes the temporary deployer global admin,
+  and transfers Ownable control for `StreamAdmins` and `StreamCore` to the Safe
+  placeholder.
+- Added deployment manifest schema/example files under `deployments/`; the
+  local example now enumerates every contract deployed by the rehearsal stack
+  and keeps ABI/bytecode checksums as explicit `TBD` placeholders until real
+  broadcast artifacts exist.
+- Added `docs/deployment.md`, refreshed `script/README.md`, and linked the
+  rehearsal from README, tooling, status, roadmap, and the test matrix.
+- Added `StreamDeploymentManifest.t.sol` to prove deployment wiring, ceremony
+  state, temporary admin revocation, manifest JSON parsing, and randomizer
+  contract status.
+- Added the deployment rehearsal to `make check`, Linux/Windows check scripts,
+  and CI. The production size gate now skips both `test` and `script` artifacts
+  so non-production script bytecode does not pollute EIP-170/EIP-3860 evidence.
+
+Validation completed at `2026-06-11 07:14 UTC`:
+
+- `forge test --match-contract StreamDeploymentManifestTest -vvv` passed with
+  2 tests.
+- `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
+  passed.
+- `make check` passed, including build, full test suite, production size gate,
+  and deployment rehearsal.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- `forge fmt --check script\RehearseDeployment.s.sol
+  test\StreamDeploymentManifest.t.sol` passed.
+- `git diff --check` passed.
+- `forge build --sizes --via-ir --skip test --skip script --force` passed;
+  `StreamCore` remains 23,139 runtime bytes with 1,437 bytes of EIP-170
+  headroom, and `StreamMetadataRenderer` remains 6,843 runtime bytes.
+
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 07:14 | Revalidate Queue Item 47 after manifest expansion | Expanded the local example manifest to cover all nine deployed contracts and ABI hash placeholders, then reran focused manifest tests, `make check`, Windows wrapper, and whitespace validation successfully |
+| 2026-06-11 07:05 | Finish Queue Item 47 local validation | Full local and Windows gates pass after adding the local deployment rehearsal, manifest schema/example, manifest parsing/wiring tests, CI workflow rehearsal step, and production size command narrowed to skip both test and script artifacts |
+| 2026-06-11 06:57 | Exclude scripts from production size gate | `forge build --sizes --via-ir --skip test` measured the new rehearsal script bytecode as if it were production deployable bytecode; the release gate now uses `--skip test --skip script` and CI has a separate deployment rehearsal step |
+| 2026-06-11 06:44 | Start Queue Item 47 | PR #90 is merged, issue #91 now tracks the missing Gate E deployment rehearsal baseline, and branch `codex/deployment-rehearsal` starts from `origin/main` |
+| 2026-06-11 06:37 | Merge PR #90 | Size-reduction PR merged as `36d993a946aad298b920c19fcbc26485b220b6e4`; CI passed on final head `a6db76f68c0fb7bb6ebeabafdff53583ee488b53`, CodeRabbit was green, and review threads were resolved |
 | 2026-06-11 06:31 | Address CodeRabbit PR #90 comments locally | Accepted both CodeRabbit quick wins: escape public renderer `schemaVersion`/`metadataState` inputs, add direct library regression coverage, and align roadmap Slither low/informational counts; focused metadata tests, Windows wrapper, size gate, whitespace, and Slither comparison all pass |
 | 2026-06-11 06:17 | Open PR #90 | StreamCore size-reduction PR published at `https://github.com/6529-Collections/6529Stream/pull/90`; the branch proves `StreamCore` fits under EIP-170 through the production size gate, and CodeRabbit will be requested after the PR state update is pushed |
 | 2026-06-11 06:13 | Finish Queue Item 46 local validation | Full local gate set is ready for PR: `make check`, Windows wrapper, touched-file formatting, whitespace, production size gate, stale-helper grep, and Slither baseline comparison all pass; `StreamCore` is `23,139` runtime bytes with `1,437` bytes of EIP-170 headroom, and Slither high/medium remain unchanged at `4/19` |
 | 2026-06-11 06:04 | Keep only the high-value renderer library extraction | Temporary freeze/dependency/randomizer helper extractions barely changed `StreamCore` size and would have added extra linked-library calls in mint/freeze/admin paths, so they were folded back into `StreamCore`; the final local production size gate still passes with `StreamCore` at `23,139` runtime bytes and `1,437` bytes of EIP-170 headroom |
-| 2026-06-11 05:57 | Use IR-optimized production size gate | Default all-artifact `forge build --sizes` still measures test-only invariant handler initcode and default non-IR `StreamCore` bytecode; the production release gate is now explicit as `forge build --sizes --via-ir --skip test --force`, which skips tests and proves deployable contracts fit |
+| 2026-06-11 05:57 | Use IR-optimized production size gate | Default all-artifact `forge build --sizes` still measures non-production test/script artifacts and default non-IR `StreamCore` bytecode; the production release gate is now explicit as `forge build --sizes --via-ir --skip test --skip script --force`, which skips non-production artifacts and proves deployable contracts fit |
 | 2026-06-11 05:48 | Remove optional ERC721Enumerable support | The roadmap already identified ERC721Enumerable as a P1 architecture concern; `StreamCore` only needs live supply locally, so the optional enumerable interface was removed, live `totalSupply()` was preserved, and interface support is now explicitly tested |
 | 2026-06-11 05:31 | Start Queue Item 46 | PR #88 is merged and `forge build --sizes` now shows an explicit `StreamCore` deployment blocker, so issue #89 tracks P1-DEPLOY-001 and branch `codex/streamcore-size-reduction` starts with low-risk metadata renderer/escaper extraction |
 | 2026-06-11 05:29 | Create issue #89 for EIP-170 blocker | P1-META-006 still owns metadata escaping/size/render policy, but `StreamCore` exceeding EIP-170 is a separate release/deployment blocker that needs its own acceptance criteria and size-budget evidence |

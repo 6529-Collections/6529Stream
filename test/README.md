@@ -187,7 +187,7 @@ token range, empty collections do not emit empty batch events, and mint-only
 plus burn paths do not emit misleading ERC-4906 events.
 
 Production bytecode size is checked through the local/CI gate
-`forge build --sizes --via-ir --skip test --force`, rather than a unit test,
+`forge build --sizes --via-ir --skip test --skip script --force`, rather than a unit test,
 because the deployable contracts use the IR-optimized release profile while
 test-only invariant handlers can exceed initcode limits.
 

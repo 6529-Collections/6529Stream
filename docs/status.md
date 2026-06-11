@@ -6,7 +6,7 @@ The current Gate A smoke baseline proves:
 
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
-- `forge build --sizes --via-ir --skip test --force` runs as the production
+- `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
   size gate. Current `StreamCore` production runtime size is 23,139 bytes,
   leaving 1,437 bytes of EIP-170 headroom under the IR-optimized deployment
   profile.
@@ -69,6 +69,13 @@ The current Gate A smoke baseline proves:
   dependency script content through escaped JavaScript strings, and neutralizes
   closing-script sequences so hostile metadata inputs do not create extra raw
   wrapper `</script>` tags.
+- `StreamDeploymentManifest.t.sol` proves the first Gate E local deployment
+  rehearsal can deploy and wire the stack, configure sample admin/pause/signer
+  ceremony state, transfer Ownable control to the configured Safe placeholder,
+  revoke the temporary deployment admin, and parse the deployment manifest
+  schema/example JSON artifacts.
+- `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
+  executes as part of the local/CI smoke gate.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -76,8 +83,8 @@ blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
 randomizer reserve lifecycle accounting,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup beyond the now-triaged
-high/medium baseline, signer/deployment ceremony runbooks, deployment scripts
-and manifests that use the production size profile, remaining generated
+high/medium baseline, fork/testnet deployment rehearsals, production manifest
+generation from broadcast outputs, ABI/event-topic checksums, remaining generated
 HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser

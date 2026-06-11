@@ -86,7 +86,7 @@ contributors who start from the README.
 - `StreamCore` now uses a linked metadata renderer library, removes optional
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
-  `forge build --sizes --via-ir --skip test --force`. That gate currently shows
+  `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
   `StreamCore` under EIP-170 with deployment headroom, but deployment scripts,
   manifests, and rehearsals still need to use this production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed

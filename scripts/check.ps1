@@ -18,4 +18,5 @@ if (-not (Get-Command forge -ErrorAction SilentlyContinue)) {
 
 forge build
 forge test -vvv
-forge build --sizes --via-ir --skip test --force
+forge build --sizes --via-ir --skip test --skip script --force
+forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

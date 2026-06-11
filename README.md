@@ -8,9 +8,10 @@ randomness adapters.
 
 This repository is pre-audit and not production-ready.
 
-The current CI and local smoke checks prove only that the contracts compile and
-that the Foundry test command executes. They do not prove protocol correctness.
-Known P0 blockers and the execution roadmap are tracked in
+The current CI and local smoke checks prove compilation, test command execution,
+the production size gate, and a local deployment rehearsal. They do not prove
+protocol correctness or production deployment readiness. Known P0 blockers and
+the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
 
 ## Drop Flow
@@ -35,11 +36,16 @@ The canonical smoke check runs:
 ```bash
 forge build
 forge test -vvv
-forge build --sizes --via-ir --skip test --force
+forge build --sizes --via-ir --skip test --skip script --force
+forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
-The size step is production-only: it skips Foundry test contracts, compiles via
-IR, and fails if deployable contracts exceed EIP-170/EIP-3860 limits.
+The size step is production-only: it skips Foundry test and script contracts,
+compiles via IR, and fails if deployable contracts exceed EIP-170/EIP-3860
+limits.
+
+The deployment rehearsal step is local-only and uses placeholder addresses; it
+proves the deploy-and-wire ceremony can execute without production secrets.
 
 On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
 with:
@@ -77,6 +83,7 @@ Current pinned versions:
 | `smart-contracts/` | Solidity source |
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
+| `deployments/` | Deployment manifest schema and examples |
 | `docs/` | Project, security, ADR, and operational docs |
 | `ops/` | Roadmap and execution state |
 
@@ -90,4 +97,5 @@ Current pinned versions:
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)
 - [`docs/tooling.md`](docs/tooling.md)
+- [`docs/deployment.md`](docs/deployment.md)
 - [`docs/slither.md`](docs/slither.md)
