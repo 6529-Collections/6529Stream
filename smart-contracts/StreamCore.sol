@@ -28,8 +28,46 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
 
     bytes4 private constant _INTERFACE_ID_ERC4906 = 0x49064906;
     string public constant METADATA_SCHEMA_VERSION = "6529stream-v1";
+    bytes32 public constant METADATA_FREEZE_MANIFEST_TYPEHASH = keccak256(
+        "6529StreamMetadataFreezeManifest(uint256 collectionId,bytes32 schemaVersionHash,bytes32 collectionStateHash,bytes32 supplyStateHash,bytes32 liveTokenMetadataHash,bytes32 integrationStateHash,address core,uint256 chainId)"
+    );
+    bytes32 private constant _FREEZE_COLLECTION_STATE_TYPEHASH = keccak256(
+        "6529StreamFreezeCollectionState(bool onchainMetadata,bytes32 collectionInfoHash,bytes32 dependencyKey,bytes32 dependencyContentHash,bytes32 collectionScriptHash)"
+    );
+    bytes32 private constant _FREEZE_SUPPLY_STATE_TYPEHASH = keccak256(
+        "6529StreamFreezeSupplyState(uint256 finalSupply,uint256 mintedEver,uint256 burnCount)"
+    );
+    bytes32 private constant _FREEZE_INTEGRATION_STATE_TYPEHASH = keccak256(
+        "6529StreamFreezeIntegrationState(uint256 randomizerEpoch,address randomizer,address dependencyRegistry)"
+    );
+    bytes32 private constant _COLLECTION_INFO_TYPEHASH = keccak256(
+        "6529StreamCollectionInfo(bytes32 nameHash,bytes32 artistHash,bytes32 descriptionHash,bytes32 websiteHash,bytes32 licenseHash,bytes32 baseURIHash,bytes32 libraryHash)"
+    );
+    bytes32 private constant _COLLECTION_SCRIPT_TYPEHASH =
+        keccak256("6529StreamCollectionScript(uint256 chunkCount,bytes32 chunksHash)");
+    bytes32 private constant _COLLECTION_SCRIPT_CHUNK_TYPEHASH = keccak256(
+        "6529StreamCollectionScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
+    );
+    bytes32 private constant _TOKEN_METADATA_RECORD_TYPEHASH = keccak256(
+        "6529StreamTokenMetadataRecord(uint256 tokenId,bytes32 tokenDataHash,bytes32 tokenImageHash,bytes32 tokenAttributesHash,bytes32 tokenHash)"
+    );
+    bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
+        keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
     string private constant _METADATA_STATE_PENDING = "pending";
     string private constant _METADATA_STATE_FINAL = "final";
+
+    error CollectionAlreadyFrozen(uint256 collectionId);
+    error CollectionDataMissing(uint256 collectionId);
+    error CollectionFinalSupplyWindowActive(
+        uint256 collectionId, uint256 currentTimestamp, uint256 finalSupplyTimestamp
+    );
+    error CollectionHasPendingTokenMetadata(uint256 collectionId, uint256 pendingCount);
+    error CollectionMintWindowActive(
+        uint256 collectionId, uint256 currentTimestamp, uint256 endTime
+    );
+    error CollectionNotCreated(uint256 collectionId);
+    error FrozenCollectionDependencyRegistry();
+    error MetadataFrozen(uint256 collectionId);
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -106,6 +144,17 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     // collection lock status (status cannot revert)
     mapping(uint256 => bool) private collectionFreeze;
 
+    // immutable manifest hash recorded when a collection is frozen
+    mapping(uint256 => bytes32) private collectionFreezeManifestHashes;
+
+    // live-token metadata aggregate state used by freeze eligibility and manifests
+    mapping(uint256 => uint256) private collectionPendingMetadataCounts;
+    mapping(uint256 => uint256) private collectionLiveTokenMetadataAccumulators;
+    mapping(uint256 => bytes32) private tokenFreezeMetadataRecordHashes;
+
+    // count of frozen collections; used to block global dependency registry swaps
+    uint256 private frozenCollectionCount;
+
     // checks if an artist signed its collection
     mapping(uint256 => bool) public artistSigned;
 
@@ -121,6 +170,12 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         address indexed oldRandomizer,
         address indexed newRandomizer,
         uint256 randomizerEpoch
+    );
+    event CollectionFrozen(
+        uint256 indexed _collectionID,
+        bytes32 indexed manifestHash,
+        string schemaVersion,
+        address indexed admin
     );
 
     // constructor
@@ -224,6 +279,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             IRandomizer(_randomizerContract).isRandomizerContract() == true,
             "Contract is not Randomizer"
         );
+        _requireCollectionNotFrozen(_collectionID);
         address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
         _requireNoPendingRandomnessRequests(_collectionID, oldRandomizer);
         collectionRandomizerEpoch[_collectionID] = collectionRandomizerEpoch[_collectionID] + 1;
@@ -246,6 +302,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         uint256 _collectionID
     ) external {
         require(msg.sender == minterContract, "Caller is not the Minter Contract");
+        _requireCollectionNotFrozen(_collectionID);
         collectionAdditionalData[_collectionID].collectionCirculationSupply =
             collectionAdditionalData[_collectionID].collectionCirculationSupply + 1;
         if (
@@ -266,11 +323,13 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             _isApprovedOrOwner(_msgSender(), _tokenId),
             "ERC721: caller is not token owner or approved"
         );
+        _requireCollectionNotFrozen(_collectionID);
         require(
             (_tokenId >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
                 && (_tokenId <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
             "id err"
         );
+        _removeLiveTokenMetadataRecord(_collectionID, _tokenId);
         _burn(_tokenId);
         burnAmount[_collectionID] = burnAmount[_collectionID] + 1;
     }
@@ -285,6 +344,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     ) internal {
         tokenData[_mintIndex] = _tokenData;
         tokenIdsToCollectionIds[_mintIndex] = _collectionID;
+        _addLiveTokenMetadataRecord(_collectionID, _mintIndex);
         _safeMint(_recipient, _mintIndex);
         collectionAdditionalData[_collectionID].randomizer
             .calculateTokenHash(_collectionID, _mintIndex, _saltfun_o);
@@ -333,6 +393,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     // function that is used by artists for signing
     function artistSignature(uint256 _collectionID, string memory _signature) public {
         _requireMetadataMutationNotPaused();
+        _requireCollectionNotFrozen(_collectionID);
         require(
             msg.sender == collectionAdditionalData[_collectionID].collectionArtistAddress
                 && artistSigned[_collectionID] == false,
@@ -363,9 +424,11 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         FunctionAdminRequired(this.changeTokenData.selector)
     {
         _requireMetadataMutationNotPaused();
-        require(collectionFreeze[tokenIdsToCollectionIds[_tokenId]] == false, "Data frozen");
+        uint256 collectionId = tokenIdsToCollectionIds[_tokenId];
+        require(collectionFreeze[collectionId] == false, "Data frozen");
         _requireMinted(_tokenId);
         tokenData[_tokenId] = newData;
+        _refreshLiveTokenMetadataRecord(collectionId, _tokenId);
         emit MetadataUpdate(_tokenId);
     }
 
@@ -380,10 +443,12 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             (_tokenId.length == _images.length) && (_images.length == _attributes.length), "inv len"
         );
         for (uint256 x; x < _tokenId.length; x++) {
-            require(collectionFreeze[tokenIdsToCollectionIds[_tokenId[x]]] == false, "Data frozen");
+            uint256 collectionId = tokenIdsToCollectionIds[_tokenId[x]];
+            require(collectionFreeze[collectionId] == false, "Data frozen");
             _requireMinted(_tokenId[x]);
             tokenImageAndAttributes[_tokenId[x]][0] = _images[x];
             tokenImageAndAttributes[_tokenId[x]][1] = _attributes[x];
+            _refreshLiveTokenMetadataRecord(collectionId, _tokenId[x]);
             emit MetadataUpdate(_tokenId[x]);
         }
     }
@@ -394,25 +459,38 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         FunctionAdminRequired(this.freezeCollection.selector)
     {
         _requireMetadataMutationNotPaused();
-        require(
-            block.timestamp > IStreamMinter(minterContract).getEndTime(_collectionID)
-                && IStreamMinter(minterContract).getEndTime(_collectionID) != 0
-                && wereDataAdded[_collectionID] == true
-        );
+        _requireFreezeEligible(_collectionID);
+        _finalizeCollectionSupply(_collectionID);
+        bytes32 manifestHash = _collectionFreezeManifestHash(_collectionID);
         collectionFreeze[_collectionID] = true;
+        collectionFreezeManifestHashes[_collectionID] = manifestHash;
+        frozenCollectionCount = frozenCollectionCount + 1;
+        emit CollectionFrozen(_collectionID, manifestHash, METADATA_SCHEMA_VERSION, msg.sender);
     }
 
     // function to set the tokenHash (this function is called only from randomizer contracts)
     function setTokenHash(uint256 _collectionID, uint256 _mintIndex, bytes32 _hash) external {
         require(msg.sender == collectionAdditionalData[_collectionID].randomizerContract);
+        _requireCollectionNotFrozen(_collectionID);
         require(_hash != bytes32(0), "Zero token hash");
+        require(
+            (_mintIndex >= collectionAdditionalData[_collectionID].reservedMinTokensIndex)
+                && (_mintIndex <= collectionAdditionalData[_collectionID].reservedMaxTokensIndex),
+            "Wrong collection"
+        );
         require(
             tokenToHash[_mintIndex]
                 == 0x0000000000000000000000000000000000000000000000000000000000000000
         );
+        bool liveToken = _exists(_mintIndex);
+        if (liveToken) {
+            require(tokenIdsToCollectionIds[_mintIndex] == _collectionID, "Wrong collection");
+        }
         tokenToHash[_mintIndex] = _hash;
         // Record pre-mint callbacks, but only live tokens announce metadata changes.
-        if (_exists(_mintIndex)) {
+        if (liveToken) {
+            _markLiveTokenMetadataFinal(_collectionID, _mintIndex);
+            _refreshLiveTokenMetadataRecord(_collectionID, _mintIndex);
             emit MetadataUpdate(_mintIndex);
         }
     }
@@ -422,17 +500,14 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         public
         FunctionAdminRequired(this.setFinalSupply.selector)
     {
+        _requireCollectionNotFrozen(_collectionID);
         require(
             block.timestamp
                 > IStreamMinter(minterContract).getEndTime(_collectionID)
                     + collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint,
             "Time has not passed"
         );
-        collectionAdditionalData[_collectionID].collectionTotalSupply =
-        collectionAdditionalData[_collectionID].collectionCirculationSupply;
-        collectionAdditionalData[_collectionID].reservedMaxTokensIndex =
-            (_collectionID * 10000000000)
-                + collectionAdditionalData[_collectionID].collectionTotalSupply - 1;
+        _finalizeCollectionSupply(_collectionID);
     }
 
     // function to update the admin, minter or dependency contract
@@ -448,6 +523,9 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             require(IStreamMinter(_newContract).isMinterContract() == true, "Not Minter");
             minterContract = _newContract;
         } else if (_opt == 3) {
+            if (frozenCollectionCount != 0) {
+                revert FrozenCollectionDependencyRegistry();
+            }
             dependencyRegistry = IDependencyRegistry(_newContract);
         }
     }
@@ -626,6 +704,21 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         return collectionFreeze[_collectionID];
     }
 
+    /// @notice Returns the manifest hash stored when a collection was frozen.
+    /// @dev Returns zero for collections that have not been frozen.
+    function collectionFreezeManifestHash(uint256 _collectionID) public view returns (bytes32) {
+        return collectionFreezeManifestHashes[_collectionID];
+    }
+
+    /// @notice Computes the freeze manifest hash for the collection's current state.
+    function previewCollectionFreezeManifestHash(uint256 _collectionID)
+        public
+        view
+        returns (bytes32)
+    {
+        return _collectionFreezeManifestHash(_collectionID);
+    }
+
     // function to return the collection id given a token id
     function viewColIDforTokenID(uint256 _tokenid) public view returns (uint256) {
         return (tokenIdsToCollectionIds[_tokenid]);
@@ -797,6 +890,215 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
         return dependencyRegistry.getDependencyScriptContentHash(
             collectionInfo[collectionId].collectionDependencyScript
+        );
+    }
+
+    function _requireCollectionNotFrozen(uint256 _collectionID) private view {
+        if (collectionFreeze[_collectionID]) {
+            revert MetadataFrozen(_collectionID);
+        }
+    }
+
+    function _requireFreezeEligible(uint256 _collectionID) private view {
+        if (collectionFreeze[_collectionID]) {
+            revert CollectionAlreadyFrozen(_collectionID);
+        }
+        if (!isCollectionCreated[_collectionID]) {
+            revert CollectionNotCreated(_collectionID);
+        }
+        if (!wereDataAdded[_collectionID]) {
+            revert CollectionDataMissing(_collectionID);
+        }
+
+        uint256 endTime = IStreamMinter(minterContract).getEndTime(_collectionID);
+        if (endTime == 0 || block.timestamp <= endTime) {
+            revert CollectionMintWindowActive(_collectionID, block.timestamp, endTime);
+        }
+
+        uint256 finalSupplyTimestamp =
+            endTime + collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint;
+        if (block.timestamp <= finalSupplyTimestamp) {
+            revert CollectionFinalSupplyWindowActive(
+                _collectionID, block.timestamp, finalSupplyTimestamp
+            );
+        }
+
+        _requireLiveTokenMetadataFinal(_collectionID);
+    }
+
+    function _requireLiveTokenMetadataFinal(uint256 _collectionID) private view {
+        uint256 pendingCount = collectionPendingMetadataCounts[_collectionID];
+        if (pendingCount != 0) {
+            revert CollectionHasPendingTokenMetadata(_collectionID, pendingCount);
+        }
+    }
+
+    function _addLiveTokenMetadataRecord(uint256 _collectionID, uint256 tokenId) private {
+        bytes32 recordHash = _tokenMetadataRecordHash(tokenId);
+        tokenFreezeMetadataRecordHashes[tokenId] = recordHash;
+        collectionLiveTokenMetadataAccumulators[_collectionID] =
+            collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(recordHash);
+
+        if (tokenToHash[tokenId] == bytes32(0)) {
+            collectionPendingMetadataCounts[_collectionID] =
+                collectionPendingMetadataCounts[_collectionID] + 1;
+        }
+    }
+
+    function _removeLiveTokenMetadataRecord(uint256 _collectionID, uint256 tokenId) private {
+        bytes32 recordHash = tokenFreezeMetadataRecordHashes[tokenId];
+        collectionLiveTokenMetadataAccumulators[_collectionID] =
+            collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(recordHash);
+        delete tokenFreezeMetadataRecordHashes[tokenId];
+
+        if (
+            tokenToHash[tokenId] == bytes32(0)
+                && collectionPendingMetadataCounts[_collectionID] != 0
+        ) {
+            collectionPendingMetadataCounts[_collectionID] =
+                collectionPendingMetadataCounts[_collectionID] - 1;
+        }
+    }
+
+    function _markLiveTokenMetadataFinal(uint256 _collectionID, uint256 tokenId) private {
+        if (
+            tokenToHash[tokenId] != bytes32(0)
+                && collectionPendingMetadataCounts[_collectionID] != 0
+        ) {
+            collectionPendingMetadataCounts[_collectionID] =
+                collectionPendingMetadataCounts[_collectionID] - 1;
+        }
+    }
+
+    function _refreshLiveTokenMetadataRecord(uint256 _collectionID, uint256 tokenId) private {
+        if (!_exists(tokenId)) {
+            return;
+        }
+
+        bytes32 previousRecordHash = tokenFreezeMetadataRecordHashes[tokenId];
+        bytes32 nextRecordHash = _tokenMetadataRecordHash(tokenId);
+        if (previousRecordHash == nextRecordHash) {
+            return;
+        }
+
+        collectionLiveTokenMetadataAccumulators[_collectionID] =
+            collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(previousRecordHash)
+                ^ uint256(nextRecordHash);
+        tokenFreezeMetadataRecordHashes[tokenId] = nextRecordHash;
+    }
+
+    function _finalizeCollectionSupply(uint256 _collectionID) private {
+        uint256 finalSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply;
+        uint256 reservedMin = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
+        collectionAdditionalData[_collectionID].collectionTotalSupply = finalSupply;
+        collectionAdditionalData[_collectionID].reservedMaxTokensIndex =
+            finalSupply == 0 ? reservedMin - 1 : reservedMin + finalSupply - 1;
+    }
+
+    function _collectionFreezeManifestHash(uint256 _collectionID) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                METADATA_FREEZE_MANIFEST_TYPEHASH,
+                _collectionID,
+                keccak256(bytes(METADATA_SCHEMA_VERSION)),
+                _freezeCollectionStateHash(_collectionID),
+                _freezeSupplyStateHash(_collectionID),
+                _liveTokenMetadataHash(_collectionID),
+                _freezeIntegrationStateHash(_collectionID),
+                address(this),
+                block.chainid
+            )
+        );
+    }
+
+    function _freezeCollectionStateHash(uint256 _collectionID) private view returns (bytes32) {
+        bytes32 dependencyKey = collectionInfo[_collectionID].collectionDependencyScript;
+        return keccak256(
+            abi.encode(
+                _FREEZE_COLLECTION_STATE_TYPEHASH,
+                onchainMetadata[_collectionID],
+                _collectionInfoHash(_collectionID),
+                dependencyKey,
+                dependencyRegistry.getDependencyScriptContentHash(dependencyKey),
+                _collectionScriptHash(_collectionID)
+            )
+        );
+    }
+
+    function _freezeSupplyStateHash(uint256 _collectionID) private view returns (bytes32) {
+        uint256 finalSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply;
+        return keccak256(
+            abi.encode(
+                _FREEZE_SUPPLY_STATE_TYPEHASH,
+                finalSupply,
+                collectionAdditionalData[_collectionID].collectionCirculationSupply,
+                burnAmount[_collectionID]
+            )
+        );
+    }
+
+    function _freezeIntegrationStateHash(uint256 _collectionID) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _FREEZE_INTEGRATION_STATE_TYPEHASH,
+                collectionRandomizerEpoch[_collectionID],
+                collectionAdditionalData[_collectionID].randomizerContract,
+                address(dependencyRegistry)
+            )
+        );
+    }
+
+    function _collectionInfoHash(uint256 _collectionID) private view returns (bytes32) {
+        collectionInfoStructure storage info = collectionInfo[_collectionID];
+        return keccak256(
+            abi.encode(
+                _COLLECTION_INFO_TYPEHASH,
+                keccak256(bytes(info.collectionName)),
+                keccak256(bytes(info.collectionArtist)),
+                keccak256(bytes(info.collectionDescription)),
+                keccak256(bytes(info.collectionWebsite)),
+                keccak256(bytes(info.collectionLicense)),
+                keccak256(bytes(info.collectionBaseURI)),
+                keccak256(bytes(info.collectionLibrary))
+            )
+        );
+    }
+
+    function _collectionScriptHash(uint256 _collectionID) private view returns (bytes32) {
+        string[] storage script = collectionInfo[_collectionID].collectionScript;
+        bytes32 chunksHash = bytes32(0);
+
+        for (uint256 i = 0; i < script.length; i++) {
+            bytes memory chunk = bytes(script[i]);
+            bytes32 chunkHash = keccak256(
+                abi.encode(_COLLECTION_SCRIPT_CHUNK_TYPEHASH, i, keccak256(chunk), chunk.length)
+            );
+            chunksHash = keccak256(abi.encode(chunksHash, chunkHash));
+        }
+
+        return keccak256(abi.encode(_COLLECTION_SCRIPT_TYPEHASH, script.length, chunksHash));
+    }
+
+    function _liveTokenMetadataHash(uint256 _collectionID) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH,
+                bytes32(collectionLiveTokenMetadataAccumulators[_collectionID]),
+                totalSupplyOfCollection(_collectionID)
+            )
+        );
+    }
+
+    function _tokenMetadataRecordHash(uint256 tokenId) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _TOKEN_METADATA_RECORD_TYPEHASH,
+                tokenId,
+                keccak256(bytes(tokenData[tokenId])),
+                keccak256(bytes(tokenImageAndAttributes[tokenId][0])),
+                keccak256(bytes(tokenImageAndAttributes[tokenId][1])),
+                tokenToHash[tokenId]
+            )
         );
     }
 

@@ -47,8 +47,9 @@ base64-encoded HTML animation URL.
 `StreamCore.metadataSchemaVersion()` exposes the active schema version and
 `StreamCore.tokenMetadataState(tokenId)` exposes the current `pending` or
 `final` state for minted tokens. The current schema version does not yet solve
-JSON escaping, raw attribute validation, metadata size limits, freeze manifests,
-dependency immutability, stale randomness display, or burn metadata semantics.
+JSON escaping, raw attribute validation, metadata size limits, immutable
+dependency version records, stale randomness display, or burn metadata
+semantics.
 
 ## Golden Fixtures
 
@@ -90,12 +91,48 @@ fulfillment itself emits `MetadataUpdate`. Burn also does not emit ERC-4906;
 indexers should treat the ERC-721 transfer-to-zero event as the live-token
 metadata removal signal.
 
-Current freeze does not change `tokenURI` bytes, so `freezeCollection` does not
-emit ERC-4906 yet. Future schema-versioned freeze manifests may add finality
-fields and should update this policy intentionally. Dependency reference changes
-through `updateCollectionInfo` emit batch events; dependency registry content
-versioning and reverse collection-to-dependency signaling remain part of
-P1-META-003.
+`freezeCollection` does not change `tokenURI` bytes, so it emits the
+protocol-specific `CollectionFrozen` event rather than an ERC-4906 update.
+Dependency reference changes through `updateCollectionInfo` emit batch events;
+dependency registry content versioning and reverse collection-to-dependency
+signaling remain part of P1-META-003.
+
+## Freeze Manifest And Boundaries
+
+`StreamCore.freezeCollection(collectionId)` records the public freeze boundary
+for the current `StreamCore` metadata surface. A collection can freeze only when:
+
+- collection data has been added
+- the configured mint window has ended
+- the final-supply delay has elapsed
+- every live minted token has nonzero final metadata randomness
+
+Freeze finalizes the collection supply to the minted-ever count, tightens the
+reserved max token ID, stores `collectionFreezeManifestHash(collectionId)`, and
+emits:
+
+```text
+CollectionFrozen(collectionId, manifestHash, schemaVersion, admin)
+```
+
+The manifest hash commits to the schema version, collection display fields,
+metadata mode, dependency key and current dependency content hash, collection
+script chunk hashes, final supply counters, burn count, the tracked live-token
+metadata aggregate, randomizer epoch/contract, dependency registry address, core
+contract address, and chain ID. The live-token aggregate is maintained as tokens
+are minted, burned, finalized by randomness, or changed through token data,
+image, and attribute writes, so freeze eligibility and manifest preview do not
+scan every minted token.
+
+After freeze, current `StreamCore` paths cannot mint into the collection, change
+collection metadata, change metadata mode, change token data, update token image
+or attributes, change the collection randomizer, set token hashes, finalize
+supply again, or swap the dependency registry while any collection is frozen.
+
+The manifest currently pins the dependency registry address and current
+dependency content hash, but immutable dependency version records and registry
+provenance are still P1-META-003. Burn metadata and callback-after-burn
+semantics remain P1-META-005.
 
 ## Public-Beta Target
 
@@ -103,5 +140,5 @@ ADR 0006 requires future metadata work to add:
 
 - stale and burned-state policy
 - JSON escaping and raw-attribute validation
-- freeze manifests and immutable dependency version pins
+- immutable dependency version pins
 - burn semantics and callback-after-burn tests

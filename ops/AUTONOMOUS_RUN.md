@@ -33,11 +33,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-schema-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/82` |
+| Active PR branch | `codex/metadata-freeze-manifest` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/83` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-10 23:55 UTC` |
+| Last updated | `2026-06-11 00:59 UTC` |
 
 ## Packaging Notes
 
@@ -94,7 +94,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 37 | Add signer lifecycle manager | Gate B1/Gate C | Implement P0-ADMIN-003 by separating drop-signing identity from signer-management authority, adding signer-manager role tests, proving rotation invalidates stale payloads, and updating ADR/roadmap state | Merged in PR #80 |
 | 38 | Add metadata schema and golden-file tests | Gate D | Implement the first P1-META-001 test/docs slice: lock current off-chain pending/final tokenURI behavior, add on-chain JSON golden fixtures where feasible, document schema fields, and update roadmap/test traceability | Merged in PR #81 |
 | 39 | Add ERC-4906 metadata update signaling | Gate D | Implement P1-META-004 for `StreamCore`: interface support, token-level and collection-range metadata update events, no misleading mint/burn-only events, docs, and roadmap/test traceability | Merged in PR #82 |
-| 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | PR #83 open on `codex/metadata-schema-state` |
+| 40 | Add schema-v1 metadata state outputs | Gate D | Continue P1-META-001 by adding schema-versioned on-chain base64 JSON, explicit pending/final metadata state views, golden fixtures, docs, and roadmap/test traceability | Merged in PR #83 |
+| 41 | Add collection freeze manifests and guards | Gate D | Implement the first P1-META-002 slice: deterministic freeze manifest hash/event/views, terminal-randomness freeze eligibility, final-supply freeze boundary, post-freeze guards for current StreamCore metadata-significant paths, tests, docs, and roadmap traceability | Open in PR #84 on `codex/metadata-freeze-manifest` |
 
 ## Current PR Worklog
 
@@ -3455,7 +3456,7 @@ Merge:
 
 ### PR #83: Add schema-v1 metadata state outputs (Queue Item 40)
 
-Status: PR open; CodeRabbit assertion-label nitpick accepted and ready to push.
+Status: Merged.
 Branch: `codex/metadata-schema-state`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/83`.
 Related issue:
@@ -3538,13 +3539,140 @@ Review requests:
   guard; CodeRabbit marked it addressed in commit `3dc56d6`.
 - CodeRabbit comment `4675802795` confirmed the guard and regression are solid
   and suggested a clearer assertion label; the label nitpick was accepted.
+- CodeRabbit comment `4675822063` verified final head `78664b0`, confirmed
+  the assertion-label cleanup, and reported no concerns.
 - Claude remains intentionally skipped per current user instruction; use
   CodeRabbit unless risk or future user instruction changes.
+
+Merge:
+
+- Squash merge commit: `be2bdbe5db792f2eac52770e7dddf49893d3d3c1`.
+- Merged at `2026-06-11 00:00 UTC`.
+- Issue `#46` remains open because freeze, burn, and future schema-migration
+  state coverage remain in the P1 metadata track.
+
+### PR #84: Add collection freeze manifests and guards (Queue Item 41)
+
+Status: Open.
+Branch: `codex/metadata-freeze-manifest`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/84`.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/47`
+- This PR references issue `#47` but should not close it yet. Issue `#47`
+  includes dependency content immutability acceptance criteria that remain
+  intentionally split into `P1-META-003` / issue `#48`.
+
+Goal:
+
+- Implement the first P1-META-002 target-state slice after schema-v1 and
+  ERC-4906 support.
+- Store and expose a deterministic collection freeze manifest hash.
+- Emit a stable `CollectionFrozen` event with collection ID, manifest hash,
+  schema version, and admin.
+- Require freeze eligibility to include ended mint window, final supply
+  boundary, and terminal randomness for every live minted token.
+- Finalize collection supply at freeze so post-freeze `setFinalSupply` cannot
+  mutate collection metadata promises.
+- Guard current `StreamCore` metadata-significant mutation paths after freeze,
+  including collection metadata, metadata mode, token metadata inputs,
+  randomizer changes, dependency-registry swaps, final-supply changes, and
+  post-freeze token-hash writes for live tokens.
+- Add focused freeze-boundary tests and update metadata docs, roadmap/test
+  traceability, status docs, and this run state.
+
+Out of scope:
+
+- Immutable dependency version records and registry-level provenance remain
+  `P1-META-003`.
+- Burn metadata and post-burn callback semantics remain `P1-META-005`.
+- JSON/HTML escaping, raw attribute validation, size limits, and render sandbox
+  tests remain `P1-META-006`.
+- Replacing magic collection update indexes remains a later metadata authority
+  cleanup.
+
+Candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/IStreamCore.sol`
+- `test/StreamMetadataFreeze.t.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation notes:
+
+- Added `METADATA_FREEZE_MANIFEST_TYPEHASH` plus typed component hashes for
+  collection state, supply state, integration state, collection script chunks,
+  collection display fields, and live token metadata records.
+- CodeRabbit follow-up replaced freeze-time live-token scans with tracked
+  per-collection pending metadata counts and a live-token metadata accumulator
+  maintained by mint, burn, token-hash, token-data, image, and attribute writes.
+- CodeRabbit second follow-up now guards post-freeze burns and rejects pre-mint
+  token-hash writes outside the target collection's reserved token range.
+- Added `collectionFreezeManifestHash(collectionId)` and
+  `previewCollectionFreezeManifestHash(collectionId)` views.
+- `freezeCollection` now requires created collection data, ended mint window,
+  elapsed final-supply delay, and nonzero final metadata hashes for every live
+  minted token.
+- `freezeCollection` finalizes collection supply to minted-ever count, tightens
+  the reserved max token ID, stores the manifest hash, increments the frozen
+  collection counter, and emits `CollectionFrozen`.
+- Current `StreamCore` metadata-significant paths now fail after freeze:
+  minting into the collection, randomizer changes, token-hash writes,
+  artist signatures, final supply changes, and dependency registry swaps while
+  any collection is frozen. Existing metadata setters already carried freeze
+  guards and now have target-state coverage.
+- Docs and roadmap explicitly keep immutable dependency version records,
+  registry provenance, burn semantics, and escaping out of this PR.
+
+Validation so far:
+
+- Focused freeze tests passed:
+  `forge test --match-contract StreamMetadataFreezeTest -vvv` with 7 tests,
+  0 failed.
+- Full canonical local gate passed: `make check` with the new freeze suite
+  included.
+- Windows wrapper passed:
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- Touched-file formatting passed:
+  `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataFreeze.t.sol`.
+- Diff whitespace check passed: `git diff --check`.
+- Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
+  `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
+  `ops\AUTONOMOUS_RUN.md`.
+- Traceability grep passed for `P1-META-002`, `CollectionFrozen`,
+  `collectionFreezeManifestHash`, `METADATA_FREEZE_MANIFEST_TYPEHASH`,
+  `_LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH`, `StreamMetadataFreeze`,
+  `codex/metadata-freeze-manifest`, `Queue Item 41`, PR `#84`, and
+  `FrozenCollectionDependencyRegistry`.
+- Slither baseline comparison remains non-blocking and high/medium unchanged:
+  `718` total findings, `4` High, `19` Medium, `93` Low, `591`
+  Informational, `11` Optimization. The first Slither run found one new
+  test-only `unused-return` medium row in `StreamMetadataFreeze.t.sol`; the test
+  now asserts the full tuple and the rerun returned to the `4/19` high/medium
+  baseline.
+- Second CodeRabbit follow-up validation passed after the burn/range guard patch:
+  focused freeze tests now cover 7 cases, full `make check` passed, Windows
+  wrapper passed, touched-file formatting passed, diff whitespace passed, and
+  Slither remained `718` total findings with high/medium unchanged at `4/19`.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 00:59 | Validate CodeRabbit PR #84 second follow-up | Focused freeze tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither comparison passed after guarding post-freeze burn and pre-mint hash range writes |
+| 2026-06-11 00:57 | Address CodeRabbit PR #84 second follow-up | Guarded `burn()` after collection freeze to keep the manifest surface immutable, added pre-mint token-range validation to `setTokenHash`, and added focused regression coverage; full gate is rerunning before push |
+| 2026-06-11 00:42 | Validate CodeRabbit PR #84 review fix | Focused freeze tests and `make check` pass after moving live-token aggregate tracking before `_safeMint`; Slither returned to the prior `718` total findings with high/medium unchanged at `4/19` |
+| 2026-06-11 00:32 | Address CodeRabbit PR #84 review | Durable state now records open PR #84; freeze eligibility and manifest preview use tracked pending metadata counts plus a live-token metadata accumulator instead of full-range token scans; freeze tests now assert exact revert reasons and cover burned pending tokens |
+| 2026-06-11 00:16 | Validate Queue Item 41 locally | Focused freeze tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither comparison all pass; Slither high/medium remain `4/19` after fixing the initial test-only unused-return row |
+| 2026-06-11 00:12 | Keep the Queue Item 41 PR as a reference to issue #47, not a closure | Issue #47 includes dependency content immutability acceptance criteria; this PR implements the `StreamCore` freeze-manifest and current mutation-guard slice while leaving registry versioning/provenance to issue #48 |
+| 2026-06-11 00:08 | Implement Queue Item 41 local draft | Added typed freeze manifest hashes, manifest/event/views, final-supply freeze boundary, terminal live-token metadata eligibility, current `StreamCore` post-freeze guards, focused freeze tests, and docs/roadmap traceability |
+| 2026-06-11 00:02 | Start Queue Item 41 | PR #83 merged; the next missing Gate D metadata row is P1-META-002 collection freeze boundaries, and dependency versioning/burn/escaping remain separate issues |
+| 2026-06-11 00:00 | Merge PR #83 | CI passed on final head `78664b0`, CodeRabbit verified the assertion-label cleanup with no concerns, the zero-hash thread was resolved, and the stale aggregate CodeRabbit status was documented before merge |
 | 2026-06-10 23:55 | Accept CodeRabbit PR #83 assertion-label nit | Clarified the zero-hash regression failure message after CodeRabbit confirmed the guard and coverage were solid; focused metadata tests, `make check`, Windows wrapper, formatting, and whitespace checks all pass |
 | 2026-06-10 23:48 | Address CodeRabbit PR #83 zero-hash finding | Added `setTokenHash` guard for `bytes32(0)`, added pending-sentinel regression coverage, and reran focused metadata tests, `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison |
 | 2026-06-10 23:30 | Open PR #83 | Schema-v1 metadata state outputs are published with local validation evidence; next step is state follow-up push and CodeRabbit request |

@@ -161,6 +161,14 @@ collection-level metadata writes emit `BatchMetadataUpdate` for the minted-ever
 token range, empty collections do not emit empty batch events, and mint-only
 plus burn paths do not emit misleading ERC-4906 events.
 
+Collection freeze boundaries now have P1-META-002 target-state coverage in
+`StreamMetadataFreeze.t.sol`: freeze requires the mint window and final-supply
+delay to have elapsed, rejects live tokens whose metadata is still pending,
+stores and exposes a deterministic manifest hash, emits `CollectionFrozen`,
+finalizes collection supply to the minted-ever count, tightens the reserved max
+token ID, blocks dependency-registry swaps while any collection is frozen, and
+rejects current `StreamCore` metadata-significant writes after freeze.
+
 Mint-accounting state now has P0-CORE-001 target-state coverage in
 `StreamMintAccounting.t.sol`: never-written public/allowlist mint counters were
 removed from `StreamCore`, while the retained airdrop counter starts at zero,

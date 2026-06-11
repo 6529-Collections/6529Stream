@@ -21,6 +21,13 @@ interface IStreamCore {
 
     function collectionFreezeStatus(uint256 _collectionID) external view returns (bool);
 
+    function collectionFreezeManifestHash(uint256 _collectionID) external view returns (bytes32);
+
+    function previewCollectionFreezeManifestHash(uint256 _collectionID)
+        external
+        view
+        returns (bytes32);
+
     function viewMaxAllowance(uint256 _collectionID) external view returns (uint256);
 
     function viewColIDforTokenID(uint256 _tokenid) external view returns (uint256);

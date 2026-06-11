@@ -64,11 +64,14 @@ contributors who start from the README.
   explicit `metadata_schema_version` and `metadata_state` fields. Pending
   on-chain metadata no longer runs final generative HTML with a zero token hash.
   ERC-4906 support and current `MetadataUpdate` / `BatchMetadataUpdate`
-  semantics now cover `StreamCore` metadata mutations; dependency-registry
-  reverse signaling remains part of dependency versioning/freeze work.
-  Remaining metadata blockers include collection freeze manifests, immutable
-  dependency version records, registry identity pinning, burn semantics,
-  escaping, and size limits.
+  semantics now cover `StreamCore` metadata mutations. Collection freeze now
+  records a manifest hash/event, requires final live-token metadata and the
+  final-supply boundary, finalizes supply, and rejects current `StreamCore`
+  metadata-significant writes after freeze. Dependency-registry reverse
+  signaling and immutable dependency records remain part of dependency
+  versioning work. Remaining metadata blockers include immutable dependency
+  version records, registry identity provenance, burn semantics, escaping, and
+  size limits.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
@@ -86,10 +89,10 @@ contributors who start from the README.
   emergency-surplus, randomizer request lifecycle, randomizer callback
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
-  and a bounded payment sequence invariant baseline now exist, but metadata,
-  dependency versioning/freeze, deployment, production-governance,
-  supply/replay/freeze invariant tests, and any future shared-ledger invariants
-  are still missing.
+  collection freeze-boundary tests, and a bounded payment sequence invariant
+  baseline now exist, but metadata escaping, dependency versioning, burn
+  semantics, deployment, production-governance, richer supply/replay/freeze
+  invariant tests, and any future shared-ledger invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

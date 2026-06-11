@@ -41,7 +41,11 @@ The current Gate A smoke baseline proves:
   generative HTML with a zero token hash. `StreamMetadataEvents.t.sol` proves
   ERC-4906 interface support and current metadata update event semantics for
   token-level updates, collection-range updates, randomness fulfillment,
-  mint-only paths, and burn.
+  mint-only paths, and burn. `StreamMetadataFreeze.t.sol` proves the current
+  collection freeze boundary: ended mint window, elapsed final-supply delay,
+  final live-token metadata, stored manifest hash/event, final supply
+  tightening, and post-freeze rejection for current `StreamCore`
+  metadata-significant mutation paths.
 - CI can run the same build/test smoke commands and publish logs.
 
 The current tests are regression tripwires, not a correctness proof. Known
@@ -51,8 +55,8 @@ randomizer reserve lifecycle accounting,
 callback-after-burn policy, canonical randomizer lifecycle
 ownership, lower-impact static-analysis cleanup beyond the now-triaged
 high/medium baseline, signer/deployment ceremony runbooks, metadata escaping,
-dependency version/freeze manifest work, burn metadata policy, deployment
-discipline, and the broader P0/P1 test suite.
+immutable dependency version records and provenance, burn metadata policy,
+deployment discipline, and the broader P0/P1 test suite.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.
