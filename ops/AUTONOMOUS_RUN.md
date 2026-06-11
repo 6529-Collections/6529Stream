@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/104` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 12:18 UTC` |
+| Last updated | `2026-06-11 12:21 UTC` |
 
 ## Packaging Notes
 
@@ -4849,9 +4849,9 @@ Merge evidence:
 
 ### PR candidate: Generate machine-readable release manifest (Queue Item 54)
 
-Status: Locally validated; ready to commit, push, open PR, and request
-CodeRabbit.
+Status: PR opened; awaiting CI and CodeRabbit review.
 Branch: `codex/release-manifest`.
+Pull request: `https://github.com/6529-Collections/6529Stream/pull/106`.
 Related issue:
 
 - `https://github.com/6529-Collections/6529Stream/issues/105`
@@ -4932,6 +4932,7 @@ Validation:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 12:20 | Open PR #106 | Release manifest PR published at `https://github.com/6529-Collections/6529Stream/pull/106`; this state-only follow-up records the PR URL before requesting CodeRabbit on the final head |
 | 2026-06-11 12:18 | Validate Queue Item 54 locally | Release manifest tests/check, release checksum tests/check, release artifact ownership-regression tests/check, changelog tests/check, Python compile, shell/PowerShell syntax, whitespace check, full `make check`, and Windows wrapper all pass |
 | 2026-06-11 12:06 | Start Queue Item 54 | Issue #105 tracks the machine-readable release manifest gap; branch `codex/release-manifest` starts from merged PR #104 and scopes to deterministic manifest generation plus local/CI drift checks |
 | 2026-06-11 11:54 | Create release manifest issue #105 | No open issue covered the top-level release manifest, so a focused P1 release issue keeps the Gate G PR auditable |
