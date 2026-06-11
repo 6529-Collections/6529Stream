@@ -35,8 +35,9 @@ The current Gate A smoke baseline proves:
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output. `StreamDependencyRegistry.t.sol` proves immutable dependency version
-  records, provenance/deprecation views, collection dependency pins, explicit
-  repinning, and frozen-output stability after later registry versions.
+  records, provenance/deprecation views, collection dependency
+  key/version/content-hash/registry-address pins, explicit repinning, and
+  output stability after later registry versions or registry swaps.
   `StreamMetadataGolden.t.sol` locks current off-chain pending/final URIs plus
   schema-v1 on-chain pending/final base64 JSON data URIs against fixtures. The
   on-chain schema exposes `metadata_schema_version` and `metadata_state`, and

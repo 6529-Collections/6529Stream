@@ -150,11 +150,12 @@ Dependency registry versioning now has P1-META-003 target-state coverage in
 versions instead of mutating previous versions, chunk-index updates derive a new
 version, version records expose typed content hashes, provenance, creator,
 creation block/time, and deprecation state, collection metadata pins a dependency
-key/version/content hash, explicit repinning moves an unfrozen collection to the
-latest version, explicit no-dependency collections pin version zero while the
-registry reserves the zero key from real dependency writes, nonzero unknown
-dependency keys fail closed, and frozen collection output plus freeze manifests
-remain stable after later registry versions.
+key/version/content hash/registry address, explicit repinning moves an unfrozen
+collection to the latest version in the current registry, explicit no-dependency
+collections pin version zero while the registry reserves the zero key from real
+dependency writes, nonzero unknown dependency keys fail closed, and collection
+output plus freeze manifests remain stable after later registry versions or
+registry swaps until an explicit repin.
 
 Metadata golden fixtures now have P1-META-001 characterization coverage in
 `StreamMetadataGolden.t.sol`: current off-chain pending and final token URI

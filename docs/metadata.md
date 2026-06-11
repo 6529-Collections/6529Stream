@@ -121,9 +121,12 @@ views remain for compatibility, while versioned views expose
 registry address at collection creation and whenever `updateCollectionInfo` runs
 the full collection update path. Later registry versions do not change existing
 collection output until the collection is explicitly repinned through
-`updateCollectionInfo`. `collectionDependencyVersionState(collectionId)` exposes
-the current pin, and `DependencyVersionPinned(collectionId, key, version,
-contentHash)` records each pin.
+`updateCollectionInfo`. Script retrieval and freeze manifests use that pinned
+registry address, so a later global registry swap cannot change an existing
+collection's dependency bytes until the collection is explicitly repinned.
+`collectionDependencyVersionState(collectionId)` exposes the current pin, and
+`DependencyVersionPinned(collectionId, key, version, contentHash, registry)`
+records each pin.
 
 `bytes32(0)` is the explicit no-dependency sentinel and pins version `0` plus
 the typed empty-script content hash. `DependencyRegistry` reserves that key for
@@ -153,21 +156,22 @@ CollectionFrozen(collectionId, manifestHash, schemaVersion, admin)
 
 The manifest hash commits to the schema version, collection display fields,
 metadata mode, dependency key, pinned dependency version, pinned dependency
-content hash, collection script chunk hashes, final supply counters, burn count,
-the tracked live-token metadata aggregate, randomizer epoch/contract, dependency
-registry address, core contract address, and chain ID. The live-token aggregate
-is maintained as tokens are minted, burned, finalized by randomness, or changed
-through token data, image, and attribute writes, so freeze eligibility and
-manifest preview do not scan every minted token.
+content hash, pinned dependency registry address, collection script chunk
+hashes, final supply counters, burn count, the tracked live-token metadata
+aggregate, randomizer epoch/contract, core contract address, and chain ID. The
+live-token aggregate is maintained as tokens are minted, burned, finalized by
+randomness, or changed through token data, image, and attribute writes, so
+freeze eligibility and manifest preview do not scan every minted token.
 
 After freeze, current `StreamCore` paths cannot mint into the collection, change
 collection metadata, change metadata mode, change token data, update token image
 or attributes, change the collection randomizer, set token hashes, finalize
 supply again, or swap the dependency registry while any collection is frozen.
 
-The manifest now uses the collection's pinned dependency version and content
-hash, so later dependency registry versions cannot change frozen collection
-output. Burn metadata and callback-after-burn semantics remain P1-META-005.
+The manifest now uses the collection's pinned dependency version, content hash,
+and registry address, so later dependency registry versions or registry swaps
+cannot change frozen collection output. Burn metadata and callback-after-burn
+semantics remain P1-META-005.
 
 ## Public-Beta Target
 

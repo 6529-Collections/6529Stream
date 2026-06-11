@@ -97,6 +97,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     mapping(uint256 => collectionInfoStructure) private collectionInfo;
 
     // dependency version and content hash pinned for each collection
+    mapping(uint256 => IDependencyRegistry) private collectionDependencyRegistries;
     mapping(uint256 => uint256) private collectionDependencyVersions;
     mapping(uint256 => bytes32) private collectionDependencyContentHashes;
 
@@ -189,7 +190,8 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
         uint256 indexed _collectionID,
         bytes32 indexed dependencyNameAndVersion,
         uint256 indexed version,
-        bytes32 contentHash
+        bytes32 contentHash,
+        address registry
     );
 
     // constructor
@@ -546,23 +548,25 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     function _pinCollectionDependency(uint256 _collectionID, bytes32 dependencyNameAndVersion)
         private
     {
+        IDependencyRegistry registry = dependencyRegistry;
         uint256 version = 0;
         bytes32 contentHash;
         if (dependencyNameAndVersion == bytes32(0)) {
-            contentHash =
-                dependencyRegistry.getDependencyScriptContentHashAtVersion(bytes32(0), version);
+            contentHash = registry.getDependencyScriptContentHashAtVersion(bytes32(0), version);
         } else {
-            version = dependencyRegistry.latestDependencyVersion(dependencyNameAndVersion);
+            version = registry.latestDependencyVersion(dependencyNameAndVersion);
             if (version == 0) {
                 revert UnknownDependency(dependencyNameAndVersion);
             }
-            contentHash = dependencyRegistry.getDependencyScriptContentHashAtVersion(
-                dependencyNameAndVersion, version
-            );
+            contentHash =
+                registry.getDependencyScriptContentHashAtVersion(dependencyNameAndVersion, version);
         }
+        collectionDependencyRegistries[_collectionID] = registry;
         collectionDependencyVersions[_collectionID] = version;
         collectionDependencyContentHashes[_collectionID] = contentHash;
-        emit DependencyVersionPinned(_collectionID, dependencyNameAndVersion, version, contentHash);
+        emit DependencyVersionPinned(
+            _collectionID, dependencyNameAndVersion, version, contentHash, address(registry)
+        );
     }
 
     function _requireMetadataMutationNotPaused() private view {
@@ -763,7 +767,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
             collectionInfo[_collectionID].collectionDependencyScript,
             collectionDependencyVersions[_collectionID],
             collectionDependencyContentHashes[_collectionID],
-            address(dependencyRegistry)
+            address(collectionDependencyRegistries[_collectionID])
         );
     }
 
@@ -915,21 +919,17 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
     function retrieveDependencyScript(uint256 tokenId) private view returns (string memory) {
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
         bytes32 dependencyNameAndVersion = collectionInfo[collectionId].collectionDependencyScript;
+        IDependencyRegistry registry = collectionDependencyRegistries[collectionId];
         uint256 version = collectionDependencyVersions[collectionId];
         string memory scripttext = "";
         for (
             uint256 i = 0;
-            i
-                < dependencyRegistry.getDependencyScriptCountAtVersion(
-                    dependencyNameAndVersion, version
-                );
+            i < registry.getDependencyScriptCountAtVersion(dependencyNameAndVersion, version);
             i++
         ) {
             scripttext = string.concat(
                 scripttext,
-                dependencyRegistry.getDependencyScriptAtVersion(
-                    dependencyNameAndVersion, version, i
-                )
+                registry.getDependencyScriptAtVersion(dependencyNameAndVersion, version, i)
             );
         }
         return scripttext;
@@ -1096,7 +1096,7 @@ contract StreamCore is ERC721Enumerable, ERC2981, Ownable, IERC4906 {
                 _FREEZE_INTEGRATION_STATE_TYPEHASH,
                 collectionRandomizerEpoch[_collectionID],
                 collectionAdditionalData[_collectionID].randomizerContract,
-                address(dependencyRegistry)
+                address(collectionDependencyRegistries[_collectionID])
             )
         );
     }

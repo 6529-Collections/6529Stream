@@ -28,7 +28,7 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
     bytes32 private constant DEPENDENCY_VERSION_DEPRECATED_TOPIC =
         keccak256("DependencyVersionDeprecated(bytes32,uint256,address)");
     bytes32 private constant DEPENDENCY_VERSION_PINNED_TOPIC =
-        keccak256("DependencyVersionPinned(uint256,bytes32,uint256,bytes32)");
+        keccak256("DependencyVersionPinned(uint256,bytes32,uint256,bytes32,address)");
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant TOKEN_ID = 10_000_000_000;
@@ -237,7 +237,12 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         vm.recordLogs();
         _pinCollectionDependency(deployed, dependencyKey);
         _assertDependencyVersionPinnedLog(
-            vm.getRecordedLogs(), address(deployed.core), dependencyKey, 1, v1Hash
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            dependencyKey,
+            1,
+            v1Hash,
+            address(deployed.dependencyRegistry)
         );
         _assertCollectionDependencyState(deployed, dependencyKey, 1, v1Hash);
 
@@ -261,7 +266,12 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         vm.recordLogs();
         _pinCollectionDependency(deployed, dependencyKey);
         _assertDependencyVersionPinnedLog(
-            vm.getRecordedLogs(), address(deployed.core), dependencyKey, 2, v2Hash
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            dependencyKey,
+            2,
+            v2Hash,
+            address(deployed.dependencyRegistry)
         );
         _assertCollectionDependencyState(deployed, dependencyKey, 2, v2Hash);
         deployed.core.retrieveDependencyScriptContentHash(TOKEN_ID)
@@ -270,6 +280,67 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
             .assertEq(
                 _expectedGenerativeScript(
                     TOKEN_ID, keccak256(abi.encode(uint256(1), TOKEN_ID, uint256(7))), "depV2"
+                ),
+                "repinned rendered script"
+            );
+    }
+
+    function testCollectionPinsDependencyRegistryAddressUntilExplicitRepin() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        bytes32 dependencyKey = keccak256("registry-pinned-library");
+        string[] memory originalChunks = _singleChunk("originalRegistryDep");
+        string[] memory replacementChunks = _singleChunk("replacementRegistryDep");
+        bytes32 originalHash = _contentHash(dependencyKey, originalChunks);
+        bytes32 replacementHash = _contentHash(dependencyKey, replacementChunks);
+
+        deployed.dependencyRegistry.addDependency(dependencyKey, originalChunks);
+        _pinCollectionDependency(deployed, dependencyKey);
+        _mintToken(deployed, TOKEN_ID, 7);
+        bytes32 manifestBeforeRegistrySwap =
+            deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
+
+        DependencyRegistry replacementRegistry = new DependencyRegistry(address(deployed.admins));
+        replacementRegistry.addDependency(dependencyKey, replacementChunks);
+        deployed.core.updateContracts(3, address(replacementRegistry));
+
+        _assertCollectionDependencyState(
+            deployed, dependencyKey, 1, originalHash, address(deployed.dependencyRegistry)
+        );
+        deployed.core.retrieveDependencyScriptContentHash(TOKEN_ID)
+            .assertEq(originalHash, "pinned token hash changed after registry swap");
+        deployed.core.retrieveGenerativeScript(TOKEN_ID)
+            .assertEq(
+                _expectedGenerativeScript(
+                    TOKEN_ID,
+                    keccak256(abi.encode(uint256(1), TOKEN_ID, uint256(7))),
+                    "originalRegistryDep"
+                ),
+                "rendered script used replacement registry before repin"
+            );
+        deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(manifestBeforeRegistrySwap, "manifest changed after registry swap");
+
+        vm.recordLogs();
+        _pinCollectionDependency(deployed, dependencyKey);
+        _assertDependencyVersionPinnedLog(
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            dependencyKey,
+            1,
+            replacementHash,
+            address(replacementRegistry)
+        );
+        _assertCollectionDependencyState(
+            deployed, dependencyKey, 1, replacementHash, address(replacementRegistry)
+        );
+        deployed.core.retrieveDependencyScriptContentHash(TOKEN_ID)
+            .assertEq(replacementHash, "repinned replacement hash");
+        deployed.core.retrieveGenerativeScript(TOKEN_ID)
+            .assertEq(
+                _expectedGenerativeScript(
+                    TOKEN_ID,
+                    keccak256(abi.encode(uint256(1), TOKEN_ID, uint256(7))),
+                    "replacementRegistryDep"
                 ),
                 "repinned rendered script"
             );
@@ -315,12 +386,24 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         uint256 version,
         bytes32 contentHash
     ) private view {
+        _assertCollectionDependencyState(
+            deployed, dependencyKey, version, contentHash, address(deployed.dependencyRegistry)
+        );
+    }
+
+    function _assertCollectionDependencyState(
+        DeployedStream memory deployed,
+        bytes32 dependencyKey,
+        uint256 version,
+        bytes32 contentHash,
+        address expectedRegistry
+    ) private view {
         (bytes32 pinnedKey, uint256 pinnedVersion, bytes32 pinnedContentHash, address registry) =
             deployed.core.collectionDependencyVersionState(COLLECTION_ID);
         pinnedKey.assertEq(dependencyKey, "pinned key");
         pinnedVersion.assertEq(version, "pinned version");
         pinnedContentHash.assertEq(contentHash, "pinned content hash");
-        registry.assertEq(address(deployed.dependencyRegistry), "pinned registry");
+        registry.assertEq(expectedRegistry, "pinned registry");
     }
 
     function _assertDependencyVersionCreatedLog(
@@ -379,7 +462,8 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         address emitter,
         bytes32 dependencyKey,
         uint256 version,
-        bytes32 contentHash
+        bytes32 contentHash,
+        address expectedRegistry
     ) private pure {
         bool found = false;
         for (uint256 i; i < logs.length; i++) {
@@ -391,8 +475,10 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
             logs[i].topics[1].assertEq(bytes32(COLLECTION_ID), "pinned collection topic");
             logs[i].topics[2].assertEq(dependencyKey, "pinned key topic");
             logs[i].topics[3].assertEq(bytes32(version), "pinned version topic");
-            bytes32 pinnedContentHash = abi.decode(logs[i].data, (bytes32));
+            (bytes32 pinnedContentHash, address registry) =
+                abi.decode(logs[i].data, (bytes32, address));
             pinnedContentHash.assertEq(contentHash, "pinned content hash");
+            registry.assertEq(expectedRegistry, "pinned registry");
             found = true;
             break;
         }
