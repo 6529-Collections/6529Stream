@@ -32,11 +32,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/broadcast-manifest-ingestion` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/108` |
+| Active PR branch | `codex/metadata-size-limits` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/110` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 14:30 UTC` |
+| Last updated | `2026-06-11 15:06 UTC` |
 
 ## Packaging Notes
 
@@ -109,7 +109,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 53 | Add release change approval policy and changelog gate | Gate G support | Implement P1-RELEASE-005 by documenting ABI/schema/release change approval rules and adding a local/CI changelog gate for release-impacting paths | Merged in PR #104 |
 | 54 | Generate machine-readable release manifest | Gate G support | Implement P1-RELEASE-006 by generating a deterministic top-level release manifest over committed release/deployment artifacts, governance docs, and release-ceremony status, with local/CI drift checks | Merged in PR #106 |
 | 55 | Generate source verification inputs | Gate G support | Implement P1-RELEASE-007 by generating deterministic source-verification inputs from Foundry artifacts, source files, compiler settings, and contract config, with local/CI drift checks | Merged in PR #108 |
-| 56 | Add Foundry broadcast manifest ingestion | Gate E/Gate G support | Implement P1-DEPLOY-004 by parsing sanitized Foundry broadcast output into deterministic deployment-manifest evidence with local/CI drift checks | Active |
+| 56 | Add Foundry broadcast manifest ingestion | Gate E/Gate G support | Implement P1-DEPLOY-004 by parsing sanitized Foundry broadcast output into deterministic deployment-manifest evidence with local/CI drift checks | Merged in PR #110 |
+| 57 | Add metadata size limits | Gate D/Gate G support | Continue P1-META-006 by enforcing numeric byte caps for metadata storage inputs, generated `tokenURI` output, and dependency registry metadata, with focused tests, docs, release artifact refresh, and roadmap traceability | Active |
 
 ## Current PR Worklog
 
@@ -5064,9 +5065,9 @@ Merge evidence:
 
 ### PR candidate: Add Foundry broadcast manifest ingestion (Queue Item 56)
 
-Status: PR open; CI and local `make check` passed on the review-fix code head,
-CodeRabbit resolved the secret-key normalization thread, and this state-only
-follow-up replaces a non-auditable head placeholder.
+Status: Merged as PR #110; CI and local `make check` passed on the review-fix
+code head, CodeRabbit resolved the secret-key normalization thread, the
+state-only head placeholder fix was accepted, and issue #109 closed completed.
 Branch: `codex/broadcast-manifest-ingestion`.
 Pull request: `https://github.com/6529-Collections/6529Stream/pull/110`.
 Review-fix code head SHA: `29412bd342c8c3676265599b33e4eaab8caa2e9b`.
@@ -5119,15 +5120,80 @@ Validation status:
   release-checksum tests/check, changelog tests/check, Python compile,
   Bash syntax, PowerShell syntax, `git diff --check`, full `make check`, and
   Windows `scripts\check.ps1` pass locally.
-- CI validation pending after PR open.
+- CI validation passed before merge.
 - CodeRabbit-response validation passed:
   `python scripts\test_broadcast_manifest_input.py` and
   `python scripts\generate_broadcast_manifest_input.py --check`.
+
+### PR candidate: Add metadata size limits (Queue Item 57)
+
+Status: Local implementation validated on branch `codex/metadata-size-limits`;
+ready to commit, push, open PR, and request CodeRabbit review.
+Branch: `codex/metadata-size-limits`.
+Pull request: TBD.
+Related issue:
+
+- `https://github.com/6529-Collections/6529Stream/issues/51`
+
+Goal:
+
+- Continue P1-META-006 by enforcing numeric byte caps on metadata inputs and
+  generated metadata output without bundling the remaining URI policy, semantic
+  attribute schema, invalid UTF-8 policy, or browser render-sandbox work.
+- Keep the PR deployable under the production via-IR EIP-170 size gate.
+- Refresh ABI/bytecode release artifacts and docs because the contract ABI gains
+  public limit constants and structured custom errors.
+
+Initial scope:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/DependencyRegistry.sol`
+- `test/StreamMetadataSizeLimits.t.sol`
+- metadata/status/blocker docs, roadmap/test/run-state traceability,
+  changelog, and generated release/deployment artifacts
+
+Implementation so far:
+
+- Added `MetadataFieldTooLarge(field, actual, maximum)` and
+  `DependencyFieldTooLarge(field, actual, maximum)` custom errors.
+- Added public byte-limit constants for collection text fields, collection
+  script chunks/counts, token data, token image, token raw attributes,
+  generated `tokenURI`, dependency script chunks/counts, and dependency
+  provenance.
+- Enforced limits at collection creation/update, token mint/data/image/attribute
+  mutation, generated `tokenURI`, and dependency version creation/update paths.
+- Added boundary and oversized-input tests for Core metadata inputs, generated
+  output, and dependency registry metadata.
+- Regenerated release artifacts, deployment manifests, address books, source
+  verification inputs, release manifest, and checksum bundle after the ABI and
+  bytecode changes.
+
+Validation status:
+
+- `forge test --match-contract StreamMetadataSizeLimitsTest -vvv` passes.
+- `forge test --match-contract StreamMetadataEscapingTest -vvv` passes.
+- `forge test --match-contract StreamDependencyRegistryTest -vvv` passes.
+- `forge build --sizes --via-ir --skip test --skip script --force` passes with
+  `StreamCore` at 24,461 runtime bytes and 115 bytes of EIP-170 headroom.
+- `make release-checksums` passes and regenerates deterministic artifacts.
+- Full `make check` passes.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passes.
+- `git diff --check` passes.
+- Touched-file formatting passes:
+  `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\DependencyRegistry.sol test\StreamMetadataSizeLimits.t.sol`.
+- Full `forge fmt --check smart-contracts` still fails on existing legacy
+  formatting outside this PR and remains tracked as a broader repo cleanup.
+- PR publication remains pending.
 
 ## Decision Log
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 15:06 | Validate Queue Item 57 locally | Focused metadata/dependency tests, full `make check`, Windows wrapper, production size gate, release artifact generation/checks, touched-file formatting, and whitespace validation pass; full smart-contract formatting still fails on existing untouched legacy files |
+| 2026-06-11 14:53 | Start Queue Item 57 | Issue #51 remains open for P1-META-006; numeric metadata size limits are a deterministic, high-value slice after PR #87/#88 and can ship without deciding the remaining URI/schema/UTF-8/browser sandbox policies |
+| 2026-06-11 14:51 | Enforce generated response cap at `tokenURI` boundary | A separate generated-animation URI cap made `StreamCore` exceed EIP-170; enforcing the generated `tokenURI` cap preserves the external response limit while keeping production bytecode deployable |
+| 2026-06-11 14:49 | Trim `StreamCore` size before docs/artifact work | Initial size-limit implementation exceeded EIP-170 by 123 bytes; removing redundant generated-animation measurement brought `StreamCore` to 24,461 runtime bytes with 115 bytes of headroom |
+| 2026-06-11 14:46 | Merge PR #110 | CI passed, CodeRabbit status and review threads were clean after the state-placeholder fix, PR #110 merged as `d248502263a1c8cd7d4b415750d4cfd5e78f2e0a`, and issue #109 closed completed |
 | 2026-06-11 14:30 | Address CodeRabbit PR #110 state-log nitpick locally | Replaced the non-deterministic head placeholder with concrete review-fix code head `29412bd342c8c3676265599b33e4eaab8caa2e9b`; this follow-up is state-only and exists to keep the durable run log auditable |
 | 2026-06-11 14:23 | Address CodeRabbit PR #110 finding locally | Accepted the secret-key normalization finding; forbidden-key checks now lowercase and strip non-alphanumerics before comparison, regression tests cover mixed-case and separator variants, and focused generator tests/check pass |
 | 2026-06-11 14:10 | Open PR #110 | Broadcast-manifest ingestion PR published at `https://github.com/6529-Collections/6529Stream/pull/110`; state-only follow-up will push the PR URL before requesting CodeRabbit on the final head |

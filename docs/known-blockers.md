@@ -79,10 +79,13 @@ contributors who start from the README.
   string fields, rejects raw attribute fragments that can break out of the
   enclosing attribute array, escapes generated animation wrapper fields, parses
   `tokenData` from an escaped string, and neutralizes closing-script sequences
-  in generated HTML. Remaining metadata blockers include dependency artifact
-  packaging and deployment migration runbooks beyond registry provenance
-  strings, browser render-sandbox automation, semantic attribute schema
-  validation, URI policy, invalid UTF-8 policy, and size limits.
+  in generated HTML. Numeric byte limits now cover collection display fields,
+  collection scripts, token data, token images, token attributes, generated
+  `tokenURI` output, dependency scripts, and dependency provenance. Remaining
+  metadata blockers include dependency artifact packaging and deployment
+  migration runbooks beyond registry provenance strings, browser render-sandbox
+  automation, semantic attribute schema validation, URI policy, and invalid
+  UTF-8 policy.
 - `StreamCore` now uses a linked metadata renderer library, removes optional
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
@@ -108,9 +111,9 @@ contributors who start from the README.
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
   bounded payment sequence invariant baseline now exist, but browser-level
-  generated metadata render-sandbox tests, metadata size-limit tests, deployment,
-  production-governance, richer supply/replay/freeze invariant tests, and any
-  future shared-ledger invariants are still missing.
+  generated metadata render-sandbox tests, deployment, production-governance,
+  richer supply/replay/freeze invariant tests, and any future shared-ledger
+  invariants are still missing.
 - Deployment scripts, manifests, and rehearsal runbooks are missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

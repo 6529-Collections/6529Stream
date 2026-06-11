@@ -19,6 +19,9 @@ the release policy in `docs/release-policy.md`.
 - Added deterministic Foundry broadcast manifest-input ingestion from sanitized
   broadcast JSON, with generated broadcast-derived deployment manifest and
   address-book artifacts covered by release manifest and checksum gates.
+- Added contract-enforced metadata byte limits for collection display fields,
+  collection scripts, token data, token images, token attributes, generated
+  `tokenURI` output, dependency scripts, and dependency provenance strings.
 
 ### Release Impact
 
@@ -34,6 +37,8 @@ the release policy in `docs/release-policy.md`.
 - Gate E/G now checks sanitized broadcast-derived deployment evidence before
   deployment manifests, address books, release manifests, and checksums are
   considered current.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  metadata size-limit custom errors and public limit constants.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
 

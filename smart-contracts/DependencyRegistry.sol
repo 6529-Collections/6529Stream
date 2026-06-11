@@ -19,12 +19,19 @@ contract DependencyRegistry {
     bytes32 public constant DEPENDENCY_SCRIPT_CHUNK_TYPEHASH = keccak256(
         "6529StreamDependencyScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
     );
+    uint256 public constant MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES = 8_192;
+    uint256 public constant MAX_DEPENDENCY_SCRIPT_CHUNKS = 32;
+    uint256 public constant MAX_DEPENDENCY_PROVENANCE_BYTES = 2_048;
+    bytes32 private constant _FIELD_DEPENDENCY_SCRIPT = "dependency.script";
+    bytes32 private constant _FIELD_DEPENDENCY_SCRIPT_COUNT = "dependency.scriptCount";
+    bytes32 private constant _FIELD_DEPENDENCY_PROVENANCE = "dependency.provenance";
 
     error DependencyChunkIndexOutOfBounds(
         bytes32 dependencyNameAndVersion, uint256 version, uint256 index
     );
     error DependencyVersionMissing(bytes32 dependencyNameAndVersion, uint256 version);
     error DependencyKeyReserved(bytes32 dependencyNameAndVersion);
+    error DependencyFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
 
     event DependencyVersionCreated(
         bytes32 indexed dependencyNameAndVersion,
@@ -294,6 +301,7 @@ contract DependencyRegistry {
         string memory _provenance
     ) private {
         _requireDependencyKeyNotReserved(_collectionDependencyName);
+        _requireDependencyLimits(_libraryScript, _provenance);
         uint256 version = latestDependencyVersions[_collectionDependencyName] + 1;
         bytes32 contentHash =
             _hashDependencyScriptContent(_collectionDependencyName, _libraryScript);
@@ -319,6 +327,26 @@ contract DependencyRegistry {
         if (dependencyNameAndVersion == bytes32(0)) {
             revert DependencyKeyReserved(dependencyNameAndVersion);
         }
+    }
+
+    function _requireDependencyLimits(string[] memory chunks, string memory provenance)
+        private
+        pure
+    {
+        if (chunks.length > MAX_DEPENDENCY_SCRIPT_CHUNKS) {
+            revert DependencyFieldTooLarge(
+                _FIELD_DEPENDENCY_SCRIPT_COUNT, chunks.length, MAX_DEPENDENCY_SCRIPT_CHUNKS
+            );
+        }
+        for (uint256 i = 0; i < chunks.length; i++) {
+            _requireMaxBytes(_FIELD_DEPENDENCY_SCRIPT, chunks[i], MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES);
+        }
+        _requireMaxBytes(_FIELD_DEPENDENCY_PROVENANCE, provenance, MAX_DEPENDENCY_PROVENANCE_BYTES);
+    }
+
+    function _requireMaxBytes(bytes32 field, string memory value, uint256 maximum) private pure {
+        uint256 actual = bytes(value).length;
+        if (actual > maximum) revert DependencyFieldTooLarge(field, actual, maximum);
     }
 
     // Slither maps the provenance timestamp field to this version-existence check.

@@ -50,9 +50,9 @@ base64-encoded HTML animation URL.
 fields emitted by on-chain metadata and rejects raw attribute fragments that
 contain literal control characters, unterminated strings, unbalanced
 object/array delimiters, or unquoted `]`/`}` breakout attempts. It does not yet
-solve semantic attribute schema validation, metadata size limits, dependency
-artifact packaging beyond registry provenance strings, stale randomness display,
-or deployment release manifests.
+solve semantic attribute schema validation, URI policy, invalid UTF-8 policy,
+browser render-sandbox checks, dependency artifact packaging beyond registry
+provenance strings, stale randomness display, or deployment release manifests.
 
 ## Escaping And Attribute Fragments
 
@@ -81,8 +81,30 @@ literals, parses `tokenData` through `JSON.parse("[" + tokenDataRaw + "]")`,
 and neutralizes literal `</script` sequences inside the generated wrapper
 script. This protects wrapper structure, but it does not sandbox artist
 `collectionScript` code or certify dependency code as safe. Release tooling
-still needs URI policy, size limits, semantic attribute validation, invalid
-UTF-8 policy, and browser render-sandbox checks before public beta.
+still needs URI policy, semantic attribute validation, invalid UTF-8 policy,
+and browser render-sandbox checks before public beta.
+
+## Size Limits
+
+`StreamCore` and `DependencyRegistry` now reject oversized metadata inputs
+before storing them, and `StreamCore.tokenURI` rejects generated responses that
+exceed the configured response cap. Reverts use
+`MetadataFieldTooLarge(field, actual, maximum)` or
+`DependencyFieldTooLarge(field, actual, maximum)` so callers can identify the
+failed surface without parsing strings.
+
+| Surface | Limit |
+| --- | ---: |
+| Collection text fields: name, artist, description, website, license, base URI, library URL | 2,048 bytes each |
+| Collection script chunk | 8,192 bytes |
+| Collection script chunks per collection | 32 chunks |
+| Token data | 4,096 bytes |
+| Token image | 2,048 bytes |
+| Token raw attributes fragment | 8,192 bytes |
+| Generated `tokenURI` response | 65,536 bytes |
+| Dependency script chunk | 8,192 bytes |
+| Dependency script chunks per version | 32 chunks |
+| Dependency provenance | 2,048 bytes |
 
 ## Golden Fixtures
 
@@ -247,8 +269,7 @@ cannot change frozen collection output.
 ADR 0006 requires future metadata work to add:
 
 - stale-state display policy
-- HTML/JavaScript escaping or rejection for generated animation code
+- browser render-sandbox proofing for generated animation code
 - final raw-attribute schema validation or structured attributes
-- numeric size limits for metadata fields and generated outputs
 - dependency artifact packaging and release manifests beyond registry
   provenance strings

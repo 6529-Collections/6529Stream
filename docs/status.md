@@ -7,8 +7,8 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 23,139 bytes,
-  leaving 1,437 bytes of EIP-170 headroom under the IR-optimized deployment
+  size gate. Current `StreamCore` production runtime size is 24,461 bytes,
+  leaving 115 bytes of EIP-170 headroom under the IR-optimized deployment
   profile.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
@@ -68,7 +68,10 @@ The current Gate A smoke baseline proves:
   the wrapper escapes the external library attribute, embeds `tokenData` and
   dependency script content through escaped JavaScript strings, and neutralizes
   closing-script sequences so hostile metadata inputs do not create extra raw
-  wrapper `</script>` tags.
+  wrapper `</script>` tags. `StreamMetadataSizeLimits.t.sol` proves byte caps
+  for collection display fields, collection script chunks and counts, token
+  data, token images, token raw attributes, generated `tokenURI` output,
+  dependency script chunks and counts, and dependency provenance strings.
 - `StreamDeploymentManifest.t.sol` proves the first Gate E local deployment
   rehearsal can deploy and wire the stack, configure sample admin/pause/signer
   ceremony state, transfer Ownable control to the configured Safe placeholder,
@@ -134,7 +137,7 @@ high/medium baseline, fork/testnet deployment rehearsals, production manifest
 generation from live broadcast outputs, detached checksum signatures, signed
 release tags, production address books, verified live
 deployment hashes and explorer submissions, remaining generated
-HTML/JavaScript render-sandbox hardening, metadata size limits, dependency
+HTML/JavaScript render-sandbox hardening, dependency
 artifact packaging and migration runbooks beyond registry provenance strings,
 semantic attribute schema validation, URI policy, invalid UTF-8 policy, browser
 render-sandbox automation, deployment discipline, and the broader P0/P1 test

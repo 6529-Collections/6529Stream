@@ -174,9 +174,16 @@ characters, and unterminated strings revert with the metadata attribute guard.
 The suite also decodes final animation HTML and asserts wrapper-boundary
 escaping for the external library attribute, `tokenData` JavaScript string
 embedding, dependency script JavaScript string embedding, and literal
-closing-script sequences. Browser-level render-sandbox tests, URI policy,
-semantic attribute schema validation, invalid UTF-8 policy, and numeric
-size-limit tests remain future P1-META-006 work.
+closing-script sequences.
+
+Metadata size limits now have P1-META-006 coverage in
+`StreamMetadataSizeLimits.t.sol`: collection display fields, collection script
+chunks and chunk counts, token data, token images, token raw attributes,
+generated `tokenURI` output, dependency script chunks and chunk counts, and
+dependency provenance strings accept configured boundaries and reject oversized
+inputs with structured custom errors. Browser-level render-sandbox tests, URI
+policy, semantic attribute schema validation, and invalid UTF-8 policy remain
+future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
