@@ -22,7 +22,7 @@ SPEC.loader.exec_module(generator)
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:
-        json.dump(value, handle, indent=2)
+        json.dump(value, handle, indent=2, ensure_ascii=False)
         handle.write("\n")
 
 
