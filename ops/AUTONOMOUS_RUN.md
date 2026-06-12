@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-nonlocal-evidence-schema` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/171` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/172` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/174` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 21:02 UTC` |
+| Last updated | `2026-06-12 21:03 UTC` |
 
 ## Packaging Notes
 
@@ -144,16 +144,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | Merged in PR #167 |
 | 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Merged in PR #169 |
 | 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | Merged in PR #171 |
-| 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | In progress locally; PR not opened yet |
+| 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | PR #174 open; waiting for CI and CodeRabbit |
 | 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | Planned next after Queue Item 89 |
 
 ## Current PR Worklog
 
 ### PR candidate: Reconcile Gate G roadmap after non-local evidence schema merge (Queue Item 89)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #174 open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/172`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/174`.
+CodeRabbit request: issue comment `4695446245`.
 Branch: `codex/reconcile-nonlocal-evidence-schema`.
 Branch started from PR #171 squash merge commit
 `6a5a2f96b8196c2387eda3ed3187cbde2616f9cb`.
@@ -195,6 +196,8 @@ Implementation notes so far:
   it as Queue Item 90.
 - Refreshed roadmap verification metadata to reference the completed PR #171
   Linux CI run instead of pending PR state.
+- Opened PR #174 against `main`, linked `Closes #172`, and requested
+  CodeRabbit review in comment `4695446245`.
 
 Validation completed locally:
 
@@ -8159,6 +8162,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 21:03 | Open PR #174 and request CodeRabbit | State-only reconciliation PR opened against `main`, linked `Closes #172`, requested CodeRabbit in comment `4695446245`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 20:59 | Create issue #173 and select Queue Item 90 | After PR #171 merged and the state-only reconciliation issue #172 was opened, the next no-secret Gate E/G gap is a protocol incident-response runbook covering stuck auctions, failed randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes |
 | 2026-06-12 20:57 | Create issue #172 and select Queue Item 89 | PR #171 merged with CI run `27442075849` and CodeRabbit success on head `7050e0ea474c507126c4d2e11744e8b61fd3ab52`; the durable run state and roadmap verification metadata needed a state-only reconciliation before the next implementation PR |
 | 2026-06-12 20:56 | Merge PR #171 | Non-local release evidence metadata schema/checker merged as `6a5a2f96b8196c2387eda3ed3187cbde2616f9cb`; final head `7050e0ea474c507126c4d2e11744e8b61fd3ab52` passed CI run `27442075849`, CodeRabbit status was success with no actionable comments, and issue #170 closed completed |
