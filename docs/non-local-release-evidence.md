@@ -305,4 +305,3 @@ A reviewer should be able to answer yes to every question below:
 
 Only after that review should a release PR claim a public-beta or production
 requirement is complete.
-

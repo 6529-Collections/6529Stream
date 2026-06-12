@@ -453,8 +453,8 @@
       },
       {
         "path": "docs/non-local-release-evidence.md",
-        "sha256": "sha256:27a9219255f035eecf93e8656c74f1b9d240a88479c4166620849c2ede2b6721",
-        "size_bytes": 13365
+        "sha256": "sha256:6d63c90596cc0f374acad30c9a0e4b0411971900f9586128d8f855771f559214",
+        "size_bytes": 13364
       },
       {
         "path": "docs/architecture.md",

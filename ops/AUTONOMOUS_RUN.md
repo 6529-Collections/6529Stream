@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/169` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 19:39 UTC` |
+| Last updated | `2026-06-12 19:42 UTC` |
 
 ## Packaging Notes
 
@@ -148,7 +148,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add non-local release evidence intake runbook (Queue Item 87)
 
-Status: PR open; GitHub Actions CI and CodeRabbit review pending.
+Status: CI hygiene fix ready to push; GitHub Actions rerun and CodeRabbit
+review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/168`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/169`.
 CodeRabbit request: issue comment `4694642716`.
@@ -214,6 +215,9 @@ Implementation notes so far:
   evidence docs, tooling docs, release-artifacts docs, and roadmap.
 - Added a changelog entry for the release governance/process change.
 - Opened PR #169 against `main` and requested CodeRabbit review.
+- GitHub Actions CI run `27438712570` failed repository hygiene on an extra
+  blank line at EOF in `docs/non-local-release-evidence.md`; trimmed the EOF
+  and regenerated release manifest/checksum artifacts.
 
 Validation so far:
 
@@ -228,6 +232,12 @@ Validation so far:
 - `rg -n "^#|^##|^###" docs\non-local-release-evidence.md docs\release-readiness.md docs\public-beta-evidence.md docs\release-policy.md docs\tooling.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
 - `git diff --check`
 - `make check`
+- Post-CI-hygiene fix: `git diff --check`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`,
+  `python scripts/check_release_readiness.py`,
+  `python scripts/test_release_readiness.py`, and
+  `python scripts/check_changelog.py`
 
 ### PR #167: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
 
@@ -7938,6 +7948,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 19:42 | Fix PR #169 CI hygiene failure | GitHub Actions run `27438712570` failed repository hygiene on an extra blank line at EOF in `docs/non-local-release-evidence.md`; trimmed the EOF, regenerated release manifest/checksum artifacts, and reran focused whitespace/readiness/manifest/checksum/changelog validation |
 | 2026-06-12 19:39 | Open PR #169 and request CodeRabbit | Non-local release evidence intake PR opened against `main`, linked `Closes #168`, requested CodeRabbit in comment `4694642716`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 19:36 | Run full local gate for Queue Item 87 | `make check` passed after the focused checks; only existing Foundry warning noise appeared, and no unexpected tracked artifacts changed |
 | 2026-06-12 19:29 | Finish local Queue Item 87 validation | Non-local evidence runbook docs/checker updates, release-manifest governance-doc coverage, regenerated manifest/checksum artifacts, public-beta evidence, changelog, Python compile, heading scan, and whitespace checks all pass locally |
