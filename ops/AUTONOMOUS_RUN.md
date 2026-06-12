@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/release-signature-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/155` |
-| Active PR | `TBD for https://github.com/6529-Collections/6529Stream/issues/156` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/157` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 14:01 UTC` |
+| Last updated | `2026-06-12 14:03 UTC` |
 
 ## Packaging Notes
 
@@ -141,9 +141,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release signature evidence baseline (Queue Item 81)
 
-Status: branch created; implementation in progress before PR.
+Status: PR #157 open; CodeRabbit review not yet requested.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/156`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/157`.
 CodeRabbit request: TBD after PR opens.
 Branch: `codex/release-signature-evidence`.
 Branch started from PR #155 squash merge commit
