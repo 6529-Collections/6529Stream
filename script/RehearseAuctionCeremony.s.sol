@@ -30,10 +30,16 @@ contract AuctionCeremonyRandomizer is IRandomizer {
         external
     {
         core.setTokenHash(
-            collectionId,
-            mintIndex,
-            keccak256(abi.encode("local-auction-ceremony", collectionId, mintIndex, saltfunO))
+            collectionId, mintIndex, deterministicHash(collectionId, mintIndex, saltfunO)
         );
+    }
+
+    function deterministicHash(uint256 collectionId, uint256 mintIndex, uint256 saltfunO)
+        public
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode("local-auction-ceremony", collectionId, mintIndex, saltfunO));
     }
 
     function isRandomizerContract() external pure returns (bool) {
@@ -98,6 +104,7 @@ contract RehearseAuctionCeremony {
         vm.stopBroadcast();
 
         uint256 tokenId = drops.retrieveTokenID(authorization.dropId);
+        _assertTokenHash(core, randomizer, deployed.sampleCollectionId, tokenId);
         _assert(core.ownerOf(tokenId) == address(auctions), "auction custody missing");
         _assert(
             uint8(auctions.retrieveAuctionStatus(tokenId))
@@ -196,6 +203,18 @@ contract RehearseAuctionCeremony {
         return abi.encodePacked(r, s, v);
     }
 
+    function _assertTokenHash(
+        StreamCore core,
+        AuctionCeremonyRandomizer randomizer,
+        uint256 collectionId,
+        uint256 tokenId
+    ) private view {
+        bytes32 tokenHash = core.retrieveTokenHash(tokenId);
+        bytes32 expectedTokenHash = randomizer.deterministicHash(collectionId, tokenId, 0);
+        _assert(tokenHash != bytes32(0), "token hash missing");
+        _assert(tokenHash == expectedTokenHash, "token hash mismatch");
+    }
+
     function _withdrawProceeds(
         StreamAuctions auctions,
         RehearseDeployment.DeploymentConfig memory config
@@ -210,24 +229,26 @@ contract RehearseAuctionCeremony {
             posterCredit + protocolCredit + curatorCredit == BID_AMOUNT, "proceeds credit mismatch"
         );
 
-        posterWithdrawn = _withdrawFor(auctions, POSTER);
-        protocolWithdrawn = _withdrawFor(auctions, config.payout);
-        curatorWithdrawn = _withdrawFor(auctions, CURATOR_PROCEEDS_RECIPIENT);
+        _withdrawFor(auctions, POSTER);
+        _withdrawFor(auctions, config.payout);
+        _withdrawFor(auctions, CURATOR_PROCEEDS_RECIPIENT);
 
-        _assert(posterWithdrawn == posterCredit, "poster withdrawal mismatch");
-        _assert(protocolWithdrawn == protocolCredit, "protocol withdrawal mismatch");
-        _assert(curatorWithdrawn == curatorCredit, "curator withdrawal mismatch");
+        _assert(auctions.auctionPosterCredits(POSTER) == 0, "poster credit remains");
+        _assert(auctions.auctionProtocolCredits(config.payout) == 0, "protocol credit remains");
+        _assert(
+            auctions.auctionCuratorCredits(CURATOR_PROCEEDS_RECIPIENT) == 0,
+            "curator credit remains"
+        );
+
+        posterWithdrawn = posterCredit;
+        protocolWithdrawn = protocolCredit;
+        curatorWithdrawn = curatorCredit;
     }
 
-    function _withdrawFor(StreamAuctions auctions, address account)
-        private
-        returns (uint256 withdrawn)
-    {
-        uint256 balanceBefore = account.balance;
+    function _withdrawFor(StreamAuctions auctions, address account) private {
         vm.startBroadcast(account);
         auctions.withdrawAuctionProceedsCreditTo(payable(account));
         vm.stopBroadcast();
-        withdrawn = account.balance - balanceBefore;
     }
 
     function _assert(bool condition, string memory message) private pure {

@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/141` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 06:09 UTC` |
+| Last updated | `2026-06-12 06:27 UTC` |
 
 ## Packaging Notes
 
@@ -134,7 +134,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 ### PR candidate: Add dry-run auction ceremony rehearsal (Queue Item 73)
 
 Status: PR #141 opened and CodeRabbit requested in PR comment `4687976396`;
-CI and bot review pending for issue #140.
+initial CI passed, CodeRabbit review findings are addressed locally, and the
+review-response commit is pending push for latest-head CI/re-review.
 Branch `codex/dry-run-auction-ceremony` started from PR #139 merge commit
 `e09e422a4f95fbf6948d182fcff83a25aaf88e0c`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/140`.
@@ -168,6 +169,9 @@ Initial candidate files:
 - `CHANGELOG.md`
 - `ops/ROADMAP.md`
 - `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `release-artifacts/latest/release-manifest.json`
 
 Validation plan:
 
@@ -192,6 +196,10 @@ Current implementation notes:
 - Updated deployment/tooling/status/blocker/test/script docs, changelog, and
   roadmap state to distinguish local Anvil ceremony evidence from remaining
   fork/testnet/live release evidence.
+- Addressed CodeRabbit review findings by recording generated release artifacts
+  in the candidate-file scope, asserting the deterministic randomizer wrote the
+  expected token hash, and using ledger credits rather than gas-affected account
+  balance deltas as proceeds evidence.
 
 Validation completed:
 
@@ -213,6 +221,16 @@ Validation completed:
   `scripts/bootstrap-windows.ps1`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
 - `git diff --cached --check`
+- Post-CodeRabbit fix validation:
+  `forge fmt script\RehearseAuctionCeremony.s.sol test\StreamDeploymentManifest.t.sol`
+- Post-CodeRabbit fix validation:
+  `forge fmt --check script\RehearseAuctionCeremony.s.sol test\StreamDeploymentManifest.t.sol`
+- Post-CodeRabbit fix validation:
+  `forge test --match-path test\StreamDeploymentManifest.t.sol -vvv`
+- Post-CodeRabbit fix validation:
+  `forge script script\RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`
+- Post-CodeRabbit fix validation: `make check`
+- Post-CodeRabbit fix validation: `git diff --check`
 
 ### PR candidate: Add deployment-rehearsal metadata browser coverage (Queue Item 72)
 
@@ -6915,6 +6933,7 @@ Outcome:
 | 2026-06-10 22:58 | Finish local Queue Item 39 validation | Focused ERC-4906 event tests, full `make check`, Windows wrapper, formatting, whitespace, heading scan, traceability grep, and Slither baseline comparison all pass; Slither remains at 721 total findings with unchanged 4 High / 19 Medium counts and zero `StreamMetadataEvents` reentrancy-event rows |
 | 2026-06-10 23:02 | Open PR #82 | ERC-4906 metadata update event PR opened on head `96052819e2cfd5d6f53c4793af03baaadda2ad00`; CodeRabbit requested in issue comment `4675495632`; Claude intentionally skipped per current user instruction |
 | 2026-06-10 23:08 | Address CodeRabbit PR #82 coverage suggestions | Accepted CodeRabbit's low-risk suggestions from comment `4675512759`: added pre-mint `setTokenHash` no-event coverage, two-token image/attribute event coverage, and the `_exists` guard comment; focused tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison all pass with 209 tests |
+| 2026-06-12 06:27 | Address CodeRabbit PR #141 review | Recorded generated release-artifact files in scope, added deterministic token-hash evidence to the auction ceremony rehearsal, replaced gas-affected proceeds balance deltas with ledger-credit evidence, and reran focused rehearsal validation plus `make check` |
 
 ## Resume Instructions
 
