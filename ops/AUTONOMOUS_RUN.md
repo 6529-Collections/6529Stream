@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-incident-response-runbook` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/175` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/176` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/178` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 22:07 UTC` |
+| Last updated | `2026-06-12 22:10 UTC` |
 
 ## Packaging Notes
 
@@ -146,19 +146,22 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | Merged in PR #171 |
 | 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | Merged in PR #174 |
 | 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | Merged in PR #175 |
-| 91 | Reconcile roadmap after incident response runbook merge | Gate G support | Implement issue #176 by marking PR #175 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and selecting the next signing examples target | In progress locally; PR not opened yet |
+| 91 | Reconcile roadmap after incident response runbook merge | Gate G support | Implement issue #176 by marking PR #175 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and selecting the next signing examples target | PR #178 open; waiting for CI and CodeRabbit |
 | 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Planned next after Queue Item 91 |
 
 ## Current PR Worklog
 
 ### PR candidate: Reconcile roadmap after incident response runbook merge (Queue Item 91)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #178 open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/176`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/178`.
+CodeRabbit request: issue comment `4695830022`.
 Branch: `codex/reconcile-incident-response-runbook`.
 Branch started from PR #175 squash merge commit
 `4be2808e9e6f654143794d4db29f455eabff3a70`.
+Head before PR-number state update:
+`c45830485646a115dc969a6d22707d8a3151169d`.
 
 Goal:
 
@@ -175,6 +178,11 @@ Validation target:
 
 - `rg -n "Last verified|CI run|Queue Item 91|Queue Item 92|PR #175|#177" ops\AUTONOMOUS_RUN.md ops\ROADMAP.md`
 - `git diff --check`
+
+Remote validation:
+
+- GitHub Actions CI pending on PR #178.
+- CodeRabbit review requested in issue comment `4695830022`; review pending.
 
 ### PR candidate: Add protocol incident response runbooks (Queue Item 90)
 
@@ -8336,6 +8344,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 22:10 | Open PR #178 and request CodeRabbit | State-only incident-response reconciliation PR opened against `main`, linked `Closes #176`, requested CodeRabbit in comment `4695830022`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 22:07 | Create issues #176 and #177 and select Queue Item 91 | After PR #175 merged and issue #173 closed completed, the durable state and roadmap verification metadata needed a state-only reconciliation before implementing the next no-secret drop-authorization signing examples and fixtures target |
 | 2026-06-12 22:05 | Merge PR #175 | Protocol incident-response runbook merged as `4be2808e9e6f654143794d4db29f455eabff3a70`; final head `574804b6421c5658001839d483dd5a24dcbb2ad8` passed CI run `27445423380`, CodeRabbit status was success with the visible thread resolved, and issue #173 closed completed |
 | 2026-06-12 21:41 | Open PR #175 and request CodeRabbit | Incident-response runbook PR opened against `main`, linked `Closes #173`, pushed head `0a0a49be0ab2adc3b1141389a52d1e8523865945`, requested CodeRabbit in comment `4695671204`, and intentionally skipped Claude per current user instruction |
