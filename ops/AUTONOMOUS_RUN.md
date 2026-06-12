@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/randomizer-reserve-lifecycle-tests` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/151` |
-| Active PR | TBD for Queue Item 79 |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/153` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 12:29 UTC` |
+| Last updated | `2026-06-12 12:32 UTC` |
 
 ## Packaging Notes
 
@@ -133,15 +133,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
 | 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Merged in PR #149 |
 | 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Merged in PR #151 |
-| 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | In progress |
+| 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | Open PR #153 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add request-level randomizer reserve lifecycle tests (Queue Item 79)
 
-Status: local validation complete; ready to open PR.
+Status: PR #153 open with CodeRabbit requested.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/152`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/153`.
+CodeRabbit request: issue comment `4691282971`.
+Initial head: `7d97515138fe22d206b6d156e9cf30550377eea2`.
 Branch: `codex/randomizer-reserve-lifecycle-tests`.
 Branch started from PR #151 squash merge commit
 `e7de312e9a74cee5bd9d47edb7bd974421bee17b`.
@@ -7120,6 +7122,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 12:32 | Open PR #153 and request CodeRabbit | Pushed `codex/randomizer-reserve-lifecycle-tests`, opened https://github.com/6529-Collections/6529Stream/pull/153 against `main`, linked `Closes #152`, requested CodeRabbit in comment `4691282971`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 12:29 | Finish local Queue Item 79 validation | Focused randomizer-payment, emergency-withdrawal, payment-invariant, randomizer-lifecycle, and randomizer-retry Forge tests pass; release manifest/checksum/changelog drift checks pass; full `make check`, Windows `scripts\check.ps1`, and `git diff --check` pass locally with only existing warning noise |
 | 2026-06-12 12:11 | Implement Queue Item 79 local draft | Added focused `StreamRandomizerPayments.t.sol` coverage for request-cost spending, multiple pending arRNG requests, fulfilled/stale/failed/retried request states, forced ETH, and unauthorized emergency-withdrawal reserve preservation; focused formatting and Forge tests pass locally |
 | 2026-06-12 12:05 | Create issue #152 and select Queue Item 79 | PR #151 merged as `e7de312e9a74cee5bd9d47edb7bd974421bee17b` and no open GitHub issues remained, so the next no-secret Gate D gap is the roadmap's previously deferred request-level randomizer reserve lifecycle accounting |
