@@ -18,6 +18,8 @@ GENERATOR_VERSION = "1"
 DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/dependencies"),
+    Path("release-artifacts/schema"),
+    Path("release-artifacts/signatures"),
     Path("release-artifacts/latest"),
     Path("release-artifacts/baselines"),
     Path("deployments/broadcasts"),

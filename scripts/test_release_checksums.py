@@ -25,6 +25,10 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
+    def test_default_covered_paths_include_signature_evidence(self) -> None:
+        self.assertIn(Path("release-artifacts/schema"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
+
     def test_generator_writes_sorted_checksums_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/release-signature-evidence.schema.json",
+  "title": "6529Stream Release Signature Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "protocol_version",
+    "release_version",
+    "network",
+    "source",
+    "artifacts",
+    "signing_identity",
+    "signatures",
+    "retained_artifacts",
+    "redaction_policy",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.release-signature-evidence.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "name", "chain_id", "confirmation_depth"],
+      "properties": {
+        "environment": {
+          "enum": ["local", "fork", "testnet", "mainnet", "production"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "confirmation_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_manifest", "checksum_bundle"],
+      "properties": {
+        "release_manifest": {
+          "$ref": "#/$defs/self_referential_ref"
+        },
+        "checksum_bundle": {
+          "$ref": "#/$defs/self_referential_ref"
+        }
+      }
+    },
+    "signing_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "public_key_fingerprint",
+        "key_custody",
+        "rotation_policy"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not_available_local", "active", "rotated", "revoked"]
+        },
+        "public_key_fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key_custody": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rotation_policy": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "signatures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["detached_checksum_signature", "signed_git_tag"],
+      "properties": {
+        "detached_checksum_signature": {
+          "$ref": "#/$defs/signature_result"
+        },
+        "signed_git_tag": {
+          "$ref": "#/$defs/signature_result"
+        }
+      }
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "path", "sha256"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "$ref": "#/$defs/repo_path"
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          }
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^/"
+          },
+          {
+            "pattern": "\\\\"
+          },
+          {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        ]
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "self_referential_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "digest_status", "reason"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "digest_status": {
+          "const": "not_available_self_referential"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "signature_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "format",
+        "artifact_path",
+        "verification_command",
+        "evidence",
+        "notes"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not_available_local", "signed", "pending", "blocked"]
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification_command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file_ref"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

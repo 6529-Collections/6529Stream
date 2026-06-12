@@ -43,6 +43,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     deployment_schema_dir = root / "deployments" / "schema"
     ceremony_evidence_dir = root / "deployments" / "ceremony-evidence"
     randomizer_operations_dir = root / "deployments" / "randomizer-operations"
+    release_signatures_dir = root / "release-artifacts" / "signatures"
+    release_signature_schema = root / "release-artifacts" / "schema" / (
+        "release-signature-evidence.schema.json"
+    )
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
     docs = [
@@ -51,6 +55,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "tooling.md",
         root / "docs" / "status.md",
         root / "docs" / "randomizer-operations.md",
+        root / "docs" / "release-signatures.md",
     ]
 
     write_json(
@@ -101,6 +106,8 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         latest / "source-verification-inputs.json",
         {"schema_version": "6529stream.source-verification-inputs.v1", "contracts": {}},
     )
+    write_text(output, "{}\n")
+    write_text(latest / "SHA256SUMS", "placeholder\n")
     write_json(
         baseline,
         {"schema_version": "6529stream.abi-surface.v1", "contracts": {}},
@@ -158,6 +165,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
+        release_signature_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
         ceremony_evidence_dir / "anvil-local.json",
         {
             "schema_version": "6529stream.deployment-ceremony-evidence.v1",
@@ -205,6 +216,75 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             },
         },
     )
+    write_json(
+        release_signatures_dir / "anvil-signature-local.json",
+        {
+            "schema_version": "6529stream.release-signature-evidence.v1",
+            "evidence_id": "anvil-release-signature-local",
+            "protocol_version": "0.1.0",
+            "release_version": "v0.1.0-local",
+            "network": {
+                "environment": "local",
+                "name": "anvil",
+                "chain_id": 31337,
+                "confirmation_depth": 0,
+            },
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "artifacts": {
+                "release_manifest": {
+                    "path": "release-artifacts/latest/release-manifest.json",
+                    "digest_status": "not_available_self_referential",
+                    "reason": "Self-referential release output.",
+                },
+                "checksum_bundle": {
+                    "path": "release-artifacts/latest/SHA256SUMS",
+                    "digest_status": "not_available_self_referential",
+                    "reason": "Self-referential release output.",
+                },
+            },
+            "signing_identity": {
+                "status": "not_available_local",
+                "public_key_fingerprint": "not_applicable_local",
+                "key_custody": "not_applicable_local",
+                "rotation_policy": "Production releases must document signer rotation.",
+            },
+            "signatures": {
+                "detached_checksum_signature": {
+                    "status": "not_available_local",
+                    "format": "not_applicable_local",
+                    "artifact_path": "not_applicable_local",
+                    "verification_command": "not_applicable_local",
+                    "evidence": [],
+                    "notes": "local placeholder signature result",
+                },
+                "signed_git_tag": {
+                    "status": "not_available_local",
+                    "format": "not_applicable_local",
+                    "artifact_path": "not_applicable_local",
+                    "verification_command": "not_applicable_local",
+                    "evidence": [],
+                    "notes": "local placeholder signed tag result",
+                },
+            },
+            "retained_artifacts": [
+                {
+                    "category": "release_signature_schema",
+                    "path": "release-artifacts/schema/release-signature-evidence.schema.json",
+                    "sha256": generator.file_sha256(release_signature_schema),
+                }
+            ],
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": ["private_key", "mnemonic", "api_key", "rpc_url"],
+            },
+            "operator_notes": "local placeholder only",
+        },
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
@@ -221,6 +301,8 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "deployment_schema_dir": deployment_schema_dir,
         "ceremony_evidence_dir": ceremony_evidence_dir,
         "randomizer_operations_dir": randomizer_operations_dir,
+        "release_signatures_dir": release_signatures_dir,
+        "release_signature_schema": release_signature_schema,
         "output": output,
         "changelog": changelog,
         "docs": docs,
@@ -327,6 +409,24 @@ class ReleaseManifestTests(unittest.TestCase):
                 "not_applicable_local",
             )
             self.assertEqual(
+                manifest["release_artifacts"]["release_signature_evidence"][0][
+                    "evidence_id"
+                ],
+                "anvil-release-signature-local",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["release_signature_evidence"][0][
+                    "detached_checksum_signature"
+                ]["status"],
+                "not_available_local",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["release_signature_evidence"][0]["evidence"][
+                    "operator_notes"
+                ],
+                "local placeholder only",
+            )
+            self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],
                 generator.CHECKSUM_DIGEST_STATUS,
             )
@@ -375,8 +475,38 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
-                )
+            )
             self.assertEqual(result, 0)
+
+    def test_generator_rejects_invalid_release_signature_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            evidence_path = paths["release_signatures_dir"] / "anvil-signature-local.json"
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            evidence["source"]["unexpected"] = "value"
+            write_json(evidence_path, evidence)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError, "invalid release signature evidence"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    paths["gas_snapshot"],
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
 
     def test_check_mode_rejects_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

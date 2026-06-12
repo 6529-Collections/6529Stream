@@ -69,6 +69,8 @@ jobs:
             scripts/test_ceremony_evidence.py \
             scripts/check_randomizer_operations.py \
             scripts/test_randomizer_operations.py \
+            scripts/check_release_signatures.py \
+            scripts/test_release_signatures.py \
             scripts/generate_release_manifest.py \
             scripts/test_release_manifest.py \
             scripts/generate_release_checksums.py \
@@ -210,6 +212,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_randomizer_operations.py 2>&1 | tee ci-logs/randomizer-operations-tests.log
           python3 scripts/check_randomizer_operations.py 2>&1 | tee ci-logs/randomizer-operations-check.log
+
+      - name: Release signature evidence
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_release_signatures.py 2>&1 | tee ci-logs/release-signature-tests.log
+          python3 scripts/check_release_signatures.py 2>&1 | tee ci-logs/release-signature-check.log
 
       - name: Release manifest
         shell: bash

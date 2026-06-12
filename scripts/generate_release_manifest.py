@@ -12,6 +12,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import check_release_signatures as release_signature_checker
+
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
 GENERATOR_VERSION = "1"
@@ -29,12 +31,14 @@ DEFAULT_ADDRESS_BOOK_DIR = Path("deployments/address-books")
 DEFAULT_DEPLOYMENT_SCHEMA_DIR = Path("deployments/schema")
 DEFAULT_CEREMONY_EVIDENCE_DIR = Path("deployments/ceremony-evidence")
 DEFAULT_RANDOMIZER_OPERATIONS_DIR = Path("deployments/randomizer-operations")
+DEFAULT_RELEASE_SIGNATURES_DIR = Path("release-artifacts/signatures")
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/release-policy.md"),
     Path("docs/deployment.md"),
     Path("docs/dependency-operations.md"),
     Path("docs/randomizer-operations.md"),
+    Path("docs/release-signatures.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]
@@ -298,6 +302,61 @@ def randomizer_operations_record(path: Path, repo_root: Path) -> dict[str, Any]:
     return record
 
 
+def release_signature_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    data = require_dict(load_json(path), str(path))
+    try:
+        release_signature_checker.validate_evidence_document(data, repo_root, str(path))
+    except release_signature_checker.ReleaseSignatureEvidenceError as exc:
+        raise ReleaseManifestError(f"invalid release signature evidence {path}: {exc}") from exc
+
+    network = require_dict(data.get("network"), f"{path}.network")
+    signing_identity = require_dict(data.get("signing_identity"), f"{path}.signing_identity")
+    signatures = require_dict(data.get("signatures"), f"{path}.signatures")
+    detached_signature = require_dict(
+        signatures.get("detached_checksum_signature"),
+        f"{path}.signatures.detached_checksum_signature",
+    )
+    signed_git_tag = require_dict(
+        signatures.get("signed_git_tag"), f"{path}.signatures.signed_git_tag"
+    )
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "evidence_id": require_string(data.get("evidence_id"), "evidence_id"),
+            "protocol_version": require_string(data.get("protocol_version"), "protocol_version"),
+            "release_version": require_string(data.get("release_version"), "release_version"),
+            "network": {
+                "environment": require_string(network.get("environment"), "network.environment"),
+                "name": require_string(network.get("name"), "network.name"),
+                "chain_id": network.get("chain_id"),
+            },
+            "signing_identity_status": require_string(
+                signing_identity.get("status"), "signing_identity.status"
+            ),
+            "detached_checksum_signature": {
+                "status": require_string(
+                    detached_signature.get("status"),
+                    "signatures.detached_checksum_signature.status",
+                ),
+                "format": require_string(
+                    detached_signature.get("format"),
+                    "signatures.detached_checksum_signature.format",
+                ),
+            },
+            "signed_git_tag": {
+                "status": require_string(
+                    signed_git_tag.get("status"), "signatures.signed_git_tag.status"
+                ),
+                "format": require_string(
+                    signed_git_tag.get("format"), "signatures.signed_git_tag.format"
+                ),
+            },
+            "evidence": data,
+        }
+    )
+    return record
+
+
 def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> dict[str, Any]:
     path = release_artifacts_dir / "release-artifact-manifest.json"
     data = require_dict(load_json(path), str(path))
@@ -396,6 +455,7 @@ def build_manifest(
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> dict[str, Any]:
+    release_signatures_dir = repo_root / DEFAULT_RELEASE_SIGNATURES_DIR
     deployment_manifests = [
         deployment_manifest_record(path, repo_root) for path in json_files(deployment_manifest_dir)
     ]
@@ -407,12 +467,16 @@ def build_manifest(
         randomizer_operations_record(path, repo_root)
         for path in json_files(randomizer_operations_dir)
     ]
+    release_signatures = [
+        release_signature_record(path, repo_root) for path in json_files(release_signatures_dir)
+    ]
     protocol_versions = sorted(
         set(
             [record["protocol_version"] for record in deployment_manifests]
             + [record["protocol_version"] for record in address_books]
             + [record["protocol_version"] for record in ceremony_evidence]
             + [record["protocol_version"] for record in randomizer_operations]
+            + [record["protocol_version"] for record in release_signatures]
         )
     )
     deployment_versions = sorted(
@@ -448,6 +512,7 @@ def build_manifest(
             "randomizer_operations_dir": normalize_path(
                 randomizer_operations_dir, repo_root
             ),
+            "release_signatures_dir": normalize_path(release_signatures_dir, repo_root),
         },
         "release_artifacts": {
             "contract_config": file_record(contract_config_path, repo_root, schema_required=True),
@@ -477,6 +542,7 @@ def build_manifest(
                 repo_root,
                 schema_required=True,
             ),
+            "release_signature_evidence": release_signatures,
             "abi_compatibility_baseline": file_record(
                 baseline_path,
                 repo_root,
