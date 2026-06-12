@@ -32,6 +32,23 @@ configured Safe placeholder.
 The rehearsal is not a production broadcast. It uses non-secret placeholder
 addresses and local-only external dependency addresses.
 
+Run the local metadata browser rehearsal with:
+
+```sh
+python scripts/test_rehearsal_metadata_browser_sandbox.py
+python scripts/check_rehearsal_metadata_browser_sandbox.py
+```
+
+`script/RehearseMetadataBrowser.s.sol` builds on the deployment rehearsal by
+deploying the local stack, registering a deterministic metadata dependency,
+minting through the EIP-712 drop authorization path, finalizing token
+randomness/image/attribute inputs, and returning the generated on-chain
+`tokenURI`. The Python checker executes the generated final animation in the
+same Playwright/Chromium sandbox policy used for committed metadata fixtures.
+This is a local Anvil release gate and does not require RPC secrets; fork,
+testnet, and production broadcasts should still retain their own manifest and
+browser evidence during the release ceremony.
+
 ## Manifest Requirements
 
 Deployment manifests live under `deployments/` and must include:

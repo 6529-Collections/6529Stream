@@ -87,10 +87,17 @@ DEFAULT_EXPECTED_BOOTSTRAP = ExpectedBootstrap(
 def load_final_animation_fixture(fixtures_dir: Path) -> AnimationFixture:
     """Load, decode, and statically validate the committed final animation fixture."""
 
+    token_uri = fixture_checker.read_fixture(fixtures_dir, fixture_checker.ONCHAIN_FINAL_FIXTURE)
+    return load_animation_from_token_uri(token_uri, label="on-chain final tokenURI")
+
+
+def load_animation_from_token_uri(token_uri: str, *, label: str) -> AnimationFixture:
+    """Load, decode, and statically validate a final on-chain metadata tokenURI."""
+
     final_json = fixture_checker.decode_data_uri(
-        fixture_checker.read_fixture(fixtures_dir, fixture_checker.ONCHAIN_FINAL_FIXTURE),
+        token_uri,
         fixture_checker.JSON_DATA_URI_PREFIX,
-        "on-chain final tokenURI",
+        label,
     )
     final_metadata = fixture_checker.validate_metadata_json(
         final_json, expected_state=fixture_checker.STATE_FINAL
