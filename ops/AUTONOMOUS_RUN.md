@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 16:01 UTC` |
+| Last updated | `2026-06-12 16:05 UTC` |
 
 ## Packaging Notes
 
@@ -143,8 +143,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add architecture and threat model audit docs (Queue Item 83)
 
-Status: PR #161 CodeRabbit follow-up addressed locally; push and CI rerun
-pending.
+Status: PR #161 second CodeRabbit follow-up addressed locally; push and CI
+rerun pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/160`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/161`.
 CodeRabbit request: issue comment `4692872990`.
@@ -207,6 +207,9 @@ Implementation notes so far:
   ceremony phrase in the deployment/release threat row, removing redundant
   checker link scans, anchoring committed-doc tests to the script path, and
   adding reciprocal-link rejection tests.
+- Accepted CodeRabbit review thread `PRRT_kwDOM7REis6JLvcL` by updating the
+  roadmap verification metadata CI row from issue #160 to PR #161. Thread
+  `PRRT_kwDOM7REis6JLvcO` was already addressed by commit `b5d531d`.
 
 Validation so far:
 
@@ -7528,6 +7531,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 16:05 | Address remaining CodeRabbit PR #161 roadmap thread | Updated the roadmap verification metadata CI row to refer to PR #161; the separate committed-doc path thread was already fixed in `b5d531d` |
 | 2026-06-12 16:01 | Address CodeRabbit PR #161 review | Accepted the low-risk review suggestions: add ADR evidence for `StreamMinter`, clarify `arRNG`, anchor deployment ceremony wording, precompute per-document links, anchor committed-doc tests to the script path, add reciprocal-link rejection tests, regenerate release evidence, and pass focused architecture/audit/manifest/checksum/changelog/syntax/whitespace validation |
 | 2026-06-12 15:54 | Open PR #161 and request CodeRabbit | Architecture/threat-model PR opened against `main`, linked `Closes #160`, requested CodeRabbit in comment `4692872990`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 15:52 | Finish local Queue Item 83 validation | Architecture/threat-model checker/tests, updated audit package checks, release manifest/checksum/changelog gates, Python compilation, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
