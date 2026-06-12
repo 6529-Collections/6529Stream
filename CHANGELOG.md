@@ -46,6 +46,10 @@ the release policy in `docs/release-policy.md`.
   fields, collection script chunks, token data, token image URIs, and token raw
   attributes, with valid multibyte acceptance, invalid-sequence, field-specific
   selector, direct-update-path, and size-before-UTF-8 tests.
+- Added Playwright-backed metadata browser sandbox checks for the committed
+  final on-chain animation fixture, with deterministic dependency stubbing,
+  unexpected-network rejection, bootstrap assertions, and parent-frame
+  isolation proof in local and CI gates.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.

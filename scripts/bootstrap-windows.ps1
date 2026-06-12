@@ -99,6 +99,7 @@ if (-not (Test-Path $toolPython)) {
 }
 Invoke-Native -FilePath $toolPython -Arguments @("-m", "pip", "install", "--upgrade", "pip")
 Invoke-Native -FilePath $toolPython -Arguments @("-m", "pip", "install", "-r", "requirements-tools.txt")
+Invoke-Native -FilePath $toolPython -Arguments @("-m", "playwright", "install", "chromium")
 Invoke-Native -FilePath (Join-Path $repoRoot ".venv-tools\Scripts\solc-select.exe") -Arguments @("install", "0.8.19")
 Invoke-Native -FilePath (Join-Path $repoRoot ".venv-tools\Scripts\solc-select.exe") -Arguments @("use", "0.8.19")
 

@@ -16,40 +16,55 @@ if (-not (Get-Command forge -ErrorAction SilentlyContinue)) {
     throw "forge was not found. Run scripts\bootstrap-windows.ps1, then retry this command."
 }
 
-$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+$venvPython = Join-Path $repoRoot ".venv-tools\Scripts\python.exe"
+$pythonPath = $null
 $pythonArgs = @()
-if (-not $pythonCommand) {
+if (Test-Path $venvPython) {
+    $pythonPath = (Resolve-Path $venvPython).Path
+}
+if (-not $pythonPath) {
+    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+    if ($pythonCommand) {
+        $pythonPath = $pythonCommand.Source
+    }
+}
+if (-not $pythonPath) {
     $pythonCommand = Get-Command py -ErrorAction SilentlyContinue
     $pythonArgs = @("-3")
+    if ($pythonCommand) {
+        $pythonPath = $pythonCommand.Source
+    }
 }
-if (-not $pythonCommand) {
+if (-not $pythonPath) {
     throw "python or py was not found. Install Python 3, then retry this command."
 }
 
 forge build
 forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
-& $pythonCommand.Source @pythonArgs "scripts\test_metadata_fixtures.py"
-& $pythonCommand.Source @pythonArgs "scripts\check_metadata_fixtures.py"
-& $pythonCommand.Source @pythonArgs "scripts\test_release_artifacts.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_release_artifacts.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_source_verification_inputs.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_source_verification_inputs.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_dependency_artifact_manifest.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_dependency_artifact_manifest.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_abi_compatibility.py"
-& $pythonCommand.Source @pythonArgs "scripts\check_abi_compatibility.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_broadcast_manifest_input.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_broadcast_manifest_input.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_deployment_manifest.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_deployment_manifest.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\generate_deployment_manifest.py" "--config" "deployments\config\anvil-6529stream-v0.1.0-001-broadcast.json" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_address_books.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_address_books.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_release_manifest.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_release_manifest.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_release_checksums.py"
-& $pythonCommand.Source @pythonArgs "scripts\generate_release_checksums.py" "--check"
-& $pythonCommand.Source @pythonArgs "scripts\test_changelog_check.py"
-& $pythonCommand.Source @pythonArgs "scripts\check_changelog.py"
+& $pythonPath @pythonArgs "scripts\test_metadata_fixtures.py"
+& $pythonPath @pythonArgs "scripts\check_metadata_fixtures.py"
+& $pythonPath @pythonArgs "scripts\test_metadata_browser_sandbox.py"
+& $pythonPath @pythonArgs "scripts\check_metadata_browser_sandbox.py"
+& $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
+& $pythonPath @pythonArgs "scripts\generate_release_artifacts.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_source_verification_inputs.py"
+& $pythonPath @pythonArgs "scripts\generate_source_verification_inputs.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_dependency_artifact_manifest.py"
+& $pythonPath @pythonArgs "scripts\generate_dependency_artifact_manifest.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_abi_compatibility.py"
+& $pythonPath @pythonArgs "scripts\check_abi_compatibility.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_broadcast_manifest_input.py"
+& $pythonPath @pythonArgs "scripts\generate_broadcast_manifest_input.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_deployment_manifest.py"
+& $pythonPath @pythonArgs "scripts\generate_deployment_manifest.py" "--check"
+& $pythonPath @pythonArgs "scripts\generate_deployment_manifest.py" "--config" "deployments\config\anvil-6529stream-v0.1.0-001-broadcast.json" "--check"
+& $pythonPath @pythonArgs "scripts\test_address_books.py"
+& $pythonPath @pythonArgs "scripts\generate_address_books.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_release_manifest.py"
+& $pythonPath @pythonArgs "scripts\generate_release_manifest.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_release_checksums.py"
+& $pythonPath @pythonArgs "scripts\generate_release_checksums.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_changelog_check.py"
+& $pythonPath @pythonArgs "scripts\check_changelog.py"
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

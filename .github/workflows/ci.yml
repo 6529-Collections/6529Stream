@@ -51,6 +51,8 @@ jobs:
             scripts/test_release_artifacts.py \
             scripts/check_metadata_fixtures.py \
             scripts/test_metadata_fixtures.py \
+            scripts/check_metadata_browser_sandbox.py \
+            scripts/test_metadata_browser_sandbox.py \
             scripts/generate_source_verification_inputs.py \
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
@@ -67,6 +69,13 @@ jobs:
             scripts/test_release_checksums.py \
             scripts/check_changelog.py \
             scripts/test_changelog_check.py
+
+      - name: Install browser test tooling
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements-tools.txt
+          python3 -m playwright install --with-deps chromium
 
       - name: PowerShell syntax
         shell: pwsh
@@ -117,6 +126,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_metadata_fixtures.py 2>&1 | tee ci-logs/metadata-fixture-tests.log
           python3 scripts/check_metadata_fixtures.py 2>&1 | tee ci-logs/metadata-fixture-check.log
+          python3 scripts/test_metadata_browser_sandbox.py 2>&1 | tee ci-logs/metadata-browser-sandbox-tests.log
+          python3 scripts/check_metadata_browser_sandbox.py 2>&1 | tee ci-logs/metadata-browser-sandbox-check.log
 
       - name: Release artifact catalog
         shell: bash

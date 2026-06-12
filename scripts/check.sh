@@ -11,7 +11,11 @@ if ! command -v forge >/dev/null 2>&1; then
   exit 1
 fi
 
-if command -v python3 >/dev/null 2>&1; then
+venv_python="$repo_root/.venv-tools/bin/python"
+
+if [ -x "$venv_python" ]; then
+  python_bin="$venv_python"
+elif command -v python3 >/dev/null 2>&1; then
   python_bin="python3"
 elif command -v python >/dev/null 2>&1; then
   python_bin="python"
@@ -25,6 +29,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/test_metadata_fixtures.py
 "$python_bin" scripts/check_metadata_fixtures.py
+"$python_bin" scripts/test_metadata_browser_sandbox.py
+"$python_bin" scripts/check_metadata_browser_sandbox.py
 "$python_bin" scripts/test_release_artifacts.py
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_source_verification_inputs.py

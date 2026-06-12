@@ -120,13 +120,99 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Merged in PR #121 |
 | 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Merged in PR #123 |
 | 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | Merged in PR #126 |
-| 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Open in PR #127 |
+| 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Merged in PR #127 |
+| 67 | Add browser execution metadata sandbox checks | Gate D | Implement issue #128 by adding a deterministic browser-backed check for committed final animation metadata, pinning reproducible browser tooling, wiring local/CI gates, and updating docs/roadmap/state | In progress on `codex/metadata-browser-sandbox-checks` |
 
 ## Current PR Worklog
 
-### PR candidate: Core UTF-8 enforcement headroom (Queue Item 66)
+### PR candidate: Browser execution metadata sandbox checks (Queue Item 67)
 
-Status: PR #127 open; CI and CodeRabbit pending.
+Status: local implementation ready for PR after PR #127 merged; focused script
+tests, live Playwright/Chromium browser sandbox check, full `make check`, and
+Windows `scripts\check.ps1` pass locally.
+Branch: `codex/metadata-browser-sandbox-checks`.
+PR: TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/128`.
+Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
+
+Goal:
+
+- Execute the committed final on-chain animation fixture in a real browser
+  engine inside a documented sandbox harness.
+- Stub the expected external dependency script request and fail any unexpected
+  outbound request.
+- Capture page errors and console errors as test failures.
+- Prove the sandboxed frame cannot access the parent document.
+- Pin/document the browser test dependency and wire the check into Linux,
+  Windows, Makefile, and CI entry points.
+- Update docs, roadmap traceability, changelog, and autonomous state.
+
+Initial candidate files:
+
+- `scripts/check_metadata_browser_sandbox.py`
+- `scripts/test_metadata_browser_sandbox.py`
+- `requirements-tools.txt`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `.github/workflows/ci.yml`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+
+Implementation notes:
+
+- Added `scripts/check_metadata_browser_sandbox.py`, which loads the committed
+  final on-chain metadata fixture, decodes the final `animation_url`, launches
+  Chromium through Playwright, renders the exact data URI in an
+  `allow-scripts` sandboxed iframe, fulfills the single expected dependency URL
+  with a deterministic stub, aborts unexpected HTTP(S) requests, captures page
+  and console errors, asserts the expected hash/token bootstrap values, and
+  verifies parent-document access fails with `SecurityError`.
+- Added `scripts/test_metadata_browser_sandbox.py` for unit coverage of fixture
+  loading, sandbox harness shape, happy-path browser result validation, duplicate
+  dependency requests, unexpected outbound requests, page errors, wrong
+  bootstrap values, and missing/wrong parent isolation errors without launching
+  a browser.
+- Pinned `playwright==1.60.0` in `requirements-tools.txt`; updated Windows and
+  EC2 bootstrap scripts to install Chromium; updated `scripts/check.ps1` and
+  `scripts/check.sh` to prefer `.venv-tools` Python when available.
+- Wired the browser sandbox unit/check scripts into `make metadata-fixtures-check`,
+  `scripts/check.ps1`, `scripts/check.sh`, and the GitHub CI metadata fixture
+  safety job.
+- Updated metadata docs, status/blocker docs, test README, changelog, roadmap
+  traceability, and this state file to distinguish committed-fixture browser
+  proof from broader future live/fork browser coverage.
+
+Focused local validation:
+
+- `python -m py_compile scripts\check_metadata_browser_sandbox.py scripts\test_metadata_browser_sandbox.py scripts\check_metadata_fixtures.py scripts\test_metadata_fixtures.py` passes.
+- `python scripts\test_metadata_browser_sandbox.py` passes.
+- `python scripts\test_metadata_fixtures.py` passes.
+- `.venv-tools\Scripts\python.exe scripts\check_metadata_browser_sandbox.py`
+  passes after installing pinned Playwright and Chromium.
+- `.venv-tools\Scripts\python.exe scripts\check_metadata_fixtures.py` passes.
+- `make metadata-fixtures-check` passes.
+- `make release-checksums` regenerated release manifest/checksum artifacts for
+  the new scripts/docs/tooling.
+- `make release-checksums-check` passes.
+- Bash syntax check for `scripts/check.sh` and `scripts/bootstrap-ec2.sh`
+  passes.
+- Windows PowerShell parser check for `scripts\check.ps1` and
+  `scripts\bootstrap-windows.ps1` passes.
+- `git diff --check` passes with expected Git CRLF conversion notices for the
+  Windows scripts.
+- `make check` passes.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passes.
+
+### PR #127: Core UTF-8 enforcement headroom (Queue Item 66)
+
+Status: Merged; CI passed and CodeRabbit completed with no actionable comments
+and all 5 pre-merge checks green.
 Branch: `codex/core-utf8-headroom`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/127`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/125`.
@@ -5838,6 +5924,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 00:47 | Validate Queue Item 67 locally | Full `make check`, Windows `scripts\check.ps1`, metadata fixture/browser gates, release checksum checks, Bash/PowerShell syntax checks, py-compile checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
+| 2026-06-12 00:31 | Implement Queue Item 67 local draft | Added pinned Playwright/Chromium browser sandbox tooling for the committed final metadata fixture, wired local/CI gates, updated docs/roadmap/state, and confirmed focused script tests plus the live browser check pass locally |
+| 2026-06-12 00:07 | Start Queue Item 67 | PR #127 merged as `bed60c80c8ee5ac01a14e6e173b5f82d55396148`; issue #128 scopes the next P1-META-006 slice as a real browser execution sandbox check for committed animation metadata |
+| 2026-06-12 00:04 | Merge PR #127 | CI passed, CodeRabbit completed with no actionable comments and 5/5 pre-merge checks, Claude was not triggered per user instruction, and PR #127 squash-merged as `bed60c80c8ee5ac01a14e6e173b5f82d55396148` |
 | 2026-06-11 23:54 | Open PR #127 for Queue Item 66 | Pushed `codex/core-utf8-headroom`, opened https://github.com/6529-Collections/6529Stream/pull/127 against `main`, linked it with `Closes #125`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-11 23:50 | Validate Queue Item 66 locally | Focused UTF-8/custom-error/URI-policy tests, release checksum regeneration, full `make check`, Windows `scripts\check.ps1`, touched-file `forge fmt --check`, and `git diff --check` pass; `StreamCore` remains 24,160 runtime bytes with 416 bytes of EIP-170 headroom |
 | 2026-06-11 23:46 | Fix selector-preserving renderer helper reverts | Full test coverage caught that reverting from offset `0x1c` returned the wrong selector for `bytes4` values already positioned for calldata; reverting from `0x00` restores the existing `Invalid*Contract()` and `MetadataMutationPaused()` typed selectors without changing Core size |

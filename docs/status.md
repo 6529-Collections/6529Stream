@@ -100,6 +100,12 @@ The current Gate A smoke baseline proves:
   semantic attribute shape, checking current URI scheme policy, and asserting
   the generated final animation wrapper has exactly the expected script
   boundaries.
+  `scripts/test_metadata_browser_sandbox.py` and
+  `scripts/check_metadata_browser_sandbox.py` execute the committed final
+  on-chain animation fixture in Chromium inside a sandboxed iframe, serve the
+  expected external dependency through a deterministic stub, fail unexpected
+  outbound HTTP(S) requests, assert the bootstrap values, capture page/console
+  errors, and prove parent-document access is blocked.
 - `StreamDeploymentManifest.t.sol` proves the first Gate E local deployment
   rehearsal can deploy and wire the stack, configure sample admin/pause/signer
   ceremony state, transfer Ownable control to the configured Safe placeholder,
@@ -172,9 +178,10 @@ beyond the now-triaged high/medium baseline, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
-HTML/JavaScript render-sandbox hardening, production dependency migration
-runbooks beyond the local artifact-manifest baseline, full browser execution
-sandbox automation, deployment discipline, and the broader P0/P1 test suite.
+HTML/JavaScript render-sandbox hardening beyond the committed browser fixture,
+production dependency migration runbooks beyond the local artifact-manifest
+baseline, broader live/fork browser execution coverage, deployment discipline,
+and the broader P0/P1 test suite.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 
