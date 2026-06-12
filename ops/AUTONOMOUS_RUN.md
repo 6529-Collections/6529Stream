@@ -32,12 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-gate-g-roadmap` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/167` |
+| Active PR branch | `codex/nonlocal-release-evidence-runbook` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/167` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/168` |
+| Active PR | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 19:06 UTC` |
+| Last updated | `2026-06-12 19:36 UTC` |
 
 ## Packaging Notes
 
@@ -140,20 +141,104 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
 | 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #163 |
 | 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #165 |
-| 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | In Progress |
-| 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Planned |
+| 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | Merged in PR #167 |
+| 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | In Progress |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
+### PR candidate: Add non-local release evidence intake runbook (Queue Item 87)
 
-Status: CodeRabbit follow-up addressed locally; refreshed CI and CodeRabbit
-status pending after push.
+Status: Local validation complete; ready to commit and open PR.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/168`.
+PR: TBD.
+Branch: `codex/nonlocal-release-evidence-runbook`.
+Branch started from PR #167 squash merge commit
+`e11dc44ee5eb33f95fede07d6a4045d44d4faa87`.
+
+Goal:
+
+- Add `docs/non-local-release-evidence.md` as the operator-facing intake
+  runbook for fork/testnet/live deployment, metadata-browser, ceremony,
+  randomizer, verification, address-book, gas, invariant, audit, and
+  signed-release evidence.
+- Require every retained non-local artifact to carry environment, chain ID,
+  block/reference, command/source system, retained path, sha256, redaction
+  statement, owner, reviewer, and public-beta requirement ID.
+- Link the runbook from release-readiness, release policy, tooling,
+  public-beta evidence docs, roadmap, and autonomous state.
+- Treat the runbook as a release governance document in the generated release
+  manifest and checksum bundle.
+- Keep the change documentation/tooling/artifact-only with no Solidity behavior
+  changes.
+
+Initial candidate files:
+
+- `docs/non-local-release-evidence.md`
+- `docs/release-readiness.md`
+- `docs/release-policy.md`
+- `docs/public-beta-evidence.md`
+- `docs/tooling.md`
+- `release-artifacts/README.md`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation target:
+
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/check_changelog.py`
+- `rg -n "^#|^##|^###" docs\non-local-release-evidence.md docs\release-readiness.md docs\public-beta-evidence.md docs\release-policy.md docs\tooling.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check`
+
+Implementation notes so far:
+
+- Added the non-local release evidence runbook with evidence families, required
+  retained artifact fields, no-secret checklist, reviewer standard, and
+  `public-beta-evidence.json` requirement mapping.
+- Added the runbook to release-readiness required phrases and required links.
+- Added the runbook to release-manifest governance docs and test fixtures.
+- Linked the runbook from release-readiness, release policy, public-beta
+  evidence docs, tooling docs, release-artifacts docs, and roadmap.
+- Added a changelog entry for the release governance/process change.
+
+Validation so far:
+
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts\check_release_readiness.py scripts\test_release_readiness.py scripts\generate_release_manifest.py scripts\test_release_manifest.py`
+- `rg -n "^#|^##|^###" docs\non-local-release-evidence.md docs\release-readiness.md docs\public-beta-evidence.md docs\release-policy.md docs\tooling.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check`
+- `make check`
+
+### PR #167: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
+
+Status: Merged in PR #167 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/166`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/167`.
 Branch: `codex/reconcile-gate-g-roadmap`.
 Branch started from PR #165 squash merge commit
 `5e9a6c9f5afb569151b74b2095ef180cbbcfe884`.
+Final head: `820eb1ac09cbfe1bb2347a60986f50e8ef8455c0`.
+Squash merge commit: `e11dc44ee5eb33f95fede07d6a4045d44d4faa87`.
+CI run: `27437060820`.
+CodeRabbit status: success.
 
 Goal:
 
@@ -205,9 +290,9 @@ Validation so far:
 - `python scripts\check_public_beta_evidence.py`
 - `python scripts\generate_release_manifest.py --check`
 - `python scripts\generate_release_checksums.py --check`
-- Remote validation: GitHub Actions CI run `27436411351` passed on head
-  `d2a83ce73d3889a67f0405fa8a79a7d2d7f8ce41`; CodeRabbit status was
-  `success`; there are no visible review threads.
+- Remote validation: GitHub Actions CI run `27437060820` passed on final head
+  `820eb1ac09cbfe1bb2347a60986f50e8ef8455c0`; CodeRabbit status was
+  `success`; there were no unresolved review threads at merge.
 - CodeRabbit follow-up focused validation:
   `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`,
   `git diff --check`,
@@ -7851,6 +7936,11 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 19:36 | Run full local gate for Queue Item 87 | `make check` passed after the focused checks; only existing Foundry warning noise appeared, and no unexpected tracked artifacts changed |
+| 2026-06-12 19:29 | Finish local Queue Item 87 validation | Non-local evidence runbook docs/checker updates, release-manifest governance-doc coverage, regenerated manifest/checksum artifacts, public-beta evidence, changelog, Python compile, heading scan, and whitespace checks all pass locally |
+| 2026-06-12 19:20 | Implement Queue Item 87 local draft | Added the non-local release evidence runbook, wired it into release-readiness, public-beta evidence, release policy, tooling, release-manifest governance docs, roadmap, changelog, and autonomous run state before regenerating release evidence |
+| 2026-06-12 19:18 | Create issue #168 and select Queue Item 87 | PR #167 merged, issue #166 closed completed, and Gate E/G still needed an operator-facing no-secret intake runbook for future fork/testnet/live, audit, explorer, gas, invariant, signature, and signed-tag evidence |
+| 2026-06-12 19:16 | Merge PR #167 | Gate G roadmap reconciliation merged as `e11dc44ee5eb33f95fede07d6a4045d44d4faa87`; final head `820eb1ac09cbfe1bb2347a60986f50e8ef8455c0` passed CI run `27437060820`, CodeRabbit status was `success`, and issue #166 closed completed |
 | 2026-06-12 19:06 | Address CodeRabbit PR #167 review | Moved completed issues #162 and #164 from Gate G `Blocking issues` into `Evidence`, leaving only live Gate G blockers in the blocker paragraph; focused heading, whitespace, release-readiness, public-beta evidence, release-manifest, and release-checksum checks pass locally |
 | 2026-06-12 19:02 | Mark PR #167 merge-ready | GitHub Actions CI run `27436411351` passed on head `d2a83ce73d3889a67f0405fa8a79a7d2d7f8ce41`, CodeRabbit status was `success`, and CodeRabbit comment `4694328674` found no blocking issues |
 | 2026-06-12 18:54 | Open PR #167 | Gate G roadmap reconciliation PR opened against `main`; CodeRabbit will be requested after the PR-number state update is pushed, and Claude remains intentionally skipped per current user instruction |

@@ -99,6 +99,11 @@ the release policy in `docs/release-policy.md`.
   fork/testnet/live, external audit, signature, signed tag, address,
   broadcast-retention, explorer-verification, and post-audit blockers stay
   machine-checkable before any public-beta or production release claim.
+- Added a non-local release evidence intake runbook so fork/testnet/live,
+  audit, explorer, gas, invariant, checksum-signature, and signed-tag evidence
+  has required retained fields, no-secret redaction rules, reviewer
+  expectations, and public-beta requirement mapping before status rows are
+  marked complete.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

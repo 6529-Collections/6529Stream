@@ -31,6 +31,12 @@ canonical requirement list. If the required public-beta or production rows
 change, update the schema's `requirements.minItems` count and this document in
 the same PR.
 
+Use [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) before
+moving any fork, testnet, live, audit, explorer, gas, invariant, signature, or
+signed-tag requirement to `complete`. That runbook defines required retained
+artifact fields, no-secret redaction boundaries, reviewer expectations, and the
+requirement IDs that each evidence family updates.
+
 ## Status Values
 
 Each requirement uses one of these statuses:
@@ -93,9 +99,12 @@ To move a requirement to `complete`:
 
 1. Add the retained public evidence file to the repository.
 2. Add the evidence file path and `sha256:` digest to the relevant requirement.
-3. Keep `risk_acceptance` as `null`.
-4. Run `python scripts/check_public_beta_evidence.py`.
-5. Regenerate and check the release manifest and checksum bundle.
+3. Confirm the evidence follows the non-local release evidence intake runbook
+   when the requirement depends on fork, testnet, live, audit, explorer, gas,
+   invariant, signature, or signed-tag proof.
+4. Keep `risk_acceptance` as `null`.
+5. Run `python scripts/check_public_beta_evidence.py`.
+6. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

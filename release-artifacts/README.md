@@ -86,9 +86,10 @@ Production dependency version changes must follow
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
 hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
-public-beta evidence status, schema hashes, governance doc hashes including `docs/architecture.md`,
-`docs/threat-model.md`, `docs/audit-package.md`, and
-`docs/public-beta-evidence.md`, and `docs/release-readiness.md`, and the
+public-beta evidence status, schema hashes, governance doc hashes including
+`docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
+`docs/public-beta-evidence.md`, `docs/non-local-release-evidence.md`, and
+`docs/release-readiness.md`, and the
 release-ceremony items that are not yet available for this pre-audit local
 baseline.
 
@@ -99,11 +100,12 @@ signatures, signed tags, explorer verification, and address evidence are
 retained or explicitly risk-accepted.
 
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
-`docs/public-beta-evidence.md`, and `docs/release-readiness.md` are the
-auditor-facing architecture, trust-boundary, package, evidence-status, and
-Gate G readiness indexes for the current local baseline. They are validated
-before release manifest generation, and the release manifest records their
-hashes as governance documents.
+`docs/public-beta-evidence.md`, `docs/non-local-release-evidence.md`, and
+`docs/release-readiness.md` are the auditor-facing architecture,
+trust-boundary, package, evidence-status, non-local evidence intake, and Gate G
+readiness indexes for the current local baseline. They are validated before
+release manifest generation, and the release manifest records their hashes as
+governance documents.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release

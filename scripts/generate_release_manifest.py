@@ -42,6 +42,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/randomizer-operations.md"),
     Path("docs/release-signatures.md"),
     Path("docs/public-beta-evidence.md"),
+    Path("docs/non-local-release-evidence.md"),
     Path("docs/architecture.md"),
     Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),

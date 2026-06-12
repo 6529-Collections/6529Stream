@@ -155,6 +155,12 @@ The public-beta evidence step validates
 `release-artifacts/latest/public-beta-evidence.json`, the no-secret status
 manifest that keeps public beta and production release blocked until retained
 non-local evidence or explicit risk acceptance exists.
+The non-local release evidence intake runbook in
+[`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
+operator workflow, required retained fields, redaction rules, reviewer
+expectations, and public-beta requirement mapping for the fork, testnet, live,
+audit, explorer, gas, invariant, signature, and signed-tag evidence that will
+eventually unblock those status rows.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
