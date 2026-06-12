@@ -123,10 +123,14 @@ The current Gate A smoke baseline proves:
 - `StreamDeploymentManifest.t.sol` proves the first Gate E local deployment
   rehearsal can deploy and wire the stack, configure sample admin/pause/signer
   ceremony state, transfer Ownable control to the configured Safe placeholder,
-  revoke the temporary deployment admin, and parse the deployment manifest
-  schema/example JSON artifacts.
+  revoke the temporary deployment admin, parse the deployment manifest
+  schema/example JSON artifacts, and run a local auction ceremony from signed
+  auction drop through active auction custody, bid escrow, with-bid settlement,
+  poster/protocol/curator proceeds withdrawals, and zero owed funds.
 - `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
-  executes as part of the local/CI smoke gate.
+  and
+  `forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`
+  execute as part of the local/CI smoke gate.
 - `scripts/test_release_artifacts.py` and
   `scripts/generate_release_artifacts.py --check` prove the committed
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
@@ -198,7 +202,8 @@ detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata
-browser evidence, deployment discipline, and the broader P0/P1 test suite.
+browser evidence, fork/testnet/live ceremony evidence, deployment discipline,
+and the broader P0/P1 test suite.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 

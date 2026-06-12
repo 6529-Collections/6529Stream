@@ -35,6 +35,12 @@ credits. Auction-local tests also cover no-bid pending-claim rollback to a
 rejecting receiver, forced ETH surplus handling, and non-divisible proceeds
 rounding.
 
+`StreamDeploymentManifest.t.sol` includes local Gate E rehearsal coverage for
+the deployed stack and the auction ceremony script: the rehearsal signs and
+mints an auction drop, proves active NFT custody in `StreamAuctions`, places a
+bid, settles after the auction end, withdraws poster/protocol/curator proceeds,
+and asserts zero owed funds.
+
 Fixed-price payments now have target-state coverage in
 `StreamFixedPricePayments.t.sol` and converted integration characterization
 tests: paid fixed-price mints record poster, protocol, and curator-reserve

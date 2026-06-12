@@ -9,6 +9,7 @@ Run the local deployment rehearsal with:
 
 ```sh
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
 ```
 
 The script deploys and wires a local stack:
@@ -31,6 +32,16 @@ configured Safe placeholder.
 
 The rehearsal is not a production broadcast. It uses non-secret placeholder
 addresses and local-only external dependency addresses.
+
+`script/RehearseAuctionCeremony.s.sol` adds the local auction ceremony layer on
+top of the deployed stack. It configures a local deterministic randomizer,
+signs an auction drop with the configured EIP-712 signer, mints the auction
+drop, proves NFT custody is held by `StreamAuctions` while active, funds and
+places a bid, settles after the auction end, withdraws poster/protocol/curator
+proceeds, and asserts the auction contract returns to zero owed funds. The
+returned evidence is local Anvil evidence only; fork, testnet, and production
+broadcast ceremonies must still retain their own manifests and transaction
+evidence.
 
 Run the local metadata browser rehearsal with:
 
@@ -187,5 +198,6 @@ Before a deployment can become public-beta eligible:
 - Generate and check the release checksum bundle.
 
 Live fork/testnet broadcast, production broadcast retention, contract
-verification, event topic catalog publication against a live deployment, and
-end-to-end dry-run mint/auction ceremonies remain Gate E follow-up work.
+verification, event topic catalog publication against a live deployment,
+fork/testnet/live ceremony evidence, and emergency redeployment rehearsal remain
+Gate E follow-up work.

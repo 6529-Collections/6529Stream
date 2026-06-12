@@ -12,11 +12,15 @@ Current scripts:
   deterministic metadata dependency, mints through the EIP-712 drop
   authorization path, finalizes token metadata inputs, and returns generated
   on-chain metadata evidence for the browser sandbox checker.
+- `RehearseAuctionCeremony.s.sol`: builds on the local stack, signs and mints
+  an auction drop through EIP-712 authorization, bids, settles, withdraws
+  poster/protocol/curator proceeds, and returns local accounting evidence.
 
 Run the local rehearsal with:
 
 ```bash
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
 ```
 
 Run the local metadata browser rehearsal with:
@@ -29,4 +33,4 @@ python scripts/check_rehearsal_metadata_browser_sandbox.py
 This is an Anvil/local simulation gate, not a production broadcast. Gate E still
 requires fork/testnet dry runs, production metadata browser evidence, real
 manifest generation from broadcast outputs, contract verification inputs, ABI
-checksums, and dry-run mint/auction ceremonies before public beta.
+checksums, and retained live-ceremony evidence before public beta.

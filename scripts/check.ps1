@@ -70,3 +70,4 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_changelog_check.py"
 & $pythonPath @pythonArgs "scripts\check_changelog.py"
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
