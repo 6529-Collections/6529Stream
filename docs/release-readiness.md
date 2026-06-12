@@ -8,6 +8,9 @@ production release.
 Use this file to answer one question before any release claim: what is already
 proved by committed local evidence, and what still blocks a public beta or
 production release?
+Use [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) as
+the intake runbook for any fork, testnet, live, audit, gas, invariant,
+verification, or signing evidence that updates the public-beta evidence status.
 
 ## Maturity And Scope
 
@@ -33,7 +36,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, and public-beta evidence status exist for the local baseline | Live release artifacts and non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, public-beta evidence status, and non-local release evidence intake runbook exist for the local baseline | Live release artifacts and non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -63,6 +66,8 @@ The current local baseline includes:
 - no-secret public-beta evidence status under
   [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
   following [`docs/public-beta-evidence.md`](public-beta-evidence.md);
+- non-local release evidence intake requirements under
+  [`docs/non-local-release-evidence.md`](non-local-release-evidence.md);
 - Slither baseline evidence in [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md)
   and [`docs/slither.md`](slither.md);
 - the test matrix in [`ops/ROADMAP.md`](../ops/ROADMAP.md#appendix-b-test-matrix);
@@ -78,7 +83,8 @@ for:
 - completed external audit report and issue-linked remediation status;
 - fork/testnet/live evidence for deployment rehearsal, metadata browser
   execution, ceremony evidence, randomizer operations evidence, emergency
-  redeployment evidence, and invariant/gas checks;
+  redeployment evidence, and invariant/gas checks following
+  [`docs/non-local-release-evidence.md`](non-local-release-evidence.md);
 - production address books generated from retained broadcast artifacts;
 - verified deployed addresses and explorer verification status;
 - production signer and admin ceremony evidence with secrets redacted;
@@ -101,6 +107,8 @@ Production release remains blocked until maintainers add or explicitly accept:
   [`docs/dependency-operations.md`](dependency-operations.md);
 - randomizer provider configuration, funding, lifecycle, and request-health
   evidence following [`docs/randomizer-operations.md`](randomizer-operations.md).
+- no-secret non-local release evidence intake records following
+  [`docs/non-local-release-evidence.md`](non-local-release-evidence.md).
 
 ## Required Evidence Links
 
@@ -125,6 +133,7 @@ Audit and protocol evidence:
 - [docs/release-policy.md](release-policy.md)
 - [docs/release-signatures.md](release-signatures.md)
 - [docs/public-beta-evidence.md](public-beta-evidence.md)
+- [docs/non-local-release-evidence.md](non-local-release-evidence.md)
 - [docs/randomizer-operations.md](randomizer-operations.md)
 - [docs/dependency-operations.md](dependency-operations.md)
 - [docs/slither.md](slither.md)
@@ -187,5 +196,8 @@ Required maintenance rules:
   manifest, checksum bundle, signatures, signed tag, deployment evidence,
   explorer verification, audit report, and post-audit remediation evidence that
   justify it.
+- Any fork/testnet/live evidence that changes public-beta or production status
+  must follow the non-local release evidence intake runbook and include a
+  reviewer before the related requirement is marked `complete`.
 - Regenerate the release manifest and checksum bundle after changing this file,
   because it is a governance document in the release evidence package.

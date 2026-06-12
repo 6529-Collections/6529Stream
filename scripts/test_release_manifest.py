@@ -60,6 +60,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "randomizer-operations.md",
         root / "docs" / "release-signatures.md",
         root / "docs" / "public-beta-evidence.md",
+        root / "docs" / "non-local-release-evidence.md",
         root / "docs" / "architecture.md",
         root / "docs" / "threat-model.md",
         root / "docs" / "audit-package.md",

@@ -44,8 +44,9 @@ A PR is release-impacting when it changes any of these surfaces:
 - CI, `Makefile`, or local check wrappers that define the release gate.
 - Release process docs such as this file, `docs/deployment.md`,
   `docs/release-signatures.md`, `docs/public-beta-evidence.md`, `docs/architecture.md`,
-  `docs/threat-model.md`, `docs/release-readiness.md`, `docs/tooling.md`, `SECURITY.md`,
-  `CONTRIBUTING.md`, or the PR template.
+  `docs/threat-model.md`, `docs/non-local-release-evidence.md`,
+  `docs/release-readiness.md`, `docs/tooling.md`, `SECURITY.md`, `CONTRIBUTING.md`,
+  or the PR template.
 
 Release-impacting PRs must update `CHANGELOG.md` under `## Unreleased` with a
 non-placeholder bullet. The `scripts/check_changelog.py` gate enforces this for
@@ -143,6 +144,9 @@ Before a public release tag:
 - Public-beta evidence status follows `docs/public-beta-evidence.md`, keeps
   unresolved public-beta and production blockers visible, and passes
   `python scripts/check_public_beta_evidence.py`.
+- Non-local release evidence follows `docs/non-local-release-evidence.md`
+  before any fork, testnet, live, audit, explorer, gas, invariant, signature,
+  or signed-tag row is marked complete in the public-beta evidence status.
 - Architecture and threat-model evidence follows `docs/architecture.md` and
   `docs/threat-model.md` and passes
   `python scripts/check_architecture_threat_model.py`.

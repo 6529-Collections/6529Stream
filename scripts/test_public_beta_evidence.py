@@ -60,6 +60,26 @@ def requirement(
     }
 
 
+def runbook_evidence(
+    requirement_id: str,
+    *,
+    reviewer: str = "release-reviewer",
+) -> dict[str, object]:
+    """Build runbook-required metadata for a reviewed non-local artifact."""
+    return {
+        "environment": "live",
+        "chain_id": 1,
+        "block_or_reference": "block 123456",
+        "command_or_source_system": "operator transcript",
+        "retained_path": f"release-artifacts/evidence/{requirement_id}.json",
+        "sha256": "sha256:" + "1" * 64,
+        "redaction_statement": "Secrets were never present.",
+        "owner": "release-operator",
+        "reviewer": reviewer,
+        "public_beta_requirement_id": requirement_id,
+    }
+
+
 def risk_acceptance() -> dict[str, str]:
     """Return complete risk-acceptance metadata."""
     return {
@@ -202,6 +222,77 @@ class PublicBetaEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, root)
 
+    def test_rejects_runbook_requirement_without_review_metadata(self) -> None:
+        """Runbook-governed complete rows require reviewed evidence metadata."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence_ref = file_ref(
+                root,
+                "deployments/address-books/mainnet-6529stream-v0.1.0-001.json",
+                "{}\n",
+            )
+            for item in evidence["requirements"]:
+                if item["id"] == "production_address_books":
+                    item["status"] = "complete"
+                    item["evidence"] = [evidence_ref]
+                    break
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.PublicBetaEvidenceError,
+                "non-local release evidence runbook metadata",
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_accepts_runbook_requirement_with_review_metadata(self) -> None:
+        """Production address books can complete with reviewed runbook metadata."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence_ref = file_ref(
+                root,
+                "release-artifacts/evidence/production-address-books.json",
+                json.dumps(runbook_evidence("production_address_books")) + "\n",
+            )
+            for item in evidence["requirements"]:
+                if item["id"] == "production_address_books":
+                    item["status"] = "complete"
+                    item["evidence"] = [evidence_ref]
+                    break
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(path, evidence)
+
+            checker.validate_evidence(path, root)
+
+    def test_rejects_runbook_requirement_with_tbd_reviewer(self) -> None:
+        """Runbook metadata must name a reviewer before completion."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence_ref = file_ref(
+                root,
+                "deployments/broadcasts/mainnet-6529stream-v0.1.0-001.json",
+                json.dumps(
+                    runbook_evidence("production_broadcast_retention", reviewer="TBD")
+                )
+                + "\n",
+            )
+            for item in evidence["requirements"]:
+                if item["id"] == "production_broadcast_retention":
+                    item["status"] = "complete"
+                    item["evidence"] = [evidence_ref]
+                    break
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.PublicBetaEvidenceError,
+                "non-local release evidence runbook metadata",
+            ):
+                checker.validate_evidence(path, root)
+
     def test_accepts_accepted_risk_with_metadata(self) -> None:
         """Risk-accepted rows require complete acceptance metadata."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -217,6 +308,22 @@ class PublicBetaEvidenceTests(unittest.TestCase):
             write_json(path, evidence)
 
             checker.validate_evidence(path, root)
+
+    def test_runbook_requirement_keeps_accepted_risk_behavior(self) -> None:
+        """Accepted-risk rows do not need complete evidence or runbook review."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            for item in evidence["requirements"]:
+                if item["id"] == "production_broadcast_retention":
+                    item["status"] = "accepted_risk"
+                    item["risk_acceptance"] = risk_acceptance()
+                    break
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(path, evidence)
+
+            checker.validate_evidence(path, root)
+
 
     def test_rejects_accepted_risk_without_metadata(self) -> None:
         """Accepted-risk rows cannot omit owner/date/reference metadata."""
