@@ -120,7 +120,10 @@ Before a public release tag:
 - CI is green on the release commit.
 - `make check` or the documented platform equivalent passes locally.
 - Slither baseline is reviewed and accepted.
-- Gas and size snapshots are accepted.
+- Gas and size snapshots are accepted. The current local gas baseline is
+  `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and must pass
+  `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
+  release-artifacts/baselines/v0.1.0/gas-snapshot.snap`.
 - Deployment rehearsal passes.
 - ABI, bytecode, interface ID, event topic, broadcast-derived manifest input,
   deployment manifest, address book, source verification input, release

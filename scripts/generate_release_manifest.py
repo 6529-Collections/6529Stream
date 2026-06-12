@@ -18,7 +18,9 @@ GENERATOR_VERSION = "1"
 
 DEFAULT_OUTPUT = Path("release-artifacts/latest/release-manifest.json")
 DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
-DEFAULT_BASELINE = Path("release-artifacts/baselines/v0.1.0/abi-surface.json")
+BASELINE_DIR = Path("release-artifacts/baselines")
+DEFAULT_BASELINE = BASELINE_DIR / "v0.1.0" / "abi-surface.json"
+GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
@@ -250,6 +252,50 @@ def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> di
     return record
 
 
+def default_gas_snapshot_path(protocol_versions: list[str]) -> Path:
+    if len(protocol_versions) != 1:
+        raise ReleaseManifestError(
+            "gas snapshot baseline requires exactly one protocol version; "
+            f"found {protocol_versions}"
+        )
+
+    protocol_version = protocol_versions[0]
+    if "/" in protocol_version or "\\" in protocol_version:
+        raise ReleaseManifestError(
+            f"protocol version is not safe for a baseline path: {protocol_version}"
+        )
+    return BASELINE_DIR / f"v{protocol_version}" / GAS_SNAPSHOT_FILENAME
+
+
+def resolve_gas_snapshot_path(
+    gas_snapshot_path: Path | None, protocol_versions: list[str], repo_root: Path
+) -> Path:
+    expected_path = default_gas_snapshot_path(protocol_versions)
+    expected_resolved = (repo_root / expected_path).resolve()
+    if gas_snapshot_path is None:
+        return expected_resolved
+    if gas_snapshot_path.name != GAS_SNAPSHOT_FILENAME:
+        raise ReleaseManifestError(
+            f"gas snapshot path must end with {GAS_SNAPSHOT_FILENAME}: {gas_snapshot_path}"
+        )
+    if gas_snapshot_path.parent.name != expected_path.parent.name:
+        raise ReleaseManifestError(
+            "gas snapshot path version does not match release protocol version "
+            f"{protocol_versions[0]}: {gas_snapshot_path}"
+        )
+    candidate_resolved = (
+        gas_snapshot_path
+        if gas_snapshot_path.is_absolute()
+        else repo_root / gas_snapshot_path
+    ).resolve()
+    if candidate_resolved != expected_resolved:
+        raise ReleaseManifestError(
+            "gas snapshot path must match canonical release baseline "
+            f"{expected_path}: {gas_snapshot_path}"
+        )
+    return expected_resolved
+
+
 def checksum_bundle() -> dict[str, Any]:
     return {
         "status": "generated_after_release_manifest",
@@ -280,6 +326,7 @@ def build_manifest(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path | None,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -310,6 +357,9 @@ def build_manifest(
             + [record["deployment_version"] for record in address_books]
             + [record["deployment_version"] for record in ceremony_evidence]
         )
+    )
+    resolved_gas_snapshot_path = resolve_gas_snapshot_path(
+        gas_snapshot_path, protocol_versions, repo_root
     )
 
     return {
@@ -364,6 +414,7 @@ def build_manifest(
                 repo_root,
                 schema_required=True,
             ),
+            "gas_snapshot_baseline": file_record(resolved_gas_snapshot_path, repo_root),
         },
         "deployment_artifacts": {
             "configs": [
@@ -400,6 +451,7 @@ def build_output_text(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path | None,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -415,6 +467,7 @@ def build_output_text(
         output_path,
         release_artifacts_dir,
         baseline_path,
+        gas_snapshot_path,
         contract_config_path,
         deployment_config_dir,
         deployment_broadcast_dir,
@@ -433,6 +486,7 @@ def write_output(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path | None,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -448,6 +502,7 @@ def write_output(
         output_path,
         release_artifacts_dir,
         baseline_path,
+        gas_snapshot_path,
         contract_config_path,
         deployment_config_dir,
         deployment_broadcast_dir,
@@ -468,6 +523,7 @@ def check_output(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path | None,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -491,6 +547,7 @@ def check_output(
         output_path,
         release_artifacts_dir,
         baseline_path,
+        gas_snapshot_path,
         contract_config_path,
         deployment_config_dir,
         deployment_broadcast_dir,
@@ -525,6 +582,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--release-artifacts-dir", type=Path, default=DEFAULT_RELEASE_ARTIFACTS_DIR)
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    parser.add_argument("--gas-snapshot", type=Path)
     parser.add_argument("--contract-config", type=Path, default=DEFAULT_CONTRACT_CONFIG)
     parser.add_argument("--deployment-config-dir", type=Path, default=DEFAULT_DEPLOYMENT_CONFIG_DIR)
     parser.add_argument(
@@ -562,6 +620,7 @@ def main(argv: list[str]) -> int:
                 args.output,
                 args.release_artifacts_dir,
                 args.baseline,
+                args.gas_snapshot,
                 args.contract_config,
                 args.deployment_config_dir,
                 args.deployment_broadcast_dir,
@@ -577,6 +636,7 @@ def main(argv: list[str]) -> int:
             args.output,
             args.release_artifacts_dir,
             args.baseline,
+            args.gas_snapshot,
             args.contract_config,
             args.deployment_config_dir,
             args.deployment_broadcast_dir,

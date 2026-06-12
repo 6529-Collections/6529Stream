@@ -33,13 +33,21 @@ class ReleaseChecksumTests(unittest.TestCase):
             write_text(output_dir / "abi-checksums.json", '{"abis":[]}\n')
             write_text(output_dir / "release-manifest.json", '{"release":{}}\n')
             write_text(
+                root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-snapshot.snap",
+                "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n",
+            )
+            write_text(
                 root / "deployments" / "examples" / "anvil.json",
                 '{"chain":31337}\n',
             )
 
             written = generator.write_outputs(
                 root,
-                [Path("release-artifacts/latest"), Path("deployments/examples")],
+                [
+                    Path("release-artifacts/latest"),
+                    Path("release-artifacts/baselines"),
+                    Path("deployments/examples"),
+                ],
                 output_dir,
             )
             self.assertEqual(
@@ -53,6 +61,7 @@ class ReleaseChecksumTests(unittest.TestCase):
                 covered_paths,
                 [
                     "deployments/examples/anvil.json",
+                    "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/event-topic-catalog.json",
                     "release-artifacts/latest/release-manifest.json",
@@ -69,7 +78,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             self.assertEqual(manifest["source"]["output_dir"], "release-artifacts/latest")
             self.assertEqual(
                 manifest["source"]["covered_paths"],
-                ["release-artifacts/latest", "deployments/examples"],
+                [
+                    "release-artifacts/latest",
+                    "release-artifacts/baselines",
+                    "deployments/examples",
+                ],
             )
             self.assertEqual(
                 manifest["text_checksum_file"]["sha256"],

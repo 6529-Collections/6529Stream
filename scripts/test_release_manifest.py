@@ -34,6 +34,7 @@ def write_text(path: Path, value: str) -> None:
 def seed_release_tree(root: Path) -> dict[str, Path]:
     latest = root / "release-artifacts" / "latest"
     baseline = root / "release-artifacts" / "baselines" / "v0.1.0" / "abi-surface.json"
+    gas_snapshot = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-snapshot.snap"
     contract_config = root / "release-artifacts" / "contracts.json"
     deployment_config_dir = root / "deployments" / "config"
     deployment_broadcast_dir = root / "deployments" / "broadcasts"
@@ -102,6 +103,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         baseline,
         {"schema_version": "6529stream.abi-surface.v1", "contracts": {}},
     )
+    write_text(gas_snapshot, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
     write_json(
         deployment_config_dir / "anvil.json",
         {"schema_version": "6529stream.deployment-manifest-input.v1"},
@@ -174,6 +176,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     return {
         "latest": latest,
         "baseline": baseline,
+        "gas_snapshot": gas_snapshot,
         "contract_config": contract_config,
         "deployment_config_dir": deployment_config_dir,
         "deployment_broadcast_dir": deployment_broadcast_dir,
@@ -198,6 +201,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -214,6 +218,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -241,6 +246,18 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["dependency_artifact_manifest"]["schema_version"],
                 "6529stream.dependency-artifact-manifest.v1",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["path"],
+                "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["sha256"],
+                generator.file_sha256(paths["gas_snapshot"]),
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["size_bytes"],
+                paths["gas_snapshot"].stat().st_size,
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["broadcasts"][0]["path"],
@@ -279,6 +296,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -296,6 +314,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],
@@ -317,6 +336,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -336,6 +356,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],
@@ -352,6 +373,87 @@ class ReleaseManifestTests(unittest.TestCase):
                 stderr.getvalue(),
             )
 
+    def test_generator_derives_gas_snapshot_path_from_protocol_version(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+
+            manifest = generator.build_manifest(
+                root,
+                paths["output"],
+                paths["latest"],
+                paths["baseline"],
+                None,
+                paths["contract_config"],
+                paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
+                paths["deployment_manifest_dir"],
+                paths["address_book_dir"],
+                paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
+                paths["changelog"],
+                paths["docs"],
+            )
+
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["path"],
+                "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
+            )
+
+    def test_generator_rejects_gas_snapshot_version_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            mismatched = root / "release-artifacts" / "baselines" / "v0.2.0" / "gas-snapshot.snap"
+            write_text(mismatched, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError, "does not match release protocol version"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    mismatched,
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
+    def test_generator_rejects_gas_snapshot_outside_baseline_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            foreign = root / "tmp" / "v0.1.0" / "gas-snapshot.snap"
+            write_text(foreign, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError, "canonical release baseline"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    foreign,
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
     def test_generator_rejects_missing_required_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -364,6 +466,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],
@@ -387,6 +490,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],

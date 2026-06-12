@@ -22,15 +22,21 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
+check: build test gas-snapshot-check size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
 
 test:
 	forge test -vvv
+
+gas-snapshot:
+	forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+
+gas-snapshot-check:
+	forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 
 size:
 	forge build --sizes --via-ir --skip test --skip script --force

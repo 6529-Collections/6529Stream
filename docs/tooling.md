@@ -24,6 +24,7 @@ This runs:
 ```bash
 forge build
 forge test -vvv
+forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
@@ -170,6 +171,7 @@ build and regenerate the tracked release baseline with:
 
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force
+forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_release_artifacts.py
 python scripts/generate_source_verification_inputs.py
 python scripts/check_abi_compatibility.py
@@ -188,6 +190,7 @@ The check mode is:
 
 ```bash
 python scripts/generate_release_artifacts.py --check
+forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_source_verification_inputs.py --check
 python scripts/check_abi_compatibility.py --check
 python scripts/generate_broadcast_manifest_input.py --check
@@ -209,6 +212,12 @@ The ABI compatibility baseline uses the production contract set from the same
 config file. Refresh it only when maintainers intentionally accept a release
 surface change; removed or changed entries should also update the breaking
 change documentation and release notes.
+
+The gas snapshot baseline lives at
+`release-artifacts/baselines/v0.1.0/gas-snapshot.snap`. Refresh it only when
+maintainers intentionally accept changed gas for the focused Gate D operations:
+fixed-price mint, auction bid, auction settlement, curator claim, final
+on-chain `tokenURI`, and dependency/script reads.
 
 The deployment manifest generator uses committed inputs under
 `deployments/config/`. The broadcast-derived input is generated first from the
