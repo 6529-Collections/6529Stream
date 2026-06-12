@@ -210,6 +210,9 @@ Update this package when any of the following changes:
 
 After editing this file, run:
 
+The `generate_*` calls below regenerate tracked output files; the `--check`
+calls verify that those tracked files are current.
+
 ```sh
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py

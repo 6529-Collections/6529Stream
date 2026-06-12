@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/159` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 14:59 UTC` |
+| Last updated | `2026-06-12 15:05 UTC` |
 
 ## Packaging Notes
 
@@ -142,7 +142,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add external audit package index (Queue Item 82)
 
-Status: PR #159 open; CI and CodeRabbit pending.
+Status: PR #159 open; CodeRabbit review comments addressed and follow-up
+validation passed; CI and CodeRabbit re-review pending after follow-up push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/158`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/159`.
 CodeRabbit request: issue comment `4692444134`.
@@ -202,6 +203,10 @@ Implementation notes:
 - Regenerated `release-artifacts/latest/release-manifest.json`,
   `release-artifacts/latest/SHA256SUMS`, and
   `release-artifacts/latest/release-checksums.json`.
+- Accepted CodeRabbit's PR #159 follow-up review by aggregating missing-link
+  failures, guarding the missing-required-link test replacement, clarifying that
+  `generate_*` commands mutate tracked files while `--check` verifies them, and
+  changing `AuditPackageError` to inherit from `ValueError`.
 
 Validation:
 
@@ -219,6 +224,14 @@ Validation:
 - `git diff --check`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- CodeRabbit follow-up validation: `python scripts\test_audit_package.py`,
+  `python scripts\check_audit_package.py`, targeted `python -m py_compile`,
+  `python scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\test_release_checksums.py`,
+  `python scripts\generate_release_checksums.py --check`,
+  `python scripts\test_changelog_check.py`, `python scripts\check_changelog.py`,
+  `bash -n scripts/check.sh`, and `git diff --check`.
 
 ### PR candidate: Add release signature evidence baseline (Queue Item 81)
 
@@ -7410,6 +7423,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 15:05 | Address PR #159 CodeRabbit review | Accepted the minor review suggestions: aggregate missing-link failures, guard the missing-link test mutation, clarify generate-vs-check docs, use `ValueError` for validation errors, regenerate release evidence, and pass focused audit/manifest/checksum/changelog/syntax/whitespace validation |
 | 2026-06-12 14:59 | Open PR #159 and request CodeRabbit | Audit package index PR opened against `main`, linked `Closes #158`, requested CodeRabbit in comment `4692444134`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 14:58 | Finish local Queue Item 82 validation | Audit package checker/tests, release manifest/checksum/changelog gates, Python compilation, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
 | 2026-06-12 14:36 | Start Queue Item 82 | Created issue #158 and selected the Gate F external audit package index because no open issues remained and Gate F still lacked a single auditor-facing package tying scope, ADRs, invariants, Slither, deployment/release evidence, blockers, and security reporting together |

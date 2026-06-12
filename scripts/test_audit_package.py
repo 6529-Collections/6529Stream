@@ -136,10 +136,12 @@ class AuditPackageTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_required_targets(root)
             package_path = root / checker.DEFAULT_PACKAGE
-            text = minimal_valid_package().replace(
+            original = minimal_valid_package()
+            text = original.replace(
                 "- [README.md](../README.md)\n",
                 "",
             )
+            self.assertNotEqual(text, original, "replacement had no effect")
             write_text(package_path, text)
 
             with self.assertRaisesRegex(checker.AuditPackageError, "missing required links"):
@@ -153,7 +155,7 @@ class AuditPackageTests(unittest.TestCase):
             package_path = root / checker.DEFAULT_PACKAGE
             write_text(package_path, minimal_valid_package())
 
-            with self.assertRaisesRegex(checker.AuditPackageError, "linked target is missing"):
+            with self.assertRaisesRegex(checker.AuditPackageError, "linked targets are missing"):
                 checker.validate_audit_package(root, package_path)
 
 

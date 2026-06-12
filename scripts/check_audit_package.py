@@ -85,7 +85,7 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 
 
-class AuditPackageError(RuntimeError):
+class AuditPackageError(ValueError):
     pass
 
 
@@ -120,6 +120,7 @@ def normalized_link_target(raw_target: str) -> str | None:
 
 def linked_repo_paths(repo_root: Path, package_path: Path, text: str) -> set[str]:
     links = set()
+    missing = []
     for match in LINK_RE.finditer(text):
         target = normalized_link_target(match.group(1))
         if target is None:
@@ -132,8 +133,14 @@ def linked_repo_paths(repo_root: Path, package_path: Path, text: str) -> set[str
         resolved = target_path.resolve()
         relative = normalize_repo_path(resolved, repo_root)
         if not resolved.exists():
-            raise AuditPackageError(f"linked target is missing: {relative}")
+            missing.append(relative)
+            continue
         links.add(relative)
+
+    if missing:
+        raise AuditPackageError(
+            "linked targets are missing: " + ", ".join(sorted(missing))
+        )
     return links
 
 
