@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/emergency-redeployment-rehearsal` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/141` |
-| Active PR | TBD for issue `https://github.com/6529-Collections/6529Stream/issues/142` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/143` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 07:07 UTC` |
+| Last updated | `2026-06-12 07:10 UTC` |
 
 ## Packaging Notes
 
@@ -128,13 +128,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | Merged in PR #138 |
 | 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | Merged in PR #139 |
 | 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Merged in PR #141 |
-| 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Local validation complete on `codex/emergency-redeployment-rehearsal`; PR pending |
+| 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Open in PR #143 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add local emergency redeployment rehearsal (Queue Item 74)
 
-Status: local validation complete for issue #142; PR not opened yet.
+Status: open in PR #143; awaiting CI and CodeRabbit.
 Branch `codex/emergency-redeployment-rehearsal` started from PR #141 merge
 commit `1b3ad3df35fb6dedd65b2b227b1beb29feaa8b61`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/142`.
@@ -7025,6 +7025,7 @@ Outcome:
 | 2026-06-12 06:37 | Create issue #142 and select Queue Item 74 | No open GitHub issues remained; the next Gate E gap is local emergency redeployment rehearsal because ADR 0007 still requires executable emergency redeployment evidence without secrets before broader fork/testnet/live ceremonies |
 | 2026-06-12 06:52 | Implement Queue Item 74 local draft | Added local emergency redeployment rehearsal script/test/gate wiring, updated docs/roadmap/changelog/run-state, regenerated release manifest/checksum evidence, and passed focused Forge/script validation |
 | 2026-06-12 07:07 | Finish local Queue Item 74 validation | Focused Forge tests and script rehearsal, release manifest/checksum/changelog drift checks, bash syntax checks, full `make check`, and Windows PowerShell wrapper validation pass locally; CI and CodeRabbit remain pending until PR creation |
+| 2026-06-12 07:10 | Open PR #143 | Emergency redeployment rehearsal PR opened on head `cf8f5ec488294005ecf2c809018fee6d84f40c98` with issue #142 closure, local validation transcript, and fork/testnet/live emergency evidence explicitly scoped to later Gate E work |
 
 ## Resume Instructions
 
