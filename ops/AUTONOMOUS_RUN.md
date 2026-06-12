@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/roadmap-issue-reconciliation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/133` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/137` |
+| Active PR branch | `codex/dependency-migration-runbook` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/137` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/138` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 03:59 UTC` |
+| Last updated | `2026-06-12 04:29 UTC` |
 
 ## Packaging Notes
 
@@ -124,13 +124,95 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 67 | Add browser execution metadata sandbox checks | Gate D | Implement issue #128 by adding a deterministic browser-backed check for committed final animation metadata, pinning reproducible browser tooling, wiring local/CI gates, and updating docs/roadmap/state | Merged in PR #129 |
 | 68 | Expose stale and failed randomness metadata states | Gate D | Implement issue #130 by mapping lifecycle-aware `Stale` and `FailedPostProcessing` requests into public metadata state strings, off-chain URIs, schema-v1 on-chain JSON, fixtures, docs, and roadmap traceability | Merged in PR #131 |
 | 69 | Recover `StreamCore` release-floor bytecode headroom | Gate D/Gate G support | Implement issue #132 by recovering at least 156 bytes of `StreamCore` production runtime headroom, preserving metadata state behavior, refreshing size docs/artifacts, and keeping the production IR size gate green | Merged in PR #133 |
-| 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | In progress on `codex/roadmap-issue-reconciliation` |
+| 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | Merged in PR #137 |
+| 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | In progress on `codex/dependency-migration-runbook` |
 
 ## Current PR Worklog
 
+### PR candidate: Document dependency migration runbooks (Queue Item 71)
+
+Status: PR #138 opened and CodeRabbit requested in PR comment `4687472511`.
+Issue #136 selected after PR #137 merged and stale umbrella issues #25, #30,
+\#45, #46, #47, #48, #51, and #124 were closed with evidence comments. Branch
+`codex/dependency-migration-runbook` started from `main` at PR #137 merge commit
+`40ce3e31bdf4a9d8b137d4923662d5d1b5a2fa2b`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/138`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/136`.
+
+Goal:
+
+- Add a production dependency operations runbook covering proposal, review,
+  packaging, registry registration, unfrozen collection repinning,
+  deprecation, rollback by corrective version, frozen collection protection,
+  and source-retention evidence.
+- Link the runbook from metadata, deployment, release, and dependency artifact
+  docs so operators can find it during release ceremonies.
+- Include the runbook in the generated release manifest governance-doc evidence.
+- Refresh release manifest and checksum artifacts because release docs and
+  changelog evidence changed.
+- Keep the PR docs/tooling scoped; no Solidity behavior changes are planned.
+
+Initial candidate files:
+
+- `docs/dependency-operations.md`
+- `docs/metadata.md`
+- `docs/deployment.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `release-artifacts/README.md`
+- `release-artifacts/dependencies/README.md`
+- `scripts/generate_release_manifest.py`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation plan:
+
+- `rg -n "dependency-operations|Dependency Operations|#136" docs release-artifacts ops CHANGELOG.md scripts`
+- `python scripts/test_dependency_artifact_manifest.py`
+- `python scripts/generate_dependency_artifact_manifest.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `git diff --check`
+- `make check`
+
+Local validation:
+
+- Link/reference grep passed for `dependency-operations`, `Dependency
+  Operations`, and #136 across docs, release artifacts, ops, changelog, and
+  scripts.
+- Stale missing-runbook grep passed for previous production dependency runbook
+  blocker language.
+- `python scripts/test_dependency_artifact_manifest.py` passed.
+- `python scripts/generate_dependency_artifact_manifest.py --check` passed.
+- `python scripts/test_release_manifest.py` passed.
+- `python scripts/generate_release_manifest.py --check` passed.
+- `python scripts/test_release_checksums.py` passed.
+- `python scripts/generate_release_checksums.py --check` passed.
+- `python scripts/check_changelog.py` passed.
+- `git diff --check` passed with the existing line-ending warning for the
+  touched release-manifest generator.
+- `make check` passed, including Foundry build/tests, production size,
+  metadata fixture/browser-sandbox checks, release-artifact drift checks,
+  changelog gate, and deployment rehearsal. Pre-existing compiler/lint warnings
+  remained unchanged.
+
 ### PR candidate: Reconcile completed roadmap issues (Queue Item 70)
 
-Status: Issue #134 created; branch `codex/roadmap-issue-reconciliation`
+Status: Merged in PR #137; CI run `27393589713` passed, CodeRabbit completed
+with no actionable comments on the final head, and squash merge
+`40ce3e31bdf4a9d8b137d4923662d5d1b5a2fa2b` landed on `main`. Issue #134 was
+closed through the PR merge. Issues #25, #30, #45, #46, #47, #48, #51, and
+\#124 were closed manually with evidence comments after merge.
+
+Original status: Issue #134 created; branch `codex/roadmap-issue-reconciliation`
 started from `main` at PR #133 merge commit
 `f583f7662dab2945b79a5c92d31ed74c5e227639`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/137`.
@@ -1583,7 +1665,7 @@ Review feedback:
 - CodeRabbit completed successfully on the final head.
 - Claude review threads were addressed and resolved before merge.
 - Late Claude PR #20 review threads were also addressed and resolved after PR
-  #23 merged, because PR #23 had already updated ADR 0001 with the requested
+  \#23 merged, because PR #23 had already updated ADR 0001 with the requested
   field semantics and canonical `DROP_ID_TYPEHASH`.
 
 Outcome:

@@ -17,3 +17,8 @@ Each descriptor uses a `.dependency.json` suffix and must:
 
 Run `python scripts/generate_dependency_artifact_manifest.py --check` or
 `make dependency-artifacts-check` to verify the generated manifest is current.
+
+Production dependency changes must also follow
+[`docs/dependency-operations.md`](../../docs/dependency-operations.md), which
+defines proposal, review, packaging, pinning, deprecation, rollback, and
+source-retention ceremony requirements.

@@ -125,6 +125,10 @@ Before a public release tag:
 - ABI, bytecode, interface ID, event topic, broadcast-derived manifest input,
   deployment manifest, address book, source verification input, release
   manifest, and checksum artifacts are generated and checked.
+- Dependency source packages, migration plans, source-retention evidence,
+  deprecation decisions, and unfrozen collection repins follow
+  `docs/dependency-operations.md` when the release uses dependency registry
+  versions.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.

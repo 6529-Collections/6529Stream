@@ -70,9 +70,9 @@ before storage for collection text fields, collection script chunks, token
 data, token image URIs, and token raw attributes. Browser render-sandbox checks
 now execute the committed final on-chain animation fixture in Chromium with a
 deterministic dependency stub and parent-frame isolation assertion. Production
-dependency migration runbooks beyond the local dependency artifact manifest
-baseline, broader live/fork browser coverage, and live deployment release
-manifests remain open.
+dependency migration and source-retention ceremonies are documented in
+[`docs/dependency-operations.md`](dependency-operations.md). Broader live/fork
+browser coverage and live deployment release manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -348,6 +348,12 @@ manifest, and `SHA256SUMS` covers both the generated output and the source
 descriptors/files. The first committed package covers the local Anvil rehearsal
 dependency registered by `script/RehearseDeployment.s.sol`.
 
+Production dependency changes must follow the
+[`Dependency Operations Runbook`](dependency-operations.md). The runbook covers
+proposal, review, source packaging, registry registration, unfrozen collection
+repinning, deprecation, rollback by corrective version, frozen collection
+immutability, and source-retention evidence.
+
 ## Freeze Manifest And Boundaries
 
 `StreamCore.freezeCollection(collectionId)` records the public freeze boundary
@@ -394,5 +400,3 @@ ADR 0006 requires future metadata work to add:
   beyond the committed golden fixture sandbox check
 - richer structured attributes if the protocol moves away from caller-authored
   raw fragments; production raw-attribute schema validation now exists
-- production dependency migration runbooks beyond the local artifact-manifest
-  baseline

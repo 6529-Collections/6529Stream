@@ -153,12 +153,15 @@ Before a deployment can become public-beta eligible:
 - Configure signer manager and drop signer.
 - Wire minter, drops, auctions, randomizers, dependency registry, payout, and
   curator pool.
+- Confirm production dependency source packages, pins, and deprecation plans
+  follow `docs/dependency-operations.md`.
 - Transfer Ownable control where applicable.
 - Revoke temporary deployment admin grants.
 - Run a dry-run fixed-price mint.
 - Run a dry-run auction drop, bid, settlement, and withdrawal.
 - Retain constructor args and verification inputs.
 - Generate and check source verification inputs.
+- Generate and check dependency artifact manifests.
 - Generate and check broadcast-derived manifest input from sanitized Foundry
   output.
 - Generate and checksum the deployment manifest.

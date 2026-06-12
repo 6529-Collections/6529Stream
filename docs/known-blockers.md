@@ -93,9 +93,12 @@ contributors who start from the README.
   errors while preserving size-before-UTF-8 error ordering. `StreamCore`
   metadata writes now reject invalid UTF-8 collection fields, collection script
   chunks, token data, token image URIs, and token raw attributes with typed
-  field errors while preserving size-before-UTF-8 ordering.
-  Remaining metadata blockers include deployment migration runbooks beyond
-  registry provenance strings and broader live/fork browser execution coverage.
+  field errors while preserving size-before-UTF-8 ordering. The dependency
+  operations runbook now documents production dependency proposal, review,
+  packaging, pinning, deprecation, rollback, frozen-collection protection, and
+  source-retention ceremonies beyond registry provenance strings.
+  Remaining metadata blockers include broader live/fork browser execution
+  coverage.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries, plus a Playwright-backed Chromium
@@ -132,6 +135,8 @@ contributors who start from the README.
   generated metadata render-sandbox tests, deployment, production-governance,
   richer supply/replay/freeze invariant tests, and any future shared-ledger
   invariants are still missing.
-- Deployment scripts, manifests, and rehearsal runbooks are missing.
+- Live fork/testnet deployment rehearsals, production broadcast retention,
+  production address books, explorer verification, and emergency redeployment
+  rehearsal remain missing.
 
 Do not treat the current build/test smoke baseline as a security claim.
