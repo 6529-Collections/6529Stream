@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/167` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 19:02 UTC` |
+| Last updated | `2026-06-12 19:06 UTC` |
 
 ## Packaging Notes
 
@@ -147,9 +147,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
 
-Status: PR #167 merge-ready; CI run `27436411351` passed and CodeRabbit
-status was `success` on head
-`d2a83ce73d3889a67f0405fa8a79a7d2d7f8ce41`.
+Status: CodeRabbit follow-up addressed locally; refreshed CI and CodeRabbit
+status pending after push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/166`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/167`.
 Branch: `codex/reconcile-gate-g-roadmap`.
@@ -193,6 +192,10 @@ Implementation notes so far:
   public-beta and production-release blocked status.
 - Opened PR #167 against `main`.
 - CodeRabbit comment `4694328674` found no blocking issues.
+- Addressed CodeRabbit review thread `PRRT_kwDOM7REis6JOXqG` by moving
+  completed issue refs `#162` and `#164` out of the Gate G `Blocking issues`
+  paragraph and into `Evidence`, leaving only live blockers in the blocker
+  text.
 
 Validation so far:
 
@@ -205,6 +208,13 @@ Validation so far:
 - Remote validation: GitHub Actions CI run `27436411351` passed on head
   `d2a83ce73d3889a67f0405fa8a79a7d2d7f8ce41`; CodeRabbit status was
   `success`; there are no visible review threads.
+- CodeRabbit follow-up focused validation:
+  `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`,
+  `git diff --check`,
+  `python scripts\check_release_readiness.py`,
+  `python scripts\check_public_beta_evidence.py`,
+  `python scripts\generate_release_manifest.py --check`, and
+  `python scripts\generate_release_checksums.py --check`.
 
 ### PR #165: Add public beta evidence status manifest (Queue Item 85)
 
@@ -7841,6 +7851,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 19:06 | Address CodeRabbit PR #167 review | Moved completed issues #162 and #164 from Gate G `Blocking issues` into `Evidence`, leaving only live Gate G blockers in the blocker paragraph; focused heading, whitespace, release-readiness, public-beta evidence, release-manifest, and release-checksum checks pass locally |
 | 2026-06-12 19:02 | Mark PR #167 merge-ready | GitHub Actions CI run `27436411351` passed on head `d2a83ce73d3889a67f0405fa8a79a7d2d7f8ce41`, CodeRabbit status was `success`, and CodeRabbit comment `4694328674` found no blocking issues |
 | 2026-06-12 18:54 | Open PR #167 | Gate G roadmap reconciliation PR opened against `main`; CodeRabbit will be requested after the PR-number state update is pushed, and Claude remains intentionally skipped per current user instruction |
 | 2026-06-12 18:52 | Finish local Queue Item 86 validation | Roadmap/run-state reconciliation is limited to `ops/ROADMAP.md` and `ops/AUTONOMOUS_RUN.md`; heading scan, whitespace check, release-readiness check, public-beta evidence check, release-manifest check, and release-checksum check pass locally |

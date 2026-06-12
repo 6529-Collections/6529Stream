@@ -337,16 +337,16 @@ Blocking issues: production signatures, signed tags, live explorer
 verification, verified live addresses, production address books,
 fork/testnet/live ceremony evidence, fork/testnet/live randomizer operations
 evidence, fork/testnet/live deployment and metadata-browser evidence, and
-external audit completion remain future release blockers. [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
-is complete for the release-readiness dashboard and checker, and
-[`#164`](https://github.com/6529-Collections/6529Stream/issues/164) is complete
-for the public-beta evidence status manifest and checker.
+external audit completion remain future release blockers.
 Evidence: deterministic local release artifacts, release manifest, checksum
 bundle, local ceremony evidence, local randomizer operations evidence, local
 release signature placeholder evidence, audit package docs, architecture/threat
 model docs, the `docs/release-readiness.md` dashboard, and the
 `release-artifacts/latest/public-beta-evidence.json` status manifest/checker
-from PR #165.
+from PR #165. [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
+is complete for the release-readiness dashboard and checker, and
+[`#164`](https://github.com/6529-Collections/6529Stream/issues/164) is complete
+for the public-beta evidence status manifest and checker.
 
 Exit criteria:
 
