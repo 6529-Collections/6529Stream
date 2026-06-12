@@ -7,8 +7,8 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,319 bytes,
-  leaving 257 bytes of EIP-170 headroom under the IR-optimized deployment
+  size gate. Current `StreamCore` production runtime size is 24,348 bytes,
+  leaving 228 bytes of EIP-170 headroom under the IR-optimized deployment
   profile. This passes the EIP-170 deployability gate but is below the current
   384-byte minimum release floor; issue-sized follow-up work should recover
   headroom or explicitly accept the size-budget exception before further
@@ -57,7 +57,8 @@ The current Gate A smoke baseline proves:
   contract preserves a live `totalSupply()` view.
   collection-range updates, randomness fulfillment, mint-only paths, and burn.
   `StreamMetadataFreeze.t.sol` proves the current collection freeze boundary:
-  ended mint window, elapsed final-supply delay, final live-token metadata,
+  ended mint window, elapsed final-supply delay, ADR 0006 rejection of live
+  tokens whose randomness remains pending, stale, or failed instead of final,
   stored manifest hash/event, final supply tightening, and post-freeze rejection
   for current `StreamCore` metadata-significant mutation paths.
   `StreamCoreBurn.t.sol` proves burn metadata semantics: burned tokens lose

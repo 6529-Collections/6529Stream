@@ -76,7 +76,7 @@ the release policy in `docs/release-policy.md`.
   by moving reusable metadata guards into the linked renderer library and
   replacing inherited `_requireMinted` string reverts with `TokenNotMinted()`;
   after lifecycle-aware stale/failed metadata state display, the production
-  IR-optimized runtime remains deployable at 24,319 bytes with 257 bytes of
+  IR-optimized runtime remains deployable at 24,348 bytes with 228 bytes of
   EIP-170 headroom and is tracked as below the 384-byte release floor.
 
 ### Release Impact

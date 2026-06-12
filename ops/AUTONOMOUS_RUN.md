@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 01:45 UTC` |
+| Last updated | `2026-06-12 02:00 UTC` |
 
 ## Packaging Notes
 
@@ -136,7 +136,7 @@ Issue: `https://github.com/6529-Collections/6529Stream/issues/130`.
 Related issues: `https://github.com/6529-Collections/6529Stream/issues/46`,
 `https://github.com/6529-Collections/6529Stream/issues/51`, and
 `https://github.com/6529-Collections/6529Stream/issues/40`.
-CodeRabbit requested in issue comment `4686592260`.
+CodeRabbit requested in issue comments `4686592260` and `4686597476`.
 
 Goal:
 
@@ -185,34 +185,42 @@ Implementation notes:
 - Replaced the initial `try/catch` lifecycle lookup with a compact bounded
   `staticcall` so lookup failures still fall back to `pending` while limiting
   `StreamCore` bytecode growth.
+- CodeRabbit review `4481745377` correctly asked for an explicit
+  `supportsRandomizerLifecycle()` probe before the token state lookup; the final
+  implementation gates selector-only randomizers that report unsupported back to
+  `pending` and adds regression coverage.
+- CodeRabbit review `4481745377` also asked for status docs to state that ADR
+  0006 freeze eligibility excludes pending, stale, and failed live tokens; the
+  docs now say that explicitly. The run-state `TBD` comment was stale because
+  later state commits already recorded PR #131.
 - Measured and rejected two local size experiments before docs/artifacts:
   replacing the burn approval string with a custom error increased Core size,
   and moving the lifecycle mapping to `StreamMetadataRenderer` reduced library
   pressure but increased `StreamCore` to 24,546 runtime bytes.
 - Final measured implementation keeps the production size gate green with
-  `StreamCore` at 24,319 runtime bytes and 257 bytes of EIP-170 headroom, below
+  `StreamCore` at 24,348 runtime bytes and 228 bytes of EIP-170 headroom, below
   the documented 384-byte release floor; docs and roadmap now track this as
   size-budget debt before further non-trivial Core work.
 
 Local validation:
 
-- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`: 13 tests
+- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`: 14 tests
   pass.
 - `forge test --match-path test\StreamMetadataEvents.t.sol -vvv`: 10 tests
   pass during the rejected burn custom-error experiment; no event-test changes
   remain in the final diff.
 - `forge build --sizes --via-ir --skip test --skip script --force`: passes with
-  `StreamCore` at 24,319 runtime bytes and 257 bytes of EIP-170 headroom.
+  `StreamCore` at 24,348 runtime bytes and 228 bytes of EIP-170 headroom.
 - `forge fmt smart-contracts\StreamCore.sol smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataGolden.t.sol test\StreamMetadataEvents.t.sol`
   completed after the size experiments.
 - `make release-checksums`: passes and refreshes deterministic release,
   deployment, address-book, source-verification, and checksum artifacts.
 - `make release-checksums-check`: passes after artifact refresh.
-- `make check`: passes with 225 Solidity tests, metadata fixture/browser
+- `make check`: passes with 226 Solidity tests, metadata fixture/browser
   checks, release-artifact drift checks, changelog gate, and deployment
   rehearsal.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`:
-  passes with the same 225-test local gate on Windows.
+  passes with the same 226-test local gate on Windows.
 - `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataGolden.t.sol`:
   passes.
 - `git diff --check`: passes.
@@ -6027,9 +6035,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
-| 2026-06-12 01:45 | Request CodeRabbit PR #131 review | CodeRabbit review requested in issue comment `4686592260`; Claude intentionally skipped per current user instruction |
+| 2026-06-12 02:00 | Address CodeRabbit PR #131 review | Accepted CodeRabbit's lifecycle-support finding by probing `supportsRandomizerLifecycle()` before token-state lookup, added unsupported-lifecycle pending fallback coverage, clarified ADR 0006 freeze eligibility docs for pending/stale/failed live tokens, refreshed release artifacts, and reran focused metadata tests, production size build, release checksum checks, full `make check`, Windows wrapper, formatting, and whitespace checks |
+| 2026-06-12 01:45 | Request CodeRabbit PR #131 review | CodeRabbit review requested in issue comments `4686592260` and `4686597476`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 01:42 | Open PR #131 for Queue Item 68 | Pushed `codex/metadata-randomness-state-display`, opened https://github.com/6529-Collections/6529Stream/pull/131 against `main`, linked `Closes #130`, and will use CI plus CodeRabbit review only per user instruction |
-| 2026-06-12 01:38 | Finish local Queue Item 68 validation | Focused metadata golden tests, production size build, release checksum generation/checking, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, and whitespace checks pass; `StreamCore` remains EIP-170 compliant at 24,319 runtime bytes with 257 bytes of headroom, and the internal 384-byte headroom shortfall is documented as size-budget debt |
+| 2026-06-12 01:38 | Finish local Queue Item 68 validation | Focused metadata golden tests, production size build, release checksum generation/checking, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, and whitespace checks pass; `StreamCore` remains EIP-170 compliant at 24,348 runtime bytes with 228 bytes of headroom, and the internal 384-byte headroom shortfall is documented as size-budget debt |
 | 2026-06-12 01:23 | Implement Queue Item 68 local draft | Exposed lifecycle-aware `stale` and `failed` metadata states across `tokenMetadataState`, off-chain token URIs, and schema-v1 on-chain JSON; added stale/failed golden fixtures and tests; used a compact bounded `staticcall` fallback after rejecting two size-worse experiments |
 | 2026-06-12 00:59 | Select Queue Item 68 | PR #129 merged as `7ccc771017be46c9f60fb6114abaf88ca98368a5`; issue #130 now scopes the next Gate D slice as stale/failed randomness metadata state display across views, off-chain URI fallback, on-chain schema-v1 JSON, fixtures, docs, and traceability |
 | 2026-06-12 00:56 | Merge PR #129 | CI run `27387173347` passed on final head `a8567b8edcfd1d2a2a2d0fbb30e877265cc31e3d`, CodeRabbit reported no actionable comments and all 5 pre-merge checks passed, Claude was not triggered per user instruction, issue #128 closed completed, and PR #129 squash-merged as `7ccc771017be46c9f60fb6114abaf88ca98368a5` |

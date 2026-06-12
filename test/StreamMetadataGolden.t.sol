@@ -14,6 +14,7 @@ import "./mocks/MockRandomizer.sol";
 
 contract MetadataLifecycleRandomizer is IRandomizer, IRandomizerLifecycle {
     RandomnessRequest private request;
+    bool private lifecycleSupported = true;
     bool private revertStateLookup;
 
     function calculateTokenHash(uint256, uint256, uint256) external { }
@@ -22,8 +23,8 @@ contract MetadataLifecycleRandomizer is IRandomizer, IRandomizerLifecycle {
         return true;
     }
 
-    function supportsRandomizerLifecycle() external pure returns (bool) {
-        return true;
+    function supportsRandomizerLifecycle() external view returns (bool) {
+        return lifecycleSupported;
     }
 
     function setTokenState(uint256 collectionId, uint256 tokenId, RandomnessRequestState state)
@@ -53,6 +54,10 @@ contract MetadataLifecycleRandomizer is IRandomizer, IRandomizerLifecycle {
 
     function setStateLookupReverts(bool value) external {
         revertStateLookup = value;
+    }
+
+    function setLifecycleSupported(bool value) external {
+        lifecycleSupported = value;
     }
 
     function finalizeToken(IStreamCore core, uint256 collectionId, uint256 tokenId, bytes32 hash)
@@ -200,6 +205,22 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
             .assertEq("pending", "failed lifecycle lookup should fall back to pending");
         deployed.core.tokenURI(TOKEN_ID)
             .assertEq("ipfs://base/pending", "off-chain fallback URI changed");
+    }
+
+    function testUnsupportedLifecycleFallsBackToPendingMetadataState() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer lifecycleRandomizer =
+            MetadataLifecycleRandomizer(address(deployed.randomizer));
+        lifecycleRandomizer.setTokenState(
+            COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+        );
+        lifecycleRandomizer.setLifecycleSupported(false);
+
+        deployed.core.tokenMetadataState(TOKEN_ID)
+            .assertEq("pending", "unsupported lifecycle should fall back to pending");
+        deployed.core.tokenURI(TOKEN_ID)
+            .assertEq("ipfs://base/pending", "unsupported lifecycle URI changed");
     }
 
     function testFinalTokenHashOverridesLifecycleStateDisplay() public {

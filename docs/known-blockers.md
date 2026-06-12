@@ -104,7 +104,7 @@ contributors who start from the README.
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
-  `StreamCore` at 24,319 runtime bytes with 257 bytes of EIP-170 headroom,
+  `StreamCore` at 24,348 runtime bytes with 228 bytes of EIP-170 headroom,
   which passes deployability but is below the documented 384-byte minimum
   release floor. Further non-trivial Core work needs headroom recovery or an
   explicit size-budget exception, and deployment scripts, manifests, and

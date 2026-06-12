@@ -226,7 +226,7 @@ Production bytecode size is checked through the local/CI gate
 because the deployable contracts use the IR-optimized release profile while
 test-only invariant handlers can exceed initcode limits. The current Core UTF-8
 slice plus lifecycle-aware stale/failed metadata state display keeps
-`StreamCore` deployable at 24,319 runtime bytes with 257 bytes of EIP-170
+`StreamCore` deployable at 24,348 runtime bytes with 228 bytes of EIP-170
 headroom, below the documented 384-byte release floor and tracked as size
 budget debt before further non-trivial Core work.
 

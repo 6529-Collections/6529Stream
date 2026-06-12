@@ -822,16 +822,22 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         view
         returns (string memory)
     {
-        bytes4 selector = IRandomizerLifecycle.randomnessRequestStateForToken.selector;
         address randomizer = collectionAdditionalData[collectionId].randomizerContract;
+        bytes4 supportSelector = IRandomizerLifecycle.supportsRandomizerLifecycle.selector;
+        bytes4 stateSelector = IRandomizerLifecycle.randomnessRequestStateForToken.selector;
+        bool supported;
         uint256 state;
         bool hasState;
         assembly ("memory-safe") {
             let ptr := mload(0x40)
-            mstore(ptr, selector)
+            mstore(ptr, supportSelector)
+            supported := staticcall(gas(), randomizer, ptr, 0x04, ptr, 0x20)
+            supported := and(supported, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
+
+            mstore(ptr, stateSelector)
             mstore(add(ptr, 0x04), tokenId)
             hasState := staticcall(gas(), randomizer, ptr, 0x24, ptr, 0x20)
-            hasState := and(hasState, eq(returndatasize(), 0x20))
+            hasState := and(supported, and(hasState, eq(returndatasize(), 0x20)))
             state := mload(ptr)
         }
 
