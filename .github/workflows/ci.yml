@@ -227,6 +227,7 @@ jobs:
           set -o pipefail
           mkdir -p ci-logs
           forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir 2>&1 | tee ci-logs/forge-deployment-rehearsal.log
+          forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir 2>&1 | tee ci-logs/forge-auction-ceremony-rehearsal.log
 
       - name: Upload Foundry logs
         if: always()

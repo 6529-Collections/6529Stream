@@ -132,10 +132,12 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist, but fork/testnet/live
+  bounded payment sequence invariant baseline now exist. The local deployment
+  rehearsal also includes an auction ceremony from signed auction drop through
+  bid, settlement, proceeds withdrawal, and zero owed funds. Fork/testnet/live
   production metadata browser evidence, deployment, production-governance,
-  richer supply/replay/freeze invariant tests, and any future shared-ledger
-  invariants are still missing.
+  richer supply/replay/freeze invariant tests, retained live ceremony evidence,
+  and any future shared-ledger invariants are still missing.
 - Live fork/testnet deployment rehearsals, production broadcast retention,
   production address books, explorer verification, and emergency redeployment
   rehearsal remain missing.

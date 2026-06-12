@@ -45,6 +45,7 @@ python scripts/generate_release_checksums.py --check
 python scripts/test_changelog_check.py
 python scripts/check_changelog.py
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
 ```
 
 The size step is the production deployability gate. It skips test and script
@@ -55,7 +56,10 @@ needs the IR optimizer to fit under the runtime limit.
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
 minter/drops/auction/randomizer surfaces, transfers Ownable control to the Safe
-placeholder, and leaves fork/testnet broadcasting for later Gate E work.
+placeholder, and runs a local auction ceremony from signed auction drop through
+bid, settlement, proceeds withdrawal, and zero-owed accounting. It leaves
+fork/testnet broadcasting and retained live ceremony evidence for later Gate E
+work.
 
 The release artifact step is the first Gate G machine-readable artifact gate.
 It verifies that `release-artifacts/latest/` matches the production `via-ir`

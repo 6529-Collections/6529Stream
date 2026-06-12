@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../script/RehearseDeployment.s.sol";
+import "../script/RehearseAuctionCeremony.s.sol";
 import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
@@ -82,5 +83,39 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
 
         Assertions.assertTrue(vm.parseJson(schema).length > 0, "schema json invalid");
         Assertions.assertTrue(vm.parseJson(example).length > 0, "example json invalid");
+    }
+
+    function testLocalAuctionCeremonyRehearsalSettlesAndWithdrawsProceeds() public {
+        vm.chainId(31_337);
+        RehearseAuctionCeremony rehearsor = new RehearseAuctionCeremony();
+
+        RehearseAuctionCeremony.AuctionCeremonyResult memory result = rehearsor.run();
+
+        Assertions.assertEq(result.chainId, 31_337, "chain id not recorded");
+        Assertions.assertTrue(result.deploymentManifestHash != bytes32(0), "manifest hash missing");
+        Assertions.assertEq(result.collectionId, 1, "collection id");
+        Assertions.assertTrue(result.dropId != bytes32(0), "drop id missing");
+        Assertions.assertEq(result.tokenId, 10_000_000_000, "token id");
+        Assertions.assertEq(
+            result.finalOwner, address(0x00000000000000000000000000000000000065A2), "final owner"
+        );
+        Assertions.assertEq(
+            result.highestBidder,
+            address(0x00000000000000000000000000000000000065A2),
+            "highest bidder"
+        );
+        Assertions.assertEq(result.highestBid, 4 ether, "highest bid");
+        Assertions.assertEq(
+            result.finalStatus, uint8(StreamAuctions.AuctionStatus.SettledWithBid), "final status"
+        );
+        Assertions.assertEq(result.posterProceedsWithdrawn, 2 ether, "poster proceeds");
+        Assertions.assertEq(result.protocolProceedsWithdrawn, 1 ether, "protocol proceeds");
+        Assertions.assertEq(result.curatorProceedsWithdrawn, 1 ether, "curator proceeds");
+        Assertions.assertEq(result.totalOwedAfterWithdrawals, 0, "owed after withdrawals");
+        Assertions.assertEq(
+            keccak256(bytes(result.evidenceKind)),
+            keccak256(bytes("local-anvil-auction-ceremony")),
+            "evidence kind"
+        );
     }
 }

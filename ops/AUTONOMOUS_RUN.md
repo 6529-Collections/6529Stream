@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-fork-metadata-browser` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/138` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
+| Active PR branch | `codex/dry-run-auction-ceremony` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
+| Active PR | `TBD for issue #140` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 05:32 UTC` |
+| Last updated | `2026-06-12 06:05 UTC` |
 
 ## Packaging Notes
 
@@ -126,14 +126,97 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 69 | Recover `StreamCore` release-floor bytecode headroom | Gate D/Gate G support | Implement issue #132 by recovering at least 156 bytes of `StreamCore` production runtime headroom, preserving metadata state behavior, refreshing size docs/artifacts, and keeping the production IR size gate green | Merged in PR #133 |
 | 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | Merged in PR #137 |
 | 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | Merged in PR #138 |
-| 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | In progress on `codex/live-fork-metadata-browser` |
+| 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | Merged in PR #139 |
+| 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | In progress on `codex/dry-run-auction-ceremony` |
 
 ## Current PR Worklog
 
+### PR candidate: Add dry-run auction ceremony rehearsal (Queue Item 73)
+
+Status: local implementation and full local validation complete; PR packaging
+pending for issue #140.
+Branch `codex/dry-run-auction-ceremony` started from PR #139 merge commit
+`e09e422a4f95fbf6948d182fcff83a25aaf88e0c`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/140`.
+
+Goal:
+
+- Add a local release-style auction ceremony rehearsal that builds on
+  `script/RehearseDeployment.s.sol`.
+- Mint an auction drop through the EIP-712 authorization path.
+- Confirm custody, bid, settlement, proceeds withdrawal, final owner, final
+  status, and zero remaining owed balance.
+- Wire the rehearsal into local/CI deployment gates and update docs, roadmap,
+  changelog, release evidence, and this durable run state.
+- Keep live fork/testnet/production broadcast evidence explicitly out of scope
+  because this slice must not require secrets.
+
+Initial candidate files:
+
+- `script/RehearseAuctionCeremony.s.sol`
+- `test/StreamDeploymentManifest.t.sol`
+- `Makefile`
+- `.github/workflows/ci.yml`
+- `scripts/check.ps1`
+- `scripts/check.sh`
+- `docs/deployment.md`
+- `docs/tooling.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `script/README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation plan:
+
+- `forge fmt` for touched Solidity scripts/tests.
+- Focused Forge test for the rehearsal evidence.
+- `forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`.
+- Generated release manifest/checksum/changelog drift checks after docs updates.
+- Full local `make check` before opening the PR if runtime permits.
+
+Current implementation notes:
+
+- Added `script/RehearseAuctionCeremony.s.sol` with a local deterministic
+  randomizer, auction EIP-712 authorization, active custody assertion, bid,
+  with-bid settlement, poster/protocol/curator proceeds withdrawals, and
+  zero-owed accounting evidence.
+- Extended `test/StreamDeploymentManifest.t.sol` to assert the local auction
+  ceremony evidence: chain ID, manifest hash, collection/drop/token IDs, final
+  owner, highest bidder/bid, settled-with-bid status, 2/1/1 ETH proceeds split,
+  and zero owed funds.
+- Wired the auction ceremony into `make deploy-rehearsal`, Linux/Windows check
+  wrappers, and the CI deployment rehearsal step.
+- Updated deployment/tooling/status/blocker/test/script docs, changelog, and
+  roadmap state to distinguish local Anvil ceremony evidence from remaining
+  fork/testnet/live release evidence.
+
+Validation completed:
+
+- `forge fmt script\RehearseAuctionCeremony.s.sol test\StreamDeploymentManifest.t.sol`
+- `forge test --match-path test\StreamDeploymentManifest.t.sol -vvv`
+- `forge script script\RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `forge build`
+- `forge test -vvv`
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- `make check`
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`
+- PowerShell parser check for `scripts/check.ps1` and
+  `scripts/bootstrap-windows.ps1`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --cached --check`
+
 ### PR candidate: Add deployment-rehearsal metadata browser coverage (Queue Item 72)
 
-Status: PR #139 opened and CodeRabbit requested in PR comment `4687690174`;
-CodeRabbit review comments addressed locally and pending commit.
+Status: merged in PR #139 after CI and CodeRabbit success.
 Issue #135 selected after PR #138 merged and `main` advanced to
 `9510a0f25bbdb61292644ab4ebdeba90e5d401fc`.
 Branch `codex/live-fork-metadata-browser` started from that merge commit.
@@ -6367,6 +6450,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 05:54 | Implement Queue Item 73 local draft | Added the local auction ceremony rehearsal script, focused deployment-manifest coverage, local/CI gate wiring, docs/roadmap/changelog/state updates, and validated the focused test plus standalone rehearsal script |
+| 2026-06-12 05:41 | Select Queue Item 73 | PR #139 merged as `e09e422a4f95fbf6948d182fcff83a25aaf88e0c`, issue #135 closed completed, no open 6529Stream issue remained for the next Gate E local ceremony gap, and issue #140 now scopes the dry-run auction ceremony rehearsal |
+| 2026-06-12 05:38 | Merge PR #139 | CI run `27396771559` passed, CodeRabbit status was success with no actionable comments on final head `13f90451bc471bbda9c7522a3c4f4b08f6cfb173`, the prior review thread was resolved, Claude was intentionally not requested per user instruction, and issue #135 closed completed |
 | 2026-06-12 05:32 | Address CodeRabbit PR #139 review | Hardened Forge stdout parsing for noisy or multi-record JSON output, added empty `tokenDataRaw` coverage and import assertion diagnostics, and reran py_compile, focused tests, live rehearsal check, metadata fixture gate, full `make check`, and whitespace validation |
 | 2026-06-12 05:16 | Open PR #139 and request CodeRabbit | Pushed `codex/live-fork-metadata-browser`, opened https://github.com/6529-Collections/6529Stream/pull/139 against `main`, linked `Closes #135`, requested CodeRabbit in comment `4687690174`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 05:13 | Validate Queue Item 72 locally | Focused Python rehearsal tests, live Forge-to-Chromium rehearsal check, metadata fixture gate, release manifest/checksum/changelog drift checks, full `make check`, Bash/PowerShell syntax checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
