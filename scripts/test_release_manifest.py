@@ -252,6 +252,14 @@ class ReleaseManifestTests(unittest.TestCase):
                 "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
             )
             self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["sha256"],
+                generator.file_sha256(paths["gas_snapshot"]),
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["size_bytes"],
+                paths["gas_snapshot"].stat().st_size,
+            )
+            self.assertEqual(
                 manifest["deployment_artifacts"]["broadcasts"][0]["path"],
                 "deployments/broadcasts/run-latest.json",
             )
@@ -364,6 +372,60 @@ class ReleaseManifestTests(unittest.TestCase):
                 "changed release-artifacts/latest/release-manifest.json",
                 stderr.getvalue(),
             )
+
+    def test_generator_derives_gas_snapshot_path_from_protocol_version(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+
+            manifest = generator.build_manifest(
+                root,
+                paths["output"],
+                paths["latest"],
+                paths["baseline"],
+                None,
+                paths["contract_config"],
+                paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
+                paths["deployment_manifest_dir"],
+                paths["address_book_dir"],
+                paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
+                paths["changelog"],
+                paths["docs"],
+            )
+
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["path"],
+                "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
+            )
+
+    def test_generator_rejects_gas_snapshot_version_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            mismatched = root / "release-artifacts" / "baselines" / "v0.2.0" / "gas-snapshot.snap"
+            write_text(mismatched, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError, "does not match release protocol version"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    mismatched,
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
 
     def test_generator_rejects_missing_required_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
