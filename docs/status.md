@@ -21,10 +21,17 @@ The current Gate A smoke baseline proves:
   curator reward claim credits, and randomness lifecycle behavior. Current
   emergency-withdrawal target-state tests also cover explicit emergency
   recipients, `StreamMinter` surplus withdrawal, `NextGenRandomizerRNG` reserve
-  boundaries, dependency-script segment-safe content hashing, explicit
+  boundaries, request-level randomizer reserve lifecycle accounting,
+  dependency-script segment-safe content hashing, explicit
   local-initialization regressions, vendored OpenZeppelin utility-library
   provenance/behavior regressions, and retained airdrop mint-accounting
   behavior after removal of dead public/allowlist counters.
+- Focused randomizer reserve lifecycle tests now cover arRNG request-cost
+  spending, multiple pending requests, fulfilled requests, stale requests,
+  failed post-processing, deterministic retry, forced ETH, and unauthorized
+  emergency-withdrawal attempts while proving remaining provider reserves stay
+  represented by `totalRandomnessReserved()`, `totalOwed()`, and
+  `totalReserved()` with zero emergency-withdrawable surplus.
 - Payment sequence fuzzing now covers mixed fixed-price mint, auction bid,
   auction settlement, curator claim, withdrawal, emergency withdrawal,
   randomizer reserve, and forced-balance operations, proving the current local
@@ -229,8 +236,7 @@ The current Gate A smoke baseline proves:
 
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including any future unified
-pull-payment ledger abstraction or protocol-wide aggregation layer, fuller
-randomizer reserve lifecycle accounting,
+pull-payment ledger abstraction or protocol-wide aggregation layer,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
 beyond the now-triaged high/medium baseline, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,

@@ -74,6 +74,9 @@ the release policy in `docs/release-policy.md`.
   registration, escrow custody, first bids, outbids, cancellation, settlement,
   invalid-operation preservation, withdrawals, and auction-local owed/reserve
   surplus coherence.
+- Added focused randomizer reserve lifecycle tests covering arRNG request-cost
+  spending, multiple pending requests, fulfillment, stale marking, failed
+  post-processing, retry, forced ETH, and emergency-withdrawal boundaries.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

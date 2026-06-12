@@ -86,6 +86,15 @@ as `emergencyWithdrawable()` surplus, and withdraws only that amount;
 emergency-withdrawable balance, including direct ETH, forced ETH, and
 post-request remaining reserve.
 
+`StreamRandomizerPayments.t.sol` adds focused request-level reserve lifecycle
+coverage for `NextGenRandomizerRNG`: multiple arRNG requests spend provider
+costs from the funded adapter reserve, remaining balances stay represented by
+`totalRandomnessReserved()`/`totalOwed()`/`totalReserved()`, fulfilled, stale,
+failed-post-processing, and retried requests do not turn provider reserves into
+emergency surplus, forced ETH remains reserved under the conservative adapter
+model, and unauthorized emergency withdrawal preserves pending-request reserve
+accounting.
+
 Payment accounting now has a bounded sequence fuzz invariant baseline in
 `StreamPaymentsInvariant.t.sol`: mixed fixed-price mint, auction bid,
 auction settlement, curator claim, withdrawal, emergency withdrawal, randomizer
