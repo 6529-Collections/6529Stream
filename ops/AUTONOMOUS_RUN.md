@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/133` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 03:16 UTC` |
+| Last updated | `2026-06-12 03:17 UTC` |
 
 ## Packaging Notes
 
@@ -6119,6 +6119,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 03:17 | Request CodeRabbit PR #133 review | CodeRabbit review requested in PR comment `4687004505`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 03:16 | Open PR #133 for Queue Item 69 | Pushed `codex/streamcore-size-floor-recovery`, opened https://github.com/6529-Collections/6529Stream/pull/133 against `main`, linked `Closes #132`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-12 02:15 | Select Queue Item 69 | PR #131 merged as `3a6405d7d0cdc1d3550a8f872c6f17f3a0a147ac`; issue #132 scopes the next slice as recovering `StreamCore` from 24,348 runtime bytes / 228 bytes EIP-170 headroom back to the documented 384-byte release floor before further non-trivial Core work |
 | 2026-06-12 02:00 | Address CodeRabbit PR #131 review | Accepted CodeRabbit's lifecycle-support finding by probing `supportsRandomizerLifecycle()` before token-state lookup, added unsupported-lifecycle pending fallback coverage, clarified ADR 0006 freeze eligibility docs for pending/stale/failed live tokens, refreshed release artifacts, and reran focused metadata tests, production size build, release checksum checks, full `make check`, Windows wrapper, formatting, and whitespace checks |
