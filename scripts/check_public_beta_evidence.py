@@ -44,6 +44,44 @@ REQUIRED_BY_PHASE = {
     PUBLIC_BETA_PHASE: frozenset(PUBLIC_BETA_REQUIREMENTS),
     PRODUCTION_PHASE: frozenset(PRODUCTION_REQUIREMENTS),
 }
+RUNBOOK_REVIEW_REQUIREMENTS = frozenset(
+    {
+        "external_audit_report",
+        "fork_deployment_rehearsal",
+        "testnet_deployment_rehearsal",
+        "fork_testnet_metadata_browser_evidence",
+        "fork_testnet_ceremony_evidence",
+        "fork_testnet_randomizer_operations_evidence",
+        "verified_deployed_addresses",
+        "explorer_verification_status",
+        "production_signatures",
+        "signed_git_tag",
+        "production_address_books",
+        "production_broadcast_retention",
+        "live_deployment_manifest",
+        "live_ceremony_evidence",
+        "live_randomizer_operations_evidence",
+        "live_explorer_verification",
+        "post_audit_remediation",
+    }
+)
+RUNBOOK_FIELDS = frozenset(
+    {
+        "environment",
+        "chain_id",
+        "block_or_reference",
+        "command_or_source_system",
+        "retained_path",
+        "sha256",
+        "redaction_statement",
+        "owner",
+        "reviewer",
+        "public_beta_requirement_id",
+    }
+)
+RUNBOOK_ENVIRONMENTS = frozenset(
+    {"fork", "testnet", "live", "audit", "release_signing"}
+)
 
 OVERALL_STATUSES = frozenset({"blocked", "ready"})
 REQUIREMENT_STATUSES = frozenset(
@@ -278,6 +316,90 @@ def validate_risk_acceptance(value: Any, path: str) -> None:
     require_string(risk.get("notes"), f"{path}.notes")
 
 
+def candidate_runbook_documents(value: Any) -> list[dict[str, Any]]:
+    """Return dicts that look like runbook artifact metadata."""
+    candidates: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        if RUNBOOK_FIELDS.issubset(value):
+            candidates.append(value)
+        for item in value.values():
+            candidates.extend(candidate_runbook_documents(item))
+    elif isinstance(value, list):
+        for item in value:
+            candidates.extend(candidate_runbook_documents(item))
+    return candidates
+
+
+def validate_runbook_metadata(
+    metadata: dict[str, Any], requirement_id: str, path: str
+) -> None:
+    """Validate one non-local release evidence runbook metadata block."""
+    environment = require_enum(
+        metadata.get("environment"),
+        f"{path}.environment",
+        RUNBOOK_ENVIRONMENTS,
+    )
+    chain_id = metadata.get("chain_id")
+    if environment in {"audit", "release_signing"}:
+        if chain_id != "not_applicable" and not isinstance(chain_id, int):
+            raise PublicBetaEvidenceError(
+                f"{path}.chain_id must be a number or not_applicable"
+            )
+    elif not isinstance(chain_id, int):
+        raise PublicBetaEvidenceError(f"{path}.chain_id must be a number")
+    require_string(metadata.get("block_or_reference"), f"{path}.block_or_reference")
+    require_string(
+        metadata.get("command_or_source_system"),
+        f"{path}.command_or_source_system",
+    )
+    require_string(metadata.get("retained_path"), f"{path}.retained_path")
+    require_sha256(metadata.get("sha256"), f"{path}.sha256")
+    require_string(
+        metadata.get("redaction_statement"),
+        f"{path}.redaction_statement",
+    )
+    require_string(metadata.get("owner"), f"{path}.owner")
+    reviewer = require_string(metadata.get("reviewer"), f"{path}.reviewer")
+    if reviewer.upper() == "TBD":
+        raise PublicBetaEvidenceError(f"{path}.reviewer must be set before complete")
+    evidence_requirement = require_string(
+        metadata.get("public_beta_requirement_id"),
+        f"{path}.public_beta_requirement_id",
+    )
+    if evidence_requirement != requirement_id:
+        raise PublicBetaEvidenceError(
+            f"{path}.public_beta_requirement_id must match {requirement_id}"
+        )
+
+
+def validate_runbook_review_evidence(
+    evidence: list[Any], repo_root: Path, requirement_id: str, path: str
+) -> None:
+    """Require complete non-local rows to include reviewed runbook metadata."""
+    for index, ref in enumerate(evidence):
+        ref_path = repo_root / require_string(
+            require_dict(ref, f"{path}.evidence[{index}]").get("path"),
+            f"{path}.evidence[{index}].path",
+        )
+        try:
+            data = load_json(ref_path)
+        except PublicBetaEvidenceError:
+            continue
+        for candidate_index, candidate in enumerate(candidate_runbook_documents(data)):
+            try:
+                validate_runbook_metadata(
+                    candidate,
+                    requirement_id,
+                    f"{path}.evidence[{index}].runbook[{candidate_index}]",
+                )
+            except PublicBetaEvidenceError:
+                continue
+            return
+    raise PublicBetaEvidenceError(
+        f"{path} must include reviewed non-local release evidence runbook metadata"
+    )
+
+
 def validate_requirement(
     value: Any, repo_root: Path, path: str
 ) -> tuple[str, str, str]:
@@ -304,6 +426,8 @@ def validate_requirement(
     risk_acceptance = item.get("risk_acceptance")
     if status == "complete" and not evidence:
         raise PublicBetaEvidenceError(f"{path}.evidence must not be empty when status is complete")
+    if status == "complete" and requirement_id in RUNBOOK_REVIEW_REQUIREMENTS:
+        validate_runbook_review_evidence(evidence, repo_root, requirement_id, path)
     if status == "accepted_risk":
         validate_risk_acceptance(risk_acceptance, f"{path}.risk_acceptance")
     elif risk_acceptance is not None:

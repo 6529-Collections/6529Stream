@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/169` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 19:42 UTC` |
+| Last updated | `2026-06-12 20:01 UTC` |
 
 ## Packaging Notes
 
@@ -148,8 +148,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add non-local release evidence intake runbook (Queue Item 87)
 
-Status: CI hygiene fix ready to push; GitHub Actions rerun and CodeRabbit
-review pending.
+Status: CodeRabbit follow-up implemented and validated locally; ready to push
+follow-up commit and wait for final CI/CodeRabbit rerun.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/168`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/169`.
 CodeRabbit request: issue comment `4694642716`.
@@ -218,6 +218,20 @@ Implementation notes so far:
 - GitHub Actions CI run `27438712570` failed repository hygiene on an extra
   blank line at EOF in `docs/non-local-release-evidence.md`; trimmed the EOF
   and regenerated release manifest/checksum artifacts.
+- CodeRabbit review `4488726267` requested three fixes: include
+  `production_broadcast_retention` and `production_address_books` in the
+  non-local evidence runbook gate, clarify checksum-backed production signing
+  language in the roadmap, and describe `docs/non-local-release-evidence.md` as
+  a maintained governance input rather than a generated artifact.
+- Added checker enforcement for complete runbook-governed
+  `public-beta-evidence.json` rows: they now need reviewed JSON runbook
+  metadata with matching requirement ID, required artifact fields, and a
+  non-`TBD` reviewer. Added focused tests for production address-book and
+  broadcast-retention rows while preserving accepted-risk behavior.
+- Regenerated `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json` after the CodeRabbit
+  follow-up.
 
 Validation so far:
 
@@ -238,6 +252,17 @@ Validation so far:
   `python scripts/check_release_readiness.py`,
   `python scripts/test_release_readiness.py`, and
   `python scripts/check_changelog.py`
+- CodeRabbit follow-up: `python scripts/test_public_beta_evidence.py`,
+  `python scripts/check_public_beta_evidence.py`,
+  `python scripts/test_release_manifest.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`,
+  `python scripts/check_release_readiness.py`,
+  `python scripts/test_release_readiness.py`,
+  `python scripts/check_changelog.py`,
+  `python -m py_compile scripts\check_public_beta_evidence.py scripts\test_public_beta_evidence.py scripts\check_release_readiness.py scripts\test_release_readiness.py scripts\generate_release_manifest.py scripts\test_release_manifest.py`,
+  `rg -n "^#|^##|^###" docs\non-local-release-evidence.md docs\release-readiness.md docs\public-beta-evidence.md docs\release-policy.md docs\tooling.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`,
+  `git diff --check`, and `make check`
 
 ### PR #167: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
 
@@ -7948,6 +7973,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 20:01 | Address PR #169 CodeRabbit review | Expanded the non-local evidence gate to production broadcast/address-book rows, added reviewed runbook metadata enforcement for complete public-beta evidence requirements, clarified checksum-backed signing wording, treated the runbook as a maintained manifest input, regenerated release artifacts, and reran focused gates plus `make check` |
 | 2026-06-12 19:42 | Fix PR #169 CI hygiene failure | GitHub Actions run `27438712570` failed repository hygiene on an extra blank line at EOF in `docs/non-local-release-evidence.md`; trimmed the EOF, regenerated release manifest/checksum artifacts, and reran focused whitespace/readiness/manifest/checksum/changelog validation |
 | 2026-06-12 19:39 | Open PR #169 and request CodeRabbit | Non-local release evidence intake PR opened against `main`, linked `Closes #168`, requested CodeRabbit in comment `4694642716`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 19:36 | Run full local gate for Queue Item 87 | `make check` passed after the focused checks; only existing Foundry warning noise appeared, and no unexpected tracked artifacts changed |

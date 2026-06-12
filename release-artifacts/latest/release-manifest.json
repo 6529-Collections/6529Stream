@@ -448,8 +448,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:e6bf552df8223679b8dc9cf0b63be6a8dfc104a0fbac98dadbaa2acea2d745e2",
-        "size_bytes": 4764
+        "sha256": "sha256:75840a107e72e2a7168cefaecc32ca7d69f7d8033f5588c74332a0a88f46a621",
+        "size_bytes": 4935
       },
       {
         "path": "docs/non-local-release-evidence.md",

@@ -32,10 +32,11 @@ change, update the schema's `requirements.minItems` count and this document in
 the same PR.
 
 Use [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) before
-moving any fork, testnet, live, audit, explorer, gas, invariant, signature, or
-signed-tag requirement to `complete`. That runbook defines required retained
-artifact fields, no-secret redaction boundaries, reviewer expectations, and the
-requirement IDs that each evidence family updates.
+moving any fork, testnet, live, audit, explorer, gas, invariant,
+checksum-backed production-signature, signed-tag, production-address-book, or
+production-broadcast-retention requirement to `complete`. That runbook defines
+required retained artifact fields, no-secret redaction boundaries, reviewer
+expectations, and the requirement IDs that each evidence family updates.
 
 ## Status Values
 
@@ -101,7 +102,8 @@ To move a requirement to `complete`:
 2. Add the evidence file path and `sha256:` digest to the relevant requirement.
 3. Confirm the evidence follows the non-local release evidence intake runbook
    when the requirement depends on fork, testnet, live, audit, explorer, gas,
-   invariant, signature, or signed-tag proof.
+   invariant, checksum-backed production-signature, signed-tag,
+   production-address-book, or production-broadcast-retention proof.
 4. Keep `risk_acceptance` as `null`.
 5. Run `python scripts/check_public_beta_evidence.py`.
 6. Regenerate and check the release manifest and checksum bundle.
