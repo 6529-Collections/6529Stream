@@ -45,6 +45,7 @@ Explicitly out of scope for this package:
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
+| Incident response runbook | [`docs/incident-response.md`](incident-response.md) |
 | Public-beta evidence status | [`docs/public-beta-evidence.md`](public-beta-evidence.md) |
 | Gated execution roadmap | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 | Autonomous execution state | [`ops/AUTONOMOUS_RUN.md`](../ops/AUTONOMOUS_RUN.md) |
@@ -77,6 +78,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/randomizer-operations.md`](randomizer-operations.md)
 - [`docs/deployment.md`](deployment.md)
 - [`docs/release-policy.md`](release-policy.md)
+- [`docs/incident-response.md`](incident-response.md)
 - [`docs/release-signatures.md`](release-signatures.md)
 - [`docs/public-beta-evidence.md`](public-beta-evidence.md)
 - [`docs/release-readiness.md`](release-readiness.md)
@@ -140,11 +142,13 @@ Local deployment and release evidence:
   defines the retained status format.
 
 The release manifest includes this audit package as a governance document. The
-release manifest also includes the architecture map and threat model as
-governance documents, and it summarizes the public-beta evidence status. The
+release manifest also includes the architecture map, threat model, and incident
+response runbook as governance documents, and it summarizes the public-beta
+evidence status. The
 checksum bundle covers the release manifest, so changes to the audit package,
-architecture map, threat model, or public-beta evidence status must refresh
-release evidence before a release-oriented PR can pass.
+architecture map, threat model, incident-response runbook, or public-beta
+evidence status must refresh release evidence before a release-oriented PR can
+pass.
 
 ## Known Blockers And Accepted Risks
 
@@ -193,6 +197,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_incident_response.py
+python scripts/check_incident_response.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_public_beta_evidence.py

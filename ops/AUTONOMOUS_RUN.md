@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-nonlocal-evidence-schema` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/171` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/172` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/174` |
+| Active PR branch | `codex/protocol-incident-response-runbooks` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/174` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/173` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/175` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 21:03 UTC` |
+| Last updated | `2026-06-12 21:41 UTC` |
 
 ## Packaging Notes
 
@@ -144,20 +144,139 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | Merged in PR #167 |
 | 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Merged in PR #169 |
 | 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | Merged in PR #171 |
-| 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | PR #174 open; waiting for CI and CodeRabbit |
-| 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | Planned next after Queue Item 89 |
+| 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | Merged in PR #174 |
+| 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | PR #175 open; waiting for CI and CodeRabbit |
 
 ## Current PR Worklog
 
+### PR candidate: Add protocol incident response runbooks (Queue Item 90)
+
+Status: PR #175 open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/173`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/175`.
+CodeRabbit request: issue comment `4695671204`.
+Branch: `codex/protocol-incident-response-runbooks`.
+Branch started from PR #174 squash merge commit
+`074ac3eb510ccafa593812677e6c26cbed4171b1`.
+Head before CodeRabbit follow-up:
+`08466151647bed25277feb454191f88d00609da7`.
+
+Goal:
+
+- Add a no-secret protocol incident-response runbook for stuck auctions,
+  failed or stale randomness, bad Merkle roots, curator claims, bad
+  metadata/dependency configuration, signer compromise, drop-pause decisions,
+  and release artifact/evidence mistakes from issue #173.
+- Tie incident procedures to existing pause, signer, randomizer, auction,
+  dependency, release-readiness, and evidence-retention docs.
+- Add a lightweight docs checker/test only if it matches the repository's
+  existing documentation gate pattern.
+- Link the runbook from security, release-readiness, tooling, randomizer,
+  dependency, roadmap, and any release/governance surfaces that need it.
+- Keep the change documentation/tooling-only with no Solidity behavior changes.
+
+Initial candidate files:
+
+- `docs/incident-response.md`
+- `scripts/check_incident_response.py`
+- `scripts/test_incident_response.py`
+- `Makefile`
+- `.github/workflows/ci.yml`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/generate_release_checksums.py`
+- `scripts/test_release_checksums.py`
+- `docs/release-readiness.md`
+- `docs/tooling.md`
+- `docs/randomizer-operations.md`
+- `docs/dependency-operations.md`
+- `SECURITY.md`
+- `release-artifacts/README.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation target:
+
+- `python scripts/test_incident_response.py`
+- `python scripts/check_incident_response.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `bash -n scripts/check.sh`
+- PowerShell parse check for `scripts/check.ps1`
+- `python -m py_compile` for touched scripts/tests
+- `rg -n "^#|^##|^###" docs\incident-response.md docs\release-readiness.md docs\tooling.md docs\randomizer-operations.md docs\dependency-operations.md SECURITY.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check`
+- `make check`
+
+Remote validation:
+
+- GitHub Actions CI pending on PR #175.
+- CodeRabbit review requested in issue comment `4695671204`; review pending.
+
+Implementation notes:
+
+- Added `docs/incident-response.md` as a no-secret operator runbook for
+  severity classification, universal triage, evidence retention, reopening,
+  and post-incident review.
+- Covered stuck auctions or settlement, failed/stale randomness, bad Merkle
+  roots or curator claims, bad metadata/dependency configuration, signer
+  compromise/drop authorization, and release artifact/evidence mistakes.
+- Added `scripts/check_incident_response.py` and
+  `scripts/test_incident_response.py` to enforce required headings, maturity
+  language, no-secret/private-reporting guidance, local commands, and links.
+- Wired the new gate into `Makefile`, CI, `scripts/check.sh`, and
+  `scripts/check.ps1`.
+- Linked the runbook from security, release readiness, tooling, randomizer
+  operations, dependency operations, audit package, roadmap, and release
+  artifact documentation.
+- Added the runbook to release-manifest governance docs, regenerated the
+  latest release manifest/checksum artifacts, and updated the changelog.
+
+Validation completed locally:
+
+- `python scripts/test_incident_response.py`
+- `python scripts/check_incident_response.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_audit_package.py`
+- `python scripts/check_audit_package.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts/check.ps1`
+- `python -m py_compile` for touched scripts/tests
+- `rg -n "^#|^##|^###" docs\incident-response.md docs\release-readiness.md docs\tooling.md docs\randomizer-operations.md docs\dependency-operations.md SECURITY.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check`
+- `make check`
+
 ### PR candidate: Reconcile Gate G roadmap after non-local evidence schema merge (Queue Item 89)
 
-Status: PR #174 open; waiting for CI and CodeRabbit.
+Status: merged in PR #174 as
+`074ac3eb510ccafa593812677e6c26cbed4171b1`; issue #172 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/172`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/174`.
 CodeRabbit request: issue comment `4695446245`.
 Branch: `codex/reconcile-nonlocal-evidence-schema`.
 Branch started from PR #171 squash merge commit
 `6a5a2f96b8196c2387eda3ed3187cbde2616f9cb`.
+Final head: `55b7dc716c5bfdd9e003d5b068f24ba7dfb5eddd`.
+Squash merge commit: `074ac3eb510ccafa593812677e6c26cbed4171b1`.
+CI run: `27442981046`.
+CodeRabbit status: success; no actionable comments.
 
 Goal:
 
@@ -185,6 +304,15 @@ Validation target:
 - `python scripts/generate_release_checksums.py --check`
 - `python scripts/check_changelog.py`
 - `git diff --check`
+
+Remote validation:
+
+- GitHub Actions CI run `27442981046` passed on final head
+  `55b7dc716c5bfdd9e003d5b068f24ba7dfb5eddd`.
+- CodeRabbit status was success, the bot reported no actionable comments, and
+  all five pre-merge checks passed.
+- PR #174 squash-merged as
+  `074ac3eb510ccafa593812677e6c26cbed4171b1`; issue #172 closed completed.
 
 Implementation notes so far:
 
@@ -8162,6 +8290,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 21:41 | Open PR #175 and request CodeRabbit | Incident-response runbook PR opened against `main`, linked `Closes #173`, pushed head `0a0a49be0ab2adc3b1141389a52d1e8523865945`, requested CodeRabbit in comment `4695671204`, and intentionally skipped Claude per current user instruction |
+| 2026-06-12 21:38 | Prepare Queue Item 90 for PR | Incident-response runbook, docs checker, CI/wrapper wiring, release manifest/checksum refresh, docs links, roadmap/changelog updates, focused checks, `git diff --check`, and `make check` all pass locally |
+| 2026-06-12 21:13 | Start Queue Item 90 | PR #174 merged, issue #172 closed completed, and issue #173 is the next active no-secret Gate E/G docs and operations slice |
+| 2026-06-12 21:12 | Merge PR #174 | Non-local evidence schema merge reconciliation merged as `074ac3eb510ccafa593812677e6c26cbed4171b1`; final head `55b7dc716c5bfdd9e003d5b068f24ba7dfb5eddd` passed CI run `27442981046`, CodeRabbit status was success with no actionable comments, and issue #172 closed completed |
 | 2026-06-12 21:03 | Open PR #174 and request CodeRabbit | State-only reconciliation PR opened against `main`, linked `Closes #172`, requested CodeRabbit in comment `4695446245`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 20:59 | Create issue #173 and select Queue Item 90 | After PR #171 merged and the state-only reconciliation issue #172 was opened, the next no-secret Gate E/G gap is a protocol incident-response runbook covering stuck auctions, failed randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes |
 | 2026-06-12 20:57 | Create issue #172 and select Queue Item 89 | PR #171 merged with CI run `27442075849` and CodeRabbit success on head `7050e0ea474c507126c4d2e11744e8b61fd3ab52`; the durable run state and roadmap verification metadata needed a state-only reconciliation before the next implementation PR |

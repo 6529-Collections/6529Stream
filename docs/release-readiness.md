@@ -11,6 +11,9 @@ production release?
 Use [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) as
 the intake runbook for any fork, testnet, live, audit, gas, invariant,
 verification, or signing evidence that updates the public-beta evidence status.
+Use [`docs/incident-response.md`](incident-response.md) for no-secret triage,
+containment, recovery, evidence retention, and reopening procedures when an
+operational incident affects release readiness.
 
 ## Maturity And Scope
 
@@ -32,7 +35,7 @@ local tests prove protocol correctness.
 
 | Area | Current state | Blocks public beta | Blocks production release |
 | --- | --- | --- | --- |
-| CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
+| CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
@@ -49,6 +52,8 @@ The current local baseline includes:
 - auditor-facing architecture, threat model, and audit package docs under
   [`docs/architecture.md`](architecture.md), [`docs/threat-model.md`](threat-model.md),
   and [`docs/audit-package.md`](audit-package.md);
+- incident response procedures in
+  [`docs/incident-response.md`](incident-response.md);
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -130,6 +135,7 @@ Core project and governance:
 Audit and protocol evidence:
 
 - [docs/audit-package.md](audit-package.md)
+- [docs/incident-response.md](incident-response.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
 - [docs/deployment.md](deployment.md)
@@ -169,6 +175,8 @@ Run the dashboard checker directly:
 ```sh
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_incident_response.py
+python scripts/check_incident_response.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_non_local_release_evidence.py

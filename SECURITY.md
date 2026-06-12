@@ -5,6 +5,10 @@ protocol draft with known P0 blockers tracked in [ops/ROADMAP.md](ops/ROADMAP.md
 Do not use these contracts for production drops, custody of valuable assets, or
 public security claims until the launch gates are complete.
 
+Operational incidents that do not contain public exploit details should follow
+the no-secret procedure in [docs/incident-response.md](docs/incident-response.md)
+after private vulnerability triage starts.
+
 ## Reporting Vulnerabilities
 
 Please do not open public GitHub issues for exploitable vulnerabilities.
@@ -89,5 +93,7 @@ The current roadmap calls out these high-risk areas:
 - Randomizer request and callback validation.
 - Static-analysis high/medium findings.
 - Deployment rehearsal, verification, and release artifacts.
+- Incident response, emergency pause, signer revocation, retry/recovery,
+  withdrawal availability, and evidence retention.
 
 Security reports should reference the relevant roadmap issue ID when possible.
