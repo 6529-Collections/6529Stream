@@ -44,6 +44,7 @@ Explicitly out of scope for this package:
 | Threat model | [`docs/threat-model.md`](threat-model.md) |
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
+| Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
 | Gated execution roadmap | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 | Autonomous execution state | [`ops/AUTONOMOUS_RUN.md`](../ops/AUTONOMOUS_RUN.md) |
 | Contributor workflow | [`CONTRIBUTING.md`](../CONTRIBUTING.md) |
@@ -76,6 +77,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/deployment.md`](deployment.md)
 - [`docs/release-policy.md`](release-policy.md)
 - [`docs/release-signatures.md`](release-signatures.md)
+- [`docs/release-readiness.md`](release-readiness.md)
 
 ## Invariants And Test Evidence
 
@@ -181,6 +183,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_release_readiness.py
+python scripts/check_release_readiness.py
 ```
 
 Run the release evidence checks that include this package:
@@ -224,6 +228,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_release_readiness.py
+python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check

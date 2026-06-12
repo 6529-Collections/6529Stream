@@ -13,11 +13,12 @@ the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
 deterministic local deployment manifest/address-book/checksum-bundle checks,
 plus retained source-verification inputs, a machine-readable release manifest,
-architecture/threat-model checks, an audit-package check, and changelog gate
-for release-impacting changes.
+architecture/threat-model checks, an audit-package check, a release-readiness
+dashboard check, and changelog gate for release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
-Known P0 blockers and the execution roadmap are tracked in
-[`ops/ROADMAP.md`](ops/ROADMAP.md).
+Known P0 blockers, the execution roadmap, and the release-readiness dashboard
+are tracked in [`ops/ROADMAP.md`](ops/ROADMAP.md) and
+[`docs/release-readiness.md`](docs/release-readiness.md).
 
 ## Drop Flow
 
@@ -62,6 +63,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_release_readiness.py
+python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -114,6 +117,12 @@ The audit-package step verifies the auditor-facing index under
 [`docs/audit-package.md`](docs/audit-package.md). The package links scope,
 accepted ADRs, invariants, Slither disposition, local deployment/release
 evidence, known blockers, and security reporting in one place.
+
+The release-readiness step verifies the Gate G dashboard under
+[`docs/release-readiness.md`](docs/release-readiness.md). The dashboard
+separates passing local evidence from missing fork/testnet/live evidence,
+production signatures, signed tags, verified addresses, explorer verification,
+external audit, and post-audit remediation blockers.
 
 The release-checksum step verifies the signable checksum bundle under
 `release-artifacts/latest/` against the committed release artifacts,
@@ -177,6 +186,7 @@ Current pinned versions:
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/threat-model.md`](docs/threat-model.md)
 - [`docs/audit-package.md`](docs/audit-package.md)
+- [`docs/release-readiness.md`](docs/release-readiness.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)
 - [`docs/tooling.md`](docs/tooling.md)

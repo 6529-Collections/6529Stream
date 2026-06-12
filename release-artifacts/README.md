@@ -19,6 +19,7 @@ python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```
@@ -49,6 +50,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_release_readiness.py
+python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -81,14 +84,15 @@ Production dependency version changes must follow
 records release metadata, release artifact hashes, ABI compatibility baseline
 hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
 schema hashes, governance doc hashes including `docs/architecture.md`,
-`docs/threat-model.md`, and `docs/audit-package.md`, and the release-ceremony
-items that are not yet available for this pre-audit local baseline.
+`docs/threat-model.md`, `docs/audit-package.md`, and
+`docs/release-readiness.md`, and the release-ceremony items that are not yet
+available for this pre-audit local baseline.
 
-`docs/architecture.md`, `docs/threat-model.md`, and `docs/audit-package.md`
-are the auditor-facing architecture, trust-boundary, and package indexes for
-the current local baseline. They are validated before release manifest
-generation, and the release manifest records their hashes as governance
-documents.
+`docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`, and
+`docs/release-readiness.md` are the auditor-facing architecture,
+trust-boundary, package, and Gate G readiness indexes for the current local
+baseline. They are validated before release manifest generation, and the
+release manifest records their hashes as governance documents.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
@@ -138,6 +142,7 @@ python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```

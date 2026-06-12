@@ -35,6 +35,8 @@ REQUIRED_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_audit_package.py",
     "python scripts/check_audit_package.py",
+    "python scripts/test_release_readiness.py",
+    "python scripts/check_release_readiness.py",
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
     "make check",
@@ -49,6 +51,7 @@ REQUIRED_LINK_TARGETS = [
     "ops/SLITHER_BASELINE.md",
     "docs/architecture.md",
     "docs/threat-model.md",
+    "docs/release-readiness.md",
     "docs/status.md",
     "docs/known-blockers.md",
     "docs/slither.md",

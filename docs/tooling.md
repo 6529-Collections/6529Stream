@@ -49,6 +49,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_release_readiness.py
+python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -140,6 +142,12 @@ single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
 deployment/release evidence, known blockers, accepted local-baseline
 dispositions, and security reporting.
 
+The release-readiness step validates
+[`release-readiness.md`](release-readiness.md), the Gate G dashboard that
+separates passing local evidence from missing fork/testnet/live evidence,
+production signatures, signed Git tags, verified deployed addresses, explorer
+verification, external audit, and post-audit remediation blockers.
+
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, deployment manifest, address-book, schema, ceremony-evidence, and release-manifest
@@ -204,6 +212,7 @@ python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
@@ -226,6 +235,7 @@ python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
