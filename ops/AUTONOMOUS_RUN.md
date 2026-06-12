@@ -133,7 +133,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 Status: PR #138 opened and CodeRabbit requested in PR comment `4687472511`.
 Issue #136 selected after PR #137 merged and stale umbrella issues #25, #30,
-#45, #46, #47, #48, #51, and #124 were closed with evidence comments. Branch
+\#45, #46, #47, #48, #51, and #124 were closed with evidence comments. Branch
 `codex/dependency-migration-runbook` started from `main` at PR #137 merge commit
 `40ce3e31bdf4a9d8b137d4923662d5d1b5a2fa2b`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/138`.
@@ -210,7 +210,7 @@ Status: Merged in PR #137; CI run `27393589713` passed, CodeRabbit completed
 with no actionable comments on the final head, and squash merge
 `40ce3e31bdf4a9d8b137d4923662d5d1b5a2fa2b` landed on `main`. Issue #134 was
 closed through the PR merge. Issues #25, #30, #45, #46, #47, #48, #51, and
-#124 were closed manually with evidence comments after merge.
+\#124 were closed manually with evidence comments after merge.
 
 Original status: Issue #134 created; branch `codex/roadmap-issue-reconciliation`
 started from `main` at PR #133 merge commit
@@ -1665,7 +1665,7 @@ Review feedback:
 - CodeRabbit completed successfully on the final head.
 - Claude review threads were addressed and resolved before merge.
 - Late Claude PR #20 review threads were also addressed and resolved after PR
-  #23 merged, because PR #23 had already updated ADR 0001 with the requested
+  \#23 merged, because PR #23 had already updated ADR 0001 with the requested
   field semantics and canonical `DROP_ID_TYPEHASH`.
 
 Outcome:
