@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/163` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 17:04 UTC` |
+| Last updated | `2026-06-12 17:13 UTC` |
 
 ## Packaging Notes
 
@@ -138,13 +138,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
 | 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
-| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | CodeRabbit follow-up committed; CI and CodeRabbit pending |
+| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | CodeRabbit docstring warning follow-up pending CI/review |
 
 ## Current PR Worklog
 
 ### PR candidate: Add release readiness dashboard and blocker checker (Queue Item 84)
 
-Status: CodeRabbit follow-up committed; CI and CodeRabbit pending.
+Status: CodeRabbit docstring warning follow-up pending CI/review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/162`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/163`.
 CodeRabbit request: issue comment `4693404700`.
@@ -204,6 +204,8 @@ Implementation notes so far:
   #162 as the active Gate G work item.
 - Accepted CodeRabbit review comment `4693433631` by adding focused tests for
   the missing-document error path and the custom `--release-readiness` CLI path.
+- Added concise docstrings to the new checker and tests after CodeRabbit's
+  pre-merge summary flagged docstring coverage on the new Python files.
 
 Validation so far:
 
@@ -231,6 +233,10 @@ Validation so far:
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 - CodeRabbit follow-up validation: `python scripts\test_release_readiness.py`
   now runs 11 tests, `python scripts\check_release_readiness.py`, targeted
+  `python -m py_compile`, `python scripts\check_changelog.py`, and
+  `git diff --check` all pass.
+- Docstring follow-up validation: `python scripts\test_release_readiness.py`,
+  `python scripts\check_release_readiness.py`, targeted
   `python -m py_compile`, `python scripts\check_changelog.py`, and
   `git diff --check` all pass.
 
@@ -7632,6 +7638,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 17:13 | Address CodeRabbit PR #163 docstring warning | Added concise docstrings to the new checker/test functions after CodeRabbit's pre-merge summary flagged docstring coverage; focused release-readiness, py_compile, changelog, and whitespace validation pass locally |
 | 2026-06-12 17:04 | Address CodeRabbit PR #163 review | Accepted the two low-risk coverage suggestions by adding missing-document and custom `--release-readiness` path tests; focused release-readiness, py_compile, changelog, and whitespace validation pass locally |
 | 2026-06-12 16:59 | Open PR #163 and request CodeRabbit | Release-readiness dashboard PR opened against `main`, linked `Closes #162`, requested CodeRabbit in comment `4693404700`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 16:56 | Finish local Queue Item 84 validation | Release-readiness checker/tests, audit-package checks, release manifest/checksum regeneration and check modes, Python compilation, changelog gate, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |

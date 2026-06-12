@@ -103,6 +103,7 @@ class ReleaseReadinessError(ValueError):
 
 
 def normalize_repo_path(path: Path, repo_root: Path) -> str:
+    """Return a repository-relative POSIX path or reject path escapes."""
     try:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except ValueError as exc:
@@ -110,6 +111,7 @@ def normalize_repo_path(path: Path, repo_root: Path) -> str:
 
 
 def markdown_headings(text: str) -> set[tuple[int, str]]:
+    """Extract Markdown headings as level/title pairs."""
     headings = set()
     for match in HEADING_RE.finditer(text):
         level = len(match.group(1))
@@ -119,6 +121,7 @@ def markdown_headings(text: str) -> set[tuple[int, str]]:
 
 
 def normalized_link_target(raw_target: str) -> str | None:
+    """Return a local Markdown link path without anchors or query strings."""
     target = raw_target.strip()
     if not target or target.startswith("#"):
         return None
@@ -132,6 +135,7 @@ def normalized_link_target(raw_target: str) -> str | None:
 
 
 def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[str]:
+    """Collect existing repository-relative file links from Markdown text."""
     links = set()
     missing = []
     for match in LINK_RE.finditer(text):
@@ -158,11 +162,13 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
 
 
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
+    """Return required phrases that are absent from text, case-insensitively."""
     normalized_text = text.lower()
     return [phrase for phrase in phrases if phrase.lower() not in normalized_text]
 
 
 def validate_release_readiness(repo_root: Path, document_path: Path) -> None:
+    """Validate the release-readiness dashboard against required evidence."""
     if not document_path.is_file():
         relative = normalize_repo_path(document_path, repo_root)
         raise ReleaseReadinessError(f"missing document: {relative}")
@@ -213,6 +219,7 @@ def validate_release_readiness(repo_root: Path, document_path: Path) -> None:
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
+    """Parse release-readiness checker command-line options."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--release-readiness", type=Path, default=DEFAULT_RELEASE_READINESS)
@@ -220,6 +227,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the release-readiness checker CLI."""
     args = parse_args(argv or [])
     repo_root = args.repo_root.resolve()
     release_readiness_path = args.release_readiness

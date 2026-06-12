@@ -19,22 +19,26 @@ SPEC.loader.exec_module(checker)
 
 
 def write_text(path: Path, value: str) -> None:
+    """Write UTF-8 text while creating parent directories."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8", newline="\n")
 
 
 def seed_required_targets(root: Path) -> None:
+    """Create placeholder files for every required dashboard link target."""
     for relative in checker.REQUIRED_LINK_TARGETS:
         write_text(root / relative, f"seed for {relative}\n")
 
 
 def target_links() -> str:
+    """Render Markdown list items for all required link targets."""
     return "\n".join(
         f"- [{target}](../{target})" for target in checker.REQUIRED_LINK_TARGETS
     )
 
 
 def minimal_release_readiness_doc() -> str:
+    """Build the smallest dashboard document accepted by the checker."""
     commands = "\n".join(checker.REQUIRED_COMMANDS)
     links = target_links()
     return f"""# Release Readiness
@@ -84,6 +88,7 @@ Refresh whenever release evidence or blockers change.
 
 class ReleaseReadinessTests(unittest.TestCase):
     def test_accepts_committed_doc(self) -> None:
+        """The committed dashboard satisfies the checker."""
         repo_root = Path(__file__).resolve().parents[1]
 
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
@@ -92,6 +97,7 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertEqual(result, 0)
 
     def test_accepts_minimal_valid_doc(self) -> None:
+        """A minimal complete dashboard passes validation."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -106,6 +112,7 @@ class ReleaseReadinessTests(unittest.TestCase):
             self.assertEqual(result, 0)
 
     def test_accepts_custom_release_readiness_path(self) -> None:
+        """The CLI accepts a non-default dashboard path."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -125,6 +132,7 @@ class ReleaseReadinessTests(unittest.TestCase):
             self.assertEqual(result, 0)
 
     def test_rejects_missing_document(self) -> None:
+        """A missing dashboard reports the missing-document error."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
 
@@ -136,6 +144,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_missing_heading(self) -> None:
+        """Missing required headings are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -152,6 +161,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_missing_maturity_language(self) -> None:
+        """Missing maturity warnings are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -168,6 +178,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_missing_readiness_phrase(self) -> None:
+        """Missing readiness-blocker phrases are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -184,6 +195,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_missing_command(self) -> None:
+        """Missing required commands are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -200,6 +212,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_missing_required_link(self) -> None:
+        """Missing required evidence links are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -216,6 +229,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_missing_linked_file(self) -> None:
+        """Links to missing required files are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -233,6 +247,7 @@ class ReleaseReadinessTests(unittest.TestCase):
                 )
 
     def test_rejects_escaped_link_target(self) -> None:
+        """Links that escape the repository root are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
