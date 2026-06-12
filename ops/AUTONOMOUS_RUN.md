@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/local-gas-snapshot-baseline` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/145` |
-| Active PR | TBD for issue `https://github.com/6529-Collections/6529Stream/issues/146` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/147` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 09:26 UTC` |
+| Last updated | `2026-06-12 09:29 UTC` |
 
 ## Packaging Notes
 
@@ -130,14 +130,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Merged in PR #141 |
 | 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Merged in PR #143 |
 | 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
-| 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | In progress on `codex/local-gas-snapshot-baseline` |
+| 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Open in PR #147 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add local gas snapshot baseline (Queue Item 76)
 
-Status: in progress on branch `codex/local-gas-snapshot-baseline`.
+Status: open in PR #147 on branch `codex/local-gas-snapshot-baseline`; CI and
+CodeRabbit are pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/146`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/147`.
+CodeRabbit request: issue comment `4689622593`.
 Branch started from PR #145 squash merge commit
 `9f1c2578ab12097e945c7400a2f37df83608a092`.
 
@@ -6781,6 +6784,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 09:29 | Open PR #147 and request CodeRabbit | Pushed `codex/local-gas-snapshot-baseline`, opened https://github.com/6529-Collections/6529Stream/pull/147 against `main`, linked `Closes #146`, requested CodeRabbit in comment `4689622593`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 09:26 | Finish local Queue Item 76 validation | Focused gas snapshot test and snapshot regeneration/check pass, release manifest/checksum/changelog drift checks pass, full `make check` and Windows `scripts\check.ps1` pass, and `git diff --check` is clean aside from normal line-ending notices |
 | 2026-06-12 09:08 | Select Queue Item 76 | PR #145 merged as `9f1c2578ab12097e945c7400a2f37df83608a092` and issue #144 closed completed; no open GitHub issues remained, so issue #146 now scopes the next no-secret Gate D/G gap as a committed local gas snapshot baseline |
 | 2026-06-12 08:44 | Address CodeRabbit PR #145 review | Accepted the two actionable comments and two low-cost nitpicks: CI py_compile now covers ceremony scripts, tooling docs include the test step, non-local ceremony evidence is scoped as future work, secret-like value detection has a regression, release artifacts were regenerated, and focused/full local gates plus the Windows wrapper pass |
