@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/supply-replay-freeze-invariants` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/147` |
-| Active PR | TBD for issue #148 |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/149` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 10:54 UTC` |
+| Last updated | `2026-06-12 10:56 UTC` |
 
 ## Packaging Notes
 
@@ -131,15 +131,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Merged in PR #143 |
 | 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
 | 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
-| 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | In progress |
+| 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Open in PR #149 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add supply/replay/freeze invariant baseline (Queue Item 77)
 
-Status: local implementation in progress on branch
-`codex/supply-replay-freeze-invariants`; PR not opened yet.
+Status: open in PR #149 on branch `codex/supply-replay-freeze-invariants`;
+local validation passed and CI/CodeRabbit are pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/148`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/149`.
+CodeRabbit request: issue comment `4690503803`.
 Branch started from PR #147 squash merge commit
 `a907219a2717322a6be72e141615dbeeb1edb7d8`.
 
@@ -6916,6 +6918,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 10:56 | Open PR #149 and request CodeRabbit | Pushed `codex/supply-replay-freeze-invariants`, opened https://github.com/6529-Collections/6529Stream/pull/149 against `main`, linked `Closes #148`, requested CodeRabbit in comment `4690503803`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 10:54 | Finish local Queue Item 77 validation | Focused supply/replay/freeze invariant fuzzing, release manifest/checksum/changelog drift checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check` pass locally with only existing repo warnings |
 | 2026-06-12 10:36 | Implement Queue Item 77 local draft | Added a bounded supply/replay/freeze invariant test file covering mixed fixed-price mints, cancellations, replay attempts, burns, metadata edits, freeze attempts, and post-freeze guards; focused formatting and Forge test validation passed before docs/release evidence updates |
 | 2026-06-12 10:28 | Create issue #148 and select Queue Item 77 | PR #147 merged and no open GitHub issues remained, so the next Gate D gap is a local supply/replay/freeze invariant baseline before broader fork/testnet/live and auction-consistency evidence |
