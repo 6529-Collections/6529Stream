@@ -170,7 +170,7 @@
     {
       "category": "public_beta_evidence_schema",
       "path": "release-artifacts/schema/public-beta-evidence.schema.json",
-      "sha256": "sha256:ba2d10eb3b20a8699dd33f8bb1b42a2b7f98aa8ea67830350a90e50a2efa3f2c"
+      "sha256": "sha256:cec024757bfe8967a27106ee8c4739c6f51ff8b0ec6a2fb564939441fd9ac9bb"
     }
   ],
   "redaction_policy": {

@@ -76,15 +76,15 @@ REDACTION_POLICY_FIELDS = frozenset({"no_secrets", "redacted_fields"})
 
 GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
-SECRET_KEY_PARTS = (
-    "private_key",
-    "mnemonic",
-    "seed_phrase",
-    "secret",
-    "rpc_url",
-    "api_key",
-    "password",
-    "unreleased_drop_payload",
+ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+SECRET_KEY_RE = re.compile(
+    r"(^|[_\-\s])("
+    r"private[_\-\s]?key|mnemonic|seed[_\-\s]?phrase|rpc[_\-\s]?url|"
+    r"api[_\-\s]?key|password|unreleased[_\-\s]?drop[_\-\s]?payload"
+    r")([_\-\s]|$)"
+    r"|(^|[_\-\s])client[_\-\s]?secret([_\-\s]|$)"
+    r"|(^|[_\-\s])secret$",
+    re.IGNORECASE,
 )
 SAFE_SECRET_POLICY_KEYS = frozenset({"redaction_policy", "no_secrets", "redacted_fields"})
 SECRET_VALUE_RE = re.compile(
@@ -187,6 +187,14 @@ def require_git_commit(value: Any, path: str) -> str:
     return commit
 
 
+def require_iso_date(value: Any, path: str) -> str:
+    """Require an ISO-8601 date string in YYYY-MM-DD form."""
+    text = require_string(value, path)
+    if not ISO_DATE_RE.fullmatch(text):
+        raise PublicBetaEvidenceError(f"{path} must be an ISO-8601 date (YYYY-MM-DD)")
+    return text
+
+
 def resolve_repo_file(repo_root: Path, relative_path: str, path: str) -> Path:
     """Resolve a forward-slash repo path and reject traversal."""
     if "\\" in relative_path:
@@ -257,8 +265,8 @@ def validate_risk_acceptance(value: Any, path: str) -> None:
     risk = require_dict(value, path)
     require_exact_keys(risk, path, RISK_ACCEPTANCE_FIELDS)
     require_string(risk.get("accepted_by"), f"{path}.accepted_by")
-    require_string(risk.get("accepted_at"), f"{path}.accepted_at")
-    require_string(risk.get("expires_at"), f"{path}.expires_at")
+    require_iso_date(risk.get("accepted_at"), f"{path}.accepted_at")
+    require_iso_date(risk.get("expires_at"), f"{path}.expires_at")
     require_string(risk.get("reference"), f"{path}.reference")
     require_string(risk.get("notes"), f"{path}.notes")
 
@@ -389,9 +397,7 @@ def scan_for_secret_like_data(value: Any, path: str = "$") -> None:
         for key, item in value.items():
             key_text = str(key)
             key_lower = key_text.lower()
-            if key_lower not in SAFE_SECRET_POLICY_KEYS and any(
-                part in key_lower for part in SECRET_KEY_PARTS
-            ):
+            if key_lower not in SAFE_SECRET_POLICY_KEYS and SECRET_KEY_RE.search(key_text):
                 raise PublicBetaEvidenceError(f"secret-like key found at {path}.{key_text}")
             scan_for_secret_like_data(item, f"{path}.{key_text}")
     elif isinstance(value, list):

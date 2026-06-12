@@ -365,6 +365,7 @@ def release_signature_record(path: Path, repo_root: Path) -> dict[str, Any]:
 
 
 def public_beta_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    """Load, validate, and summarize public-beta evidence status."""
     data = require_dict(load_json(path), str(path))
     try:
         public_beta_checker.validate_evidence_document(data, repo_root, str(path))

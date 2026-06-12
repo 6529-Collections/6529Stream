@@ -218,6 +218,25 @@ class PublicBetaEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, root)
 
+    def test_rejects_accepted_risk_without_iso_dates(self) -> None:
+        """Risk-acceptance dates must be machine-readable dates."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            risk = risk_acceptance()
+            risk["accepted_at"] = "soon"
+            evidence = valid_evidence(root)
+            evidence["requirements"][0] = requirement(
+                checker.PUBLIC_BETA_REQUIREMENTS[0],
+                checker.PUBLIC_BETA_PHASE,
+                "accepted_risk",
+                risk_acceptance=risk,
+            )
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(checker.PublicBetaEvidenceError, "ISO-8601 date"):
+                checker.validate_evidence(path, root)
+
     def test_rejects_ready_status_with_blockers(self) -> None:
         """Overall ready status is rejected while blockers remain."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -275,6 +294,15 @@ class PublicBetaEvidenceTests(unittest.TestCase):
 
             with self.assertRaisesRegex(checker.PublicBetaEvidenceError, "secret-like"):
                 checker.validate_evidence(path, root)
+
+    def test_secret_key_scan_allows_benign_secret_words(self) -> None:
+        """Benign future key names should not collide with the secret scanner."""
+        checker.scan_for_secret_like_data(
+            {"secret_free_note": "public", "no_secrets_stored": True}
+        )
+
+        with self.assertRaisesRegex(checker.PublicBetaEvidenceError, "secret-like key"):
+            checker.scan_for_secret_like_data({"client_secret": "do-not-commit"})
 
 
 if __name__ == "__main__":

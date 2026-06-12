@@ -26,6 +26,11 @@ The status file is included in release manifest and checksum coverage, so
 changes to blocker status, retained evidence paths, hashes, or risk acceptance
 records must refresh the generated release artifacts before release.
 
+The checker constants in `scripts/check_public_beta_evidence.py` are the
+canonical requirement list. If the required public-beta or production rows
+change, update the schema's `requirements.minItems` count and this document in
+the same PR.
+
 ## Status Values
 
 Each requirement uses one of these statuses:

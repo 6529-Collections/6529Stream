@@ -83,7 +83,7 @@
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:1e5167b2578696513e5273d08a90db1339228f71082241feee91370a6fb59df3",
+      "sha256": "sha256:3b75cde36f75662061011af793d4c9240a1fec6447294ce0e3ee1d331d729b4d",
       "size_bytes": 6296,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
@@ -448,8 +448,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:fa1c8f3268c4d51f2aafcdc7767aee9109ebc8a9a6de3d3d703eb5b5bc1a269a",
-        "size_bytes": 3746
+        "sha256": "sha256:380809bc1fd1b77d3ef8f75f3f466851a1ac94cb2202f037a231c4f5df8add72",
+        "size_bytes": 3987
       },
       {
         "path": "docs/architecture.md",
