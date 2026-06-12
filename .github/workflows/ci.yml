@@ -71,6 +71,8 @@ jobs:
             scripts/test_randomizer_operations.py \
             scripts/check_release_signatures.py \
             scripts/test_release_signatures.py \
+            scripts/check_audit_package.py \
+            scripts/test_audit_package.py \
             scripts/generate_release_manifest.py \
             scripts/test_release_manifest.py \
             scripts/generate_release_checksums.py \
@@ -220,6 +222,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_signatures.py 2>&1 | tee ci-logs/release-signature-tests.log
           python3 scripts/check_release_signatures.py 2>&1 | tee ci-logs/release-signature-check.log
+
+      - name: Audit package
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_audit_package.py 2>&1 | tee ci-logs/audit-package-tests.log
+          python3 scripts/check_audit_package.py 2>&1 | tee ci-logs/audit-package-check.log
 
       - name: Release manifest
         shell: bash

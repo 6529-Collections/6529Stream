@@ -41,6 +41,12 @@ python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/test_randomizer_operations.py
+python scripts/check_randomizer_operations.py
+python scripts/test_release_signatures.py
+python scripts/check_release_signatures.py
+python scripts/test_audit_package.py
+python scripts/check_audit_package.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -118,8 +124,14 @@ The release-manifest step builds
 `release-artifacts/latest/release-manifest.json`, a deterministic top-level
 index over the committed release artifact catalog, ABI compatibility baseline,
 deployment manifests, address books, deployment schemas, ceremony evidence,
-changelog, governance docs, and unavailable release-ceremony artifacts. It is regenerated with
-`python scripts/generate_release_manifest.py` after any covered input changes.
+changelog, governance docs, the audit package, and unavailable release-ceremony
+artifacts. It is regenerated with `python scripts/generate_release_manifest.py`
+after any covered input changes.
+
+The audit-package step validates [`audit-package.md`](audit-package.md), the
+single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
+deployment/release evidence, known blockers, accepted local-baseline
+dispositions, and security reporting.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
@@ -181,6 +193,9 @@ python scripts/generate_deployment_manifest.py --config deployments/config/anvil
 python scripts/generate_address_books.py
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/check_randomizer_operations.py
+python scripts/check_release_signatures.py
+python scripts/check_audit_package.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
@@ -199,6 +214,9 @@ python scripts/generate_deployment_manifest.py --config deployments/config/anvil
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/check_randomizer_operations.py
+python scripts/check_release_signatures.py
+python scripts/check_audit_package.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py

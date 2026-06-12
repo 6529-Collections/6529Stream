@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-signature-evidence` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/155` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/157` |
+| Active PR branch | `codex/audit-package-index` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/157` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/159` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 14:19 UTC` |
+| Last updated | `2026-06-12 15:12 UTC` |
 
 ## Packaging Notes
 
@@ -135,14 +135,112 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Merged in PR #151 |
 | 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | Merged in PR #153 |
 | 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #155 |
-| 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | In progress |
+| 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
+| 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merge-ready; CI and CodeRabbit green on final head |
 
 ## Current PR Worklog
 
+### PR candidate: Add external audit package index (Queue Item 82)
+
+Status: PR #159 merge-ready; CodeRabbit review comments addressed and
+follow-up validation passed; GitHub CI run `27424138673` passed and CodeRabbit
+reported success on final head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/158`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/159`.
+CodeRabbit request: issue comment `4692444134`.
+Branch: `codex/audit-package-index`.
+Branch started from PR #157 squash merge commit
+`ed5f3b17cec879d74f765cbd457a9b0fbe809cad`.
+
+Goal:
+
+- Add a single auditor-facing index for current maturity, scope, ADRs,
+  invariants, static analysis, local deployment/release evidence, known
+  blockers, accepted local-baseline dispositions, and security reporting.
+- Add a deterministic checker and unit tests so required sections, maturity
+  warnings, commands, and linked evidence targets cannot silently disappear.
+- Wire the checker into Makefile, Unix and Windows check wrappers, and CI.
+- Include `docs/audit-package.md` in release-manifest governance docs so the
+  generated manifest and checksum bundle capture the package hash.
+- Keep the PR documentation/tooling-only with no Solidity behavior changes.
+
+Initial candidate files:
+
+- `docs/audit-package.md`
+- `scripts/check_audit_package.py`
+- `scripts/test_audit_package.py`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `release-artifacts/README.md`
+- `docs/tooling.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes:
+
+- Added `docs/audit-package.md` as the canonical Gate F index for audit scope,
+  maturity warnings, entry points, ADRs, invariants, Slither, deployment/release
+  evidence, blocker/risk separation, security reporting, and verification
+  commands.
+- Added `scripts/check_audit_package.py` to enforce required headings, maturity
+  language, local verification commands, required links, and missing linked
+  files.
+- Added `scripts/test_audit_package.py` covering the committed package, a
+  minimal valid package, missing heading, missing maturity language, missing
+  required link, and missing linked file cases.
+- Wired the checker into Makefile, Unix and Windows check wrappers, CI,
+  release-manifest governance docs, and release documentation.
+- Regenerated `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json`.
+- Accepted CodeRabbit's PR #159 follow-up review by aggregating missing-link
+  failures, guarding the missing-required-link test replacement, clarifying that
+  `generate_*` commands mutate tracked files while `--check` verifies them, and
+  changing `AuditPackageError` to inherit from `ValueError`.
+
+Validation:
+
+- `python scripts\test_audit_package.py`
+- `python scripts\check_audit_package.py`
+- `python -m py_compile scripts\check_audit_package.py scripts\test_audit_package.py scripts\generate_release_manifest.py scripts\test_release_manifest.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts\check.ps1`
+- `git diff --check`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- CodeRabbit follow-up validation: `python scripts\test_audit_package.py`,
+  `python scripts\check_audit_package.py`, targeted `python -m py_compile`,
+  `python scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\test_release_checksums.py`,
+  `python scripts\generate_release_checksums.py --check`,
+  `python scripts\test_changelog_check.py`, `python scripts\check_changelog.py`,
+  `bash -n scripts/check.sh`, and `git diff --check`.
+- Remote validation: GitHub CI run `27424138673` passed on head
+  `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, including the audit package,
+  release manifest, release checksums, changelog, and deployment rehearsal
+  steps. CodeRabbit status was `success` on the same head.
+
 ### PR candidate: Add release signature evidence baseline (Queue Item 81)
 
-Status: PR #157 open; CodeRabbit findings addressed locally and follow-up
-validation passed; awaiting follow-up push.
+Status: Merged in PR #157 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/156`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/157`.
 CodeRabbit request: issue comment `4691996355`.
@@ -7330,6 +7428,11 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 15:05 | Address PR #159 CodeRabbit review | Accepted the minor review suggestions: aggregate missing-link failures, guard the missing-link test mutation, clarify generate-vs-check docs, use `ValueError` for validation errors, regenerate release evidence, and pass focused audit/manifest/checksum/changelog/syntax/whitespace validation |
+| 2026-06-12 14:59 | Open PR #159 and request CodeRabbit | Audit package index PR opened against `main`, linked `Closes #158`, requested CodeRabbit in comment `4692444134`, and intentionally skipped Claude per current user instruction |
+| 2026-06-12 14:58 | Finish local Queue Item 82 validation | Audit package checker/tests, release manifest/checksum/changelog gates, Python compilation, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
+| 2026-06-12 14:36 | Start Queue Item 82 | Created issue #158 and selected the Gate F external audit package index because no open issues remained and Gate F still lacked a single auditor-facing package tying scope, ADRs, invariants, Slither, deployment/release evidence, blockers, and security reporting together |
+| 2026-06-12 14:33 | Merge PR #157 | Release signature evidence baseline merged as `ed5f3b17cec879d74f765cbd457a9b0fbe809cad`; CI run `27421639645` passed, CodeRabbit status was green, issue #156 closed completed, and local `main` was fast-forwarded |
 | 2026-06-12 14:18 | Address PR #157 CodeRabbit findings | Enforced exact evidence object keys, validated release-signature evidence before manifest indexing, retained the validated payload in the release manifest, added schema/signature evidence to checksum coverage, regenerated release artifacts, and passed focused release-signature, manifest, and checksum tests locally |
 | 2026-06-12 14:10 | Address PR #157 CI hygiene failure | GitHub CI run `27420702347` failed `git diff --check` on an extra blank line at EOF in `docs/release-signatures.md`; trimmed the EOF, regenerated release manifest/checksum evidence, and reran focused release-signature, manifest, checksum, Python compile, Bash syntax, and whitespace checks locally |
 | 2026-06-12 14:03 | Open PR #157 and request CodeRabbit | Release signature evidence baseline PR opened against `main`, linked `Closes #156`, requested CodeRabbit in comment `4691996355`, and intentionally skipped Claude per current user instruction |
@@ -7839,6 +7942,7 @@ Outcome:
 | 2026-06-12 07:10 | Open PR #143 | Emergency redeployment rehearsal PR opened on head `cf8f5ec488294005ecf2c809018fee6d84f40c98` with issue #142 closure, local validation transcript, and fork/testnet/live emergency evidence explicitly scoped to later Gate E work |
 | 2026-06-12 07:22 | Address CodeRabbit PR #143 review | Accepted CodeRabbit's request to make deployment-version uniqueness a direct script assertion, then reran focused Forge formatting, evidence test, and emergency redeployment script validation |
 | 2026-06-12 07:28 | Finish PR #143 follow-up validation | Full `make check` passed after the CodeRabbit deployment-version guard fix; CI rerun and CodeRabbit re-review remain pending until the follow-up commit is pushed |
+| 2026-06-12 15:12 | Mark PR #159 merge-ready | CI run `27424138673` passed on head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, CodeRabbit status was success, and the visible CodeRabbit review suggestions were addressed in the follow-up commit |
 
 ## Resume Instructions
 

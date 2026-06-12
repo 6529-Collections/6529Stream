@@ -13,7 +13,7 @@ the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
 deterministic local deployment manifest/address-book/checksum-bundle checks,
 plus retained source-verification inputs, a machine-readable release manifest,
-and changelog gate for release-impacting changes.
+an audit-package check, and changelog gate for release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
 Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
@@ -51,6 +51,14 @@ python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
+python scripts/test_randomizer_operations.py
+python scripts/check_randomizer_operations.py
+python scripts/test_release_signatures.py
+python scripts/check_release_signatures.py
+python scripts/test_audit_package.py
+python scripts/check_audit_package.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -91,8 +99,13 @@ The address-book step verifies compact generated address books under
 The release-manifest step verifies a deterministic top-level release manifest
 under `release-artifacts/latest/release-manifest.json`. The manifest ties the
 release-artifact catalog, ABI compatibility baseline, deployment manifests,
-address books, governance docs, and release-ceremony status together for
-integrators and maintainers.
+address books, governance docs including the audit package, and
+release-ceremony status together for integrators and maintainers.
+
+The audit-package step verifies the auditor-facing index under
+[`docs/audit-package.md`](docs/audit-package.md). The package links scope,
+accepted ADRs, invariants, Slither disposition, local deployment/release
+evidence, known blockers, and security reporting in one place.
 
 The release-checksum step verifies the signable checksum bundle under
 `release-artifacts/latest/` against the committed release artifacts,
@@ -153,6 +166,7 @@ Current pinned versions:
 - [`ops/ROADMAP.md`](ops/ROADMAP.md)
 - [`ops/SLITHER_BASELINE.md`](ops/SLITHER_BASELINE.md)
 - [`ops/AUTONOMOUS_RUN.md`](ops/AUTONOMOUS_RUN.md)
+- [`docs/audit-package.md`](docs/audit-package.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)
 - [`docs/tooling.md`](docs/tooling.md)
