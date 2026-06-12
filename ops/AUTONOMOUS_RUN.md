@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/supply-replay-freeze-invariants` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/147` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/149` |
+| Active PR branch | `codex/auction-consistency-invariants` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/149` |
+| Active PR | TBD for issue #150 |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 11:06 UTC` |
+| Last updated | `2026-06-12 11:38 UTC` |
 
 ## Packaging Notes
 
@@ -131,17 +131,102 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Merged in PR #143 |
 | 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
 | 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
-| 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Open in PR #149 |
+| 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Merged in PR #149 |
+| 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | In progress |
 
 ## Current PR Worklog
 
+### PR candidate: Add auction consistency invariant baseline (Queue Item 78)
+
+Status: local implementation and focused validation complete on branch
+`codex/auction-consistency-invariants`; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/150`.
+Branch started from PR #149 squash merge commit
+`3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`.
+
+Goal:
+
+- Add a bounded sequence invariant baseline for auction registration, active
+  custody, first bids, higher outbids, pre-bid cancellation, ended no-bid
+  settlement, ended with-bid settlement, repeated settlement attempts,
+  withdrawals where useful, and invalid-operation preservation.
+- Reassert that auction token custody is known at all times, previous bidders
+  receive withdrawable credit, active bid escrow remains represented in local
+  accounting, cancellation is pre-bid only, terminal auctions reject new bids,
+  settlement is terminal/idempotent, and final ownership/proceeds expectations
+  remain coherent.
+- Update changelog, test inventory, project status, roadmap traceability, and
+  this durable run state.
+- Keep fork/testnet/live invariant evidence and new auction product semantics
+  out of scope unless the local invariant reveals a concrete defect.
+
+Initial candidate files:
+
+- `test/StreamAuctionInvariant.t.sol`
+- `test/README.md`
+- `docs/status.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes:
+
+- Added `test/StreamAuctionInvariant.t.sol`, a bounded sequence harness over a
+  single deployed stream/auction stack.
+- The handler mints signed auction drops, cancels active no-bid auctions,
+  places first bids and higher outbids, attempts underbids, settles no-bid and
+  with-bid auctions, attempts repeat settlement and late bids, withdraws bidder
+  and proceeds credits, forces surplus, and runs emergency surplus withdrawal.
+- The invariant reasserts token custody, auction status, highest bid/bidder,
+  previous-bidder credits, proceeds splits, active bid escrow, `totalOwed()`,
+  `totalReserved()`, balance coverage, and `surplus()`/`emergencyWithdrawable()`
+  after each action.
+- Invalid-operation attempts snapshot custody/accounting before the call and
+  prove failed calls preserve status, owner, bid state, owed totals, and
+  contract balance.
+- Updated `test/README.md`, `docs/status.md`, `CHANGELOG.md`, and
+  `ops/ROADMAP.md` to document the new local Gate D coverage and remaining
+  fork/testnet evidence gap.
+
+Focused validation:
+
+- `forge fmt test\StreamAuctionInvariant.t.sol` passed.
+- `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv` passed with
+  256 fuzz runs.
+- Release manifest/checksum/changelog self-tests and check modes passed after
+  regenerating `release-artifacts/latest/`.
+- Full local `make check` passed.
+- Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed.
+- `git diff --check` passed.
+
+Validation plan:
+
+- `forge fmt test\StreamAuctionInvariant.t.sol`
+- `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `python scripts\test_changelog_check.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\check_changelog.py`
+- Full local `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
 ### PR candidate: Add supply/replay/freeze invariant baseline (Queue Item 77)
 
-Status: open in PR #149 on branch `codex/supply-replay-freeze-invariants`;
-local validation passed and CI/CodeRabbit are pending.
+Status: merged in PR #149 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/148`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/149`.
 CodeRabbit request: issue comment `4690503803`.
+Final head: `ed6bd87f50877fdf711f14fbc215aa958bd59f16`.
+Squash merge commit: `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`.
 Branch started from PR #147 squash merge commit
 `a907219a2717322a6be72e141615dbeeb1edb7d8`.
 
@@ -6935,6 +7020,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 11:16 | Create issue #150 and select Queue Item 78 | PR #149 merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610` and no open GitHub issues remained, so the next local Gate D gap is broader auction-consistency invariant coverage before fork/testnet/live evidence |
+| 2026-06-12 11:15 | Merge PR #149 | Supply/replay/freeze invariant baseline merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`; final head `ed6bd87f50877fdf711f14fbc215aa958bd59f16` had CI run `27411884632` and CodeRabbit green, no review threads, and issue #148 closed completed |
 | 2026-06-12 11:06 | Validate CodeRabbit PR #149 response | Focused invariant formatting/test, release manifest/checksum drift checks, and whitespace checks pass after the drop-tracking overflow guard |
 | 2026-06-12 11:05 | Address CodeRabbit PR #149 nitpick | Accepted CodeRabbit review `4485046635` by making drop tracking capacity fail loudly instead of silently weakening future invariant coverage |
 | 2026-06-12 10:56 | Open PR #149 and request CodeRabbit | Pushed `codex/supply-replay-freeze-invariants`, opened https://github.com/6529-Collections/6529Stream/pull/149 against `main`, linked `Closes #148`, requested CodeRabbit in comment `4690503803`, and intentionally skipped Claude per user instruction |

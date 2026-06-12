@@ -70,6 +70,10 @@ the release policy in `docs/release-policy.md`.
 - Added a bounded supply/replay/freeze invariant baseline covering fixed-price
   drop mints, cancellations, replay attempts, burns, metadata updates,
   freeze-manifest stability, and post-freeze mutation rejection.
+- Added a bounded auction-consistency invariant baseline covering auction-drop
+  registration, escrow custody, first bids, outbids, cancellation, settlement,
+  invalid-operation preservation, withdrawals, and auction-local owed/reserve
+  surplus coherence.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen
