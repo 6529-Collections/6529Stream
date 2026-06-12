@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/auction-consistency-invariants` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/149` |
-| Active PR | TBD for issue #150 |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/151` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 11:38 UTC` |
+| Last updated | `2026-06-12 11:40 UTC` |
 
 ## Packaging Notes
 
@@ -132,15 +132,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
 | 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
 | 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Merged in PR #149 |
-| 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | In progress |
+| 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Open PR #151 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add auction consistency invariant baseline (Queue Item 78)
 
-Status: local implementation and focused validation complete on branch
-`codex/auction-consistency-invariants`; PR not opened yet.
+Status: PR #151 open with CodeRabbit requested.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/150`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/151`.
+CodeRabbit request: issue comment `4690918785`.
+Initial head: `f83b68a32e5446c22e40f44ff190c593fed93b06`.
 Branch started from PR #149 squash merge commit
 `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`.
 
@@ -7020,6 +7022,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 11:40 | Open PR #151 and request CodeRabbit | Auction consistency invariant baseline pushed to `codex/auction-consistency-invariants`, opened as https://github.com/6529-Collections/6529Stream/pull/151 against `main`, linked `Closes #150`, requested CodeRabbit in comment `4690918785`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 11:16 | Create issue #150 and select Queue Item 78 | PR #149 merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610` and no open GitHub issues remained, so the next local Gate D gap is broader auction-consistency invariant coverage before fork/testnet/live evidence |
 | 2026-06-12 11:15 | Merge PR #149 | Supply/replay/freeze invariant baseline merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`; final head `ed6bd87f50877fdf711f14fbc215aa958bd59f16` had CI run `27411884632` and CodeRabbit green, no review threads, and issue #148 closed completed |
 | 2026-06-12 11:06 | Validate CodeRabbit PR #149 response | Focused invariant formatting/test, release manifest/checksum drift checks, and whitespace checks pass after the drop-tracking overflow guard |
