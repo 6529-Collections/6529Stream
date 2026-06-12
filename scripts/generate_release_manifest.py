@@ -25,7 +25,7 @@ BASELINE_DIR = Path("release-artifacts/baselines")
 DEFAULT_BASELINE = BASELINE_DIR / "v0.1.0" / "abi-surface.json"
 GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_PUBLIC_BETA_EVIDENCE = Path("release-artifacts/latest/public-beta-evidence.json")
+PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
@@ -599,7 +599,7 @@ def build_manifest(
                 schema_required=True,
             ),
             "public_beta_evidence": public_beta_evidence_record(
-                repo_root / DEFAULT_PUBLIC_BETA_EVIDENCE,
+                release_artifacts_dir / PUBLIC_BETA_EVIDENCE_FILENAME,
                 repo_root,
             ),
             "release_signature_evidence": release_signatures,

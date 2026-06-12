@@ -520,6 +520,50 @@ class ReleaseManifestTests(unittest.TestCase):
                 ]
             )
 
+    def test_generator_uses_custom_release_artifacts_dir_for_public_beta_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            custom_latest = root / "custom-release-artifacts" / "latest"
+            custom_latest.mkdir(parents=True, exist_ok=True)
+            for source in paths["latest"].iterdir():
+                if source.is_file():
+                    (custom_latest / source.name).write_bytes(source.read_bytes())
+            output = custom_latest / "release-manifest.json"
+
+            written = generator.write_output(
+                root,
+                output,
+                custom_latest,
+                paths["baseline"],
+                paths["gas_snapshot"],
+                paths["contract_config"],
+                paths["deployment_config_dir"],
+                paths["deployment_broadcast_dir"],
+                paths["deployment_manifest_dir"],
+                paths["address_book_dir"],
+                paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
+                paths["randomizer_operations_dir"],
+                paths["changelog"],
+                paths["docs"],
+            )
+
+            manifest = json.loads(written.read_text(encoding="utf-8"))
+            self.assertEqual(
+                manifest["source"]["release_artifacts_dir"],
+                "custom-release-artifacts/latest",
+            )
+            public_beta = manifest["release_artifacts"]["public_beta_evidence"]
+            self.assertEqual(
+                public_beta["path"],
+                "custom-release-artifacts/latest/public-beta-evidence.json",
+            )
+            self.assertEqual(
+                public_beta["sha256"],
+                generator.file_sha256(custom_latest / "public-beta-evidence.json"),
+            )
+
     def test_check_mode_accepts_current_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

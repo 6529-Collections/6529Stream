@@ -88,8 +88,9 @@ records release metadata, release artifact hashes, ABI compatibility baseline
 hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
 public-beta evidence status, schema hashes, governance doc hashes including `docs/architecture.md`,
 `docs/threat-model.md`, `docs/audit-package.md`, and
-`docs/release-readiness.md`, and the release-ceremony items that are not yet
-available for this pre-audit local baseline.
+`docs/public-beta-evidence.md`, and `docs/release-readiness.md`, and the
+release-ceremony items that are not yet available for this pre-audit local
+baseline.
 
 `latest/public-beta-evidence.json` is the no-secret status manifest for
 public-beta and production-release evidence. It stays blocked in the committed

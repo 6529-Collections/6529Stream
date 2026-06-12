@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 18:13 UTC` |
+| Last updated | `2026-06-12 18:28 UTC` |
 
 ## Packaging Notes
 
@@ -145,7 +145,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add public beta evidence status manifest (Queue Item 85)
 
-Status: PR #165 open; CodeRabbit follow-up addressed; CI and final CodeRabbit status pending.
+Status: PR #165 open; second CodeRabbit follow-up addressed; refreshed CI and final CodeRabbit status pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/164`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/165`.
 CodeRabbit request: issue comment `4693993623`.
@@ -214,6 +214,12 @@ Implementation notes so far:
   docstring, enforcing ISO `YYYY-MM-DD` dates for risk-acceptance metadata,
   documenting schema/checker requirement-count alignment, and tightening the
   secret-key scan to avoid benign future key-name collisions.
+- Addressed CodeRabbit review threads `PRRT_kwDOM7REis6JN30J`,
+  `PRRT_kwDOM7REis6JN30V`, and `PRRT_kwDOM7REis6JN30b` by documenting ISO
+  risk-acceptance dates, parsing them as real calendar dates, fixing
+  `--release-artifacts-dir` handling for public-beta evidence, adding schema
+  minItems drift coverage, adding custom release-artifacts-dir manifest
+  coverage, and updating checksum/governance-doc coverage docs.
 
 Validation so far:
 
@@ -246,6 +252,20 @@ Validation so far:
   `python scripts\test_audit_package.py`,
   `python scripts\check_audit_package.py`, and
   `python scripts\generate_release_checksums.py --check`.
+- Second CodeRabbit follow-up focused validation:
+  `python scripts\test_public_beta_evidence.py`,
+  `python scripts\check_public_beta_evidence.py`,
+  `python scripts\test_release_manifest.py`,
+  `python -m py_compile scripts\check_public_beta_evidence.py scripts\test_public_beta_evidence.py scripts\generate_release_manifest.py scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\generate_release_checksums.py --check`,
+  `python scripts\test_release_readiness.py`,
+  `python scripts\check_release_readiness.py`,
+  `python scripts\test_audit_package.py`,
+  `python scripts\check_audit_package.py`,
+  `python scripts\test_release_artifacts.py`,
+  `python scripts\generate_release_artifacts.py --check`, and
+  `git diff --check`.
 
 ### PR #163: Add release readiness dashboard and blocker checker (Queue Item 84)
 
@@ -7746,6 +7766,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 18:28 | Address second CodeRabbit PR #165 review | Fixed the valid custom `--release-artifacts-dir` path bug, made ISO risk-acceptance dates parse as real dates, documented the date format, added schema minItems drift coverage, added custom release-artifact directory manifest coverage, updated checksum/governance-doc coverage docs, regenerated release evidence, and passed focused validation |
 | 2026-06-12 18:13 | Address CodeRabbit PR #165 review | Accepted the pre-merge docstring recommendation plus the low-risk ISO date, schema-count note, and secret-key false-positive hardening suggestions; focused public-beta, release-manifest, release-artifact, readiness, audit-package, checksum, and py_compile validation pass locally |
 | 2026-06-12 18:10 | Open PR #165 and request CodeRabbit | Public-beta evidence status PR opened against `main`, linked `Closes #164`, requested CodeRabbit in comment `4693993623`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 18:05 | Finish local Queue Item 85 validation | Public-beta evidence checker/tests, release-artifact downstream handling, release-manifest/checksum drift checks, py_compile, wrapper syntax, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |

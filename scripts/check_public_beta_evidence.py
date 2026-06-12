@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -192,6 +193,12 @@ def require_iso_date(value: Any, path: str) -> str:
     text = require_string(value, path)
     if not ISO_DATE_RE.fullmatch(text):
         raise PublicBetaEvidenceError(f"{path} must be an ISO-8601 date (YYYY-MM-DD)")
+    try:
+        date.fromisoformat(text)
+    except ValueError as exc:
+        raise PublicBetaEvidenceError(
+            f"{path} must be an ISO-8601 date (YYYY-MM-DD)"
+        ) from exc
     return text
 
 

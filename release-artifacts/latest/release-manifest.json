@@ -448,8 +448,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:380809bc1fd1b77d3ef8f75f3f466851a1ac94cb2202f037a231c4f5df8add72",
-        "size_bytes": 3987
+        "sha256": "sha256:a4ced1ba019dee3d68bead58bd38d70b991d707b9c826bba6425ef52f8f27d6b",
+        "size_bytes": 4193
       },
       {
         "path": "docs/architecture.md",
@@ -473,8 +473,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:d97f0d1fbf1bef98ef539579de25bd3c0289eadd55bcf274a2ff1e2c0caff183",
-        "size_bytes": 14661
+        "sha256": "sha256:e5dec25a861590437d7b3f882f1bc6b3680640647ff3f90c3ed16c2f177355be",
+        "size_bytes": 14737
       },
       {
         "path": "docs/status.md",

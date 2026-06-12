@@ -158,8 +158,9 @@ non-local evidence or explicit risk acceptance exists.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
-artifact, deployment manifest, address-book, schema, ceremony-evidence, and release-manifest
-outputs. This gives maintainers a deterministic, signable checksum bundle. The
+artifact, public-beta evidence, deployment manifest, address-book, schema,
+ceremony-evidence, and release-manifest outputs. This gives maintainers a
+deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
 `release-manifest.json`; embedding the final bundle digest in that covered file
@@ -281,13 +282,13 @@ or duplicate contract addresses, missing contract metadata, or mismatch against
 the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
+`release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,
 `deployments/address-books/`, `deployments/ceremony-evidence/`, and
-`deployments/schema/`, excluding its own
-generated checksum files to avoid self-referential hashes. Refresh the release
-manifest before refreshing the checksum bundle after changing any covered
-artifact.
+`deployments/schema/`, excluding its own generated checksum files to avoid
+self-referential hashes. Refresh the release manifest before refreshing the
+checksum bundle after changing any covered artifact.
 
 ## Non-Gating Diagnostics
 

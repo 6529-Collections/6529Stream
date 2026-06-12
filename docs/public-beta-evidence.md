@@ -98,5 +98,8 @@ To move a requirement to `complete`:
 5. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
-`expires_at`, `reference`, and `notes`. Risk acceptance should be rare, explicit,
-and tied to a public issue, governance decision, or release note.
+`expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`
+fields must use real ISO `YYYY-MM-DD` calendar dates, such as `2026-06-12`;
+`scripts/check_public_beta_evidence.py` enforces the format and tests reject
+free-form values. Risk acceptance should be rare, explicit, and tied to a
+public issue, governance decision, or release note.

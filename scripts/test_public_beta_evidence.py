@@ -134,6 +134,20 @@ class PublicBetaEvidenceTests(unittest.TestCase):
 
             checker.validate_evidence(path, root)
 
+    def test_schema_requirement_count_matches_checker(self) -> None:
+        """The JSON schema row count follows the checker requirement sets."""
+        repo_root = Path(__file__).resolve().parents[1]
+        schema = json.loads(
+            (repo_root / "release-artifacts/schema/public-beta-evidence.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        self.assertEqual(
+            schema["properties"]["requirements"]["minItems"],
+            len(checker.PUBLIC_BETA_REQUIREMENTS) + len(checker.PRODUCTION_REQUIREMENTS),
+        )
+
     def test_accepts_custom_evidence_path(self) -> None:
         """The CLI accepts a non-default evidence path."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -224,6 +238,25 @@ class PublicBetaEvidenceTests(unittest.TestCase):
             root = Path(temp_dir)
             risk = risk_acceptance()
             risk["accepted_at"] = "soon"
+            evidence = valid_evidence(root)
+            evidence["requirements"][0] = requirement(
+                checker.PUBLIC_BETA_REQUIREMENTS[0],
+                checker.PUBLIC_BETA_PHASE,
+                "accepted_risk",
+                risk_acceptance=risk,
+            )
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(checker.PublicBetaEvidenceError, "ISO-8601 date"):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_accepted_risk_without_real_calendar_dates(self) -> None:
+        """Risk-acceptance dates must be valid calendar dates."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            risk = risk_acceptance()
+            risk["expires_at"] = "2026-13-40"
             evidence = valid_evidence(root)
             evidence["requirements"][0] = requirement(
                 checker.PUBLIC_BETA_REQUIREMENTS[0],
