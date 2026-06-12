@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/roadmap-issue-reconciliation` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/133` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/137` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 03:58 UTC` |
+| Last updated | `2026-06-12 03:59 UTC` |
 
 ## Packaging Notes
 
@@ -133,7 +133,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 Status: Issue #134 created; branch `codex/roadmap-issue-reconciliation`
 started from `main` at PR #133 merge commit
 `f583f7662dab2945b79a5c92d31ed74c5e227639`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/137`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/134`.
 Follow-up issues created:
 `https://github.com/6529-Collections/6529Stream/issues/135` for live/fork
