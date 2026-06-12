@@ -1,0 +1,133 @@
+{
+  "schema_version": "6529stream.deployment-ceremony-evidence.v1",
+  "evidence_id": "anvil-6529stream-v0.1.0-001-local",
+  "protocol_version": "0.1.0",
+  "deployment_version": "anvil-6529stream-v0.1.0-001",
+  "network": {
+    "environment": "local",
+    "name": "anvil",
+    "chain_id": 31337,
+    "confirmation_depth": 0
+  },
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "local"
+  },
+  "participants": {
+    "deployer": "0x0000000000000000000000000000000000006537",
+    "admin_safe": "0x0000000000000000000000000000000000006529",
+    "tdh_signer": "0x0000000000000000000000000000000000006532",
+    "emergency_recipient": "0x0000000000000000000000000000000000006531"
+  },
+  "artifacts": {
+    "deployment_manifest": {
+      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+    },
+    "deployment_manifest_canonical_sha256": "sha256:8718720cd04c02290a336cdcd5d6fceae5e900d1340c5fb7939c60fd4f8c0d95",
+    "address_book": {
+      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:ebec623efd4c2848f3e97b803e91e8ff7b469ec2797fbe388b7091d52aba8550"
+    },
+    "abi_checksums": {
+      "path": "release-artifacts/latest/abi-checksums.json",
+      "sha256": "sha256:2290e589f3970441cf4698e457bf6784e399cfea5dd458f1e633eb92005f18f7"
+    },
+    "release_checksum_bundle": {
+      "path": "release-artifacts/latest/SHA256SUMS",
+      "digest_status": "not_available_self_referential",
+      "reason": "The release checksum bundle covers ceremony evidence outputs, so its own digest is intentionally recorded by the top-level release manifest instead of this evidence file."
+    }
+  },
+  "ceremony_results": {
+    "admin_ceremony": {
+      "status": "passed",
+      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
+      "evidence": [
+        {
+          "path": "script/RehearseDeployment.s.sol",
+          "sha256": "sha256:45bf3da3bcd41edb2d1432910513617fe71eb6d08796ffbf58bc1d8cdebd8fd4"
+        }
+      ],
+      "notes": "Local Anvil rehearsal transfers StreamAdmins and StreamCore ownership to the Safe placeholder and removes the temporary deployer global admin."
+    },
+    "signer_setup": {
+      "status": "passed",
+      "evidence": [
+        {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+        }
+      ],
+      "notes": "The local manifest records the drop signer placeholder and signer-manager Safe placeholder."
+    },
+    "metadata_browser": {
+      "status": "passed",
+      "command": "python scripts/check_rehearsal_metadata_browser_sandbox.py",
+      "evidence": [
+        {
+          "path": "script/RehearseMetadataBrowser.s.sol",
+          "sha256": "sha256:6ad0d9cee364ddb57246bb7bf2a3057b2efa9fca4d0f4aec5ff1e044e14d999f"
+        }
+      ],
+      "notes": "Local deployment-rehearsal metadata executes inside the committed Chromium sandbox check."
+    },
+    "auction_ceremony": {
+      "status": "passed",
+      "command": "forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig \"run()\" --via-ir",
+      "evidence": [
+        {
+          "path": "script/RehearseAuctionCeremony.s.sol",
+          "sha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+        }
+      ],
+      "notes": "Local auction ceremony mints a signed auction drop, receives a bid, settles, withdraws proceeds, and ends with zero owed funds."
+    },
+    "emergency_redeployment": {
+      "status": "passed",
+      "command": "forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig \"run()\" --via-ir",
+      "evidence": [
+        {
+          "path": "script/RehearseEmergencyRedeployment.s.sol",
+          "sha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+        }
+      ],
+      "notes": "Local emergency redeployment rehearsal proves distinct old/replacement versions, manifests, drop domains, contract addresses, Safe-rooted ceremony state, deployer-admin removal, and replacement fixed-price mint smoke."
+    }
+  },
+  "verification_status": {
+    "contract_verification": "not_applicable",
+    "source_verification_inputs": "verified",
+    "explorer_submissions": []
+  },
+  "retained_artifacts": [
+    {
+      "category": "deployment_manifest",
+      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+    },
+    {
+      "category": "address_book",
+      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:ebec623efd4c2848f3e97b803e91e8ff7b469ec2797fbe388b7091d52aba8550"
+    },
+    {
+      "category": "abi_checksums",
+      "path": "release-artifacts/latest/abi-checksums.json",
+      "sha256": "sha256:2290e589f3970441cf4698e457bf6784e399cfea5dd458f1e633eb92005f18f7"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "rpc_url",
+      "api_key",
+      "unreleased_drop_payload"
+    ]
+  },
+  "operator_notes": "This is local Anvil evidence only. Fork, testnet, and production ceremony evidence must retain real broadcast manifests, verification submissions, and operator-reviewed incident/deprecation notes without private keys or RPC credentials."
+}

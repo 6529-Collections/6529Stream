@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/ceremony-evidence.schema.json",
+  "title": "6529Stream Deployment Ceremony Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "protocol_version",
+    "deployment_version",
+    "network",
+    "source",
+    "participants",
+    "artifacts",
+    "ceremony_results",
+    "verification_status",
+    "retained_artifacts",
+    "redaction_policy",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.deployment-ceremony-evidence.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "name", "chain_id", "confirmation_depth"],
+      "properties": {
+        "environment": {
+          "enum": ["local", "fork", "testnet", "mainnet", "production"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "confirmation_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "participants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deployer", "admin_safe", "tdh_signer", "emergency_recipient"],
+      "properties": {
+        "deployer": {
+          "$ref": "#/$defs/address"
+        },
+        "admin_safe": {
+          "$ref": "#/$defs/address"
+        },
+        "tdh_signer": {
+          "$ref": "#/$defs/address"
+        },
+        "emergency_recipient": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployment_manifest",
+        "deployment_manifest_canonical_sha256",
+        "address_book",
+        "abi_checksums",
+        "release_checksum_bundle"
+      ],
+      "properties": {
+        "deployment_manifest": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "deployment_manifest_canonical_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "address_book": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "abi_checksums": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "release_checksum_bundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "digest_status", "reason"],
+          "properties": {
+            "path": {
+              "$ref": "#/$defs/repo_path"
+            },
+            "digest_status": {
+              "const": "not_available_self_referential"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "ceremony_results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admin_ceremony",
+        "signer_setup",
+        "metadata_browser",
+        "auction_ceremony",
+        "emergency_redeployment"
+      ],
+      "properties": {
+        "admin_ceremony": {
+          "$ref": "#/$defs/ceremony_result"
+        },
+        "signer_setup": {
+          "$ref": "#/$defs/ceremony_result"
+        },
+        "metadata_browser": {
+          "$ref": "#/$defs/ceremony_result"
+        },
+        "auction_ceremony": {
+          "$ref": "#/$defs/ceremony_result"
+        },
+        "emergency_redeployment": {
+          "$ref": "#/$defs/ceremony_result"
+        }
+      }
+    },
+    "verification_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_verification",
+        "source_verification_inputs",
+        "explorer_submissions"
+      ],
+      "properties": {
+        "contract_verification": {
+          "$ref": "#/$defs/verification_status"
+        },
+        "source_verification_inputs": {
+          "$ref": "#/$defs/verification_status"
+        },
+        "explorer_submissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["explorer", "status"],
+            "properties": {
+              "explorer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "$ref": "#/$defs/verification_status"
+              }
+            }
+          }
+        }
+      }
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "path", "sha256"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "$ref": "#/$defs/repo_path"
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          }
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "pattern": "(^/|\\\\|(^|/)\\.\\.(/|$))"
+      }
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "ceremony_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence", "notes"],
+      "properties": {
+        "status": {
+          "enum": ["passed", "failed", "blocked", "pending", "not_applicable"]
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file_ref"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verification_status": {
+      "enum": ["not_started", "submitted", "verified", "partial", "not_applicable"]
+    }
+  }
+}
