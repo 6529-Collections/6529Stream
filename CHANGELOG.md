@@ -56,6 +56,10 @@ the release policy in `docs/release-policy.md`.
 - Added a local auction ceremony rehearsal gate that deploys the stack, signs
   and mints an auction drop, proves auction custody, bids, settles, withdraws
   poster/protocol/curator proceeds, and checks zero owed funds.
+- Added a local emergency redeployment rehearsal gate that deploys impacted and
+  replacement stacks with distinct deployment versions, manifests, EIP-712 drop
+  domains, and contract addresses, then proves replacement fixed-price mint
+  smoke evidence after Safe-rooted admin ceremonies.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

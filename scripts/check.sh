@@ -56,3 +56,4 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_changelog.py
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
+forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir

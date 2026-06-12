@@ -134,12 +134,15 @@ contributors who start from the README.
   collection freeze-boundary tests, dependency version/pinning tests, and a
   bounded payment sequence invariant baseline now exist. The local deployment
   rehearsal also includes an auction ceremony from signed auction drop through
-  bid, settlement, proceeds withdrawal, and zero owed funds. Fork/testnet/live
-  production metadata browser evidence, deployment, production-governance,
-  richer supply/replay/freeze invariant tests, retained live ceremony evidence,
-  and any future shared-ledger invariants are still missing.
+  bid, settlement, proceeds withdrawal, and zero owed funds plus a local
+  emergency redeployment rehearsal with distinct old/replacement manifests,
+  drop domains, addresses, Safe-rooted ceremony state, and replacement mint
+  smoke evidence. Fork/testnet/live production metadata browser evidence,
+  deployment, production-governance, richer supply/replay/freeze invariant
+  tests, retained live ceremony evidence, and any future shared-ledger
+  invariants are still missing.
 - Live fork/testnet deployment rehearsals, production broadcast retention,
-  production address books, explorer verification, and emergency redeployment
-  rehearsal remain missing.
+  production address books, explorer verification, and retained fork/testnet/live
+  emergency redeployment evidence remain missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

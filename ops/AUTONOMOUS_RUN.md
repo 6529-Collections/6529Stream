@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/dry-run-auction-ceremony` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/141` |
+| Active PR branch | `codex/emergency-redeployment-rehearsal` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/141` |
+| Active PR | TBD for issue `https://github.com/6529-Collections/6529Stream/issues/142` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 06:27 UTC` |
+| Last updated | `2026-06-12 07:07 UTC` |
 
 ## Packaging Notes
 
@@ -127,15 +127,102 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | Merged in PR #137 |
 | 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | Merged in PR #138 |
 | 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | Merged in PR #139 |
-| 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Open in PR #141 |
+| 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Merged in PR #141 |
+| 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Local validation complete on `codex/emergency-redeployment-rehearsal`; PR pending |
 
 ## Current PR Worklog
 
+### PR candidate: Add local emergency redeployment rehearsal (Queue Item 74)
+
+Status: local validation complete for issue #142; PR not opened yet.
+Branch `codex/emergency-redeployment-rehearsal` started from PR #141 merge
+commit `1b3ad3df35fb6dedd65b2b227b1beb29feaa8b61`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/142`.
+
+Goal:
+
+- Add a local ADR 0007 emergency redeployment rehearsal that deploys an
+  impacted historical stack and a replacement stack with a distinct deployment
+  version.
+- Prove old/replacement manifest hashes, EIP-712 drop domains, and core/drops/
+  auction addresses differ.
+- Prove both deployments complete the Safe-rooted admin ceremony and remove the
+  temporary deployer admin.
+- Prove the replacement stack is independently usable by minting a fixed-price
+  smoke token through EIP-712 authorization and a deterministic randomizer.
+- Wire the rehearsal into local/CI deployment gates and update docs, roadmap,
+  changelog, release evidence, and this durable run state.
+- Keep fork/testnet/live emergency evidence explicitly out of scope because this
+  slice must not require secrets.
+
+Initial candidate files:
+
+- `script/RehearseEmergencyRedeployment.s.sol`
+- `test/StreamDeploymentManifest.t.sol`
+- `Makefile`
+- `.github/workflows/ci.yml`
+- `scripts/check.ps1`
+- `scripts/check.sh`
+- `docs/deployment.md`
+- `docs/tooling.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `script/README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `release-artifacts/latest/release-manifest.json`
+
+Validation plan:
+
+- `forge fmt` for touched Solidity scripts/tests.
+- Focused Forge test for the emergency redeployment evidence.
+- `forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`.
+- Generated release manifest/checksum/changelog drift checks after docs updates.
+- Full local `make check`.
+- Bash and PowerShell wrapper syntax checks.
+
+Current implementation notes:
+
+- Added `script/RehearseEmergencyRedeployment.s.sol` with a local deterministic
+  randomizer, double deployment ceremony, distinct deployment-version/domain/
+  manifest/address assertions, Safe ownership/deployer-admin revocation checks,
+  and replacement fixed-price EIP-712 mint smoke.
+- Extended `test/StreamDeploymentManifest.t.sol` to assert machine-checkable
+  evidence hashes, distinct old/replacement domains and contract addresses,
+  signer/Safe continuity, replacement token ownership, token hash, and signer
+  epoch.
+- Wired the emergency redeployment ceremony into `make deploy-rehearsal`,
+  Linux/Windows check wrappers, and the CI deployment rehearsal step.
+- Updated deployment/tooling/status/blocker/test/script docs, changelog, and
+  roadmap state to distinguish local Anvil emergency redeployment evidence from
+  future fork/testnet/live emergency evidence.
+
+Validation completed so far:
+
+- `forge fmt script\RehearseEmergencyRedeployment.s.sol test\StreamDeploymentManifest.t.sol`
+- `forge test --match-path test\StreamDeploymentManifest.t.sol -vvv`
+- `forge script script\RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`
+- `make check`
+- PowerShell parser check for `scripts\check.ps1` and `scripts\bootstrap-windows.ps1`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
 ### PR candidate: Add dry-run auction ceremony rehearsal (Queue Item 73)
 
-Status: PR #141 opened and CodeRabbit requested in PR comment `4687976396`;
-initial CI passed, CodeRabbit review findings are addressed locally, and the
-review-response commit is pending push for latest-head CI/re-review.
+Status: merged in PR #141 after CI passed and CodeRabbit resolved all review
+threads.
 Branch `codex/dry-run-auction-ceremony` started from PR #139 merge commit
 `e09e422a4f95fbf6948d182fcff83a25aaf88e0c`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/140`.
@@ -6934,6 +7021,10 @@ Outcome:
 | 2026-06-10 23:02 | Open PR #82 | ERC-4906 metadata update event PR opened on head `96052819e2cfd5d6f53c4793af03baaadda2ad00`; CodeRabbit requested in issue comment `4675495632`; Claude intentionally skipped per current user instruction |
 | 2026-06-10 23:08 | Address CodeRabbit PR #82 coverage suggestions | Accepted CodeRabbit's low-risk suggestions from comment `4675512759`: added pre-mint `setTokenHash` no-event coverage, two-token image/attribute event coverage, and the `_exists` guard comment; focused tests, full `make check`, Windows wrapper, formatting, whitespace, and Slither baseline comparison all pass with 209 tests |
 | 2026-06-12 06:27 | Address CodeRabbit PR #141 review | Recorded generated release-artifact files in scope, added deterministic token-hash evidence to the auction ceremony rehearsal, replaced gas-affected proceeds balance deltas with ledger-credit evidence, and reran focused rehearsal validation plus `make check` |
+| 2026-06-12 06:35 | Merge PR #141 | CI run `27398853992` passed, CodeRabbit status was green, all CodeRabbit review threads were resolved by the bot, issue #140 closed completed, and the local branch fast-forwarded `main` to merge commit `1b3ad3df35fb6dedd65b2b227b1beb29feaa8b61` |
+| 2026-06-12 06:37 | Create issue #142 and select Queue Item 74 | No open GitHub issues remained; the next Gate E gap is local emergency redeployment rehearsal because ADR 0007 still requires executable emergency redeployment evidence without secrets before broader fork/testnet/live ceremonies |
+| 2026-06-12 06:52 | Implement Queue Item 74 local draft | Added local emergency redeployment rehearsal script/test/gate wiring, updated docs/roadmap/changelog/run-state, regenerated release manifest/checksum evidence, and passed focused Forge/script validation |
+| 2026-06-12 07:07 | Finish local Queue Item 74 validation | Focused Forge tests and script rehearsal, release manifest/checksum/changelog drift checks, bash syntax checks, full `make check`, and Windows PowerShell wrapper validation pass locally; CI and CodeRabbit remain pending until PR creation |
 
 ## Resume Instructions
 

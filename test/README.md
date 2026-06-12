@@ -36,10 +36,14 @@ rejecting receiver, forced ETH surplus handling, and non-divisible proceeds
 rounding.
 
 `StreamDeploymentManifest.t.sol` includes local Gate E rehearsal coverage for
-the deployed stack and the auction ceremony script: the rehearsal signs and
-mints an auction drop, proves active NFT custody in `StreamAuctions`, places a
-bid, settles after the auction end, withdraws poster/protocol/curator proceeds,
-and asserts zero owed funds.
+the deployed stack, the auction ceremony script, and the emergency redeployment
+script: the deployment rehearsal proves local wiring and Safe-rooted admin
+ceremony state; the auction rehearsal signs and mints an auction drop, proves
+active NFT custody in `StreamAuctions`, places a bid, settles after the auction
+end, withdraws poster/protocol/curator proceeds, and asserts zero owed funds;
+the emergency redeployment rehearsal proves distinct old/replacement
+deployment versions, manifests, drop domains, and contract addresses, then mints
+a fixed-price smoke token on the replacement stack.
 
 Fixed-price payments now have target-state coverage in
 `StreamFixedPricePayments.t.sol` and converted integration characterization
