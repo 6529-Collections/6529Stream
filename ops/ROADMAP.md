@@ -20,8 +20,8 @@ order.
   checks deterministic release artifacts, and runs the local deployment and
   auction ceremony rehearsals. It still does not prove full protocol
   correctness.
-- Known remaining production-readiness blockers include broader supply/replay/
-  freeze invariant baselines, live fork/testnet rehearsals, production broadcast retention, live
+- Known remaining production-readiness blockers include broader auction
+  consistency and fork-level invariant baselines, live fork/testnet rehearsals, production broadcast retention, live
   explorer verification, signed release artifacts, production governance
   ceremonies, fork/testnet/live production metadata browser and ceremony
   evidence contents, and external audit packaging.
@@ -50,8 +50,8 @@ order.
   generated local and broadcast-derived address books, generated source
   verification input bundle, generated release manifest, and release checksum
   bundle, no-secret ceremony evidence schema, local Anvil ceremony evidence
-  bundle, ceremony evidence checker, and focused local gas snapshot baseline,
-  plus a local auction ceremony rehearsal
+  bundle, ceremony evidence checker, focused local gas snapshot baseline, and
+  local supply/replay/freeze invariant baseline, plus a local auction ceremony rehearsal
   from signed auction drop through bid, settlement, proceeds withdrawal, and
   zero owed funds, plus a local emergency redeployment rehearsal with distinct
   old/replacement deployment evidence and replacement mint smoke. Live
@@ -70,12 +70,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 08:13 UTC` after Queue Item 75 focused checks, local `make check`, and Windows wrapper validation |
-| OS tested | Windows local; Linux CI pending for Queue Item 75 PR |
+| Last verified | `2026-06-12 10:54 UTC` after Queue Item 77 focused checks, release drift checks, local `make check`, and Windows wrapper validation |
+| OS tested | Windows local; Linux CI pending for Queue Item 77 PR |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | TBD for Queue Item 75 PR |
+| CI run | TBD for Queue Item 77 PR |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -83,7 +83,7 @@ order.
 | Area | Current status | Evidence | Required before public beta |
 | --- | --- | --- | --- |
 | Build | Passes with warnings when `forge` is invoked through the installed binary path | `forge build` | Build passes in CI and locally with warnings burned down or documented |
-| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness pending/stale/failed/final metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
+| Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, randomness pending/stale/failed/final metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, supply/replay/freeze invariants, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior; broader P0/P1 tests are missing | `forge test -vvv` | P0 regression and integration suite exists |
 | Production size | Production deployable contracts pass the IR-optimized size gate; the P1-SIZE-001 recovery pass replaces selected legacy `StreamCore` string reverts with typed custom errors, rejects missing collection data before final-supply math, the Core UTF-8 pass moves reusable metadata guards into the linked renderer library while replacing inherited `_requireMinted` string reverts with `TokenNotMinted()`, and the current release-floor recovery moves freeze hash helpers into the renderer while preserving lifecycle migration behavior; current `StreamCore` runtime is 24,139 bytes with 437 bytes of EIP-170 headroom, above the 384-byte minimum release floor but below the 512-byte warning threshold | `forge build --sizes --via-ir --skip test --skip script --force` | Production size gate passes in CI and deployment scripts use the same profile, with the agreed minimum `StreamCore` margin recovered or an explicit size-budget exception accepted before release |
 | Formatting | Fails broadly | `forge fmt --check smart-contracts` | Passing, or vendored exclusions documented |
 | Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High, 19 Medium, and 93 Low; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
@@ -233,8 +233,11 @@ Evidence: Payment sequence fuzz invariant baseline added in
 baselines added in `test/StreamMetadataGolden.t.sol` and
 `test/StreamMetadataEvents.t.sol`; focused local gas snapshot baseline added in
 `test/StreamGasSnapshot.t.sol` and
-`release-artifacts/baselines/v0.1.0/gas-snapshot.snap`; broader supply, replay,
-freeze, fork gas, and deployment rehearsal baselines remain open.
+`release-artifacts/baselines/v0.1.0/gas-snapshot.snap`; local
+supply/replay/freeze invariant baseline added in
+`test/StreamSupplyReplayFreezeInvariant.t.sol`; broader auction-consistency,
+fork gas, fork/testnet deployment rehearsal, and live evidence baselines remain
+open.
 
 Exit criteria:
 
@@ -2356,6 +2359,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Passing for P0-PAY-005: valid claims create credits and duplicate claims fail without increasing credit | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C/Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsPool.t.sol` | In Progress: reward leaves use `abi.encode`-based hashing for reward address, collection ID, and amount; root epoch/domain expansion remains future curator metadata work | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), `P1-CURATOR-*` | Gate D | TBD |
 | Burn accounting | Burned-token supply, unavailable `tokenURI`, retained audit state, terminal token IDs, and callback-after-burn behavior follow ADR 0006 | `test/StreamCoreBurn.t.sol` | Passing: burn emits the ERC-721 transfer-to-zero event and `TokenBurned`, removes owner/`tokenURI`/`tokenMetadataState` availability, decrements live global and collection supply, increments `burnAmount`, rejects remint attempts for previously burned token IDs, retains token-to-collection/hash audit state, exposes `isTokenBurned` and `burnedTokenAuditState`, records valid VRF and arRNG post-burn randomness through `BurnedTokenRandomnessRecorded`, emits no ERC-4906 metadata updates for burn/post-burn fulfillment, and proves a valid post-burn VRF callback after collection freeze does not alter the frozen manifest. | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-005`](https://github.com/6529-Collections/6529Stream/issues/50), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40) | Gate D | TBD |
+| Supply/replay/freeze invariants | Mixed mints, cancellations, replay attempts, burns, metadata writes, freeze, and post-freeze failed mutations keep supply, drop, burn, and freeze state coherent | `test/StreamSupplyReplayFreezeInvariant.t.sol` | Passing locally: bounded sequences assert global and collection live supply, minted-ever counters, burn counters, burn audit state, consumed/cancelled drop IDs, freeze manifest stability, final-supply tightening, token ownership, token-to-collection mapping, and post-freeze mint/burn/token-data rejections. Fork/testnet and auction-consistency invariants remain future Gate D work. | [`Supply/replay/freeze invariant baseline`](https://github.com/6529-Collections/6529Stream/issues/148) | Gate D | TBD |
 | Local gas snapshot baseline | Mint, bid, settlement, curator claim, `tokenURI`, and dependency/script read gas are measured by deterministic local snapshots | `test/StreamGasSnapshot.t.sol`, `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`, `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap` | Passing locally: Foundry gas snapshot records fixed-price mint, auction bid, auction settlement with bid, curator reward claim, final on-chain `tokenURI`, and dependency generative-script read operations with setup gas paused; local/CI gates fail if the committed snapshot drifts. Fork/testnet/mainnet gas reports remain future release work. | [`Local gas snapshot baseline`](https://github.com/6529-Collections/6529Stream/issues/146) | Gate D/Gate G | TBD |
 | Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamPaymentsInvariant.t.sol` | Passing for current first-party local accounting: direct and forced ETH regressions cover auction, fixed-price drops, curator pool, StreamMinter, and NextGenRandomizerRNG local accounting; bounded sequence fuzzing now injects deterministic forced-balance surplus between mixed operations and proves owed totals, reserves, balance coverage, and emergency-withdrawable surplus stay coherent. | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C/Gate D | TBD |
 
