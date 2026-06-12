@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/public-beta-evidence-status` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/163` |
-| Active PR | TBD; issue `https://github.com/6529-Collections/6529Stream/issues/164` is active |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 18:05 UTC` |
+| Last updated | `2026-06-12 18:10 UTC` |
 
 ## Packaging Notes
 
@@ -145,9 +145,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add public beta evidence status manifest (Queue Item 85)
 
-Status: Local implementation validated; PR not opened yet.
+Status: PR #165 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/164`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/165`.
+CodeRabbit request: issue comment `4693993623`.
 Branch: `codex/public-beta-evidence-status`.
 Branch started from PR #163 squash merge commit
 `cb01f4668cfad068d6df6e556da3baf03fc23575`.
@@ -7728,6 +7729,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 18:10 | Open PR #165 and request CodeRabbit | Public-beta evidence status PR opened against `main`, linked `Closes #164`, requested CodeRabbit in comment `4693993623`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 18:05 | Finish local Queue Item 85 validation | Public-beta evidence checker/tests, release-artifact downstream handling, release-manifest/checksum drift checks, py_compile, wrapper syntax, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
 | 2026-06-12 17:47 | Fix Queue Item 85 artifact-generator integration | Full `make check` exposed that `release-artifacts/latest/public-beta-evidence.json` was correctly tracked by release manifest/checksum tooling but still looked unexpected to the lower-level ABI/event/interface artifact generator, so it is now classified as a downstream release file and covered by the generator test |
 | 2026-06-12 17:25 | Create issue #164 and select Queue Item 85 | PR #163 merged, no open 6529Stream issues remained, and the next Gate G gap is a no-secret public-beta evidence status manifest so fork/testnet/live, audit, signature, signed tag, address, broadcast, explorer, and post-audit blockers become machine-checkable |
