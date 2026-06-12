@@ -7,12 +7,12 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,348 bytes,
-  leaving 228 bytes of EIP-170 headroom under the IR-optimized deployment
-  profile. This passes the EIP-170 deployability gate but is below the current
-  384-byte minimum release floor; issue-sized follow-up work should recover
-  headroom or explicitly accept the size-budget exception before further
-  non-trivial `StreamCore` feature work.
+  size gate. Current `StreamCore` production runtime size is 24,139 bytes,
+  leaving 437 bytes of EIP-170 headroom under the IR-optimized deployment
+  profile. This passes the EIP-170 deployability gate and the current 384-byte
+  minimum release floor, but remains below the 512-byte warning threshold; large
+  non-trivial `StreamCore` feature work should still recover headroom or
+  explicitly accept a size-budget exception.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271
@@ -91,6 +91,9 @@ The current Gate A smoke baseline proves:
   and enforces that `StreamCore` rejects invalid UTF-8 collection fields,
   collection script chunks, token data, token image URIs, and token raw
   attributes while preserving size-before-UTF-8 error ordering.
+  `StreamRandomizerLifecycle.t.sol` also proves unsupported lifecycle providers
+  do not block randomizer migration, while lifecycle-aware providers whose
+  pending-request probe fails still block replacement.
   `StreamCoreCustomErrors.t.sol` proves the typed failure selectors used to
   recover `StreamCore` bytecode headroom for function-admin authorization,
   artist-signature authorization, metadata-array length validation, and

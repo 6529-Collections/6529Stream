@@ -13,6 +13,40 @@ import "./helpers/StreamFixture.sol";
 import "./mocks/MockRandomizer.sol";
 import "./mocks/MockRandomizerCore.sol";
 
+contract UnsupportedLifecycleRandomizer is IRandomizer {
+    function calculateTokenHash(uint256, uint256, uint256) external { }
+
+    function isRandomizerContract() external pure returns (bool) {
+        return true;
+    }
+
+    function supportsRandomizerLifecycle() external pure returns (bool) {
+        return false;
+    }
+
+    // Intentionally reverts because lifecycle support is false; a caller that
+    // still probes pending requests has a bug, not unfinished test scaffolding.
+    function pendingRandomnessRequests(uint256) external pure returns (uint256) {
+        revert("unsupported lifecycle pending probe");
+    }
+}
+
+contract RevertingPendingLifecycleRandomizer is IRandomizer {
+    function calculateTokenHash(uint256, uint256, uint256) external { }
+
+    function isRandomizerContract() external pure returns (bool) {
+        return true;
+    }
+
+    function supportsRandomizerLifecycle() external pure returns (bool) {
+        return true;
+    }
+
+    function pendingRandomnessRequests(uint256) external pure returns (uint256) {
+        revert("pending probe failed");
+    }
+}
+
 contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixture {
     using Assertions for address;
     using Assertions for bool;
@@ -334,6 +368,52 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
             .assertEq(address(replacement), "replacement");
         deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(3, "epoch");
+    }
+
+    function testUnsupportedLifecycleRandomizerDoesNotBlockMigration() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        UnsupportedLifecycleRandomizer unsupported = new UnsupportedLifecycleRandomizer();
+        NoopRandomizer replacement = new NoopRandomizer();
+
+        vm.recordLogs();
+        deployed.core.addRandomizer(COLLECTION_ID, address(unsupported));
+        _assertCollectionRandomizerUpdated(
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            address(deployed.randomizer),
+            address(unsupported),
+            2
+        );
+
+        vm.recordLogs();
+        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+        _assertCollectionRandomizerUpdated(
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            address(unsupported),
+            address(replacement),
+            3
+        );
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(replacement), "replacement");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(3, "epoch");
+    }
+
+    function testSupportedLifecyclePendingProbeFailureBlocksMigration() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        RevertingPendingLifecycleRandomizer oldRandomizer =
+            new RevertingPendingLifecycleRandomizer();
+        NoopRandomizer replacement = new NoopRandomizer();
+
+        deployed.core.addRandomizer(COLLECTION_ID, address(oldRandomizer));
+
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "pending probe failed"));
+        deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+
+        deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
+            .assertEq(address(oldRandomizer), "provider changed");
+        deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(2, "epoch changed");
     }
 
     function testRandomizerMigrationWithPendingRequestIsBlocked() public {

@@ -43,14 +43,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     bytes32 private constant _COLLECTION_INFO_TYPEHASH = keccak256(
         "6529StreamCollectionInfo(bytes32 nameHash,bytes32 artistHash,bytes32 descriptionHash,bytes32 websiteHash,bytes32 licenseHash,bytes32 baseURIHash,bytes32 libraryHash)"
     );
-    bytes32 private constant _COLLECTION_SCRIPT_TYPEHASH =
-        keccak256("6529StreamCollectionScript(uint256 chunkCount,bytes32 chunksHash)");
-    bytes32 private constant _COLLECTION_SCRIPT_CHUNK_TYPEHASH = keccak256(
-        "6529StreamCollectionScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
-    );
-    bytes32 private constant _TOKEN_METADATA_RECORD_TYPEHASH = keccak256(
-        "6529StreamTokenMetadataRecord(uint256 tokenId,bytes32 tokenDataHash,bytes32 tokenImageHash,bytes32 tokenAttributesHash,bytes32 tokenHash)"
-    );
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
     string private constant _METADATA_STATE_PENDING = "pending";
@@ -371,7 +363,33 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         );
         _requireCollectionNotFrozen(_collectionID);
         address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
-        _requireNoPendingRandomnessRequests(_collectionID, oldRandomizer);
+        if (oldRandomizer != address(0)) {
+            uint256 pendingRequests;
+            assembly ("memory-safe") {
+                let ptr := mload(0x40)
+                // IRandomizerLifecycle.supportsRandomizerLifecycle()
+                mstore(ptr, 0x81d673e000000000000000000000000000000000000000000000000000000000)
+                let ok := staticcall(gas(), oldRandomizer, ptr, 0x04, ptr, 0x20)
+                let supported := and(ok, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
+                if supported {
+                    // IRandomizerLifecycle.pendingRandomnessRequests(uint256)
+                    mstore(ptr, 0xdd26bdd100000000000000000000000000000000000000000000000000000000)
+                    mstore(add(ptr, 0x04), _collectionID)
+                    ok := staticcall(gas(), oldRandomizer, ptr, 0x24, ptr, 0x20)
+                    if iszero(ok) {
+                        returndatacopy(0, 0, returndatasize())
+                        revert(0, returndatasize())
+                    }
+                    if iszero(eq(returndatasize(), 0x20)) {
+                        revert(0, 0)
+                    }
+                    pendingRequests := mload(ptr)
+                }
+            }
+            if (pendingRequests != 0) {
+                revert PendingRandomnessRequests(_collectionID, oldRandomizer, pendingRequests);
+            }
+        }
         collectionRandomizerEpoch[_collectionID] = collectionRandomizerEpoch[_collectionID] + 1;
         collectionAdditionalData[_collectionID].randomizerContract = _randomizerContract;
         collectionAdditionalData[_collectionID].randomizer = IRandomizer(_randomizerContract);
@@ -751,36 +769,11 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         emit BatchMetadataUpdate(firstTokenId, firstTokenId + mintedCount - 1);
     }
 
-    function _requireNoPendingRandomnessRequests(uint256 _collectionID, address oldRandomizer)
-        private
-        view
-    {
-        if (oldRandomizer == address(0)) {
-            return;
-        }
-
-        try IRandomizerLifecycle(oldRandomizer).supportsRandomizerLifecycle() returns (
-            bool supported
-        ) {
-            if (!supported) {
-                return;
-            }
-        } catch {
-            return;
-        }
-
-        uint256 pendingRequests =
-            IRandomizerLifecycle(oldRandomizer).pendingRandomnessRequests(_collectionID);
-        if (pendingRequests != 0) {
-            revert PendingRandomnessRequests(_collectionID, oldRandomizer, pendingRequests);
-        }
-    }
-
     // function that return the tokenURI
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         _requireMinted(tokenId);
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
-        bool finalMetadata = _isTokenMetadataFinal(tokenId);
+        bool finalMetadata = tokenToHash[tokenId] != bytes32(0);
 
         if (!onchainMetadata[collectionId]) {
             string memory baseURI = collectionInfo[collectionId].collectionBaseURI;
@@ -808,13 +801,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     /// @notice Returns the token's public metadata state under the active schema.
     function tokenMetadataState(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
-        return _isTokenMetadataFinal(tokenId)
+        return tokenToHash[tokenId] != bytes32(0)
             ? _METADATA_STATE_FINAL
             : _pendingTokenMetadataState(tokenId, tokenIdsToCollectionIds[tokenId]);
-    }
-
-    function _isTokenMetadataFinal(uint256 tokenId) private view returns (bool) {
-        return tokenToHash[tokenId] != bytes32(0);
     }
 
     function _pendingTokenMetadataState(uint256 tokenId, uint256 collectionId)
@@ -868,7 +857,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         return StreamMetadataRenderer.onchainTokenURIWithLimit(
             METADATA_SCHEMA_VERSION,
             metadataState,
-            getTokenName(tokenId),
+            getTokenName(tokenId, collectionId),
             collectionInfo[collectionId].collectionDescription,
             tokenImageAndAttributes[tokenId][0],
             tokenImageAndAttributes[tokenId][1],
@@ -920,13 +909,14 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     }
 
     // function to retrieve the name attribute
-    function getTokenName(uint256 tokenId) private view returns (string memory) {
-        uint256 tok = tokenId
-            - collectionAdditionalData[tokenIdsToCollectionIds[tokenId]].reservedMinTokensIndex;
+    function getTokenName(uint256 tokenId, uint256 collectionId)
+        private
+        view
+        returns (string memory)
+    {
+        uint256 tok = tokenId - collectionAdditionalData[collectionId].reservedMinTokensIndex;
         return string(
-            abi.encodePacked(
-                collectionInfo[viewColIDforTokenID(tokenId)].collectionName, " #", tok.toString()
-            )
+            abi.encodePacked(collectionInfo[collectionId].collectionName, " #", tok.toString())
         );
     }
 
@@ -1114,17 +1104,11 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
 
     function retrieveGenerativeScript(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        string[] storage collectionScript = collectionInfo[collectionId].collectionScript;
         string memory scripttext = "";
-        for (
-            uint256 i = 0;
-            i < collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionScript.length;
-            i++
-        ) {
-            scripttext = string(
-                abi.encodePacked(
-                    scripttext, collectionInfo[tokenIdsToCollectionIds[tokenId]].collectionScript[i]
-                )
-            );
+        for (uint256 i = 0; i < collectionScript.length; i++) {
+            scripttext = string.concat(scripttext, collectionScript[i]);
         }
         return StreamMetadataRenderer.generativeScript(
             tokenToHash[tokenId],
@@ -1304,7 +1288,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
                 dependencyKey,
                 collectionDependencyVersions[_collectionID],
                 collectionDependencyContentHashes[_collectionID],
-                _collectionScriptHash(_collectionID)
+                StreamMetadataRenderer.collectionScriptHash(
+                    collectionInfo[_collectionID].collectionScript
+                )
             )
         );
     }
@@ -1313,10 +1299,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         uint256 finalSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply;
         return keccak256(
             abi.encode(
-                _FREEZE_SUPPLY_STATE_TYPEHASH,
-                finalSupply,
-                collectionAdditionalData[_collectionID].collectionCirculationSupply,
-                burnAmount[_collectionID]
+                _FREEZE_SUPPLY_STATE_TYPEHASH, finalSupply, finalSupply, burnAmount[_collectionID]
             )
         );
     }
@@ -1348,21 +1331,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         );
     }
 
-    function _collectionScriptHash(uint256 _collectionID) private view returns (bytes32) {
-        string[] storage script = collectionInfo[_collectionID].collectionScript;
-        bytes32 chunksHash = bytes32(0);
-
-        for (uint256 i = 0; i < script.length; i++) {
-            bytes memory chunk = bytes(script[i]);
-            bytes32 chunkHash = keccak256(
-                abi.encode(_COLLECTION_SCRIPT_CHUNK_TYPEHASH, i, keccak256(chunk), chunk.length)
-            );
-            chunksHash = keccak256(abi.encode(chunksHash, chunkHash));
-        }
-
-        return keccak256(abi.encode(_COLLECTION_SCRIPT_TYPEHASH, script.length, chunksHash));
-    }
-
     function _liveTokenMetadataHash(uint256 _collectionID) private view returns (bytes32) {
         return keccak256(
             abi.encode(
@@ -1374,15 +1342,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     }
 
     function _tokenMetadataRecordHash(uint256 tokenId) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _TOKEN_METADATA_RECORD_TYPEHASH,
-                tokenId,
-                keccak256(bytes(tokenData[tokenId])),
-                keccak256(bytes(tokenImageAndAttributes[tokenId][0])),
-                keccak256(bytes(tokenImageAndAttributes[tokenId][1])),
-                tokenToHash[tokenId]
-            )
+        return StreamMetadataRenderer.tokenMetadataRecordHash(
+            tokenId,
+            tokenData[tokenId],
+            tokenImageAndAttributes[tokenId][0],
+            tokenImageAndAttributes[tokenId][1],
+            tokenToHash[tokenId]
         );
     }
 

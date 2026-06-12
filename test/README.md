@@ -225,10 +225,12 @@ Production bytecode size is checked through the local/CI gate
 `forge build --sizes --via-ir --skip test --skip script --force`, rather than a unit test,
 because the deployable contracts use the IR-optimized release profile while
 test-only invariant handlers can exceed initcode limits. The current Core UTF-8
-slice plus lifecycle-aware stale/failed metadata state display keeps
-`StreamCore` deployable at 24,348 runtime bytes with 228 bytes of EIP-170
-headroom, below the documented 384-byte release floor and tracked as size
-budget debt before further non-trivial Core work.
+slice plus lifecycle-aware stale/failed metadata state display now keeps
+`StreamCore` deployable at 24,139 runtime bytes with 437 bytes of EIP-170
+headroom, above the documented 384-byte release floor but still below the
+512-byte warning threshold for larger Core feature work. The size recovery also
+adds randomizer migration regressions for unsupported lifecycle providers and
+for lifecycle-aware providers whose pending-request probe fails.
 
 Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event
