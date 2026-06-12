@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 16:05 UTC` |
+| Last updated | `2026-06-12 16:13 UTC` |
 
 ## Packaging Notes
 
@@ -137,20 +137,22 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #155 |
 | 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
-| 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | In progress locally |
+| 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merge-ready in PR #161 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add architecture and threat model audit docs (Queue Item 83)
 
-Status: PR #161 second CodeRabbit follow-up addressed locally; push and CI
-rerun pending.
+Status: Merge-ready in PR #161 after CI and CodeRabbit success on final head.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/160`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/161`.
 CodeRabbit request: issue comment `4692872990`.
+CodeRabbit final clean comment: issue comment `4692962127`.
 Branch: `codex/architecture-threat-model`.
 Branch started from PR #159 squash merge commit
 `e2e9fcfdf0ef73e058244d4262f4d50137eefd3a`.
+Final head: `f0b4407c27bfe1676d49852e3eee62815733bf3a`.
+CI run: `27427589746`.
 
 Goal:
 
@@ -242,6 +244,11 @@ Validation so far:
   `python scripts\test_changelog_check.py`, `python scripts\check_changelog.py`,
   `bash -n scripts/check.sh`, PowerShell parser check for `scripts\check.ps1`,
   and `git diff --check`.
+- CI run `27427589746` passed on head
+  `f0b4407c27bfe1676d49852e3eee62815733bf3a`, including the architecture and
+  threat model, audit package, release manifest, release checksums, changelog,
+  and deployment rehearsal steps. CodeRabbit status was `success` on the same
+  head.
 
 ### PR candidate: Add external audit package index (Queue Item 82)
 
@@ -8052,6 +8059,7 @@ Outcome:
 | 2026-06-12 07:22 | Address CodeRabbit PR #143 review | Accepted CodeRabbit's request to make deployment-version uniqueness a direct script assertion, then reran focused Forge formatting, evidence test, and emergency redeployment script validation |
 | 2026-06-12 07:28 | Finish PR #143 follow-up validation | Full `make check` passed after the CodeRabbit deployment-version guard fix; CI rerun and CodeRabbit re-review remain pending until the follow-up commit is pushed |
 | 2026-06-12 15:12 | Mark PR #159 merge-ready | CI run `27424138673` passed on head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, CodeRabbit status was success, and the visible CodeRabbit review suggestions were addressed in the follow-up commit |
+| 2026-06-12 16:13 | Mark PR #161 merge-ready | CI run `27427589746` passed on head `f0b4407c27bfe1676d49852e3eee62815733bf3a`, CodeRabbit status was success with clean comment `4692962127`, and the visible review threads were resolved |
 
 ## Resume Instructions
 

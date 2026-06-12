@@ -73,12 +73,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 15:52 UTC` after Queue Item 83 focused architecture/threat-model checks, audit package checks, release drift checks, changelog gate, Unix wrapper syntax, full `make check`, Windows wrapper validation, and whitespace checks |
-| OS tested | Windows local; Linux CI pending for Queue Item 83 PR |
+| Last verified | `2026-06-12 16:13 UTC` after Queue Item 83 focused architecture/threat-model checks, audit package checks, release drift checks, changelog gate, Unix wrapper syntax, full `make check`, Windows wrapper validation, whitespace checks, CodeRabbit success, and CI run `27427589746` success |
+| OS tested | Windows local; Linux CI run `27427589746` for Queue Item 83 PR |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | TBD for PR #161 |
+| CI run | `27427589746` for PR #161 |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -303,10 +303,12 @@ Required evidence:
 
 Status: In Progress.
 Owner: TBD.
-Blocking issues: [`#160`](https://github.com/6529-Collections/6529Stream/issues/160).
+Blocking issues: [`#160`](https://github.com/6529-Collections/6529Stream/issues/160)
+via merge-ready PR #161.
 Evidence: `docs/audit-package.md` and `scripts/check_audit_package.py` are
 merged; `docs/architecture.md`, `docs/threat-model.md`, and
-`scripts/check_architecture_threat_model.py` are in progress.
+`scripts/check_architecture_threat_model.py` passed local validation,
+CodeRabbit review, and CI in PR #161.
 
 Exit criteria:
 
