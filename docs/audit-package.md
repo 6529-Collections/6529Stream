@@ -46,6 +46,7 @@ Explicitly out of scope for this package:
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
 | Incident response runbook | [`docs/incident-response.md`](incident-response.md) |
+| Drop authorization signing fixtures | [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) |
 | Public-beta evidence status | [`docs/public-beta-evidence.md`](public-beta-evidence.md) |
 | Gated execution roadmap | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 | Autonomous execution state | [`ops/AUTONOMOUS_RUN.md`](../ops/AUTONOMOUS_RUN.md) |
@@ -76,6 +77,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/metadata.md`](metadata.md)
 - [`docs/dependency-operations.md`](dependency-operations.md)
 - [`docs/randomizer-operations.md`](randomizer-operations.md)
+- [`docs/drop-authorization-signing.md`](drop-authorization-signing.md)
 - [`docs/deployment.md`](deployment.md)
 - [`docs/release-policy.md`](release-policy.md)
 - [`docs/incident-response.md`](incident-response.md)
@@ -138,17 +140,21 @@ Local deployment and release evidence:
 - [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
   records the no-secret public-beta evidence status and keeps public beta and
   production release blocked until non-local evidence is retained.
+- [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) and
+  [`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/)
+  record no-secret local EIP-712 and ERC-1271 drop authorization signing
+  examples with deterministic digest fixtures.
 - [`release-artifacts/schema/public-beta-evidence.schema.json`](../release-artifacts/schema/public-beta-evidence.schema.json)
   defines the retained status format.
 
 The release manifest includes this audit package as a governance document. The
-release manifest also includes the architecture map, threat model, and incident
-response runbook as governance documents, and it summarizes the public-beta
-evidence status. The
+release manifest also includes the architecture map, threat model, incident
+response runbook, and drop authorization signing guide as governance documents,
+and it summarizes the public-beta evidence status. The
 checksum bundle covers the release manifest, so changes to the audit package,
-architecture map, threat model, incident-response runbook, or public-beta
-evidence status must refresh release evidence before a release-oriented PR can
-pass.
+architecture map, threat model, incident-response runbook, drop authorization
+signing guide, or public-beta evidence status must refresh release evidence
+before a release-oriented PR can pass.
 
 ## Known Blockers And Accepted Risks
 
@@ -199,6 +205,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_public_beta_evidence.py
@@ -248,6 +256,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py

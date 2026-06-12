@@ -15,6 +15,8 @@ current roadmap in [`ops/ROADMAP.md`](../ops/ROADMAP.md).
 Release-status changes should also follow
 [`docs/public-beta-evidence.md`](public-beta-evidence.md) and
 [`docs/release-policy.md`](release-policy.md).
+Signer-compromise and drop-authorization incidents should also use
+[`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
 
 ## Maturity And Scope
 
@@ -261,6 +263,8 @@ Immediate checks:
 - Identify the signer, signer manager, signer epoch, drop ID, deadline, domain,
   verifying contract, chain ID, consumed state, cancelled state, and affected
   authorization payloads.
+- Compare the payload and digest with
+  [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
 - Confirm whether any payload has already been executed.
 - Preserve EIP-712 domain and signature validation evidence without committing
   unreleased payloads.
@@ -342,6 +346,8 @@ Run the incident-response checker directly:
 ```sh
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 ```
 
 Run the release evidence checks after changing this runbook or linked
@@ -375,6 +381,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check

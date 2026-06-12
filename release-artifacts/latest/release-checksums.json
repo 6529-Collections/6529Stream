@@ -17,14 +17,15 @@
       "deployments/address-books",
       "deployments/schema",
       "deployments/ceremony-evidence",
-      "deployments/randomizer-operations"
+      "deployments/randomizer-operations",
+      "test/fixtures/drop-authorization"
     ],
     "output_dir": "release-artifacts/latest"
   },
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:dbf366a453e139be6904f59435c7d7869f4c3d8e7c83044afa24437315c5c855"
+    "sha256": "sha256:3e5024d46840ff6c9638888d06dd6a656d0eb4ca713108768c50ad750359193a"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -168,8 +169,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:3737d89628abbd266410fbe28ed4bce49bfb43846fb3307394cc796c9c212c93",
-      "size_bytes": 23683
+      "sha256": "sha256:d7712c6462e6306338bac75be47355f0bf6cc0d80c16118a23e5564218ba1894",
+      "size_bytes": 23874
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -195,6 +196,21 @@
       "path": "release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json",
       "sha256": "sha256:0a8e8632f12613fdbe980297ea39cd3e2b2365044c08ed542745df8cc626e6d8",
       "size_bytes": 2771
+    },
+    {
+      "path": "test/fixtures/drop-authorization/auction-eoa.json",
+      "sha256": "sha256:1bdf6b0bf350944b07b86c642a10821d57e8a5d14d31d31d1f1081681c7268c9",
+      "size_bytes": 5534
+    },
+    {
+      "path": "test/fixtures/drop-authorization/erc1271-contract-signer.json",
+      "sha256": "sha256:e687608f6421f1efb34be9e6a11a863ebcfbc6c7f84f6c8fd62dafe1bbe8c4c7",
+      "size_bytes": 5444
+    },
+    {
+      "path": "test/fixtures/drop-authorization/fixed-price-eoa.json",
+      "sha256": "sha256:1ad9336461c4cfbdd000eb40f8fa7066012d6b46cdd410106fd65cef1261b40e",
+      "size_bytes": 5597
     }
   ]
 }

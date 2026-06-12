@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 22:20 UTC` |
+| Last updated | `2026-06-12 23:00 UTC` |
 
 ## Packaging Notes
 
@@ -153,7 +153,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
-Status: active local implementation; PR not opened yet.
+Status: locally validated; PR not opened yet.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/177`.
 PR: `TBD`.
 Branch: `codex/drop-authorization-signing-examples`.
@@ -183,12 +183,23 @@ Goal:
   release-manifest inputs.
 - Do not change Solidity behavior.
 
-Validation target:
+Local validation:
 
-- Focused checker/tests for the new signing fixture validator.
+- `python scripts\test_drop_authorization_fixtures.py`.
+- `python scripts\check_drop_authorization_fixtures.py`.
+- `python scripts\test_audit_package.py`.
+- `python scripts\check_audit_package.py`.
+- `python scripts\test_incident_response.py`.
+- `python scripts\check_incident_response.py`.
+- `python scripts\test_release_readiness.py`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
 - `git diff --check`.
-- `make check` before PR, unless an implementation-specific blocker is
-  documented here before opening.
+- `make check` passed after regenerating release manifest/checksum artifacts for
+  the changelog and signing-fixture coverage.
 
 Remote validation:
 

@@ -29,6 +29,7 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("release-artifacts/schema"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/evidence"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)
 
     def test_generator_writes_sorted_checksums_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

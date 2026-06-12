@@ -55,6 +55,8 @@ jobs:
             scripts/test_metadata_browser_sandbox.py \
             scripts/check_rehearsal_metadata_browser_sandbox.py \
             scripts/test_rehearsal_metadata_browser_sandbox.py \
+            scripts/check_drop_authorization_fixtures.py \
+            scripts/test_drop_authorization_fixtures.py \
             scripts/generate_source_verification_inputs.py \
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
@@ -157,6 +159,14 @@ jobs:
           python3 scripts/check_metadata_browser_sandbox.py 2>&1 | tee ci-logs/metadata-browser-sandbox-check.log
           python3 scripts/test_rehearsal_metadata_browser_sandbox.py 2>&1 | tee ci-logs/rehearsal-metadata-browser-sandbox-tests.log
           python3 scripts/check_rehearsal_metadata_browser_sandbox.py 2>&1 | tee ci-logs/rehearsal-metadata-browser-sandbox-check.log
+
+      - name: Drop authorization fixtures
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_drop_authorization_fixtures.py 2>&1 | tee ci-logs/drop-authorization-fixture-tests.log
+          python3 scripts/check_drop_authorization_fixtures.py 2>&1 | tee ci-logs/drop-authorization-fixture-check.log
 
       - name: Release artifact catalog
         shell: bash

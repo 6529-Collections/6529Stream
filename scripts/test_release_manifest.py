@@ -72,6 +72,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "threat-model.md",
         root / "docs" / "audit-package.md",
         root / "docs" / "incident-response.md",
+        root / "docs" / "drop-authorization-signing.md",
         root / "docs" / "release-readiness.md",
     ]
 
