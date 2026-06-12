@@ -151,5 +151,8 @@ contributors who start from the README.
   production address books, explorer verification, and detailed retained
   fork/testnet/live emergency redeployment evidence contents are planned for
   future non-local ceremonies.
+- The structured public-beta and production blocker status lives in
+  [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
+  and is documented in [`docs/public-beta-evidence.md`](public-beta-evidence.md).
 
 Do not treat the current build/test smoke baseline as a security claim.

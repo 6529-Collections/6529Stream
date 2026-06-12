@@ -151,6 +151,10 @@ class ReleaseArtifactTests(unittest.TestCase):
                 {"schema_version": "6529stream.release-manifest.v1"},
             )
             write_json(
+                output_dir / "public-beta-evidence.json",
+                {"schema_version": "6529stream.public-beta-evidence.v1"},
+            )
+            write_json(
                 output_dir / "source-verification-inputs.json",
                 {"schema_version": "6529stream.source-verification-inputs.v1"},
             )

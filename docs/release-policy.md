@@ -43,7 +43,7 @@ A PR is release-impacting when it changes any of these surfaces:
   deployment manifest generation/check scripts.
 - CI, `Makefile`, or local check wrappers that define the release gate.
 - Release process docs such as this file, `docs/deployment.md`,
-  `docs/release-signatures.md`, `docs/architecture.md`,
+  `docs/release-signatures.md`, `docs/public-beta-evidence.md`, `docs/architecture.md`,
   `docs/threat-model.md`, `docs/release-readiness.md`, `docs/tooling.md`, `SECURITY.md`,
   `CONTRIBUTING.md`, or the PR template.
 
@@ -140,6 +140,9 @@ Before a public release tag:
   `python scripts/check_randomizer_operations.py`.
 - Release signature evidence follows `docs/release-signatures.md` and passes
   `python scripts/check_release_signatures.py`.
+- Public-beta evidence status follows `docs/public-beta-evidence.md`, keeps
+  unresolved public-beta and production blockers visible, and passes
+  `python scripts/check_public_beta_evidence.py`.
 - Architecture and threat-model evidence follows `docs/architecture.md` and
   `docs/threat-model.md` and passes
   `python scripts/check_architecture_threat_model.py`.

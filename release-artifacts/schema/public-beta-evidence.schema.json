@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/public-beta-evidence.schema.json",
+  "title": "6529Stream Public Beta Evidence Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "release_version",
+    "source",
+    "status",
+    "requirements",
+    "retained_artifacts",
+    "redaction_policy",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.public-beta-evidence.v1"
+    },
+    "release_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["public_beta", "production_release"],
+      "properties": {
+        "public_beta": {
+          "enum": ["blocked", "ready"]
+        },
+        "production_release": {
+          "enum": ["blocked", "ready"]
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirement"
+      },
+      "minItems": 17
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/retained_artifact"
+      },
+      "minItems": 1
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^/"
+          },
+          {
+            "pattern": "\\\\"
+          },
+          {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        ]
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "retained_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "path", "sha256"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "risk_acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted_by", "accepted_at", "expires_at", "reference", "notes"],
+      "properties": {
+        "accepted_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accepted_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "phase", "status", "owner", "evidence", "risk_acceptance", "notes"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase": {
+          "enum": ["public_beta", "production_release"]
+        },
+        "status": {
+          "enum": [
+            "missing",
+            "pending",
+            "blocked",
+            "accepted_risk",
+            "not_applicable",
+            "complete"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file_ref"
+          }
+        },
+        "risk_acceptance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/risk_acceptance"
+            }
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

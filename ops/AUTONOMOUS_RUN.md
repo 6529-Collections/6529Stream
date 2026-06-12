@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-readiness-dashboard` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/163` |
+| Active PR branch | `codex/public-beta-evidence-status` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/163` |
+| Active PR | TBD; issue `https://github.com/6529-Collections/6529Stream/issues/164` is active |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 17:13 UTC` |
+| Last updated | `2026-06-12 18:05 UTC` |
 
 ## Packaging Notes
 
@@ -138,13 +138,100 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
 | 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
-| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | CodeRabbit docstring warning follow-up pending CI/review |
+| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #163 |
+| 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | In Progress |
 
 ## Current PR Worklog
 
-### PR candidate: Add release readiness dashboard and blocker checker (Queue Item 84)
+### PR candidate: Add public beta evidence status manifest (Queue Item 85)
 
-Status: CodeRabbit docstring warning follow-up pending CI/review.
+Status: Local implementation validated; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/164`.
+PR: TBD.
+Branch: `codex/public-beta-evidence-status`.
+Branch started from PR #163 squash merge commit
+`cb01f4668cfad068d6df6e556da3baf03fc23575`.
+
+Goal:
+
+- Add `release-artifacts/latest/public-beta-evidence.json` as the no-secret
+  status manifest for public-beta and production-release blockers.
+- Add `release-artifacts/schema/public-beta-evidence.schema.json`.
+- Add deterministic checker/tests so required categories, SHA256 file
+  references, path boundaries, no-secret policy, risk-acceptance metadata, and
+  overall ready/blocked claims cannot silently regress.
+- Wire the checker into Makefile, Unix and Windows check wrappers, CI,
+  release-manifest/checksum coverage, audit/readiness docs, release docs, and
+  this run state.
+- Keep the PR documentation/tooling/artifact-only with no Solidity behavior
+  changes and no production evidence claims.
+
+Initial candidate files:
+
+- `release-artifacts/latest/public-beta-evidence.json`
+- `release-artifacts/schema/public-beta-evidence.schema.json`
+- `docs/public-beta-evidence.md`
+- `scripts/check_public_beta_evidence.py`
+- `scripts/test_public_beta_evidence.py`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/check_audit_package.py`
+- `scripts/check_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `README.md`
+- `docs/audit-package.md`
+- `docs/known-blockers.md`
+- `docs/release-policy.md`
+- `docs/release-readiness.md`
+- `docs/status.md`
+- `docs/tooling.md`
+- `release-artifacts/README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes so far:
+
+- Created issue #164 and branch `codex/public-beta-evidence-status`.
+- Added the public-beta evidence checker and focused tests.
+- Added the conservative committed evidence status with public beta and
+  production release blocked.
+- Added the schema and operator documentation.
+- Wired Makefile, shell wrappers, CI, release manifest generation, audit
+  package checker, release-readiness checker, README, status, release policy,
+  tooling, release-artifact docs, known blockers, changelog, and roadmap.
+- Made the release artifact generator treat `public-beta-evidence.json` as a
+  downstream release file, matching the existing treatment for generated
+  checksum, manifest, source-verification, and dependency-manifest outputs.
+
+Validation so far:
+
+- `python scripts\test_public_beta_evidence.py`
+- `python scripts\check_public_beta_evidence.py`
+- `python -m py_compile scripts\check_public_beta_evidence.py scripts\test_public_beta_evidence.py`
+- `python scripts\test_release_readiness.py`
+- `python scripts\test_audit_package.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_artifacts.py`
+- `python scripts\generate_release_artifacts.py --check`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts\check.ps1`
+- `rg -n "^#|^##|^###" docs\public-beta-evidence.md docs\release-readiness.md docs\audit-package.md docs\tooling.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check` passes with only the existing `scripts/check.ps1` line-ending warning
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+### PR #163: Add release readiness dashboard and blocker checker (Queue Item 84)
+
+Status: Merged in PR #163 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/162`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/163`.
 CodeRabbit request: issue comment `4693404700`.
@@ -152,6 +239,9 @@ CodeRabbit review comment: issue comment `4693433631`.
 Branch: `codex/release-readiness-dashboard`.
 Branch started from PR #161 squash merge commit
 `0bddc2c93157e328c40b88b9c98e0fa7195b5acd`.
+Final head: `ac65a41a13141a05e88a6801f487c598d5793302`.
+Squash merge commit: `cb01f4668cfad068d6df6e556da3baf03fc23575`.
+CI run: `27431237322`.
 
 Goal:
 
@@ -7638,6 +7728,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 18:05 | Finish local Queue Item 85 validation | Public-beta evidence checker/tests, release-artifact downstream handling, release-manifest/checksum drift checks, py_compile, wrapper syntax, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
+| 2026-06-12 17:47 | Fix Queue Item 85 artifact-generator integration | Full `make check` exposed that `release-artifacts/latest/public-beta-evidence.json` was correctly tracked by release manifest/checksum tooling but still looked unexpected to the lower-level ABI/event/interface artifact generator, so it is now classified as a downstream release file and covered by the generator test |
+| 2026-06-12 17:25 | Create issue #164 and select Queue Item 85 | PR #163 merged, no open 6529Stream issues remained, and the next Gate G gap is a no-secret public-beta evidence status manifest so fork/testnet/live, audit, signature, signed tag, address, broadcast, explorer, and post-audit blockers become machine-checkable |
+| 2026-06-12 17:22 | Merge PR #163 | Release-readiness dashboard merged as `cb01f4668cfad068d6df6e556da3baf03fc23575`; final CI run `27431237322` passed, CodeRabbit status was success with no unresolved review threads, and issue #162 closed completed |
 | 2026-06-12 17:13 | Address CodeRabbit PR #163 docstring warning | Added concise docstrings to the new checker/test functions after CodeRabbit's pre-merge summary flagged docstring coverage; focused release-readiness, py_compile, changelog, and whitespace validation pass locally |
 | 2026-06-12 17:04 | Address CodeRabbit PR #163 review | Accepted the two low-risk coverage suggestions by adding missing-document and custom `--release-readiness` path tests; focused release-readiness, py_compile, changelog, and whitespace validation pass locally |
 | 2026-06-12 16:59 | Open PR #163 and request CodeRabbit | Release-readiness dashboard PR opened against `main`, linked `Closes #162`, requested CodeRabbit in comment `4693404700`, and intentionally skipped Claude per current user instruction |

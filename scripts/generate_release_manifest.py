@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import check_public_beta_evidence as public_beta_checker
 import check_release_signatures as release_signature_checker
 
 
@@ -24,6 +25,7 @@ BASELINE_DIR = Path("release-artifacts/baselines")
 DEFAULT_BASELINE = BASELINE_DIR / "v0.1.0" / "abi-surface.json"
 GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
+DEFAULT_PUBLIC_BETA_EVIDENCE = Path("release-artifacts/latest/public-beta-evidence.json")
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
@@ -39,6 +41,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/dependency-operations.md"),
     Path("docs/randomizer-operations.md"),
     Path("docs/release-signatures.md"),
+    Path("docs/public-beta-evidence.md"),
     Path("docs/architecture.md"),
     Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),
@@ -361,6 +364,54 @@ def release_signature_record(path: Path, repo_root: Path) -> dict[str, Any]:
     return record
 
 
+def public_beta_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    data = require_dict(load_json(path), str(path))
+    try:
+        public_beta_checker.validate_evidence_document(data, repo_root, str(path))
+    except public_beta_checker.PublicBetaEvidenceError as exc:
+        raise ReleaseManifestError(f"invalid public beta evidence {path}: {exc}") from exc
+
+    status = require_dict(data.get("status"), f"{path}.status")
+    phase_requirements = {
+        public_beta_checker.PUBLIC_BETA_PHASE: {},
+        public_beta_checker.PRODUCTION_PHASE: {},
+    }
+    for item in data.get("requirements", []):
+        if not isinstance(item, dict):
+            continue
+        phase = item.get("phase")
+        requirement_id = item.get("id")
+        requirement_status = item.get("status")
+        if phase in phase_requirements and isinstance(requirement_id, str):
+            phase_requirements[phase][requirement_id] = requirement_status
+
+    blocking_counts = {
+        phase: sum(
+            1
+            for requirement_status in requirements.values()
+            if requirement_status in public_beta_checker.BLOCKING_STATUSES
+        )
+        for phase, requirements in phase_requirements.items()
+    }
+
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "release_version": require_string(data.get("release_version"), "release_version"),
+            "status": {
+                "public_beta": require_string(
+                    status.get("public_beta"), "status.public_beta"
+                ),
+                "production_release": require_string(
+                    status.get("production_release"), "status.production_release"
+                ),
+            },
+            "blocking_counts": blocking_counts,
+        }
+    )
+    return record
+
+
 def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> dict[str, Any]:
     path = release_artifacts_dir / "release-artifact-manifest.json"
     data = require_dict(load_json(path), str(path))
@@ -545,6 +596,10 @@ def build_manifest(
                 release_artifacts_dir / "source-verification-inputs.json",
                 repo_root,
                 schema_required=True,
+            ),
+            "public_beta_evidence": public_beta_evidence_record(
+                repo_root / DEFAULT_PUBLIC_BETA_EVIDENCE,
+                repo_root,
             ),
             "release_signature_evidence": release_signatures,
             "abi_compatibility_baseline": file_record(

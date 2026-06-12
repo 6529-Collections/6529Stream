@@ -33,7 +33,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, and release-signature evidence exist for the local baseline | Live release artifacts and non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, and public-beta evidence status exist for the local baseline | Live release artifacts and non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -60,6 +60,9 @@ The current local baseline includes:
   [`deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json`](../deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json),
   [`deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json`](../deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json),
   and [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json);
+- no-secret public-beta evidence status under
+  [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
+  following [`docs/public-beta-evidence.md`](public-beta-evidence.md);
 - Slither baseline evidence in [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md)
   and [`docs/slither.md`](slither.md);
 - the test matrix in [`ops/ROADMAP.md`](../ops/ROADMAP.md#appendix-b-test-matrix);
@@ -121,6 +124,7 @@ Audit and protocol evidence:
 - [docs/deployment.md](deployment.md)
 - [docs/release-policy.md](release-policy.md)
 - [docs/release-signatures.md](release-signatures.md)
+- [docs/public-beta-evidence.md](public-beta-evidence.md)
 - [docs/randomizer-operations.md](randomizer-operations.md)
 - [docs/dependency-operations.md](dependency-operations.md)
 - [docs/slither.md](slither.md)
@@ -134,7 +138,9 @@ Release artifacts:
 - [release-artifacts/latest/release-manifest.json](../release-artifacts/latest/release-manifest.json)
 - [release-artifacts/latest/SHA256SUMS](../release-artifacts/latest/SHA256SUMS)
 - [release-artifacts/latest/release-checksums.json](../release-artifacts/latest/release-checksums.json)
+- [release-artifacts/latest/public-beta-evidence.json](../release-artifacts/latest/public-beta-evidence.json)
 - [release-artifacts/latest/source-verification-inputs.json](../release-artifacts/latest/source-verification-inputs.json)
+- [release-artifacts/schema/public-beta-evidence.schema.json](../release-artifacts/schema/public-beta-evidence.schema.json)
 - [release-artifacts/baselines/v0.1.0/abi-surface.json](../release-artifacts/baselines/v0.1.0/abi-surface.json)
 - [release-artifacts/baselines/v0.1.0/gas-snapshot.snap](../release-artifacts/baselines/v0.1.0/gas-snapshot.snap)
 - [deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json](../deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json)
@@ -148,6 +154,8 @@ Run the dashboard checker directly:
 ```sh
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_public_beta_evidence.py
+python scripts/check_public_beta_evidence.py
 ```
 
 Run the release evidence drift checks:

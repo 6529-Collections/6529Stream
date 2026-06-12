@@ -222,14 +222,16 @@ The current Gate A smoke baseline proves:
   `scripts/generate_release_manifest.py --check` prove the generated top-level
   release manifest ties the release artifact catalog, dependency artifact
   manifest, ABI compatibility baseline, deployment manifests, address books,
-  ceremony evidence, schemas, changelog, governance docs, and unavailable
-  release-ceremony outputs together without drift.
+  ceremony evidence, public-beta evidence status, schemas, changelog,
+  governance docs, and unavailable release-ceremony outputs together without
+  drift.
 - `scripts/test_release_checksums.py` and
   `scripts/generate_release_checksums.py --check` prove the committed
   `release-artifacts/latest/SHA256SUMS` and
   `release-artifacts/latest/release-checksums.json` bundle covers the current
   release artifact, dependency artifact source, broadcast fixture, deployment
-  manifest, address-book, config, schema, and release-manifest files.
+  manifest, address-book, config, schema, public-beta evidence status, and
+  release-manifest files.
 - `scripts/test_release_signatures.py` and
   `scripts/check_release_signatures.py` prove the committed no-secret local
   release signature evidence follows
@@ -238,6 +240,14 @@ The current Gate A smoke baseline proves:
   stale retained hashes and secret-like values, and reserves production
   detached checksum signatures, signed Git tags, signer identity, and
   verification output for public release ceremonies.
+- `scripts/test_public_beta_evidence.py` and
+  `scripts/check_public_beta_evidence.py` prove the committed no-secret
+  public-beta evidence status follows
+  `release-artifacts/schema/public-beta-evidence.schema.json`, keeps public
+  beta and production release blocked while non-local audit, deployment,
+  ceremony, randomizer, signature, signed tag, address, broadcast, and explorer
+  evidence is missing, rejects stale retained hashes, rejects secret-like keys
+  or values, and rejects ready claims while blockers remain.
 - `scripts/test_architecture_threat_model.py` and
   `scripts/check_architecture_threat_model.py` prove
   `docs/architecture.md` and `docs/threat-model.md` retain the current
@@ -285,6 +295,7 @@ discipline, and fork/testnet/live invariant coverage.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 
-Contributor, security intake, architecture, threat-model, audit package, and
-release-readiness files exist so future work can be packaged and reviewed
-consistently, but they do not change the pre-audit status.
+Contributor, security intake, architecture, threat-model, audit package,
+public-beta evidence, and release-readiness files exist so future work can be
+packaged and reviewed consistently, but they do not change the pre-audit
+status.

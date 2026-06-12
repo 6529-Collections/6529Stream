@@ -47,6 +47,9 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     release_signature_schema = root / "release-artifacts" / "schema" / (
         "release-signature-evidence.schema.json"
     )
+    public_beta_schema = root / "release-artifacts" / "schema" / (
+        "public-beta-evidence.schema.json"
+    )
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
     docs = [
@@ -56,6 +59,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "status.md",
         root / "docs" / "randomizer-operations.md",
         root / "docs" / "release-signatures.md",
+        root / "docs" / "public-beta-evidence.md",
         root / "docs" / "architecture.md",
         root / "docs" / "threat-model.md",
         root / "docs" / "audit-package.md",
@@ -170,6 +174,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     write_json(
         release_signature_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
+        public_beta_schema,
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
@@ -289,6 +297,65 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "operator_notes": "local placeholder only",
         },
     )
+    public_beta_requirements = [
+        {
+            "id": requirement_id,
+            "phase": generator.public_beta_checker.PUBLIC_BETA_PHASE,
+            "status": "missing",
+            "owner": "TBD",
+            "evidence": [],
+            "risk_acceptance": None,
+            "notes": f"{requirement_id} is missing.",
+        }
+        for requirement_id in generator.public_beta_checker.PUBLIC_BETA_REQUIREMENTS
+    ] + [
+        {
+            "id": requirement_id,
+            "phase": generator.public_beta_checker.PRODUCTION_PHASE,
+            "status": "missing",
+            "owner": "TBD",
+            "evidence": [],
+            "risk_acceptance": None,
+            "notes": f"{requirement_id} is missing.",
+        }
+        for requirement_id in generator.public_beta_checker.PRODUCTION_REQUIREMENTS
+    ]
+    write_json(
+        latest / "public-beta-evidence.json",
+        {
+            "schema_version": "6529stream.public-beta-evidence.v1",
+            "release_version": "v0.1.0-local",
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "status": {
+                "public_beta": "blocked",
+                "production_release": "blocked",
+            },
+            "requirements": public_beta_requirements,
+            "retained_artifacts": [
+                {
+                    "category": "public_beta_evidence_schema",
+                    "path": "release-artifacts/schema/public-beta-evidence.schema.json",
+                    "sha256": generator.file_sha256(public_beta_schema),
+                }
+            ],
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "api_key",
+                    "rpc_url",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "operator_notes": "public beta and production remain blocked",
+        },
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
@@ -307,6 +374,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "randomizer_operations_dir": randomizer_operations_dir,
         "release_signatures_dir": release_signatures_dir,
         "release_signature_schema": release_signature_schema,
+        "public_beta_schema": public_beta_schema,
         "output": output,
         "changelog": changelog,
         "docs": docs,
@@ -429,6 +497,18 @@ class ReleaseManifestTests(unittest.TestCase):
                     "operator_notes"
                 ],
                 "local placeholder only",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["public_beta_evidence"]["status"][
+                    "public_beta"
+                ],
+                "blocked",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["public_beta_evidence"]["blocking_counts"][
+                    "production_release"
+                ],
+                len(generator.public_beta_checker.PRODUCTION_REQUIREMENTS),
             )
             self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],
