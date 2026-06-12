@@ -14,6 +14,9 @@ verification, or signing evidence that updates the public-beta evidence status.
 Use [`docs/incident-response.md`](incident-response.md) for no-secret triage,
 containment, recovery, evidence retention, and reopening procedures when an
 operational incident affects release readiness.
+Use [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) for
+the local no-secret drop authorization signing fixtures and the EIP-712 /
+ERC-1271 evidence they cover.
 
 ## Maturity And Scope
 
@@ -39,7 +42,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, public-beta evidence status, and non-local release evidence runbook, schema, checked template, and checker exist for the local baseline | Live release artifacts and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, public-beta evidence status, and non-local release evidence runbook, schema, checked template, and checker exist for the local baseline | Live release artifacts, production signing evidence, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -54,6 +57,9 @@ The current local baseline includes:
   and [`docs/audit-package.md`](audit-package.md);
 - incident response procedures in
   [`docs/incident-response.md`](incident-response.md);
+- drop authorization signing fixtures in
+  [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) and
+  [`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/);
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -96,6 +102,8 @@ for:
 - production address books generated from retained broadcast artifacts;
 - verified deployed addresses and explorer verification status;
 - production signer and admin ceremony evidence with secrets redacted;
+- production drop authorization signing evidence and operator tooling beyond
+  the no-secret local fixtures;
 - a final review that known blockers in [`docs/known-blockers.md`](known-blockers.md)
   and [`ops/ROADMAP.md`](../ops/ROADMAP.md) have either been resolved or
   explicitly deferred outside public beta.
@@ -136,6 +144,7 @@ Audit and protocol evidence:
 
 - [docs/audit-package.md](audit-package.md)
 - [docs/incident-response.md](incident-response.md)
+- [docs/drop-authorization-signing.md](drop-authorization-signing.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
 - [docs/deployment.md](deployment.md)
@@ -177,6 +186,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_non_local_release_evidence.py

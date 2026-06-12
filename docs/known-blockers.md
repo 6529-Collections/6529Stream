@@ -4,8 +4,11 @@ This file summarizes the high-level blockers from `ops/ROADMAP.md` for
 contributors who start from the README.
 
 - Drop execution uses EIP-712 authorization for EOA and ERC-1271 contract
-  signers, but production signing examples, fixtures, and external tooling still
-  need to be added before public beta.
+  signers, and no-secret local signing examples plus deterministic fixtures now
+  live in [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
+  Production signer custody, production signing service integration, retained
+  fork/testnet/live signing evidence, and any external operator tooling still
+  need to be completed or explicitly accepted before public beta.
 - Auction custody and settlement state-machine coverage now exists for ADR 0002:
   auction NFTs are escrowed by the auction contract, no-bid and with-bid
   settlement are explicit, outbid refunds use bidder credits, and auction-local

@@ -1,0 +1,184 @@
+{
+  "schema_version": "6529stream.drop-authorization-fixture.v1",
+  "fixture_id": "erc1271-contract-signer",
+  "description": "No-secret local ERC-1271 contract-signer vector. The signature bytes are the mock value used by test/StreamDropsERC1271.t.sol and are accepted only when the signer contract returns the ERC-1271 magic value for this digest.",
+  "source": {
+    "contract": "smart-contracts/StreamDrops.sol",
+    "adr": "docs/adr/0001-drop-authorization.md",
+    "tests": [
+      "test/StreamDropsERC1271.t.sol",
+      "test/helpers/DropAuthTestHelper.sol"
+    ]
+  },
+  "no_secret_policy": {
+    "key_material_included": false,
+    "mnemonic_included": false,
+    "production_payload": false
+  },
+  "typed_data": {
+    "types": {
+      "EIP712Domain": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address"
+        }
+      ],
+      "DropAuthorization": [
+        {
+          "name": "dropId",
+          "type": "bytes32"
+        },
+        {
+          "name": "poster",
+          "type": "address"
+        },
+        {
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "name": "saleMode",
+          "type": "uint8"
+        },
+        {
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "name": "quantity",
+          "type": "uint256"
+        },
+        {
+          "name": "auctionReservePrice",
+          "type": "uint256"
+        },
+        {
+          "name": "auctionEndTime",
+          "type": "uint256"
+        },
+        {
+          "name": "salt",
+          "type": "uint256"
+        },
+        {
+          "name": "nonce",
+          "type": "uint256"
+        },
+        {
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "name": "signerEpoch",
+          "type": "uint256"
+        }
+      ]
+    },
+    "primaryType": "DropAuthorization",
+    "domain": {
+      "name": "6529StreamDrops",
+      "version": "1",
+      "chainId": 31337,
+      "verifyingContract": "0x100000000000000000000000000000000000dEaD"
+    },
+    "message": {
+      "dropId": "0xd123aa42e1b4e56a50513a6fd5b197a1426f080a8398cb79fa82d3868122e7c7",
+      "poster": "0x0000000000000000000000000000000000001001",
+      "recipient": "0x0000000000000000000000000000000000005005",
+      "payer": "0x0000000000000000000000000000000000000000",
+      "collectionId": "1",
+      "saleMode": 1,
+      "tokenDataHash": "0x8f54f1c2d0eb5771cd5bf67a6689fcd6eed9444d91a39e5ef32a9b4ae5ca14ff",
+      "price": "0",
+      "quantity": "1",
+      "auctionReservePrice": "0",
+      "auctionEndTime": "0",
+      "salt": "6",
+      "nonce": "5",
+      "deadline": "1893456000",
+      "signerEpoch": "1"
+    }
+  },
+  "token_data": "data",
+  "expected": {
+    "signer": "0x1271000000000000000000000000000000001271",
+    "drop_id": "0xd123aa42e1b4e56a50513a6fd5b197a1426f080a8398cb79fa82d3868122e7c7",
+    "token_data_hash": "0x8f54f1c2d0eb5771cd5bf67a6689fcd6eed9444d91a39e5ef32a9b4ae5ca14ff",
+    "domain_separator": "0xaced18559f963adb99804b4c7ca4209355b2e434ba32eab5b033561df367efa0",
+    "struct_hash": "0xa41083ac3d25ea7b724cc430e2eca28cb1e88d4a6c0603c656243662c716f63f",
+    "digest": "0xb89220d093812473fe4dc55922c83f2186da4f1c4d17044f45287b9cf64f0293",
+    "signature_kind": "erc1271_mock_bytes",
+    "signature": "0x127165291271",
+    "erc1271_magic_value": "0x1626ba7e",
+    "call": {
+      "function": "mintDrop(DropAuthorization,string,bytes)",
+      "msg_value_wei": "0"
+    }
+  },
+  "failure_cases": [
+    {
+      "id": "wrong_signer",
+      "expected_revert": "Bad contract sig",
+      "notes": "The signer contract must be the active tdhSigner and must approve the same digest."
+    },
+    {
+      "id": "wrong_domain",
+      "expected_revert": "Bad contract sig",
+      "notes": "A contract signer should reject a digest generated for a different domain."
+    },
+    {
+      "id": "expired",
+      "expected_revert": "Expired",
+      "notes": "ERC-1271 approval does not bypass deadline validation."
+    },
+    {
+      "id": "replayed_or_consumed",
+      "expected_revert": "Drop Executed",
+      "notes": "Replay protection remains StreamDrops storage, not contract-signer memory."
+    },
+    {
+      "id": "stale_signer_epoch",
+      "expected_revert": "Bad epoch",
+      "notes": "Epoch rotation invalidates contract-signer payloads exactly like EOA payloads."
+    },
+    {
+      "id": "bad_drop_id",
+      "expected_revert": "Bad dropId",
+      "notes": "The drop ID must derive from the contract signer address, signerEpoch, nonce, and salt."
+    },
+    {
+      "id": "erc1271_invalid_magic",
+      "expected_revert": "Bad contract sig",
+      "notes": "Invalid magic values, empty returns, short returns, long returns, reverts, wrong digests, and wrong bytes fail closed."
+    },
+    {
+      "id": "zero_address",
+      "expected_revert": "Zero recipient",
+      "notes": "The same zero-address validation applies after ERC-1271 approval."
+    }
+  ]
+}

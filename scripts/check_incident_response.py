@@ -56,6 +56,8 @@ REQUIRED_INCIDENT_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_incident_response.py",
     "python scripts/check_incident_response.py",
+    "python scripts/test_drop_authorization_fixtures.py",
+    "python scripts/check_drop_authorization_fixtures.py",
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
     "make check",
@@ -71,6 +73,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/tooling.md",
     "docs/randomizer-operations.md",
     "docs/dependency-operations.md",
+    "docs/drop-authorization-signing.md",
     "docs/auction-custody.md",
     "docs/metadata.md",
     "docs/deployment.md",

@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check drop-authorization-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test gas-snapshot-check size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-checksums-check changelog-check deploy-rehearsal
+check: build test gas-snapshot-check size metadata-fixtures-check drop-authorization-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
@@ -53,6 +53,10 @@ metadata-fixtures-check:
 	$(PYTHON) scripts/check_metadata_browser_sandbox.py
 	$(PYTHON) scripts/test_rehearsal_metadata_browser_sandbox.py
 	$(PYTHON) scripts/check_rehearsal_metadata_browser_sandbox.py
+
+drop-authorization-fixtures-check:
+	$(PYTHON) scripts/test_drop_authorization_fixtures.py
+	$(PYTHON) scripts/check_drop_authorization_fixtures.py
 
 release-artifacts: size
 	$(PYTHON) scripts/generate_release_artifacts.py
@@ -141,10 +145,10 @@ release-readiness-check:
 	$(PYTHON) scripts/test_release_readiness.py
 	$(PYTHON) scripts/check_release_readiness.py
 
-release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check
+release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check
+release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 

@@ -1,0 +1,188 @@
+{
+  "schema_version": "6529stream.drop-authorization-fixture.v1",
+  "fixture_id": "fixed-price-eoa",
+  "description": "No-secret local fixed-price EOA signing vector for StreamDrops.mintDrop. The signer is the public deterministic Foundry test signer used by test/helpers/DropAuthTestHelper.sol; key material is intentionally omitted.",
+  "source": {
+    "contract": "smart-contracts/StreamDrops.sol",
+    "adr": "docs/adr/0001-drop-authorization.md",
+    "tests": [
+      "test/StreamDropsEIP712.t.sol",
+      "test/helpers/DropAuthTestHelper.sol"
+    ]
+  },
+  "no_secret_policy": {
+    "key_material_included": false,
+    "mnemonic_included": false,
+    "production_payload": false
+  },
+  "typed_data": {
+    "types": {
+      "EIP712Domain": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address"
+        }
+      ],
+      "DropAuthorization": [
+        {
+          "name": "dropId",
+          "type": "bytes32"
+        },
+        {
+          "name": "poster",
+          "type": "address"
+        },
+        {
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "name": "saleMode",
+          "type": "uint8"
+        },
+        {
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "name": "quantity",
+          "type": "uint256"
+        },
+        {
+          "name": "auctionReservePrice",
+          "type": "uint256"
+        },
+        {
+          "name": "auctionEndTime",
+          "type": "uint256"
+        },
+        {
+          "name": "salt",
+          "type": "uint256"
+        },
+        {
+          "name": "nonce",
+          "type": "uint256"
+        },
+        {
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "name": "signerEpoch",
+          "type": "uint256"
+        }
+      ]
+    },
+    "primaryType": "DropAuthorization",
+    "domain": {
+      "name": "6529StreamDrops",
+      "version": "1",
+      "chainId": 31337,
+      "verifyingContract": "0x100000000000000000000000000000000000dEaD"
+    },
+    "message": {
+      "dropId": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+      "poster": "0x0000000000000000000000000000000000001001",
+      "recipient": "0x0000000000000000000000000000000000005005",
+      "payer": "0x0000000000000000000000000000000000000000",
+      "collectionId": "1",
+      "saleMode": 1,
+      "tokenDataHash": "0x8f54f1c2d0eb5771cd5bf67a6689fcd6eed9444d91a39e5ef32a9b4ae5ca14ff",
+      "price": "0",
+      "quantity": "1",
+      "auctionReservePrice": "0",
+      "auctionEndTime": "0",
+      "salt": "2",
+      "nonce": "1",
+      "deadline": "1893456000",
+      "signerEpoch": "1"
+    }
+  },
+  "token_data": "data",
+  "expected": {
+    "signer": "0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7",
+    "drop_id": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+    "token_data_hash": "0x8f54f1c2d0eb5771cd5bf67a6689fcd6eed9444d91a39e5ef32a9b4ae5ca14ff",
+    "domain_separator": "0xaced18559f963adb99804b4c7ca4209355b2e434ba32eab5b033561df367efa0",
+    "struct_hash": "0x0d15ce18a217fa38b136567d2f9dddc89a58f854d6750652133e4085d52815b9",
+    "digest": "0xf65815cf0254253a34051e8051e5bbb982fcbc57b7de34e4112885e5e06a0f0c",
+    "signature_kind": "eoa_65_byte",
+    "signature": "0xff2c6f08dde590295569ee54d0ae9665ce1d12297a0966e98c4b42c1f155fdd52e60bc44bc122156121d459d429e514cc9009794101c66a28ac07933547d40421b",
+    "call": {
+      "function": "mintDrop(DropAuthorization,string,bytes)",
+      "msg_value_wei": "0"
+    }
+  },
+  "failure_cases": [
+    {
+      "id": "wrong_signer",
+      "expected_revert": "Wrong signer",
+      "notes": "A signature from any address other than the active tdhSigner fails after recovery."
+    },
+    {
+      "id": "wrong_domain",
+      "expected_revert": "Wrong signer",
+      "notes": "Changing chainId or verifyingContract changes the digest and makes the recovered signer invalid for this payload."
+    },
+    {
+      "id": "expired",
+      "expected_revert": "Expired",
+      "notes": "A mint after deadline must fail before consuming the drop ID."
+    },
+    {
+      "id": "replayed_or_consumed",
+      "expected_revert": "Drop Executed",
+      "notes": "The first successful mint writes consumedDropIds[dropId]; later calls fail."
+    },
+    {
+      "id": "cancelled_drop",
+      "expected_revert": "Drop cancelled",
+      "notes": "Admin cancellation writes cancelledDropIds[dropId] before execution."
+    },
+    {
+      "id": "stale_signer_epoch",
+      "expected_revert": "Bad epoch",
+      "notes": "Signer epoch rotation invalidates still-signed old payloads."
+    },
+    {
+      "id": "bad_drop_id",
+      "expected_revert": "Bad dropId",
+      "notes": "dropId must equal deriveDropId(signer, signerEpoch, nonce, salt)."
+    },
+    {
+      "id": "token_data_substitution",
+      "expected_revert": "Token data",
+      "notes": "The calldata tokenData string must hash to tokenDataHash."
+    },
+    {
+      "id": "zero_address",
+      "expected_revert": "Zero recipient",
+      "notes": "Fixed-price drops require a non-zero recipient and poster."
+    }
+  ]
+}

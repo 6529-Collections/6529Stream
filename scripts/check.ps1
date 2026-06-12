@@ -49,6 +49,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_metadata_browser_sandbox.py"
 & $pythonPath @pythonArgs "scripts\test_rehearsal_metadata_browser_sandbox.py"
 & $pythonPath @pythonArgs "scripts\check_rehearsal_metadata_browser_sandbox.py"
+& $pythonPath @pythonArgs "scripts\test_drop_authorization_fixtures.py"
+& $pythonPath @pythonArgs "scripts\check_drop_authorization_fixtures.py"
 & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\generate_release_artifacts.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_source_verification_inputs.py"

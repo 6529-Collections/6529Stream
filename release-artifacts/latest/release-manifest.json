@@ -467,8 +467,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:dcf184b61eb06d35ccbd99c91acf0cc9d51c10be0e04e34e25a18c1bfe630f03",
-      "size_bytes": 13473
+      "sha256": "sha256:b59a4fecf9119245119b2a25684f159278c3e19fd52936b2cc28f12d5ce83ad1",
+      "size_bytes": 13671
     },
     "governance_docs": [
       {
@@ -518,23 +518,28 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:1a5ce4f55438cb231c050b57cf4a0fcf577cd79341a0aaa1da910bdae5b8f1f5",
-        "size_bytes": 12020
+        "sha256": "sha256:ec699460fd0f5925fc87f663c55182cd07c1289a70588fef701ab6b436da95e5",
+        "size_bytes": 12752
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:8c80a6e3d3fa8ef89917880d74963fce1d29178d373213a513bc85bcb41f80e4",
-        "size_bytes": 16129
+        "sha256": "sha256:00bda57aa6a8257ed43a3691ebcb9dc6ea853f3c942fdfa312d97d6d67a10026",
+        "size_bytes": 16584
+      },
+      {
+        "path": "docs/drop-authorization-signing.md",
+        "sha256": "sha256:38caa654c0d199815d91efaf8d28c28bf31fa5ed0e22a3547cadf21d9f15e438",
+        "size_bytes": 9261
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:f9d9b126a912e8674b43c422f51c958f0d8884f42a41d45b6e45ddedb9fb0137",
-        "size_bytes": 12703
+        "sha256": "sha256:71b93d42f843ba96e1a831b044a43797af4e80baee0df9eb542182c6108ea30a",
+        "size_bytes": 13430
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:5a3288ca43b5dc0f2e22a2c10634922b5f714283d9592c996a6947d25c76b9e4",
-        "size_bytes": 16409
+        "sha256": "sha256:1d7dcb916bc09fa20519629b1fd5cc72fcada85624580c4018477b7ffd749ed1",
+        "size_bytes": 17202
       },
       {
         "path": "docs/status.md",

@@ -26,6 +26,8 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/test_source_verification_inputs.py
@@ -154,6 +156,14 @@ for stuck auctions, failed randomness, bad Merkle roots, bad metadata or
 dependency configuration, signer compromise, and release artifact/evidence
 mistakes.
 
+The drop-authorization fixture step validates
+[`drop-authorization-signing.md`](drop-authorization-signing.md) and the
+deterministic no-secret fixtures under
+[`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/).
+It recomputes `dropId`, token-data hash, domain separator, struct hash, and
+EIP-712 digest for the fixed-price EOA, auction EOA, and ERC-1271 mock
+contract-signer examples.
+
 The release-readiness step validates
 [`release-readiness.md`](release-readiness.md), the Gate G dashboard that
 separates passing local evidence from missing fork/testnet/live evidence,
@@ -248,6 +258,8 @@ python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -276,6 +288,8 @@ python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_fixtures.py
+python scripts/check_drop_authorization_fixtures.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
@@ -316,10 +330,11 @@ The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,
-`deployments/address-books/`, `deployments/ceremony-evidence/`, and
-`deployments/schema/`, excluding its own generated checksum files to avoid
-self-referential hashes. Refresh the release manifest before refreshing the
-checksum bundle after changing any covered artifact.
+`deployments/address-books/`, `deployments/ceremony-evidence/`,
+`deployments/randomizer-operations/`, `deployments/schema/`, and
+`test/fixtures/drop-authorization/`, excluding its own generated checksum files
+to avoid self-referential hashes. Refresh the release manifest before
+refreshing the checksum bundle after changing any covered artifact.
 
 ## Non-Gating Diagnostics
 
