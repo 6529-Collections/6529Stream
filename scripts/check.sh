@@ -51,6 +51,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_address_books.py --check
 "$python_bin" scripts/test_ceremony_evidence.py
 "$python_bin" scripts/check_ceremony_evidence.py
+"$python_bin" scripts/test_randomizer_operations.py
+"$python_bin" scripts/check_randomizer_operations.py
 "$python_bin" scripts/test_release_manifest.py
 "$python_bin" scripts/generate_release_manifest.py --check
 "$python_bin" scripts/test_release_checksums.py

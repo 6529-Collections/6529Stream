@@ -28,11 +28,13 @@ DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
 DEFAULT_ADDRESS_BOOK_DIR = Path("deployments/address-books")
 DEFAULT_DEPLOYMENT_SCHEMA_DIR = Path("deployments/schema")
 DEFAULT_CEREMONY_EVIDENCE_DIR = Path("deployments/ceremony-evidence")
+DEFAULT_RANDOMIZER_OPERATIONS_DIR = Path("deployments/randomizer-operations")
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/release-policy.md"),
     Path("docs/deployment.md"),
     Path("docs/dependency-operations.md"),
+    Path("docs/randomizer-operations.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]
@@ -240,6 +242,62 @@ def ceremony_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
     return record
 
 
+def randomizer_operations_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    data = require_dict(load_json(path), str(path))
+    network = require_dict(data.get("network"), f"{path}.network")
+    artifacts = require_dict(data.get("artifacts"), f"{path}.artifacts")
+    provider_configuration = require_dict(
+        data.get("provider_configuration"), f"{path}.provider_configuration"
+    )
+    providers = {}
+    for key in ("vrf", "arrng"):
+        provider = require_dict(
+            provider_configuration.get(key), f"{path}.provider_configuration.{key}"
+        )
+        providers[key] = {
+            "adapter": require_string(
+                provider.get("adapter"), f"provider_configuration.{key}.adapter"
+            ),
+            "provider": require_string(
+                provider.get("provider"), f"provider_configuration.{key}.provider"
+            ),
+            "provider_type": require_string(
+                provider.get("provider_type"), f"provider_configuration.{key}.provider_type"
+            ),
+            "provider_epoch": provider.get("provider_epoch"),
+            "funding_status": require_string(
+                provider.get("funding_status"), f"provider_configuration.{key}.funding_status"
+            ),
+        }
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "evidence_id": require_string(data.get("evidence_id"), "evidence_id"),
+            "protocol_version": require_string(data.get("protocol_version"), "protocol_version"),
+            "deployment_version": require_string(
+                data.get("deployment_version"), "deployment_version"
+            ),
+            "network": {
+                "environment": require_string(network.get("environment"), "network.environment"),
+                "name": require_string(network.get("name"), "network.name"),
+                "chain_id": network.get("chain_id"),
+            },
+            "deployment_manifest": require_string(
+                require_dict(
+                    artifacts.get("deployment_manifest"), "artifacts.deployment_manifest"
+                ).get("path"),
+                "artifacts.deployment_manifest.path",
+            ),
+            "address_book": require_string(
+                require_dict(artifacts.get("address_book"), "artifacts.address_book").get("path"),
+                "artifacts.address_book.path",
+            ),
+            "providers": providers,
+        }
+    )
+    return record
+
+
 def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> dict[str, Any]:
     path = release_artifacts_dir / "release-artifact-manifest.json"
     data = require_dict(load_json(path), str(path))
@@ -334,6 +392,7 @@ def build_manifest(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> dict[str, Any]:
@@ -344,11 +403,16 @@ def build_manifest(
     ceremony_evidence = [
         ceremony_evidence_record(path, repo_root) for path in json_files(ceremony_evidence_dir)
     ]
+    randomizer_operations = [
+        randomizer_operations_record(path, repo_root)
+        for path in json_files(randomizer_operations_dir)
+    ]
     protocol_versions = sorted(
         set(
             [record["protocol_version"] for record in deployment_manifests]
             + [record["protocol_version"] for record in address_books]
             + [record["protocol_version"] for record in ceremony_evidence]
+            + [record["protocol_version"] for record in randomizer_operations]
         )
     )
     deployment_versions = sorted(
@@ -356,6 +420,7 @@ def build_manifest(
             [record["deployment_version"] for record in deployment_manifests]
             + [record["deployment_version"] for record in address_books]
             + [record["deployment_version"] for record in ceremony_evidence]
+            + [record["deployment_version"] for record in randomizer_operations]
         )
     )
     resolved_gas_snapshot_path = resolve_gas_snapshot_path(
@@ -380,6 +445,9 @@ def build_manifest(
             "address_book_dir": normalize_path(address_book_dir, repo_root),
             "deployment_schema_dir": normalize_path(deployment_schema_dir, repo_root),
             "ceremony_evidence_dir": normalize_path(ceremony_evidence_dir, repo_root),
+            "randomizer_operations_dir": normalize_path(
+                randomizer_operations_dir, repo_root
+            ),
         },
         "release_artifacts": {
             "contract_config": file_record(contract_config_path, repo_root, schema_required=True),
@@ -431,6 +499,7 @@ def build_manifest(
                 for path in json_files(deployment_schema_dir)
             ],
             "ceremony_evidence": ceremony_evidence,
+            "randomizer_operations": randomizer_operations,
         },
         "release_notes_and_policy": {
             "changelog": file_record(changelog_path, repo_root),
@@ -459,6 +528,7 @@ def build_output_text(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> str:
@@ -475,6 +545,7 @@ def build_output_text(
         address_book_dir,
         deployment_schema_dir,
         ceremony_evidence_dir,
+        randomizer_operations_dir,
         changelog_path,
         governance_docs,
     )
@@ -494,6 +565,7 @@ def write_output(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> Path:
@@ -510,6 +582,7 @@ def write_output(
         address_book_dir,
         deployment_schema_dir,
         ceremony_evidence_dir,
+        randomizer_operations_dir,
         changelog_path,
         governance_docs,
     )
@@ -531,6 +604,7 @@ def check_output(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> int:
@@ -555,6 +629,7 @@ def check_output(
         address_book_dir,
         deployment_schema_dir,
         ceremony_evidence_dir,
+        randomizer_operations_dir,
         changelog_path,
         governance_docs,
     )
@@ -602,6 +677,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_CEREMONY_EVIDENCE_DIR,
     )
+    parser.add_argument(
+        "--randomizer-operations-dir",
+        type=Path,
+        default=DEFAULT_RANDOMIZER_OPERATIONS_DIR,
+    )
     parser.add_argument("--changelog", type=Path, default=DEFAULT_CHANGELOG)
     parser.add_argument("--governance-doc", type=Path, action="append", dest="governance_docs")
     parser.add_argument("--check", action="store_true")
@@ -628,6 +708,7 @@ def main(argv: list[str]) -> int:
                 args.address_book_dir,
                 args.deployment_schema_dir,
                 args.ceremony_evidence_dir,
+                args.randomizer_operations_dir,
                 args.changelog,
                 governance_docs,
             )
@@ -644,6 +725,7 @@ def main(argv: list[str]) -> int:
             args.address_book_dir,
             args.deployment_schema_dir,
             args.ceremony_evidence_dir,
+            args.randomizer_operations_dir,
             args.changelog,
             governance_docs,
         )

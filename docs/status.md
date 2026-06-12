@@ -32,6 +32,12 @@ The current Gate A smoke baseline proves:
   emergency-withdrawal attempts while proving remaining provider reserves stay
   represented by `totalRandomnessReserved()`, `totalOwed()`, and
   `totalReserved()` with zero emergency-withdrawable surplus.
+- Randomizer operations evidence now has a schema, local Anvil evidence bundle,
+  and local/CI checker. The local bundle records deployed adapter addresses,
+  placeholder provider addresses, provider epochs, local funding status,
+  lifecycle-control evidence, reserve-accounting evidence, retained artifacts,
+  and redaction policy. Fork/testnet/live provider funding and request-health
+  evidence remains future Gate E release work.
 - Payment sequence fuzzing now covers mixed fixed-price mint, auction bid,
   auction settlement, curator claim, withdrawal, emergency withdrawal,
   randomizer reserve, and forced-balance operations, proving the current local
@@ -245,9 +251,9 @@ verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata
 browser evidence, fork/testnet/live ceremony evidence contents,
-fork/testnet/live emergency redeployment evidence contents, deployment
-discipline, and broader auction-consistency plus fork/testnet/live invariant
-coverage.
+fork/testnet/live emergency redeployment evidence contents,
+fork/testnet/live randomizer operations evidence contents, deployment
+discipline, and fork/testnet/live invariant coverage.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 

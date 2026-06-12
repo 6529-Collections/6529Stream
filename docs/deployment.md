@@ -135,6 +135,8 @@ python scripts/generate_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/test_randomizer_operations.py
+python scripts/check_randomizer_operations.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py
@@ -213,6 +215,34 @@ their own evidence bundles from real broadcast manifests, retained transaction
 logs, source/explorer verification submissions, admin/signer/dependency
 operator notes, and incident or deprecation records where relevant.
 
+## Randomizer Operations Evidence
+
+Randomizer operations evidence bundles live under
+`deployments/randomizer-operations/` and follow
+`deployments/schema/randomizer-operations-evidence.schema.json`. They are
+no-secret public release artifacts that bind a deployment version to:
+
+- deployed VRF and arRNG adapter addresses;
+- VRF coordinator and arRNG controller addresses;
+- provider epoch and provider funding status;
+- arRNG refund-recipient and reserve policy;
+- request tracking, callback validation, migration, stale request, failed
+  request, retry, reserve-accounting, pause, and emergency-withdrawal controls;
+- retained artifact references and redaction policy.
+
+Validate the committed local evidence with:
+
+```sh
+python scripts/test_randomizer_operations.py
+python scripts/check_randomizer_operations.py
+```
+
+`deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json` is
+local Anvil evidence only. Fork, testnet, and production releases must produce
+their own randomizer operations evidence from real provider configuration,
+funding/billing records, request-health checks, retained transaction evidence,
+and operator notes. See `docs/randomizer-operations.md`.
+
 ## Admin Ceremony Checklist
 
 Before a deployment can become public-beta eligible:
@@ -240,10 +270,12 @@ Before a deployment can become public-beta eligible:
 - Generate and checksum the deployment manifest.
 - Generate and check the address book.
 - Generate and check the ceremony evidence bundle.
+- Generate and check the randomizer operations evidence bundle.
 - Generate and check the release manifest.
 - Generate and check the release checksum bundle.
 
 Live fork/testnet broadcast, production broadcast retention, contract
 verification, event topic catalog publication against a live deployment,
 fork/testnet/live ceremony evidence contents, and fork/testnet/live emergency
-redeployment evidence contents remain Gate E follow-up work.
+redeployment evidence contents, and fork/testnet/live randomizer operations
+evidence contents remain Gate E follow-up work.

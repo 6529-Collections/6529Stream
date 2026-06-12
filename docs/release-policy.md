@@ -132,6 +132,10 @@ Before a public release tag:
   deprecation decisions, and unfrozen collection repins follow
   `docs/dependency-operations.md` when the release uses dependency registry
   versions.
+- Randomizer provider configuration, funding/billing status, lifecycle controls,
+  reserve policy, retained artifacts, and redaction policy follow
+  `docs/randomizer-operations.md` and pass
+  `python scripts/check_randomizer_operations.py`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.

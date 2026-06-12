@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/randomizer-operations-evidence.schema.json",
+  "title": "6529Stream Randomizer Operations Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "protocol_version",
+    "deployment_version",
+    "network",
+    "source",
+    "artifacts",
+    "provider_configuration",
+    "lifecycle_controls",
+    "retained_artifacts",
+    "redaction_policy",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.randomizer-operations-evidence.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "name", "chain_id", "confirmation_depth"],
+      "properties": {
+        "environment": {
+          "enum": ["local", "fork", "testnet", "mainnet", "production"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "confirmation_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployment_manifest",
+        "address_book",
+        "abi_checksums",
+        "release_checksum_bundle"
+      ],
+      "properties": {
+        "deployment_manifest": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "address_book": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "abi_checksums": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "release_checksum_bundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "digest_status", "reason"],
+          "properties": {
+            "path": {
+              "$ref": "#/$defs/repo_path"
+            },
+            "digest_status": {
+              "const": "not_available_self_referential"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "provider_configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vrf", "arrng"],
+      "properties": {
+        "vrf": {
+          "$ref": "#/$defs/provider"
+        },
+        "arrng": {
+          "$ref": "#/$defs/provider"
+        }
+      }
+    },
+    "lifecycle_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_tracking",
+        "callback_validation",
+        "provider_epoch_migration",
+        "pending_request_migration_block",
+        "stale_request_policy",
+        "failed_request_policy",
+        "retry_policy",
+        "reserve_accounting",
+        "pause_policy",
+        "emergency_withdrawal_boundary"
+      ],
+      "properties": {
+        "request_tracking": {
+          "$ref": "#/$defs/control_result"
+        },
+        "callback_validation": {
+          "$ref": "#/$defs/control_result"
+        },
+        "provider_epoch_migration": {
+          "$ref": "#/$defs/control_result"
+        },
+        "pending_request_migration_block": {
+          "$ref": "#/$defs/control_result"
+        },
+        "stale_request_policy": {
+          "$ref": "#/$defs/control_result"
+        },
+        "failed_request_policy": {
+          "$ref": "#/$defs/control_result"
+        },
+        "retry_policy": {
+          "$ref": "#/$defs/control_result"
+        },
+        "reserve_accounting": {
+          "$ref": "#/$defs/control_result"
+        },
+        "pause_policy": {
+          "$ref": "#/$defs/control_result"
+        },
+        "emergency_withdrawal_boundary": {
+          "$ref": "#/$defs/control_result"
+        }
+      }
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "path", "sha256"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "$ref": "#/$defs/repo_path"
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          }
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter",
+        "provider",
+        "provider_type",
+        "provider_epoch",
+        "funding_status",
+        "balance_wei",
+        "operator_notes",
+        "evidence"
+      ],
+      "properties": {
+        "adapter": {
+          "$ref": "#/$defs/address"
+        },
+        "provider": {
+          "$ref": "#/$defs/address"
+        },
+        "provider_type": {
+          "enum": ["chainlink_vrf", "arrng", "local_mock"]
+        },
+        "provider_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "funding_status": {
+          "enum": ["not_applicable_local", "funded", "pending", "blocked"]
+        },
+        "balance_wei": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "refund_recipient": {
+          "$ref": "#/$defs/address"
+        },
+        "operator_notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file_ref"
+          }
+        }
+      }
+    },
+    "control_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "notes", "evidence"],
+      "properties": {
+        "status": {
+          "enum": ["passed", "failed", "blocked", "pending", "not_applicable"]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file_ref"
+          }
+        }
+      }
+    }
+  }
+}

@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-reserve-lifecycle-tests` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/151` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/153` |
+| Active PR branch | `codex/randomizer-operations-evidence` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/153` |
+| Active PR | Pending for issue `https://github.com/6529-Collections/6529Stream/issues/154` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 12:32 UTC` |
+| Last updated | `2026-06-12 13:13 UTC` |
 
 ## Packaging Notes
 
@@ -133,13 +133,94 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
 | 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Merged in PR #149 |
 | 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Merged in PR #151 |
-| 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | Open PR #153 |
+| 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | Merged in PR #153 |
+| 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | In progress |
 
 ## Current PR Worklog
 
+### PR candidate: Add randomizer operations evidence bundle (Queue Item 80)
+
+Status: local branch in progress before PR.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/154`.
+Branch: `codex/randomizer-operations-evidence`.
+Branch started from PR #153 squash merge commit
+`551185c6399d79c74321d2e4fb128cbb29c4a8e7`.
+
+Goal:
+
+- Add a machine-readable randomizer operations evidence schema.
+- Add a local Anvil randomizer operations evidence bundle that records
+  placeholder provider addresses, provider epochs, local funding status,
+  lifecycle controls, reserve-accounting evidence, retained artifacts, and
+  redaction policy without claiming fork/testnet/live readiness.
+- Add validator/unit tests and wire them into local, Windows, and CI gates.
+- Include the new evidence in release manifest and checksum coverage.
+- Update deployment, release, status, roadmap, and durable run-state docs.
+- Keep production provider credentials, live RPC calls, and Solidity behavior
+  out of scope.
+
+Initial candidate files:
+
+- `scripts/check_randomizer_operations.py`
+- `scripts/test_randomizer_operations.py`
+- `deployments/schema/randomizer-operations-evidence.schema.json`
+- `deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json`
+- `docs/randomizer-operations.md`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/generate_release_checksums.py`
+- `deployments/README.md`
+- `docs/deployment.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes:
+
+- Added `scripts/check_randomizer_operations.py` with no-secret validation,
+  file-reference hash checks, deployment-manifest/address-book alignment,
+  provider funding status checks, lifecycle-control evidence checks, retained
+  artifact category checks, and stricter production/mainnet evidence
+  requirements.
+- Added `scripts/test_randomizer_operations.py` with success coverage and
+  negative tests for invalid addresses, manifest mismatches, missing passed
+  control evidence, secret-like values, non-local local-only funding status,
+  production evidence missing provider-funding proof, and duplicate retained
+  categories.
+- Added local Anvil randomizer evidence under
+  `deployments/randomizer-operations/` and a schema under
+  `deployments/schema/`.
+- Wired the checker into Makefile, Unix and Windows check wrappers, CI, release
+  manifest, and release checksum coverage.
+
+Validation:
+
+- `python scripts\test_randomizer_operations.py`
+- `python scripts\check_randomizer_operations.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\check_randomizer_operations.py scripts\test_randomizer_operations.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py`
+- `bash -n scripts/check.sh`
+- `git diff --check`
+- `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
 ### PR candidate: Add request-level randomizer reserve lifecycle tests (Queue Item 79)
 
-Status: PR #153 open with CodeRabbit requested.
+Status: Merged in PR #153.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/152`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/153`.
 CodeRabbit request: issue comment `4691282971`.
@@ -7122,6 +7203,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 13:13 | Finish local Queue Item 80 validation | Focused randomizer-operations tests/checker, release manifest/checksum/changelog drift checks, Python compilation, Unix check-wrapper syntax, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry warning noise |
+| 2026-06-12 12:54 | Implement Queue Item 80 local draft | Added randomizer operations schema, local Anvil evidence, validator/tests, gate wiring, release manifest/checksum coverage, and docs/run-state updates for issue #154 without Solidity behavior changes or live provider secrets |
+| 2026-06-12 12:42 | Create issue #154 and select Queue Item 80 | PR #153 merged as `551185c6399d79c74321d2e4fb128cbb29c4a8e7`; no open GitHub issues remained, and the next no-secret Gate E/Gate G gap is checkable randomizer provider/funding/lifecycle evidence for future fork/testnet/live ceremonies |
+| 2026-06-12 12:40 | Merge PR #153 | Request-level randomizer reserve lifecycle tests merged as `551185c6399d79c74321d2e4fb128cbb29c4a8e7`; final head `9f35d7667e69d25cb8025cc1d2e879fcc270db28` had CI run `27415896020` and CodeRabbit green with no unresolved review threads, and issue #152 closed completed |
 | 2026-06-12 12:32 | Open PR #153 and request CodeRabbit | Pushed `codex/randomizer-reserve-lifecycle-tests`, opened https://github.com/6529-Collections/6529Stream/pull/153 against `main`, linked `Closes #152`, requested CodeRabbit in comment `4691282971`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 12:29 | Finish local Queue Item 79 validation | Focused randomizer-payment, emergency-withdrawal, payment-invariant, randomizer-lifecycle, and randomizer-retry Forge tests pass; release manifest/checksum/changelog drift checks pass; full `make check`, Windows `scripts\check.ps1`, and `git diff --check` pass locally with only existing warning noise |
 | 2026-06-12 12:11 | Implement Queue Item 79 local draft | Added focused `StreamRandomizerPayments.t.sol` coverage for request-cost spending, multiple pending arRNG requests, fulfilled/stale/failed/retried request states, forced ETH, and unauthorized emergency-withdrawal reserve preservation; focused formatting and Forge tests pass locally |

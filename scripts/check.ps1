@@ -66,6 +66,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_address_books.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_ceremony_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_ceremony_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_randomizer_operations.py"
+& $pythonPath @pythonArgs "scripts\check_randomizer_operations.py"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"
 & $pythonPath @pythonArgs "scripts\generate_release_manifest.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_checksums.py"
