@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/dependency-migration-runbook` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/137` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/138` |
+| Active PR branch | `codex/live-fork-metadata-browser` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/138` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 04:29 UTC` |
+| Last updated | `2026-06-12 05:32 UTC` |
 
 ## Packaging Notes
 
@@ -125,13 +125,113 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 68 | Expose stale and failed randomness metadata states | Gate D | Implement issue #130 by mapping lifecycle-aware `Stale` and `FailedPostProcessing` requests into public metadata state strings, off-chain URIs, schema-v1 on-chain JSON, fixtures, docs, and roadmap traceability | Merged in PR #131 |
 | 69 | Recover `StreamCore` release-floor bytecode headroom | Gate D/Gate G support | Implement issue #132 by recovering at least 156 bytes of `StreamCore` production runtime headroom, preserving metadata state behavior, refreshing size docs/artifacts, and keeping the production IR size gate green | Merged in PR #133 |
 | 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | Merged in PR #137 |
-| 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | In progress on `codex/dependency-migration-runbook` |
+| 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | Merged in PR #138 |
+| 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | In progress on `codex/live-fork-metadata-browser` |
 
 ## Current PR Worklog
 
+### PR candidate: Add deployment-rehearsal metadata browser coverage (Queue Item 72)
+
+Status: PR #139 opened and CodeRabbit requested in PR comment `4687690174`;
+CodeRabbit review comments addressed locally and pending commit.
+Issue #135 selected after PR #138 merged and `main` advanced to
+`9510a0f25bbdb61292644ab4ebdeba90e5d401fc`.
+Branch `codex/live-fork-metadata-browser` started from that merge commit.
+PR: `https://github.com/6529-Collections/6529Stream/pull/139`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/135`.
+
+Goal:
+
+- Add a local deployment-rehearsal metadata browser proof that is stronger than
+  a committed fixture check but does not require RPC secrets.
+- Deploy the local non-production stack, register a deterministic metadata
+  dependency, mint through the EIP-712 drop authorization path, finalize token
+  metadata inputs, extract the generated on-chain `tokenURI`, and execute the
+  generated final animation in Chromium.
+- Reuse the existing browser sandbox policy: deterministic dependency stub,
+  unexpected-network rejection, bootstrap assertions, page/console error
+  capture, and parent-frame isolation.
+- Wire the unit and live rehearsal checks into Makefile, Windows/Unix wrapper
+  checks, and CI.
+- Update docs, roadmap, changelog, and this durable run state to distinguish
+  local deployment-rehearsal proof from future fork/testnet/live production
+  evidence.
+
+Initial candidate files:
+
+- `script/RehearseMetadataBrowser.s.sol`
+- `scripts/check_metadata_browser_sandbox.py`
+- `scripts/check_rehearsal_metadata_browser_sandbox.py`
+- `scripts/test_rehearsal_metadata_browser_sandbox.py`
+- `Makefile`
+- `scripts/check.ps1`
+- `scripts/check.sh`
+- `.github/workflows/ci.yml`
+- `docs/metadata.md`
+- `docs/deployment.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `script/README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation plan:
+
+- `forge fmt script/RehearseMetadataBrowser.s.sol`
+- `python -m py_compile scripts\check_metadata_browser_sandbox.py scripts\check_rehearsal_metadata_browser_sandbox.py scripts\test_rehearsal_metadata_browser_sandbox.py`
+- `python scripts\test_rehearsal_metadata_browser_sandbox.py`
+- `.venv-tools\Scripts\python.exe scripts\check_rehearsal_metadata_browser_sandbox.py`
+- `make metadata-fixtures-check`
+- Release manifest/checksum/changelog drift checks after docs and CI wiring.
+- Full local `make check` before opening the PR if runtime permits.
+
+Local validation:
+
+- `forge fmt script/RehearseMetadataBrowser.s.sol` passed using the installed
+  Foundry binary at `$HOME\.foundry\bin\forge.exe` because the current
+  PowerShell session does not resolve `forge` on `PATH`.
+- `forge build` passed after removing the oversized rehearsal evidence event
+  and using the ABI return payload as the script/checker contract.
+- `python -m py_compile scripts\check_metadata_browser_sandbox.py scripts\check_rehearsal_metadata_browser_sandbox.py scripts\test_rehearsal_metadata_browser_sandbox.py` passed.
+- `python scripts\test_rehearsal_metadata_browser_sandbox.py` passed with 9
+  focused tests, including direct and wrapped Forge ABI return decoding.
+- `.venv-tools\Scripts\python.exe scripts\check_rehearsal_metadata_browser_sandbox.py`
+  passed and validated local Anvil deployment-rehearsal metadata in Chromium.
+- `make metadata-fixtures-check` passed and now exercises both committed fixture
+  and local deployment-rehearsal browser sandbox checks.
+- `python scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\test_release_checksums.py`,
+  `python scripts\generate_release_checksums.py --check`, and
+  `python scripts\check_changelog.py` passed after regenerating the release
+  manifest/checksum bundle.
+- Full `make check` passed.
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`, PowerShell parser checks
+  for `scripts/check.ps1` and `scripts/bootstrap-windows.ps1`, and
+  `git diff --check` passed.
+
+Review response validation:
+
+- CodeRabbit review `4482738727` correctly identified that Forge JSON stdout
+  should not be treated as a single JSON document. The checker now scans stdout
+  for JSON object/array records and selects the record containing `returned`.
+- Accepted both low-risk test nitpicks by adding an empty `tokenDataRaw`
+  regression and a descriptive dynamic-import assertion message.
+- `python -m py_compile scripts\check_rehearsal_metadata_browser_sandbox.py scripts\test_rehearsal_metadata_browser_sandbox.py` passed.
+- `python scripts\test_rehearsal_metadata_browser_sandbox.py` passed with 11
+  focused tests.
+- `.venv-tools\Scripts\python.exe scripts\check_rehearsal_metadata_browser_sandbox.py`
+  passed and validated local Anvil deployment-rehearsal metadata in Chromium.
+- `make metadata-fixtures-check` passed with the rehearsal tests and browser
+  checks.
+- Full `make check` passed after the review fixes.
+- `git diff --check` passed.
+
 ### PR candidate: Document dependency migration runbooks (Queue Item 71)
 
-Status: PR #138 opened and CodeRabbit requested in PR comment `4687472511`.
+Status: merged in PR #138 after CodeRabbit review and CI success.
 Issue #136 selected after PR #137 merged and stale umbrella issues #25, #30,
 \#45, #46, #47, #48, #51, and #124 were closed with evidence comments. Branch
 `codex/dependency-migration-runbook` started from `main` at PR #137 merge commit
@@ -6267,6 +6367,11 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 05:32 | Address CodeRabbit PR #139 review | Hardened Forge stdout parsing for noisy or multi-record JSON output, added empty `tokenDataRaw` coverage and import assertion diagnostics, and reran py_compile, focused tests, live rehearsal check, metadata fixture gate, full `make check`, and whitespace validation |
+| 2026-06-12 05:16 | Open PR #139 and request CodeRabbit | Pushed `codex/live-fork-metadata-browser`, opened https://github.com/6529-Collections/6529Stream/pull/139 against `main`, linked `Closes #135`, requested CodeRabbit in comment `4687690174`, and intentionally skipped Claude per user instruction |
+| 2026-06-12 05:13 | Validate Queue Item 72 locally | Focused Python rehearsal tests, live Forge-to-Chromium rehearsal check, metadata fixture gate, release manifest/checksum/changelog drift checks, full `make check`, Bash/PowerShell syntax checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
+| 2026-06-12 05:00 | Implement Queue Item 72 local draft | Added `RehearseMetadataBrowser.s.sol`, a return-payload-driven rehearsal browser checker, local/CI gate wiring, docs/roadmap/run-state/changelog updates, and release evidence refreshes for issue #135 |
+| 2026-06-12 04:45 | Select Queue Item 72 | PR #138 merged as `9510a0f25bbdb61292644ab4ebdeba90e5d401fc`; issue #135 accepts fork or deployment-rehearsal generated metadata browser proof, and local Anvil rehearsal evidence can ship without RPC secrets |
 | 2026-06-12 03:17 | Request CodeRabbit PR #133 review | CodeRabbit review requested in PR comment `4687004505`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 03:16 | Open PR #133 for Queue Item 69 | Pushed `codex/streamcore-size-floor-recovery`, opened https://github.com/6529-Collections/6529Stream/pull/133 against `main`, linked `Closes #132`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-12 02:15 | Select Queue Item 69 | PR #131 merged as `3a6405d7d0cdc1d3550a8f872c6f17f3a0a147ac`; issue #132 scopes the next slice as recovering `StreamCore` from 24,348 runtime bytes / 228 bytes EIP-170 headroom back to the documented 384-byte release floor before further non-trivial Core work |

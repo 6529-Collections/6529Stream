@@ -97,8 +97,9 @@ contributors who start from the README.
   operations runbook now documents production dependency proposal, review,
   packaging, pinning, deprecation, rollback, frozen-collection protection, and
   source-retention ceremonies beyond registry provenance strings.
-  Remaining metadata blockers include broader live/fork browser execution
-  coverage.
+  Local deployment-rehearsal metadata browser execution now exists; remaining
+  metadata blockers include fork/testnet/live production browser evidence for
+  release ceremonies.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries, plus a Playwright-backed Chromium
@@ -131,8 +132,8 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist, but broader live/fork
-  generated metadata render-sandbox tests, deployment, production-governance,
+  bounded payment sequence invariant baseline now exist, but fork/testnet/live
+  production metadata browser evidence, deployment, production-governance,
   richer supply/replay/freeze invariant tests, and any future shared-ledger
   invariants are still missing.
 - Live fork/testnet deployment rehearsals, production broadcast retention,

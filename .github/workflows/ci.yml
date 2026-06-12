@@ -53,6 +53,8 @@ jobs:
             scripts/test_metadata_fixtures.py \
             scripts/check_metadata_browser_sandbox.py \
             scripts/test_metadata_browser_sandbox.py \
+            scripts/check_rehearsal_metadata_browser_sandbox.py \
+            scripts/test_rehearsal_metadata_browser_sandbox.py \
             scripts/generate_source_verification_inputs.py \
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
@@ -128,6 +130,8 @@ jobs:
           python3 scripts/check_metadata_fixtures.py 2>&1 | tee ci-logs/metadata-fixture-check.log
           python3 scripts/test_metadata_browser_sandbox.py 2>&1 | tee ci-logs/metadata-browser-sandbox-tests.log
           python3 scripts/check_metadata_browser_sandbox.py 2>&1 | tee ci-logs/metadata-browser-sandbox-check.log
+          python3 scripts/test_rehearsal_metadata_browser_sandbox.py 2>&1 | tee ci-logs/rehearsal-metadata-browser-sandbox-tests.log
+          python3 scripts/check_rehearsal_metadata_browser_sandbox.py 2>&1 | tee ci-logs/rehearsal-metadata-browser-sandbox-check.log
 
       - name: Release artifact catalog
         shell: bash

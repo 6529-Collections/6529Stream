@@ -69,10 +69,14 @@ storage, and `StreamCore` production metadata writes now reject invalid UTF-8
 before storage for collection text fields, collection script chunks, token
 data, token image URIs, and token raw attributes. Browser render-sandbox checks
 now execute the committed final on-chain animation fixture in Chromium with a
-deterministic dependency stub and parent-frame isolation assertion. Production
-dependency migration and source-retention ceremonies are documented in
-[`docs/dependency-operations.md`](dependency-operations.md). Broader live/fork
-browser coverage and live deployment release manifests remain open.
+deterministic dependency stub and parent-frame isolation assertion. A separate
+local deployment-rehearsal browser check now deploys the stack, mints through
+the drop authorization path, finalizes metadata inputs, extracts the generated
+`tokenURI`, and executes that generated final animation in the same Chromium
+sandbox policy. Production dependency migration and source-retention ceremonies
+are documented in [`docs/dependency-operations.md`](dependency-operations.md).
+Fork/testnet/live production-evidence browser coverage and live deployment
+release manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -109,8 +113,8 @@ generated HTML wrapper/script boundaries. It also runs the committed final
 animation fixture in Chromium through a sandboxed iframe, fulfills exactly the
 expected external dependency request with a deterministic stub, rejects
 unexpected outbound requests, asserts the token bootstrap values are present,
-and proves the frame cannot read the parent document. Broader live/fork browser
-execution proofing remains required before public beta.
+and proves the frame cannot read the parent document. Fork/testnet/live
+production-evidence browser proofing remains required before public beta.
 
 ## URI Policy
 
@@ -222,6 +226,19 @@ the frame, and verifies parent-document access fails with `SecurityError`.
 validation logic without launching a browser. Playwright is pinned in
 `requirements-tools.txt`; bootstrap scripts install Chromium for contributors,
 and CI installs the same toolchain before the metadata fixture safety job.
+
+`script/RehearseMetadataBrowser.s.sol` and
+`scripts/check_rehearsal_metadata_browser_sandbox.py` add the
+deployment-rehearsal-generated half of the browser gate. The rehearsal deploys
+the local non-production stack, registers a deterministic dependency,
+configures an executable draw script, mints a zero-price fixed-price drop using
+EIP-712 authorization, finalizes token image/attribute and randomness inputs,
+then returns the generated on-chain `tokenURI`. The Python checker decodes that
+`tokenURI`, validates the rehearsal evidence envelope, and runs the generated
+final animation through the same Chromium sandbox policy as the committed
+fixture check. This is local Anvil evidence and does not require RPC secrets; a
+future fork, testnet, or production broadcast should still retain equivalent
+browser evidence for release ceremonies.
 
 ## ERC-4906 Events
 
@@ -396,7 +413,8 @@ cannot change frozen collection output.
 
 ADR 0006 requires future metadata work to add:
 
-- broader live/fork browser execution proofing for generated animation code
-  beyond the committed golden fixture sandbox check
+- broader fork/testnet/live production-evidence browser execution proofing for
+  generated animation code beyond the committed golden fixture and local
+  deployment-rehearsal sandbox checks
 - richer structured attributes if the protocol moves away from caller-authored
   raw fragments; production raw-attribute schema validation now exists

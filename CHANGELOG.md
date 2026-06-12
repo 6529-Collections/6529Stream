@@ -50,6 +50,9 @@ the release policy in `docs/release-policy.md`.
   final on-chain animation fixture, with deterministic dependency stubbing,
   unexpected-network rejection, bootstrap assertions, and parent-frame
   isolation proof in local and CI gates.
+- Added a local deployment-rehearsal metadata browser sandbox gate that deploys
+  the stack, mints through EIP-712 drop authorization, finalizes generated
+  metadata inputs, and executes the resulting on-chain animation in Chromium.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

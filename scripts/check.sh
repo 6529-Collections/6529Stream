@@ -31,6 +31,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_metadata_fixtures.py
 "$python_bin" scripts/test_metadata_browser_sandbox.py
 "$python_bin" scripts/check_metadata_browser_sandbox.py
+"$python_bin" scripts/test_rehearsal_metadata_browser_sandbox.py
+"$python_bin" scripts/check_rehearsal_metadata_browser_sandbox.py
 "$python_bin" scripts/test_release_artifacts.py
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_source_verification_inputs.py

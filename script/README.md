@@ -8,6 +8,10 @@ Current scripts:
   6529Stream stack, creates a sample collection, configures sample admin
   ceremony state, revokes the temporary deployment admin, and transfers Ownable
   control to the configured Safe placeholder.
+- `RehearseMetadataBrowser.s.sol`: builds on the local stack, registers a
+  deterministic metadata dependency, mints through the EIP-712 drop
+  authorization path, finalizes token metadata inputs, and returns generated
+  on-chain metadata evidence for the browser sandbox checker.
 
 Run the local rehearsal with:
 
@@ -15,7 +19,14 @@ Run the local rehearsal with:
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 ```
 
+Run the local metadata browser rehearsal with:
+
+```bash
+python scripts/test_rehearsal_metadata_browser_sandbox.py
+python scripts/check_rehearsal_metadata_browser_sandbox.py
+```
+
 This is an Anvil/local simulation gate, not a production broadcast. Gate E still
-requires fork/testnet dry runs, real manifest generation from broadcast outputs,
-contract verification inputs, ABI checksums, and dry-run mint/auction
-ceremonies before public beta.
+requires fork/testnet dry runs, production metadata browser evidence, real
+manifest generation from broadcast outputs, contract verification inputs, ABI
+checksums, and dry-run mint/auction ceremonies before public beta.

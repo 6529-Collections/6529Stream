@@ -210,8 +210,14 @@ for the committed final on-chain animation fixture: Chromium executes the
 fixture in an `allow-scripts` sandboxed iframe, the expected dependency URL is
 served by a deterministic stub, unexpected HTTP(S) requests fail, bootstrap
 values are asserted in-frame, page/console errors fail the check, and
-parent-document access must fail with `SecurityError`. Broader live/fork
-browser coverage remains future P1-META-006 work.
+parent-document access must fail with `SecurityError`.
+`scripts/test_rehearsal_metadata_browser_sandbox.py` and
+`scripts/check_rehearsal_metadata_browser_sandbox.py` extend that policy to a
+local deployment-rehearsal-generated tokenURI: the Forge rehearsal deploys the
+stack, mints through the EIP-712 drop authorization path, finalizes metadata
+inputs, and the Python checker executes the generated final animation in the
+same sandbox. Fork/testnet/live production browser evidence remains future
+release-gate work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

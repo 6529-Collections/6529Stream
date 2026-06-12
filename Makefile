@@ -43,6 +43,8 @@ metadata-fixtures-check:
 	$(PYTHON) scripts/check_metadata_fixtures.py
 	$(PYTHON) scripts/test_metadata_browser_sandbox.py
 	$(PYTHON) scripts/check_metadata_browser_sandbox.py
+	$(PYTHON) scripts/test_rehearsal_metadata_browser_sandbox.py
+	$(PYTHON) scripts/check_rehearsal_metadata_browser_sandbox.py
 
 release-artifacts: size
 	$(PYTHON) scripts/generate_release_artifacts.py
