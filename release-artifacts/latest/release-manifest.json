@@ -22,7 +22,8 @@
     "deployment_schema_dir": "deployments/schema",
     "ceremony_evidence_dir": "deployments/ceremony-evidence",
     "randomizer_operations_dir": "deployments/randomizer-operations",
-    "release_signatures_dir": "release-artifacts/signatures"
+    "release_signatures_dir": "release-artifacts/signatures",
+    "non_local_evidence_dir": "release-artifacts/evidence"
   },
   "release_artifacts": {
     "contract_config": {
@@ -190,6 +191,55 @@
             ]
           },
           "operator_notes": "This is local release-signature evidence only. Fork, testnet, and production releases must retain public signature artifacts, verification output, signer identity, and rotation evidence without private signing material."
+        }
+      }
+    ],
+    "non_local_release_evidence": [
+      {
+        "path": "release-artifacts/evidence/non-local-release-evidence-template.json",
+        "sha256": "sha256:577180f7815fe7ad8fc4d0ddd364824b4dcf7a1cb3c5ff4920f4e282d12fdec7",
+        "size_bytes": 1685,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "non-local-release-evidence-template",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "testnet",
+        "public_beta_requirement_id": "testnet_deployment_rehearsal",
+        "retained_path": "release-artifacts/evidence/non-local-template-retained-artifact.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "non-local-release-evidence-template",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "testnet",
+          "chain_id": 11155111,
+          "block_or_reference": "template-only block, transaction, explorer URL, audit report ID, CI run, or signed-tag reference",
+          "command_or_source_system": "template-only command, CI job, explorer, Safe transaction, audit portal, or signing tool",
+          "retained_path": "release-artifacts/evidence/non-local-template-retained-artifact.txt",
+          "sha256": "sha256:62a31be301ecadcfa41b110289b992bf28b69990feaacf7dd823fd56d60eddbd",
+          "redaction_statement": "Template only; no raw logs, RPC URLs, credentials, private keys, mnemonics, API tokens, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "testnet_deployment_rehearsal",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Copy this shape for real retained evidence, replace every template value with reviewed no-secret data, and link the resulting JSON from release-artifacts/latest/public-beta-evidence.json only after review."
         }
       }
     ],
@@ -417,8 +467,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:a367f3be055b5188bf4a1f2376c2d669704f3d3206f7785ba8bef7d20c01b519",
-      "size_bytes": 12933
+      "sha256": "sha256:604e4173f38e12234d9c4703ba2ad7c9cef5bee15376eea7d52ec9c752bea227",
+      "size_bytes": 13181
     },
     "governance_docs": [
       {
@@ -448,13 +498,13 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:75840a107e72e2a7168cefaecc32ca7d69f7d8033f5588c74332a0a88f46a621",
-        "size_bytes": 4935
+        "sha256": "sha256:5ea2f3c1f67a870f4cf268a87a150d1074d8fffbc359d8debd8360220a19f7f2",
+        "size_bytes": 5474
       },
       {
         "path": "docs/non-local-release-evidence.md",
-        "sha256": "sha256:6d63c90596cc0f374acad30c9a0e4b0411971900f9586128d8f855771f559214",
-        "size_bytes": 13364
+        "sha256": "sha256:9140f08dde3fe2ee6b1808b8bef15125a62ead564f68924edf5892d86d23cfab",
+        "size_bytes": 14729
       },
       {
         "path": "docs/architecture.md",
@@ -473,13 +523,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:1cb4328595851e83144ea2807883f79834efa55f1169741584169eec18227b68",
-        "size_bytes": 11264
+        "sha256": "sha256:a8909810e050d1cd4c2800a1c388b1f60b1bb0be48137f698e427fb8b683a8c4",
+        "size_bytes": 12258
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:9cb85632135e3e71dcab6521b6c11e39c9c5d05eae0c0ae8622bca5c154c5e1e",
-        "size_bytes": 15129
+        "sha256": "sha256:9d4615d7f9d8a43aa4470c0792abb8fb07eace6e402b9e46c84bc23e829def1b",
+        "size_bytes": 15858
       },
       {
         "path": "docs/status.md",

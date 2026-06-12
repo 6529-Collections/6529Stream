@@ -36,7 +36,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, public-beta evidence status, and non-local release evidence intake runbook exist for the local baseline | Live release artifacts and non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, public-beta evidence status, and non-local release evidence runbook, schema, checked template, and checker exist for the local baseline | Live release artifacts and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -66,8 +66,11 @@ The current local baseline includes:
 - no-secret public-beta evidence status under
   [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
   following [`docs/public-beta-evidence.md`](public-beta-evidence.md);
-- non-local release evidence intake requirements under
-  [`docs/non-local-release-evidence.md`](non-local-release-evidence.md);
+- non-local release evidence intake requirements, schema, checked template, and
+  checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
+  [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),
+  [`release-artifacts/evidence/non-local-release-evidence-template.json`](../release-artifacts/evidence/non-local-release-evidence-template.json),
+  and [`scripts/check_non_local_release_evidence.py`](../scripts/check_non_local_release_evidence.py);
 - Slither baseline evidence in [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md)
   and [`docs/slither.md`](slither.md);
 - the test matrix in [`ops/ROADMAP.md`](../ops/ROADMAP.md#appendix-b-test-matrix);
@@ -150,6 +153,9 @@ Release artifacts:
 - [release-artifacts/latest/public-beta-evidence.json](../release-artifacts/latest/public-beta-evidence.json)
 - [release-artifacts/latest/source-verification-inputs.json](../release-artifacts/latest/source-verification-inputs.json)
 - [release-artifacts/schema/public-beta-evidence.schema.json](../release-artifacts/schema/public-beta-evidence.schema.json)
+- [release-artifacts/schema/non-local-release-evidence.schema.json](../release-artifacts/schema/non-local-release-evidence.schema.json)
+- [release-artifacts/evidence/non-local-release-evidence-template.json](../release-artifacts/evidence/non-local-release-evidence-template.json)
+- [release-artifacts/evidence/non-local-template-retained-artifact.txt](../release-artifacts/evidence/non-local-template-retained-artifact.txt)
 - [release-artifacts/baselines/v0.1.0/abi-surface.json](../release-artifacts/baselines/v0.1.0/abi-surface.json)
 - [release-artifacts/baselines/v0.1.0/gas-snapshot.snap](../release-artifacts/baselines/v0.1.0/gas-snapshot.snap)
 - [deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json](../deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json)
@@ -165,6 +171,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
 ```
 
 Run the release evidence drift checks:

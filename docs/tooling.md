@@ -45,6 +45,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
@@ -161,6 +163,12 @@ operator workflow, required retained fields, redaction rules, reviewer
 expectations, and public-beta requirement mapping for the fork, testnet, live,
 audit, explorer, gas, invariant, signature, and signed-tag evidence that will
 eventually unblock those status rows.
+The non-local release evidence checker validates
+`release-artifacts/evidence/non-local-release-evidence-template.json` against
+`release-artifacts/schema/non-local-release-evidence.schema.json`, confirms the
+retained artifact hash, rejects secret-shaped metadata, and lets future
+reviewed evidence become release-manifest and checksum inputs without treating
+the template as completion evidence.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
@@ -225,6 +233,8 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
@@ -249,6 +259,8 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
@@ -288,6 +300,7 @@ or duplicate contract addresses, missing contract metadata, or mismatch against
 the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
+`release-artifacts/evidence/`,
 `release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,

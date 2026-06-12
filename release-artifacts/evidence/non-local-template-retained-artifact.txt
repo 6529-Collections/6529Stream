@@ -1,0 +1,5 @@
+Template retained artifact for non-local release evidence metadata.
+
+This file is public, sanitized, and not completion evidence.
+It does not prove fork, testnet, mainnet, audit, explorer, gas, invariant,
+address-book, broadcast-retention, checksum-signature, or signed-tag readiness.

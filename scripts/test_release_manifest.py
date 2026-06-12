@@ -44,11 +44,18 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     ceremony_evidence_dir = root / "deployments" / "ceremony-evidence"
     randomizer_operations_dir = root / "deployments" / "randomizer-operations"
     release_signatures_dir = root / "release-artifacts" / "signatures"
+    non_local_evidence_dir = root / "release-artifacts" / "evidence"
     release_signature_schema = root / "release-artifacts" / "schema" / (
         "release-signature-evidence.schema.json"
     )
     public_beta_schema = root / "release-artifacts" / "schema" / (
         "public-beta-evidence.schema.json"
+    )
+    non_local_evidence_schema = root / "release-artifacts" / "schema" / (
+        "non-local-release-evidence.schema.json"
+    )
+    non_local_retained_artifact = (
+        non_local_evidence_dir / "non-local-template-retained-artifact.txt"
     )
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
@@ -179,6 +186,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     write_json(
         public_beta_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
+        non_local_evidence_schema,
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
@@ -357,6 +368,55 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "operator_notes": "public beta and production remain blocked",
         },
     )
+    write_text(
+        non_local_retained_artifact,
+        (
+            "Template retained artifact for non-local release evidence tests.\n"
+            "This placeholder is not completion evidence.\n"
+        ),
+    )
+    write_json(
+        non_local_evidence_dir / "non-local-release-evidence-template.json",
+        {
+            "schema_version": "6529stream.non-local-release-evidence.v1",
+            "evidence_id": "non-local-release-evidence-template",
+            "record_type": "template",
+            "review_status": "template",
+            "environment": "audit",
+            "chain_id": "not_applicable",
+            "block_or_reference": "TBD",
+            "command_or_source_system": "TBD",
+            "retained_path": (
+                "release-artifacts/evidence/non-local-template-retained-artifact.txt"
+            ),
+            "sha256": generator.file_sha256(non_local_retained_artifact),
+            "redaction_statement": "Template contains no secrets and no completion evidence.",
+            "owner": "TBD",
+            "reviewer": "TBD",
+            "public_beta_requirement_id": "external_audit_report",
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "api_key",
+                    "rpc_url",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "template_notice": (
+                "This template is not completion evidence and must be replaced "
+                "by reviewed evidence before any public-beta status changes."
+            ),
+            "operator_notes": "local template only",
+        },
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
@@ -374,8 +434,11 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "ceremony_evidence_dir": ceremony_evidence_dir,
         "randomizer_operations_dir": randomizer_operations_dir,
         "release_signatures_dir": release_signatures_dir,
+        "non_local_evidence_dir": non_local_evidence_dir,
         "release_signature_schema": release_signature_schema,
         "public_beta_schema": public_beta_schema,
+        "non_local_evidence_schema": non_local_evidence_schema,
+        "non_local_retained_artifact": non_local_retained_artifact,
         "output": output,
         "changelog": changelog,
         "docs": docs,
@@ -512,6 +575,27 @@ class ReleaseManifestTests(unittest.TestCase):
                 len(generator.public_beta_checker.PRODUCTION_REQUIREMENTS),
             )
             self.assertEqual(
+                manifest["source"]["non_local_evidence_dir"],
+                "release-artifacts/evidence",
+            )
+            non_local_evidence = manifest["release_artifacts"][
+                "non_local_release_evidence"
+            ][0]
+            self.assertEqual(
+                non_local_evidence["evidence_id"],
+                "non-local-release-evidence-template",
+            )
+            self.assertEqual(non_local_evidence["record_type"], "template")
+            self.assertEqual(non_local_evidence["review_status"], "template")
+            self.assertEqual(
+                non_local_evidence["public_beta_requirement_id"],
+                "external_audit_report",
+            )
+            self.assertEqual(
+                non_local_evidence["evidence"]["operator_notes"],
+                "local template only",
+            )
+            self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],
                 generator.CHECKSUM_DIGEST_STATUS,
             )
@@ -618,6 +702,39 @@ class ReleaseManifestTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 generator.ReleaseManifestError, "invalid release signature evidence"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    paths["gas_snapshot"],
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
+    def test_generator_rejects_invalid_non_local_release_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            evidence_path = (
+                paths["non_local_evidence_dir"]
+                / "non-local-release-evidence-template.json"
+            )
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            evidence["public_beta_requirement_id"] = "not_a_real_requirement"
+            write_json(evidence_path, evidence)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError, "invalid non-local release evidence"
             ):
                 generator.build_manifest(
                     root,

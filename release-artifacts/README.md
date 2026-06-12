@@ -17,6 +17,7 @@ python scripts/generate_address_books.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
@@ -47,6 +48,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
@@ -99,6 +102,12 @@ local baseline until fork/testnet/live evidence, audit evidence, production
 signatures, signed tags, explorer verification, and address evidence are
 retained or explicitly risk-accepted.
 
+`evidence/non-local-release-evidence-template.json` is the checked no-secret
+template for future reviewed non-local release evidence metadata. Its schema
+lives at `schema/non-local-release-evidence.schema.json`, and the template
+points at `evidence/non-local-template-retained-artifact.txt` to prove retained
+artifact hash validation without claiming public-beta or production readiness.
+
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/public-beta-evidence.md`, `docs/non-local-release-evidence.md`, and
 `docs/release-readiness.md` are the auditor-facing architecture,
@@ -112,7 +121,8 @@ outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
 baseline, deployment manifest config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, artifact
-schemas, public-beta evidence status, and release manifest. Treat
+schemas, non-local release evidence metadata, public-beta evidence status, and
+release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.
@@ -154,6 +164,7 @@ python scripts/generate_dependency_artifact_manifest.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py

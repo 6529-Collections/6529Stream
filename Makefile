@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test gas-snapshot-check size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check release-checksums-check changelog-check deploy-rehearsal
+check: build test gas-snapshot-check size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
@@ -117,6 +117,10 @@ release-signatures-check:
 	$(PYTHON) scripts/test_release_signatures.py
 	$(PYTHON) scripts/check_release_signatures.py
 
+non-local-release-evidence-check:
+	$(PYTHON) scripts/test_non_local_release_evidence.py
+	$(PYTHON) scripts/check_non_local_release_evidence.py
+
 public-beta-evidence-check:
 	$(PYTHON) scripts/test_public_beta_evidence.py
 	$(PYTHON) scripts/check_public_beta_evidence.py
@@ -133,10 +137,10 @@ release-readiness-check:
 	$(PYTHON) scripts/test_release_readiness.py
 	$(PYTHON) scripts/check_release_readiness.py
 
-release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check
+release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check
+release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check public-beta-evidence-check architecture-threat-model-check audit-package-check release-readiness-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 

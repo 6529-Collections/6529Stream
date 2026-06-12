@@ -68,6 +68,32 @@ Prefer JSON for machine-readable evidence and Markdown for human reports. If a
 Markdown report references generated JSON artifacts, include the JSON path and
 digest in the report.
 
+## Machine-Readable Metadata
+
+Use
+[`release-artifacts/evidence/non-local-release-evidence-template.json`](../release-artifacts/evidence/non-local-release-evidence-template.json)
+as the starting point for reviewed non-local evidence metadata. The schema is
+[`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),
+and the retained template artifact is
+[`release-artifacts/evidence/non-local-template-retained-artifact.txt`](../release-artifacts/evidence/non-local-template-retained-artifact.txt).
+
+The committed template is not completion evidence and does not unblock public
+beta or production release. Real non-local evidence should copy the template
+shape, replace every template value with reviewed no-secret metadata, point
+`retained_path` at the retained public artifact, and update `sha256` to match
+that file.
+
+Validate metadata with:
+
+```sh
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
+```
+
+The checker validates the public-beta requirement ID, environment, chain ID
+policy, retained artifact path, SHA-256 digest, review status, source metadata,
+and no-secret boundary before release manifest and checksum generation.
+
 ## Public-Beta Requirement Mapping
 
 When evidence is retained, update the matching requirement row in
@@ -120,6 +146,8 @@ The required validation sequence is:
 
 ```sh
 python scripts/check_public_beta_evidence.py
+python scripts/test_non_local_release_evidence.py
+python scripts/check_non_local_release_evidence.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py

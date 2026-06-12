@@ -104,6 +104,10 @@ the release policy in `docs/release-policy.md`.
   has required retained fields, no-secret redaction rules, reviewer
   expectations, and public-beta requirement mapping before status rows are
   marked complete.
+- Added a non-local release evidence metadata schema, checked template,
+  retained placeholder artifact, checker, and local/CI gate so future reviewed
+  non-local evidence can be machine-validated before release manifest and
+  checksum generation.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

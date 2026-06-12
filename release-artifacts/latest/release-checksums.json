@@ -7,6 +7,7 @@
       "release-artifacts/contracts.json",
       "release-artifacts/dependencies",
       "release-artifacts/schema",
+      "release-artifacts/evidence",
       "release-artifacts/signatures",
       "release-artifacts/latest",
       "release-artifacts/baselines",
@@ -23,7 +24,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:a3d3f3036bf5e45a16fa0e547c3a8ed97f4081f7dd873b7be783cc44565fa962"
+    "sha256": "sha256:0baf73807d3fba71b7b0c2f5bda1ef793811e4a37b7e82d4714df235dace3d27"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -126,6 +127,16 @@
       "size_bytes": 48
     },
     {
+      "path": "release-artifacts/evidence/non-local-release-evidence-template.json",
+      "sha256": "sha256:577180f7815fe7ad8fc4d0ddd364824b4dcf7a1cb3c5ff4920f4e282d12fdec7",
+      "size_bytes": 1685
+    },
+    {
+      "path": "release-artifacts/evidence/non-local-template-retained-artifact.txt",
+      "sha256": "sha256:62a31be301ecadcfa41b110289b992bf28b69990feaacf7dd823fd56d60eddbd",
+      "size_bytes": 285
+    },
+    {
       "path": "release-artifacts/latest/abi-checksums.json",
       "sha256": "sha256:2290e589f3970441cf4698e457bf6784e399cfea5dd458f1e633eb92005f18f7",
       "size_bytes": 11216
@@ -157,13 +168,18 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:a4ef179c04f5db65cc8375a7bfcc84351bccdbf839faaad67b12e17581519abd",
-      "size_bytes": 20792
+      "sha256": "sha256:92c39444ad39badde397deb0fb54e332cbfd6ec7284b208293b11a675c75edac",
+      "size_bytes": 23500
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
       "sha256": "sha256:374fce4bc46746d61cbae487cf6cb549cb40b5db5a95951568ed4455669af33a",
       "size_bytes": 48684
+    },
+    {
+      "path": "release-artifacts/schema/non-local-release-evidence.schema.json",
+      "sha256": "sha256:5a5aede0ab1b7bee194e495bdac98e0f37b814879be62a72ce819be07da82c1a",
+      "size_bytes": 3429
     },
     {
       "path": "release-artifacts/schema/public-beta-evidence.schema.json",
