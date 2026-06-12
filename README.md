@@ -14,11 +14,14 @@ release-artifact catalog checks, ABI compatibility baseline checks, and
 deterministic local deployment manifest/address-book/checksum-bundle checks,
 plus retained source-verification inputs, a machine-readable release manifest,
 architecture/threat-model checks, an audit-package check, a release-readiness
-dashboard check, and changelog gate for release-impacting changes.
+dashboard check, a public-beta evidence status check, and changelog gate for
+release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
-Known P0 blockers, the execution roadmap, and the release-readiness dashboard
-are tracked in [`ops/ROADMAP.md`](ops/ROADMAP.md) and
-[`docs/release-readiness.md`](docs/release-readiness.md).
+Known P0 blockers, the execution roadmap, the release-readiness dashboard, and
+the public-beta evidence status are tracked in
+[`ops/ROADMAP.md`](ops/ROADMAP.md),
+[`docs/release-readiness.md`](docs/release-readiness.md), and
+[`docs/public-beta-evidence.md`](docs/public-beta-evidence.md).
 
 ## Drop Flow
 
@@ -59,6 +62,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_public_beta_evidence.py
+python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -110,8 +115,8 @@ The release-manifest step verifies a deterministic top-level release manifest
 under `release-artifacts/latest/release-manifest.json`. The manifest ties the
 release-artifact catalog, ABI compatibility baseline, deployment manifests,
 address books, governance docs including the architecture map, threat model,
-and audit package, and release-ceremony status together for integrators and
-maintainers.
+and audit package, public-beta evidence status, and release-ceremony status
+together for integrators and maintainers.
 
 The audit-package step verifies the auditor-facing index under
 [`docs/audit-package.md`](docs/audit-package.md). The package links scope,
@@ -123,6 +128,12 @@ The release-readiness step verifies the Gate G dashboard under
 separates passing local evidence from missing fork/testnet/live evidence,
 production signatures, signed tags, verified addresses, explorer verification,
 external audit, and post-audit remediation blockers.
+
+The public-beta evidence step verifies
+[`release-artifacts/latest/public-beta-evidence.json`](release-artifacts/latest/public-beta-evidence.json)
+against [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md), keeping
+public beta and production release blocked until retained non-local evidence or
+explicit risk acceptance exists.
 
 The release-checksum step verifies the signable checksum bundle under
 `release-artifacts/latest/` against the committed release artifacts,
@@ -172,7 +183,7 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, release manifest, and release checksum bundle |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, public-beta evidence status, release manifest, and release checksum bundle |
 | `docs/` | Project, security, ADR, and operational docs |
 | `ops/` | Roadmap and execution state |
 
@@ -187,6 +198,7 @@ Current pinned versions:
 - [`docs/threat-model.md`](docs/threat-model.md)
 - [`docs/audit-package.md`](docs/audit-package.md)
 - [`docs/release-readiness.md`](docs/release-readiness.md)
+- [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)
 - [`docs/tooling.md`](docs/tooling.md)

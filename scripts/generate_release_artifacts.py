@@ -22,6 +22,7 @@ MANIFEST_SCHEMA = "6529stream.release-artifact-manifest.v1"
 GENERATOR_VERSION = "1"
 DOWNSTREAM_RELEASE_FILES = {
     "dependency-artifact-manifest.json",
+    "public-beta-evidence.json",
     "SHA256SUMS",
     "release-checksums.json",
     "release-manifest.json",

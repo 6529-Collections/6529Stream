@@ -17,6 +17,7 @@ python scripts/generate_address_books.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -46,6 +47,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_public_beta_evidence.py
+python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -83,25 +86,34 @@ Production dependency version changes must follow
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
 hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
-schema hashes, governance doc hashes including `docs/architecture.md`,
+public-beta evidence status, schema hashes, governance doc hashes including `docs/architecture.md`,
 `docs/threat-model.md`, `docs/audit-package.md`, and
-`docs/release-readiness.md`, and the release-ceremony items that are not yet
-available for this pre-audit local baseline.
+`docs/public-beta-evidence.md`, and `docs/release-readiness.md`, and the
+release-ceremony items that are not yet available for this pre-audit local
+baseline.
 
-`docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`, and
-`docs/release-readiness.md` are the auditor-facing architecture,
-trust-boundary, package, and Gate G readiness indexes for the current local
-baseline. They are validated before release manifest generation, and the
-release manifest records their hashes as governance documents.
+`latest/public-beta-evidence.json` is the no-secret status manifest for
+public-beta and production-release evidence. It stays blocked in the committed
+local baseline until fork/testnet/live evidence, audit evidence, production
+signatures, signed tags, explorer verification, and address evidence are
+retained or explicitly risk-accepted.
+
+`docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
+`docs/public-beta-evidence.md`, and `docs/release-readiness.md` are the
+auditor-facing architecture, trust-boundary, package, evidence-status, and
+Gate G readiness indexes for the current local baseline. They are validated
+before release manifest generation, and the release manifest records their
+hashes as governance documents.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
 baseline, deployment manifest config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, artifact
-schemas, and release manifest. Treat `SHA256SUMS` as the signable checksum file
-for a release; the committed local signature evidence records that production
-detached signatures and signed tags remain a maintainer release-ceremony step.
+schemas, public-beta evidence status, and release manifest. Treat
+`SHA256SUMS` as the signable checksum file for a release; the committed local
+signature evidence records that production detached signatures and signed tags
+remain a maintainer release-ceremony step.
 
 Because the checksum bundle covers `latest/release-manifest.json`, the release
 manifest cannot also embed the final checksum-bundle digests without creating a
@@ -140,6 +152,7 @@ python scripts/generate_dependency_artifact_manifest.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py

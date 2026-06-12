@@ -54,7 +54,7 @@ The dashboard covers public beta and production release readiness.
 
 Release manifest, checksum bundle, source verification inputs, ceremony evidence,
 randomizer operations evidence, release-signature evidence, Slither baseline,
-test matrix, and ADR index evidence are summarized.
+public-beta evidence status, test matrix, and ADR index evidence are summarized.
 
 ## Local Evidence Already Passing
 

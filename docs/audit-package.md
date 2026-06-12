@@ -45,6 +45,7 @@ Explicitly out of scope for this package:
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
+| Public-beta evidence status | [`docs/public-beta-evidence.md`](public-beta-evidence.md) |
 | Gated execution roadmap | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 | Autonomous execution state | [`ops/AUTONOMOUS_RUN.md`](../ops/AUTONOMOUS_RUN.md) |
 | Contributor workflow | [`CONTRIBUTING.md`](../CONTRIBUTING.md) |
@@ -77,6 +78,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/deployment.md`](deployment.md)
 - [`docs/release-policy.md`](release-policy.md)
 - [`docs/release-signatures.md`](release-signatures.md)
+- [`docs/public-beta-evidence.md`](public-beta-evidence.md)
 - [`docs/release-readiness.md`](release-readiness.md)
 
 ## Invariants And Test Evidence
@@ -131,11 +133,17 @@ Local deployment and release evidence:
 - [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json)
   records local placeholder signature evidence and the self-referential
   manifest/checksum boundary.
+- [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
+  records the no-secret public-beta evidence status and keeps public beta and
+  production release blocked until non-local evidence is retained.
+- [`release-artifacts/schema/public-beta-evidence.schema.json`](../release-artifacts/schema/public-beta-evidence.schema.json)
+  defines the retained status format.
 
 The release manifest includes this audit package as a governance document. The
 release manifest also includes the architecture map and threat model as
-governance documents. The checksum bundle covers the release manifest, so
-changes to the audit package, architecture map, or threat model must refresh
+governance documents, and it summarizes the public-beta evidence status. The
+checksum bundle covers the release manifest, so changes to the audit package,
+architecture map, threat model, or public-beta evidence status must refresh
 release evidence before a release-oriented PR can pass.
 
 ## Known Blockers And Accepted Risks
@@ -146,7 +154,9 @@ Known unresolved blockers are tracked in
 include fork/testnet/live deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
 signatures, non-local randomizer operations evidence, non-local metadata browser
-evidence, and external audit completion.
+evidence, and external audit completion. The machine-readable status for these
+categories lives in
+[`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 
 Accepted local-baseline dispositions are separate from unresolved production
 blockers:
@@ -185,6 +195,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_public_beta_evidence.py
+python scripts/check_public_beta_evidence.py
 ```
 
 Run the release evidence checks that include this package:
@@ -230,6 +242,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_public_beta_evidence.py
+python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check

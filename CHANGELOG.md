@@ -95,6 +95,10 @@ the release policy in `docs/release-policy.md`.
   evidence, public-beta blockers, production release blockers, required
   evidence links, and release-readiness commands remain visible before release
   manifest and checksum generation.
+- Added a public-beta evidence status manifest, schema, and local/CI checker so
+  fork/testnet/live, external audit, signature, signed tag, address,
+  broadcast-retention, explorer-verification, and post-audit blockers stay
+  machine-checkable before any public-beta or production release claim.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

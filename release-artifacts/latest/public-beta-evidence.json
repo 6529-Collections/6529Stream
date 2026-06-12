@@ -1,0 +1,188 @@
+{
+  "schema_version": "6529stream.public-beta-evidence.v1",
+  "release_version": "v0.1.0-local",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "local"
+  },
+  "status": {
+    "public_beta": "blocked",
+    "production_release": "blocked"
+  },
+  "requirements": [
+    {
+      "id": "external_audit_report",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "A completed external audit report and issue-linked remediation status are not yet retained."
+    },
+    {
+      "id": "fork_deployment_rehearsal",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "A fork deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained."
+    },
+    {
+      "id": "testnet_deployment_rehearsal",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained."
+    },
+    {
+      "id": "fork_testnet_metadata_browser_evidence",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained."
+    },
+    {
+      "id": "fork_testnet_ceremony_evidence",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Fork or testnet deployment ceremony evidence is not yet retained."
+    },
+    {
+      "id": "fork_testnet_randomizer_operations_evidence",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Fork or testnet randomizer provider, funding, callback, reserve, and migration evidence is not yet retained."
+    },
+    {
+      "id": "verified_deployed_addresses",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Verified deployed addresses for non-local environments are not yet retained."
+    },
+    {
+      "id": "explorer_verification_status",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Explorer verification submissions or verified-source links for non-local deployments are not yet retained."
+    },
+    {
+      "id": "production_signatures",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Production detached signatures over the checksum bundle are not yet retained."
+    },
+    {
+      "id": "signed_git_tag",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "A signed Git tag and verification output for the release commit are not yet retained."
+    },
+    {
+      "id": "production_address_books",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Production address books generated from live deployment manifests are not yet retained."
+    },
+    {
+      "id": "production_broadcast_retention",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Sanitized production broadcast outputs and derived manifests are not yet retained."
+    },
+    {
+      "id": "live_deployment_manifest",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Live deployment manifests generated from production inputs are not yet retained."
+    },
+    {
+      "id": "live_ceremony_evidence",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Live admin, signer, metadata, auction, and emergency ceremony evidence is not yet retained."
+    },
+    {
+      "id": "live_randomizer_operations_evidence",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained."
+    },
+    {
+      "id": "live_explorer_verification",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Live explorer verification outputs and verified contract-address links are not yet retained."
+    },
+    {
+      "id": "post_audit_remediation",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained."
+    }
+  ],
+  "retained_artifacts": [
+    {
+      "category": "public_beta_evidence_schema",
+      "path": "release-artifacts/schema/public-beta-evidence.schema.json",
+      "sha256": "sha256:cec024757bfe8967a27106ee8c4739c6f51ff8b0ec6a2fb564939441fd9ac9bb"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "unreleased_drop_payload"
+    ]
+  },
+  "operator_notes": "This committed baseline is intentionally blocked. It tracks the evidence categories required before public beta or production release without storing private RPC URLs, credentials, signing material, or unreleased drop payloads."
+}

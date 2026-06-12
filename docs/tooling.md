@@ -45,6 +45,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_public_beta_evidence.py
+python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -148,10 +150,17 @@ separates passing local evidence from missing fork/testnet/live evidence,
 production signatures, signed Git tags, verified deployed addresses, explorer
 verification, external audit, and post-audit remediation blockers.
 
+The public-beta evidence step validates
+[`public-beta-evidence.md`](public-beta-evidence.md) and
+`release-artifacts/latest/public-beta-evidence.json`, the no-secret status
+manifest that keeps public beta and production release blocked until retained
+non-local evidence or explicit risk acceptance exists.
+
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
-artifact, deployment manifest, address-book, schema, ceremony-evidence, and release-manifest
-outputs. This gives maintainers a deterministic, signable checksum bundle. The
+artifact, public-beta evidence, deployment manifest, address-book, schema,
+ceremony-evidence, and release-manifest outputs. This gives maintainers a
+deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
 `release-manifest.json`; embedding the final bundle digest in that covered file
@@ -210,6 +219,7 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -233,6 +243,7 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -271,13 +282,13 @@ or duplicate contract addresses, missing contract metadata, or mismatch against
 the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
+`release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,
 `deployments/address-books/`, `deployments/ceremony-evidence/`, and
-`deployments/schema/`, excluding its own
-generated checksum files to avoid self-referential hashes. Refresh the release
-manifest before refreshing the checksum bundle after changing any covered
-artifact.
+`deployments/schema/`, excluding its own generated checksum files to avoid
+self-referential hashes. Refresh the release manifest before refreshing the
+checksum bundle after changing any covered artifact.
 
 ## Non-Gating Diagnostics
 

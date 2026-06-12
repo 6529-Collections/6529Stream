@@ -71,6 +71,8 @@ jobs:
             scripts/test_randomizer_operations.py \
             scripts/check_release_signatures.py \
             scripts/test_release_signatures.py \
+            scripts/check_public_beta_evidence.py \
+            scripts/test_public_beta_evidence.py \
             scripts/check_architecture_threat_model.py \
             scripts/test_architecture_threat_model.py \
             scripts/check_audit_package.py \
@@ -226,6 +228,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_signatures.py 2>&1 | tee ci-logs/release-signature-tests.log
           python3 scripts/check_release_signatures.py 2>&1 | tee ci-logs/release-signature-check.log
+
+      - name: Public beta evidence
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_public_beta_evidence.py 2>&1 | tee ci-logs/public-beta-evidence-tests.log
+          python3 scripts/check_public_beta_evidence.py 2>&1 | tee ci-logs/public-beta-evidence-check.log
 
       - name: Architecture and threat model
         shell: bash
