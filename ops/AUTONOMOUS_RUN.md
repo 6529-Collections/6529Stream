@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/drop-authorization-signing-examples` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/178` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/177` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
+| Active PR branch | `codex/drop-authorization-payload-generator` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/180` |
+| Active PR | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:14 UTC` |
+| Last updated | `2026-06-12 23:26 UTC` |
 
 ## Packaging Notes
 
@@ -147,13 +147,65 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | Merged in PR #174 |
 | 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | Merged in PR #175 |
 | 91 | Reconcile roadmap after incident response runbook merge | Gate G support | Implement issue #176 by marking PR #175 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and selecting the next signing examples target | Merged in PR #178 |
-| 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Active on `codex/drop-authorization-signing-examples` |
+| 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Merged in PR #179 |
+| 93 | Add no-secret drop authorization payload generator tooling | Gate G/Gate C support | Implement issue #180 by adding a production-safe unsigned typed-data generator, derived-hash output, tests, docs links, and maintained local/CI gates without private-key handling | Active on `codex/drop-authorization-payload-generator` |
 
 ## Current PR Worklog
 
+### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
+
+Status: active local implementation; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/180`.
+PR: `TBD`.
+Branch: `codex/drop-authorization-payload-generator`.
+Branch started from PR #179 squash merge commit
+`3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
+
+Prior queue transition:
+
+- Queue Item 92 merged in PR #179 as squash commit
+  `3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
+- PR #179 CodeRabbit review completed after one actionable comment was fixed;
+  CodeRabbit resolved the thread and status was success on the latest head.
+- PR #179 GitHub Actions CI run `27448523471` passed on head
+  `99bf1f3044d0760da07903701419075a463caaf6`.
+- Issue #177 closed completed at merge.
+- Issue #180 created as the next local tooling slice because no open roadmap
+  issues remained.
+
+Goal:
+
+- Add a no-secret CLI or equivalent script that generates canonical unsigned
+  EIP-712 drop authorization payload JSON for fixed-price and auction drops.
+- Reuse the accepted domain/message field order and derived-hash semantics from
+  `scripts/check_drop_authorization_fixtures.py`.
+- Emit or write `dropId`, `tokenDataHash`, `domainSeparator`, `structHash`, and
+  `digest` for downstream signer comparison without accepting private keys.
+- Add focused tests for generation, sale-mode constraints, zero-address
+  rejection, stale/missing fields, and no-secret policy.
+- Link the tool from signing, tooling, known-blocker, release-readiness, audit,
+  and roadmap docs as appropriate.
+- Do not change Solidity behavior or claim production signer custody/readiness.
+
+Validation target:
+
+- Focused generator tests and existing drop-authorization fixture tests.
+- Updated docs/checker gates if the new tool becomes part of maintained release
+  evidence.
+- `git diff --check`.
+- `make check` before PR unless an implementation-specific blocker is recorded
+  here.
+
+Remote validation:
+
+- PR not opened yet.
+- GitHub Actions and CodeRabbit pending until issue #180 is implemented,
+  committed, pushed, and opened as a PR.
+
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
-Status: CodeRabbit fix locally validated; fix commit pending.
+Status: merged in PR #179 as
+`3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`; issue #177 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/177`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/179`.
 Branch: `codex/drop-authorization-signing-examples`.
@@ -163,6 +215,10 @@ Implementation head at PR open:
 `0e3b1d10e98cdb439cd04e9ca78fd34175760887`.
 Current head after run-state update:
 `c26c05ad52174ec343794c78bd281483cbc19404`.
+Final head:
+`99bf1f3044d0760da07903701419075a463caaf6`.
+Squash merge commit:
+`3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
 
 Prior queue transition:
 
@@ -217,6 +273,9 @@ Remote validation:
   - `python scripts\test_drop_authorization_fixtures.py`.
   - `python scripts\check_drop_authorization_fixtures.py`.
   - `git diff --check`.
+- GitHub Actions run `27448523471` passed on the final head.
+- CodeRabbit marked the actionable thread addressed by commit `99bf1f3` and
+  resolved it.
 
 ### PR candidate: Add protocol incident response runbooks (Queue Item 90)
 
