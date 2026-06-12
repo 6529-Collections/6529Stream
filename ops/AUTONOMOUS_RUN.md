@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/core-utf8-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/126` |
-| Active PR | TBD |
+| Active PR branch | `codex/metadata-browser-sandbox-checks` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/127` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/129` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 23:08 UTC` |
+| Last updated | `2026-06-12 00:48 UTC` |
 
 ## Packaging Notes
 
@@ -127,9 +127,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Browser execution metadata sandbox checks (Queue Item 67)
 
-Status: PR #129 open; local implementation passed focused script tests, live
-Playwright/Chromium browser sandbox check, full `make check`, and Windows
-`scripts\check.ps1`. Awaiting GitHub CI and CodeRabbit.
+Status: PR #129 open; CodeRabbit review fixes are applied locally. The expanded
+browser sandbox unit suite, live Playwright/Chromium sandbox check,
+`make metadata-fixtures-check`, release checksum drift check, `git diff --check`,
+and full `make check` pass. Awaiting pushed GitHub CI and CodeRabbit re-review.
 Branch: `codex/metadata-browser-sandbox-checks`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/129`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/128`.
@@ -208,6 +209,18 @@ Focused local validation:
   Windows scripts.
 - `make check` passes.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passes.
+
+CodeRabbit review response:
+
+- Updated the durable run-state timestamp and active-PR evidence.
+- Added docstrings across the browser sandbox checker and unit tests to satisfy
+  the repository docstring coverage gate.
+- Expanded `scripts/test_metadata_browser_sandbox.py` to cover console errors,
+  unloaded dependency stubs, wrong script counts, wrong hash/token bootstrap
+  values, wrong token-data tuples, and missing draw functions.
+- Revalidated with `python -m py_compile`, the expanded 16-test browser sandbox
+  unit suite, the live browser sandbox check, `make metadata-fixtures-check`,
+  `make release-checksums-check`, `git diff --check`, and full `make check`.
 
 ### PR #127: Core UTF-8 enforcement headroom (Queue Item 66)
 
@@ -5924,6 +5937,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 00:48 | Address CodeRabbit PR #129 review | Updated active PR run-state evidence, added docstrings for the new browser sandbox scripts, expanded sandbox validation unit coverage to 16 tests, and reran `py_compile`, focused tests, live browser check, metadata fixture gate, release checksum drift check, `git diff --check`, and full `make check` |
 | 2026-06-12 00:32 | Open PR #129 for Queue Item 67 | Pushed `codex/metadata-browser-sandbox-checks`, opened https://github.com/6529-Collections/6529Stream/pull/129 against `main`, linked `Closes #128`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-12 00:30 | Validate Queue Item 67 locally | Full `make check`, Windows `scripts\check.ps1`, metadata fixture/browser gates, release checksum checks, Bash/PowerShell syntax checks, py-compile checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
 | 2026-06-12 00:18 | Implement Queue Item 67 local draft | Added pinned Playwright/Chromium browser sandbox tooling for the committed final metadata fixture, wired local/CI gates, updated docs/roadmap/state, and confirmed focused script tests plus the live browser check pass locally |

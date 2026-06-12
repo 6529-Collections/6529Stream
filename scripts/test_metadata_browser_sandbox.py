@@ -35,6 +35,8 @@ def passing_result(
     parent_access_blocked: bool = True,
     parent_access_error_name: str | None = "SecurityError",
 ) -> object:
+    """Construct a valid sandbox result with optional field overrides."""
+
     return sandbox_checker.SandboxResult(
         expected_script_requests=expected_script_requests,
         unexpected_requests=unexpected_requests,
@@ -55,7 +57,11 @@ def passing_result(
 
 
 class MetadataBrowserSandboxTests(unittest.TestCase):
+    """Unit tests for the metadata browser sandbox checker."""
+
     def test_current_repository_fixture_loads_expected_dependency(self) -> None:
+        """The committed fixture exposes the expected data URI and dependency URL."""
+
         repo_root = Path(__file__).resolve().parents[1]
         fixture = sandbox_checker.load_final_animation_fixture(
             repo_root / "test" / "fixtures" / "metadata"
@@ -66,6 +72,8 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
         self.assertEqual(fixture.external_script_url, "https://cdn.example/script.js")
 
     def test_harness_uses_script_only_sandbox(self) -> None:
+        """The parent harness enables scripts without same-origin parent access."""
+
         document = sandbox_checker.build_harness_document(
             "data:text/html;base64,PGh0bWw+PC9odG1sPg=="
         )
@@ -75,12 +83,16 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
         self.assertIn('id="metadata-frame"', document)
 
     def test_accepts_expected_browser_snapshot(self) -> None:
+        """A valid browser snapshot satisfies the sandbox result policy."""
+
         sandbox_checker.validate_sandbox_result(
             passing_result(),
             expected_external_script_url="https://cdn.example/script.js",
         )
 
     def test_rejects_duplicate_expected_dependency_requests(self) -> None:
+        """The expected external dependency must be requested exactly once."""
+
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "exactly one"):
             sandbox_checker.validate_sandbox_result(
                 passing_result(
@@ -93,6 +105,8 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
             )
 
     def test_rejects_unexpected_outbound_request(self) -> None:
+        """Unexpected HTTP(S) requests fail the sandbox policy."""
+
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "unexpected outbound"):
             sandbox_checker.validate_sandbox_result(
                 passing_result(unexpected_requests=("https://tracker.example/pixel",)),
@@ -100,20 +114,89 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
             )
 
     def test_rejects_page_error(self) -> None:
+        """Browser page errors fail the sandbox policy."""
+
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "page errors"):
             sandbox_checker.validate_sandbox_result(
                 passing_result(page_errors=("ReferenceError: x is not defined",)),
                 expected_external_script_url="https://cdn.example/script.js",
             )
 
+    def test_rejects_console_error(self) -> None:
+        """Browser console errors fail the sandbox policy."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "console errors"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(console_errors=("error: bad draw",)),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
+    def test_rejects_unloaded_dependency_stub(self) -> None:
+        """The deterministic dependency stub must execute inside the frame."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "dependency stub"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(dependency_loaded=False),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
+    def test_rejects_wrong_script_count(self) -> None:
+        """The browser frame must contain the expected two-script wrapper."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "two scripts"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(script_count=3),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
+    def test_rejects_wrong_hash_bootstrap_value(self) -> None:
+        """The committed final hash bootstrap value is locked by the sandbox check."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "hash"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(hash_value="0x02"),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
     def test_rejects_wrong_bootstrap_value(self) -> None:
+        """The committed tokenId bootstrap value is locked by the sandbox check."""
+
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "tokenId"):
             sandbox_checker.validate_sandbox_result(
                 passing_result(token_id=1),
                 expected_external_script_url="https://cdn.example/script.js",
             )
 
+    def test_rejects_wrong_token_data_raw_bootstrap_value(self) -> None:
+        """The raw token data bootstrap string is locked by the sandbox check."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "tokenDataRaw"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(token_data_raw="4,5,6"),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
+    def test_rejects_wrong_token_data_values(self) -> None:
+        """The parsed tokenData array is locked by the sandbox check."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "tokenData"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(token_data_values=(1, 2)),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
+    def test_rejects_missing_draw_function(self) -> None:
+        """The generative draw bootstrap function must be present."""
+
+        with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "draw"):
+            sandbox_checker.validate_sandbox_result(
+                passing_result(draw_is_function=False),
+                expected_external_script_url="https://cdn.example/script.js",
+            )
+
     def test_rejects_missing_parent_sandbox_isolation(self) -> None:
+        """The sandboxed frame must not be able to read the parent document."""
+
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "parent document"):
             sandbox_checker.validate_sandbox_result(
                 passing_result(parent_access_blocked=False, parent_access_error_name=None),
@@ -121,6 +204,8 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
             )
 
     def test_rejects_wrong_parent_access_error(self) -> None:
+        """Parent-document access must fail with the expected browser security error."""
+
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "unexpected error"):
             sandbox_checker.validate_sandbox_result(
                 passing_result(parent_access_error_name="TypeError"),

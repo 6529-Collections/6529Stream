@@ -38,6 +38,8 @@ class BrowserSandboxError(ValueError):
 
 @dataclass(frozen=True)
 class AnimationFixture:
+    """Decoded final animation fixture details needed by the browser harness."""
+
     animation_url: str
     animation_html: str
     external_script_url: str
@@ -45,6 +47,8 @@ class AnimationFixture:
 
 @dataclass(frozen=True)
 class ExpectedBootstrap:
+    """Expected top-level animation bootstrap values for the committed fixture."""
+
     hash_value: str
     token_id: int
     token_data_raw: str
@@ -53,6 +57,8 @@ class ExpectedBootstrap:
 
 @dataclass(frozen=True)
 class SandboxResult:
+    """Observed browser execution snapshot for the sandboxed metadata frame."""
+
     expected_script_requests: tuple[str, ...]
     unexpected_requests: tuple[str, ...]
     page_errors: tuple[str, ...]
@@ -79,6 +85,8 @@ DEFAULT_EXPECTED_BOOTSTRAP = ExpectedBootstrap(
 
 
 def load_final_animation_fixture(fixtures_dir: Path) -> AnimationFixture:
+    """Load, decode, and statically validate the committed final animation fixture."""
+
     final_json = fixture_checker.decode_data_uri(
         fixture_checker.read_fixture(fixtures_dir, fixture_checker.ONCHAIN_FINAL_FIXTURE),
         fixture_checker.JSON_DATA_URI_PREFIX,
@@ -113,6 +121,8 @@ def load_final_animation_fixture(fixtures_dir: Path) -> AnimationFixture:
 
 
 def build_harness_document(animation_url: str) -> str:
+    """Build a minimal parent page that executes the animation in a sandboxed iframe."""
+
     escaped_animation_url = html_lib.escape(animation_url, quote=True)
     return (
         "<!doctype html><html><head><meta charset=\"utf-8\"></head><body>"
@@ -122,6 +132,8 @@ def build_harness_document(animation_url: str) -> str:
 
 
 def run_browser_sandbox(fixture: AnimationFixture, *, timeout_ms: int, headed: bool) -> SandboxResult:
+    """Execute the animation fixture in Chromium and return the observed sandbox state."""
+
     try:
         from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
         from playwright.sync_api import sync_playwright
@@ -269,6 +281,8 @@ def validate_sandbox_result(
     expected_external_script_url: str,
     expected_bootstrap: ExpectedBootstrap = DEFAULT_EXPECTED_BOOTSTRAP,
 ) -> None:
+    """Raise when the observed browser sandbox state violates the fixture policy."""
+
     if result.expected_script_requests != (expected_external_script_url,):
         raise BrowserSandboxError(
             "expected exactly one external dependency request to "
@@ -314,6 +328,8 @@ def validate_sandbox_result(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for the browser sandbox checker."""
+
     parser = argparse.ArgumentParser(
         description="Execute committed final metadata animation fixtures in a browser sandbox."
     )
@@ -338,6 +354,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the metadata browser sandbox check from the command line."""
+
     args = build_parser().parse_args(argv)
     try:
         fixture = load_final_animation_fixture(args.fixtures_dir)
