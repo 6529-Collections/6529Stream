@@ -75,12 +75,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 20:43 UTC` after Queue Item 88 non-local release evidence schema/template/checker/tests, release-manifest/checksum integration, docs/roadmap updates, Python compilation, Bash and PowerShell syntax checks, whitespace check, focused release evidence checks, and full `make check` |
-| OS tested | Windows local for Queue Item 88 focused checks and full `make check`; Linux CI pending for the PR |
+| Last verified | `2026-06-12 20:56 UTC` after PR #171 / Queue Item 88 non-local release evidence schema/template/checker/tests, release-manifest/checksum integration, docs/roadmap updates, Python compilation, Bash and PowerShell syntax checks, whitespace check, focused release evidence checks, full `make check`, GitHub Actions CI run `27442075849`, and CodeRabbit success |
+| OS tested | Windows local for Queue Item 88 focused checks and full `make check`; Linux GitHub Actions CI run `27442075849` for PR #171 |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | TBD for Queue Item 88 PR; last completed baseline was `27439897232` for PR #169 on head `93917b20672e25b7edb9eb56dc22e11b9b3e7ecc` |
+| CI run | `27442075849` for PR #171 on head `7050e0ea474c507126c4d2e11744e8b61fd3ab52`; CodeRabbit status was success with no actionable comments |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -598,7 +598,8 @@ later sections.
 
 - Add deployment scripts and post-deployment checklists.
 - Add runbooks for stuck auctions, failed randomness, bad Merkle roots, bad
-  metadata, failed payouts, and signer compromise.
+  metadata, failed payouts, and signer compromise. Tracked by
+  [`#173`](https://github.com/6529-Collections/6529Stream/issues/173).
 - Monitor admin changes, pending randomness, pending auctions, curator pool
   balances, and failed claims.
 - Document the trust model and accepted risks publicly.
