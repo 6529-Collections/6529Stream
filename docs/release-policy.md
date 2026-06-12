@@ -43,7 +43,8 @@ A PR is release-impacting when it changes any of these surfaces:
   deployment manifest generation/check scripts.
 - CI, `Makefile`, or local check wrappers that define the release gate.
 - Release process docs such as this file, `docs/deployment.md`,
-  `docs/tooling.md`, `SECURITY.md`, `CONTRIBUTING.md`, or the PR template.
+  `docs/release-signatures.md`, `docs/tooling.md`, `SECURITY.md`,
+  `CONTRIBUTING.md`, or the PR template.
 
 Release-impacting PRs must update `CHANGELOG.md` under `## Unreleased` with a
 non-placeholder bullet. The `scripts/check_changelog.py` gate enforces this for
@@ -136,8 +137,10 @@ Before a public release tag:
   reserve policy, retained artifacts, and redaction policy follow
   `docs/randomizer-operations.md` and pass
   `python scripts/check_randomizer_operations.py`.
+- Release signature evidence follows `docs/release-signatures.md` and passes
+  `python scripts/check_release_signatures.py`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.
-- Detached checksum signatures and signed git tags are produced once maintainer
-  signing-key policy is accepted.
+- Detached checksum signatures and signed Git tags are produced for public
+  releases once maintainer signing-key policy is accepted.

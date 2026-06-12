@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-operations-evidence` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/153` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/155` |
+| Active PR branch | `codex/release-signature-evidence` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/155` |
+| Active PR | `TBD for https://github.com/6529-Collections/6529Stream/issues/156` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 13:32 UTC` |
+| Last updated | `2026-06-12 14:01 UTC` |
 
 ## Packaging Notes
 
@@ -134,13 +134,95 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Merged in PR #149 |
 | 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Merged in PR #151 |
 | 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | Merged in PR #153 |
-| 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | In progress |
+| 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #155 |
+| 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | In progress |
 
 ## Current PR Worklog
 
+### PR candidate: Add release signature evidence baseline (Queue Item 81)
+
+Status: branch created; implementation in progress before PR.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/156`.
+PR: TBD.
+CodeRabbit request: TBD after PR opens.
+Branch: `codex/release-signature-evidence`.
+Branch started from PR #155 squash merge commit
+`a63a52f81f2dc97bd40954e36772d55ae9087e79`.
+
+Goal:
+
+- Add a machine-readable release signature evidence schema.
+- Add a local placeholder evidence bundle that records the self-referential
+  release manifest/checksum boundary without claiming production signing has
+  happened.
+- Add validator/unit tests and wire them into local, Windows, and CI gates.
+- Include release signature evidence in the generated release manifest and
+  release checksum coverage.
+- Document production expectations for detached checksum signatures, signed Git
+  tags, public signer fingerprints, verification commands, signer rotation, and
+  no-secret redaction.
+- Keep private signing keys, real production signatures, and Solidity behavior
+  out of scope.
+
+Initial candidate files:
+
+- `scripts/check_release_signatures.py`
+- `scripts/test_release_signatures.py`
+- `release-artifacts/schema/release-signature-evidence.schema.json`
+- `release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`
+- `docs/release-signatures.md`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `release-artifacts/README.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes:
+
+- Added `scripts/check_release_signatures.py` with no-secret validation,
+  self-referential release-manifest/checksum references, signer identity checks,
+  local-placeholder restrictions, production signed-output requirements, and
+  retained artifact hash checks.
+- Added `scripts/test_release_signatures.py` covering valid local evidence,
+  negative confirmation depth, secret-like values, stale retained hashes,
+  non-local placeholder rejection, signed-output verification command
+  requirements, and production signed-output requirements.
+- Added local release signature evidence under `release-artifacts/signatures/`
+  and a schema under `release-artifacts/schema/`.
+- Wired the checker into Makefile, Unix and Windows check wrappers, CI, release
+  manifest, and release checksum coverage.
+- Updated release policy, release artifact docs, status, roadmap, changelog,
+  and run-state docs.
+
+Validation:
+
+- `python scripts\test_release_signatures.py`
+- `python scripts\check_release_signatures.py`
+- `python -m py_compile scripts\check_release_signatures.py scripts\test_release_signatures.py scripts\generate_release_manifest.py scripts\test_release_manifest.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `bash -n scripts/check.sh`
+- `git diff --check` passed with the existing PowerShell line-ending warning for
+  `scripts/check.ps1`.
+- `make check`
+
 ### PR candidate: Add randomizer operations evidence bundle (Queue Item 80)
 
-Status: PR #155 open with CodeRabbit follow-up fixes prepared.
+Status: Merged in PR #155 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/154`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/155`.
 CodeRabbit requests: issue comments `4691619335` and `4691631125`.

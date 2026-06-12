@@ -1,0 +1,72 @@
+{
+  "schema_version": "6529stream.release-signature-evidence.v1",
+  "evidence_id": "anvil-release-signature-local",
+  "protocol_version": "0.1.0",
+  "release_version": "v0.1.0-local",
+  "network": {
+    "environment": "local",
+    "name": "anvil",
+    "chain_id": 31337,
+    "confirmation_depth": 0
+  },
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "local"
+  },
+  "artifacts": {
+    "release_manifest": {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "digest_status": "not_available_self_referential",
+      "reason": "The release manifest records release signature evidence, so embedding its digest here would create a hash cycle."
+    },
+    "checksum_bundle": {
+      "path": "release-artifacts/latest/SHA256SUMS",
+      "digest_status": "not_available_self_referential",
+      "reason": "The checksum bundle covers release signature evidence, so embedding its digest here would create a hash cycle."
+    }
+  },
+  "signing_identity": {
+    "status": "not_available_local",
+    "public_key_fingerprint": "not_applicable_local",
+    "key_custody": "not_applicable_local",
+    "rotation_policy": "Production releases must document signer custody, rotation, revocation, and emergency key replacement before public release."
+  },
+  "signatures": {
+    "detached_checksum_signature": {
+      "status": "not_available_local",
+      "format": "not_applicable_local",
+      "artifact_path": "not_applicable_local",
+      "verification_command": "not_applicable_local",
+      "evidence": [],
+      "notes": "Local Anvil release evidence does not include a production detached checksum signature."
+    },
+    "signed_git_tag": {
+      "status": "not_available_local",
+      "format": "not_applicable_local",
+      "artifact_path": "not_applicable_local",
+      "verification_command": "not_applicable_local",
+      "evidence": [],
+      "notes": "Local Anvil release evidence does not include a production signed Git tag."
+    }
+  },
+  "retained_artifacts": [
+    {
+      "category": "release_signature_schema",
+      "path": "release-artifacts/schema/release-signature-evidence.schema.json",
+      "sha256": "sha256:de13b77aa6de680ebefba9a56e635f76a4e8f6b1081dc5e4d724039ac6299f27"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url"
+    ]
+  },
+  "operator_notes": "This is local release-signature evidence only. Fork, testnet, and production releases must retain public signature artifacts, verification output, signer identity, and rotation evidence without private signing material."
+}

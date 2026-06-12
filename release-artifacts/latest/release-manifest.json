@@ -21,7 +21,8 @@
     "address_book_dir": "deployments/address-books",
     "deployment_schema_dir": "deployments/schema",
     "ceremony_evidence_dir": "deployments/ceremony-evidence",
-    "randomizer_operations_dir": "deployments/randomizer-operations"
+    "randomizer_operations_dir": "deployments/randomizer-operations",
+    "release_signatures_dir": "release-artifacts/signatures"
   },
   "release_artifacts": {
     "contract_config": {
@@ -80,6 +81,31 @@
       "size_bytes": 48684,
       "schema_version": "6529stream.source-verification-inputs.v1"
     },
+    "release_signature_evidence": [
+      {
+        "path": "release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json",
+        "sha256": "sha256:0a8e8632f12613fdbe980297ea39cd3e2b2365044c08ed542745df8cc626e6d8",
+        "size_bytes": 2771,
+        "schema_version": "6529stream.release-signature-evidence.v1",
+        "evidence_id": "anvil-release-signature-local",
+        "protocol_version": "0.1.0",
+        "release_version": "v0.1.0-local",
+        "network": {
+          "environment": "local",
+          "name": "anvil",
+          "chain_id": 31337
+        },
+        "signing_identity_status": "not_available_local",
+        "detached_checksum_signature": {
+          "status": "not_available_local",
+          "format": "not_applicable_local"
+        },
+        "signed_git_tag": {
+          "status": "not_available_local",
+          "format": "not_applicable_local"
+        }
+      }
+    ],
     "abi_compatibility_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
       "sha256": "sha256:44e97807c70ed606edb985cca85eace493a893a62c345212c18e7834ba6c08be",
@@ -304,14 +330,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e6f114e0e6d56d4ad37eac4a456cb1ca3c8d9666412f77e4e9f62ff5734efb53",
-      "size_bytes": 11161
+      "sha256": "sha256:d61f90d27419c8149dc0a52c3c89ecd3ab3057d1dcf98a0a9f0d3e4d0311ca18",
+      "size_bytes": 11396
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:a02f42eb804c0409a2a5d90f9ce8ed773245329657de6960d8a616865d7684b3",
-        "size_bytes": 6402
+        "sha256": "sha256:0b4628913a02c28837f6a42ea3865b92ddf15e91861d7ed8f15ae393ec64016f",
+        "size_bytes": 6579
       },
       {
         "path": "docs/deployment.md",
@@ -329,14 +355,19 @@
         "size_bytes": 3488
       },
       {
+        "path": "docs/release-signatures.md",
+        "sha256": "sha256:e62557cf636f7e5b643612cdc84504fdd83119da067b7447a19c8e580476bafc",
+        "size_bytes": 1268
+      },
+      {
         "path": "docs/tooling.md",
         "sha256": "sha256:990931045f234e4bad0a299961deec6a8e06f668d35e25a7a0670d055a73952b",
         "size_bytes": 12426
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:4a48e7eab135e9197edc5cbf801caf1550bf1b08b308d39db1c053cf79830b9b",
-        "size_bytes": 17527
+        "sha256": "sha256:4430d52de43eca372aa0cc7c54679311ccc4f74bbbc5f2a4ac0b77068c35e46d",
+        "size_bytes": 18040
       }
     ]
   },

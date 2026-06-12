@@ -80,6 +80,10 @@ the release policy in `docs/release-policy.md`.
 - Added a randomizer operations evidence schema, local Anvil evidence bundle,
   and local/CI checker covering provider configuration, funding status,
   lifecycle controls, reserve policy, retained artifacts, and redaction rules.
+- Added a release signature evidence schema, local placeholder bundle, and
+  local/CI checker covering detached checksum signatures, signed Git tags,
+  signer identity, retained verification artifacts, and no-secret redaction
+  rules.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

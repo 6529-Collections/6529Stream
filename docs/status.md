@@ -230,6 +230,14 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/release-checksums.json` bundle covers the current
   release artifact, dependency artifact source, broadcast fixture, deployment
   manifest, address-book, config, schema, and release-manifest files.
+- `scripts/test_release_signatures.py` and
+  `scripts/check_release_signatures.py` prove the committed no-secret local
+  release signature evidence follows
+  `release-artifacts/schema/release-signature-evidence.schema.json`, records
+  the self-referential release manifest/checksum bundle boundary, rejects
+  stale retained hashes and secret-like values, and reserves production
+  detached checksum signatures, signed Git tags, signer identity, and
+  verification output for public release ceremonies.
 - `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
   release-artifacts/baselines/v0.1.0/gas-snapshot.snap` proves the committed
   local gas snapshot still matches the focused Gate D operations for
@@ -246,7 +254,7 @@ pull-payment ledger abstraction or protocol-wide aggregation layer,
 canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
 beyond the now-triaged high/medium baseline, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,
-detached checksum signatures, signed release tags, production address books,
+production detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata

@@ -43,6 +43,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     deployment_schema_dir = root / "deployments" / "schema"
     ceremony_evidence_dir = root / "deployments" / "ceremony-evidence"
     randomizer_operations_dir = root / "deployments" / "randomizer-operations"
+    release_signatures_dir = root / "release-artifacts" / "signatures"
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
     docs = [
@@ -51,6 +52,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "tooling.md",
         root / "docs" / "status.md",
         root / "docs" / "randomizer-operations.md",
+        root / "docs" / "release-signatures.md",
     ]
 
     write_json(
@@ -205,6 +207,27 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             },
         },
     )
+    write_json(
+        release_signatures_dir / "anvil-signature-local.json",
+        {
+            "schema_version": "6529stream.release-signature-evidence.v1",
+            "evidence_id": "anvil-release-signature-local",
+            "protocol_version": "0.1.0",
+            "release_version": "v0.1.0-local",
+            "network": {"environment": "local", "name": "anvil", "chain_id": 31337},
+            "signing_identity": {"status": "not_available_local"},
+            "signatures": {
+                "detached_checksum_signature": {
+                    "status": "not_available_local",
+                    "format": "not_applicable_local",
+                },
+                "signed_git_tag": {
+                    "status": "not_available_local",
+                    "format": "not_applicable_local",
+                },
+            },
+        },
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
@@ -325,6 +348,18 @@ class ReleaseManifestTests(unittest.TestCase):
                     "funding_status"
                 ],
                 "not_applicable_local",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["release_signature_evidence"][0][
+                    "evidence_id"
+                ],
+                "anvil-release-signature-local",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["release_signature_evidence"][0][
+                    "detached_checksum_signature"
+                ]["status"],
+                "not_available_local",
             )
             self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],
