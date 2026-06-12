@@ -40,6 +40,8 @@ Explicitly out of scope for this package:
 | Purpose | Entry point |
 | --- | --- |
 | Project overview | [`README.md`](../README.md) |
+| Architecture map | [`docs/architecture.md`](architecture.md) |
+| Threat model | [`docs/threat-model.md`](threat-model.md) |
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Gated execution roadmap | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
@@ -129,8 +131,10 @@ Local deployment and release evidence:
   manifest/checksum boundary.
 
 The release manifest includes this audit package as a governance document. The
-checksum bundle covers the release manifest, so changes to the audit package
-must refresh release evidence before a release-oriented PR can pass.
+release manifest also includes the architecture map and threat model as
+governance documents. The checksum bundle covers the release manifest, so
+changes to the audit package, architecture map, or threat model must refresh
+release evidence before a release-oriented PR can pass.
 
 ## Known Blockers And Accepted Risks
 
@@ -175,6 +179,8 @@ Run the audit-package checks directly:
 ```sh
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_architecture_threat_model.py
+python scripts/check_architecture_threat_model.py
 ```
 
 Run the release evidence checks that include this package:
@@ -216,6 +222,8 @@ calls verify that those tracked files are current.
 ```sh
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_architecture_threat_model.py
+python scripts/check_architecture_threat_model.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check

@@ -238,12 +238,19 @@ The current Gate A smoke baseline proves:
   stale retained hashes and secret-like values, and reserves production
   detached checksum signatures, signed Git tags, signer identity, and
   verification output for public release ceremonies.
+- `scripts/test_architecture_threat_model.py` and
+  `scripts/check_architecture_threat_model.py` prove
+  `docs/architecture.md` and `docs/threat-model.md` retain the current
+  auditor-facing component map, role boundaries, value/custody flows, threat
+  categories, residual risks, evidence links, and pre-audit/no-production-claim
+  maturity language before the audit package and release manifest are checked.
 - `scripts/test_audit_package.py` and `scripts/check_audit_package.py` prove
   `docs/audit-package.md` remains a complete auditor-facing index over current
   maturity, scope, ADRs, invariants, Slither disposition, local deployment and
   release evidence, known blockers, accepted local-baseline dispositions, and
-  security reporting. The generated release manifest records the audit package
-  hash as a governance document before the checksum bundle is refreshed.
+  security reporting. The generated release manifest records the architecture,
+  threat model, and audit package hashes as governance documents before the
+  checksum bundle is refreshed.
 - `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
   release-artifacts/baselines/v0.1.0/gas-snapshot.snap` proves the committed
   local gas snapshot still matches the focused Gate D operations for
@@ -271,6 +278,6 @@ discipline, and fork/testnet/live invariant coverage.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 
-Contributor, security intake, and audit package files exist so future work can
-be packaged and reviewed consistently, but they do not change the pre-audit
-status.
+Contributor, security intake, architecture, threat-model, and audit package
+files exist so future work can be packaged and reviewed consistently, but they
+do not change the pre-audit status.
