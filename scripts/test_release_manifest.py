@@ -40,6 +40,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     deployment_manifest_dir = root / "deployments" / "examples"
     address_book_dir = root / "deployments" / "address-books"
     deployment_schema_dir = root / "deployments" / "schema"
+    ceremony_evidence_dir = root / "deployments" / "ceremony-evidence"
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
     docs = [
@@ -144,6 +145,28 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         deployment_schema_dir / "address-book.schema.json",
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
+    write_json(
+        deployment_schema_dir / "ceremony-evidence.schema.json",
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
+        ceremony_evidence_dir / "anvil-local.json",
+        {
+            "schema_version": "6529stream.deployment-ceremony-evidence.v1",
+            "evidence_id": "anvil-local",
+            "protocol_version": "0.1.0",
+            "deployment_version": "anvil-001",
+            "network": {"environment": "local", "name": "anvil", "chain_id": 31337},
+            "artifacts": {
+                "deployment_manifest": {"path": "deployments/examples/anvil.json"},
+                "address_book": {"path": "deployments/address-books/anvil.json"},
+                "release_checksum_bundle": {
+                    "path": "release-artifacts/latest/SHA256SUMS"
+                },
+            },
+            "verification_status": {"contract_verification": "not_applicable"},
+        },
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
@@ -157,6 +180,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "deployment_manifest_dir": deployment_manifest_dir,
         "address_book_dir": address_book_dir,
         "deployment_schema_dir": deployment_schema_dir,
+        "ceremony_evidence_dir": ceremony_evidence_dir,
         "output": output,
         "changelog": changelog,
         "docs": docs,
@@ -180,6 +204,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -195,6 +220,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -225,6 +251,16 @@ class ReleaseManifestTests(unittest.TestCase):
                 ["Example"],
             )
             self.assertEqual(
+                manifest["deployment_artifacts"]["ceremony_evidence"][0]["evidence_id"],
+                "anvil-local",
+            )
+            self.assertEqual(
+                manifest["deployment_artifacts"]["ceremony_evidence"][0]["network"][
+                    "environment"
+                ],
+                "local",
+            )
+            self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],
                 generator.CHECKSUM_DIGEST_STATUS,
             )
@@ -249,6 +285,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -265,6 +302,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -285,6 +323,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["deployment_manifest_dir"],
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
+                paths["ceremony_evidence_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -303,6 +342,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -330,6 +370,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -352,6 +393,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["deployment_manifest_dir"],
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )

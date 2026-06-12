@@ -184,6 +184,14 @@ jobs:
           python3 scripts/test_address_books.py 2>&1 | tee ci-logs/address-book-tests.log
           python3 scripts/generate_address_books.py --check 2>&1 | tee ci-logs/address-books-check.log
 
+      - name: Ceremony evidence
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_ceremony_evidence.py 2>&1 | tee ci-logs/ceremony-evidence-tests.log
+          python3 scripts/check_ceremony_evidence.py 2>&1 | tee ci-logs/ceremony-evidence-check.log
+
       - name: Release manifest
         shell: bash
         run: |

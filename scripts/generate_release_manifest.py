@@ -25,6 +25,7 @@ DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
 DEFAULT_ADDRESS_BOOK_DIR = Path("deployments/address-books")
 DEFAULT_DEPLOYMENT_SCHEMA_DIR = Path("deployments/schema")
+DEFAULT_CEREMONY_EVIDENCE_DIR = Path("deployments/ceremony-evidence")
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/release-policy.md"),
@@ -192,6 +193,51 @@ def address_book_record(path: Path, repo_root: Path) -> dict[str, Any]:
     return record
 
 
+def ceremony_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    data = require_dict(load_json(path), str(path))
+    network = require_dict(data.get("network"), f"{path}.network")
+    artifacts = require_dict(data.get("artifacts"), f"{path}.artifacts")
+    verification_status = require_dict(
+        data.get("verification_status"), f"{path}.verification_status"
+    )
+    release_checksum_bundle = require_dict(
+        artifacts.get("release_checksum_bundle"), f"{path}.artifacts.release_checksum_bundle"
+    )
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "evidence_id": require_string(data.get("evidence_id"), "evidence_id"),
+            "protocol_version": require_string(data.get("protocol_version"), "protocol_version"),
+            "deployment_version": require_string(
+                data.get("deployment_version"), "deployment_version"
+            ),
+            "network": {
+                "environment": require_string(network.get("environment"), "network.environment"),
+                "name": require_string(network.get("name"), "network.name"),
+                "chain_id": network.get("chain_id"),
+            },
+            "deployment_manifest": require_string(
+                require_dict(
+                    artifacts.get("deployment_manifest"), "artifacts.deployment_manifest"
+                ).get("path"),
+                "artifacts.deployment_manifest.path",
+            ),
+            "address_book": require_string(
+                require_dict(artifacts.get("address_book"), "artifacts.address_book").get("path"),
+                "artifacts.address_book.path",
+            ),
+            "release_checksum_bundle": require_string(
+                release_checksum_bundle.get("path"), "artifacts.release_checksum_bundle.path"
+            ),
+            "contract_verification": require_string(
+                verification_status.get("contract_verification"),
+                "verification_status.contract_verification",
+            ),
+        }
+    )
+    return record
+
+
 def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> dict[str, Any]:
     path = release_artifacts_dir / "release-artifact-manifest.json"
     data = require_dict(load_json(path), str(path))
@@ -240,6 +286,7 @@ def build_manifest(
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
+    ceremony_evidence_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> dict[str, Any]:
@@ -247,16 +294,21 @@ def build_manifest(
         deployment_manifest_record(path, repo_root) for path in json_files(deployment_manifest_dir)
     ]
     address_books = [address_book_record(path, repo_root) for path in json_files(address_book_dir)]
+    ceremony_evidence = [
+        ceremony_evidence_record(path, repo_root) for path in json_files(ceremony_evidence_dir)
+    ]
     protocol_versions = sorted(
         set(
             [record["protocol_version"] for record in deployment_manifests]
             + [record["protocol_version"] for record in address_books]
+            + [record["protocol_version"] for record in ceremony_evidence]
         )
     )
     deployment_versions = sorted(
         set(
             [record["deployment_version"] for record in deployment_manifests]
             + [record["deployment_version"] for record in address_books]
+            + [record["deployment_version"] for record in ceremony_evidence]
         )
     )
 
@@ -277,6 +329,7 @@ def build_manifest(
             "deployment_manifest_dir": normalize_path(deployment_manifest_dir, repo_root),
             "address_book_dir": normalize_path(address_book_dir, repo_root),
             "deployment_schema_dir": normalize_path(deployment_schema_dir, repo_root),
+            "ceremony_evidence_dir": normalize_path(ceremony_evidence_dir, repo_root),
         },
         "release_artifacts": {
             "contract_config": file_record(contract_config_path, repo_root, schema_required=True),
@@ -326,6 +379,7 @@ def build_manifest(
                 file_record(path, repo_root, schema_required=True)
                 for path in json_files(deployment_schema_dir)
             ],
+            "ceremony_evidence": ceremony_evidence,
         },
         "release_notes_and_policy": {
             "changelog": file_record(changelog_path, repo_root),
@@ -352,6 +406,7 @@ def build_output_text(
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
+    ceremony_evidence_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> str:
@@ -366,6 +421,7 @@ def build_output_text(
         deployment_manifest_dir,
         address_book_dir,
         deployment_schema_dir,
+        ceremony_evidence_dir,
         changelog_path,
         governance_docs,
     )
@@ -383,6 +439,7 @@ def write_output(
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
+    ceremony_evidence_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> Path:
@@ -397,6 +454,7 @@ def write_output(
         deployment_manifest_dir,
         address_book_dir,
         deployment_schema_dir,
+        ceremony_evidence_dir,
         changelog_path,
         governance_docs,
     )
@@ -416,6 +474,7 @@ def check_output(
     deployment_manifest_dir: Path,
     address_book_dir: Path,
     deployment_schema_dir: Path,
+    ceremony_evidence_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
 ) -> int:
@@ -438,6 +497,7 @@ def check_output(
         deployment_manifest_dir,
         address_book_dir,
         deployment_schema_dir,
+        ceremony_evidence_dir,
         changelog_path,
         governance_docs,
     )
@@ -479,6 +539,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument("--address-book-dir", type=Path, default=DEFAULT_ADDRESS_BOOK_DIR)
     parser.add_argument("--deployment-schema-dir", type=Path, default=DEFAULT_DEPLOYMENT_SCHEMA_DIR)
+    parser.add_argument(
+        "--ceremony-evidence-dir",
+        type=Path,
+        default=DEFAULT_CEREMONY_EVIDENCE_DIR,
+    )
     parser.add_argument("--changelog", type=Path, default=DEFAULT_CHANGELOG)
     parser.add_argument("--governance-doc", type=Path, action="append", dest="governance_docs")
     parser.add_argument("--check", action="store_true")
@@ -503,6 +568,7 @@ def main(argv: list[str]) -> int:
                 args.deployment_manifest_dir,
                 args.address_book_dir,
                 args.deployment_schema_dir,
+                args.ceremony_evidence_dir,
                 args.changelog,
                 governance_docs,
             )
@@ -517,6 +583,7 @@ def main(argv: list[str]) -> int:
             args.deployment_manifest_dir,
             args.address_book_dir,
             args.deployment_schema_dir,
+            args.ceremony_evidence_dir,
             args.changelog,
             governance_docs,
         )

@@ -38,6 +38,8 @@ python scripts/generate_deployment_manifest.py --check
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -104,16 +106,23 @@ full ceremony and constructor-argument details from deployment manifests. They
 follow `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and are regenerated with `python scripts/generate_address_books.py`.
 
+The ceremony-evidence step validates retained no-secret deployment evidence
+bundles under `deployments/ceremony-evidence/`. The committed Anvil bundle ties
+local deployment/admin/signer, metadata-browser, auction, emergency
+redeployment, verification, artifact-retention, and redaction evidence together
+against `deployments/schema/ceremony-evidence.schema.json`; fork/testnet/live
+evidence contents remain later Gate E work.
+
 The release-manifest step builds
 `release-artifacts/latest/release-manifest.json`, a deterministic top-level
 index over the committed release artifact catalog, ABI compatibility baseline,
-deployment manifests, address books, deployment schemas, changelog, governance
-docs, and unavailable release-ceremony artifacts. It is regenerated with
+deployment manifests, address books, deployment schemas, ceremony evidence,
+changelog, governance docs, and unavailable release-ceremony artifacts. It is regenerated with
 `python scripts/generate_release_manifest.py` after any covered input changes.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
-artifact, deployment manifest, address-book, schema, and release-manifest
+artifact, deployment manifest, address-book, schema, ceremony-evidence, and release-manifest
 outputs. This gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
@@ -168,6 +177,7 @@ python scripts/generate_broadcast_manifest_input.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
 python scripts/generate_address_books.py
+python scripts/check_ceremony_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
@@ -183,6 +193,8 @@ python scripts/generate_broadcast_manifest_input.py --check
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/generate_address_books.py --check
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
@@ -214,7 +226,8 @@ the release artifact contract set.
 The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,
-`deployments/address-books/`, and `deployments/schema/`, excluding its own
+`deployments/address-books/`, `deployments/ceremony-evidence/`, and
+`deployments/schema/`, excluding its own
 generated checksum files to avoid self-referential hashes. Refresh the release
 manifest before refreshing the checksum bundle after changing any covered
 artifact.

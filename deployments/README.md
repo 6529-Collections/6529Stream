@@ -9,6 +9,8 @@ The current baseline includes:
 
 - `schema/deployment-manifest.schema.json`: the required manifest shape.
 - `schema/address-book.schema.json`: the compact address-book shape.
+- `schema/ceremony-evidence.schema.json`: the retained deployment ceremony
+  evidence shape.
 - `broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json`: a sanitized
   Foundry broadcast fixture used to prove broadcast-derived manifest ingestion
   without committing RPC credentials or private material.
@@ -23,6 +25,11 @@ The current baseline includes:
   projection of the local example for scripts, docs, wallets, and indexers.
 - `address-books/anvil-6529stream-v0.1.0-001-broadcast.json`: the compact
   address-book projection of the broadcast-derived manifest.
+- `ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json`: a no-secret local
+  Anvil evidence bundle tying the deployment manifest, address book, ABI
+  checksums, admin ceremony, signer setup, metadata-browser check, auction
+  ceremony, emergency redeployment rehearsal, verification status, retained
+  artifacts, and redaction policy together.
 
 Do not commit private keys, RPC credentials, unreleased drop payloads, or signer
 material in this directory. Public deployment manifests, ABI hashes, checksums,
@@ -38,6 +45,8 @@ python scripts/generate_broadcast_manifest_input.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
 python scripts/generate_address_books.py
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
 python scripts/generate_release_checksums.py
 ```
 
@@ -67,7 +76,15 @@ status. Address-book JSON files are generated outputs; update the source
 manifest or release artifacts, then rerun `python scripts/generate_address_books.py`
 instead of editing address books by hand.
 
-After broadcast, manifest, schema, config, or address-book outputs change, regenerate
-`release-artifacts/latest/SHA256SUMS` and
+Ceremony evidence bundles are retained under `deployments/ceremony-evidence/`
+and validated by `scripts/check_ceremony_evidence.py`. The committed local
+bundle is Anvil-only evidence. Fork, testnet, and production bundles must retain
+real broadcast manifests, address books, checksum references, source/explorer
+verification status, admin/signer/dependency/auction/emergency ceremony
+results, and operator notes without private keys, RPC URLs, API keys, mnemonics,
+or unreleased drop payloads.
+
+After broadcast, manifest, schema, config, address-book, or ceremony evidence
+outputs change, regenerate `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` with
 `python scripts/generate_release_checksums.py`.

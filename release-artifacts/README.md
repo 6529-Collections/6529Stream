@@ -13,6 +13,7 @@ python scripts/generate_dependency_artifact_manifest.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
+python scripts/check_ceremony_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```
@@ -32,6 +33,8 @@ python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -62,17 +65,17 @@ Production dependency version changes must follow
 
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
-hashes, deployment manifest/address-book hashes, schema hashes, release-policy
-doc hashes, and the release-ceremony items that are not yet available for this
-pre-audit local baseline.
+hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
+schema hashes, release-policy doc hashes, and the release-ceremony items that
+are not yet available for this pre-audit local baseline.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
-baseline, deployment manifest config/examples, address books, artifact schemas,
-and release manifest. Treat `SHA256SUMS` as the signable checksum file for a
-release; detached signatures and signed tags remain a separate maintainer
-release-ceremony step.
+baseline, deployment manifest config/examples, address books, ceremony evidence
+bundles, artifact schemas, and release manifest. Treat `SHA256SUMS` as the
+signable checksum file for a release; detached signatures and signed tags
+remain a separate maintainer release-ceremony step.
 
 Because the checksum bundle covers `latest/release-manifest.json`, the release
 manifest cannot also embed the final checksum-bundle digests without creating a
@@ -98,6 +101,7 @@ python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_dependency_artifact_manifest.py
+python scripts/check_ceremony_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```

@@ -137,12 +137,13 @@ contributors who start from the README.
   bid, settlement, proceeds withdrawal, and zero owed funds plus a local
   emergency redeployment rehearsal with distinct old/replacement manifests,
   drop domains, addresses, Safe-rooted ceremony state, and replacement mint
-  smoke evidence. Fork/testnet/live production metadata browser evidence,
-  deployment, production-governance, richer supply/replay/freeze invariant
-  tests, retained live ceremony evidence, and any future shared-ledger
-  invariants are still missing.
+  smoke evidence. A no-secret deployment ceremony evidence schema, local Anvil
+  bundle, and checker now exist. Fork/testnet/live production metadata browser
+  evidence, deployment, production-governance, richer supply/replay/freeze
+  invariant tests, retained fork/testnet/live ceremony evidence contents, and
+  any future shared-ledger invariants are still missing.
 - Live fork/testnet deployment rehearsals, production broadcast retention,
   production address books, explorer verification, and retained fork/testnet/live
-  emergency redeployment evidence remain missing.
+  emergency redeployment evidence contents remain missing.
 
 Do not treat the current build/test smoke baseline as a security claim.

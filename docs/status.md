@@ -181,12 +181,20 @@ The current Gate A smoke baseline proves:
   address books are compact, deterministic projections of the committed
   placeholder and broadcast-derived deployment manifests plus release artifact
   contract metadata.
+- `scripts/test_ceremony_evidence.py` and
+  `scripts/check_ceremony_evidence.py` prove the committed no-secret local
+  Anvil ceremony evidence bundle follows
+  `deployments/schema/ceremony-evidence.schema.json`, references existing
+  deployment manifests, address books, checksum inputs, rehearsal scripts, and
+  verification status by SHA-256, rejects stale file hashes and secret-like
+  keys, and reserves fork/testnet/live retained evidence contents for later
+  Gate E ceremonies.
 - `scripts/test_release_manifest.py` and
   `scripts/generate_release_manifest.py --check` prove the generated top-level
   release manifest ties the release artifact catalog, dependency artifact
   manifest, ABI compatibility baseline, deployment manifests, address books,
-  schemas, changelog, governance docs, and unavailable release-ceremony outputs
-  together without drift.
+  ceremony evidence, schemas, changelog, governance docs, and unavailable
+  release-ceremony outputs together without drift.
 - `scripts/test_release_checksums.py` and
   `scripts/generate_release_checksums.py --check` prove the committed
   `release-artifacts/latest/SHA256SUMS` and
@@ -209,9 +217,9 @@ detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata
-browser evidence, fork/testnet/live ceremony evidence, fork/testnet/live
-emergency redeployment evidence, deployment discipline, and the broader P0/P1
-test suite.
+browser evidence, fork/testnet/live ceremony evidence contents,
+fork/testnet/live emergency redeployment evidence contents, deployment
+discipline, and the broader P0/P1 test suite.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 

@@ -133,6 +133,8 @@ python scripts/generate_deployment_manifest.py --config deployments/config/anvil
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/generate_address_books.py
 python scripts/generate_address_books.py --check
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py
@@ -181,6 +183,36 @@ or produce signatures in the local gate. Because the checksum bundle covers the
 release manifest, the release manifest lists checksum-bundle outputs without
 embedding their final digests.
 
+## Ceremony Evidence
+
+Deployment ceremony evidence bundles live under
+`deployments/ceremony-evidence/` and follow
+`deployments/schema/ceremony-evidence.schema.json`. They are no-secret public
+release artifacts that bind a deployment version to:
+
+- network environment, chain ID, confirmation depth, source commit, and CI run;
+- deployer, Safe/multisig, signer, and emergency-recipient addresses;
+- deployment manifest, address book, ABI checksum, and release checksum bundle
+  references;
+- admin ceremony, signer setup, metadata browser, auction ceremony, and
+  emergency redeployment results;
+- source/explorer verification status and retained artifact references;
+- redaction policy proving private keys, mnemonics, RPC URLs, API keys, and
+  unreleased drop payloads are not committed.
+
+Validate the committed local evidence with:
+
+```sh
+python scripts/test_ceremony_evidence.py
+python scripts/check_ceremony_evidence.py
+```
+
+`deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json` is local
+Anvil evidence only. Fork, testnet, and production ceremonies must produce
+their own evidence bundles from real broadcast manifests, retained transaction
+logs, source/explorer verification submissions, admin/signer/dependency
+operator notes, and incident or deprecation records where relevant.
+
 ## Admin Ceremony Checklist
 
 Before a deployment can become public-beta eligible:
@@ -207,10 +239,11 @@ Before a deployment can become public-beta eligible:
   output.
 - Generate and checksum the deployment manifest.
 - Generate and check the address book.
+- Generate and check the ceremony evidence bundle.
 - Generate and check the release manifest.
 - Generate and check the release checksum bundle.
 
 Live fork/testnet broadcast, production broadcast retention, contract
 verification, event topic catalog publication against a live deployment,
-fork/testnet/live ceremony evidence, and fork/testnet/live emergency
-redeployment evidence remain Gate E follow-up work.
+fork/testnet/live ceremony evidence contents, and fork/testnet/live emergency
+redeployment evidence contents remain Gate E follow-up work.

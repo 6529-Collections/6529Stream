@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/emergency-redeployment-rehearsal` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/141` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/143` |
+| Active PR branch | `codex/ceremony-evidence-schema` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/143` |
+| Active PR | TBD for issue #144 |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 07:28 UTC` |
+| Last updated | `2026-06-12 08:13 UTC` |
 
 ## Packaging Notes
 
@@ -128,14 +128,114 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | Merged in PR #138 |
 | 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | Merged in PR #139 |
 | 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Merged in PR #141 |
-| 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Open in PR #143 |
+| 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Merged in PR #143 |
+| 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | In progress on `codex/ceremony-evidence-schema` |
 
 ## Current PR Worklog
 
+### PR candidate: Add deployment ceremony evidence bundle schema (Queue Item 75)
+
+Status: locally validated on branch `codex/ceremony-evidence-schema`; PR TBD.
+Branch started from PR #143 squash merge commit
+`6dd5846122ebca965a0f1bcefac0386f0ab0cb60`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/144`.
+
+Goal:
+
+- Define a no-secret deployment ceremony evidence schema under `deployments/`.
+- Add a local Anvil evidence bundle tying the deployment manifest, address book,
+  ABI checksums, release checksum bundle, admin ceremony, signer setup,
+  metadata-browser check, auction ceremony, emergency redeployment rehearsal,
+  verification status, retained artifacts, and redaction policy together.
+- Add a Python validator and unit tests that catch stale hashes, missing
+  referenced files, missing sections, weak non-local evidence, invalid
+  verification state, and secret-like keys.
+- Wire the checker into Makefile, Linux/Windows check wrappers, and CI.
+- Include ceremony evidence in release manifest and checksum coverage.
+- Update docs, changelog, roadmap, release artifact docs, and this durable run
+  state while keeping fork/testnet/live evidence contents explicitly out of
+  scope.
+
+Initial candidate files:
+
+- `deployments/schema/ceremony-evidence.schema.json`
+- `deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json`
+- `scripts/check_ceremony_evidence.py`
+- `scripts/test_ceremony_evidence.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/generate_release_checksums.py`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `.github/workflows/ci.yml`
+- `deployments/README.md`
+- `docs/deployment.md`
+- `docs/tooling.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `release-artifacts/README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Validation plan:
+
+- `python scripts\test_ceremony_evidence.py`
+- `python scripts\check_ceremony_evidence.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile` for touched Python scripts.
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`.
+- Full local `make check`.
+- PowerShell parser check and `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Current implementation notes:
+
+- Added `scripts/check_ceremony_evidence.py` with schema-version, environment,
+  source, participant, artifact, result, verification, retained-artifact,
+  redaction-policy, repo-path, SHA-256, and secret-like-key validation.
+- Added `scripts/test_ceremony_evidence.py` for valid evidence, missing
+  sections, invalid hashes, missing files, non-local retained-artifact
+  requirements, testnet verification status, and secret-like-key rejection.
+- Added `deployments/schema/ceremony-evidence.schema.json` and the local Anvil
+  evidence bundle under `deployments/ceremony-evidence/`.
+- Wired ceremony evidence into `make check`, Linux/Windows check wrappers, CI,
+  release manifest generation/tests, and release checksum coverage.
+- Updated docs, changelog, roadmap, and run-state to make the evidence format
+  discoverable while preserving the remaining fork/testnet/live evidence gap.
+
+Validation completed so far:
+
+- `python scripts\test_ceremony_evidence.py`
+- `python scripts\check_ceremony_evidence.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\check_ceremony_evidence.py scripts\test_ceremony_evidence.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py`
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`
+- `make check`
+- PowerShell parser check for `scripts\check.ps1` and
+  `scripts\bootstrap-windows.ps1`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
 ### PR candidate: Add local emergency redeployment rehearsal (Queue Item 74)
 
-Status: open in PR #143; CodeRabbit deployment-version assertion fix applied
-locally, full `make check` passed, and follow-up push is pending.
+Status: merged in PR #143 after CI passed and CodeRabbit resolved the
+deployment-version assertion thread.
 Branch `codex/emergency-redeployment-rehearsal` started from PR #141 merge
 commit `1b3ad3df35fb6dedd65b2b227b1beb29feaa8b61`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/142`.
@@ -6562,6 +6662,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 08:13 | Finish local Queue Item 75 validation | Focused ceremony evidence/release/changelog checks, py_compile, Bash syntax check, full `make check`, PowerShell parser check, and Windows wrapper all pass locally; CI and CodeRabbit remain pending until PR creation |
+| 2026-06-12 07:51 | Implement Queue Item 75 local draft | Added ceremony evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, changelog, and run-state updates; focused ceremony evidence and release-manifest tests pass so far |
+| 2026-06-12 07:39 | Create issue #144 and select Queue Item 75 | PR #143 merged and issue #142 closed completed; the next Gate E/G gap is retained deployment ceremony evidence format because live ceremonies need a no-secret evidence bundle before fork/testnet/production contents can be collected |
+| 2026-06-12 07:34 | Merge PR #143 | Local emergency redeployment rehearsal merged as `6dd5846122ebca965a0f1bcefac0386f0ab0cb60`; CI run `27401454911` passed, CodeRabbit resolved the deployment-version assertion thread after commit `ed2a536806259f0ce25daddd9339dcd4cb90d762`, and issue #142 closed completed |
 | 2026-06-12 06:09 | Open PR #141 and request CodeRabbit | Pushed `codex/dry-run-auction-ceremony`, opened https://github.com/6529-Collections/6529Stream/pull/141 against `main`, linked `Closes #140`, requested CodeRabbit in comment `4687976396`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 05:54 | Implement Queue Item 73 local draft | Added the local auction ceremony rehearsal script, focused deployment-manifest coverage, local/CI gate wiring, docs/roadmap/changelog/state updates, and validated the focused test plus standalone rehearsal script |
 | 2026-06-12 05:41 | Select Queue Item 73 | PR #139 merged as `e09e422a4f95fbf6948d182fcff83a25aaf88e0c`, issue #135 closed completed, no open 6529Stream issue remained for the next Gate E local ceremony gap, and issue #140 now scopes the dry-run auction ceremony rehearsal |

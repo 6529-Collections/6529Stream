@@ -60,6 +60,10 @@ the release policy in `docs/release-policy.md`.
   replacement stacks with distinct deployment versions, manifests, EIP-712 drop
   domains, and contract addresses, then proves replacement fixed-price mint
   smoke evidence after Safe-rooted admin ceremonies.
+- Added a deployment ceremony evidence schema, local Anvil evidence bundle, and
+  local/CI checker so admin, signer, metadata-browser, auction, emergency
+  redeployment, artifact, verification, and redaction evidence has a
+  deterministic no-secret release format.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen
