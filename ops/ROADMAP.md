@@ -74,12 +74,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 16:56 UTC` after Queue Item 84 focused release-readiness checker/tests, audit-package checks, release manifest/checksum regeneration, Python compilation, changelog gate, Unix wrapper syntax, heading scan, whitespace check, full `make check`, and Windows wrapper validation; CI pending before PR #162 review |
-| OS tested | Windows local for Queue Item 84 focused and full-wrapper checks; Linux CI pending for PR #162 |
+| Last verified | `2026-06-12 18:47 UTC` after PR #165 / Queue Item 85 public-beta evidence checker/tests, release-readiness and audit-package checks, release manifest/checksum regeneration and check modes, Python compilation, Unix and PowerShell syntax checks, heading scan, whitespace check, full `make check`, Windows wrapper validation, GitHub Actions CI run `27435644265`, and CodeRabbit success |
+| OS tested | Windows local for Queue Item 85 focused and full-wrapper checks; Linux GitHub Actions CI run `27435644265` for PR #165 |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | TBD for PR #162 |
+| CI run | `27435644265` for PR #165 on head `54af773ccbf8c73c6d880a7713932039249053a5` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -333,18 +333,20 @@ Required evidence:
 
 Status: In Progress.
 Owner: TBD.
-Blocking issues: [`#164`](https://github.com/6529-Collections/6529Stream/issues/164)
-for the public-beta evidence status manifest and checker; production
-signatures, signed tags, live explorer verification, verified live addresses,
-production address books, fork/testnet/live ceremony evidence,
-fork/testnet/live randomizer operations evidence, and external audit completion
-remain future release blockers. [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
-is complete for the release-readiness dashboard and checker.
+Blocking issues: production signatures, signed tags, live explorer
+verification, verified live addresses, production address books,
+fork/testnet/live ceremony evidence, fork/testnet/live randomizer operations
+evidence, fork/testnet/live deployment and metadata-browser evidence, and
+external audit completion remain future release blockers.
 Evidence: deterministic local release artifacts, release manifest, checksum
 bundle, local ceremony evidence, local randomizer operations evidence, local
 release signature placeholder evidence, audit package docs, architecture/threat
-model docs, the `docs/release-readiness.md` dashboard, and the in-progress
-`release-artifacts/latest/public-beta-evidence.json` status manifest.
+model docs, the `docs/release-readiness.md` dashboard, and the
+`release-artifacts/latest/public-beta-evidence.json` status manifest/checker
+from PR #165. [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
+is complete for the release-readiness dashboard and checker, and
+[`#164`](https://github.com/6529-Collections/6529Stream/issues/164) is complete
+for the public-beta evidence status manifest and checker.
 
 Exit criteria:
 
