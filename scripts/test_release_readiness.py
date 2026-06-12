@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""Focused tests for the release-readiness checker."""
+
+from __future__ import annotations
+
+import importlib.util
+import tempfile
+import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
+from pathlib import Path
+
+
+SCRIPT_PATH = Path(__file__).with_name("check_release_readiness.py")
+SPEC = importlib.util.spec_from_file_location("check_release_readiness", SCRIPT_PATH)
+assert SPEC is not None and SPEC.loader is not None
+checker = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(checker)
+
+
+def write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def seed_required_targets(root: Path) -> None:
+    for relative in checker.REQUIRED_LINK_TARGETS:
+        write_text(root / relative, f"seed for {relative}\n")
+
+
+def target_links() -> str:
+    return "\n".join(
+        f"- [{target}](../{target})" for target in checker.REQUIRED_LINK_TARGETS
+    )
+
+
+def minimal_release_readiness_doc() -> str:
+    commands = "\n".join(checker.REQUIRED_COMMANDS)
+    links = target_links()
+    return f"""# Release Readiness
+
+This pre-audit local baseline is not production-ready and not a security claim.
+Local evidence does not replace fork/testnet/live evidence for public beta.
+
+## Maturity And Scope
+
+The dashboard covers public beta and production release readiness.
+
+## Readiness Summary
+
+Release manifest, checksum bundle, source verification inputs, ceremony evidence,
+randomizer operations evidence, release-signature evidence, Slither baseline,
+test matrix, and ADR index evidence are summarized.
+
+## Local Evidence Already Passing
+
+Local evidence is listed for review.
+
+## Public Beta Blockers
+
+Fork/testnet/live evidence, explorer verification, verified deployed addresses,
+and external audit evidence remain blockers.
+
+## Production Release Blockers
+
+Production signatures, signed Git tags, and post-audit remediation evidence
+remain blockers.
+
+## Required Evidence Links
+
+{links}
+
+## Release Commands
+
+```sh
+{commands}
+```
+
+## Maintenance
+
+Refresh whenever release evidence or blockers change.
+"""
+
+
+class ReleaseReadinessTests(unittest.TestCase):
+    def test_accepts_committed_doc(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+
+        with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+            result = checker.main(["--repo-root", str(repo_root)])
+
+        self.assertEqual(result, 0)
+
+    def test_accepts_minimal_valid_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            write_text(
+                root / checker.DEFAULT_RELEASE_READINESS,
+                minimal_release_readiness_doc(),
+            )
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(["--repo-root", str(root)])
+
+            self.assertEqual(result, 0)
+
+    def test_rejects_missing_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc().replace(
+                "## Public Beta Blockers\n", ""
+            )
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "missing required headings"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+    def test_rejects_missing_maturity_language(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc().replace(
+                "not production-ready", "ready"
+            )
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "missing required maturity language"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+    def test_rejects_missing_readiness_phrase(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc()
+            text = text.replace("production signatures", "signature files")
+            text = text.replace("Production signatures", "Signature files")
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "missing required content"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+    def test_rejects_missing_command(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc().replace(
+                "python scripts/check_release_readiness.py\n", ""
+            )
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "missing required commands"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+    def test_rejects_missing_required_link(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc().replace(
+                "- [README.md](../README.md)\n", ""
+            )
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "missing required links"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+    def test_rejects_missing_linked_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            (root / "SECURITY.md").unlink()
+            write_text(
+                root / checker.DEFAULT_RELEASE_READINESS,
+                minimal_release_readiness_doc(),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "linked targets are missing"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+    def test_rejects_escaped_link_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc() + "\n[escape](../../outside.md)\n"
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "linked path escapes repository"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
+
+if __name__ == "__main__":
+    unittest.main()

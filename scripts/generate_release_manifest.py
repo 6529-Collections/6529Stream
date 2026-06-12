@@ -42,6 +42,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/architecture.md"),
     Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),
+    Path("docs/release-readiness.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]

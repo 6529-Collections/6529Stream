@@ -75,6 +75,8 @@ jobs:
             scripts/test_architecture_threat_model.py \
             scripts/check_audit_package.py \
             scripts/test_audit_package.py \
+            scripts/check_release_readiness.py \
+            scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
             scripts/test_release_manifest.py \
             scripts/generate_release_checksums.py \
@@ -240,6 +242,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_audit_package.py 2>&1 | tee ci-logs/audit-package-tests.log
           python3 scripts/check_audit_package.py 2>&1 | tee ci-logs/audit-package-check.log
+
+      - name: Release readiness
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_release_readiness.py 2>&1 | tee ci-logs/release-readiness-tests.log
+          python3 scripts/check_release_readiness.py 2>&1 | tee ci-logs/release-readiness-check.log
 
       - name: Release manifest
         shell: bash

@@ -74,6 +74,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\test_audit_package.py"
 & $pythonPath @pythonArgs "scripts\check_audit_package.py"
+& $pythonPath @pythonArgs "scripts\test_release_readiness.py"
+& $pythonPath @pythonArgs "scripts\check_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"
 & $pythonPath @pythonArgs "scripts\generate_release_manifest.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_checksums.py"

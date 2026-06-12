@@ -91,6 +91,10 @@ the release policy in `docs/release-policy.md`.
 - Added architecture and threat-model docs plus a local/CI checker so current
   system components, trust boundaries, value/custody flows, threat categories,
   residual risks, and evidence links remain complete before audit packaging.
+- Added a release-readiness dashboard and local/CI checker so Gate G local
+  evidence, public-beta blockers, production release blockers, required
+  evidence links, and release-readiness commands remain visible before release
+  manifest and checksum generation.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

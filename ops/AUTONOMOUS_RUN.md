@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/architecture-threat-model` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/159` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
+| Active PR branch | `codex/release-readiness-dashboard` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
+| Active PR | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 16:13 UTC` |
+| Last updated | `2026-06-12 16:56 UTC` |
 
 ## Packaging Notes
 
@@ -137,13 +137,99 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #155 |
 | 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
-| 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merge-ready in PR #161 |
+| 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
+| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Validated locally; PR pending |
 
 ## Current PR Worklog
 
-### PR candidate: Add architecture and threat model audit docs (Queue Item 83)
+### PR candidate: Add release readiness dashboard and blocker checker (Queue Item 84)
 
-Status: Merge-ready in PR #161 after CI and CodeRabbit success on final head.
+Status: Validated locally; PR pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/162`.
+PR: TBD.
+CodeRabbit request: TBD.
+Branch: `codex/release-readiness-dashboard`.
+Branch started from PR #161 squash merge commit
+`0bddc2c93157e328c40b88b9c98e0fa7195b5acd`.
+
+Goal:
+
+- Add `docs/release-readiness.md` as the Gate G dashboard that separates local
+  baseline evidence from public-beta blockers and production-release blockers.
+- Add deterministic checker/tests so required headings, maturity warnings,
+  evidence links, blocker language, release commands, missing linked files, and
+  path-boundary handling cannot silently regress.
+- Wire the checker into Makefile, Unix and Windows check wrappers, CI,
+  release-manifest governance docs, audit package docs, release docs, and the
+  release artifact catalog.
+- Keep the PR documentation/tooling-only with no Solidity behavior changes.
+
+Initial candidate files:
+
+- `docs/release-readiness.md`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/check_audit_package.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `docs/audit-package.md`
+- `release-artifacts/README.md`
+- `docs/tooling.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes so far:
+
+- Added the release-readiness dashboard with explicit pre-audit,
+  not-production-ready, local-baseline, and no-security-claim maturity language.
+- Added `scripts/check_release_readiness.py` and
+  `scripts/test_release_readiness.py` to enforce headings, required maturity
+  language, public-beta and production blocker terms, release commands, required
+  evidence links, missing linked files, and path-boundary rejection.
+- Wired the checker into Makefile, shell wrappers, CI, release-manifest
+  governance docs, audit-package checker/docs, and release/status/tooling docs.
+- Updated the roadmap and this run-state file to show PR #161 merged and issue
+  #162 as the active Gate G work item.
+
+Validation so far:
+
+- `python scripts\test_release_readiness.py`
+- `python scripts\check_release_readiness.py`
+- `python -m py_compile scripts\check_release_readiness.py scripts\test_release_readiness.py`
+- `python scripts\test_audit_package.py`
+- `python scripts\check_audit_package.py`
+- `python -m py_compile scripts\check_release_readiness.py scripts\test_release_readiness.py scripts\check_audit_package.py scripts\test_audit_package.py scripts\generate_release_manifest.py scripts\test_release_manifest.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts\check.ps1`
+- heading scan for `docs/release-readiness.md`, `docs/audit-package.md`,
+  `docs/tooling.md`, `docs/release-policy.md`, `ops/ROADMAP.md`, and
+  `ops/AUTONOMOUS_RUN.md`
+- `git diff --check`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+### PR #161: Add architecture and threat model audit docs (Queue Item 83)
+
+Status: Merged in PR #161 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/160`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/161`.
 CodeRabbit request: issue comment `4692872990`.
@@ -151,8 +237,9 @@ CodeRabbit final clean comment: issue comment `4692962127`.
 Branch: `codex/architecture-threat-model`.
 Branch started from PR #159 squash merge commit
 `e2e9fcfdf0ef73e058244d4262f4d50137eefd3a`.
-Final head: `f0b4407c27bfe1676d49852e3eee62815733bf3a`.
-CI run: `27427589746`.
+Final head: `95a70908b3470488dac8e142c427de28d022824a`.
+Squash merge commit: `0bddc2c93157e328c40b88b9c98e0fa7195b5acd`.
+CI run: `27428125013`.
 
 Goal:
 
@@ -244,8 +331,8 @@ Validation so far:
   `python scripts\test_changelog_check.py`, `python scripts\check_changelog.py`,
   `bash -n scripts/check.sh`, PowerShell parser check for `scripts\check.ps1`,
   and `git diff --check`.
-- CI run `27427589746` passed on head
-  `f0b4407c27bfe1676d49852e3eee62815733bf3a`, including the architecture and
+- CI run `27428125013` passed on final head
+  `95a70908b3470488dac8e142c427de28d022824a`, including the architecture and
   threat model, audit package, release manifest, release checksums, changelog,
   and deployment rehearsal steps. CodeRabbit status was `success` on the same
   head.
@@ -7538,6 +7625,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 16:56 | Finish local Queue Item 84 validation | Release-readiness checker/tests, audit-package checks, release manifest/checksum regeneration and check modes, Python compilation, changelog gate, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
+| 2026-06-12 16:34 | Implement Queue Item 84 local draft | Added the release-readiness dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, changelog, and run-state updates for issue #162 without Solidity behavior changes |
+| 2026-06-12 16:23 | Create issue #162 and select Queue Item 84 | PR #161 merged, no open issues remained, and Gate G still needed a checked release-readiness dashboard that distinguishes local baseline evidence from public-beta and production-release blockers |
+| 2026-06-12 16:22 | Merge PR #161 | Architecture/threat-model docs merged as `0bddc2c93157e328c40b88b9c98e0fa7195b5acd`; final CI run `27428125013` passed, CodeRabbit status was success, issue #160 closed completed, and local `main` was fast-forwarded |
 | 2026-06-12 16:05 | Address remaining CodeRabbit PR #161 roadmap thread | Updated the roadmap verification metadata CI row to refer to PR #161; the separate committed-doc path thread was already fixed in `b5d531d` |
 | 2026-06-12 16:01 | Address CodeRabbit PR #161 review | Accepted the low-risk review suggestions: add ADR evidence for `StreamMinter`, clarify `arRNG`, anchor deployment ceremony wording, precompute per-document links, anchor committed-doc tests to the script path, add reciprocal-link rejection tests, regenerate release evidence, and pass focused architecture/audit/manifest/checksum/changelog/syntax/whitespace validation |
 | 2026-06-12 15:54 | Open PR #161 and request CodeRabbit | Architecture/threat-model PR opened against `main`, linked `Closes #160`, requested CodeRabbit in comment `4692872990`, and intentionally skipped Claude per current user instruction |
@@ -8059,7 +8150,7 @@ Outcome:
 | 2026-06-12 07:22 | Address CodeRabbit PR #143 review | Accepted CodeRabbit's request to make deployment-version uniqueness a direct script assertion, then reran focused Forge formatting, evidence test, and emergency redeployment script validation |
 | 2026-06-12 07:28 | Finish PR #143 follow-up validation | Full `make check` passed after the CodeRabbit deployment-version guard fix; CI rerun and CodeRabbit re-review remain pending until the follow-up commit is pushed |
 | 2026-06-12 15:12 | Mark PR #159 merge-ready | CI run `27424138673` passed on head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, CodeRabbit status was success, and the visible CodeRabbit review suggestions were addressed in the follow-up commit |
-| 2026-06-12 16:13 | Mark PR #161 merge-ready | CI run `27427589746` passed on head `f0b4407c27bfe1676d49852e3eee62815733bf3a`, CodeRabbit status was success with clean comment `4692962127`, and the visible review threads were resolved |
+| 2026-06-12 16:13 | Mark PR #161 merge-ready | Final CI run `27428125013` passed on head `95a70908b3470488dac8e142c427de28d022824a`, CodeRabbit status was success, and the visible review threads were resolved |
 
 ## Resume Instructions
 

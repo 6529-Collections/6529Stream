@@ -251,6 +251,13 @@ The current Gate A smoke baseline proves:
   security reporting. The generated release manifest records the architecture,
   threat model, and audit package hashes as governance documents before the
   checksum bundle is refreshed.
+- `scripts/test_release_readiness.py` and
+  `scripts/check_release_readiness.py` prove
+  `docs/release-readiness.md` remains a Gate G dashboard that separates
+  passing local evidence from missing fork/testnet/live evidence, production
+  signatures, signed Git tags, verified deployed addresses, explorer
+  verification, external audit, and post-audit remediation blockers before the
+  release manifest and checksum bundle are refreshed.
 - `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
   release-artifacts/baselines/v0.1.0/gas-snapshot.snap` proves the committed
   local gas snapshot still matches the focused Gate D operations for
@@ -278,6 +285,6 @@ discipline, and fork/testnet/live invariant coverage.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 
-Contributor, security intake, architecture, threat-model, and audit package
-files exist so future work can be packaged and reviewed consistently, but they
-do not change the pre-audit status.
+Contributor, security intake, architecture, threat-model, audit package, and
+release-readiness files exist so future work can be packaged and reviewed
+consistently, but they do not change the pre-audit status.
