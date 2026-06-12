@@ -67,7 +67,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 07:07 UTC` after Queue Item 74 local `make check` and Windows wrapper validation |
+| Last verified | `2026-06-12 07:28 UTC` after Queue Item 74 CodeRabbit follow-up local `make check` validation |
 | OS tested | Windows local; Linux CI pending for Queue Item 74 |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |

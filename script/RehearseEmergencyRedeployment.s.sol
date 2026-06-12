@@ -103,6 +103,10 @@ contract RehearseEmergencyRedeployment {
         replacementConfig.deploymentVersion = REPLACEMENT_DEPLOYMENT_VERSION;
         bytes32 replacementDeploymentVersionHash =
             keccak256(bytes(replacementConfig.deploymentVersion));
+        _assert(
+            oldDeploymentVersionHash != replacementDeploymentVersionHash,
+            "deployment version reused"
+        );
         RehearseDeployment.DeploymentResult memory replacementDeployment =
             deployment.deployLocal(replacementConfig);
         _assertDeploymentCeremony(replacementDeployment, replacementConfig);

@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/143` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 07:10 UTC` |
+| Last updated | `2026-06-12 07:28 UTC` |
 
 ## Packaging Notes
 
@@ -134,7 +134,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add local emergency redeployment rehearsal (Queue Item 74)
 
-Status: open in PR #143; awaiting CI and CodeRabbit.
+Status: open in PR #143; CodeRabbit deployment-version assertion fix applied
+locally, full `make check` passed, and follow-up push is pending.
 Branch `codex/emergency-redeployment-rehearsal` started from PR #141 merge
 commit `1b3ad3df35fb6dedd65b2b227b1beb29feaa8b61`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/142`.
@@ -218,6 +219,12 @@ Validation completed so far:
 - `make check`
 - PowerShell parser check for `scripts\check.ps1` and `scripts\bootstrap-windows.ps1`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- CodeRabbit follow-up focused validation after adding explicit deployment
+  version reuse guard:
+  - `forge fmt script\RehearseEmergencyRedeployment.s.sol`
+  - `forge test --match-path test\StreamDeploymentManifest.t.sol -vvv`
+  - `forge script script\RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`
+  - `make check`
 
 ### PR candidate: Add dry-run auction ceremony rehearsal (Queue Item 73)
 
@@ -7026,6 +7033,8 @@ Outcome:
 | 2026-06-12 06:52 | Implement Queue Item 74 local draft | Added local emergency redeployment rehearsal script/test/gate wiring, updated docs/roadmap/changelog/run-state, regenerated release manifest/checksum evidence, and passed focused Forge/script validation |
 | 2026-06-12 07:07 | Finish local Queue Item 74 validation | Focused Forge tests and script rehearsal, release manifest/checksum/changelog drift checks, bash syntax checks, full `make check`, and Windows PowerShell wrapper validation pass locally; CI and CodeRabbit remain pending until PR creation |
 | 2026-06-12 07:10 | Open PR #143 | Emergency redeployment rehearsal PR opened on head `cf8f5ec488294005ecf2c809018fee6d84f40c98` with issue #142 closure, local validation transcript, and fork/testnet/live emergency evidence explicitly scoped to later Gate E work |
+| 2026-06-12 07:22 | Address CodeRabbit PR #143 review | Accepted CodeRabbit's request to make deployment-version uniqueness a direct script assertion, then reran focused Forge formatting, evidence test, and emergency redeployment script validation |
+| 2026-06-12 07:28 | Finish PR #143 follow-up validation | Full `make check` passed after the CodeRabbit deployment-version guard fix; CI rerun and CodeRabbit re-review remain pending until the follow-up commit is pushed |
 
 ## Resume Instructions
 
