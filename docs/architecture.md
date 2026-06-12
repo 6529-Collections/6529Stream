@@ -37,7 +37,7 @@ The current local deployment rehearsal wires the following contracts:
 | `StreamAdmins` | Root admin, global/function admin, pause guardian, unpause admin, signer manager, and emergency-recipient registry | [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md), `test/StreamAdmins.t.sol` |
 | `DependencyRegistry` | Versioned generative dependency source, content hashes, provenance, and deprecation state | [`docs/dependency-operations.md`](dependency-operations.md), `test/StreamDependencyRegistry.t.sol` |
 | `StreamCore` | ERC-721 ownership, collection configuration, metadata generation, dependency pins, burns, freeze manifests, and randomizer registration | [`docs/metadata.md`](metadata.md), `test/StreamMetadataFreeze.t.sol` |
-| `StreamMinter` | Mint phase gating and mint authority bridge into `StreamCore` | `test/StreamCoreMinting.t.sol`, `test/StreamEmergencyWithdraw.t.sol` |
+| `StreamMinter` | Mint phase gating and mint authority bridge into `StreamCore` | [`docs/adr/0001-drop-authorization.md`](adr/0001-drop-authorization.md), `test/StreamCoreMinting.t.sol`, `test/StreamEmergencyWithdraw.t.sol` |
 | `StreamDrops` | EIP-712 drop authorization, fixed-price mint execution, auction-drop creation, pull-payment credits, and consumed/cancelled drop IDs | [`docs/adr/0001-drop-authorization.md`](adr/0001-drop-authorization.md), `test/StreamDropAuthorization.t.sol` |
 | `StreamAuctions` | Auction escrow custody, bidding, settlement, cancellation, bidder/proceeds credits, and auction-local accounting | [`docs/auction-custody.md`](auction-custody.md), `test/StreamAuctionInvariant.t.sol` |
 | `StreamCuratorsPool` | Curator Merkle reward claims, delegation checks, reward credits, and curator-pool surplus boundaries | [`docs/adr/0003-payment-accounting.md`](adr/0003-payment-accounting.md), `test/StreamCuratorsPool.t.sol` |
@@ -47,6 +47,10 @@ The current local deployment rehearsal wires the following contracts:
 OpenZeppelin utility files retained in the repo are tracked separately in
 [`docs/vendored-libraries.md`](vendored-libraries.md) and
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md).
+
+In this document, `arRNG` means the external randomness controller consumed
+through `ArrngConsumer` by `NextGenRandomizerRNG`. Its concrete provider
+configuration is release evidence, not hard-coded protocol trust.
 
 ## Actor And Role Boundaries
 

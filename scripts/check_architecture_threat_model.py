@@ -278,7 +278,13 @@ def validate_architecture_threat_model(
             + ", ".join(missing_commands)
         )
 
-    links = linked_repo_paths(repo_root, documents)
+    architecture_links = linked_repo_paths(
+        repo_root, {architecture_path: documents[architecture_path]}
+    )
+    threat_links = linked_repo_paths(
+        repo_root, {threat_model_path: documents[threat_model_path]}
+    )
+    links = architecture_links | threat_links
     missing_targets = [
         target for target in REQUIRED_LINK_TARGETS if target not in links
     ]
@@ -290,12 +296,6 @@ def validate_architecture_threat_model(
 
     architecture_relative = normalize_repo_path(architecture_path, repo_root)
     threat_relative = normalize_repo_path(threat_model_path, repo_root)
-    architecture_links = linked_repo_paths(
-        repo_root, {architecture_path: documents[architecture_path]}
-    )
-    threat_links = linked_repo_paths(
-        repo_root, {threat_model_path: documents[threat_model_path]}
-    )
     if threat_relative not in architecture_links:
         raise ArchitectureThreatModelError(
             f"{architecture_relative} must link to {threat_relative}"

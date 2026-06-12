@@ -144,7 +144,7 @@ Refresh when the trust boundary changes.
 
 class ArchitectureThreatModelTests(unittest.TestCase):
     def test_accepts_committed_docs(self) -> None:
-        repo_root = Path.cwd()
+        repo_root = Path(__file__).resolve().parents[1]
 
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
             result = checker.main(["--repo-root", str(repo_root)])
@@ -247,6 +247,44 @@ class ArchitectureThreatModelTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.ArchitectureThreatModelError, "missing required content"
+            ):
+                checker.validate_architecture_threat_model(
+                    root,
+                    root / checker.DEFAULT_ARCHITECTURE,
+                    root / checker.DEFAULT_THREAT_MODEL,
+                )
+
+    def test_rejects_missing_architecture_to_threat_link(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_architecture_doc()
+            text = text.replace("Read the [threat model](threat-model.md).\n", "")
+            text = text.replace("- [docs/threat-model.md](../docs/threat-model.md)\n", "")
+            write_text(root / checker.DEFAULT_ARCHITECTURE, text)
+            write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
+
+            with self.assertRaisesRegex(
+                checker.ArchitectureThreatModelError, "must link to"
+            ):
+                checker.validate_architecture_threat_model(
+                    root,
+                    root / checker.DEFAULT_ARCHITECTURE,
+                    root / checker.DEFAULT_THREAT_MODEL,
+                )
+
+    def test_rejects_missing_threat_to_architecture_link(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
+            text = minimal_threat_model_doc()
+            text = text.replace("Read the [architecture](architecture.md).\n", "")
+            text = text.replace("- [docs/architecture.md](../docs/architecture.md)\n", "")
+            write_text(root / checker.DEFAULT_THREAT_MODEL, text)
+
+            with self.assertRaisesRegex(
+                checker.ArchitectureThreatModelError, "must link to"
             ):
                 checker.validate_architecture_threat_model(
                     root,

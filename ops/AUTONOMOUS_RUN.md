@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 15:54 UTC` |
+| Last updated | `2026-06-12 16:01 UTC` |
 
 ## Packaging Notes
 
@@ -143,7 +143,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add architecture and threat model audit docs (Queue Item 83)
 
-Status: PR #161 open; CI and CodeRabbit pending.
+Status: PR #161 CodeRabbit follow-up addressed locally; push and CI rerun
+pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/160`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/161`.
 CodeRabbit request: issue comment `4692872990`.
@@ -201,6 +202,11 @@ Implementation notes so far:
   reciprocal doc links, required evidence links, and missing linked files.
 - Wired the checker into Makefile, shell wrappers, CI, release-manifest
   governance docs, the audit package checker, and release/status/tooling docs.
+- Accepted CodeRabbit review comment `4692896209` by linking the `StreamMinter`
+  component row to ADR 0001, clarifying `arRNG`, anchoring the deployment
+  ceremony phrase in the deployment/release threat row, removing redundant
+  checker link scans, anchoring committed-doc tests to the script path, and
+  adding reciprocal-link rejection tests.
 
 Validation so far:
 
@@ -223,6 +229,16 @@ Validation so far:
   `docs/audit-package.md`, and `ops/ROADMAP.md`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- CodeRabbit follow-up validation: `python scripts\test_architecture_threat_model.py`,
+  `python scripts\check_architecture_threat_model.py`, targeted
+  `python -m py_compile`, `python scripts\test_audit_package.py`,
+  `python scripts\check_audit_package.py`, `python scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\test_release_checksums.py`,
+  `python scripts\generate_release_checksums.py --check`,
+  `python scripts\test_changelog_check.py`, `python scripts\check_changelog.py`,
+  `bash -n scripts/check.sh`, PowerShell parser check for `scripts\check.ps1`,
+  and `git diff --check`.
 
 ### PR candidate: Add external audit package index (Queue Item 82)
 
@@ -7512,6 +7528,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 16:01 | Address CodeRabbit PR #161 review | Accepted the low-risk review suggestions: add ADR evidence for `StreamMinter`, clarify `arRNG`, anchor deployment ceremony wording, precompute per-document links, anchor committed-doc tests to the script path, add reciprocal-link rejection tests, regenerate release evidence, and pass focused architecture/audit/manifest/checksum/changelog/syntax/whitespace validation |
 | 2026-06-12 15:54 | Open PR #161 and request CodeRabbit | Architecture/threat-model PR opened against `main`, linked `Closes #160`, requested CodeRabbit in comment `4692872990`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 15:52 | Finish local Queue Item 83 validation | Architecture/threat-model checker/tests, updated audit package checks, release manifest/checksum/changelog gates, Python compilation, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
 | 2026-06-12 15:36 | Start Queue Item 83 | Created issue #160 and selected the Gate F architecture/threat-model gap because the audit package index exists but still needs checked system and trust-boundary docs for external auditors |
