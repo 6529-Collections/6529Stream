@@ -7,8 +7,8 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,135 bytes,
-  leaving 441 bytes of EIP-170 headroom under the IR-optimized deployment
+  size gate. Current `StreamCore` production runtime size is 24,160 bytes,
+  leaving 416 bytes of EIP-170 headroom under the IR-optimized deployment
   profile. This satisfies the current 384-byte minimum release floor; future
   non-trivial `StreamCore` feature work should preserve at least 512 bytes of
   warning-threshold headroom or document an explicit size-budget exception.
@@ -82,14 +82,17 @@ The current Gate A smoke baseline proves:
   inputs, and non-HTTPS external library URLs.
   `StreamMetadataUtf8.t.sol` proves the shared strict UTF-8 scanner accepts
   valid ASCII and multibyte sequences, rejects invalid lead/continuation,
-  overlong, surrogate, out-of-range, and truncated sequences, and enforces that
-  `DependencyRegistry` rejects invalid UTF-8 dependency scripts/provenance
-  while preserving size-before-UTF-8 error ordering.
+  overlong, surrogate, out-of-range, and truncated sequences; enforces that
+  `DependencyRegistry` rejects invalid UTF-8 dependency scripts/provenance;
+  and enforces that `StreamCore` rejects invalid UTF-8 collection fields,
+  collection script chunks, token data, token image URIs, and token raw
+  attributes while preserving size-before-UTF-8 error ordering.
   `StreamCoreCustomErrors.t.sol` proves the typed failure selectors used to
   recover `StreamCore` bytecode headroom for function-admin authorization,
   artist-signature authorization, metadata-array length validation, and
   final-supply timing, plus missing collection data rejection before final
-  supply math.
+  supply math and the compact `TokenNotMinted()` selector used by Core metadata
+  views.
   `scripts/test_metadata_fixtures.py` and
   `scripts/check_metadata_fixtures.py` validate the committed metadata golden
   fixtures outside Foundry by strictly decoding JSON and HTML data URIs,
@@ -170,12 +173,10 @@ rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening, production dependency migration
-runbooks beyond the local artifact-manifest baseline, `StreamCore` production
-invalid UTF-8 enforcement, full browser execution sandbox automation,
-deployment discipline, and the broader P0/P1 test suite. Fixture-level invalid
-UTF-8 regressions and dependency registry production UTF-8 guards are now
-covered, but Core-level production UTF-8 enforcement remains size-gated in
-issue #125.
+runbooks beyond the local artifact-manifest baseline, full browser execution
+sandbox automation, deployment discipline, and the broader P0/P1 test suite.
+Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
+guards, and Core-level production UTF-8 guards are now covered.
 
 Contributor and security intake files exist so future work can be packaged and
 reviewed consistently, but they do not change the pre-audit status.

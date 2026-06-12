@@ -86,11 +86,12 @@ contributors who start from the README.
   unsafe URI inputs, and renderer helpers define the current content/script URI
   scheme policy for tests and fixture checks. Dependency registry writes now
   reject invalid UTF-8 dependency script chunks and provenance with typed field
-  errors while preserving size-before-UTF-8 error ordering.
+  errors while preserving size-before-UTF-8 error ordering. `StreamCore`
+  metadata writes now reject invalid UTF-8 collection fields, collection script
+  chunks, token data, token image URIs, and token raw attributes with typed
+  field errors while preserving size-before-UTF-8 ordering.
   Remaining metadata blockers include deployment migration runbooks beyond
-  registry provenance strings, full browser execution sandbox automation, and
-  `StreamCore` production invalid UTF-8 policy, which is size-gated under issue
-  #125.
+  registry provenance strings and full browser execution sandbox automation.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries.
@@ -98,8 +99,9 @@ contributors who start from the README.
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
-  `StreamCore` under EIP-170 with narrow deployment headroom, but deployment scripts,
-  manifests, and rehearsals still need to use this production profile.
+  `StreamCore` at 24,160 runtime bytes with 416 bytes of EIP-170 headroom, but
+  deployment scripts, manifests, and rehearsals still need to use this
+  production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

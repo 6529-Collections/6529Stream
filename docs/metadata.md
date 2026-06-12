@@ -54,10 +54,12 @@ images, collection base URIs, and external collection library URLs before
 storage. Fixture-level checks now reject invalid UTF-8 data URI payloads and
 non-semantic attribute entries in committed metadata golden files. Production
 dependency registry writes now reject invalid UTF-8 dependency script chunks
-and provenance before storage. `StreamCore` production invalid UTF-8 rejection,
-browser render-sandbox checks, production dependency migration runbooks beyond
-the local dependency artifact manifest baseline, stale randomness display, and
-live deployment release manifests remain open.
+and provenance before storage, and `StreamCore` production metadata writes now
+reject invalid UTF-8 before storage for collection text fields, collection
+script chunks, token data, token image URIs, and token raw attributes. Browser
+render-sandbox checks, production dependency migration runbooks beyond the
+local dependency artifact manifest baseline, stale randomness display, and live
+deployment release manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -91,8 +93,7 @@ script. This protects wrapper structure, but it does not sandbox artist
 now validates the committed golden fixtures for JSON/data-URI structure,
 strict UTF-8 decoding, current URI scheme policy, semantic attribute shape, and
 generated HTML wrapper/script boundaries. Full browser execution sandboxing plus
-`StreamCore` production invalid UTF-8 enforcement remain required before public
-beta.
+live browser execution proofing remain required before public beta.
 
 ## URI Policy
 
@@ -150,10 +151,10 @@ failed surface without parsing strings.
 ## UTF-8 Policy
 
 `StreamMetadataRenderer.isValidUtf8(raw)` exposes the shared strict UTF-8
-scanner used by the current production registry guard. The scanner accepts
-ASCII and valid 2-, 3-, and 4-byte UTF-8 sequences, and rejects lone
-continuation bytes, invalid continuation bytes, overlong encodings, surrogate
-encodings, code points above U+10FFFF, and truncated multibyte sequences.
+scanner used by production metadata guards. The scanner accepts ASCII and valid
+2-, 3-, and 4-byte UTF-8 sequences, and rejects lone continuation bytes,
+invalid continuation bytes, overlong encodings, surrogate encodings, code
+points above U+10FFFF, and truncated multibyte sequences.
 
 `DependencyRegistry` applies this policy to dependency script chunks and
 dependency provenance. Oversized values still fail with
@@ -161,10 +162,11 @@ dependency provenance. Oversized values still fail with
 checked; invalid in-limit values fail with
 `DependencyFieldInvalidUTF8(field)`.
 
-`StreamCore` does not yet apply the same production UTF-8 guard because the
-direct Core wiring exceeded the EIP-170 production size gate by 1,179 runtime
-bytes in local experiments. Core-level enforcement is tracked separately in
-[issue #125](https://github.com/6529-Collections/6529Stream/issues/125).
+`StreamCore` applies the same strict policy to collection display fields,
+collection base URI and library URL inputs, collection script chunks, token
+data, token image URI inputs, and token raw attributes. Oversized values fail
+first with `MetadataFieldTooLarge(field, actual, maximum)`; invalid in-limit
+values fail with `MetadataFieldInvalidUTF8(field)`.
 
 ## Golden Fixtures
 
@@ -357,12 +359,9 @@ cannot change frozen collection output.
 ADR 0006 requires future metadata work to add:
 
 - stale-state display policy
-- browser execution sandbox proofing for generated animation code; fixture-level
-  JSON/data-URI/HTML boundary checks now exist
+- browser execution sandbox proofing for generated animation code beyond the
+  fixture-level JSON/data-URI/HTML boundary checks
 - richer structured attributes if the protocol moves away from caller-authored
   raw fragments; production raw-attribute schema validation now exists
-- production invalid UTF-8 rejection for all `StreamCore` metadata inputs;
-  dependency registry production UTF-8 checks and fixture-level invalid UTF-8
-  checks now exist
 - production dependency migration runbooks beyond the local artifact-manifest
   baseline

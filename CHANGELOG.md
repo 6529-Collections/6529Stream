@@ -41,8 +41,11 @@ the release policy in `docs/release-policy.md`.
   empty or comma-separated objects with `trait_type` and `value` string fields.
 - Added a strict UTF-8 scanner and production dependency registry enforcement
   for dependency script chunks and provenance, with focused invalid-sequence and
-  size-before-UTF-8 tests. `StreamCore` metadata-input UTF-8 enforcement remains
-  a size-gated follow-up.
+  size-before-UTF-8 tests.
+- Added production `StreamCore` UTF-8 enforcement for collection metadata
+  fields, collection script chunks, token data, token image URIs, and token raw
+  attributes, with valid multibyte acceptance, invalid-sequence, field-specific
+  selector, direct-update-path, and size-before-UTF-8 tests.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.
@@ -61,6 +64,11 @@ the release policy in `docs/release-policy.md`.
   runtime to 24,135 bytes with 441 bytes of EIP-170 headroom.
 - Rejected `setFinalSupply` for collections with missing collection data using
   `CollectionDataMissing(collectionId)` before final supply math can underflow.
+- Recovered enough `StreamCore` bytecode for Core UTF-8 production enforcement
+  by moving reusable metadata guards into the linked renderer library and
+  replacing inherited `_requireMinted` string reverts with `TokenNotMinted()`;
+  the production IR-optimized runtime is now 24,160 bytes with 416 bytes of
+  EIP-170 headroom.
 
 ### Release Impact
 

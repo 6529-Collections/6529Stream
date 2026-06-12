@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-utf8-production` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/123` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/126` |
+| Active PR branch | `codex/core-utf8-headroom` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/126` |
+| Active PR | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-11 22:56 UTC` |
+| Last updated | `2026-06-11 23:08 UTC` |
 
 ## Packaging Notes
 
@@ -119,15 +119,81 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 62 | Add dependency artifact manifest packaging | Gate D/Gate G support | Implement issue #117 by adding deterministic dependency artifact descriptors, a generated release manifest, local/CI drift checks, release checksum coverage, docs, and roadmap traceability without Solidity bytecode changes | Merged in PR #118 |
 | 63 | Add metadata fixture UTF-8 and semantic attribute safety tests | Gate D/Gate G support | Implement issue #119 by adding focused fixture-checker regressions for invalid UTF-8 metadata/animation payloads and semantic attribute shape failures, and include issue #120's release-artifact LF pinning fix discovered during validation; docs and roadmap traceability, no Solidity bytecode changes | Merged in PR #121 |
 | 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Merged in PR #123 |
-| 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | In progress on `codex/metadata-utf8-production` |
+| 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | Merged in PR #126 |
+| 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Open in PR #127 |
 
 ## Current PR Worklog
 
-### PR candidate: Dependency registry UTF-8 enforcement (Queue Item 65)
+### PR candidate: Core UTF-8 enforcement headroom (Queue Item 66)
 
-Status: PR #126 open; focused checks, release checksum generation, full
-`make check`, Windows wrapper, release drift checks, and diff hygiene pass
-locally.
+Status: PR #127 open; CI and CodeRabbit pending.
+Branch: `codex/core-utf8-headroom`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/127`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/125`.
+Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
+
+Goal:
+
+- Enforce strict UTF-8 for `StreamCore` production metadata inputs covered by
+  existing size guards.
+- Preserve size-before-UTF-8 error ordering.
+- Keep valid ASCII and valid multibyte UTF-8 inputs accepted.
+- Keep `StreamCore` under the production EIP-170 size gate with documented
+  headroom evidence.
+- Update tests, status docs, roadmap traceability, changelog, and release
+  artifacts with deployable implementation evidence.
+
+Initial candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/StreamMetadataRenderer.sol`
+- `test/StreamMetadataUtf8.t.sol`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+- release artifacts after checksum refresh
+
+Implementation notes:
+
+- Reused the linked `StreamMetadataRenderer` library for size-aware production
+  guards: strict UTF-8 byte caps, content/script URI checks, raw-attribute UTF-8
+  checks, collection URI validation, generated `tokenURI` size validation,
+  contract marker probes, and metadata pause checks.
+- Updated `StreamCore` collection and token metadata mutation paths so
+  collection text fields, collection scripts, token data, token image values,
+  and token raw attributes reject invalid UTF-8 in production.
+- Preserved size-before-UTF-8 ordering by routing existing byte-limit checks
+  through the shared renderer guard before the UTF-8 scanner reports invalid
+  sequences.
+- Recovered final Core size headroom by replacing inherited `_requireMinted`
+  string reverts with the compact `TokenNotMinted()` selector for Core metadata
+  paths.
+
+Local evidence:
+
+- `forge test --match-path test/StreamMetadataUtf8.t.sol -vvv`: 12 tests pass.
+- `forge test --match-path test/StreamCoreCustomErrors.t.sol -vvv`: 6 tests
+  pass.
+- `forge test --match-path test/StreamMetadataUriPolicy.t.sol -vvv`: 8 tests
+  pass after fixing selector-preserving library reverts.
+- Production size measurement after implementation: `StreamCore` 24,160 runtime
+  bytes with 416 bytes of EIP-170 headroom.
+- `make release-checksums`: passes and refreshes deterministic release,
+  deployment, address-book, source-verification, and checksum artifacts.
+- `make check`: passes.
+- `scripts\check.ps1`: passes.
+- `forge fmt --check` on touched Solidity/test files and `git diff --check`
+  pass.
+
+### PR #126: Dependency registry UTF-8 enforcement (Queue Item 65)
+
+Status: Merged; CI passed and CodeRabbit posted pre-merge checks with no
+actionable review threads. Merge proceeded under the autonomous maintainer rule
+after CodeRabbit's commit status remained pending but no findings were present.
 Branch: `codex/metadata-utf8-production`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/126`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/124`.
@@ -194,6 +260,12 @@ Notes:
   implementation, new UTF-8 suite, docs updates, and release artifact refresh.
 - Windows `scripts\check.ps1` passes on the same narrowed slice, including the
   6-test `StreamMetadataUtf8.t.sol` suite and release artifact drift checks.
+
+Outcome:
+
+- Merged as PR #126 on `2026-06-11 23:07 UTC`.
+- Squash commit: `2865658049ca648f15048dc53862b650558e3da9`.
+- Issue #125 remains open for the `StreamCore` production UTF-8 slice.
 
 ### PR #123: Production raw attribute schema enforcement (Queue Item 64)
 
@@ -5766,6 +5838,13 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-11 23:54 | Open PR #127 for Queue Item 66 | Pushed `codex/core-utf8-headroom`, opened https://github.com/6529-Collections/6529Stream/pull/127 against `main`, linked it with `Closes #125`, and will use CI plus CodeRabbit review only per user instruction |
+| 2026-06-11 23:50 | Validate Queue Item 66 locally | Focused UTF-8/custom-error/URI-policy tests, release checksum regeneration, full `make check`, Windows `scripts\check.ps1`, touched-file `forge fmt --check`, and `git diff --check` pass; `StreamCore` remains 24,160 runtime bytes with 416 bytes of EIP-170 headroom |
+| 2026-06-11 23:46 | Fix selector-preserving renderer helper reverts | Full test coverage caught that reverting from offset `0x1c` returned the wrong selector for `bytes4` values already positioned for calldata; reverting from `0x00` restores the existing `Invalid*Contract()` and `MetadataMutationPaused()` typed selectors without changing Core size |
+| 2026-06-11 23:31 | Validate focused Queue Item 66 tests | The Core UTF-8 path now passes `forge test --match-path test/StreamMetadataUtf8.t.sol -vvv` with 12 tests and `forge test --match-path test/StreamCoreCustomErrors.t.sol -vvv` with 6 tests before the full local gate |
+| 2026-06-11 23:24 | Recover Core UTF-8 size path | Renderer-linked metadata guard consolidation plus the compact `TokenNotMinted()` selector keeps `StreamCore` deployable at 24,160 runtime bytes with 416 bytes of EIP-170 headroom while restoring production invalid UTF-8 rejection for Core metadata writes |
+| 2026-06-11 23:08 | Start Queue Item 66 | PR #126 merged as `2865658049ca648f15048dc53862b650558e3da9`; local `main` is synced, branch `codex/core-utf8-headroom` starts issue #125, and the first step is measuring bytecode-safe `StreamCore` UTF-8 enforcement paths |
+| 2026-06-11 23:07 | Merge PR #126 | CI passed, CodeRabbit posted walkthrough/pre-merge checks with no actionable review threads, Claude was not triggered per user instruction, and a stuck pending CodeRabbit status was documented before squash merge |
 | 2026-06-11 22:56 | Open PR #126 for Queue Item 65 | Pushed `codex/metadata-utf8-production`, opened https://github.com/6529-Collections/6529Stream/pull/126 against `main`, and linked it as part of issue #124 with Core enforcement split to issue #125 |
 | 2026-06-11 22:50 | Validate Queue Item 65 locally | Focused UTF-8 and dependency-registry tests, full `make check`, Windows `scripts\check.ps1`, release manifest/checksum drift checks, Bash syntax, and whitespace checks pass; this PR remains a dependency-registry slice with Core enforcement tracked in issue #125 |
 | 2026-06-11 22:45 | Run full Queue Item 65 local gate | `make check` passes after dependency registry UTF-8 enforcement, release artifact refresh, and the new UTF-8 suite; `StreamCore` remains 24,135 runtime bytes with 441 bytes of EIP-170 headroom |

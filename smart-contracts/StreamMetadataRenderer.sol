@@ -3,10 +3,16 @@
 pragma solidity ^0.8.19;
 
 import "./Base64.sol";
+import "./IStreamAdmins.sol";
 import "./Strings.sol";
 
 library StreamMetadataRenderer {
     using Strings for uint256;
+
+    error MetadataFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
+    error MetadataFieldInvalidUTF8(bytes32 field);
+    error UnsafeMetadataURI();
+    error UnsafeRawAttributes(uint256 tokenId);
 
     uint8 private constant _RAW_ATTRIBUTE_TRAIT_TYPE_KEY = 1;
     uint8 private constant _RAW_ATTRIBUTE_VALUE_KEY = 2;
@@ -42,6 +48,34 @@ library StreamMetadataRenderer {
                 )
             )
         );
+    }
+
+    function onchainTokenURIWithLimit(
+        string memory schemaVersion,
+        string memory metadataState,
+        string memory name,
+        string memory description,
+        string memory image,
+        string memory attributes,
+        string memory collectionLibrary,
+        string memory animationScript,
+        bool includeAnimation,
+        bytes32 field,
+        uint256 maximum
+    ) public pure returns (string memory tokenUri) {
+        tokenUri = onchainTokenURI(
+            schemaVersion,
+            metadataState,
+            name,
+            description,
+            image,
+            attributes,
+            collectionLibrary,
+            animationScript,
+            includeAnimation
+        );
+        uint256 actual = bytes(tokenUri).length;
+        if (actual > maximum) revert MetadataFieldTooLarge(field, actual, maximum);
     }
 
     function onchainMetadataJson(
@@ -376,6 +410,71 @@ library StreamMetadataRenderer {
         }
     }
 
+    function requireValidUtf8Bytes(bytes32 field, string memory value, uint256 maximum)
+        public
+        pure
+    {
+        uint256 actual = bytes(value).length;
+        if (actual > maximum) revert MetadataFieldTooLarge(field, actual, maximum);
+        if (!isValidUtf8(value)) revert MetadataFieldInvalidUTF8(field);
+    }
+
+    function requireValidUtf8ContentUri(
+        bytes32 field,
+        string memory uri,
+        uint256 maximum,
+        bool allowEmpty
+    ) public pure {
+        requireValidUtf8Bytes(field, uri, maximum);
+        if (!isSafeContentUri(uri, allowEmpty)) revert UnsafeMetadataURI();
+    }
+
+    function requireValidUtf8ScriptUri(
+        bytes32 field,
+        string memory uri,
+        uint256 maximum,
+        bool allowEmpty
+    ) public pure {
+        requireValidUtf8Bytes(field, uri, maximum);
+        if (!isSafeScriptUri(uri, allowEmpty)) revert UnsafeMetadataURI();
+    }
+
+    function requireValidCollectionUris(
+        bytes32 baseField,
+        string memory baseURI,
+        bytes32 libraryField,
+        string memory libraryUrl,
+        uint256 maximum
+    ) public pure {
+        requireValidUtf8ContentUri(baseField, baseURI, maximum, true);
+        requireValidUtf8ScriptUri(libraryField, libraryUrl, maximum, true);
+    }
+
+    function requireValidUtf8RawAttributes(
+        uint256 tokenId,
+        bytes32 field,
+        string memory raw,
+        uint256 maximum
+    ) public pure {
+        requireValidUtf8Bytes(field, raw, maximum);
+        if (!isSafeRawAttributes(raw)) revert UnsafeRawAttributes(tokenId);
+    }
+
+    function requireValidUtf8ByteChunks(
+        bytes32 countField,
+        bytes32 chunkField,
+        string[] memory chunks,
+        uint256 maxChunks,
+        uint256 maxChunkBytes
+    ) public pure {
+        if (chunks.length > maxChunks) {
+            revert MetadataFieldTooLarge(countField, chunks.length, maxChunks);
+        }
+        for (uint256 i = 0; i < chunks.length; i++) {
+            requireValidUtf8Bytes(chunkField, chunks[i], maxChunkBytes);
+        }
+    }
+
     function isSafeRawAttributes(string memory raw) public pure returns (bool) {
         bytes memory input = bytes(raw);
         if (input.length == 0) {
@@ -456,6 +555,27 @@ library StreamMetadataRenderer {
             mstore(ptr, selector)
             let success := staticcall(gas(), target, ptr, 4, ptr, 32)
             supported := and(and(success, gt(returndatasize(), 31)), eq(mload(ptr), 1))
+        }
+    }
+
+    function requireContractMarker(address target, bytes4 markerSelector, bytes4 errorSelector)
+        public
+        view
+    {
+        if (!supportsContractMarker(target, markerSelector)) {
+            assembly {
+                mstore(0x00, errorSelector)
+                revert(0x00, 0x04)
+            }
+        }
+    }
+
+    function requireNotPaused(address admins, bytes32 domain, bytes4 errorSelector) public view {
+        if (IStreamAdmins(admins).isPaused(domain)) {
+            assembly {
+                mstore(0x00, errorSelector)
+                revert(0x00, 0x04)
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import "./helpers/StreamFixture.sol";
 
 contract StreamCoreCustomErrorsTest is CharacterizationTestBase, StreamFixture {
     uint256 private constant COLLECTION_ID = 1;
+    uint256 private constant TOKEN_ID = 10_000_000_000;
     address private constant ARTIST = address(0xA11CE);
     address private constant UNAUTHORIZED = address(0xBAD);
 
@@ -58,6 +59,13 @@ contract StreamCoreCustomErrorsTest is CharacterizationTestBase, StreamFixture {
             abi.encodeWithSelector(StreamCore.CollectionDataMissing.selector, COLLECTION_ID)
         );
         core.setFinalSupply(COLLECTION_ID);
+    }
+
+    function testTokenMetadataStateUsesCustomErrorForUnmintedToken() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenNotMinted.selector));
+        deployed.core.tokenMetadataState(TOKEN_ID);
     }
 
     function _deployCoreWithCollectionInfoOnly() private returns (StreamCore core) {
