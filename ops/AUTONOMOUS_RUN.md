@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/dependency-migration-runbook` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/137` |
-| Active PR | Pending |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/138` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 04:27 UTC` |
+| Last updated | `2026-06-12 04:29 UTC` |
 
 ## Packaging Notes
 
@@ -131,12 +131,12 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Document dependency migration runbooks (Queue Item 71)
 
-Status: Local implementation and validation complete. Issue #136 selected after
-PR #137 merged and stale umbrella issues #25, #30, #45, #46, #47, #48, #51,
-and #124 were closed with evidence comments. Branch
-`codex/dependency-migration-runbook` started from `main` at PR #137 merge
-commit `40ce3e31bdf4a9d8b137d4923662d5d1b5a2fa2b`.
-PR: Pending.
+Status: PR #138 opened and CodeRabbit requested in PR comment `4687472511`.
+Issue #136 selected after PR #137 merged and stale umbrella issues #25, #30,
+#45, #46, #47, #48, #51, and #124 were closed with evidence comments. Branch
+`codex/dependency-migration-runbook` started from `main` at PR #137 merge commit
+`40ce3e31bdf4a9d8b137d4923662d5d1b5a2fa2b`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/138`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/136`.
 
 Goal:
