@@ -26,6 +26,9 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_release_artifacts.py
@@ -84,6 +87,12 @@ local emergency redeployment rehearsal that proves distinct old/replacement
 deployment versions, manifests, drop domains, contract addresses, Safe ceremony
 state, and replacement fixed-price mint smoke. It leaves fork/testnet
 broadcasting and retained live ceremony evidence for later Gate E work.
+
+The drop authorization tooling step validates both signed no-secret fixtures
+and unsigned payload-generator examples. The generator produces canonical
+EIP-712 typed data plus derived hashes for downstream signer comparison; it
+does not accept key material, does not sign, does not broadcast, and does not
+replace production signer custody or retained non-local signing evidence.
 
 The release artifact step is the first Gate G machine-readable artifact gate.
 It verifies that `release-artifacts/latest/` matches the production `via-ir`
@@ -258,6 +267,9 @@ python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/check_release_readiness.py
@@ -288,6 +300,9 @@ python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/check_release_readiness.py

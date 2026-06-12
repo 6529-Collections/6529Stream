@@ -1,0 +1,30 @@
+{
+  "schema_version": "6529stream.drop-authorization-payload-input.v1",
+  "description": "No-secret local auction payload template for generating unsigned StreamDrops EIP-712 typed data.",
+  "no_secret_policy": {
+    "key_material_included": false,
+    "mnemonic_included": false,
+    "production_payload": false
+  },
+  "domain": {
+    "chainId": 31337,
+    "verifyingContract": "0x100000000000000000000000000000000000dEaD"
+  },
+  "signer": "0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7",
+  "sale": {
+    "mode": "auction",
+    "poster": "0x0000000000000000000000000000000000001001",
+    "recipient": "0x0000000000000000000000000000000000000000",
+    "payer": "0x0000000000000000000000000000000000000000",
+    "collectionId": "7",
+    "price": "0",
+    "quantity": "1",
+    "auctionReservePrice": "5000000000000000000",
+    "auctionEndTime": "1893542400",
+    "salt": "4",
+    "nonce": "3",
+    "deadline": "1893456000",
+    "signerEpoch": "1",
+    "tokenData": "auction-data"
+  }
+}

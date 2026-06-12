@@ -55,6 +55,9 @@ metadata-fixtures-check:
 	$(PYTHON) scripts/check_rehearsal_metadata_browser_sandbox.py
 
 drop-authorization-fixtures-check:
+	$(PYTHON) scripts/test_drop_authorization_payload_generator.py
+	$(PYTHON) scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+	$(PYTHON) scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 	$(PYTHON) scripts/test_drop_authorization_fixtures.py
 	$(PYTHON) scripts/check_drop_authorization_fixtures.py
 

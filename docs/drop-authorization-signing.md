@@ -100,6 +100,42 @@ Every fixture includes:
 - no-secret policy flags;
 - failure cases that tie the fixture to expected revert paths.
 
+## Unsigned Payload Generator
+
+Use
+[`scripts/generate_drop_authorization_payload.py`](../scripts/generate_drop_authorization_payload.py)
+to produce canonical unsigned EIP-712 typed data from no-secret JSON input
+templates. The generator does not accept signing key material, does not sign,
+does not broadcast, and does not turn local evidence into production readiness.
+It emits the `typed_data`, `token_data`, `dropId`, `tokenDataHash`,
+`domainSeparator`, `structHash`, and `digest` that an external signer or
+signing service can compare before returning a signature.
+
+The maintained local templates and generated unsigned outputs are:
+
+| Input | Generated output | Sale mode |
+| --- | --- | --- |
+| [`fixed-price-input.json`](../test/fixtures/drop-authorization/payload-generator/fixed-price-input.json) | [`fixed-price-output.json`](../test/fixtures/drop-authorization/payload-generator/fixed-price-output.json) | fixed price |
+| [`auction-input.json`](../test/fixtures/drop-authorization/payload-generator/auction-input.json) | [`auction-output.json`](../test/fixtures/drop-authorization/payload-generator/auction-output.json) | auction |
+
+Check or regenerate the committed examples with:
+
+```sh
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+```
+
+The generator regression tests live in
+[`scripts/test_drop_authorization_payload_generator.py`](../scripts/test_drop_authorization_payload_generator.py).
+
+For production use, replace the placeholder `chainId`, `verifyingContract`,
+`signer`, recipient, poster, nonce, salt, deadline, and sale fields in a
+reviewed private working copy, then pass the generated typed data to the
+approved signing system. Retain the generated payload, signer identity, signer
+epoch, reviewer approval, returned signature, and command evidence separately
+under the non-local evidence process.
+
 ## Operator Signing Flow
 
 Use this flow for a real signing service or an offline ceremony:
@@ -201,6 +237,9 @@ Before any production drop signing ceremony, verify:
 ## Local Verification Commands
 
 ```sh
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/generate_release_manifest.py --check

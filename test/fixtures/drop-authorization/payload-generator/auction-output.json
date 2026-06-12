@@ -1,0 +1,139 @@
+{
+  "schema_version": "6529stream.drop-authorization-payload.v1",
+  "generated_by": "scripts/generate_drop_authorization_payload.py:1",
+  "description": "No-secret local auction payload template for generating unsigned StreamDrops EIP-712 typed data.",
+  "source": {
+    "input_schema": "6529stream.drop-authorization-payload-input.v1",
+    "generator": "scripts/generate_drop_authorization_payload.py",
+    "canonical_checker": "scripts/check_drop_authorization_fixtures.py",
+    "adr": "docs/adr/0001-drop-authorization.md"
+  },
+  "no_secret_policy": {
+    "key_material_included": false,
+    "mnemonic_included": false,
+    "production_payload": false
+  },
+  "signing_status": "unsigned",
+  "typed_data": {
+    "types": {
+      "EIP712Domain": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address"
+        }
+      ],
+      "DropAuthorization": [
+        {
+          "name": "dropId",
+          "type": "bytes32"
+        },
+        {
+          "name": "poster",
+          "type": "address"
+        },
+        {
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "name": "saleMode",
+          "type": "uint8"
+        },
+        {
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "name": "quantity",
+          "type": "uint256"
+        },
+        {
+          "name": "auctionReservePrice",
+          "type": "uint256"
+        },
+        {
+          "name": "auctionEndTime",
+          "type": "uint256"
+        },
+        {
+          "name": "salt",
+          "type": "uint256"
+        },
+        {
+          "name": "nonce",
+          "type": "uint256"
+        },
+        {
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "name": "signerEpoch",
+          "type": "uint256"
+        }
+      ]
+    },
+    "primaryType": "DropAuthorization",
+    "domain": {
+      "name": "6529StreamDrops",
+      "version": "1",
+      "chainId": 31337,
+      "verifyingContract": "0x100000000000000000000000000000000000dead"
+    },
+    "message": {
+      "dropId": "0xc50b282ae42c702592ad4b9517e1617527ea7e3e673b4bf986fe347a7b76615d",
+      "poster": "0x0000000000000000000000000000000000001001",
+      "recipient": "0x0000000000000000000000000000000000000000",
+      "payer": "0x0000000000000000000000000000000000000000",
+      "collectionId": "7",
+      "saleMode": 2,
+      "tokenDataHash": "0xd83698e2935334d9923e7900b579546d834706716a9605f6b95f499f0b88563d",
+      "price": "0",
+      "quantity": "1",
+      "auctionReservePrice": "5000000000000000000",
+      "auctionEndTime": "1893542400",
+      "salt": "4",
+      "nonce": "3",
+      "deadline": "1893456000",
+      "signerEpoch": "1"
+    }
+  },
+  "token_data": "auction-data",
+  "derived": {
+    "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+    "drop_id": "0xc50b282ae42c702592ad4b9517e1617527ea7e3e673b4bf986fe347a7b76615d",
+    "token_data_hash": "0xd83698e2935334d9923e7900b579546d834706716a9605f6b95f499f0b88563d",
+    "domain_separator": "0xaced18559f963adb99804b4c7ca4209355b2e434ba32eab5b033561df367efa0",
+    "struct_hash": "0xc5ff4c622cc02b028defc174e1159199e5b1a27f6d45cb835517579b01d5c0b2",
+    "digest": "0x418b788025cbe7047dcc9631f280bbfa9087367581c583698263528102b74182"
+  },
+  "operator_notes": [
+    "Submit typed_data and token_data to an external signer or signing service.",
+    "Retain the returned signature, signer identity, signer epoch, reviewer approval, and command evidence separately.",
+    "This artifact is local no-secret tooling evidence and is not a production readiness claim."
+  ]
+}

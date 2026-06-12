@@ -25,7 +25,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:3e5024d46840ff6c9638888d06dd6a656d0eb4ca713108768c50ad750359193a"
+    "sha256": "sha256:92c503648bdabe7e3ede8bfa8b9ff9c6ba1ce52f1fd668fff075d9ec5e8401ff"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -169,8 +169,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:d7712c6462e6306338bac75be47355f0bf6cc0d80c16118a23e5564218ba1894",
-      "size_bytes": 23874
+      "sha256": "sha256:b1a27af731648b4e4183d5b3326b19cabf673919cbe3b5f48e30490732c92dee",
+      "size_bytes": 23875
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -211,6 +211,26 @@
       "path": "test/fixtures/drop-authorization/fixed-price-eoa.json",
       "sha256": "sha256:1ad9336461c4cfbdd000eb40f8fa7066012d6b46cdd410106fd65cef1261b40e",
       "size_bytes": 5597
+    },
+    {
+      "path": "test/fixtures/drop-authorization/payload-generator/auction-input.json",
+      "sha256": "sha256:1a355e110651b5831f3640702cf76a3fa24ec91aeb95c1e13ab4fd78e6a417f3",
+      "size_bytes": 981
+    },
+    {
+      "path": "test/fixtures/drop-authorization/payload-generator/auction-output.json",
+      "sha256": "sha256:39e7afcea7b8d60152458e199bdfd9b901769099f34c9223a1f117e0311dffa9",
+      "size_bytes": 4222
+    },
+    {
+      "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-input.json",
+      "sha256": "sha256:bdd55465d0d789e987b57171b68733fddd8e4055fff2359c65b683b313994812",
+      "size_bytes": 954
+    },
+    {
+      "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+      "sha256": "sha256:a17ed42222d9784f2466fe5ffba807553cfd3bacf4578a5acf25d15550a2815e",
+      "size_bytes": 4191
     }
   ]
 }

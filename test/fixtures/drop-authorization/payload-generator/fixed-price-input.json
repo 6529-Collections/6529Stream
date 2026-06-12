@@ -1,0 +1,30 @@
+{
+  "schema_version": "6529stream.drop-authorization-payload-input.v1",
+  "description": "No-secret local fixed-price payload template for generating unsigned StreamDrops EIP-712 typed data.",
+  "no_secret_policy": {
+    "key_material_included": false,
+    "mnemonic_included": false,
+    "production_payload": false
+  },
+  "domain": {
+    "chainId": 31337,
+    "verifyingContract": "0x100000000000000000000000000000000000dEaD"
+  },
+  "signer": "0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7",
+  "sale": {
+    "mode": "fixed_price",
+    "poster": "0x0000000000000000000000000000000000001001",
+    "recipient": "0x0000000000000000000000000000000000005005",
+    "payer": "0x0000000000000000000000000000000000000000",
+    "collectionId": "1",
+    "price": "0",
+    "quantity": "1",
+    "auctionReservePrice": "0",
+    "auctionEndTime": "0",
+    "salt": "2",
+    "nonce": "1",
+    "deadline": "1893456000",
+    "signerEpoch": "1",
+    "tokenData": "data"
+  }
+}

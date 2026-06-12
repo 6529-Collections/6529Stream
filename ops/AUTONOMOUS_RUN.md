@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:26 UTC` |
+| Last updated | `2026-06-12 23:56 UTC` |
 
 ## Packaging Notes
 
@@ -154,7 +154,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
 
-Status: active local implementation; PR not opened yet.
+Status: locally validated; PR not opened yet.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/180`.
 PR: `TBD`.
 Branch: `codex/drop-authorization-payload-generator`.
@@ -195,6 +195,40 @@ Validation target:
 - `git diff --check`.
 - `make check` before PR unless an implementation-specific blocker is recorded
   here.
+
+Implementation summary:
+
+- Added `scripts/generate_drop_authorization_payload.py` as a no-secret CLI for
+  canonical unsigned fixed-price and auction EIP-712 payload artifacts.
+- Added deterministic fixed-price and auction input/output examples under
+  `test/fixtures/drop-authorization/payload-generator/`.
+- Added `scripts/test_drop_authorization_payload_generator.py` coverage for
+  committed-output drift, signed-fixture hash parity, sale-mode address rules,
+  stale output detection, missing fields, and secret-shaped input rejection.
+- Wired the generator into `make check`, Windows and Unix check scripts,
+  GitHub Actions, release-readiness/audit/incident/drop-authorization checkers,
+  release manifest/checksum artifacts, docs, changelog, and roadmap status.
+
+Local validation:
+
+- `python -m py_compile scripts\generate_drop_authorization_payload.py scripts\test_drop_authorization_payload_generator.py scripts\check_drop_authorization_fixtures.py scripts\check_audit_package.py scripts\check_incident_response.py scripts\check_release_readiness.py`
+- `python scripts\test_drop_authorization_payload_generator.py`
+- `python scripts\generate_drop_authorization_payload.py --input test\fixtures\drop-authorization\payload-generator\fixed-price-input.json --output test\fixtures\drop-authorization\payload-generator\fixed-price-output.json --check`
+- `python scripts\generate_drop_authorization_payload.py --input test\fixtures\drop-authorization\payload-generator\auction-input.json --output test\fixtures\drop-authorization\payload-generator\auction-output.json --check`
+- `python scripts\test_drop_authorization_fixtures.py`
+- `python scripts\check_drop_authorization_fixtures.py`
+- `python scripts\test_audit_package.py`
+- `python scripts\check_audit_package.py`
+- `python scripts\test_incident_response.py`
+- `python scripts\check_incident_response.py`
+- `python scripts\test_release_readiness.py`
+- `python scripts\check_release_readiness.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\check_changelog.py`
+- `git diff --check` passed with only the existing `scripts/check.ps1` LF/CRLF
+  warning.
+- `make check`
 
 Remote validation:
 

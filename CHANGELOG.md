@@ -83,6 +83,9 @@ the release policy in `docs/release-policy.md`.
 - Added no-secret drop authorization signing examples, deterministic EIP-712
   and ERC-1271 fixtures, local/CI fixture validation, and release
   manifest/checksum coverage for the signing evidence.
+- Added a no-secret drop authorization payload generator, fixed-price and
+  auction input/output examples, local/CI generator validation, and docs wiring
+  for unsigned EIP-712 payload evidence.
 - Added a release signature evidence schema, local placeholder bundle, and
   local/CI checker covering detached checksum signatures, signed Git tags,
   signer identity, retained verification artifacts, and no-secret redaction
