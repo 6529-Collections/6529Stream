@@ -41,6 +41,7 @@ if (-not $pythonPath) {
 
 forge build
 forge test -vvv
+forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_metadata_fixtures.py"
 & $pythonPath @pythonArgs "scripts\check_metadata_fixtures.py"

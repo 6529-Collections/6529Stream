@@ -19,6 +19,7 @@ GENERATOR_VERSION = "1"
 DEFAULT_OUTPUT = Path("release-artifacts/latest/release-manifest.json")
 DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 DEFAULT_BASELINE = Path("release-artifacts/baselines/v0.1.0/abi-surface.json")
+DEFAULT_GAS_SNAPSHOT = Path("release-artifacts/baselines/v0.1.0/gas-snapshot.snap")
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
@@ -280,6 +281,7 @@ def build_manifest(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -364,6 +366,7 @@ def build_manifest(
                 repo_root,
                 schema_required=True,
             ),
+            "gas_snapshot_baseline": file_record(gas_snapshot_path, repo_root),
         },
         "deployment_artifacts": {
             "configs": [
@@ -400,6 +403,7 @@ def build_output_text(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -415,6 +419,7 @@ def build_output_text(
         output_path,
         release_artifacts_dir,
         baseline_path,
+        gas_snapshot_path,
         contract_config_path,
         deployment_config_dir,
         deployment_broadcast_dir,
@@ -433,6 +438,7 @@ def write_output(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -448,6 +454,7 @@ def write_output(
         output_path,
         release_artifacts_dir,
         baseline_path,
+        gas_snapshot_path,
         contract_config_path,
         deployment_config_dir,
         deployment_broadcast_dir,
@@ -468,6 +475,7 @@ def check_output(
     output_path: Path,
     release_artifacts_dir: Path,
     baseline_path: Path,
+    gas_snapshot_path: Path,
     contract_config_path: Path,
     deployment_config_dir: Path,
     deployment_broadcast_dir: Path,
@@ -491,6 +499,7 @@ def check_output(
         output_path,
         release_artifacts_dir,
         baseline_path,
+        gas_snapshot_path,
         contract_config_path,
         deployment_config_dir,
         deployment_broadcast_dir,
@@ -525,6 +534,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--release-artifacts-dir", type=Path, default=DEFAULT_RELEASE_ARTIFACTS_DIR)
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    parser.add_argument("--gas-snapshot", type=Path, default=DEFAULT_GAS_SNAPSHOT)
     parser.add_argument("--contract-config", type=Path, default=DEFAULT_CONTRACT_CONFIG)
     parser.add_argument("--deployment-config-dir", type=Path, default=DEFAULT_DEPLOYMENT_CONFIG_DIR)
     parser.add_argument(
@@ -562,6 +572,7 @@ def main(argv: list[str]) -> int:
                 args.output,
                 args.release_artifacts_dir,
                 args.baseline,
+                args.gas_snapshot,
                 args.contract_config,
                 args.deployment_config_dir,
                 args.deployment_broadcast_dir,
@@ -577,6 +588,7 @@ def main(argv: list[str]) -> int:
             args.output,
             args.release_artifacts_dir,
             args.baseline,
+            args.gas_snapshot,
             args.contract_config,
             args.deployment_config_dir,
             args.deployment_broadcast_dir,

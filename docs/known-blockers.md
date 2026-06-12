@@ -132,7 +132,10 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist. The local deployment
+  bounded payment sequence invariant baseline now exist. A local gas snapshot
+  baseline now covers fixed-price mint, auction bid, auction settlement,
+  curator reward claim, final on-chain `tokenURI`, and dependency/script reads
+  under `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`. The local deployment
   rehearsal also includes an auction ceremony from signed auction drop through
   bid, settlement, proceeds withdrawal, and zero owed funds plus a local
   emergency redeployment rehearsal with distinct old/replacement manifests,

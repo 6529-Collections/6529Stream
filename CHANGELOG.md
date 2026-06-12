@@ -64,6 +64,9 @@ the release policy in `docs/release-policy.md`.
   local/CI checker so admin, signer, metadata-browser, auction, emergency
   redeployment, artifact, verification, and redaction evidence has a
   deterministic no-secret release format.
+- Added a committed local gas snapshot baseline for fixed-price mint, auction
+  bid, auction settlement, curator reward claim, final on-chain `tokenURI`, and
+  dependency/script reads, with local/CI drift checks.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

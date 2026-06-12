@@ -201,6 +201,11 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/release-checksums.json` bundle covers the current
   release artifact, dependency artifact source, broadcast fixture, deployment
   manifest, address-book, config, schema, and release-manifest files.
+- `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
+  release-artifacts/baselines/v0.1.0/gas-snapshot.snap` proves the committed
+  local gas snapshot still matches the focused Gate D operations for
+  fixed-price mint, auction bid, auction settlement, curator claim, final
+  on-chain `tokenURI`, and dependency/script reads.
 - `scripts/test_changelog_check.py` and `scripts/check_changelog.py` prove
   release-impacting branch changes include a non-placeholder `Unreleased`
   changelog entry before they can pass the local/CI gate.
@@ -219,7 +224,7 @@ HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata
 browser evidence, fork/testnet/live ceremony evidence contents,
 fork/testnet/live emergency redeployment evidence contents, deployment
-discipline, and the broader P0/P1 test suite.
+discipline, and broader supply/replay/freeze invariant coverage.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 

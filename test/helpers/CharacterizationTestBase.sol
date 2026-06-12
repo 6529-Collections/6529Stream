@@ -24,7 +24,9 @@ interface Vm {
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
     function parseJson(string calldata json) external pure returns (bytes memory);
+    function pauseGasMetering() external;
     function readFile(string calldata path) external view returns (string memory);
+    function resumeGasMetering() external;
 }
 
 abstract contract CharacterizationTestBase {

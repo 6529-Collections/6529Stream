@@ -34,6 +34,7 @@ def write_text(path: Path, value: str) -> None:
 def seed_release_tree(root: Path) -> dict[str, Path]:
     latest = root / "release-artifacts" / "latest"
     baseline = root / "release-artifacts" / "baselines" / "v0.1.0" / "abi-surface.json"
+    gas_snapshot = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-snapshot.snap"
     contract_config = root / "release-artifacts" / "contracts.json"
     deployment_config_dir = root / "deployments" / "config"
     deployment_broadcast_dir = root / "deployments" / "broadcasts"
@@ -102,6 +103,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         baseline,
         {"schema_version": "6529stream.abi-surface.v1", "contracts": {}},
     )
+    write_text(gas_snapshot, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
     write_json(
         deployment_config_dir / "anvil.json",
         {"schema_version": "6529stream.deployment-manifest-input.v1"},
@@ -174,6 +176,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     return {
         "latest": latest,
         "baseline": baseline,
+        "gas_snapshot": gas_snapshot,
         "contract_config": contract_config,
         "deployment_config_dir": deployment_config_dir,
         "deployment_broadcast_dir": deployment_broadcast_dir,
@@ -198,6 +201,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -214,6 +218,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -241,6 +246,10 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["dependency_artifact_manifest"]["schema_version"],
                 "6529stream.dependency-artifact-manifest.v1",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_snapshot_baseline"]["path"],
+                "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["broadcasts"][0]["path"],
@@ -279,6 +288,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -296,6 +306,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],
@@ -317,6 +328,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["output"],
                 paths["latest"],
                 paths["baseline"],
+                paths["gas_snapshot"],
                 paths["contract_config"],
                 paths["deployment_config_dir"],
                 paths["deployment_broadcast_dir"],
@@ -336,6 +348,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],
@@ -364,6 +377,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],
@@ -387,6 +401,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["output"],
                     paths["latest"],
                     paths["baseline"],
+                    paths["gas_snapshot"],
                     paths["contract_config"],
                     paths["deployment_config_dir"],
                     paths["deployment_broadcast_dir"],

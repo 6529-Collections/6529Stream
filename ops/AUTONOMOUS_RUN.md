@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/ceremony-evidence-schema` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/143` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/145` |
+| Active PR branch | `codex/local-gas-snapshot-baseline` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/145` |
+| Active PR | TBD for issue `https://github.com/6529-Collections/6529Stream/issues/146` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 08:44 UTC` |
+| Last updated | `2026-06-12 09:26 UTC` |
 
 ## Packaging Notes
 
@@ -129,14 +129,112 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | Merged in PR #139 |
 | 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Merged in PR #141 |
 | 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Merged in PR #143 |
-| 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | In progress on `codex/ceremony-evidence-schema` |
+| 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
+| 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | In progress on `codex/local-gas-snapshot-baseline` |
 
 ## Current PR Worklog
 
+### PR candidate: Add local gas snapshot baseline (Queue Item 76)
+
+Status: in progress on branch `codex/local-gas-snapshot-baseline`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/146`.
+Branch started from PR #145 squash merge commit
+`9f1c2578ab12097e945c7400a2f37df83608a092`.
+
+Goal:
+
+- Add deterministic local gas snapshot scenarios for fixed-price mint, auction
+  bid, auction settlement, curator reward claim, final on-chain `tokenURI`, and
+  dependency/script reads.
+- Commit the Foundry snapshot under
+  `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`.
+- Add `make gas-snapshot` and `make gas-snapshot-check`, then wire the check
+  into `make check`, Linux/Windows check wrappers, and CI.
+- Include the gas snapshot baseline in release manifest/checksum evidence.
+- Update docs, changelog, roadmap, test inventory, and this durable run state.
+- Keep fork/testnet/mainnet gas measurements and hard public gas budgets out of
+  scope for this local baseline.
+
+Initial candidate files:
+
+- `test/StreamGasSnapshot.t.sol`
+- `test/helpers/CharacterizationTestBase.sol`
+- `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `.github/workflows/ci.yml`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `docs/tooling.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `docs/release-policy.md`
+- `release-artifacts/README.md`
+- `test/README.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation plan:
+
+- `forge fmt test\StreamGasSnapshot.t.sol test\helpers\CharacterizationTestBase.sol`
+- `forge test --match-path test\StreamGasSnapshot.t.sol -vvv`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --snap release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\generate_release_manifest.py scripts\test_release_manifest.py`
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`
+- Full local `make check`
+- PowerShell parser check and `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Current implementation notes:
+
+- Added `test/StreamGasSnapshot.t.sol` with setup gas metering paused and one
+  measured call per scenario.
+- Added Foundry gas metering cheatcodes to the local test VM interface.
+- Added Makefile, Linux wrapper, Windows wrapper, and CI gas snapshot checks.
+- Generated `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` from the
+  focused local test file.
+- Updated release manifest generation/tests to include the gas snapshot
+  baseline as a release artifact, and documented the baseline in tooling,
+  release, status, blocker, test, roadmap, and changelog docs.
+
+Validation completed:
+
+- `forge fmt test\StreamGasSnapshot.t.sol test\helpers\CharacterizationTestBase.sol`
+- `forge test --match-path test\StreamGasSnapshot.t.sol -vvv`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --snap release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py`
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`
+- PowerShell parser checks for `scripts\check.ps1` and `scripts\bootstrap-windows.ps1`
+- `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
 ### PR candidate: Add deployment ceremony evidence bundle schema (Queue Item 75)
 
-Status: open in PR #145; CodeRabbit requested in comment `4689045122`;
-CodeRabbit follow-up fixes validated locally and pending push.
+Status: merged in PR #145 after CI and CodeRabbit success.
 Branch started from PR #143 squash merge commit
 `6dd5846122ebca965a0f1bcefac0386f0ab0cb60`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/144`.
@@ -6683,6 +6781,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 09:26 | Finish local Queue Item 76 validation | Focused gas snapshot test and snapshot regeneration/check pass, release manifest/checksum/changelog drift checks pass, full `make check` and Windows `scripts\check.ps1` pass, and `git diff --check` is clean aside from normal line-ending notices |
+| 2026-06-12 09:08 | Select Queue Item 76 | PR #145 merged as `9f1c2578ab12097e945c7400a2f37df83608a092` and issue #144 closed completed; no open GitHub issues remained, so issue #146 now scopes the next no-secret Gate D/G gap as a committed local gas snapshot baseline |
 | 2026-06-12 08:44 | Address CodeRabbit PR #145 review | Accepted the two actionable comments and two low-cost nitpicks: CI py_compile now covers ceremony scripts, tooling docs include the test step, non-local ceremony evidence is scoped as future work, secret-like value detection has a regression, release artifacts were regenerated, and focused/full local gates plus the Windows wrapper pass |
 | 2026-06-12 08:16 | Open PR #145 and request CodeRabbit | Pushed `codex/ceremony-evidence-schema`, opened https://github.com/6529-Collections/6529Stream/pull/145 against `main`, linked `Closes #144`, requested CodeRabbit in comment `4689045122`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 08:13 | Finish local Queue Item 75 validation | Focused ceremony evidence/release/changelog checks, py_compile, Bash syntax check, full `make check`, PowerShell parser check, and Windows wrapper all pass locally; CI and CodeRabbit remain pending until PR creation |

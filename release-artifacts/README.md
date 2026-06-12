@@ -7,6 +7,7 @@ Run after the production build profile:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
+forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_release_artifacts.py
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_dependency_artifact_manifest.py
@@ -23,6 +24,7 @@ Check the committed artifacts without rewriting them:
 ```sh
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_dependency_artifact_manifest.py
@@ -87,6 +89,13 @@ It captures the current production contract function, event, custom error,
 constructor, fallback, and receive surface. The check fails on removed or
 changed entries and reports additive entries as compatible for this first
 release baseline.
+
+`baselines/v0.1.0/gas-snapshot.snap` is the local Foundry gas snapshot for the
+Gate D operations. It is generated with `forge snapshot --match-path
+test/StreamGasSnapshot.t.sol --snap
+release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and checked with the same
+command's `--check` form. The snapshot intentionally covers deterministic local
+tests only; fork/testnet/mainnet gas measurements remain a later release step.
 
 The generator uses Foundry's `cast sig-event` for Ethereum event topics and
 Foundry artifact `methodIdentifiers` for function selectors and interface IDs.

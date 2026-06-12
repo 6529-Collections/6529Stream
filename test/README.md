@@ -85,6 +85,14 @@ category totals, `totalOwed()` views, balance coverage, reserves, and
 payment surfaces. The invariant suite also checks ADR-style local-ledger view
 aliases such as `totalReserved()` and `surplus()` where those surfaces apply.
 
+`StreamGasSnapshot.t.sol` provides the local Gate D gas snapshot surface. The
+committed baseline at `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`
+is generated and checked with `forge snapshot --match-path
+test/StreamGasSnapshot.t.sol`; it isolates setup with Foundry gas-metering
+cheatcodes and records fixed-price mint, auction bid, auction settlement,
+curator reward claim, final on-chain `tokenURI`, and dependency/script read
+operations.
+
 Admin permission tests now include P0-ADMIN-001 target-state coverage in
 `StreamAdminSelectors.t.sol` and `StreamAdmins.t.sol`: function-admin grants are
 scoped by account, target contract, and selector; wrong selectors and same
