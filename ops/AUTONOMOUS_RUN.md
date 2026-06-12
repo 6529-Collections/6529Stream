@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/protocol-incident-response-runbooks` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/174` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/173` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/175` |
+| Active PR branch | `codex/reconcile-incident-response-runbook` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/175` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/176` |
+| Active PR | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 21:41 UTC` |
+| Last updated | `2026-06-12 22:07 UTC` |
 
 ## Packaging Notes
 
@@ -145,13 +145,41 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Merged in PR #169 |
 | 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | Merged in PR #171 |
 | 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | Merged in PR #174 |
-| 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | PR #175 open; waiting for CI and CodeRabbit |
+| 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | Merged in PR #175 |
+| 91 | Reconcile roadmap after incident response runbook merge | Gate G support | Implement issue #176 by marking PR #175 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and selecting the next signing examples target | In progress locally; PR not opened yet |
+| 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Planned next after Queue Item 91 |
 
 ## Current PR Worklog
 
+### PR candidate: Reconcile roadmap after incident response runbook merge (Queue Item 91)
+
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/176`.
+PR: `TBD`.
+Branch: `codex/reconcile-incident-response-runbook`.
+Branch started from PR #175 squash merge commit
+`4be2808e9e6f654143794d4db29f455eabff3a70`.
+
+Goal:
+
+- Mark Queue Item 90 and PR #175 as merged with final CI and CodeRabbit
+  evidence.
+- Refresh `ops/ROADMAP.md` verification metadata from the older PR #171
+  baseline to the PR #175 incident-response baseline.
+- Add Queue Item 92 for issue #177 so the autonomous run can continue into
+  no-secret EIP-712/ERC-1271 signing examples and fixtures.
+- Keep the change documentation/state-only with no Solidity, CI, checker, or
+  release-artifact changes.
+
+Validation target:
+
+- `rg -n "Last verified|CI run|Queue Item 91|Queue Item 92|PR #175|#177" ops\AUTONOMOUS_RUN.md ops\ROADMAP.md`
+- `git diff --check`
+
 ### PR candidate: Add protocol incident response runbooks (Queue Item 90)
 
-Status: PR #175 open; waiting for CI and CodeRabbit.
+Status: merged in PR #175 as
+`4be2808e9e6f654143794d4db29f455eabff3a70`; issue #173 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/173`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/175`.
 CodeRabbit request: issue comment `4695671204`.
@@ -160,6 +188,10 @@ Branch started from PR #174 squash merge commit
 `074ac3eb510ccafa593812677e6c26cbed4171b1`.
 Head before CodeRabbit follow-up:
 `08466151647bed25277feb454191f88d00609da7`.
+Final head: `574804b6421c5658001839d483dd5a24dcbb2ad8`.
+Squash merge commit: `4be2808e9e6f654143794d4db29f455eabff3a70`.
+CI run: `27445423380`.
+CodeRabbit status: success; one minor alignment thread resolved by the bot.
 
 Goal:
 
@@ -221,8 +253,22 @@ Validation target:
 
 Remote validation:
 
-- GitHub Actions CI pending on PR #175.
-- CodeRabbit review requested in issue comment `4695671204`; review pending.
+- Initial GitHub Actions CI run `27444730234` passed on head
+  `08466151647bed25277feb454191f88d00609da7`.
+- CodeRabbit requested two alignment fixes; follow-up commit
+  `db49a0e73f6a840cdea8b59876cf27b8af34a2ad` added curator-claim/drop-pause
+  wording and synchronized the release-readiness local/CI gates row.
+- GitHub Actions CI run `27445168296` failed because the release-readiness
+  wording changed governance-document hashes without regenerating release
+  manifest/checksum artifacts.
+- Follow-up commit `574804b6421c5658001839d483dd5a24dcbb2ad8` refreshed the
+  release manifest and checksum artifacts.
+- Final GitHub Actions CI run `27445423380` passed on head
+  `574804b6421c5658001839d483dd5a24dcbb2ad8`.
+- CodeRabbit status was success; the visible review thread was resolved by the
+  bot, and all five pre-merge checks passed.
+- PR #175 squash-merged as
+  `4be2808e9e6f654143794d4db29f455eabff3a70`; issue #173 closed completed.
 
 Implementation notes:
 
@@ -8290,6 +8336,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 22:07 | Create issues #176 and #177 and select Queue Item 91 | After PR #175 merged and issue #173 closed completed, the durable state and roadmap verification metadata needed a state-only reconciliation before implementing the next no-secret drop-authorization signing examples and fixtures target |
+| 2026-06-12 22:05 | Merge PR #175 | Protocol incident-response runbook merged as `4be2808e9e6f654143794d4db29f455eabff3a70`; final head `574804b6421c5658001839d483dd5a24dcbb2ad8` passed CI run `27445423380`, CodeRabbit status was success with the visible thread resolved, and issue #173 closed completed |
 | 2026-06-12 21:41 | Open PR #175 and request CodeRabbit | Incident-response runbook PR opened against `main`, linked `Closes #173`, pushed head `0a0a49be0ab2adc3b1141389a52d1e8523865945`, requested CodeRabbit in comment `4695671204`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 21:38 | Prepare Queue Item 90 for PR | Incident-response runbook, docs checker, CI/wrapper wiring, release manifest/checksum refresh, docs links, roadmap/changelog updates, focused checks, `git diff --check`, and `make check` all pass locally |
 | 2026-06-12 21:13 | Start Queue Item 90 | PR #174 merged, issue #172 closed completed, and issue #173 is the next active no-secret Gate E/G docs and operations slice |

@@ -75,12 +75,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 20:56 UTC` after PR #171 / Queue Item 88 non-local release evidence schema/template/checker/tests, release-manifest/checksum integration, docs/roadmap updates, Python compilation, Bash and PowerShell syntax checks, whitespace check, focused release evidence checks, full `make check`, GitHub Actions CI run `27442075849`, and CodeRabbit success |
-| OS tested | Windows local for Queue Item 88 focused checks and full `make check`; Linux GitHub Actions CI run `27442075849` for PR #171 |
+| Last verified | `2026-06-12 22:05 UTC` after PR #175 / Queue Item 90 protocol incident-response runbook, checker/tests, local/CI wiring, release-manifest/checksum integration, docs/roadmap updates, focused release-readiness and release-artifact checks, full `make check`, GitHub Actions CI run `27445423380`, and CodeRabbit success |
+| OS tested | Windows local for Queue Item 90 focused checks and full `make check`; Linux GitHub Actions CI run `27445423380` for PR #175 |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | `27442075849` for PR #171 on head `7050e0ea474c507126c4d2e11744e8b61fd3ab52`; CodeRabbit status was success with no actionable comments |
+| CI run | `27445423380` for PR #175 on final head `574804b6421c5658001839d483dd5a24dcbb2ad8`; CodeRabbit status was success with the visible review thread resolved |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -598,9 +598,11 @@ later sections.
 
 - Add deployment scripts and post-deployment checklists.
 - Maintain the no-secret incident-response runbook for stuck auctions, failed
-  randomness, bad Merkle roots, bad metadata/dependency configuration, failed
-  payouts, signer compromise, and release artifact/evidence mistakes. Tracked
-  by [`#173`](https://github.com/6529-Collections/6529Stream/issues/173).
+  randomness, bad Merkle roots, bad curator claims,
+  bad metadata/dependency configuration, failed payouts, signer compromise,
+  drop-pause decisions, and release artifact/evidence mistakes. Implemented by
+  [`#173`](https://github.com/6529-Collections/6529Stream/issues/173) /
+  [PR #175](https://github.com/6529-Collections/6529Stream/pull/175).
 - Monitor admin changes, pending randomness, pending auctions, curator pool
   balances, and failed claims.
 - Document the trust model and accepted risks publicly.
