@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../script/RehearseDeployment.s.sol";
 import "../script/RehearseAuctionCeremony.s.sol";
+import "../script/RehearseEmergencyRedeployment.s.sol";
 import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
@@ -117,5 +118,65 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             keccak256(bytes("local-anvil-auction-ceremony")),
             "evidence kind"
         );
+    }
+
+    function testLocalEmergencyRedeploymentRehearsalProducesReplacementEvidence() public {
+        vm.chainId(31_337);
+        RehearseEmergencyRedeployment rehearsor = new RehearseEmergencyRedeployment();
+
+        RehearseEmergencyRedeployment.EmergencyRedeploymentResult memory result = rehearsor.run();
+
+        Assertions.assertEq(result.chainId, 31_337, "chain id not recorded");
+        Assertions.assertEq(
+            result.evidenceKindHash,
+            keccak256(bytes("local-anvil-emergency-redeployment")),
+            "evidence kind"
+        );
+        Assertions.assertEq(
+            result.oldLifecycleStateHash, keccak256(bytes("EmergencySuperseded")), "old lifecycle"
+        );
+        Assertions.assertEq(
+            result.replacementLifecycleStateHash, keccak256(bytes("Rehearsed")), "new lifecycle"
+        );
+        Assertions.assertEq(
+            result.oldDeploymentVersionHash,
+            keccak256(bytes("anvil-6529stream-v0.1.0-001")),
+            "old version"
+        );
+        Assertions.assertEq(
+            result.replacementDeploymentVersionHash,
+            keccak256(bytes("anvil-6529stream-v0.1.0-emergency-002")),
+            "replacement version"
+        );
+        Assertions.assertTrue(result.oldManifestHash != bytes32(0), "old manifest missing");
+        Assertions.assertTrue(
+            result.replacementManifestHash != bytes32(0), "replacement manifest missing"
+        );
+        Assertions.assertTrue(
+            result.oldManifestHash != result.replacementManifestHash, "manifest reused"
+        );
+        Assertions.assertTrue(
+            result.oldDropDomainSeparator != result.replacementDropDomainSeparator,
+            "drop domain reused"
+        );
+        Assertions.assertEq(
+            result.adminSafe, address(0x0000000000000000000000000000000000006529), "admin safe"
+        );
+        Assertions.assertEq(result.tdhSigner, vm.addr(0xA11CE), "signer");
+        Assertions.assertTrue(result.oldCore != result.replacementCore, "core reused");
+        Assertions.assertTrue(result.oldDrops != result.replacementDrops, "drops reused");
+        Assertions.assertTrue(result.oldAuctions != result.replacementAuctions, "auctions reused");
+        Assertions.assertEq(result.oldCollectionId, 1, "old collection");
+        Assertions.assertEq(result.replacementCollectionId, 1, "replacement collection");
+        Assertions.assertEq(result.replacementTokenId, 10_000_000_000, "replacement token");
+        Assertions.assertEq(
+            result.replacementTokenOwner,
+            address(0x00000000000000000000000000000000000065E2),
+            "replacement token owner"
+        );
+        Assertions.assertTrue(
+            result.replacementTokenHash != bytes32(0), "replacement token hash missing"
+        );
+        Assertions.assertEq(result.replacementSignerEpoch, 1, "replacement signer epoch");
     }
 }

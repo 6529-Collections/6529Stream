@@ -126,10 +126,17 @@ The current Gate A smoke baseline proves:
   revoke the temporary deployment admin, parse the deployment manifest
   schema/example JSON artifacts, and run a local auction ceremony from signed
   auction drop through active auction custody, bid escrow, with-bid settlement,
-  poster/protocol/curator proceeds withdrawals, and zero owed funds.
+  poster/protocol/curator proceeds withdrawals, and zero owed funds. It also
+  proves a local emergency redeployment rehearsal with distinct
+  old/replacement deployment versions, manifests, drop EIP-712 domains, core,
+  drops, and auction addresses, Safe-rooted admin ceremony state on both
+  deployments, temporary deployer-admin removal, and a replacement fixed-price
+  mint smoke path.
 - `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
   and
   `forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`
+  and
+  `forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`
   execute as part of the local/CI smoke gate.
 - `scripts/test_release_artifacts.py` and
   `scripts/generate_release_artifacts.py --check` prove the committed
@@ -202,8 +209,9 @@ detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata
-browser evidence, fork/testnet/live ceremony evidence, deployment discipline,
-and the broader P0/P1 test suite.
+browser evidence, fork/testnet/live ceremony evidence, fork/testnet/live
+emergency redeployment evidence, deployment discipline, and the broader P0/P1
+test suite.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 

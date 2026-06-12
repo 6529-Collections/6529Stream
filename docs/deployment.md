@@ -10,6 +10,7 @@ Run the local deployment rehearsal with:
 ```sh
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
+forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
 ```
 
 The script deploys and wires a local stack:
@@ -42,6 +43,17 @@ proceeds, and asserts the auction contract returns to zero owed funds. The
 returned evidence is local Anvil evidence only; fork, testnet, and production
 broadcast ceremonies must still retain their own manifests and transaction
 evidence.
+
+`script/RehearseEmergencyRedeployment.s.sol` adds the local emergency
+redeployment layer required by ADR 0007. It deploys an impacted historical
+stack and a replacement stack with a distinct deployment version, proves the
+manifest hashes, drop EIP-712 domains, and core/drops/auction addresses differ,
+confirms both ceremonies transfer ownership to the configured Safe placeholder
+and remove temporary deployer admin authority, then mints a fixed-price drop on
+the replacement stack through the EIP-712 authorization path with a deterministic
+randomizer. This is local Anvil evidence only; fork, testnet, and production
+emergency redeployments still need their own retained manifests, broadcast
+evidence, verification evidence, and incident/runbook records.
 
 Run the local metadata browser rehearsal with:
 
@@ -187,6 +199,7 @@ Before a deployment can become public-beta eligible:
 - Revoke temporary deployment admin grants.
 - Run a dry-run fixed-price mint.
 - Run a dry-run auction drop, bid, settlement, and withdrawal.
+- Run the local emergency redeployment rehearsal.
 - Retain constructor args and verification inputs.
 - Generate and check source verification inputs.
 - Generate and check dependency artifact manifests.
@@ -199,5 +212,5 @@ Before a deployment can become public-beta eligible:
 
 Live fork/testnet broadcast, production broadcast retention, contract
 verification, event topic catalog publication against a live deployment,
-fork/testnet/live ceremony evidence, and emergency redeployment rehearsal remain
-Gate E follow-up work.
+fork/testnet/live ceremony evidence, and fork/testnet/live emergency
+redeployment evidence remain Gate E follow-up work.
