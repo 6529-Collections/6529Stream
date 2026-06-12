@@ -215,7 +215,7 @@ def validate_network(value: Any) -> str:
     environment = require_enum(network.get("environment"), "network.environment", ENVIRONMENTS)
     require_string(network.get("name"), "network.name")
     require_positive_int(network.get("chain_id"), "network.chain_id")
-    require_int(network.get("confirmation_depth"), "network.confirmation_depth")
+    require_nonnegative_int(network.get("confirmation_depth"), "network.confirmation_depth")
     return environment
 
 
@@ -264,7 +264,7 @@ def validate_provider(value: Any, repo_root: Path, path: str) -> dict[str, Any]:
         provider.get("evidence"),
         repo_root,
         f"{path}.evidence",
-        required=funding_status == "funded",
+        required=False,
     )
     return {
         "adapter": adapter,

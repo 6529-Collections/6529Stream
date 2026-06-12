@@ -233,6 +233,17 @@ class RandomizerOperationsTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.RandomizerOperationsError, "secret-like"):
                 checker.validate_evidence(path, root)
 
+    def test_negative_confirmation_depth_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["network"]["confirmation_depth"] = -1
+            path = root / "deployments/randomizer-operations/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(checker.RandomizerOperationsError, "zero or greater"):
+                checker.validate_evidence(path, root)
+
     def test_non_local_cannot_use_local_funding_status(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -251,10 +262,27 @@ class RandomizerOperationsTests(unittest.TestCase):
             evidence["network"]["environment"] = "production"
             evidence["provider_configuration"]["vrf"]["funding_status"] = "funded"
             evidence["provider_configuration"]["arrng"]["funding_status"] = "funded"
+            evidence["retained_artifacts"].extend(
+                [
+                    {
+                        **file_ref(root, "deployments/evidence/provider-config.json"),
+                        "category": "provider_configuration",
+                    },
+                    {
+                        **file_ref(root, "deployments/evidence/provider-funding.json"),
+                        "category": "provider_funding",
+                    },
+                    {
+                        **file_ref(root, "deployments/evidence/provider-health.json"),
+                        "category": "provider_health",
+                    },
+                ]
+            )
+            evidence["provider_configuration"]["vrf"]["evidence"] = []
             path = root / "deployments/randomizer-operations/example.json"
             write_json(path, evidence)
 
-            with self.assertRaisesRegex(checker.RandomizerOperationsError, "provider_funding"):
+            with self.assertRaisesRegex(checker.RandomizerOperationsError, "requires funding evidence"):
                 checker.validate_evidence(path, root)
 
     def test_duplicate_retained_category_fails(self) -> None:

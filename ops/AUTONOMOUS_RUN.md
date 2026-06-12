@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/155` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 13:13 UTC` |
+| Last updated | `2026-06-12 13:32 UTC` |
 
 ## Packaging Notes
 
@@ -140,10 +140,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add randomizer operations evidence bundle (Queue Item 80)
 
-Status: PR #155 open with CodeRabbit requested.
+Status: PR #155 open with CodeRabbit follow-up fixes prepared.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/154`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/155`.
-CodeRabbit request: issue comment `4691619335`.
+CodeRabbit requests: issue comments `4691619335` and `4691631125`.
 Branch: `codex/randomizer-operations-evidence`.
 Branch started from PR #153 squash merge commit
 `551185c6399d79c74321d2e4fb128cbb29c4a8e7`.
@@ -204,6 +204,10 @@ Implementation notes:
   `deployments/schema/`.
 - Wired the checker into Makefile, Unix and Windows check wrappers, CI, release
   manifest, and release checksum coverage.
+- Addressed CodeRabbit follow-up by rejecting negative confirmation depths,
+  isolating the production provider-funding evidence test from retained-category
+  failures, and leaving production requirements as the operator-facing funding
+  evidence gate.
 
 Validation:
 
@@ -220,6 +224,16 @@ Validation:
 - `git diff --check`
 - `make check`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+CodeRabbit follow-up validation:
+
+- `python scripts\test_randomizer_operations.py`
+- `python scripts\check_randomizer_operations.py`
+- `python -m py_compile scripts\check_randomizer_operations.py scripts\test_randomizer_operations.py`
+- `python scripts\test_release_manifest.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_checksums.py --check`
 
 ### PR candidate: Add request-level randomizer reserve lifecycle tests (Queue Item 79)
 
