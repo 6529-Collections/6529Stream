@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/auction-consistency-invariants` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/149` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/151` |
+| Active PR branch | `codex/randomizer-reserve-lifecycle-tests` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/151` |
+| Active PR | TBD for Queue Item 79 |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 11:52 UTC` |
+| Last updated | `2026-06-12 12:29 UTC` |
 
 ## Packaging Notes
 
@@ -132,17 +132,109 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
 | 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
 | 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | Merged in PR #149 |
-| 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Open PR #151 |
+| 78 | Add auction consistency invariant baseline | Gate D | Implement issue #150 by adding bounded sequence coverage for auction registration, custody, bids, outbids, cancellation, terminal settlement, proceeds/credits, and invalid-operation preservation, with docs/roadmap/run-state updates | Merged in PR #151 |
+| 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | In progress |
 
 ## Current PR Worklog
 
+### PR candidate: Add request-level randomizer reserve lifecycle tests (Queue Item 79)
+
+Status: local validation complete; ready to open PR.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/152`.
+PR: TBD.
+Branch: `codex/randomizer-reserve-lifecycle-tests`.
+Branch started from PR #151 squash merge commit
+`e7de312e9a74cee5bd9d47edb7bd974421bee17b`.
+
+Goal:
+
+- Add focused local Gate D coverage for request-level
+  `NextGenRandomizerRNG` provider reserve accounting.
+- Prove arRNG request-cost spending decreases the adapter reserve by the
+  configured provider cost while the remaining reserve stays represented by
+  `totalRandomnessReserved()`, `totalOwed()`, and `totalReserved()`.
+- Cover multiple pending requests, fulfilled requests, stale marking, failed
+  post-processing, deterministic retry, forced ETH during a pending request,
+  and unauthorized emergency-withdrawal attempts.
+- Update changelog, test inventory, project status, roadmap traceability, and
+  this durable run state.
+- Keep production provider-funding runbooks, fork/testnet/live evidence, and
+  provider-model changes out of scope for this local test slice.
+
+Initial candidate files:
+
+- `test/StreamRandomizerPayments.t.sol`
+- `test/README.md`
+- `docs/status.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Implementation notes:
+
+- Added `test/StreamRandomizerPayments.t.sol`, a scenario suite around
+  `NextGenRandomizerRNG` and a payable arRNG controller mock.
+- The suite covers direct reserve funding, multiple request-cost payments,
+  aggregate pending-request accounting, provider refund-address capture,
+  fulfilled requests, stale requests, failed post-processing, retry after
+  failure, forced ETH during a pending request, and unauthorized emergency
+  withdrawal.
+- The tests assert `totalRandomnessReserved()`, `totalOwed()`,
+  `totalReserved()`, `surplus()`, `emergencyWithdrawable()`, contract balance,
+  pending counts, request states, and provider payment totals at each relevant
+  boundary.
+- No production Solidity changes were needed; the existing conservative adapter
+  model matched the intended local accounting.
+
+Focused validation:
+
+- `forge fmt test\StreamRandomizerPayments.t.sol` passed.
+- `forge test --match-path test\StreamRandomizerPayments.t.sol -vvv` passed
+  with 6 tests.
+- Neighboring focused suites passed:
+  `test\StreamEmergencyWithdraw.t.sol`, `test\StreamPaymentsInvariant.t.sol`,
+  `test\StreamRandomizerLifecycle.t.sol`, and
+  `test\StreamRandomizerRetry.t.sol`.
+- Release manifest, release checksum, and changelog self-tests/check modes
+  passed after regenerating `release-artifacts/latest/`.
+- Full local `make check` passed.
+- Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed.
+- `git diff --check` passed.
+
+Validation plan:
+
+- `forge fmt test\StreamRandomizerPayments.t.sol`
+- `forge test --match-path test\StreamRandomizerPayments.t.sol -vvv`
+- `forge test --match-path test\StreamEmergencyWithdraw.t.sol -vvv`
+- `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`
+- `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`
+- `forge test --match-path test\StreamRandomizerRetry.t.sol -vvv`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `python scripts\test_changelog_check.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\check_changelog.py`
+- Full local `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
 ### PR candidate: Add auction consistency invariant baseline (Queue Item 78)
 
-Status: PR #151 open with CodeRabbit requested.
+Status: merged in PR #151 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/150`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/151`.
 CodeRabbit request: issue comment `4690918785`.
 Initial head: `f83b68a32e5446c22e40f44ff190c593fed93b06`.
+Final head: `2c161ebb709423080519453b3259c35b0f847489`.
+Squash merge commit: `e7de312e9a74cee5bd9d47edb7bd974421bee17b`.
+CI run: `27413957701`.
 Branch started from PR #149 squash merge commit
 `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`.
 
@@ -7028,6 +7120,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 12:29 | Finish local Queue Item 79 validation | Focused randomizer-payment, emergency-withdrawal, payment-invariant, randomizer-lifecycle, and randomizer-retry Forge tests pass; release manifest/checksum/changelog drift checks pass; full `make check`, Windows `scripts\check.ps1`, and `git diff --check` pass locally with only existing warning noise |
+| 2026-06-12 12:11 | Implement Queue Item 79 local draft | Added focused `StreamRandomizerPayments.t.sol` coverage for request-cost spending, multiple pending arRNG requests, fulfilled/stale/failed/retried request states, forced ETH, and unauthorized emergency-withdrawal reserve preservation; focused formatting and Forge tests pass locally |
+| 2026-06-12 12:05 | Create issue #152 and select Queue Item 79 | PR #151 merged as `e7de312e9a74cee5bd9d47edb7bd974421bee17b` and no open GitHub issues remained, so the next no-secret Gate D gap is the roadmap's previously deferred request-level randomizer reserve lifecycle accounting |
+| 2026-06-12 12:02 | Merge PR #151 | Auction consistency invariant baseline merged as `e7de312e9a74cee5bd9d47edb7bd974421bee17b`; final head `2c161ebb709423080519453b3259c35b0f847489` had CI run `27413957701` and CodeRabbit green after the assertion-helper nitpick, with no unresolved review threads, and issue #150 closed completed |
 | 2026-06-12 11:52 | Address CodeRabbit PR #151 nitpick | Accepted CodeRabbit's balance-coverage assertion consistency nitpick by adding a reusable `Assertions.assertGte` helper and using it in the auction invariant; focused formatting/test and whitespace checks pass locally |
 | 2026-06-12 11:40 | Open PR #151 and request CodeRabbit | Auction consistency invariant baseline pushed to `codex/auction-consistency-invariants`, opened as https://github.com/6529-Collections/6529Stream/pull/151 against `main`, linked `Closes #150`, requested CodeRabbit in comment `4690918785`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 11:16 | Create issue #150 and select Queue Item 78 | PR #149 merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610` and no open GitHub issues remained, so the next local Gate D gap is broader auction-consistency invariant coverage before fork/testnet/live evidence |
