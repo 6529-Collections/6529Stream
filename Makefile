@@ -41,6 +41,8 @@ deploy-rehearsal:
 metadata-fixtures-check:
 	$(PYTHON) scripts/test_metadata_fixtures.py
 	$(PYTHON) scripts/check_metadata_fixtures.py
+	$(PYTHON) scripts/test_metadata_browser_sandbox.py
+	$(PYTHON) scripts/check_metadata_browser_sandbox.py
 
 release-artifacts: size
 	$(PYTHON) scripts/generate_release_artifacts.py

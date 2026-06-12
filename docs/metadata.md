@@ -57,9 +57,11 @@ dependency registry writes now reject invalid UTF-8 dependency script chunks
 and provenance before storage, and `StreamCore` production metadata writes now
 reject invalid UTF-8 before storage for collection text fields, collection
 script chunks, token data, token image URIs, and token raw attributes. Browser
-render-sandbox checks, production dependency migration runbooks beyond the
-local dependency artifact manifest baseline, stale randomness display, and live
-deployment release manifests remain open.
+render-sandbox checks now execute the committed final on-chain animation
+fixture in Chromium with a deterministic dependency stub and parent-frame
+isolation assertion. Production dependency migration runbooks beyond the local
+dependency artifact manifest baseline, stale randomness display, broader
+live/fork browser coverage, and live deployment release manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -92,8 +94,12 @@ script. This protects wrapper structure, but it does not sandbox artist
 `collectionScript` code or certify dependency code as safe. Release tooling
 now validates the committed golden fixtures for JSON/data-URI structure,
 strict UTF-8 decoding, current URI scheme policy, semantic attribute shape, and
-generated HTML wrapper/script boundaries. Full browser execution sandboxing plus
-live browser execution proofing remain required before public beta.
+generated HTML wrapper/script boundaries. It also runs the committed final
+animation fixture in Chromium through a sandboxed iframe, fulfills exactly the
+expected external dependency request with a deterministic stub, rejects
+unexpected outbound requests, asserts the token bootstrap values are present,
+and proves the frame cannot read the parent document. Broader live/fork browser
+execution proofing remains required before public beta.
 
 ## URI Policy
 
@@ -190,6 +196,17 @@ breakout. `scripts/test_metadata_fixtures.py` covers the happy path, invalid
 UTF-8 fixture payloads, semantic attribute-shape failures, and hostile wrapper
 regressions; both scripts run in `make check`, the platform check wrappers, and
 CI.
+
+`scripts/check_metadata_browser_sandbox.py` adds the browser-backed half of the
+fixture gate. It opens the committed final on-chain `animation_url` in Chromium
+inside an `allow-scripts` sandboxed iframe, stubs the single expected external
+dependency URL, fails unexpected outbound HTTP(S) requests, captures page and
+console errors, asserts the current hash/token bootstrap values are available in
+the frame, and verifies parent-document access fails with `SecurityError`.
+`scripts/test_metadata_browser_sandbox.py` covers the harness and result
+validation logic without launching a browser. Playwright is pinned in
+`requirements-tools.txt`; bootstrap scripts install Chromium for contributors,
+and CI installs the same toolchain before the metadata fixture safety job.
 
 ## ERC-4906 Events
 
@@ -359,8 +376,8 @@ cannot change frozen collection output.
 ADR 0006 requires future metadata work to add:
 
 - stale-state display policy
-- browser execution sandbox proofing for generated animation code beyond the
-  fixture-level JSON/data-URI/HTML boundary checks
+- broader live/fork browser execution proofing for generated animation code
+  beyond the committed golden fixture sandbox check
 - richer structured attributes if the protocol moves away from caller-authored
   raw fragments; production raw-attribute schema validation now exists
 - production dependency migration runbooks beyond the local artifact-manifest

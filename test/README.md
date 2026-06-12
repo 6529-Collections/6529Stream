@@ -201,8 +201,16 @@ ASCII/multibyte sequences, invalid lead/continuation, overlong, surrogate,
 out-of-range, and truncated sequences, dependency script/provenance production
 rejections, `StreamCore` production rejections for collection fields,
 collection script chunks, token data, token image URIs, and token raw
-attributes, plus size-before-UTF-8 error ordering. Full browser execution
-sandboxing remains future P1-META-006 work.
+attributes, plus size-before-UTF-8 error ordering.
+`scripts/test_metadata_browser_sandbox.py` and
+`scripts/check_metadata_browser_sandbox.py` add a Playwright-backed browser gate
+for the committed final on-chain animation fixture: Chromium executes the
+fixture in an `allow-scripts` sandboxed iframe, the expected dependency URL is
+served by a deterministic stub, unexpected HTTP(S) requests fail, bootstrap
+values are asserted in-frame, page/console errors fail the check, and
+parent-document access must fail with `SecurityError`. Broader live/fork
+browser coverage and richer stale-state metadata display remain future
+P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,

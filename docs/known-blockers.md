@@ -91,10 +91,12 @@ contributors who start from the README.
   chunks, token data, token image URIs, and token raw attributes with typed
   field errors while preserving size-before-UTF-8 ordering.
   Remaining metadata blockers include deployment migration runbooks beyond
-  registry provenance strings and full browser execution sandbox automation.
+  registry provenance strings, broader live/fork browser execution coverage,
+  and richer stale-state metadata display.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
-  animation HTML wrapper/script boundaries.
+  animation HTML wrapper/script boundaries, plus a Playwright-backed Chromium
+  sandbox check for the committed final animation fixture.
 - `StreamCore` now uses a linked metadata renderer library, removes optional
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
@@ -120,7 +122,7 @@ contributors who start from the README.
   validation, deterministic randomizer retry, raw-output hash storage,
   randomizer reserve-boundary regressions, local payment-ledger view aliases,
   collection freeze-boundary tests, dependency version/pinning tests, and a
-  bounded payment sequence invariant baseline now exist, but browser-level
+  bounded payment sequence invariant baseline now exist, but broader live/fork
   generated metadata render-sandbox tests, deployment, production-governance,
   richer supply/replay/freeze invariant tests, and any future shared-ledger
   invariants are still missing.
