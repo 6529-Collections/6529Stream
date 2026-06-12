@@ -158,13 +158,15 @@ CodeRabbit request: issue comment `4695671204`.
 Branch: `codex/protocol-incident-response-runbooks`.
 Branch started from PR #174 squash merge commit
 `074ac3eb510ccafa593812677e6c26cbed4171b1`.
-Current head: `0a0a49be0ab2adc3b1141389a52d1e8523865945`.
+Head before CodeRabbit follow-up:
+`08466151647bed25277feb454191f88d00609da7`.
 
 Goal:
 
 - Add a no-secret protocol incident-response runbook for stuck auctions,
-  failed or stale randomness, bad Merkle roots, bad metadata/dependency
-  configuration, signer compromise, and release artifact/evidence mistakes.
+  failed or stale randomness, bad Merkle roots, curator claims, bad
+  metadata/dependency configuration, signer compromise, drop-pause decisions,
+  and release artifact/evidence mistakes from issue #173.
 - Tie incident procedures to existing pause, signer, randomizer, auction,
   dependency, release-readiness, and evidence-retention docs.
 - Add a lightweight docs checker/test only if it matches the repository's
