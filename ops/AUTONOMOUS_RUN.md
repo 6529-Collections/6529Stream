@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/dry-run-auction-ceremony` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
-| Active PR | `TBD for issue #140` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/141` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 06:05 UTC` |
+| Last updated | `2026-06-12 06:09 UTC` |
 
 ## Packaging Notes
 
@@ -127,14 +127,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | Merged in PR #137 |
 | 71 | Document dependency migration runbooks | Gate D/Gate G support | Implement issue #136 by adding production dependency operation, migration, source-retention, deprecation, and rollback runbooks, linking them from release/deployment docs, and refreshing generated release evidence | Merged in PR #138 |
 | 72 | Add deployment-rehearsal metadata browser coverage | Gate D/Gate E support | Implement issue #135 by executing metadata generated from a local deployment rehearsal in the same Chromium sandbox policy as committed metadata fixtures, wiring local/CI gates, and updating release evidence docs | Merged in PR #139 |
-| 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | In progress on `codex/dry-run-auction-ceremony` |
+| 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Open in PR #141 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add dry-run auction ceremony rehearsal (Queue Item 73)
 
-Status: local implementation and full local validation complete; PR packaging
-pending for issue #140.
+Status: PR #141 opened and CodeRabbit requested in PR comment `4687976396`;
+CI and bot review pending for issue #140.
 Branch `codex/dry-run-auction-ceremony` started from PR #139 merge commit
 `e09e422a4f95fbf6948d182fcff83a25aaf88e0c`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/140`.
@@ -6450,6 +6450,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 06:09 | Open PR #141 and request CodeRabbit | Pushed `codex/dry-run-auction-ceremony`, opened https://github.com/6529-Collections/6529Stream/pull/141 against `main`, linked `Closes #140`, requested CodeRabbit in comment `4687976396`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 05:54 | Implement Queue Item 73 local draft | Added the local auction ceremony rehearsal script, focused deployment-manifest coverage, local/CI gate wiring, docs/roadmap/changelog/state updates, and validated the focused test plus standalone rehearsal script |
 | 2026-06-12 05:41 | Select Queue Item 73 | PR #139 merged as `e09e422a4f95fbf6948d182fcff83a25aaf88e0c`, issue #135 closed completed, no open 6529Stream issue remained for the next Gate E local ceremony gap, and issue #140 now scopes the dry-run auction ceremony rehearsal |
 | 2026-06-12 05:38 | Merge PR #139 | CI run `27396771559` passed, CodeRabbit status was success with no actionable comments on final head `13f90451bc471bbda9c7522a3c4f4b08f6cfb173`, the prior review thread was resolved, Claude was intentionally not requested per user instruction, and issue #135 closed completed |
