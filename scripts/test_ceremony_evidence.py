@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import copy
 import importlib.util
 import json
 import tempfile
@@ -200,8 +199,19 @@ class CeremonyEvidenceTests(unittest.TestCase):
     def test_secret_like_keys_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            evidence = copy.deepcopy(valid_evidence(root))
+            evidence = valid_evidence(root)
             evidence["operator_private_key"] = "do-not-commit"
+            path = root / "deployments/ceremony-evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(checker.CeremonyEvidenceError, "secret-like"):
+                checker.validate_evidence(path, root)
+
+    def test_secret_like_values_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["operator_notes"] = "password=do-not-commit"
             path = root / "deployments/ceremony-evidence/example.json"
             write_json(path, evidence)
 

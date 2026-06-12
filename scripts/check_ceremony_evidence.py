@@ -43,6 +43,11 @@ SECRET_KEY_PARTS = (
     "secret",
     "rpc_url",
     "api_key",
+    "password",
+)
+SECRET_VALUE_RE = re.compile(
+    r"\b(private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|api[_ -]?key|password)\s*[:=]",
+    re.IGNORECASE,
 )
 
 
@@ -289,6 +294,12 @@ def reject_secret_like_keys(value: Any, path: str = "evidence") -> None:
     elif isinstance(value, list):
         for index, child in enumerate(value):
             reject_secret_like_keys(child, f"{path}[{index}]")
+    elif isinstance(value, str) and not path.startswith(
+        "evidence.redaction_policy.redacted_fields["
+    ):
+        value_text = value.lower()
+        if any(part in value_text for part in SECRET_KEY_PARTS) or SECRET_VALUE_RE.search(value):
+            raise CeremonyEvidenceError(f"{path} contains a secret-like value")
 
 
 def validate_evidence(path: Path, repo_root: Path) -> None:

@@ -275,7 +275,7 @@ Exit criteria:
 - Local deployment manifest and sanitized broadcast-derived manifest are
   generated; live fork/testnet manifests are generated before public beta.
 - Local ceremony evidence bundle is generated and checked; fork/testnet/live
-  ceremony evidence bundles are retained before public beta.
+  evidence contents remain a separate future non-local ceremony gate.
 - Post-deploy admin, signer, randomizer, dependency, curator, and auction wiring
   verified.
 - Contract verification inputs retained.
@@ -2159,8 +2159,8 @@ No P0 contract PR may merge without:
   manifests, detached signatures, and signed tags remain future release-ceremony
   work.
 - Ceremony evidence generated. Initial local Anvil ceremony evidence schema,
-  bundle, and checker exist; fork/testnet/live evidence contents remain future
-  release-ceremony work.
+  bundle, and checker exist; fork/testnet/live evidence contents remain a
+  separate future non-local ceremony gate.
 - Source verification inputs generated. Initial deterministic verification
   input bundle exists under
   `release-artifacts/latest/source-verification-inputs.json`; live explorer

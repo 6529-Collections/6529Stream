@@ -177,6 +177,7 @@ python scripts/generate_broadcast_manifest_input.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
 python scripts/generate_address_books.py
+python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
