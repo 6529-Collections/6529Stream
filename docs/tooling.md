@@ -53,6 +53,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_incident_response.py
+python scripts/check_incident_response.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
@@ -132,9 +134,9 @@ The release-manifest step builds
 `release-artifacts/latest/release-manifest.json`, a deterministic top-level
 index over the committed release artifact catalog, ABI compatibility baseline,
 deployment manifests, address books, deployment schemas, ceremony evidence,
-changelog, governance docs, the audit package, and unavailable release-ceremony
-artifacts. It is regenerated with `python scripts/generate_release_manifest.py`
-after any covered input changes.
+changelog, governance docs, incident-response runbook, the audit package, and
+unavailable release-ceremony artifacts. It is regenerated with
+`python scripts/generate_release_manifest.py` after any covered input changes.
 
 The architecture/threat-model step validates [`architecture.md`](architecture.md)
 and [`threat-model.md`](threat-model.md), the auditor-facing map of system
@@ -145,6 +147,12 @@ The audit-package step validates [`audit-package.md`](audit-package.md), the
 single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
 deployment/release evidence, known blockers, accepted local-baseline
 dispositions, and security reporting.
+
+The incident-response step validates
+[`incident-response.md`](incident-response.md), the no-secret operator runbook
+for stuck auctions, failed randomness, bad Merkle roots, bad metadata or
+dependency configuration, signer compromise, and release artifact/evidence
+mistakes.
 
 The release-readiness step validates
 [`release-readiness.md`](release-readiness.md), the Gate G dashboard that
@@ -238,6 +246,8 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/test_incident_response.py
+python scripts/check_incident_response.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -264,6 +274,8 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/test_incident_response.py
+python scripts/check_incident_response.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check

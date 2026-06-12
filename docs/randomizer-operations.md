@@ -19,6 +19,11 @@ provider configuration and operational checks used for a deployment version:
 - redaction policy proving no private keys, mnemonics, RPC URLs, API keys, or
   unreleased drop payloads are committed.
 
+If a live request becomes stale, fails post-processing, receives an invalid
+callback, or is affected by provider migration, follow the randomizer section
+of [`docs/incident-response.md`](incident-response.md) before changing public
+readiness status.
+
 Validate the committed local evidence with:
 
 ```sh
@@ -59,6 +64,8 @@ paste credentials, endpoint URLs, private transaction payloads, or unreleased
 drop authorization payloads into the JSON. If live provider dashboards or
 explorers are used, retain sanitized screenshots, text exports, or transaction
 references as public artifacts and record their hashes.
+Incident recovery evidence should use the same retained-artifact and redaction
+rules.
 
 ## Release Integration
 

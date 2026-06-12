@@ -29,6 +29,10 @@ This runbook applies when an operator or maintainer:
 It does not authorize mutation of frozen collection output. Frozen collections
 must remain tied to their pinned dependency key, version, content hash, registry
 address, freeze manifest, and event history.
+If a dependency release, repin, deprecation, source-retention artifact, or
+metadata output is wrong, follow
+[`docs/incident-response.md`](incident-response.md) before changing public
+readiness status.
 
 ## Source Of Truth
 
@@ -254,8 +258,8 @@ Allowed operations for frozen collections:
   if a security incident requires a new path
 
 If a frozen collection depends on a version later found to be unsafe, the
-incident response must document the risk, the immutable proof, and any new
-deployment or collection path. It must not imply that the frozen output was
+incident response runbook must document the risk, the immutable proof, and any
+new deployment or collection path. It must not imply that the frozen output was
 mutated.
 
 ## Deprecation

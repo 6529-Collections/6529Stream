@@ -35,6 +35,8 @@ REQUIRED_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_audit_package.py",
     "python scripts/check_audit_package.py",
+    "python scripts/test_incident_response.py",
+    "python scripts/check_incident_response.py",
     "python scripts/test_release_readiness.py",
     "python scripts/check_release_readiness.py",
     "python scripts/test_public_beta_evidence.py",
@@ -53,6 +55,7 @@ REQUIRED_LINK_TARGETS = [
     "ops/SLITHER_BASELINE.md",
     "docs/architecture.md",
     "docs/threat-model.md",
+    "docs/incident-response.md",
     "docs/release-readiness.md",
     "docs/status.md",
     "docs/known-blockers.md",

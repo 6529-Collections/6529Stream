@@ -108,6 +108,10 @@ the release policy in `docs/release-policy.md`.
   retained placeholder artifact, checker, and local/CI gate so future reviewed
   non-local evidence can be machine-validated before release manifest and
   checksum generation.
+- Added a protocol incident-response runbook and local/CI checker covering
+  stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata or
+  dependency configuration, signer compromise, and release artifact/evidence
+  mistakes before release manifest and checksum generation.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

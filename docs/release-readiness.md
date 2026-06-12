@@ -11,6 +11,9 @@ production release?
 Use [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) as
 the intake runbook for any fork, testnet, live, audit, gas, invariant,
 verification, or signing evidence that updates the public-beta evidence status.
+Use [`docs/incident-response.md`](incident-response.md) for no-secret triage,
+containment, recovery, evidence retention, and reopening procedures when an
+operational incident affects release readiness.
 
 ## Maturity And Scope
 
@@ -49,6 +52,8 @@ The current local baseline includes:
 - auditor-facing architecture, threat model, and audit package docs under
   [`docs/architecture.md`](architecture.md), [`docs/threat-model.md`](threat-model.md),
   and [`docs/audit-package.md`](audit-package.md);
+- incident response procedures in
+  [`docs/incident-response.md`](incident-response.md);
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -130,6 +135,7 @@ Core project and governance:
 Audit and protocol evidence:
 
 - [docs/audit-package.md](audit-package.md)
+- [docs/incident-response.md](incident-response.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
 - [docs/deployment.md](deployment.md)
@@ -169,6 +175,8 @@ Run the dashboard checker directly:
 ```sh
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_incident_response.py
+python scripts/check_incident_response.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_non_local_release_evidence.py
