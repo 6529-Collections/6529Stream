@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/audit-package-index` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/157` |
-| Active PR | TBD; issue `https://github.com/6529-Collections/6529Stream/issues/158` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/159` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 14:58 UTC` |
+| Last updated | `2026-06-12 14:59 UTC` |
 
 ## Packaging Notes
 
@@ -142,10 +142,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add external audit package index (Queue Item 82)
 
-Status: Local validation passed; ready to open PR.
+Status: PR #159 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/158`.
-PR: TBD.
-CodeRabbit request: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/159`.
+CodeRabbit request: issue comment `4692444134`.
 Branch: `codex/audit-package-index`.
 Branch started from PR #157 squash merge commit
 `ed5f3b17cec879d74f765cbd457a9b0fbe809cad`.
@@ -7410,6 +7410,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 14:59 | Open PR #159 and request CodeRabbit | Audit package index PR opened against `main`, linked `Closes #158`, requested CodeRabbit in comment `4692444134`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 14:58 | Finish local Queue Item 82 validation | Audit package checker/tests, release manifest/checksum/changelog gates, Python compilation, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
 | 2026-06-12 14:36 | Start Queue Item 82 | Created issue #158 and selected the Gate F external audit package index because no open issues remained and Gate F still lacked a single auditor-facing package tying scope, ADRs, invariants, Slither, deployment/release evidence, blockers, and security reporting together |
 | 2026-06-12 14:33 | Merge PR #157 | Release signature evidence baseline merged as `ed5f3b17cec879d74f765cbd457a9b0fbe809cad`; CI run `27421639645` passed, CodeRabbit status was green, issue #156 closed completed, and local `main` was fast-forwarded |
