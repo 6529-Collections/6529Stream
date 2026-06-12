@@ -301,10 +301,11 @@ Required evidence:
 
 ### Gate F: External Audit Package Ready
 
-Status: Not Started.
+Status: In Progress.
 Owner: TBD.
-Blocking issues: TBD.
-Evidence: TBD.
+Blocking issues: [`#158`](https://github.com/6529-Collections/6529Stream/issues/158).
+Evidence: `docs/audit-package.md` and `scripts/check_audit_package.py` in
+progress.
 
 Exit criteria:
 

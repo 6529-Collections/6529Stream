@@ -55,6 +55,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_randomizer_operations.py
 "$python_bin" scripts/test_release_signatures.py
 "$python_bin" scripts/check_release_signatures.py
+"$python_bin" scripts/test_audit_package.py
+"$python_bin" scripts/check_audit_package.py
 "$python_bin" scripts/test_release_manifest.py
 "$python_bin" scripts/generate_release_manifest.py --check
 "$python_bin" scripts/test_release_checksums.py

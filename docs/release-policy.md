@@ -139,6 +139,8 @@ Before a public release tag:
   `python scripts/check_randomizer_operations.py`.
 - Release signature evidence follows `docs/release-signatures.md` and passes
   `python scripts/check_release_signatures.py`.
+- The external audit package follows `docs/audit-package.md` and passes
+  `python scripts/check_audit_package.py`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.

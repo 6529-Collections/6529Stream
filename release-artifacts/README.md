@@ -15,6 +15,9 @@ python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
 python scripts/check_ceremony_evidence.py
+python scripts/check_randomizer_operations.py
+python scripts/check_release_signatures.py
+python scripts/check_audit_package.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```
@@ -37,6 +40,12 @@ python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/test_randomizer_operations.py
+python scripts/check_randomizer_operations.py
+python scripts/test_release_signatures.py
+python scripts/check_release_signatures.py
+python scripts/test_audit_package.py
+python scripts/check_audit_package.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -68,8 +77,14 @@ Production dependency version changes must follow
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
 hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
-schema hashes, release-policy doc hashes, and the release-ceremony items that
-are not yet available for this pre-audit local baseline.
+schema hashes, governance doc hashes including `docs/audit-package.md`, and the
+release-ceremony items that are not yet available for this pre-audit local
+baseline.
+
+`docs/audit-package.md` is the auditor-facing index for the current local
+baseline. It is validated by `scripts/check_audit_package.py` before release
+manifest generation, and the release manifest records its hash as a governance
+document.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
@@ -117,6 +132,7 @@ python scripts/generate_dependency_artifact_manifest.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_audit_package.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 ```

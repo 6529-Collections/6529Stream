@@ -84,6 +84,10 @@ the release policy in `docs/release-policy.md`.
   local/CI checker covering detached checksum signatures, signed Git tags,
   signer identity, retained verification artifacts, and no-secret redaction
   rules.
+- Added an external audit package index and local/CI checker so current
+  maturity, scope, ADRs, invariants, static-analysis disposition, local
+  deployment/release evidence, known blockers, accepted local-baseline
+  dispositions, and security reporting remain linked for auditors.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen
@@ -173,6 +177,8 @@ the release policy in `docs/release-policy.md`.
   `InvalidTokenMetadataInput()`, and `FinalSupplyTimeNotPassed()`.
 - Detached checksum signatures, signed release tags, production address books,
   and verified live deployment addresses remain future release-ceremony work.
+- Gate F release evidence now includes `docs/audit-package.md` as a
+  release-manifest governance document before the checksum bundle is refreshed.
 
 ## v0.1.0 - Initial Local Baseline
 
