@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/public-beta-evidence-status` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/163` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
+| Active PR branch | `codex/reconcile-gate-g-roadmap` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
+| Active PR | TBD for issue `https://github.com/6529-Collections/6529Stream/issues/166` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 18:38 UTC` |
+| Last updated | `2026-06-12 18:52 UTC` |
 
 ## Packaging Notes
 
@@ -139,21 +139,78 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
 | 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
 | 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #163 |
-| 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | Merge-ready |
+| 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #165 |
+| 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | In Progress |
+| 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Planned |
 
 ## Current PR Worklog
 
-### PR candidate: Add public beta evidence status manifest (Queue Item 85)
+### PR candidate: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
 
-Status: PR #165 merge-ready; CI run `27435205011` passed and CodeRabbit
-status was `success` on head
-`7aba4c7cd61d8a8dbe2611b324d4c2a073327faa`.
+Status: Local validation passed; PR TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/166`.
+PR: TBD.
+Branch: `codex/reconcile-gate-g-roadmap`.
+Branch started from PR #165 squash merge commit
+`5e9a6c9f5afb569151b74b2095ef180cbbcfe884`.
+
+Goal:
+
+- Mark Queue Item 85 and PR #165 as merged with final CI and CodeRabbit
+  evidence.
+- Refresh stale `ops/ROADMAP.md` verification metadata from PR #162/Queue Item
+  84 to PR #165.
+- Remove closed issue #164 from active Gate G blockers while preserving the
+  public-beta and production-release blocked status.
+- Add the next planned non-local evidence queue item so the run can continue
+  from repo state after this reconciliation.
+- Keep the change documentation/state-only.
+
+Initial candidate files:
+
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/ROADMAP.md`
+
+Validation target:
+
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check`
+- `python scripts\check_release_readiness.py`
+- `python scripts\check_public_beta_evidence.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+
+Implementation notes so far:
+
+- Reconciled the current repository state after PR #165 merged.
+- Marked Queue Item 85 as merged and added Queue Items 86 and 87.
+- Updated PR #165 worklog evidence with final head, squash merge commit, CI
+  run, and CodeRabbit success.
+- Refreshed `ops/ROADMAP.md` verification metadata from PR #162 to PR #165.
+- Removed closed issue #164 from active Gate G blocker wording while preserving
+  public-beta and production-release blocked status.
+
+Validation so far:
+
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`
+- `git diff --check`
+- `python scripts\check_release_readiness.py`
+- `python scripts\check_public_beta_evidence.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+
+### PR #165: Add public beta evidence status manifest (Queue Item 85)
+
+Status: Merged in PR #165 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/164`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/165`.
 CodeRabbit request: issue comment `4693993623`.
 Branch: `codex/public-beta-evidence-status`.
 Branch started from PR #163 squash merge commit
 `cb01f4668cfad068d6df6e556da3baf03fc23575`.
+Final head: `54af773ccbf8c73c6d880a7713932039249053a5`.
+Squash merge commit: `5e9a6c9f5afb569151b74b2095ef180cbbcfe884`.
+CI run: `27435644265`.
 
 Goal:
 
@@ -272,6 +329,11 @@ Validation so far:
   `7aba4c7cd61d8a8dbe2611b324d4c2a073327faa`; CodeRabbit status was
   `success` on the same head; CodeRabbit marked all three visible review
   threads resolved.
+- Final remote validation after the state-only merge-readiness commit:
+  GitHub Actions CI run `27435644265` passed on final head
+  `54af773ccbf8c73c6d880a7713932039249053a5`; CodeRabbit status was
+  `success`; CodeRabbit reported no actionable comments for the latest
+  `ops/AUTONOMOUS_RUN.md`-only review.
 
 ### PR #163: Add release readiness dashboard and blocker checker (Queue Item 84)
 
@@ -7772,6 +7834,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 18:52 | Finish local Queue Item 86 validation | Roadmap/run-state reconciliation is limited to `ops/ROADMAP.md` and `ops/AUTONOMOUS_RUN.md`; heading scan, whitespace check, release-readiness check, public-beta evidence check, release-manifest check, and release-checksum check pass locally |
+| 2026-06-12 18:50 | Create issue #166 and select Queue Item 86 | PR #165 merged, issue #164 closed completed, no open 6529Stream issues remained, and the roadmap/run-state needed a state-only reconciliation so Gate G no longer treats the public-beta evidence manifest as pending |
+| 2026-06-12 18:47 | Merge PR #165 | Public-beta evidence status manifest merged as `5e9a6c9f5afb569151b74b2095ef180cbbcfe884`; final head `54af773ccbf8c73c6d880a7713932039249053a5` passed CI run `27435644265`, CodeRabbit status was `success`, and issue #164 closed completed |
 | 2026-06-12 18:38 | Mark PR #165 merge-ready | GitHub Actions CI run `27435205011` passed on head `7aba4c7cd61d8a8dbe2611b324d4c2a073327faa`, CodeRabbit status was `success`, and all visible CodeRabbit review threads were resolved |
 | 2026-06-12 18:28 | Address second CodeRabbit PR #165 review | Fixed the valid custom `--release-artifacts-dir` path bug, made ISO risk-acceptance dates parse as real dates, documented the date format, added schema minItems drift coverage, added custom release-artifact directory manifest coverage, updated checksum/governance-doc coverage docs, regenerated release evidence, and passed focused validation |
 | 2026-06-12 18:13 | Address CodeRabbit PR #165 review | Accepted the pre-merge docstring recommendation plus the low-risk ISO date, schema-count note, and secret-key false-positive hardening suggestions; focused public-beta, release-manifest, release-artifact, readiness, audit-package, checksum, and py_compile validation pass locally |
