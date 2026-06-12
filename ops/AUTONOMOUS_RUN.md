@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/drop-authorization-signing-examples` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/178` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/177` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:00 UTC` |
+| Last updated | `2026-06-12 23:02 UTC` |
 
 ## Packaging Notes
 
@@ -153,12 +153,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
-Status: locally validated; PR not opened yet.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/177`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/179`.
 Branch: `codex/drop-authorization-signing-examples`.
 Branch started from PR #178 squash merge commit
 `0122e670889df63f5359b7add2ac7f68b1ed9a31`.
+Implementation head at PR open:
+`0e3b1d10e98cdb439cd04e9ca78fd34175760887`.
 
 Prior queue transition:
 
@@ -203,9 +205,9 @@ Local validation:
 
 Remote validation:
 
-- PR not opened yet.
-- GitHub Actions and CodeRabbit pending until the issue #177 implementation is
-  committed, pushed, and opened as a PR.
+- PR #179 opened at `2026-06-12T23:02:17Z`.
+- CodeRabbit review request pending.
+- GitHub Actions pending.
 
 ### PR candidate: Add protocol incident response runbooks (Queue Item 90)
 
