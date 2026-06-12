@@ -105,6 +105,36 @@ class ReleaseReadinessTests(unittest.TestCase):
 
             self.assertEqual(result, 0)
 
+    def test_accepts_custom_release_readiness_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            custom_path = Path("custom/release-dashboard.md")
+            write_text(root / custom_path, minimal_release_readiness_doc())
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--release-readiness",
+                        str(custom_path),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+
+    def test_rejects_missing_document(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseReadinessError, "missing document"
+            ):
+                checker.validate_release_readiness(
+                    root, root / checker.DEFAULT_RELEASE_READINESS
+                )
+
     def test_rejects_missing_heading(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
