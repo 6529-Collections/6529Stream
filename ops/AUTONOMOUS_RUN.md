@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/nonlocal-release-evidence-runbook` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/167` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/168` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/169` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 19:36 UTC` |
+| Last updated | `2026-06-12 19:39 UTC` |
 
 ## Packaging Notes
 
@@ -148,9 +148,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add non-local release evidence intake runbook (Queue Item 87)
 
-Status: Local validation complete; ready to commit and open PR.
+Status: PR open; GitHub Actions CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/168`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/169`.
+CodeRabbit request: issue comment `4694642716`.
 Branch: `codex/nonlocal-release-evidence-runbook`.
 Branch started from PR #167 squash merge commit
 `e11dc44ee5eb33f95fede07d6a4045d44d4faa87`.
@@ -212,6 +213,7 @@ Implementation notes so far:
 - Linked the runbook from release-readiness, release policy, public-beta
   evidence docs, tooling docs, release-artifacts docs, and roadmap.
 - Added a changelog entry for the release governance/process change.
+- Opened PR #169 against `main` and requested CodeRabbit review.
 
 Validation so far:
 
@@ -7936,6 +7938,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 19:39 | Open PR #169 and request CodeRabbit | Non-local release evidence intake PR opened against `main`, linked `Closes #168`, requested CodeRabbit in comment `4694642716`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 19:36 | Run full local gate for Queue Item 87 | `make check` passed after the focused checks; only existing Foundry warning noise appeared, and no unexpected tracked artifacts changed |
 | 2026-06-12 19:29 | Finish local Queue Item 87 validation | Non-local evidence runbook docs/checker updates, release-manifest governance-doc coverage, regenerated manifest/checksum artifacts, public-beta evidence, changelog, Python compile, heading scan, and whitespace checks all pass locally |
 | 2026-06-12 19:20 | Implement Queue Item 87 local draft | Added the non-local release evidence runbook, wired it into release-readiness, public-beta evidence, release policy, tooling, release-manifest governance docs, roadmap, changelog, and autonomous run state before regenerating release evidence |
