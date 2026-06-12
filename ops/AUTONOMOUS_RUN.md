@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/architecture-threat-model` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/159` |
-| Active PR | TBD; issue `https://github.com/6529-Collections/6529Stream/issues/160` is active |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 15:52 UTC` |
+| Last updated | `2026-06-12 15:54 UTC` |
 
 ## Packaging Notes
 
@@ -143,10 +143,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add architecture and threat model audit docs (Queue Item 83)
 
-Status: Local validation complete before PR creation.
+Status: PR #161 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/160`.
-PR: TBD.
-CodeRabbit request: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/161`.
+CodeRabbit request: issue comment `4692872990`.
 Branch: `codex/architecture-threat-model`.
 Branch started from PR #159 squash merge commit
 `e2e9fcfdf0ef73e058244d4262f4d50137eefd3a`.
@@ -7512,6 +7512,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 15:54 | Open PR #161 and request CodeRabbit | Architecture/threat-model PR opened against `main`, linked `Closes #160`, requested CodeRabbit in comment `4692872990`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 15:52 | Finish local Queue Item 83 validation | Architecture/threat-model checker/tests, updated audit package checks, release manifest/checksum/changelog gates, Python compilation, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
 | 2026-06-12 15:36 | Start Queue Item 83 | Created issue #160 and selected the Gate F architecture/threat-model gap because the audit package index exists but still needs checked system and trust-boundary docs for external auditors |
 | 2026-06-12 15:22 | Merge PR #159 | External audit package index merged as `e2e9fcfdf0ef73e058244d4262f4d50137eefd3a`; CI run `27424703232` passed, CodeRabbit final status was success, and issue #158 closed completed |
