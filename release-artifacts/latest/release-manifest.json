@@ -356,8 +356,8 @@
       },
       {
         "path": "docs/release-signatures.md",
-        "sha256": "sha256:e62557cf636f7e5b643612cdc84504fdd83119da067b7447a19c8e580476bafc",
-        "size_bytes": 1268
+        "sha256": "sha256:a466351913edc25f98510572fadd01fcdfeea3c36c21ef97fd62ffa7af2eedd9",
+        "size_bytes": 1267
       },
       {
         "path": "docs/tooling.md",

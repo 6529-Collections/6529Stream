@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/157` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 14:03 UTC` |
+| Last updated | `2026-06-12 14:10 UTC` |
 
 ## Packaging Notes
 
@@ -141,10 +141,11 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release signature evidence baseline (Queue Item 81)
 
-Status: PR #157 open; CodeRabbit review not yet requested.
+Status: PR #157 open; CodeRabbit requested; initial CI hygiene failure fixed
+locally and awaiting follow-up push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/156`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/157`.
-CodeRabbit request: TBD after PR opens.
+CodeRabbit request: issue comment `4691996355`.
 Branch: `codex/release-signature-evidence`.
 Branch started from PR #155 squash merge commit
 `a63a52f81f2dc97bd40954e36772d55ae9087e79`.
@@ -219,6 +220,17 @@ Validation:
 - `git diff --check` passed with the existing PowerShell line-ending warning for
   `scripts/check.ps1`.
 - `make check`
+- GitHub CI run `27420702347` failed repository hygiene on an extra blank line
+  at EOF in `docs/release-signatures.md`; the EOF was trimmed and the release
+  manifest/checksum evidence was regenerated.
+- Post-CI-fix validation: `python scripts\test_release_signatures.py`,
+  `python scripts\check_release_signatures.py`,
+  `python scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\test_release_checksums.py`,
+  `python scripts\generate_release_checksums.py --check`,
+  targeted `python -m py_compile`, `bash -n scripts/check.sh`,
+  `bash -n scripts/bootstrap-ec2.sh`, and `git diff --check`.
 
 ### PR candidate: Add randomizer operations evidence bundle (Queue Item 80)
 
@@ -7302,6 +7314,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 14:10 | Address PR #157 CI hygiene failure | GitHub CI run `27420702347` failed `git diff --check` on an extra blank line at EOF in `docs/release-signatures.md`; trimmed the EOF, regenerated release manifest/checksum evidence, and reran focused release-signature, manifest, checksum, Python compile, Bash syntax, and whitespace checks locally |
+| 2026-06-12 14:03 | Open PR #157 and request CodeRabbit | Release signature evidence baseline PR opened against `main`, linked `Closes #156`, requested CodeRabbit in comment `4691996355`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 13:18 | Request CodeRabbit PR #155 review | CodeRabbit review requested in issue comment `4691619335`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 13:17 | Open PR #155 | Randomizer operations evidence PR opened against `main`, linked `Closes #154`, and includes local validation transcript; CodeRabbit review will be requested after this concrete PR state is pushed |
 | 2026-06-12 13:13 | Finish local Queue Item 80 validation | Focused randomizer-operations tests/checker, release manifest/checksum/changelog drift checks, Python compilation, Unix check-wrapper syntax, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry warning noise |

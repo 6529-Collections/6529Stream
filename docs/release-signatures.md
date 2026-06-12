@@ -28,4 +28,3 @@ by path with `not_available_self_referential` digest status. That is intentional
 the release manifest records signature evidence, and the checksum bundle covers
 the signature evidence file, so embedding those generated hashes in the evidence
 file would create a hash cycle.
-
