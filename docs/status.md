@@ -136,6 +136,10 @@ The current Gate A smoke baseline proves:
   resolve only to packaged dependency files, reject malformed keys and duplicate
   identities, and keep
   `release-artifacts/latest/dependency-artifact-manifest.json` current.
+- `docs/dependency-operations.md` documents the production dependency ceremony:
+  proposal, review, source packaging, registry registration, unfrozen
+  collection repinning, deprecation, rollback by corrective version, frozen
+  collection immutability, and source-retention evidence.
 - `scripts/test_abi_compatibility.py` and
   `scripts/check_abi_compatibility.py --check` prove the current production
   contract ABI surface remains compatible with the committed
@@ -186,8 +190,7 @@ rehearsals, production manifest generation from live broadcast outputs,
 detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated
 HTML/JavaScript render-sandbox hardening beyond the committed browser fixture,
-production dependency migration runbooks beyond the local artifact-manifest
-baseline, broader live/fork browser execution coverage, deployment discipline,
+broader live/fork browser execution coverage, deployment discipline,
 and the broader P0/P1 test suite.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.

@@ -19,7 +19,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:da3af4d26e7066ae42c42722fe86b044fa94768a8ba87f7a59484d15899651d9"
+    "sha256": "sha256:2c804ecedf9a5169615d010fa3ff57d75e05b5efdcd6cd3b2240c4f6c0a58974"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -83,8 +83,8 @@
     },
     {
       "path": "release-artifacts/dependencies/README.md",
-      "sha256": "sha256:f7d55ad9f447a5a2e3d614f4435df4cf971be5d4049ea7689847a7f11a16ce29",
-      "size_bytes": 913
+      "sha256": "sha256:2ed908509928472093ff064d985c7e6980037dad3c2d5f06d2f9a8248b14692a",
+      "size_bytes": 1152
     },
     {
       "path": "release-artifacts/dependencies/anvil-6529stream-v0.1.0-001/local-rehearsal-dependency.dependency.json",
@@ -123,8 +123,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:f91e00fa82f6808a81e1b6cb48a19059b0ded434ef1e8e70ebbd3d1374ccb94b",
-      "size_bytes": 11011
+      "sha256": "sha256:974fb11e1a641b93d6764d87b83454a5cfa8651c8f68d48c6b81eaa0c2edd304",
+      "size_bytes": 11198
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",

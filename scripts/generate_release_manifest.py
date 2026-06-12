@@ -29,6 +29,7 @@ DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/release-policy.md"),
     Path("docs/deployment.md"),
+    Path("docs/dependency-operations.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]

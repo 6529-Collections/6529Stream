@@ -57,6 +57,8 @@ Dependency artifact source files are hashed byte-for-byte, so `.gitattributes`
 pins JavaScript and other release text artifacts to LF line endings. Keep new
 packaged dependency files under that policy so Windows and Linux checkouts
 produce the same manifest hashes.
+Production dependency version changes must follow
+`docs/dependency-operations.md` before public release.
 
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
