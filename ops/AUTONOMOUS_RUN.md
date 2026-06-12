@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/live-fork-metadata-browser` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/138` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 05:13 UTC` |
+| Last updated | `2026-06-12 05:16 UTC` |
 
 ## Packaging Notes
 
@@ -132,10 +132,11 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add deployment-rehearsal metadata browser coverage (Queue Item 72)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #139 opened and CodeRabbit requested in PR comment `4687690174`.
 Issue #135 selected after PR #138 merged and `main` advanced to
 `9510a0f25bbdb61292644ab4ebdeba90e5d401fc`.
 Branch `codex/live-fork-metadata-browser` started from that merge commit.
+PR: `https://github.com/6529-Collections/6529Stream/pull/139`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/135`.
 
 Goal:
@@ -6348,6 +6349,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 05:16 | Open PR #139 and request CodeRabbit | Pushed `codex/live-fork-metadata-browser`, opened https://github.com/6529-Collections/6529Stream/pull/139 against `main`, linked `Closes #135`, requested CodeRabbit in comment `4687690174`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 05:13 | Validate Queue Item 72 locally | Focused Python rehearsal tests, live Forge-to-Chromium rehearsal check, metadata fixture gate, release manifest/checksum/changelog drift checks, full `make check`, Bash/PowerShell syntax checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
 | 2026-06-12 05:00 | Implement Queue Item 72 local draft | Added `RehearseMetadataBrowser.s.sol`, a return-payload-driven rehearsal browser checker, local/CI gate wiring, docs/roadmap/run-state/changelog updates, and release evidence refreshes for issue #135 |
 | 2026-06-12 04:45 | Select Queue Item 72 | PR #138 merged as `9510a0f25bbdb61292644ab4ebdeba90e5d401fc`; issue #135 accepts fork or deployment-rehearsal generated metadata browser proof, and local Anvil rehearsal evidence can ship without RPC secrets |
