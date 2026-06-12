@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/ceremony-evidence-schema` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/143` |
-| Active PR | TBD for issue #144 |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/145` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 08:13 UTC` |
+| Last updated | `2026-06-12 08:16 UTC` |
 
 ## Packaging Notes
 
@@ -135,7 +135,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add deployment ceremony evidence bundle schema (Queue Item 75)
 
-Status: locally validated on branch `codex/ceremony-evidence-schema`; PR TBD.
+Status: open in PR #145; CodeRabbit requested in comment `4689045122`; CI and
+review comments pending.
 Branch started from PR #143 squash merge commit
 `6dd5846122ebca965a0f1bcefac0386f0ab0cb60`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/144`.
@@ -6662,6 +6663,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 08:16 | Open PR #145 and request CodeRabbit | Pushed `codex/ceremony-evidence-schema`, opened https://github.com/6529-Collections/6529Stream/pull/145 against `main`, linked `Closes #144`, requested CodeRabbit in comment `4689045122`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 08:13 | Finish local Queue Item 75 validation | Focused ceremony evidence/release/changelog checks, py_compile, Bash syntax check, full `make check`, PowerShell parser check, and Windows wrapper all pass locally; CI and CodeRabbit remain pending until PR creation |
 | 2026-06-12 07:51 | Implement Queue Item 75 local draft | Added ceremony evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, changelog, and run-state updates; focused ceremony evidence and release-manifest tests pass so far |
 | 2026-06-12 07:39 | Create issue #144 and select Queue Item 75 | PR #143 merged and issue #142 closed completed; the next Gate E/G gap is retained deployment ceremony evidence format because live ceremonies need a no-secret evidence bundle before fork/testnet/production contents can be collected |
