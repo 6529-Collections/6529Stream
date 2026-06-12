@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-randomness-state-display` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/129` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
+| Active PR branch | `codex/streamcore-size-floor-recovery` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
+| Active PR | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 02:00 UTC` |
+| Last updated | `2026-06-12 03:15 UTC` |
 
 ## Packaging Notes
 
@@ -122,11 +122,95 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | Merged in PR #126 |
 | 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Merged in PR #127 |
 | 67 | Add browser execution metadata sandbox checks | Gate D | Implement issue #128 by adding a deterministic browser-backed check for committed final animation metadata, pinning reproducible browser tooling, wiring local/CI gates, and updating docs/roadmap/state | Merged in PR #129 |
-| 68 | Expose stale and failed randomness metadata states | Gate D | Implement issue #130 by mapping lifecycle-aware `Stale` and `FailedPostProcessing` requests into public metadata state strings, off-chain URIs, schema-v1 on-chain JSON, fixtures, docs, and roadmap traceability | In progress on `codex/metadata-randomness-state-display` |
+| 68 | Expose stale and failed randomness metadata states | Gate D | Implement issue #130 by mapping lifecycle-aware `Stale` and `FailedPostProcessing` requests into public metadata state strings, off-chain URIs, schema-v1 on-chain JSON, fixtures, docs, and roadmap traceability | Merged in PR #131 |
+| 69 | Recover `StreamCore` release-floor bytecode headroom | Gate D/Gate G support | Implement issue #132 by recovering at least 156 bytes of `StreamCore` production runtime headroom, preserving metadata state behavior, refreshing size docs/artifacts, and keeping the production IR size gate green | In progress on `codex/streamcore-size-floor-recovery` |
 
 ## Current PR Worklog
 
-### PR candidate: Stale and failed randomness metadata states (Queue Item 68)
+### PR candidate: Recover `StreamCore` release-floor bytecode headroom (Queue Item 69)
+
+Status: Issue #132 created; branch `codex/streamcore-size-floor-recovery`
+started from `main` at PR #131 merge commit
+`3a6405d7d0cdc1d3550a8f872c6f17f3a0a147ac`.
+PR: TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/132`.
+Related issues: `https://github.com/6529-Collections/6529Stream/issues/115`,
+`https://github.com/6529-Collections/6529Stream/issues/124`, and
+`https://github.com/6529-Collections/6529Stream/issues/51`.
+
+Goal:
+
+- Recover the documented `StreamCore` release floor after PR #131 reduced
+  EIP-170 headroom to 228 bytes.
+- Preserve pending/stale/failed/final metadata behavior, unsupported lifecycle
+  fallback, and final-hash override behavior.
+- Prefer compiler-shaping or duplicated-helper reductions over feature changes.
+- Update deterministic size evidence, release artifacts, docs, roadmap/test
+  traceability, changelog, and this state file with the final measured size.
+
+Initial candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `test/StreamMetadataGolden.t.sol`
+- `test/StreamCoreCustomErrors.t.sol`
+- `CHANGELOG.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/*`
+- `deployments/address-books/*`
+- `deployments/examples/*`
+
+Validation plan:
+
+- Measure each code candidate with
+  `forge build --sizes --via-ir --skip test --skip script --force`.
+- Run focused tests for touched behavior.
+- Refresh deterministic release artifacts if bytecode changes.
+- Run `make release-checksums`, `make release-checksums-check`,
+  `make check`, Windows `scripts\check.ps1`, formatting, and whitespace checks
+  before opening the PR.
+
+Implementation notes:
+
+- Moved collection-script and token-metadata freeze hash helpers from
+  `StreamCore` into linked `StreamMetadataRenderer` functions, preserving the
+  typed hash inputs and freeze manifest semantics.
+- Replaced the old-randomizer lifecycle probe helper with equivalent low-level
+  staticcalls so unsupported lifecycle providers still do not block migration,
+  while lifecycle-aware providers whose pending-request probe fails still block
+  replacement and preserve the old provider's revert data.
+- Inlined final-token metadata checks, passed the known collection ID into
+  token-name rendering, cached collection script storage in generative-script
+  retrieval, and reused final supply in the freeze supply hash.
+- Added focused `StreamRandomizerLifecycle.t.sol` regressions for unsupported
+  lifecycle-provider migration and failed pending-request probes.
+- Current production size measurement:
+  `forge build --sizes --via-ir --skip test --skip script --force` reports
+  `StreamCore` at 24,139 runtime bytes with 437 bytes of EIP-170 headroom.
+
+Local validation:
+
+- `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`: 21
+  tests passed.
+- Focused metadata/freeze/burn sweep passed:
+  `test\StreamRandomizerLifecycle.t.sol`, `test\StreamMetadataFreeze.t.sol`,
+  `test\StreamMetadataGolden.t.sol`, and `test\StreamCoreBurn.t.sol`.
+- `make release-checksums`: passed and regenerated deterministic release,
+  source-verification, deployment, address-book, manifest, and checksum
+  artifacts for the bytecode/source/docs changes.
+- `make release-checksums-check`: passed.
+- `make check`: passed.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`:
+  passed.
+- `forge fmt --check smart-contracts\StreamCore.sol
+  smart-contracts\StreamMetadataRenderer.sol
+  test\StreamRandomizerLifecycle.t.sol`: passed.
+- `git diff --check`: passed.
+
+### PR #131: Stale and failed randomness metadata states (Queue Item 68)
 
 Status: Issue #130 created; branch `codex/metadata-randomness-state-display`
 started from `main` at PR #129 merge commit
@@ -6035,6 +6119,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 02:15 | Select Queue Item 69 | PR #131 merged as `3a6405d7d0cdc1d3550a8f872c6f17f3a0a147ac`; issue #132 scopes the next slice as recovering `StreamCore` from 24,348 runtime bytes / 228 bytes EIP-170 headroom back to the documented 384-byte release floor before further non-trivial Core work |
 | 2026-06-12 02:00 | Address CodeRabbit PR #131 review | Accepted CodeRabbit's lifecycle-support finding by probing `supportsRandomizerLifecycle()` before token-state lookup, added unsupported-lifecycle pending fallback coverage, clarified ADR 0006 freeze eligibility docs for pending/stale/failed live tokens, refreshed release artifacts, and reran focused metadata tests, production size build, release checksum checks, full `make check`, Windows wrapper, formatting, and whitespace checks |
 | 2026-06-12 01:45 | Request CodeRabbit PR #131 review | CodeRabbit review requested in issue comments `4686592260` and `4686597476`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 01:42 | Open PR #131 for Queue Item 68 | Pushed `codex/metadata-randomness-state-display`, opened https://github.com/6529-Collections/6529Stream/pull/131 against `main`, linked `Closes #130`, and will use CI plus CodeRabbit review only per user instruction |

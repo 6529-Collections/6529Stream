@@ -9,6 +9,14 @@ import "./Strings.sol";
 library StreamMetadataRenderer {
     using Strings for uint256;
 
+    bytes32 private constant _COLLECTION_SCRIPT_TYPEHASH =
+        keccak256("6529StreamCollectionScript(uint256 chunkCount,bytes32 chunksHash)");
+    bytes32 private constant _COLLECTION_SCRIPT_CHUNK_TYPEHASH = keccak256(
+        "6529StreamCollectionScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)"
+    );
+    bytes32 private constant _TOKEN_METADATA_RECORD_TYPEHASH = keccak256(
+        "6529StreamTokenMetadataRecord(uint256 tokenId,bytes32 tokenDataHash,bytes32 tokenImageHash,bytes32 tokenAttributesHash,bytes32 tokenHash)"
+    );
     error MetadataFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
     error MetadataFieldInvalidUTF8(bytes32 field);
     error UnsafeMetadataURI();
@@ -162,6 +170,39 @@ library StreamMetadataRenderer {
                 escapeJavaScriptSingleQuotedString(dependencyScript),
                 "';",
                 collectionScript
+            )
+        );
+    }
+
+    function collectionScriptHash(string[] memory script) public pure returns (bytes32) {
+        bytes32 chunksHash = bytes32(0);
+
+        for (uint256 i = 0; i < script.length; i++) {
+            bytes memory chunk = bytes(script[i]);
+            bytes32 chunkHash = keccak256(
+                abi.encode(_COLLECTION_SCRIPT_CHUNK_TYPEHASH, i, keccak256(chunk), chunk.length)
+            );
+            chunksHash = keccak256(abi.encode(chunksHash, chunkHash));
+        }
+
+        return keccak256(abi.encode(_COLLECTION_SCRIPT_TYPEHASH, script.length, chunksHash));
+    }
+
+    function tokenMetadataRecordHash(
+        uint256 tokenId,
+        string memory tokenData,
+        string memory image,
+        string memory attributes,
+        bytes32 tokenHash
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _TOKEN_METADATA_RECORD_TYPEHASH,
+                tokenId,
+                keccak256(bytes(tokenData)),
+                keccak256(bytes(image)),
+                keccak256(bytes(attributes)),
+                tokenHash
             )
         );
     }

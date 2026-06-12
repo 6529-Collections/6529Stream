@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-    "deployment_manifest_sha256": "sha256:c96678204e0e6bb4b95a4f45d6b04d4f9a97ca76d3204b41092b19b5662a3a15",
+    "deployment_manifest_sha256": "sha256:2f7a3875deb21c1d2afd7db0897d449766acf1c2d1a3a26a506faac0d6bad75e",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -26,7 +26,7 @@
       "source": "smart-contracts/DependencyRegistry.sol",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
       "abi_hash": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-      "runtime_bytecode_hash": "sha256:80a68de9cdfd4674465b3d1e060a9c4842158356a6f6fe2defb28168b14355c4",
+      "runtime_bytecode_hash": "sha256:bb4f8dd875f49de1ca01cab226a0a1ac8b6bbf6d6411538ab56ab9e2acbd24dc",
       "verification_status": "not_applicable"
     },
     "NextGenRandomizerRNG": {
@@ -66,7 +66,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
-      "runtime_bytecode_hash": "sha256:bef529020e30ed9a75e5b0159c0a59becae795224c05196645c1d01b65103055",
+      "runtime_bytecode_hash": "sha256:65981958fa7ac27b9299447f47de57a482cef617d51caf910375741f40fa2780",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {

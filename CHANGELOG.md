@@ -54,6 +54,9 @@ the release policy in `docs/release-policy.md`.
   tokens whose hash is still unset, with off-chain URI fixtures, schema-v1
   on-chain JSON fixtures, token state view coverage, fallback-to-pending
   coverage, and final-hash override coverage.
+- Added focused randomizer migration regressions proving unsupported lifecycle
+  providers do not block migration while lifecycle-aware providers with failed
+  pending-request probes still block replacement.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.
@@ -78,6 +81,13 @@ the release policy in `docs/release-policy.md`.
   after lifecycle-aware stale/failed metadata state display, the production
   IR-optimized runtime remains deployable at 24,348 bytes with 228 bytes of
   EIP-170 headroom and is tracked as below the 384-byte release floor.
+- Recovered the documented `StreamCore` minimum release floor by moving freeze
+  metadata hash helpers into the linked renderer library, inlining final-token
+  metadata checks, reusing known collection IDs in token-name rendering, caching
+  generative-script storage lookups, and replacing the old-randomizer lifecycle
+  probe with equivalent low-level staticcalls that preserve pending-probe
+  revert data. The production IR-optimized runtime is now 24,139 bytes with 437
+  bytes of EIP-170 headroom.
 
 ### Release Impact
 
@@ -111,6 +121,9 @@ the release policy in `docs/release-policy.md`.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   explicit initial zero-supply rejection and dependency registry target
   validation.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  moving collection-script and token-metadata freeze hash helpers into
+  `StreamMetadataRenderer`.
 - Gate D/G release artifacts now include dependency artifact manifest coverage
   and checksum coverage for dependency descriptors/source files under
   `release-artifacts/dependencies/`.
