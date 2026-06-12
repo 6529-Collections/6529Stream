@@ -284,6 +284,21 @@ class DropAuthorizationFixtureTests(unittest.TestCase):
             ):
                 checker.validate_fixture(path)
 
+    def test_rejects_zero_poster(self) -> None:
+        """Drop authorizations require a non-zero poster address."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_valid_fixture_tree(root)
+            path = root / checker.DEFAULT_FIXTURE_DIR / "fixed-price-eoa.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["typed_data"]["message"]["poster"] = ZERO_ADDRESS
+            write_json(path, data)
+
+            with self.assertRaisesRegex(
+                checker.DropAuthorizationFixtureError, "poster must be non-zero"
+            ):
+                checker.validate_fixture(path)
+
     def test_rejects_key_material_policy(self) -> None:
         """Fixtures must explicitly omit signing key material."""
         with tempfile.TemporaryDirectory() as temp_dir:

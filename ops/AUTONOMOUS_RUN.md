@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:03 UTC` |
+| Last updated | `2026-06-12 23:14 UTC` |
 
 ## Packaging Notes
 
@@ -153,7 +153,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
-Status: PR opened; CodeRabbit requested; waiting for CI and review result.
+Status: CodeRabbit fix locally validated; fix commit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/177`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/179`.
 Branch: `codex/drop-authorization-signing-examples`.
@@ -209,7 +209,14 @@ Remote validation:
 
 - PR #179 opened at `2026-06-12T23:02:17Z`.
 - CodeRabbit review requested in issue comment `4696228472`.
-- GitHub Actions pending.
+- GitHub Actions run `27448102609` passed before the CodeRabbit fix commit.
+- CodeRabbit status passed pre-merge checks, then posted one actionable thread
+  requiring `poster` to be rejected when zero in the signing fixture validator.
+- Local fix validation:
+  - `python -m py_compile scripts\check_drop_authorization_fixtures.py scripts\test_drop_authorization_fixtures.py`.
+  - `python scripts\test_drop_authorization_fixtures.py`.
+  - `python scripts\check_drop_authorization_fixtures.py`.
+  - `git diff --check`.
 
 ### PR candidate: Add protocol incident response runbooks (Queue Item 90)
 

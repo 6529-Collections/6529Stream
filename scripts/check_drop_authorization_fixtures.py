@@ -531,6 +531,8 @@ def validate_message(typed_data: dict[str, Any], token_data: str, fixture_id: st
 
     sale_mode = require_uint(message["saleMode"], f"{fixture_id}.saleMode", (1 << 8) - 1)
     zero_address = "0x0000000000000000000000000000000000000000"
+    if message["poster"].lower() == zero_address:
+        raise DropAuthorizationFixtureError(f"{fixture_id}.poster must be non-zero")
     if sale_mode == 1:
         if message["recipient"].lower() == zero_address:
             raise DropAuthorizationFixtureError(
