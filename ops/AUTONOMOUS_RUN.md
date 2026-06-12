@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 01:42 UTC` |
+| Last updated | `2026-06-12 01:45 UTC` |
 
 ## Packaging Notes
 
@@ -136,6 +136,7 @@ Issue: `https://github.com/6529-Collections/6529Stream/issues/130`.
 Related issues: `https://github.com/6529-Collections/6529Stream/issues/46`,
 `https://github.com/6529-Collections/6529Stream/issues/51`, and
 `https://github.com/6529-Collections/6529Stream/issues/40`.
+CodeRabbit requested in issue comment `4686592260`.
 
 Goal:
 
@@ -6026,6 +6027,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 01:45 | Request CodeRabbit PR #131 review | CodeRabbit review requested in issue comment `4686592260`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 01:42 | Open PR #131 for Queue Item 68 | Pushed `codex/metadata-randomness-state-display`, opened https://github.com/6529-Collections/6529Stream/pull/131 against `main`, linked `Closes #130`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-12 01:38 | Finish local Queue Item 68 validation | Focused metadata golden tests, production size build, release checksum generation/checking, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, and whitespace checks pass; `StreamCore` remains EIP-170 compliant at 24,319 runtime bytes with 257 bytes of headroom, and the internal 384-byte headroom shortfall is documented as size-budget debt |
 | 2026-06-12 01:23 | Implement Queue Item 68 local draft | Exposed lifecycle-aware `stale` and `failed` metadata states across `tokenMetadataState`, off-chain token URIs, and schema-v1 on-chain JSON; added stale/failed golden fixtures and tests; used a compact bounded `staticcall` fallback after rejecting two size-worse experiments |
