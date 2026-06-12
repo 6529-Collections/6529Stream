@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/149` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 10:56 UTC` |
+| Last updated | `2026-06-12 11:06 UTC` |
 
 ## Packaging Notes
 
@@ -218,6 +218,23 @@ Validation completed:
 - `python -m py_compile scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py scripts\check_changelog.py scripts\test_changelog_check.py`
 - `make check`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+CodeRabbit follow-up addressed locally:
+
+- CodeRabbit review `4485046635` correctly noted `_trackDrop` would silently
+  stop tracking drops if future sequence bounds exceeded
+  `MAX_TRACKED_DROPS`.
+- Replaced the silent return with `require(trackedDropCount < MAX_TRACKED_DROPS,
+  "drop tracking overflow")` so future handler expansion fails loudly instead
+  of weakening invariant coverage.
+
+Follow-up validation:
+
+- `forge fmt test\StreamSupplyReplayFreezeInvariant.t.sol`
+- `forge test --match-path test\StreamSupplyReplayFreezeInvariant.t.sol -vvv`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
 - `git diff --check`
 
 ### PR candidate: Add local gas snapshot baseline (Queue Item 76)
@@ -6918,6 +6935,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 11:06 | Validate CodeRabbit PR #149 response | Focused invariant formatting/test, release manifest/checksum drift checks, and whitespace checks pass after the drop-tracking overflow guard |
+| 2026-06-12 11:05 | Address CodeRabbit PR #149 nitpick | Accepted CodeRabbit review `4485046635` by making drop tracking capacity fail loudly instead of silently weakening future invariant coverage |
 | 2026-06-12 10:56 | Open PR #149 and request CodeRabbit | Pushed `codex/supply-replay-freeze-invariants`, opened https://github.com/6529-Collections/6529Stream/pull/149 against `main`, linked `Closes #148`, requested CodeRabbit in comment `4690503803`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 10:54 | Finish local Queue Item 77 validation | Focused supply/replay/freeze invariant fuzzing, release manifest/checksum/changelog drift checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check` pass locally with only existing repo warnings |
 | 2026-06-12 10:36 | Implement Queue Item 77 local draft | Added a bounded supply/replay/freeze invariant test file covering mixed fixed-price mints, cancellations, replay attempts, burns, metadata edits, freeze attempts, and post-freeze guards; focused formatting and Forge test validation passed before docs/release evidence updates |

@@ -429,9 +429,7 @@ contract SupplyReplayFreezeInvariantHandler is DropAuthTestHelper, StreamFixture
     }
 
     function _trackDrop(bytes32 dropId) private {
-        if (trackedDropCount >= MAX_TRACKED_DROPS) {
-            return;
-        }
+        require(trackedDropCount < MAX_TRACKED_DROPS, "drop tracking overflow");
         trackedDropIds[trackedDropCount] = dropId;
         trackedDropCount++;
     }
