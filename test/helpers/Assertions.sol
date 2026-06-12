@@ -18,6 +18,10 @@ library Assertions {
         require(actual == expected, message);
     }
 
+    function assertGte(uint256 actual, uint256 expected, string memory message) internal pure {
+        require(actual >= expected, message);
+    }
+
     function assertEq(bytes32 actual, bytes32 expected, string memory message) internal pure {
         require(actual == expected, message);
     }

@@ -438,7 +438,7 @@ contract AuctionConsistencyInvariantHandler is DropAuthTestHelper, StreamFixture
         expectedTotalOwed.assertEq(auctions.totalOwed(), "total owed");
         auctions.totalCuratorReserved().assertEq(0, "curator reserve");
         auctions.totalRandomnessReserved().assertEq(0, "randomness reserve");
-        require(address(auctions).balance >= auctions.totalOwed(), "auction balance coverage");
+        address(auctions).balance.assertGte(auctions.totalOwed(), "auction balance coverage");
         auctions.emergencyWithdrawable()
             .assertEq(_surplus(address(auctions), auctions.totalOwed()), "surplus");
         auctions.surplus().assertEq(auctions.emergencyWithdrawable(), "surplus alias");

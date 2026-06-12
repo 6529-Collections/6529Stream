@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/151` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 11:40 UTC` |
+| Last updated | `2026-06-12 11:52 UTC` |
 
 ## Packaging Notes
 
@@ -165,6 +165,7 @@ Goal:
 Initial candidate files:
 
 - `test/StreamAuctionInvariant.t.sol`
+- `test/helpers/Assertions.sol`
 - `test/README.md`
 - `docs/status.md`
 - `CHANGELOG.md`
@@ -189,6 +190,8 @@ Implementation notes:
 - Invalid-operation attempts snapshot custody/accounting before the call and
   prove failed calls preserve status, owner, bid state, owed totals, and
   contract balance.
+- Added `Assertions.assertGte` and replaced the local balance-coverage
+  `require` in response to CodeRabbit's consistency nitpick.
 - Updated `test/README.md`, `docs/status.md`, `CHANGELOG.md`, and
   `ops/ROADMAP.md` to document the new local Gate D coverage and remaining
   fork/testnet evidence gap.
@@ -198,6 +201,9 @@ Focused validation:
 - `forge fmt test\StreamAuctionInvariant.t.sol` passed.
 - `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv` passed with
   256 fuzz runs.
+- After the CodeRabbit nitpick fix, `forge fmt
+  test\helpers\Assertions.sol test\StreamAuctionInvariant.t.sol`, focused
+  Forge auction-invariant testing, and `git diff --check` passed.
 - Release manifest/checksum/changelog self-tests and check modes passed after
   regenerating `release-artifacts/latest/`.
 - Full local `make check` passed.
@@ -7022,6 +7028,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 11:52 | Address CodeRabbit PR #151 nitpick | Accepted CodeRabbit's balance-coverage assertion consistency nitpick by adding a reusable `Assertions.assertGte` helper and using it in the auction invariant; focused formatting/test and whitespace checks pass locally |
 | 2026-06-12 11:40 | Open PR #151 and request CodeRabbit | Auction consistency invariant baseline pushed to `codex/auction-consistency-invariants`, opened as https://github.com/6529-Collections/6529Stream/pull/151 against `main`, linked `Closes #150`, requested CodeRabbit in comment `4690918785`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 11:16 | Create issue #150 and select Queue Item 78 | PR #149 merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610` and no open GitHub issues remained, so the next local Gate D gap is broader auction-consistency invariant coverage before fork/testnet/live evidence |
 | 2026-06-12 11:15 | Merge PR #149 | Supply/replay/freeze invariant baseline merged as `3ca6e53eb3b8299a80fbf5d7765e0dd7f0d0d610`; final head `ed6bd87f50877fdf711f14fbc215aa958bd59f16` had CI run `27411884632` and CodeRabbit green, no review threads, and issue #148 closed completed |
