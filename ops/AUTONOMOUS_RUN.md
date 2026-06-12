@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/133` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 03:17 UTC` |
+| Last updated | `2026-06-12 03:40 UTC` |
 
 ## Packaging Notes
 
@@ -187,6 +187,10 @@ Implementation notes:
   retrieval, and reused final supply in the freeze supply hash.
 - Added focused `StreamRandomizerLifecycle.t.sol` regressions for unsupported
   lifecycle-provider migration and failed pending-request probes.
+- CodeRabbit review `4482168726` left three nitpicks; follow-up clarified the
+  inline lifecycle selector comments, documented the unsupported-lifecycle mock
+  defensive revert, and asserted `CollectionRandomizerUpdated` events for both
+  unsupported-provider migration steps.
 - Current production size measurement:
   `forge build --sizes --via-ir --skip test --skip script --force` reports
   `StreamCore` at 24,139 runtime bytes with 437 bytes of EIP-170 headroom.
@@ -209,6 +213,15 @@ Local validation:
   smart-contracts\StreamMetadataRenderer.sol
   test\StreamRandomizerLifecycle.t.sol`: passed.
 - `git diff --check`: passed.
+- Post-CodeRabbit follow-up validation:
+  `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv` passed
+  21 tests; `forge fmt --check smart-contracts\StreamCore.sol
+  test\StreamRandomizerLifecycle.t.sol` passed; `git diff --check` passed;
+  `make release-checksums` regenerated source-verification and checksum
+  artifacts for the source/comment and state-file changes;
+  `make release-checksums-check`, `make check`, and
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed.
 
 ### PR #131: Stale and failed randomness metadata states (Queue Item 68)
 

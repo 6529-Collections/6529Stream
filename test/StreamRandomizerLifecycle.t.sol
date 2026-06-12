@@ -24,6 +24,8 @@ contract UnsupportedLifecycleRandomizer is IRandomizer {
         return false;
     }
 
+    // Intentionally reverts because lifecycle support is false; a caller that
+    // still probes pending requests has a bug, not unfinished test scaffolding.
     function pendingRandomnessRequests(uint256) external pure returns (uint256) {
         revert("unsupported lifecycle pending probe");
     }
@@ -373,8 +375,25 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
         UnsupportedLifecycleRandomizer unsupported = new UnsupportedLifecycleRandomizer();
         NoopRandomizer replacement = new NoopRandomizer();
 
+        vm.recordLogs();
         deployed.core.addRandomizer(COLLECTION_ID, address(unsupported));
+        _assertCollectionRandomizerUpdated(
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            address(deployed.randomizer),
+            address(unsupported),
+            2
+        );
+
+        vm.recordLogs();
         deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+        _assertCollectionRandomizerUpdated(
+            vm.getRecordedLogs(),
+            address(deployed.core),
+            address(unsupported),
+            address(replacement),
+            3
+        );
 
         deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
             .assertEq(address(replacement), "replacement");

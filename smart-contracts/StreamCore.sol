@@ -367,12 +367,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
             uint256 pendingRequests;
             assembly ("memory-safe") {
                 let ptr := mload(0x40)
-                // supportsRandomizerLifecycle()
+                // IRandomizerLifecycle.supportsRandomizerLifecycle()
                 mstore(ptr, 0x81d673e000000000000000000000000000000000000000000000000000000000)
                 let ok := staticcall(gas(), oldRandomizer, ptr, 0x04, ptr, 0x20)
                 let supported := and(ok, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
                 if supported {
-                    // pendingRandomnessRequests(uint256)
+                    // IRandomizerLifecycle.pendingRandomnessRequests(uint256)
                     mstore(ptr, 0xdd26bdd100000000000000000000000000000000000000000000000000000000)
                     mstore(add(ptr, 0x04), _collectionID)
                     ok := staticcall(gas(), oldRandomizer, ptr, 0x24, ptr, 0x20)
