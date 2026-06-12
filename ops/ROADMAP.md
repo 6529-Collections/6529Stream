@@ -14,12 +14,15 @@ order.
 ### Maturity Statement
 
 - Maturity: pre-audit and not production-ready.
-- Current CI proves that the repo compiles and runs the initial
-  characterization test skeleton. It does not prove protocol correctness.
-- Known remaining P0 blockers include broader payment accounting and
-  cross-contract invariants, fuller randomizer reserve lifecycle accounting,
-  metadata state work, remaining static analysis findings, missing invariants,
-  broader production governance, and incomplete deployment discipline.
+- Current CI proves that the repo builds, runs Foundry tests, checks metadata
+  fixtures/browser sandbox safety, enforces the production size gate, checks
+  deterministic release artifacts, and runs the local deployment rehearsal. It
+  still does not prove full protocol correctness.
+- Known remaining production-readiness blockers include broader invariant/gas
+  baselines, live fork/testnet rehearsals, production broadcast retention, live
+  explorer verification, signed release artifacts, production governance and
+  dependency-operation runbooks, live/fork metadata browser execution coverage,
+  and external audit packaging.
   Drop authorization now uses EIP-712 with EOA and ERC-1271 support; auction
   custody, settlement state, outbid refunds, auction-local settlement credits,
   fixed-price `StreamDrops` pull credits, and `StreamCuratorsPool` curator
@@ -58,12 +61,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-12 03:15 UTC` local size-floor recovery PR candidate validation; CI TBD |
+| Last verified | `2026-06-12 03:45 UTC` after PR #133 CodeRabbit-clean CI run |
 | OS tested | Windows / Linux |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | TBD |
+| CI run | [`27393020740`](https://github.com/6529-Collections/6529Stream/actions/runs/27393020740) |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -79,6 +82,24 @@ order.
 | Docs | Partial README and roadmap only | manual inspection | Architecture, security, deployment, and protocol docs merged |
 | Release artifacts | Partial deterministic baseline: ABI checksums, bytecode checksums, interface IDs, event topic catalog, source verification inputs, ABI compatibility baseline, sanitized broadcast fixture ingestion, local and broadcast-derived deployment manifest checksums, local and broadcast-derived address books, machine-readable release manifest, signable release checksum bundle, release change approval policy, and changelog gate are generated or documented from committed inputs; detached signatures, signed release tags, production address books, live explorer verification, and verified live addresses remain missing | `python scripts/generate_release_artifacts.py --check`, `python scripts/generate_source_verification_inputs.py --check`, `python scripts/check_abi_compatibility.py --check`, `python scripts/generate_broadcast_manifest_input.py --check`, `python scripts/generate_deployment_manifest.py --check`, `python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check`, `python scripts/generate_address_books.py --check`, `python scripts/generate_release_manifest.py --check`, `python scripts/generate_release_checksums.py --check`, `python scripts/check_changelog.py`, `release-artifacts/latest/`, `release-artifacts/latest/source-verification-inputs.json`, `release-artifacts/latest/release-manifest.json`, `release-artifacts/baselines/v0.1.0/abi-surface.json`, `deployments/broadcasts/`, `deployments/schema/address-book.schema.json`, `deployments/examples/anvil-6529stream-v0.1.0-001.json`, `deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json`, `deployments/address-books/anvil-6529stream-v0.1.0-001.json`, `deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json`, `CHANGELOG.md`, and `docs/release-policy.md` | ABIs, manifests, source verification inputs, checksums, and verified addresses published |
 | Windows setup | Foundry installed under `~/.foundry/bin`, but current shell may not resolve `forge` from `PATH` | direct binary invocation | Bootstrap works in current and future shells, or limitation documented |
+
+### Issue Tracker Reconciliation
+
+The original roadmap issues were intentionally broad. As implementation PRs
+land, stale umbrella issues should be closed with evidence and any real
+remaining work should move to narrower follow-ups. This table is the current
+closure plan for issue #134.
+
+| Issue | Reconciled state | Merged evidence | Remaining follow-up |
+| --- | --- | --- | --- |
+| [`#25` Pull-payment accounting](https://github.com/6529-Collections/6529Stream/issues/25) | Completed for the accepted current first-party local-ledger architecture | PRs #58, #59, #60, #61, #62, #77, and #78; `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamPaymentsInvariant.t.sol`; ADR 0003 status notes | No open blocker; a unified shared ledger remains optional future architecture only if a later ADR chooses that path |
+| [`#30` Withdrawal functions and failed-withdrawal behavior](https://github.com/6529-Collections/6529Stream/issues/30) | Completed for current credit surfaces | Auction, fixed-price, and curator withdrawal functions plus failed-withdrawal/reentrancy tests in `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, and payment invariants | None |
+| [`#45` Metadata/freeze ADR](https://github.com/6529-Collections/6529Stream/issues/45) | Completed | PR #52 accepted `docs/adr/0006-metadata-freeze.md`; ADR index links it | None |
+| [`#46` Metadata schema and golden files](https://github.com/6529-Collections/6529Stream/issues/46) | Completed for current schema-v1 surface | PRs #81, #83, and #131; `docs/metadata.md`; pending/stale/failed/final fixtures in `test/fixtures/metadata/`; `test/StreamMetadataGolden.t.sol` | Future metadata schema migrations should get new focused issues |
+| [`#47` Collection freeze boundaries](https://github.com/6529-Collections/6529Stream/issues/47) | Completed for current `StreamCore` freeze boundary | PRs #84, #85, #86, and #131; `test/StreamMetadataFreeze.t.sol`, `test/StreamDependencyRegistry.t.sol`, `test/StreamCoreBurn.t.sol`; freeze manifest docs | Broader fork/invariant coverage belongs in future Gate D work, not this umbrella |
+| [`#48` Dependency registry versioning](https://github.com/6529-Collections/6529Stream/issues/48) | Completed for versioning, immutability, provenance, collection pins, and frozen-output stability | PRs #85 and #118; `test/StreamDependencyRegistry.t.sol`; dependency artifact manifest generator/tests; `docs/metadata.md` dependency sections | Production dependency migration/source-retention runbooks moved to #136 |
+| [`#51` Metadata escaping, size limits, and render-sandbox tests](https://github.com/6529-Collections/6529Stream/issues/51) | Completed for production/static fixture acceptance criteria | PRs #87, #88, #111, #112, #113, #114, #121, #123, #126, #127, #129, and #131; metadata escaping, size, URI, UTF-8, fixture, and browser-sandbox tests | Broader live/fork browser execution coverage moved to #135 |
+| [`#124` Invalid UTF-8 production metadata inputs](https://github.com/6529-Collections/6529Stream/issues/124) | Completed | PRs #126 and #127; `test/StreamMetadataUtf8.t.sol`; `docs/metadata.md` UTF-8 policy; release artifacts refreshed | None |
 
 ## 1. Launch Gates
 
@@ -150,7 +171,7 @@ Required evidence:
 
 Status: Complete.
 Owner: TBD.
-Blocking issues: [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45),
+Completed issues: [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45),
 [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53).
 Evidence: `docs/adr/0006-metadata-freeze.md` and
 `docs/adr/0007-upgrade-redeployment.md` accepted.
@@ -400,6 +421,10 @@ accepted risks.
 ## 4. First Implementation Queue
 
 This is the recommended first batch of issues.
+
+This section is historical planning context. Current implementation and issue
+closure status live in `ops/AUTONOMOUS_RUN.md`, the issue reconciliation table
+above, and Appendix B's test matrix.
 
 1. `P0/M0`: Add repo status and maturity warning to README.
 2. `P0/M0`: Make local and CI baseline reproducible.
@@ -895,30 +920,40 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Issue: [#25](https://github.com/6529-Collections/6529Stream/issues/25).
 - Dependencies: [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24).
+- Reconciled status: completed for the accepted current first-party
+  local-ledger architecture. The issue should close after issue #134's
+  evidence PR merges. A unified shared ledger is optional future architecture,
+  not a remaining blocker for the original issue.
 
 Problem:
 
 - Poster, platform, curator, auction bidder, and curator reward payments are
   pushed synchronously, allowing reverts and reentrancy to block protocol flows.
 
-Current behavior:
+Historical behavior:
 
 - Multiple contracts use low-level ETH `call` during minting, bidding,
   settlement, claims, and emergency withdrawals.
+
+Current behavior:
+
+- First-party value-holding surfaces now use local pull-credit ledgers and
+  surplus-only emergency withdrawal boundaries for auction, fixed-price,
+  curator, minter, and randomizer custody surfaces covered by ADR 0003.
 
 Intended behavior:
 
 - User-owed balances are tracked separately from protocol surplus.
 - Recipients withdraw their own credits.
 
-Required code changes:
+Implemented code changes:
 
-- Add accounting for poster credits, bidder credits, curator credits, curator
+- Added accounting for poster credits, bidder credits, curator credits, curator
   reserves, protocol credits, active auction bid escrow, randomness reserves,
   protocol surplus, total poster owed, total bidder owed, total curator owed,
   total reserved, total owed, and emergency withdrawable balance.
-- Add withdrawal functions.
-- Ensure failed withdrawal does not erase credit.
+- Added withdrawal functions for current credit surfaces.
+- Failed withdrawals revert atomically and preserve credits.
 
 Child tickets:
 
@@ -926,32 +961,36 @@ Child tickets:
   Add credit ledger storage and total-owed views. Implemented for current
   local ledgers with category totals, `totalOwed()`, `totalReserved()`,
   `surplus()`, and `emergencyWithdrawable()` aliases on value-holding payment
-  surfaces; broader shared-ledger abstraction remains future work under
-  `P0-PAY-001` only if the project chooses that implementation path.
+  surfaces; broader shared-ledger abstraction is optional future architecture
+  only if the project chooses that implementation path.
 - [`P0-PAY-003`](https://github.com/6529-Collections/6529Stream/issues/27):
   Convert fixed-price poster/platform payouts to credits. Implemented for
   `StreamDrops` poster, protocol, and curator-reserve accounting; broader
-  payment-parent work remains open.
+  payment-parent consolidation is optional future architecture.
 - [`P0-PAY-004`](https://github.com/6529-Collections/6529Stream/issues/28):
   Convert auction outbid refunds to credits.
 - [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29):
   Convert curator reward claims to credits. Implemented for
   `StreamCuratorsPool` curator credits, withdrawal behavior, and local
-  owed/surplus views; shared payment-parent work remains open.
+  owed/surplus views; shared payment-parent consolidation is optional future
+  architecture.
 - [`P0-PAY-006`](https://github.com/6529-Collections/6529Stream/issues/30):
-  Add withdrawal functions and failed-withdrawal behavior.
+  Add withdrawal functions and failed-withdrawal behavior. Implemented for
+  current auction bidder/proceeds credits, fixed-price credits, and curator
+  credits, with reentrancy and failed-transfer preservation tests.
 - [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31):
   Bound emergency withdrawals by surplus. Implemented for current
   emergency-withdrawal surfaces: `StreamAuctions`, `StreamDrops`,
-  `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG`; broader
-  shared-ledger invariants remain open.
+  `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG`;
+  protocol-wide shared-ledger invariant consolidation is optional future
+  architecture.
 - [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8):
   Add payment invariants and forced-ETH tests. Implemented for the current local
   payment ledgers through fixed scenario tests and a bounded sequence fuzz
   invariant baseline covering `StreamDrops`, `StreamAuctions`,
-  `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG`; broader
-  shared-ledger architecture work remains open under #25, #26, and #30 unless a
-  later implementation introduces a unified protocol-wide ledger.
+  `StreamCuratorsPool`, `StreamMinter`, and `NextGenRandomizerRNG`. There is no
+  remaining blocker under #25 or #30; a unified protocol-wide ledger should be a
+  new ADR-backed architecture issue only if the project chooses that direction.
 
 Required tests:
 
@@ -1569,34 +1608,37 @@ Acceptance criteria:
 
 ### Metadata, Scripts, And Dependency Registry
 
-- Accept [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45)
-  before metadata schema, freeze, dependency, burn, or ERC-4906 implementation.
+- [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45)
+  is accepted in ADR 0006. Close #45 as completed after issue #134's evidence
+  PR merges.
 - [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9)
   now provides segment-safe dependency-script rendering plus typed chunk and
   content hashes. Dependency version records and collection key/version/content
   pins are now implemented by
   [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48).
-- Implement [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46):
-  metadata schema and golden-file tests. Initial characterization fixtures pin
-  current off-chain pending/stale/failed/final URIs, and schema-v1 on-chain
-  fixtures now pin pending/stale/failed/final base64 JSON output with explicit
-  `metadata_schema_version` and
-  `metadata_state` fields. Remaining P1-META-001 work is tied to freeze/burn
-  state coverage and any future schema migration.
+- [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46)
+  is complete for the current schema-v1 surface: off-chain
+  pending/stale/failed/final URIs and schema-v1 on-chain
+  pending/stale/failed/final base64 JSON are pinned with explicit
+  `metadata_schema_version` and `metadata_state` fields. Future schema
+  migrations should use focused new issues, not keep #46 open.
 - [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47)
-  now implements the first collection freeze-boundary slice for `StreamCore`:
+  is complete for the current `StreamCore` collection freeze boundary:
   freeze requires ended minting, elapsed final-supply delay, and final live
   token metadata; stores a deterministic manifest hash; emits
   `CollectionFrozen`; finalizes supply; tightens the reserved max token ID; and
   rejects current metadata-significant `StreamCore` writes after freeze.
-  Dependency version pins are included in the freeze manifest; escaping and
-  richer freeze invariants remain with their dedicated P1-META issues.
+  Dependency version pins are included in the freeze manifest. Broader
+  fork/invariant coverage belongs in future Gate D work rather than #47.
 - [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48)
-  now implements the first dependency registry versioning slice: registry writes
+  is complete for dependency registry versioning, immutability, provenance,
+  collection pins, and frozen-output stability: registry writes
   create immutable versions with typed content hashes, provenance/deprecation
   views, and collection key/version/content-hash/registry-address pins; later
   registry versions or registry swaps do not change existing or frozen
   collection output until an unfrozen collection is explicitly repinned.
+  Production dependency migration and source-retention operations are tracked in
+  #136.
 - [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49)
   now implements `StreamCore` ERC-4906 support and metadata update signaling:
   `supportsInterface(0x49064906)` succeeds, token-level metadata writes and
@@ -1611,7 +1653,8 @@ Acceptance criteria:
   state, are excluded from live supply, cannot be reminted, and can record valid
   post-burn randomness as audit-only state without changing live metadata or
   freeze manifests.
-- Continue [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51):
+- [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51)
+  is complete for the original production/static fixture acceptance criteria:
   metadata escaping, size limits, and render-sandbox tests. The first
   implementation slice now escapes on-chain JSON string fields and rejects raw
   attribute fragments that can break out of the enclosing attributes array. The
@@ -1645,10 +1688,10 @@ Acceptance criteria:
   `stale` and `failed` metadata states for minted tokens whose hash remains
   unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures,
   lookup-failure fallback coverage, and final-hash override coverage.
-- Add metadata schema and golden-file tests for `name`, `description`, `image`,
-  `attributes`, and `animation_url`.
-- Complete the remaining render-safety work for broader live/fork browser
-  execution coverage.
+- Broader live/fork browser execution coverage is the remaining render-safety
+  follow-up and is tracked in #135.
+- Metadata schema and golden-file tests cover `name`, `description`, `image`,
+  `attributes`, and `animation_url` for the current schema-v1 fixture set.
 - On-chain metadata now uses base64 JSON data URIs for schema-v1 output.
 - Numeric byte limits are now set for collection scripts, dependency scripts,
   `tokenData`, image data, attributes, dependency provenance, and generated
@@ -1656,7 +1699,7 @@ Acceptance criteria:
 - Dependency creation, update, versioning, deprecation, freeze-time
   immutability, and local dependency artifact manifests now have implementation
   slices. Continue with production dependency migration runbooks and live
-  dependency source-retention ceremonies.
+  dependency source-retention ceremonies under #136.
 - Treat generated HTML as executable code; static fixture-level render-sandbox
   checks and a browser-backed committed-fixture sandbox check now exist, and
   broader live/fork browser execution coverage remains required.
@@ -2264,13 +2307,13 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Weak helper randomness | `RandomizerNXT` and `XRandoms` are removed, test/demo-scoped, or impossible to configure for production drops | `test/StreamRandomizerLifecycle.t.sol` | Passing: `RandomizerNXT.isRandomizerContract()` returns false, `StreamCore.addRandomizer` rejects it for production collections, and the concrete `XRandoms` helper contract was removed from production source; Slither now reports `weak-prng=0` | [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C/Gate F | TBD |
 | Randomness metadata states | Off-chain and on-chain `tokenURI` pending/stale/failed/final behavior is deterministic and never treats zero hash as finalized randomness | `test/StreamMetadataGolden.t.sol`, later `test/StreamMetadata.t.sol` | Passing for schema-v1 coverage: off-chain pending/stale/failed/final URIs match fixtures; on-chain pending/stale/failed output returns base64 JSON with the matching `metadata_state` and no final animation HTML; final output returns base64 JSON with `metadata_state: "final"` and the animation URL; lifecycle lookup failure falls back to `pending`; and a nonzero token hash overrides stale lifecycle state. | [`P1-META-ADR`](https://github.com/6529-Collections/6529Stream/issues/45), [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`P0-RAND-004`](https://github.com/6529-Collections/6529Stream/issues/40), [`Metadata stale/failed state display`](https://github.com/6529-Collections/6529Stream/issues/130) | Gate C/Gate D | TBD |
 | Metadata schema golden files | Off-chain URI rules, on-chain pending/stale/failed JSON, on-chain final JSON, and generated HTML remain deterministic under the accepted schema | `test/StreamMetadataGolden.t.sol` | Passing for current schema-v1 slice: `offchain-pending-token-uri.txt`, `offchain-stale-token-uri.txt`, `offchain-failed-token-uri.txt`, `offchain-final-token-uri.txt`, `onchain-pending-schema-v1-token-uri.txt`, `onchain-stale-schema-v1-token-uri.txt`, `onchain-failed-schema-v1-token-uri.txt`, and `onchain-final-schema-v1-token-uri.txt` lock output, and `metadataSchemaVersion()` plus `tokenMetadataState(tokenId)` expose the active schema and pending/stale/failed/final state. Escaping remains covered by P1-META-006 work. | [`P1-META-001`](https://github.com/6529-Collections/6529Stream/issues/46), [`Metadata stale/failed state display`](https://github.com/6529-Collections/6529Stream/issues/130) | Gate D | TBD |
-| Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, UTF-8, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol`, `test/StreamMetadataSizeLimits.t.sol`, `test/StreamMetadataUriPolicy.t.sol`, `test/StreamMetadataUtf8.t.sol`, `scripts/test_metadata_fixtures.py`, `scripts/check_metadata_fixtures.py`, `scripts/test_metadata_browser_sandbox.py`, `scripts/check_metadata_browser_sandbox.py` | Partial: on-chain JSON string fields are escaped for schema-v1 output; raw attribute fragments now enforce empty content or comma-separated objects with exactly `trait_type` and `value` string fields, reject missing/duplicate/unexpected keys, non-string values, invalid JSON string escapes, literal control characters, malformed separators, unterminated strings, and array/object breakout attempts; decoded metadata is parser-checked for hostile collection/image strings; final animation HTML is decoded to assert library-attribute escaping, escaped `tokenData` and dependency-script JavaScript string embedding, and closing-script neutralization; numeric byte caps are enforced for collection display fields, collection scripts, token data, token images, token attributes, generated `tokenURI` output, dependency scripts, and dependency provenance; committed metadata golden fixtures are checked outside Foundry for strict JSON/HTML data-URI decoding, invalid UTF-8 rejection, semantic `trait_type` / `value` attribute shape, metadata JSON shape, current URI scheme policy, generated final animation wrapper/script boundaries, and pending/stale/failed/final metadata-state determinism; a Playwright-backed Chromium check executes the committed final animation fixture in an `allow-scripts` sandboxed iframe, stubs exactly the expected external dependency request, rejects unexpected outbound HTTP(S), asserts in-frame bootstrap values, captures page/console errors, and proves parent-document access is blocked; production writes reject unsafe token image, collection base URI, and external library URL values; `DependencyRegistry` production writes reject invalid UTF-8 script/provenance fields and preserve size-before-UTF-8 error ordering; `StreamCore` production writes reject invalid UTF-8 for collection fields, collection scripts, token data, token image values, and token raw attributes while preserving size-before-UTF-8 error ordering. Remaining work: broader live/fork browser execution coverage. | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51), [`P1-META-006 fixture UTF-8/attributes`](https://github.com/6529-Collections/6529Stream/issues/119), [`P1-META-006 production attribute schema`](https://github.com/6529-Collections/6529Stream/issues/122), [`P1-META-006 production UTF-8`](https://github.com/6529-Collections/6529Stream/issues/124), [`StreamCore UTF-8 size follow-up`](https://github.com/6529-Collections/6529Stream/issues/125), [`P1-META-006 browser sandbox`](https://github.com/6529-Collections/6529Stream/issues/128), [`Metadata stale/failed state display`](https://github.com/6529-Collections/6529Stream/issues/130) | Gate D | TBD |
+| Metadata escaping and render safety | JSON, HTML, JavaScript, raw attributes, URI, UTF-8, and size-limit inputs are escaped, validated, or rejected | `test/StreamMetadataEscaping.t.sol`, `test/StreamMetadataSizeLimits.t.sol`, `test/StreamMetadataUriPolicy.t.sol`, `test/StreamMetadataUtf8.t.sol`, `scripts/test_metadata_fixtures.py`, `scripts/check_metadata_fixtures.py`, `scripts/test_metadata_browser_sandbox.py`, `scripts/check_metadata_browser_sandbox.py` | Passing for original #51 production/static fixture acceptance: on-chain JSON string fields are escaped for schema-v1 output; raw attribute fragments now enforce empty content or comma-separated objects with exactly `trait_type` and `value` string fields, reject missing/duplicate/unexpected keys, non-string values, invalid JSON string escapes, literal control characters, malformed separators, unterminated strings, and array/object breakout attempts; decoded metadata is parser-checked for hostile collection/image strings; final animation HTML is decoded to assert library-attribute escaping, escaped `tokenData` and dependency-script JavaScript string embedding, and closing-script neutralization; numeric byte caps are enforced for collection display fields, collection scripts, token data, token images, token attributes, generated `tokenURI` output, dependency scripts, and dependency provenance; committed metadata golden fixtures are checked outside Foundry for strict JSON/HTML data-URI decoding, invalid UTF-8 rejection, semantic `trait_type` / `value` attribute shape, metadata JSON shape, current URI scheme policy, generated final animation wrapper/script boundaries, and pending/stale/failed/final metadata-state determinism; a Playwright-backed Chromium check executes the committed final animation fixture in an `allow-scripts` sandboxed iframe, stubs exactly the expected external dependency request, rejects unexpected outbound HTTP(S), asserts in-frame bootstrap values, captures page/console errors, and proves parent-document access is blocked; production writes reject unsafe token image, collection base URI, and external library URL values; `DependencyRegistry` production writes reject invalid UTF-8 script/provenance fields and preserve size-before-UTF-8 error ordering; `StreamCore` production writes reject invalid UTF-8 for collection fields, collection scripts, token data, token image values, and token raw attributes while preserving size-before-UTF-8 error ordering. Remaining work: broader live/fork browser execution coverage under #135. | [`P1-META-006`](https://github.com/6529-Collections/6529Stream/issues/51), [`P1-META-006 fixture UTF-8/attributes`](https://github.com/6529-Collections/6529Stream/issues/119), [`P1-META-006 production attribute schema`](https://github.com/6529-Collections/6529Stream/issues/122), [`P1-META-006 production UTF-8`](https://github.com/6529-Collections/6529Stream/issues/124), [`StreamCore UTF-8 size follow-up`](https://github.com/6529-Collections/6529Stream/issues/125), [`P1-META-006 browser sandbox`](https://github.com/6529-Collections/6529Stream/issues/128), [`Metadata stale/failed state display`](https://github.com/6529-Collections/6529Stream/issues/130), [`Live/fork metadata browser execution`](https://github.com/6529-Collections/6529Stream/issues/135) | Gate D | TBD |
 | `StreamCore` bytecode headroom | Optimized failure paths keep the same guarded behavior, expose typed selectors, and production bytecode stays deployable while the agreed minimum floor is tracked | `test/StreamCoreCustomErrors.t.sol`, `test/StreamMetadataUtf8.t.sol`, `test/StreamRandomizerLifecycle.t.sol`, production size gate | Passing deployability and release floor locally: selected admin, artist-signature, metadata-array length, final-supply timing, missing collection data, and unminted token metadata failures now use direct selector regressions; renderer-linked guard consolidation lets `StreamCore` enforce production UTF-8 for guarded metadata writes; lifecycle-aware stale/failed metadata state display remains covered; freeze metadata hash helpers now live in `StreamMetadataRenderer`; and the old-randomizer lifecycle probe keeps unsupported-provider and failed-pending-probe migration behavior covered while `forge build --sizes --via-ir --skip test --skip script --force` measures `StreamCore` at 24,139 runtime bytes with 437 bytes of EIP-170 headroom, above the 384-byte minimum release floor but below the 512-byte warning threshold. Larger non-trivial Core work still needs headroom recovery or an explicit size-budget exception. | [`P1-SIZE-001`](https://github.com/6529-Collections/6529Stream/issues/115), [`StreamCore UTF-8 size follow-up`](https://github.com/6529-Collections/6529Stream/issues/125), [`Metadata stale/failed state display`](https://github.com/6529-Collections/6529Stream/issues/130), [`StreamCore release-floor recovery`](https://github.com/6529-Collections/6529Stream/issues/132) | Gate D/Gate G | TBD |
 | Collection freeze boundary | Frozen collections cannot mutate collection fields, base URI, metadata mode, scripts, dependency references, token data, image, attributes, final supply, or live-token metadata state | `test/StreamMetadataFreeze.t.sol` | Passing for current `StreamCore` boundary: freeze requires ended minting, elapsed final-supply delay, and final live-token metadata; stores and exposes `collectionFreezeManifestHash`; emits `CollectionFrozen`; finalizes supply to minted-ever count; tightens the reserved max token ID; blocks dependency-registry swaps while any collection is frozen; and rejects current metadata-significant writes after freeze. Dependency version pins are included in the freeze manifest; escaping and richer invariant/fork coverage remain future P1-META work. | [`P1-META-002`](https://github.com/6529-Collections/6529Stream/issues/47) | Gate D | TBD |
-| Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash/registry address, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol`, `scripts/test_dependency_artifact_manifest.py`, `scripts/generate_dependency_artifact_manifest.py --check` | Passing: registry writes create new immutable versions, chunk-index updates derive a new version without mutating the previous one, version records expose typed content hash/provenance/creator/creation/deprecation views, collection metadata pins key/version/content hash/registry address, explicit repinning moves an unfrozen collection to the latest dependency in the current registry, output and freeze manifests stay stable after later registry versions or registry swaps until explicit repin, and segment-boundary hashes remain distinct in `test/StreamMetadataEncoding.t.sol`. The first dependency artifact manifest baseline packages the local Anvil rehearsal dependency under `release-artifacts/dependencies/`, rejects malformed descriptors and path escapes, emits `release-artifacts/latest/dependency-artifact-manifest.json`, and includes it in release manifest/checksum coverage; production dependency migration runbooks remain future operational work. | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48), [`P1-META-003 dependency artifact packaging`](https://github.com/6529-Collections/6529Stream/issues/117) | Gate D/Gate G | TBD |
+| Dependency registry immutability | Dependency versions are immutable, pinned by key/version/content hash/registry address, and cannot change frozen collection output | `test/StreamDependencyRegistry.t.sol`, `scripts/test_dependency_artifact_manifest.py`, `scripts/generate_dependency_artifact_manifest.py --check` | Passing: registry writes create new immutable versions, chunk-index updates derive a new version without mutating the previous one, version records expose typed content hash/provenance/creator/creation/deprecation views, collection metadata pins key/version/content hash/registry address, explicit repinning moves an unfrozen collection to the latest dependency in the current registry, output and freeze manifests stay stable after later registry versions or registry swaps until explicit repin, and segment-boundary hashes remain distinct in `test/StreamMetadataEncoding.t.sol`. The first dependency artifact manifest baseline packages the local Anvil rehearsal dependency under `release-artifacts/dependencies/`, rejects malformed descriptors and path escapes, emits `release-artifacts/latest/dependency-artifact-manifest.json`, and includes it in release manifest/checksum coverage; production dependency migration runbooks remain future operational work under #136. | [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48), [`P1-META-003 dependency artifact packaging`](https://github.com/6529-Collections/6529Stream/issues/117), [`Dependency migration runbooks`](https://github.com/6529-Collections/6529Stream/issues/136) | Gate D/Gate G | TBD |
 | ERC-4906 metadata signaling | `supportsInterface(0x49064906)` succeeds and `MetadataUpdate` / `BatchMetadataUpdate` emit from metadata write paths that can change token JSON | `test/StreamMetadataEvents.t.sol` | Passing for current `StreamCore` behavior: ERC-4906 interface support succeeds, randomness fulfillment and token metadata input writes emit `MetadataUpdate`, collection-level metadata mode/base URI/display/script/dependency-reference writes emit `BatchMetadataUpdate` over the minted-ever range, empty collections do not emit empty batch events, and mint-only plus burn paths do not emit ERC-4906. Dependency registry version creation does not emit ERC-4906 for pinned collections because their output does not change; explicit repinning goes through `updateCollectionInfo` and emits the existing collection-range update. | [`P1-META-004`](https://github.com/6529-Collections/6529Stream/issues/49), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate D | TBD |
 | Dependency script packed encoding | Dependency script retrieval uses safe typed concatenation/hash encoding and cannot collide across script segments | `test/StreamMetadataEncoding.t.sol` | Passing: typed chunk/content hashes include dependency key, chunk count, chunk index, chunk byte length, and chunk content hash; ambiguous chunk splits that render the same JavaScript produce distinct content hashes while preserving rendered-script compatibility; zero-chunk dependency hashes are deterministic | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9), [`P1-META-003`](https://github.com/6529-Collections/6529Stream/issues/48) | Gate C/Gate D | TBD |
-| Deployment redeployment rehearsal | Deployment manifests, broadcast-derived manifest inputs, address books, ABI hashes, source verification inputs, dependency artifact manifests, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol`, `script/RehearseDeployment.s.sol`, `scripts/generate_release_artifacts.py`, `scripts/test_release_artifacts.py`, `scripts/generate_source_verification_inputs.py`, `scripts/test_source_verification_inputs.py`, `scripts/generate_dependency_artifact_manifest.py`, `scripts/test_dependency_artifact_manifest.py`, `scripts/check_abi_compatibility.py`, `scripts/test_abi_compatibility.py`, `scripts/generate_broadcast_manifest_input.py`, `scripts/test_broadcast_manifest_input.py`, `scripts/generate_deployment_manifest.py`, `scripts/test_deployment_manifest.py`, `scripts/generate_address_books.py`, `scripts/test_address_books.py`, `scripts/generate_release_manifest.py`, `scripts/test_release_manifest.py`, `scripts/generate_release_checksums.py`, and `scripts/test_release_checksums.py` | In Progress: local deploy-and-wire rehearsal, Safe-placeholder ownership transfer, temporary admin revocation, manifest schema/example parsing, generated Anvil manifest config/example, sanitized Foundry broadcast fixture ingestion, generated broadcast-derived manifest config/example, generated local and broadcast-derived address books, deterministic source verification input bundle, deterministic dependency artifact manifest baseline for the local rehearsal dependency, deterministic top-level release manifest, deterministic manifest checksum, generated ABI/bytecode checksum baseline, generated interface ID catalog, generated event topic catalog, ABI compatibility baseline, signable checksum bundle, and default check-script gate added; live fork rehearsal, production broadcast retention, production address books, live explorer verification, dry-run mint/auction ceremonies, detached checksum signatures, live dependency migration runbooks, and emergency redeployment rehearsal remain open | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53), [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91), [`P1-RELEASE-001`](https://github.com/6529-Collections/6529Stream/issues/93), [`P1-RELEASE-002`](https://github.com/6529-Collections/6529Stream/issues/97), [`P1-DEPLOY-003`](https://github.com/6529-Collections/6529Stream/issues/95), [`P1-RELEASE-003`](https://github.com/6529-Collections/6529Stream/issues/99), [`P1-RELEASE-004`](https://github.com/6529-Collections/6529Stream/issues/101), [`P1-RELEASE-006`](https://github.com/6529-Collections/6529Stream/issues/105), [`P1-RELEASE-007`](https://github.com/6529-Collections/6529Stream/issues/107), [`P1-DEPLOY-004`](https://github.com/6529-Collections/6529Stream/issues/109), [`P1-META-003 dependency artifact packaging`](https://github.com/6529-Collections/6529Stream/issues/117) | Gate E/Gate G | TBD |
+| Deployment redeployment rehearsal | Deployment manifests, broadcast-derived manifest inputs, address books, ABI hashes, source verification inputs, dependency artifact manifests, admin ceremony, signer setup, deprecation checks, and emergency redeployment rehearsal follow ADR 0007 | `test/StreamDeploymentManifest.t.sol`, `script/RehearseDeployment.s.sol`, `scripts/generate_release_artifacts.py`, `scripts/test_release_artifacts.py`, `scripts/generate_source_verification_inputs.py`, `scripts/test_source_verification_inputs.py`, `scripts/generate_dependency_artifact_manifest.py`, `scripts/test_dependency_artifact_manifest.py`, `scripts/check_abi_compatibility.py`, `scripts/test_abi_compatibility.py`, `scripts/generate_broadcast_manifest_input.py`, `scripts/test_broadcast_manifest_input.py`, `scripts/generate_deployment_manifest.py`, `scripts/test_deployment_manifest.py`, `scripts/generate_address_books.py`, `scripts/test_address_books.py`, `scripts/generate_release_manifest.py`, `scripts/test_release_manifest.py`, `scripts/generate_release_checksums.py`, and `scripts/test_release_checksums.py` | In Progress: local deploy-and-wire rehearsal, Safe-placeholder ownership transfer, temporary admin revocation, manifest schema/example parsing, generated Anvil manifest config/example, sanitized Foundry broadcast fixture ingestion, generated broadcast-derived manifest config/example, generated local and broadcast-derived address books, deterministic source verification input bundle, deterministic dependency artifact manifest baseline for the local rehearsal dependency, deterministic top-level release manifest, deterministic manifest checksum, generated ABI/bytecode checksum baseline, generated interface ID catalog, event topic catalog, ABI compatibility baseline, signable checksum bundle, and default check-script gate added; live fork rehearsal, production broadcast retention, production address books, live explorer verification, dry-run mint/auction ceremonies, detached checksum signatures, dependency migration runbooks (#136), and emergency redeployment rehearsal remain open | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53), [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91), [`P1-RELEASE-001`](https://github.com/6529-Collections/6529Stream/issues/93), [`P1-RELEASE-002`](https://github.com/6529-Collections/6529Stream/issues/97), [`P1-DEPLOY-003`](https://github.com/6529-Collections/6529Stream/issues/95), [`P1-RELEASE-003`](https://github.com/6529-Collections/6529Stream/issues/99), [`P1-RELEASE-004`](https://github.com/6529-Collections/6529Stream/issues/101), [`P1-RELEASE-006`](https://github.com/6529-Collections/6529Stream/issues/105), [`P1-RELEASE-007`](https://github.com/6529-Collections/6529Stream/issues/107), [`P1-DEPLOY-004`](https://github.com/6529-Collections/6529Stream/issues/109), [`P1-META-003 dependency artifact packaging`](https://github.com/6529-Collections/6529Stream/issues/117), [`Dependency migration runbooks`](https://github.com/6529-Collections/6529Stream/issues/136) | Gate E/Gate G | TBD |
 | Release artifact catalog | ABI checksums, bytecode checksums, standard/custom interface IDs, event topics, source verification inputs, dependency artifact manifests, broadcast-derived manifest inputs, ABI compatibility, address books, machine-readable release manifest, signable checksum files, and release-impact changelog policy are generated or checked deterministically from current Foundry/deployment artifacts | `scripts/generate_release_artifacts.py`, `scripts/test_release_artifacts.py`, `scripts/generate_source_verification_inputs.py`, `scripts/test_source_verification_inputs.py`, `scripts/generate_dependency_artifact_manifest.py`, `scripts/test_dependency_artifact_manifest.py`, `scripts/check_abi_compatibility.py`, `scripts/test_abi_compatibility.py`, `scripts/generate_broadcast_manifest_input.py`, `scripts/test_broadcast_manifest_input.py`, `scripts/generate_deployment_manifest.py`, `scripts/test_deployment_manifest.py`, `scripts/generate_address_books.py`, `scripts/test_address_books.py`, `scripts/generate_release_manifest.py`, `scripts/test_release_manifest.py`, `scripts/generate_release_checksums.py`, `scripts/test_release_checksums.py`, `scripts/check_changelog.py`, `scripts/test_changelog_check.py`, `release-artifacts/latest/`, `release-artifacts/latest/source-verification-inputs.json`, `release-artifacts/latest/dependency-artifact-manifest.json`, `release-artifacts/latest/release-manifest.json`, `release-artifacts/dependencies/`, `release-artifacts/baselines/v0.1.0/abi-surface.json`, `deployments/broadcasts/`, `deployments/address-books/`, `CHANGELOG.md`, and `docs/release-policy.md` | In Progress locally for the deterministic Gate G baseline: generator self-tests cover ABI hashing, bytecode hashing, event topic generation, configured standard interface IDs, computed selector XOR traceability, and drift detection; source-verification self-tests cover deterministic generation, check-mode drift, missing source/artifact errors, linked-bytecode reporting, constructor ABI retention, verification command templates, and ABI checksum mismatches; dependency-artifact self-tests cover deterministic generation, check-mode drift, missing artifact files, malformed dependency keys, duplicate dependency identity, and descriptor path-boundary validation; ABI compatibility self-tests cover compatible, additive, removed, changed, missing-contract, and check-mode drift cases; broadcast-ingestion self-tests cover deterministic generation, check-mode drift, wrong-chain broadcasts, missing/unexpected deployments, failed receipts, boolean receipt status rejection, receipt address mismatch, duplicate deployment names, and secret-like key rejection; address-book self-tests cover deterministic generation, drift detection, missing output directories, duplicate/invalid addresses, `source_dirty`, chain ID, lifecycle state, git commit, verification status, hash-format validation, missing metadata, missing release contracts, and unknown contracts; release-manifest self-tests cover deterministic generation, check-mode drift, missing required artifacts, required JSON schema versions, governance-doc hashing, release/deployment/broadcast metadata, source-verification/dependency-artifact coverage, and explicit checksum-bundle self-reference policy; checksum-bundle self-tests cover deterministic generation, sorted SHA256SUMS output, dependency source coverage, manifest coverage, self-reference exclusion, drift detection, deleted covered files, missing generated outputs, and missing covered roots; changelog self-tests cover release-impacting path detection, missing changelog edits, missing `Unreleased`, placeholder entries, and valid release notes. Detached checksum signatures, signed tags, production address books, live explorer verification, and verified live deployment hashes remain future Gate G work | [`P1-RELEASE-001`](https://github.com/6529-Collections/6529Stream/issues/93), [`P1-RELEASE-002`](https://github.com/6529-Collections/6529Stream/issues/97), [`P1-RELEASE-003`](https://github.com/6529-Collections/6529Stream/issues/99), [`P1-RELEASE-004`](https://github.com/6529-Collections/6529Stream/issues/101), [`P1-RELEASE-005`](https://github.com/6529-Collections/6529Stream/issues/103), [`P1-RELEASE-006`](https://github.com/6529-Collections/6529Stream/issues/105), [`P1-RELEASE-007`](https://github.com/6529-Collections/6529Stream/issues/107), [`P1-DEPLOY-004`](https://github.com/6529-Collections/6529Stream/issues/109), [`P1-META-003 dependency artifact packaging`](https://github.com/6529-Collections/6529Stream/issues/117) | Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
 | Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Passing: Bytes32 character counts, missing/matching delegation lookups, subdelegation register/revoke gates, empty-script generative rendering, and multi-recipient minter return indexes cover the remaining first-party production rows; Slither now reports only one accepted test-only `uninitialized-local` row | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |

@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-size-floor-recovery` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/133` |
+| Active PR branch | `codex/roadmap-issue-reconciliation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/133` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/137` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 03:40 UTC` |
+| Last updated | `2026-06-12 03:59 UTC` |
 
 ## Packaging Notes
 
@@ -123,13 +123,66 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Merged in PR #127 |
 | 67 | Add browser execution metadata sandbox checks | Gate D | Implement issue #128 by adding a deterministic browser-backed check for committed final animation metadata, pinning reproducible browser tooling, wiring local/CI gates, and updating docs/roadmap/state | Merged in PR #129 |
 | 68 | Expose stale and failed randomness metadata states | Gate D | Implement issue #130 by mapping lifecycle-aware `Stale` and `FailedPostProcessing` requests into public metadata state strings, off-chain URIs, schema-v1 on-chain JSON, fixtures, docs, and roadmap traceability | Merged in PR #131 |
-| 69 | Recover `StreamCore` release-floor bytecode headroom | Gate D/Gate G support | Implement issue #132 by recovering at least 156 bytes of `StreamCore` production runtime headroom, preserving metadata state behavior, refreshing size docs/artifacts, and keeping the production IR size gate green | In progress on `codex/streamcore-size-floor-recovery` |
+| 69 | Recover `StreamCore` release-floor bytecode headroom | Gate D/Gate G support | Implement issue #132 by recovering at least 156 bytes of `StreamCore` production runtime headroom, preserving metadata state behavior, refreshing size docs/artifacts, and keeping the production IR size gate green | Merged in PR #133 |
+| 70 | Reconcile completed roadmap issues | Gate G support | Implement issue #134 by marking stale umbrella issues as evidence-backed completed work, creating narrower follow-ups for true remaining work, and preparing issue-closure actions after review | In progress on `codex/roadmap-issue-reconciliation` |
 
 ## Current PR Worklog
 
+### PR candidate: Reconcile completed roadmap issues (Queue Item 70)
+
+Status: Issue #134 created; branch `codex/roadmap-issue-reconciliation`
+started from `main` at PR #133 merge commit
+`f583f7662dab2945b79a5c92d31ed74c5e227639`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/137`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/134`.
+Follow-up issues created:
+`https://github.com/6529-Collections/6529Stream/issues/135` for live/fork
+metadata browser execution coverage and
+`https://github.com/6529-Collections/6529Stream/issues/136` for production
+dependency migration/source-retention runbooks.
+CodeRabbit requested in PR comment `4687281642`.
+
+Goal:
+
+- Make `ops/ROADMAP.md` honest about broad issues whose original acceptance
+  criteria are now satisfied by merged PR/test/docs evidence.
+- Preserve true remaining work by moving it to focused follow-up issues instead
+  of leaving stale umbrella blockers open.
+- Record the PR #133 merge and current autonomous state before opening the next
+  PR.
+- Prepare post-merge closure comments for #25, #30, #45, #46, #47, #48, #51,
+  and #124 if CodeRabbit and CI agree the reconciliation is clean.
+
+Initial candidate files:
+
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation plan:
+
+- `rg -n "issues/(25|30|45|46|47|48|51|124|135|136)|#25|#30|#45|#46|#47|#48|#51|#124|#135|#136" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`
+- `git diff --check`
+
+Local validation:
+
+- Issue-reference grep passed and confirmed the reconciliation table plus #135
+  and #136 follow-up links are present.
+- Heading-order grep passed for `ops/ROADMAP.md` and
+  `ops/AUTONOMOUS_RUN.md`.
+- `git diff --check` passed.
+- `make check` passed, including Foundry build/tests, production size,
+  metadata fixture/browser-sandbox checks, release-artifact drift checks,
+  changelog gate, and deployment rehearsal.
+
 ### PR candidate: Recover `StreamCore` release-floor bytecode headroom (Queue Item 69)
 
-Status: Issue #132 created; branch `codex/streamcore-size-floor-recovery`
+Status: Merged in PR #133; CI run `27393020740` passed, CodeRabbit completed
+with no actionable comments on the final head, and squash merge
+`f583f7662dab2945b79a5c92d31ed74c5e227639` landed on `main`.
+Issue #132 closed through the PR merge.
+
+Original status: Issue #132 created; branch `codex/streamcore-size-floor-recovery`
 started from `main` at PR #131 merge commit
 `3a6405d7d0cdc1d3550a8f872c6f17f3a0a147ac`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/133`.
