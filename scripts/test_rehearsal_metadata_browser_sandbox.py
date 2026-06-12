@@ -14,7 +14,9 @@ SPEC = importlib.util.spec_from_file_location(
     "check_rehearsal_metadata_browser_sandbox",
     SCRIPT_PATH,
 )
-assert SPEC is not None and SPEC.loader is not None
+assert SPEC is not None and SPEC.loader is not None, (
+    f"Failed to load module spec from {SCRIPT_PATH}: {SPEC!r}"
+)
 rehearsal_checker = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = rehearsal_checker
 SPEC.loader.exec_module(rehearsal_checker)
@@ -121,6 +123,21 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
         self.assertEqual(evidence["evidenceKind"], rehearsal_checker.EXPECTED_EVIDENCE_KIND)
         self.assertEqual(evidence["tokenHash"], "0x" + "34" * 32)
 
+    def test_parses_noisy_forge_stdout_records(self) -> None:
+        """Forge stdout can include non-JSON text around JSON records."""
+
+        returned = forge_output_with_return(valid_evidence())["returned"]
+        stdout = (
+            "Compiling...\n"
+            '{"status":"ok"}\n'
+            "noise with {unparseable brace\n"
+            f'{{"returned":"{returned}"}}\n'
+        )
+
+        records = rehearsal_checker.parse_forge_json_records(stdout)
+
+        self.assertEqual(records[-1]["returned"], returned)
+
     def test_rejects_missing_rehearsal_return(self) -> None:
         """Forge output must contain the structured rehearsal return payload."""
 
@@ -130,8 +147,8 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
         ):
             rehearsal_checker.extract_rehearsal_evidence({"raw_logs": []})
 
-    def test_validates_rehearsal_event_envelope(self) -> None:
-        """A complete event with the expected evidence fields is accepted."""
+    def test_validates_rehearsal_evidence_envelope(self) -> None:
+        """A complete payload with the expected evidence fields is accepted."""
 
         rehearsal_checker.validate_rehearsal_evidence(valid_evidence())
 
@@ -148,7 +165,7 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
             rehearsal_checker.validate_rehearsal_evidence(evidence)
 
     def test_rejects_bad_token_uri_shape(self) -> None:
-        """The event tokenURI must be on-chain JSON metadata."""
+        """The evidence tokenURI must be on-chain JSON metadata."""
 
         evidence = valid_evidence()
         evidence["tokenUri"] = "ipfs://metadata"
@@ -164,6 +181,12 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
 
         self.assertEqual(rehearsal_checker.parse_token_data("1, 2,3"), (1, 2, 3))
 
+    def test_parse_empty_token_data(self) -> None:
+        """Empty tokenDataRaw maps to an empty tuple."""
+
+        self.assertEqual(rehearsal_checker.parse_token_data(""), ())
+        self.assertEqual(rehearsal_checker.parse_token_data("  "), ())
+
     def test_rejects_non_integer_token_data(self) -> None:
         """Malformed tokenDataRaw values fail before Chromium launches."""
 
@@ -173,7 +196,7 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
         ):
             rehearsal_checker.parse_token_data("1,nope,3")
 
-    def test_builds_expected_bootstrap_from_event(self) -> None:
+    def test_builds_expected_bootstrap_from_evidence(self) -> None:
         """The expected browser bootstrap values come from rehearsal evidence."""
 
         expected = rehearsal_checker.build_expected_bootstrap(valid_evidence())

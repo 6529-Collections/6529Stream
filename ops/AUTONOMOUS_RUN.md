@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/139` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 05:16 UTC` |
+| Last updated | `2026-06-12 05:32 UTC` |
 
 ## Packaging Notes
 
@@ -132,7 +132,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add deployment-rehearsal metadata browser coverage (Queue Item 72)
 
-Status: PR #139 opened and CodeRabbit requested in PR comment `4687690174`.
+Status: PR #139 opened and CodeRabbit requested in PR comment `4687690174`;
+CodeRabbit review comments addressed locally and pending commit.
 Issue #135 selected after PR #138 merged and `main` advanced to
 `9510a0f25bbdb61292644ab4ebdeba90e5d401fc`.
 Branch `codex/live-fork-metadata-browser` started from that merge commit.
@@ -210,6 +211,23 @@ Local validation:
 - `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`, PowerShell parser checks
   for `scripts/check.ps1` and `scripts/bootstrap-windows.ps1`, and
   `git diff --check` passed.
+
+Review response validation:
+
+- CodeRabbit review `4482738727` correctly identified that Forge JSON stdout
+  should not be treated as a single JSON document. The checker now scans stdout
+  for JSON object/array records and selects the record containing `returned`.
+- Accepted both low-risk test nitpicks by adding an empty `tokenDataRaw`
+  regression and a descriptive dynamic-import assertion message.
+- `python -m py_compile scripts\check_rehearsal_metadata_browser_sandbox.py scripts\test_rehearsal_metadata_browser_sandbox.py` passed.
+- `python scripts\test_rehearsal_metadata_browser_sandbox.py` passed with 11
+  focused tests.
+- `.venv-tools\Scripts\python.exe scripts\check_rehearsal_metadata_browser_sandbox.py`
+  passed and validated local Anvil deployment-rehearsal metadata in Chromium.
+- `make metadata-fixtures-check` passed with the rehearsal tests and browser
+  checks.
+- Full `make check` passed after the review fixes.
+- `git diff --check` passed.
 
 ### PR candidate: Document dependency migration runbooks (Queue Item 71)
 
@@ -6349,6 +6367,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 05:32 | Address CodeRabbit PR #139 review | Hardened Forge stdout parsing for noisy or multi-record JSON output, added empty `tokenDataRaw` coverage and import assertion diagnostics, and reran py_compile, focused tests, live rehearsal check, metadata fixture gate, full `make check`, and whitespace validation |
 | 2026-06-12 05:16 | Open PR #139 and request CodeRabbit | Pushed `codex/live-fork-metadata-browser`, opened https://github.com/6529-Collections/6529Stream/pull/139 against `main`, linked `Closes #135`, requested CodeRabbit in comment `4687690174`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 05:13 | Validate Queue Item 72 locally | Focused Python rehearsal tests, live Forge-to-Chromium rehearsal check, metadata fixture gate, release manifest/checksum/changelog drift checks, full `make check`, Bash/PowerShell syntax checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
 | 2026-06-12 05:00 | Implement Queue Item 72 local draft | Added `RehearseMetadataBrowser.s.sol`, a return-payload-driven rehearsal browser checker, local/CI gate wiring, docs/roadmap/run-state/changelog updates, and release evidence refreshes for issue #135 |

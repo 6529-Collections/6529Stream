@@ -63,6 +63,38 @@ def resolve_forge(env: dict[str, str]) -> str:
     return forge
 
 
+def parse_forge_json_records(stdout: str) -> list[dict[str, Any]]:
+    """Extract JSON object records from Forge stdout."""
+
+    decoder = json.JSONDecoder()
+    records: list[dict[str, Any]] = []
+    index = 0
+    while index < len(stdout):
+        object_start = stdout.find("{", index)
+        array_start = stdout.find("[", index)
+        starts = [start for start in (object_start, array_start) if start != -1]
+        if not starts:
+            break
+        start = min(starts)
+        try:
+            parsed, end = decoder.raw_decode(stdout[start:])
+        except json.JSONDecodeError:
+            index = start + 1
+            continue
+
+        if isinstance(parsed, dict):
+            records.append(parsed)
+        elif isinstance(parsed, list):
+            records.extend(record for record in parsed if isinstance(record, dict))
+        index = start + end
+
+    if not records:
+        raise RehearsalMetadataBrowserError(
+            "forge metadata rehearsal did not produce parseable JSON records"
+        )
+    return records
+
+
 def run_forge_rehearsal() -> dict[str, Any]:
     """Run the local metadata rehearsal script and return Forge's JSON output."""
 
@@ -90,12 +122,13 @@ def run_forge_rehearsal() -> dict[str, Any]:
             f"stdout:\n{completed.stdout[-4000:]}\n"
             f"stderr:\n{completed.stderr[-4000:]}"
         )
-    try:
-        return json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
-        raise RehearsalMetadataBrowserError(
-            "forge metadata rehearsal did not produce parseable JSON"
-        ) from exc
+    records = parse_forge_json_records(completed.stdout)
+    for record in reversed(records):
+        if "returned" in record:
+            return record
+    raise RehearsalMetadataBrowserError(
+        "forge metadata rehearsal did not include returned ABI data"
+    )
 
 
 def read_word(data: bytes, index: int, *, base: int = 0) -> bytes:
