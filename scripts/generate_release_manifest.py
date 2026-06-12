@@ -12,6 +12,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import check_release_signatures as release_signature_checker
+
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
 GENERATOR_VERSION = "1"
@@ -302,6 +304,11 @@ def randomizer_operations_record(path: Path, repo_root: Path) -> dict[str, Any]:
 
 def release_signature_record(path: Path, repo_root: Path) -> dict[str, Any]:
     data = require_dict(load_json(path), str(path))
+    try:
+        release_signature_checker.validate_evidence_document(data, repo_root, str(path))
+    except release_signature_checker.ReleaseSignatureEvidenceError as exc:
+        raise ReleaseManifestError(f"invalid release signature evidence {path}: {exc}") from exc
+
     network = require_dict(data.get("network"), f"{path}.network")
     signing_identity = require_dict(data.get("signing_identity"), f"{path}.signing_identity")
     signatures = require_dict(data.get("signatures"), f"{path}.signatures")
@@ -344,6 +351,7 @@ def release_signature_record(path: Path, repo_root: Path) -> dict[str, Any]:
                     signed_git_tag.get("format"), "signatures.signed_git_tag.format"
                 ),
             },
+            "evidence": data,
         }
     )
     return record

@@ -111,6 +111,27 @@ class ReleaseSignatureEvidenceTests(unittest.TestCase):
 
             checker.validate_evidence(path, root)
 
+    def test_unexpected_fields_fail(self) -> None:
+        mutations = {
+            "top_level": lambda evidence: evidence.update({"unexpected": "value"}),
+            "nested": lambda evidence: evidence["signatures"]["signed_git_tag"].update(
+                {"unexpected": "value"}
+            ),
+        }
+
+        for label, mutate in mutations.items():
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                evidence = valid_evidence(root)
+                mutate(evidence)
+                path = root / "release-artifacts/signatures/example.json"
+                write_json(path, evidence)
+
+                with self.assertRaisesRegex(
+                    checker.ReleaseSignatureEvidenceError, "unexpected field"
+                ):
+                    checker.validate_evidence(path, root)
+
     def test_negative_confirmation_depth_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

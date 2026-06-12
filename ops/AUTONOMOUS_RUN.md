@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/157` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 14:10 UTC` |
+| Last updated | `2026-06-12 14:19 UTC` |
 
 ## Packaging Notes
 
@@ -141,8 +141,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release signature evidence baseline (Queue Item 81)
 
-Status: PR #157 open; CodeRabbit requested; initial CI hygiene failure fixed
-locally and awaiting follow-up push.
+Status: PR #157 open; CodeRabbit findings addressed locally and follow-up
+validation passed; awaiting follow-up push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/156`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/157`.
 CodeRabbit request: issue comment `4691996355`.
@@ -224,6 +224,22 @@ Validation:
   at EOF in `docs/release-signatures.md`; the EOF was trimmed and the release
   manifest/checksum evidence was regenerated.
 - Post-CI-fix validation: `python scripts\test_release_signatures.py`,
+  `python scripts\check_release_signatures.py`,
+  `python scripts\test_release_manifest.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\test_release_checksums.py`,
+  `python scripts\generate_release_checksums.py --check`,
+  targeted `python -m py_compile`, `bash -n scripts/check.sh`,
+  `bash -n scripts/bootstrap-ec2.sh`, and `git diff --check`.
+- CodeRabbit follow-up fixes:
+  - Added exact-key evidence validation so the checker rejects unexpected
+    top-level and nested fields that the schema marks as disallowed.
+  - Made release-manifest generation validate release-signature evidence before
+    indexing it, then retain the validated evidence payload in the manifest.
+  - Added release-signature schema and evidence paths to default checksum
+    coverage and regenerated the manifest/checksum bundle.
+- CodeRabbit follow-up focused validation:
+  `python scripts\test_release_signatures.py`,
   `python scripts\check_release_signatures.py`,
   `python scripts\test_release_manifest.py`,
   `python scripts\generate_release_manifest.py --check`,
@@ -7314,6 +7330,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 14:18 | Address PR #157 CodeRabbit findings | Enforced exact evidence object keys, validated release-signature evidence before manifest indexing, retained the validated payload in the release manifest, added schema/signature evidence to checksum coverage, regenerated release artifacts, and passed focused release-signature, manifest, and checksum tests locally |
 | 2026-06-12 14:10 | Address PR #157 CI hygiene failure | GitHub CI run `27420702347` failed `git diff --check` on an extra blank line at EOF in `docs/release-signatures.md`; trimmed the EOF, regenerated release manifest/checksum evidence, and reran focused release-signature, manifest, checksum, Python compile, Bash syntax, and whitespace checks locally |
 | 2026-06-12 14:03 | Open PR #157 and request CodeRabbit | Release signature evidence baseline PR opened against `main`, linked `Closes #156`, requested CodeRabbit in comment `4691996355`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 13:18 | Request CodeRabbit PR #155 review | CodeRabbit review requested in issue comment `4691619335`; Claude intentionally skipped per current user instruction |

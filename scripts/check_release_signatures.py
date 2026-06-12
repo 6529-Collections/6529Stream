@@ -29,6 +29,36 @@ NON_LOCAL_ENVIRONMENTS = frozenset({"fork", "testnet", "mainnet", "production"})
 PRODUCTION_ENVIRONMENTS = frozenset({"mainnet", "production"})
 SIGNING_IDENTITY_STATUSES = frozenset({LOCAL_PLACEHOLDER_STATUS, "active", "rotated", "revoked"})
 SIGNATURE_STATUSES = frozenset({LOCAL_PLACEHOLDER_STATUS, "signed", "pending", "blocked"})
+TOP_LEVEL_FIELDS = frozenset(
+    {
+        "schema_version",
+        "evidence_id",
+        "protocol_version",
+        "release_version",
+        "network",
+        "source",
+        "artifacts",
+        "signing_identity",
+        "signatures",
+        "retained_artifacts",
+        "redaction_policy",
+        "operator_notes",
+    }
+)
+NETWORK_FIELDS = frozenset({"environment", "name", "chain_id", "confirmation_depth"})
+SOURCE_FIELDS = frozenset({"repository", "git_commit", "source_dirty", "ci_run"})
+ARTIFACT_FIELDS = frozenset({"release_manifest", "checksum_bundle"})
+SELF_REFERENTIAL_REF_FIELDS = frozenset({"path", "digest_status", "reason"})
+SIGNING_IDENTITY_FIELDS = frozenset(
+    {"status", "public_key_fingerprint", "key_custody", "rotation_policy"}
+)
+SIGNATURES_FIELDS = frozenset({"detached_checksum_signature", "signed_git_tag"})
+SIGNATURE_RESULT_FIELDS = frozenset(
+    {"status", "format", "artifact_path", "verification_command", "evidence", "notes"}
+)
+FILE_REF_FIELDS = frozenset({"path", "sha256"})
+RETAINED_ARTIFACT_FIELDS = frozenset({"category", "path", "sha256"})
+REDACTION_POLICY_FIELDS = frozenset({"no_secrets", "redacted_fields"})
 SECRET_KEY_PARTS = (
     "private_key",
     "mnemonic",
@@ -71,6 +101,20 @@ def require_dict(value: Any, path: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ReleaseSignatureEvidenceError(f"{path} must be an object")
     return value
+
+
+def require_exact_keys(value: dict[str, Any], path: str, expected: frozenset[str]) -> None:
+    keys = set(value)
+    missing = sorted(expected - keys)
+    extra = sorted(keys - expected)
+    if missing:
+        raise ReleaseSignatureEvidenceError(
+            f"{path} is missing required field(s): {', '.join(missing)}"
+        )
+    if extra:
+        raise ReleaseSignatureEvidenceError(
+            f"{path} has unexpected field(s): {', '.join(extra)}"
+        )
 
 
 def require_list(value: Any, path: str) -> list[Any]:
@@ -156,8 +200,14 @@ def resolve_repo_file(repo_root: Path, relative_path: str, path: str) -> Path:
     return resolved
 
 
-def validate_file_ref(value: Any, repo_root: Path, path: str) -> Path:
+def validate_file_ref(
+    value: Any,
+    repo_root: Path,
+    path: str,
+    expected_fields: frozenset[str] = FILE_REF_FIELDS,
+) -> Path:
     ref = require_dict(value, path)
+    require_exact_keys(ref, path, expected_fields)
     relative_path = require_string(ref.get("path"), f"{path}.path")
     expected_hash = require_sha256(ref.get("sha256"), f"{path}.sha256")
     resolved = resolve_repo_file(repo_root, relative_path, f"{path}.path")
@@ -171,6 +221,7 @@ def validate_file_ref(value: Any, repo_root: Path, path: str) -> Path:
 
 def validate_self_referential_ref(value: Any, repo_root: Path, path: str) -> None:
     ref = require_dict(value, path)
+    require_exact_keys(ref, path, SELF_REFERENTIAL_REF_FIELDS)
     relative_path = require_string(ref.get("path"), f"{path}.path")
     resolve_repo_file(repo_root, relative_path, f"{path}.path")
     digest_status = require_string(ref.get("digest_status"), f"{path}.digest_status")
@@ -183,6 +234,7 @@ def validate_self_referential_ref(value: Any, repo_root: Path, path: str) -> Non
 
 def validate_source(value: Any) -> None:
     source = require_dict(value, "source")
+    require_exact_keys(source, "source", SOURCE_FIELDS)
     require_string(source.get("repository"), "source.repository")
     require_git_commit(source.get("git_commit"), "source.git_commit")
     require_bool(source.get("source_dirty"), "source.source_dirty")
@@ -191,6 +243,7 @@ def validate_source(value: Any) -> None:
 
 def validate_network(value: Any) -> str:
     network = require_dict(value, "network")
+    require_exact_keys(network, "network", NETWORK_FIELDS)
     environment = require_enum(network.get("environment"), "network.environment", ENVIRONMENTS)
     require_string(network.get("name"), "network.name")
     require_positive_int(network.get("chain_id"), "network.chain_id")
@@ -200,6 +253,7 @@ def validate_network(value: Any) -> str:
 
 def validate_artifacts(value: Any, repo_root: Path) -> None:
     artifacts = require_dict(value, "artifacts")
+    require_exact_keys(artifacts, "artifacts", ARTIFACT_FIELDS)
     validate_self_referential_ref(
         artifacts.get("release_manifest"), repo_root, "artifacts.release_manifest"
     )
@@ -210,6 +264,7 @@ def validate_artifacts(value: Any, repo_root: Path) -> None:
 
 def validate_signing_identity(value: Any, environment: str) -> str:
     identity = require_dict(value, "signing_identity")
+    require_exact_keys(identity, "signing_identity", SIGNING_IDENTITY_FIELDS)
     status = require_enum(
         identity.get("status"), "signing_identity.status", SIGNING_IDENTITY_STATUSES
     )
@@ -234,6 +289,7 @@ def validate_signing_identity(value: Any, environment: str) -> str:
 
 def validate_signature_result(value: Any, repo_root: Path, path: str, environment: str) -> str:
     result = require_dict(value, path)
+    require_exact_keys(result, path, SIGNATURE_RESULT_FIELDS)
     status = require_enum(result.get("status"), f"{path}.status", SIGNATURE_STATUSES)
     require_string(result.get("format"), f"{path}.format")
     artifact_path = require_string(result.get("artifact_path"), f"{path}.artifact_path")
@@ -267,6 +323,7 @@ def validate_signature_result(value: Any, repo_root: Path, path: str, environmen
 
 def validate_signatures(value: Any, repo_root: Path, environment: str) -> dict[str, str]:
     signatures = require_dict(value, "signatures")
+    require_exact_keys(signatures, "signatures", SIGNATURES_FIELDS)
     statuses = {
         "detached_checksum_signature": validate_signature_result(
             signatures.get("detached_checksum_signature"),
@@ -293,18 +350,25 @@ def validate_retained_artifacts(value: Any, repo_root: Path) -> set[str]:
     categories: set[str] = set()
     for index, item in enumerate(retained):
         artifact = require_dict(item, f"retained_artifacts[{index}]")
+        require_exact_keys(artifact, f"retained_artifacts[{index}]", RETAINED_ARTIFACT_FIELDS)
         category = require_string(artifact.get("category"), f"retained_artifacts[{index}].category")
         if category in categories:
             raise ReleaseSignatureEvidenceError(
                 f"retained_artifacts category is duplicated: {category}"
             )
         categories.add(category)
-        validate_file_ref(artifact, repo_root, f"retained_artifacts[{index}]")
+        validate_file_ref(
+            artifact,
+            repo_root,
+            f"retained_artifacts[{index}]",
+            RETAINED_ARTIFACT_FIELDS,
+        )
     return categories
 
 
 def validate_redaction_policy(value: Any) -> None:
     policy = require_dict(value, "redaction_policy")
+    require_exact_keys(policy, "redaction_policy", REDACTION_POLICY_FIELDS)
     if require_bool(policy.get("no_secrets"), "redaction_policy.no_secrets") is not True:
         raise ReleaseSignatureEvidenceError("redaction_policy.no_secrets must be true")
     fields = require_list(policy.get("redacted_fields"), "redaction_policy.redacted_fields")
@@ -330,9 +394,10 @@ def reject_secret_like_keys(value: Any, path: str = "evidence") -> None:
             raise ReleaseSignatureEvidenceError(f"{path} contains a secret-like value")
 
 
-def validate_evidence(path: Path, repo_root: Path) -> None:
-    evidence = require_dict(load_json(path), str(path))
+def validate_evidence_document(value: Any, repo_root: Path, path: str = "evidence") -> None:
+    evidence = require_dict(value, path)
     reject_secret_like_keys(evidence)
+    require_exact_keys(evidence, path, TOP_LEVEL_FIELDS)
     schema = require_string(evidence.get("schema_version"), "schema_version")
     if schema != EVIDENCE_SCHEMA:
         raise ReleaseSignatureEvidenceError(f"unsupported release signature evidence schema: {schema}")
@@ -366,6 +431,10 @@ def validate_evidence(path: Path, repo_root: Path) -> None:
             )
         if any(status != "signed" for status in signature_statuses.values()):
             raise ReleaseSignatureEvidenceError("production release signature evidence must be signed")
+
+
+def validate_evidence(path: Path, repo_root: Path) -> None:
+    validate_evidence_document(load_json(path), repo_root, str(path))
 
 
 def main(argv: list[str] | None = None) -> int:
