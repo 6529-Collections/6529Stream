@@ -85,6 +85,15 @@ category totals, `totalOwed()` views, balance coverage, reserves, and
 payment surfaces. The invariant suite also checks ADR-style local-ledger view
 aliases such as `totalReserved()` and `surplus()` where those surfaces apply.
 
+Supply, replay, and freeze behavior now has a bounded sequence invariant
+baseline in `StreamSupplyReplayFreezeInvariant.t.sol`: mixed fixed-price mints,
+drop cancellations, consumed-drop replay attempts, cancelled-drop mint attempts,
+burns, token data edits, image/attribute edits, and freeze attempts are checked
+against global and collection live supply, minted-ever circulation counters,
+burn counters, burn audit state, consumed/cancelled drop IDs, freeze manifest
+stability, final-supply tightening, and post-freeze mint/burn/token-data
+rejection.
+
 `StreamGasSnapshot.t.sol` provides the local Gate D gas snapshot surface. The
 committed baseline at `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`
 is generated and checked with `forge snapshot --match-path

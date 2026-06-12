@@ -32,6 +32,13 @@ The current Gate A smoke baseline proves:
   emergency-withdrawable surplus coherent after each step. Current value-holding
   payment surfaces also expose ADR-style local-ledger aliases for reserved
   balances and surplus where applicable.
+- Supply/replay/freeze sequence fuzzing now covers mixed fixed-price mints,
+  drop cancellations, consumed-drop replay attempts, cancelled-drop mint
+  attempts, burns, metadata edits, freeze attempts, stored freeze-manifest
+  stability, final-supply tightening, and post-freeze mint/burn/token-data
+  rejection. The invariant reasserts global and collection live supply,
+  minted-ever counters, burn counters, burn audit state, and
+  consumed/cancelled drop ID state after each step.
 - Randomizer tests now cover request lifecycle views, callback validation,
   raw-output hash storage, failed post-processing state, bounded deterministic
   post-processing retry, and the conservative provider-migration policy that
@@ -224,7 +231,8 @@ HTML/JavaScript render-sandbox hardening beyond the committed browser fixture
 and local deployment-rehearsal check, fork/testnet/live production metadata
 browser evidence, fork/testnet/live ceremony evidence contents,
 fork/testnet/live emergency redeployment evidence contents, deployment
-discipline, and broader supply/replay/freeze invariant coverage.
+discipline, and broader auction-consistency plus fork/testnet/live invariant
+coverage.
 Fixture-level invalid UTF-8 regressions, dependency registry production UTF-8
 guards, and Core-level production UTF-8 guards are now covered.
 

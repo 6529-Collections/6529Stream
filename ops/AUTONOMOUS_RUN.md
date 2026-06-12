@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/local-gas-snapshot-baseline` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/145` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/147` |
+| Active PR branch | `codex/supply-replay-freeze-invariants` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/147` |
+| Active PR | TBD for issue #148 |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 10:16 UTC` |
+| Last updated | `2026-06-12 10:54 UTC` |
 
 ## Packaging Notes
 
@@ -130,18 +130,102 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 73 | Add dry-run auction ceremony rehearsal | Gate E | Implement issue #140 by proving a local deployed stack can run the operational auction ceremony from signed auction drop through bid, settlement, proceeds withdrawal, and final accounting without RPC secrets | Merged in PR #141 |
 | 74 | Add local emergency redeployment rehearsal | Gate E | Implement issue #142 by proving ADR 0007 immutable redeployment evidence locally: distinct old/replacement deployment versions, manifests, drop domains, contract addresses, Safe-rooted ceremonies, and replacement smoke mint without RPC secrets | Merged in PR #143 |
 | 75 | Add deployment ceremony evidence bundle schema | Gate E/Gate G support | Implement issue #144 by defining a no-secret ceremony evidence schema, local Anvil evidence bundle, validator, tests, local/CI gates, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #145 |
-| 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Open in PR #147 |
+| 76 | Add local gas snapshot baseline | Gate D/Gate G support | Implement issue #146 by adding deterministic gas snapshot scenarios, a committed baseline, local/CI drift checks, release-manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #147 |
+| 77 | Add supply/replay/freeze invariant baseline | Gate D | Implement issue #148 by adding bounded sequence coverage for supply counters, drop replay/cancellation state, burns, freeze manifests, and post-freeze guards, with docs/roadmap/run-state updates | In progress |
 
 ## Current PR Worklog
 
+### PR candidate: Add supply/replay/freeze invariant baseline (Queue Item 77)
+
+Status: local implementation in progress on branch
+`codex/supply-replay-freeze-invariants`; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/148`.
+Branch started from PR #147 squash merge commit
+`a907219a2717322a6be72e141615dbeeb1edb7d8`.
+
+Goal:
+
+- Add a bounded sequence invariant baseline for fixed-price drop execution,
+  cancellation, consumed-drop replay attempts, cancelled-drop mint attempts,
+  burns, metadata edits, freeze attempts, and post-freeze mutation rejection.
+- Reassert global and collection live supply, minted-ever circulation counters,
+  burn counters, burn audit state, consumed/cancelled drop ID state, token
+  ownership, token-to-collection mapping, freeze manifest stability, and
+  final-supply tightening after each step.
+- Update changelog, test inventory, project status, roadmap traceability, and
+  this durable run state.
+- Keep fork/testnet/live invariant evidence and auction-consistency invariants
+  out of scope for this local Gate D baseline.
+
+Initial candidate files:
+
+- `test/StreamSupplyReplayFreezeInvariant.t.sol`
+- `test/README.md`
+- `docs/status.md`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+
+Validation plan:
+
+- `forge fmt test\StreamSupplyReplayFreezeInvariant.t.sol`
+- `forge test --match-path test\StreamSupplyReplayFreezeInvariant.t.sol -vvv`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\test_changelog_check.py`
+- `python scripts\check_changelog.py`
+- Full local `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Current implementation notes:
+
+- Added `test/StreamSupplyReplayFreezeInvariant.t.sol` with a bounded handler
+  that mixes valid fixed-price mints, fresh cancellations, consumed-drop
+  replays, cancelled-drop mint attempts, burns, metadata edits, freeze attempts,
+  and post-freeze mint/burn/token-data rejection checks.
+- The invariant tracks the model state for minted-ever tokens, live tokens,
+  burned tokens, consumed drop IDs, cancelled drop IDs, token ownership,
+  token-to-collection mapping, burn audit state, freeze manifest hash, and
+  finalized supply.
+- Focused local validation passed before docs updates:
+  `forge fmt test\StreamSupplyReplayFreezeInvariant.t.sol` and
+  `forge test --match-path test\StreamSupplyReplayFreezeInvariant.t.sol -vvv`.
+- Subagent spawning was attempted earlier in this manager run but blocked by
+  the app agent thread limit, so this item continues locally.
+
+Validation completed:
+
+- `forge fmt test\StreamSupplyReplayFreezeInvariant.t.sol`
+- `forge test --match-path test\StreamSupplyReplayFreezeInvariant.t.sol -vvv`
+- `python scripts\test_release_manifest.py`
+- `python scripts\test_release_checksums.py`
+- `python scripts\test_changelog_check.py`
+- `python scripts\generate_release_manifest.py`
+- `python scripts\generate_release_checksums.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\check_changelog.py`
+- `python -m py_compile scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py scripts\check_changelog.py scripts\test_changelog_check.py`
+- `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
 ### PR candidate: Add local gas snapshot baseline (Queue Item 76)
 
-Status: open in PR #147 on branch `codex/local-gas-snapshot-baseline`; GitHub
-CI passed on the prior head, CodeRabbit's second follow-up is addressed
-locally, full local validation passed, and push/review are pending.
+Status: merged in PR #147 after CI and CodeRabbit success.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/146`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/147`.
 CodeRabbit request: issue comment `4689622593`.
+Final head: `407e79e899d74a71f12b07ea69421927434ef775`.
+Squash merge commit: `a907219a2717322a6be72e141615dbeeb1edb7d8`.
 Branch started from PR #145 squash merge commit
 `9f1c2578ab12097e945c7400a2f37df83608a092`.
 
@@ -6832,6 +6916,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 10:54 | Finish local Queue Item 77 validation | Focused supply/replay/freeze invariant fuzzing, release manifest/checksum/changelog drift checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check` pass locally with only existing repo warnings |
+| 2026-06-12 10:36 | Implement Queue Item 77 local draft | Added a bounded supply/replay/freeze invariant test file covering mixed fixed-price mints, cancellations, replay attempts, burns, metadata edits, freeze attempts, and post-freeze guards; focused formatting and Forge test validation passed before docs/release evidence updates |
+| 2026-06-12 10:28 | Create issue #148 and select Queue Item 77 | PR #147 merged and no open GitHub issues remained, so the next Gate D gap is a local supply/replay/freeze invariant baseline before broader fork/testnet/live and auction-consistency evidence |
+| 2026-06-12 10:27 | Merge PR #147 | Local gas snapshot baseline merged as `a907219a2717322a6be72e141615dbeeb1edb7d8`; final head `407e79e899d74a71f12b07ea69421927434ef775` had CI and CodeRabbit green, and issue #146 closed completed |
 | 2026-06-12 10:16 | Address CodeRabbit PR #147 canonical path review | Tightened `--gas-snapshot` override validation so only the canonical release baseline path under `release-artifacts/baselines/v<protocol-version>/gas-snapshot.snap` is accepted, added a foreign-path regression, and reran focused checks, full `make check`, Windows wrapper, and whitespace checks successfully |
 | 2026-06-12 09:54 | Address CodeRabbit PR #147 review | Accepted the version-aware gas snapshot manifest fix, tooling docs parity fix, and manifest-test digest/size nitpick; regenerated release evidence and reran focused checks, full `make check`, Windows wrapper, and whitespace checks successfully |
 | 2026-06-12 09:29 | Open PR #147 and request CodeRabbit | Pushed `codex/local-gas-snapshot-baseline`, opened https://github.com/6529-Collections/6529Stream/pull/147 against `main`, linked `Closes #146`, requested CodeRabbit in comment `4689622593`, and intentionally skipped Claude per user instruction |
