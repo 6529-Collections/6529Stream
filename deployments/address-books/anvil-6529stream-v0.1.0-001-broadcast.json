@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:8f99739bd4caf2afabee0f6aa66a4227bf7ef395bc3c187ef3676fdfac6db305",
+    "deployment_manifest_sha256": "sha256:eab12b84ab8950abe145f7417d3666feea20aa66df0148862682a74ad00127f4",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -66,7 +66,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
-      "runtime_bytecode_hash": "sha256:d33974883a51fea108a14f1e33912ed213871963e95df2a546371251c453c4c8",
+      "runtime_bytecode_hash": "sha256:319883a2200495b5fbdc517b62f76e39e3fecb1c625b6e9bd5c62c2525b785bd",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {

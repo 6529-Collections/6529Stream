@@ -7,11 +7,12 @@ The current Gate A smoke baseline proves:
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. Current `StreamCore` production runtime size is 24,160 bytes,
-  leaving 416 bytes of EIP-170 headroom under the IR-optimized deployment
-  profile. This satisfies the current 384-byte minimum release floor; future
-  non-trivial `StreamCore` feature work should preserve at least 512 bytes of
-  warning-threshold headroom or document an explicit size-budget exception.
+  size gate. Current `StreamCore` production runtime size is 24,319 bytes,
+  leaving 257 bytes of EIP-170 headroom under the IR-optimized deployment
+  profile. This passes the EIP-170 deployability gate but is below the current
+  384-byte minimum release floor; issue-sized follow-up work should recover
+  headroom or explicitly accept the size-budget exception before further
+  non-trivial `StreamCore` feature work.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271
@@ -44,11 +45,13 @@ The current Gate A smoke baseline proves:
   records, provenance/deprecation views, collection dependency
   key/version/content-hash/registry-address pins, explicit repinning, and
   output stability after later registry versions or registry swaps.
-  `StreamMetadataGolden.t.sol` locks current off-chain pending/final URIs plus
-  schema-v1 on-chain pending/final base64 JSON data URIs against fixtures. The
-  on-chain schema exposes `metadata_schema_version` and `metadata_state`, and
-  pending on-chain metadata no longer runs final generative HTML with a zero
-  token hash. `StreamMetadataEvents.t.sol` proves ERC-4906 interface support and
+  `StreamMetadataGolden.t.sol` locks current off-chain pending/stale/failed/final
+  URIs plus schema-v1 on-chain pending/stale/failed/final base64 JSON data URIs
+  against fixtures. The on-chain schema exposes `metadata_schema_version` and
+  `metadata_state`; pending, stale, and failed metadata omit final animation
+  HTML while the token hash remains zero; lifecycle lookup failures fall back to
+  `pending`; and final token hashes override lifecycle display state.
+  `StreamMetadataEvents.t.sol` proves ERC-4906 interface support and
   current metadata update event semantics for token-level updates, and it now
   proves optional ERC-721 Enumerable support is not advertised while the
   contract preserves a live `totalSupply()` view.

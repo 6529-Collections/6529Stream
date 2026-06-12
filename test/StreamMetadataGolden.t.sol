@@ -2,12 +2,138 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/StreamCore.sol";
+import "../smart-contracts/IRandomizer.sol";
+import "../smart-contracts/IRandomizerLifecycle.sol";
+import "../smart-contracts/IStreamCore.sol";
 import "../smart-contracts/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
 // MockRandomizer.sol also defines NoopRandomizer, used here to hold pending state.
 import "./mocks/MockRandomizer.sol";
+
+contract MetadataLifecycleRandomizer is IRandomizer, IRandomizerLifecycle {
+    RandomnessRequest private request;
+    bool private revertStateLookup;
+
+    function calculateTokenHash(uint256, uint256, uint256) external { }
+
+    function isRandomizerContract() external pure returns (bool) {
+        return true;
+    }
+
+    function supportsRandomizerLifecycle() external pure returns (bool) {
+        return true;
+    }
+
+    function setTokenState(uint256 collectionId, uint256 tokenId, RandomnessRequestState state)
+        external
+    {
+        request = RandomnessRequest({
+            collectionId: collectionId,
+            tokenId: tokenId,
+            provider: address(this),
+            providerRequestId: 1,
+            randomizerEpoch: 1,
+            state: state,
+            requestedBlock: block.number,
+            requestedTimestamp: block.timestamp,
+            fulfilledBlock: state == RandomnessRequestState.FailedPostProcessing ? block.number : 0,
+            fulfilledTimestamp: state == RandomnessRequestState.FailedPostProcessing
+                ? block.timestamp
+                : 0,
+            derivedSeed: bytes32(uint256(1)),
+            rawOutputHash: bytes32(uint256(2)),
+            failureDataHash: state == RandomnessRequestState.FailedPostProcessing
+                ? bytes32(uint256(3))
+                : bytes32(0),
+            postProcessingRetryCount: 0
+        });
+    }
+
+    function setStateLookupReverts(bool value) external {
+        revertStateLookup = value;
+    }
+
+    function finalizeToken(IStreamCore core, uint256 collectionId, uint256 tokenId, bytes32 hash)
+        external
+    {
+        core.setTokenHash(collectionId, tokenId, hash);
+    }
+
+    function retrieveRandomnessRequest(uint256 requestId)
+        external
+        view
+        returns (RandomnessRequest memory)
+    {
+        _maybeRevertStateLookup();
+        if (request.providerRequestId == requestId) {
+            return request;
+        }
+        return _emptyRequest();
+    }
+
+    function retrieveRandomnessRequestForToken(uint256 tokenId)
+        external
+        view
+        returns (RandomnessRequest memory)
+    {
+        _maybeRevertStateLookup();
+        if (request.tokenId == tokenId) {
+            return request;
+        }
+        return _emptyRequest();
+    }
+
+    function randomnessRequestState(uint256 requestId)
+        external
+        view
+        returns (RandomnessRequestState)
+    {
+        _maybeRevertStateLookup();
+        return request.providerRequestId == requestId ? request.state : RandomnessRequestState.None;
+    }
+
+    function randomnessRequestStateForToken(uint256 tokenId)
+        external
+        view
+        returns (RandomnessRequestState)
+    {
+        _maybeRevertStateLookup();
+        return request.tokenId == tokenId ? request.state : RandomnessRequestState.None;
+    }
+
+    function requestToToken(uint256 requestId) external view returns (uint256) {
+        return request.providerRequestId == requestId ? request.tokenId : 0;
+    }
+
+    function tokenToRequest(uint256 tokenId) external view returns (uint256) {
+        return request.tokenId == tokenId ? request.providerRequestId : 0;
+    }
+
+    function tokenIdToCollection(uint256 tokenId) external view returns (uint256) {
+        return request.tokenId == tokenId ? request.collectionId : 0;
+    }
+
+    function pendingRandomnessRequests(uint256 collectionId) external view returns (uint256) {
+        return request.collectionId == collectionId
+            && request.state == RandomnessRequestState.Pending
+            ? 1
+            : 0;
+    }
+
+    function totalPendingRandomnessRequests() external view returns (uint256) {
+        return request.state == RandomnessRequestState.Pending ? 1 : 0;
+    }
+
+    function _maybeRevertStateLookup() private view {
+        if (revertStateLookup) {
+            revert("state unavailable");
+        }
+    }
+
+    function _emptyRequest() private view returns (RandomnessRequest memory empty) { }
+}
 
 contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
     using Assertions for bool;
@@ -35,6 +161,62 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         _mintGoldenToken(finalDeployment);
 
         finalDeployment.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
+    }
+
+    function testLifecycleMetadataStateViewsExposeStaleAndFailed() public {
+        DeployedStream memory staleDeployment = _deployWithLifecycleRandomizer();
+        _mintGoldenToken(staleDeployment);
+        MetadataLifecycleRandomizer(address(staleDeployment.randomizer))
+            .setTokenState(
+                COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+            );
+
+        staleDeployment.core.tokenMetadataState(TOKEN_ID).assertEq("stale", "stale state changed");
+
+        DeployedStream memory failedDeployment = _deployWithLifecycleRandomizer();
+        _mintGoldenToken(failedDeployment);
+        MetadataLifecycleRandomizer(address(failedDeployment.randomizer))
+            .setTokenState(
+                COLLECTION_ID,
+                TOKEN_ID,
+                IRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing
+            );
+
+        failedDeployment.core.tokenMetadataState(TOKEN_ID)
+            .assertEq("failed", "failed state changed");
+    }
+
+    function testLifecycleLookupFailureFallsBackToPendingMetadataState() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer lifecycleRandomizer =
+            MetadataLifecycleRandomizer(address(deployed.randomizer));
+        lifecycleRandomizer.setTokenState(
+            COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+        );
+        lifecycleRandomizer.setStateLookupReverts(true);
+
+        deployed.core.tokenMetadataState(TOKEN_ID)
+            .assertEq("pending", "failed lifecycle lookup should fall back to pending");
+        deployed.core.tokenURI(TOKEN_ID)
+            .assertEq("ipfs://base/pending", "off-chain fallback URI changed");
+    }
+
+    function testFinalTokenHashOverridesLifecycleStateDisplay() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer lifecycleRandomizer =
+            MetadataLifecycleRandomizer(address(deployed.randomizer));
+        lifecycleRandomizer.setTokenState(
+            COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+        );
+        lifecycleRandomizer.finalizeToken(
+            IStreamCore(address(deployed.core)), COLLECTION_ID, TOKEN_ID, bytes32(uint256(9))
+        );
+
+        deployed.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
+        deployed.core.tokenURI(TOKEN_ID)
+            .assertEq("ipfs://base/10000000000", "off-chain final URI changed");
     }
 
     function testSetTokenHashRejectsZeroHashReservedForPendingState() public {
@@ -81,6 +263,40 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
         );
     }
 
+    function testOffchainStaleTokenUriMatchesGoldenFile() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer(address(deployed.randomizer))
+            .setTokenState(
+                COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+            );
+
+        _assertMatchesFixture(
+            deployed.core.tokenURI(TOKEN_ID),
+            "test/fixtures/metadata/offchain-stale-token-uri.txt",
+            "off-chain stale tokenURI"
+        );
+    }
+
+    function testOffchainFailedTokenUriMatchesGoldenFile() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer(address(deployed.randomizer))
+            .setTokenState(
+                COLLECTION_ID,
+                TOKEN_ID,
+                IRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing
+            );
+
+        _assertMatchesFixture(
+            deployed.core.tokenURI(TOKEN_ID),
+            "test/fixtures/metadata/offchain-failed-token-uri.txt",
+            "off-chain failed tokenURI"
+        );
+    }
+
     function testOnchainPendingSchemaV1TokenUriMatchesGoldenFile() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         NoopRandomizer noopRandomizer = new NoopRandomizer();
@@ -111,6 +327,51 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
             "test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt",
             "schema-v1 on-chain final tokenURI"
         );
+    }
+
+    function testOnchainStaleSchemaV1TokenUriMatchesGoldenFile() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer(address(deployed.randomizer))
+            .setTokenState(
+                COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+            );
+        _setGoldenTokenMetadataInputs(deployed.core);
+        deployed.core.changeMetadataView(COLLECTION_ID, true);
+
+        _assertMatchesFixture(
+            deployed.core.tokenURI(TOKEN_ID),
+            "test/fixtures/metadata/onchain-stale-schema-v1-token-uri.txt",
+            "schema-v1 on-chain stale tokenURI"
+        );
+    }
+
+    function testOnchainFailedSchemaV1TokenUriMatchesGoldenFile() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer(address(deployed.randomizer))
+            .setTokenState(
+                COLLECTION_ID,
+                TOKEN_ID,
+                IRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing
+            );
+        _setGoldenTokenMetadataInputs(deployed.core);
+        deployed.core.changeMetadataView(COLLECTION_ID, true);
+
+        _assertMatchesFixture(
+            deployed.core.tokenURI(TOKEN_ID),
+            "test/fixtures/metadata/onchain-failed-schema-v1-token-uri.txt",
+            "schema-v1 on-chain failed tokenURI"
+        );
+    }
+
+    function _deployWithLifecycleRandomizer() private returns (DeployedStream memory deployed) {
+        deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        MetadataLifecycleRandomizer lifecycleRandomizer = new MetadataLifecycleRandomizer();
+        deployed.core.addRandomizer(COLLECTION_ID, address(lifecycleRandomizer));
+        deployed.randomizer = ImmediateRandomizer(address(lifecycleRandomizer));
     }
 
     function _mintGoldenToken(DeployedStream memory deployed) private {
