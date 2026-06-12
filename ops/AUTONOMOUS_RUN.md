@@ -127,11 +127,11 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Browser execution metadata sandbox checks (Queue Item 67)
 
-Status: local implementation ready for PR after PR #127 merged; focused script
-tests, live Playwright/Chromium browser sandbox check, full `make check`, and
-Windows `scripts\check.ps1` pass locally.
+Status: PR #129 open; local implementation passed focused script tests, live
+Playwright/Chromium browser sandbox check, full `make check`, and Windows
+`scripts\check.ps1`. Awaiting GitHub CI and CodeRabbit.
 Branch: `codex/metadata-browser-sandbox-checks`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/129`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/128`.
 Umbrella issue: `https://github.com/6529-Collections/6529Stream/issues/51`.
 
@@ -5924,8 +5924,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
-| 2026-06-12 00:47 | Validate Queue Item 67 locally | Full `make check`, Windows `scripts\check.ps1`, metadata fixture/browser gates, release checksum checks, Bash/PowerShell syntax checks, py-compile checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
-| 2026-06-12 00:31 | Implement Queue Item 67 local draft | Added pinned Playwright/Chromium browser sandbox tooling for the committed final metadata fixture, wired local/CI gates, updated docs/roadmap/state, and confirmed focused script tests plus the live browser check pass locally |
+| 2026-06-12 00:32 | Open PR #129 for Queue Item 67 | Pushed `codex/metadata-browser-sandbox-checks`, opened https://github.com/6529-Collections/6529Stream/pull/129 against `main`, linked `Closes #128`, and will use CI plus CodeRabbit review only per user instruction |
+| 2026-06-12 00:30 | Validate Queue Item 67 locally | Full `make check`, Windows `scripts\check.ps1`, metadata fixture/browser gates, release checksum checks, Bash/PowerShell syntax checks, py-compile checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |
+| 2026-06-12 00:18 | Implement Queue Item 67 local draft | Added pinned Playwright/Chromium browser sandbox tooling for the committed final metadata fixture, wired local/CI gates, updated docs/roadmap/state, and confirmed focused script tests plus the live browser check pass locally |
 | 2026-06-12 00:07 | Start Queue Item 67 | PR #127 merged as `bed60c80c8ee5ac01a14e6e173b5f82d55396148`; issue #128 scopes the next P1-META-006 slice as a real browser execution sandbox check for committed animation metadata |
 | 2026-06-12 00:04 | Merge PR #127 | CI passed, CodeRabbit completed with no actionable comments and 5/5 pre-merge checks, Claude was not triggered per user instruction, and PR #127 squash-merged as `bed60c80c8ee5ac01a14e6e173b5f82d55396148` |
 | 2026-06-11 23:54 | Open PR #127 for Queue Item 66 | Pushed `codex/core-utf8-headroom`, opened https://github.com/6529-Collections/6529Stream/pull/127 against `main`, linked it with `Closes #125`, and will use CI plus CodeRabbit review only per user instruction |
