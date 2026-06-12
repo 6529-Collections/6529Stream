@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/drop-authorization-payload-generator` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/180` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/181` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:56 UTC` |
+| Last updated | `2026-06-12 23:58 UTC` |
 
 ## Packaging Notes
 
@@ -154,12 +154,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
 
-Status: locally validated; PR not opened yet.
+Status: PR opened; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/180`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/181`.
 Branch: `codex/drop-authorization-payload-generator`.
 Branch started from PR #179 squash merge commit
 `3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
+Implementation head at PR open:
+`01103c164b0272fa8db7e67c68f1e01b2bd60b2e`.
 
 Prior queue transition:
 
@@ -232,9 +234,10 @@ Local validation:
 
 Remote validation:
 
-- PR not opened yet.
-- GitHub Actions and CodeRabbit pending until issue #180 is implemented,
-  committed, pushed, and opened as a PR.
+- PR #181 opened at
+  `https://github.com/6529-Collections/6529Stream/pull/181`.
+- GitHub Actions pending.
+- CodeRabbit pending explicit review request after this state update lands.
 
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
