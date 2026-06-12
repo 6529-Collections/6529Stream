@@ -140,9 +140,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add randomizer operations evidence bundle (Queue Item 80)
 
-Status: PR #155 open; CodeRabbit request pending.
+Status: PR #155 open with CodeRabbit requested.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/154`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/155`.
+CodeRabbit request: issue comment `4691619335`.
 Branch: `codex/randomizer-operations-evidence`.
 Branch started from PR #153 squash merge commit
 `551185c6399d79c74321d2e4fb128cbb29c4a8e7`.
@@ -7205,6 +7206,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 13:18 | Request CodeRabbit PR #155 review | CodeRabbit review requested in issue comment `4691619335`; Claude intentionally skipped per current user instruction |
 | 2026-06-12 13:17 | Open PR #155 | Randomizer operations evidence PR opened against `main`, linked `Closes #154`, and includes local validation transcript; CodeRabbit review will be requested after this concrete PR state is pushed |
 | 2026-06-12 13:13 | Finish local Queue Item 80 validation | Focused randomizer-operations tests/checker, release manifest/checksum/changelog drift checks, Python compilation, Unix check-wrapper syntax, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry warning noise |
 | 2026-06-12 12:54 | Implement Queue Item 80 local draft | Added randomizer operations schema, local Anvil evidence, validator/tests, gate wiring, release manifest/checksum coverage, and docs/run-state updates for issue #154 without Solidity behavior changes or live provider secrets |
