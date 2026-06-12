@@ -54,6 +54,8 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
     string private constant _METADATA_STATE_PENDING = "pending";
+    string private constant _METADATA_STATE_STALE = "stale";
+    string private constant _METADATA_STATE_FAILED = "failed";
     string private constant _METADATA_STATE_FINAL = "final";
     uint256 private constant _COLLECTION_TOKEN_RANGE = 10 ** 10;
     uint256 private constant _FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
@@ -787,10 +789,15 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
             }
             return finalMetadata
                 ? string(abi.encodePacked(baseURI, tokenId.toString()))
-                : string(abi.encodePacked(baseURI, _METADATA_STATE_PENDING));
+                : string(
+                    abi.encodePacked(baseURI, _pendingTokenMetadataState(tokenId, collectionId))
+                );
         }
 
-        return _onchainTokenURI(tokenId, collectionId, finalMetadata);
+        string memory metadataState = finalMetadata
+            ? _METADATA_STATE_FINAL
+            : _pendingTokenMetadataState(tokenId, collectionId);
+        return _onchainTokenURI(tokenId, collectionId, metadataState, finalMetadata);
     }
 
     /// @notice Returns the active on-chain metadata schema version.
@@ -801,18 +808,58 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     /// @notice Returns the token's public metadata state under the active schema.
     function tokenMetadataState(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
-        return _isTokenMetadataFinal(tokenId) ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING;
+        return _isTokenMetadataFinal(tokenId)
+            ? _METADATA_STATE_FINAL
+            : _pendingTokenMetadataState(tokenId, tokenIdsToCollectionIds[tokenId]);
     }
 
     function _isTokenMetadataFinal(uint256 tokenId) private view returns (bool) {
         return tokenToHash[tokenId] != bytes32(0);
     }
 
-    function _onchainTokenURI(uint256 tokenId, uint256 collectionId, bool finalMetadata)
+    function _pendingTokenMetadataState(uint256 tokenId, uint256 collectionId)
         private
         view
         returns (string memory)
     {
+        address randomizer = collectionAdditionalData[collectionId].randomizerContract;
+        bytes4 supportSelector = IRandomizerLifecycle.supportsRandomizerLifecycle.selector;
+        bytes4 stateSelector = IRandomizerLifecycle.randomnessRequestStateForToken.selector;
+        bool supported;
+        uint256 state;
+        bool hasState;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, supportSelector)
+            supported := staticcall(gas(), randomizer, ptr, 0x04, ptr, 0x20)
+            supported := and(supported, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
+
+            mstore(ptr, stateSelector)
+            mstore(add(ptr, 0x04), tokenId)
+            hasState := staticcall(gas(), randomizer, ptr, 0x24, ptr, 0x20)
+            hasState := and(supported, and(hasState, eq(returndatasize(), 0x20)))
+            state := mload(ptr)
+        }
+
+        if (hasState) {
+            if (state == uint256(IRandomizerLifecycle.RandomnessRequestState.Stale)) {
+                return _METADATA_STATE_STALE;
+            }
+            if (state == uint256(IRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing))
+            {
+                return _METADATA_STATE_FAILED;
+            }
+        }
+
+        return _METADATA_STATE_PENDING;
+    }
+
+    function _onchainTokenURI(
+        uint256 tokenId,
+        uint256 collectionId,
+        string memory metadataState,
+        bool finalMetadata
+    ) private view returns (string memory) {
         string memory animationScript = "";
         if (finalMetadata) {
             animationScript = retrieveGenerativeScript(tokenId);
@@ -820,7 +867,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
 
         return StreamMetadataRenderer.onchainTokenURIWithLimit(
             METADATA_SCHEMA_VERSION,
-            finalMetadata ? _METADATA_STATE_FINAL : _METADATA_STATE_PENDING,
+            metadataState,
             getTokenName(tokenId),
             collectionInfo[collectionId].collectionDescription,
             tokenImageAndAttributes[tokenId][0],

@@ -32,12 +32,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-browser-sandbox-checks` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/127` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/129` |
+| Active PR branch | `codex/metadata-randomness-state-display` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/129` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 00:48 UTC` |
+| Last updated | `2026-06-12 02:00 UTC` |
 
 ## Packaging Notes
 
@@ -121,16 +121,114 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 64 | Enforce production raw attribute schema | Gate D/Gate G support | Implement issue #122 by hardening `StreamMetadataRenderer.isSafeRawAttributes` so production writes accept only empty fragments or comma-separated `trait_type` / `value` string-pair objects, with focused tests, docs, release artifact refresh, and roadmap state updates | Merged in PR #123 |
 | 65 | Enforce dependency registry UTF-8 metadata policy | Gate D/Gate G support | Implement the mergeable issue #124 slice by adding a shared strict UTF-8 scanner, enforcing it for `DependencyRegistry` script/provenance writes, documenting the `StreamCore` EIP-170 blocker in issue #125, and refreshing tests/docs/artifacts | Merged in PR #126 |
 | 66 | Recover Core UTF-8 enforcement headroom | Gate D/Gate G support | Implement issue #125 by recovering or avoiding enough `StreamCore` bytecode to enforce strict UTF-8 for Core metadata inputs without violating EIP-170, with focused tests/docs/artifacts | Merged in PR #127 |
-| 67 | Add browser execution metadata sandbox checks | Gate D | Implement issue #128 by adding a deterministic browser-backed check for committed final animation metadata, pinning reproducible browser tooling, wiring local/CI gates, and updating docs/roadmap/state | In progress on `codex/metadata-browser-sandbox-checks` |
+| 67 | Add browser execution metadata sandbox checks | Gate D | Implement issue #128 by adding a deterministic browser-backed check for committed final animation metadata, pinning reproducible browser tooling, wiring local/CI gates, and updating docs/roadmap/state | Merged in PR #129 |
+| 68 | Expose stale and failed randomness metadata states | Gate D | Implement issue #130 by mapping lifecycle-aware `Stale` and `FailedPostProcessing` requests into public metadata state strings, off-chain URIs, schema-v1 on-chain JSON, fixtures, docs, and roadmap traceability | In progress on `codex/metadata-randomness-state-display` |
 
 ## Current PR Worklog
 
-### PR candidate: Browser execution metadata sandbox checks (Queue Item 67)
+### PR candidate: Stale and failed randomness metadata states (Queue Item 68)
 
-Status: PR #129 open; CodeRabbit review fixes are applied locally. The expanded
-browser sandbox unit suite, live Playwright/Chromium sandbox check,
-`make metadata-fixtures-check`, release checksum drift check, `git diff --check`,
-and full `make check` pass. Awaiting pushed GitHub CI and CodeRabbit re-review.
+Status: Issue #130 created; branch `codex/metadata-randomness-state-display`
+started from `main` at PR #129 merge commit
+`7ccc771017be46c9f60fb6114abaf88ca98368a5`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/131`.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/130`.
+Related issues: `https://github.com/6529-Collections/6529Stream/issues/46`,
+`https://github.com/6529-Collections/6529Stream/issues/51`, and
+`https://github.com/6529-Collections/6529Stream/issues/40`.
+CodeRabbit requested in issue comments `4686592260` and `4686597476`.
+
+Goal:
+
+- Preserve `final` as the public metadata state only when `tokenToHash[tokenId]`
+  is nonzero.
+- Ask lifecycle-aware configured randomizers for token request state when a
+  minted token is not final.
+- Expose `stale` and `failed` metadata states for `Stale` and
+  `FailedPostProcessing` request states.
+- Keep unsupported, unavailable, or missing lifecycle data falling back to the
+  existing `pending` behavior.
+- Apply the same public state to `tokenMetadataState(tokenId)`, off-chain
+  `tokenURI`, and schema-v1 on-chain JSON.
+- Keep `animation_url` present only in final on-chain metadata.
+- Add focused golden fixtures/tests, docs, roadmap/test traceability,
+  changelog, and autonomous state updates.
+
+Initial candidate files:
+
+- `smart-contracts/StreamCore.sol`
+- `test/StreamMetadataGolden.t.sol`
+- `test/fixtures/metadata/`
+- `docs/metadata.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `CHANGELOG.md`
+- release artifacts after checksum refresh
+
+Implementation notes:
+
+- Added lifecycle-aware metadata state mapping in `StreamCore`:
+  `Stale` maps to `stale`, `FailedPostProcessing` maps to `failed`, final token
+  hashes always map to `final`, and failed/missing/malformed lifecycle lookups
+  fall back to `pending`.
+- Kept final off-chain token URIs as `collectionBaseURI + tokenId`; non-final
+  off-chain URIs now use `pending`, `stale`, or `failed`.
+- Kept final on-chain metadata as the only path that includes `animation_url`;
+  pending, stale, and failed schema-v1 JSON omit final animation HTML while the
+  token hash is zero.
+- Added `MetadataLifecycleRandomizer` test coverage for stale/failed views,
+  lookup failure fallback, and final-hash override.
+- Added off-chain and on-chain golden fixtures for stale and failed states.
+- Replaced the initial `try/catch` lifecycle lookup with a compact bounded
+  `staticcall` so lookup failures still fall back to `pending` while limiting
+  `StreamCore` bytecode growth.
+- CodeRabbit review `4481745377` correctly asked for an explicit
+  `supportsRandomizerLifecycle()` probe before the token state lookup; the final
+  implementation gates selector-only randomizers that report unsupported back to
+  `pending` and adds regression coverage.
+- CodeRabbit review `4481745377` also asked for status docs to state that ADR
+  0006 freeze eligibility excludes pending, stale, and failed live tokens; the
+  docs now say that explicitly. The run-state `TBD` comment was stale because
+  later state commits already recorded PR #131.
+- Measured and rejected two local size experiments before docs/artifacts:
+  replacing the burn approval string with a custom error increased Core size,
+  and moving the lifecycle mapping to `StreamMetadataRenderer` reduced library
+  pressure but increased `StreamCore` to 24,546 runtime bytes.
+- Final measured implementation keeps the production size gate green with
+  `StreamCore` at 24,348 runtime bytes and 228 bytes of EIP-170 headroom, below
+  the documented 384-byte release floor; docs and roadmap now track this as
+  size-budget debt before further non-trivial Core work.
+
+Local validation:
+
+- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`: 14 tests
+  pass.
+- `forge test --match-path test\StreamMetadataEvents.t.sol -vvv`: 10 tests
+  pass during the rejected burn custom-error experiment; no event-test changes
+  remain in the final diff.
+- `forge build --sizes --via-ir --skip test --skip script --force`: passes with
+  `StreamCore` at 24,348 runtime bytes and 228 bytes of EIP-170 headroom.
+- `forge fmt smart-contracts\StreamCore.sol smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataGolden.t.sol test\StreamMetadataEvents.t.sol`
+  completed after the size experiments.
+- `make release-checksums`: passes and refreshes deterministic release,
+  deployment, address-book, source-verification, and checksum artifacts.
+- `make release-checksums-check`: passes after artifact refresh.
+- `make check`: passes with 226 Solidity tests, metadata fixture/browser
+  checks, release-artifact drift checks, changelog gate, and deployment
+  rehearsal.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`:
+  passes with the same 226-test local gate on Windows.
+- `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataGolden.t.sol`:
+  passes.
+- `git diff --check`: passes.
+
+### PR #129: Browser execution metadata sandbox checks (Queue Item 67)
+
+Status: Merged; CI passed and CodeRabbit completed with no actionable comments
+and all 5 pre-merge checks green.
 Branch: `codex/metadata-browser-sandbox-checks`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/129`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/128`.
@@ -5937,6 +6035,13 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 02:00 | Address CodeRabbit PR #131 review | Accepted CodeRabbit's lifecycle-support finding by probing `supportsRandomizerLifecycle()` before token-state lookup, added unsupported-lifecycle pending fallback coverage, clarified ADR 0006 freeze eligibility docs for pending/stale/failed live tokens, refreshed release artifacts, and reran focused metadata tests, production size build, release checksum checks, full `make check`, Windows wrapper, formatting, and whitespace checks |
+| 2026-06-12 01:45 | Request CodeRabbit PR #131 review | CodeRabbit review requested in issue comments `4686592260` and `4686597476`; Claude intentionally skipped per current user instruction |
+| 2026-06-12 01:42 | Open PR #131 for Queue Item 68 | Pushed `codex/metadata-randomness-state-display`, opened https://github.com/6529-Collections/6529Stream/pull/131 against `main`, linked `Closes #130`, and will use CI plus CodeRabbit review only per user instruction |
+| 2026-06-12 01:38 | Finish local Queue Item 68 validation | Focused metadata golden tests, production size build, release checksum generation/checking, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, and whitespace checks pass; `StreamCore` remains EIP-170 compliant at 24,348 runtime bytes with 228 bytes of headroom, and the internal 384-byte headroom shortfall is documented as size-budget debt |
+| 2026-06-12 01:23 | Implement Queue Item 68 local draft | Exposed lifecycle-aware `stale` and `failed` metadata states across `tokenMetadataState`, off-chain token URIs, and schema-v1 on-chain JSON; added stale/failed golden fixtures and tests; used a compact bounded `staticcall` fallback after rejecting two size-worse experiments |
+| 2026-06-12 00:59 | Select Queue Item 68 | PR #129 merged as `7ccc771017be46c9f60fb6114abaf88ca98368a5`; issue #130 now scopes the next Gate D slice as stale/failed randomness metadata state display across views, off-chain URI fallback, on-chain schema-v1 JSON, fixtures, docs, and traceability |
+| 2026-06-12 00:56 | Merge PR #129 | CI run `27387173347` passed on final head `a8567b8edcfd1d2a2a2d0fbb30e877265cc31e3d`, CodeRabbit reported no actionable comments and all 5 pre-merge checks passed, Claude was not triggered per user instruction, issue #128 closed completed, and PR #129 squash-merged as `7ccc771017be46c9f60fb6114abaf88ca98368a5` |
 | 2026-06-12 00:48 | Address CodeRabbit PR #129 review | Updated active PR run-state evidence, added docstrings for the new browser sandbox scripts, expanded sandbox validation unit coverage to 16 tests, and reran `py_compile`, focused tests, live browser check, metadata fixture gate, release checksum drift check, `git diff --check`, and full `make check` |
 | 2026-06-12 00:32 | Open PR #129 for Queue Item 67 | Pushed `codex/metadata-browser-sandbox-checks`, opened https://github.com/6529-Collections/6529Stream/pull/129 against `main`, linked `Closes #128`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-12 00:30 | Validate Queue Item 67 locally | Full `make check`, Windows `scripts\check.ps1`, metadata fixture/browser gates, release checksum checks, Bash/PowerShell syntax checks, py-compile checks, and whitespace checks pass; generated release manifest/checksum artifacts were refreshed |

@@ -50,6 +50,10 @@ the release policy in `docs/release-policy.md`.
   final on-chain animation fixture, with deterministic dependency stubbing,
   unexpected-network rejection, bootstrap assertions, and parent-frame
   isolation proof in local and CI gates.
+- Added lifecycle-aware stale and failed randomness metadata states for minted
+  tokens whose hash is still unset, with off-chain URI fixtures, schema-v1
+  on-chain JSON fixtures, token state view coverage, fallback-to-pending
+  coverage, and final-hash override coverage.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.
@@ -71,8 +75,9 @@ the release policy in `docs/release-policy.md`.
 - Recovered enough `StreamCore` bytecode for Core UTF-8 production enforcement
   by moving reusable metadata guards into the linked renderer library and
   replacing inherited `_requireMinted` string reverts with `TokenNotMinted()`;
-  the production IR-optimized runtime is now 24,160 bytes with 416 bytes of
-  EIP-170 headroom.
+  after lifecycle-aware stale/failed metadata state display, the production
+  IR-optimized runtime remains deployable at 24,348 bytes with 228 bytes of
+  EIP-170 headroom and is tracked as below the 384-byte release floor.
 
 ### Release Impact
 

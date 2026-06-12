@@ -196,7 +196,7 @@ names may evolve before implementation, but tests and docs must cover at least:
 - `attributes`
 - `animation_url` when on-chain animation is present
 - `metadata_schema_version`
-- `metadata_state` or an equivalent pending/final/stale indicator
+- `metadata_state` or an equivalent pending/stale/failed/final indicator
 - collection ID
 - token ID
 - final seed/hash when fulfilled
@@ -486,7 +486,7 @@ Required views or stricter equivalents:
 Public-beta implementation must:
 
 - replace zero-hash-only pending metadata checks with explicit randomness state
-- add pending/final on-chain metadata behavior
+- add pending/stale/failed/final on-chain metadata behavior
 - base64-encode on-chain JSON data URIs
 - escape JSON string contexts and generated JavaScript/HTML wrapper contexts or
   reject unsafe inputs
@@ -509,8 +509,9 @@ Public-beta implementation must:
 
 P1 metadata tests must include:
 
-- characterization tests for current off-chain pending and final URI behavior
-- on-chain pending metadata golden file
+- characterization tests for current off-chain pending, stale, failed, and final
+  URI behavior
+- on-chain pending, stale, and failed metadata golden files
 - on-chain final metadata golden file
 - off-chain URI concatenation rules
 - JSON escaping for quotes, backslashes, brackets, control characters, and
@@ -548,7 +549,7 @@ P1 metadata tests must include:
 1. Keep existing off-chain metadata characterization tests.
 2. Add golden-file tests for current behavior before changing metadata output.
 3. Introduce metadata schema versioning and escaping.
-4. Add explicit pending/final metadata states from ADR 0005.
+4. Add explicit pending/stale/failed/final metadata states from ADR 0005.
 5. Enforce dependency version records and content hashes.
 6. Store freeze manifests and post-freeze guards.
 7. Add `ERC-4906` interface support and event emissions.

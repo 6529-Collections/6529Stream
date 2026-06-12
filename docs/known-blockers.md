@@ -55,15 +55,19 @@ contributors who start from the README.
   arrays. `RandomizerNXT` remains impossible to configure as a production
   randomizer, and the concrete weak `XRandoms` helper has been removed from
   production source. Valid VRF/arRNG fulfillments after burn now record
-  audit-only randomness without restoring live metadata. Remaining randomness
-  blockers include richer stale metadata state exposure, provider configuration
-  runbooks, and canonical core/coordinator lifecycle ownership.
+  audit-only randomness without restoring live metadata. Minted tokens whose
+  hash remains unset now expose lifecycle-aware `stale` and `failed` metadata
+  states when the configured randomizer reports those states. Remaining
+  randomness blockers include provider configuration runbooks and canonical
+  core/coordinator lifecycle ownership.
 - Dependency script retrieval now has segment-safe typed chunk and content
   hashes, so the former packed/dynamic chunk-boundary Slither finding is fixed.
-  Current metadata golden fixtures now lock the pre-beta off-chain pending/final
-  URI behavior and schema-v1 on-chain pending/final base64 JSON output with
-  explicit `metadata_schema_version` and `metadata_state` fields. Pending
-  on-chain metadata no longer runs final generative HTML with a zero token hash.
+  Current metadata golden fixtures now lock the pre-beta off-chain
+  pending/stale/failed/final URI behavior and schema-v1 on-chain
+  pending/stale/failed/final base64 JSON output with explicit
+  `metadata_schema_version` and `metadata_state` fields. Pending, stale, and
+  failed on-chain metadata no longer run final generative HTML with a zero token
+  hash.
   ERC-4906 support and current `MetadataUpdate` / `BatchMetadataUpdate`
   semantics now cover `StreamCore` metadata mutations. Collection freeze now
   records a manifest hash/event, requires final live-token metadata and the
@@ -91,8 +95,7 @@ contributors who start from the README.
   chunks, token data, token image URIs, and token raw attributes with typed
   field errors while preserving size-before-UTF-8 ordering.
   Remaining metadata blockers include deployment migration runbooks beyond
-  registry provenance strings, broader live/fork browser execution coverage,
-  and richer stale-state metadata display.
+  registry provenance strings and broader live/fork browser execution coverage.
   Committed metadata fixtures now have
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries, plus a Playwright-backed Chromium
@@ -101,9 +104,11 @@ contributors who start from the README.
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
-  `StreamCore` at 24,160 runtime bytes with 416 bytes of EIP-170 headroom, but
-  deployment scripts, manifests, and rehearsals still need to use this
-  production profile.
+  `StreamCore` at 24,348 runtime bytes with 228 bytes of EIP-170 headroom,
+  which passes deployability but is below the documented 384-byte minimum
+  release floor. Further non-trivial Core work needs headroom recovery or an
+  explicit size-budget exception, and deployment scripts, manifests, and
+  rehearsals still need to use this production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

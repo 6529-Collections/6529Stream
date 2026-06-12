@@ -352,11 +352,11 @@ randomness implementation must not include mutable `tokenData`, image,
 attribute, dependency, or collection metadata values in seed derivation unless
 their request-time hashes are recorded and verified.
 
-Off-chain metadata may continue to expose a pending URI while randomness is
-pending. On-chain metadata must also have an explicit pending/final policy so it
-does not silently present a zero hash as final art data. Pending/final behavior
-must be based on explicit request state, not only on whether
-`tokenToHash[tokenId] == 0`.
+Off-chain metadata may continue to expose pending/stale/failed URIs while
+randomness is not final. On-chain metadata must also have an explicit
+pending/stale/failed/final policy so it does not silently present a zero hash as
+final art data. Non-final behavior should consult explicit request state where
+available and must not rely only on whether `tokenToHash[tokenId] == 0`.
 
 ## Burned Tokens
 

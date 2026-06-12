@@ -10,6 +10,12 @@ characterization fixtures, not a final marketplace schema promise.
 Off-chain metadata is URI-based:
 
 - Pending randomness: `collectionBaseURI + "pending"`.
+- Stale randomness: `collectionBaseURI + "stale"` when a lifecycle-aware
+  randomizer reports the token request as stale and the token hash is still
+  unset.
+- Failed randomness post-processing: `collectionBaseURI + "failed"` when a
+  lifecycle-aware randomizer reports `FailedPostProcessing` and the token hash
+  is still unset.
 - Final randomness: `collectionBaseURI + tokenId` with the token ID as a
   decimal string.
 
@@ -31,7 +37,7 @@ data:application/json;base64,<base64-json>
 The current JSON includes:
 
 - `metadata_schema_version` with value `6529stream-v1`
-- `metadata_state` with value `pending` or `final`
+- `metadata_state` with value `pending`, `stale`, `failed`, or `final`
 - `name`
 - `description`
 - `image`
@@ -40,28 +46,33 @@ The current JSON includes:
 
 Pending on-chain metadata no longer runs the final generative HTML path with a
 zero token hash. It returns schema-versioned JSON with
-`metadata_state: "pending"` and omits `animation_url`. Final on-chain metadata
-returns schema-versioned JSON with `metadata_state: "final"` and the existing
-base64-encoded HTML animation URL.
+`metadata_state: "pending"` and omits `animation_url`. Lifecycle-aware stale
+and failed post-processing requests return the same schema with
+`metadata_state: "stale"` or `metadata_state: "failed"` while the token hash
+remains unset. Final on-chain metadata returns schema-versioned JSON with
+`metadata_state: "final"` and the existing base64-encoded HTML animation URL.
 
 `StreamCore.metadataSchemaVersion()` exposes the active schema version and
-`StreamCore.tokenMetadataState(tokenId)` exposes the current `pending` or
-`final` state for minted tokens. The current schema version escapes JSON string
-fields emitted by on-chain metadata and rejects raw attribute fragments that do
-not encode empty content or comma-separated objects with exactly `trait_type`
-and `value` string fields. It also enforces the current URI policy for token
-images, collection base URIs, and external collection library URLs before
-storage. Fixture-level checks now reject invalid UTF-8 data URI payloads and
-non-semantic attribute entries in committed metadata golden files. Production
-dependency registry writes now reject invalid UTF-8 dependency script chunks
-and provenance before storage, and `StreamCore` production metadata writes now
-reject invalid UTF-8 before storage for collection text fields, collection
-script chunks, token data, token image URIs, and token raw attributes. Browser
-render-sandbox checks now execute the committed final on-chain animation
-fixture in Chromium with a deterministic dependency stub and parent-frame
-isolation assertion. Production dependency migration runbooks beyond the local
-dependency artifact manifest baseline, stale randomness display, broader
-live/fork browser coverage, and live deployment release manifests remain open.
+`StreamCore.tokenMetadataState(tokenId)` exposes `pending`, `stale`, `failed`,
+or `final` for minted tokens. Randomizer state lookup failures, unsupported
+randomizer lifecycle views, EOAs, and malformed return data fall back to
+`pending`; a nonzero token hash always overrides lifecycle state and reports
+`final`. The current schema version escapes JSON string fields emitted by
+on-chain metadata and rejects raw attribute fragments that do not encode empty
+content or comma-separated objects with exactly `trait_type` and `value` string
+fields. It also enforces the current URI policy for token images, collection
+base URIs, and external collection library URLs before storage. Fixture-level
+checks now reject invalid UTF-8 data URI payloads and non-semantic attribute
+entries in committed metadata golden files. Production dependency registry
+writes now reject invalid UTF-8 dependency script chunks and provenance before
+storage, and `StreamCore` production metadata writes now reject invalid UTF-8
+before storage for collection text fields, collection script chunks, token
+data, token image URIs, and token raw attributes. Browser render-sandbox checks
+now execute the committed final on-chain animation fixture in Chromium with a
+deterministic dependency stub and parent-frame isolation assertion. Production
+dependency migration runbooks beyond the local dependency artifact manifest
+baseline, broader live/fork browser coverage, and live deployment release
+manifests remain open.
 
 ## Escaping And Attribute Fragments
 
@@ -179,8 +190,12 @@ values fail with `MetadataFieldInvalidUTF8(field)`.
 `test/StreamMetadataGolden.t.sol` compares live contract output against:
 
 - `test/fixtures/metadata/offchain-pending-token-uri.txt`
+- `test/fixtures/metadata/offchain-stale-token-uri.txt`
+- `test/fixtures/metadata/offchain-failed-token-uri.txt`
 - `test/fixtures/metadata/offchain-final-token-uri.txt`
 - `test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt`
+- `test/fixtures/metadata/onchain-stale-schema-v1-token-uri.txt`
+- `test/fixtures/metadata/onchain-failed-schema-v1-token-uri.txt`
 - `test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt`
 
 The on-chain fixture names include the schema version so later schema migrations
@@ -375,7 +390,6 @@ cannot change frozen collection output.
 
 ADR 0006 requires future metadata work to add:
 
-- stale-state display policy
 - broader live/fork browser execution proofing for generated animation code
   beyond the committed golden fixture sandbox check
 - richer structured attributes if the protocol moves away from caller-authored

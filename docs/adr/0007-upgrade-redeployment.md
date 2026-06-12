@@ -483,7 +483,7 @@ Deployment and release work must add tests or scripted checks for:
 - payment withdrawal and surplus view checks according to ADR 0003
 - pause-domain smoke checks according to ADR 0004
 - randomness request and fulfillment smoke checks according to ADR 0005
-- metadata pending/final/freeze smoke checks according to ADR 0006
+- metadata pending/stale/failed/final/freeze smoke checks according to ADR 0006
 - deprecation runbook checks for active auctions, owed credits, pending
   randomness, and frozen manifests
 - emergency redeployment rehearsal on an Anvil or fork environment

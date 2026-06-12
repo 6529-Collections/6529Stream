@@ -158,12 +158,14 @@ output plus freeze manifests remain stable after later registry versions or
 registry swaps until an explicit repin.
 
 Metadata golden fixtures now have P1-META-001 characterization coverage in
-`StreamMetadataGolden.t.sol`: current off-chain pending and final token URI
-rules, schema-v1 on-chain pending base64 JSON, and schema-v1 on-chain final
+`StreamMetadataGolden.t.sol`: current off-chain pending, stale, failed, and
+final token URI rules plus schema-v1 on-chain pending, stale, failed, and final
 base64 JSON are compared byte-for-byte against `test/fixtures/metadata/`. The
-suite also asserts `metadataSchemaVersion()` and the token-level
-`pending`/`final` metadata state view, and pending on-chain metadata no longer
-executes the final generative HTML path with a zero token hash.
+suite also asserts `metadataSchemaVersion()`, the token-level
+`pending`/`stale`/`failed`/`final` metadata state view, lifecycle lookup
+failure fallback to `pending`, and final hash override of stale lifecycle
+state. Pending, stale, and failed on-chain metadata no longer execute the final
+generative HTML path with a zero token hash.
 
 Metadata escaping now has P1-META-006 coverage in
 `StreamMetadataEscaping.t.sol`: on-chain JSON string escaping is exercised for
@@ -209,8 +211,7 @@ fixture in an `allow-scripts` sandboxed iframe, the expected dependency URL is
 served by a deterministic stub, unexpected HTTP(S) requests fail, bootstrap
 values are asserted in-frame, page/console errors fail the check, and
 parent-document access must fail with `SecurityError`. Broader live/fork
-browser coverage and richer stale-state metadata display remain future
-P1-META-006 work.
+browser coverage remains future P1-META-006 work.
 
 ERC-4906 metadata signaling now has P1-META-004 target-state coverage in
 `StreamMetadataEvents.t.sol`: `supportsInterface(0x49064906)` succeeds,
@@ -224,8 +225,10 @@ Production bytecode size is checked through the local/CI gate
 `forge build --sizes --via-ir --skip test --skip script --force`, rather than a unit test,
 because the deployable contracts use the IR-optimized release profile while
 test-only invariant handlers can exceed initcode limits. The current Core UTF-8
-slice keeps `StreamCore` at 24,160 runtime bytes with 416 bytes of EIP-170
-headroom, above the 384-byte release floor.
+slice plus lifecycle-aware stale/failed metadata state display keeps
+`StreamCore` deployable at 24,348 runtime bytes with 228 bytes of EIP-170
+headroom, below the documented 384-byte release floor and tracked as size
+budget debt before further non-trivial Core work.
 
 Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event
