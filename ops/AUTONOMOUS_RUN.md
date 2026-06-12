@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/nonlocal-evidence-schema-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/169` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/170` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/171` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 20:43 UTC` |
+| Last updated | `2026-06-12 20:45 UTC` |
 
 ## Packaging Notes
 
@@ -143,15 +143,16 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #165 |
 | 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | Merged in PR #167 |
 | 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Merged in PR #169 |
-| 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | Full local `make check` passed; PR pending |
+| 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | PR #171 open; waiting for CI and CodeRabbit |
 
 ## Current PR Worklog
 
 ### PR candidate: Add non-local release evidence metadata schema and checker (Queue Item 88)
 
-Status: full local `make check` passed; PR not opened yet.
+Status: PR #171 open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/170`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/171`.
+CodeRabbit request: issue comment `4695302692`.
 Branch: `codex/nonlocal-evidence-schema-checker`.
 Branch started from PR #169 squash merge commit
 `1d55df3bfb59ef30b833f751e60b3f77801ae860`.
