@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/159` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 15:05 UTC` |
+| Last updated | `2026-06-12 15:12 UTC` |
 
 ## Packaging Notes
 
@@ -136,14 +136,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 79 | Add request-level randomizer reserve lifecycle tests | Gate D | Implement issue #152 by adding focused `NextGenRandomizerRNG` reserve lifecycle coverage for request-cost spending, multiple pending requests, fulfillment, stale marking, failed post-processing, retry, forced ETH, and emergency-withdrawal boundaries | Merged in PR #153 |
 | 80 | Add randomizer operations evidence bundle | Gate E/Gate G support | Implement issue #154 by adding a no-secret randomizer operations evidence schema, local Anvil bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #155 |
 | 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
-| 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | In progress |
+| 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merge-ready; CI and CodeRabbit green on final head |
 
 ## Current PR Worklog
 
 ### PR candidate: Add external audit package index (Queue Item 82)
 
-Status: PR #159 open; CodeRabbit review comments addressed and follow-up
-validation passed; CI and CodeRabbit re-review pending after follow-up push.
+Status: PR #159 merge-ready; CodeRabbit review comments addressed and
+follow-up validation passed; GitHub CI run `27424138673` passed and CodeRabbit
+reported success on final head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/158`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/159`.
 CodeRabbit request: issue comment `4692444134`.
@@ -232,6 +233,10 @@ Validation:
   `python scripts\generate_release_checksums.py --check`,
   `python scripts\test_changelog_check.py`, `python scripts\check_changelog.py`,
   `bash -n scripts/check.sh`, and `git diff --check`.
+- Remote validation: GitHub CI run `27424138673` passed on head
+  `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, including the audit package,
+  release manifest, release checksums, changelog, and deployment rehearsal
+  steps. CodeRabbit status was `success` on the same head.
 
 ### PR candidate: Add release signature evidence baseline (Queue Item 81)
 
@@ -7937,6 +7942,7 @@ Outcome:
 | 2026-06-12 07:10 | Open PR #143 | Emergency redeployment rehearsal PR opened on head `cf8f5ec488294005ecf2c809018fee6d84f40c98` with issue #142 closure, local validation transcript, and fork/testnet/live emergency evidence explicitly scoped to later Gate E work |
 | 2026-06-12 07:22 | Address CodeRabbit PR #143 review | Accepted CodeRabbit's request to make deployment-version uniqueness a direct script assertion, then reran focused Forge formatting, evidence test, and emergency redeployment script validation |
 | 2026-06-12 07:28 | Finish PR #143 follow-up validation | Full `make check` passed after the CodeRabbit deployment-version guard fix; CI rerun and CodeRabbit re-review remain pending until the follow-up commit is pushed |
+| 2026-06-12 15:12 | Mark PR #159 merge-ready | CI run `27424138673` passed on head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, CodeRabbit status was success, and the visible CodeRabbit review suggestions were addressed in the follow-up commit |
 
 ## Resume Instructions
 
