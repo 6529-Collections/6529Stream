@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/nonlocal-release-evidence-runbook` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/167` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/168` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/169` |
+| Active PR branch | `codex/nonlocal-evidence-schema-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/169` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/170` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/171` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 20:01 UTC` |
+| Last updated | `2026-06-12 20:45 UTC` |
 
 ## Packaging Notes
 
@@ -142,14 +142,127 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #163 |
 | 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #165 |
 | 86 | Reconcile Gate G roadmap after public beta evidence merge | Gate G support | Implement issue #166 by marking PR #165 merged, refreshing stale roadmap verification metadata, removing #164 from active Gate G blockers, and adding the next non-local evidence queue target | Merged in PR #167 |
-| 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | In Progress |
+| 87 | Add non-local release evidence intake runbook | Gate E/Gate G support | Document the operator workflow for retaining fork/testnet/live deployment, metadata-browser, ceremony, randomizer, verification, address-book, gas, invariant, audit, and signed-release evidence without secrets, then wire the docs into readiness/public-beta evidence maintenance | Merged in PR #169 |
+| 88 | Add non-local release evidence metadata schema and checker | Gate E/Gate G support | Add a no-secret schema, template/example, checker, and tests for reviewed non-local evidence metadata so future operators can produce machine-checkable artifacts without claiming external readiness | PR #171 open; waiting for CI and CodeRabbit |
 
 ## Current PR Worklog
 
+### PR candidate: Add non-local release evidence metadata schema and checker (Queue Item 88)
+
+Status: PR #171 open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/170`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/171`.
+CodeRabbit request: issue comment `4695302692`.
+Branch: `codex/nonlocal-evidence-schema-checker`.
+Branch started from PR #169 squash merge commit
+`1d55df3bfb59ef30b833f751e60b3f77801ae860`.
+
+Goal:
+
+- Add a machine-checkable schema for the non-local release evidence metadata
+  required by `docs/non-local-release-evidence.md`.
+- Commit a no-secret example/template that is explicitly not completion evidence
+  and cannot be confused with fork/testnet/mainnet readiness.
+- Add a focused checker and tests that validate required fields, supported
+  environments, retained paths, hashes, reviewer state, requirement IDs,
+  path boundaries, and secret-like keys/values.
+- Wire the checker into local/CI gates, platform wrappers, docs, release
+  manifest/checksum coverage, roadmap, changelog, and durable run state.
+- Keep the change docs/tooling/artifact-only with no Solidity behavior changes
+  and no real non-local evidence.
+
+Initial candidate files:
+
+- `release-artifacts/schema/non-local-release-evidence.schema.json`
+- `release-artifacts/evidence/non-local-release-evidence-template.json`
+- `release-artifacts/evidence/non-local-template-retained-artifact.txt`
+- `scripts/check_non_local_release_evidence.py`
+- `scripts/test_non_local_release_evidence.py`
+- `Makefile`
+- `.github/workflows/ci.yml`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/generate_release_checksums.py`
+- `scripts/test_release_checksums.py`
+- `docs/non-local-release-evidence.md`
+- `docs/public-beta-evidence.md`
+- `docs/release-readiness.md`
+- `docs/tooling.md`
+- `release-artifacts/README.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `CHANGELOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Validation target:
+
+- `python scripts/test_non_local_release_evidence.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/test_public_beta_evidence.py`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_changelog_check.py`
+- `python scripts/check_changelog.py`
+- `bash -n scripts/check.sh`
+- PowerShell parse check for `scripts/check.ps1`
+- `python -m py_compile` for touched release evidence, manifest, and checksum scripts/tests
+- `git diff --check`
+- `make check`
+
+Implementation notes:
+
+- Added `release-artifacts/schema/non-local-release-evidence.schema.json`,
+  `release-artifacts/evidence/non-local-release-evidence-template.json`, and
+  `release-artifacts/evidence/non-local-template-retained-artifact.txt`.
+- Added `scripts/check_non_local_release_evidence.py` and
+  `scripts/test_non_local_release_evidence.py`; the checker validates exact
+  fields, supported environments, chain ID policy, public-beta requirement IDs,
+  retained path boundaries, retained artifact hashes, template/reviewed status,
+  reviewer requirements, source metadata, redaction policy, and secret-shaped
+  keys/values.
+- Wired `non-local-release-evidence-check` into `Makefile`, `scripts/check.sh`,
+  `scripts/check.ps1`, and GitHub Actions CI between release-signature evidence
+  and public-beta evidence.
+- Integrated non-local evidence metadata into
+  `scripts/generate_release_manifest.py` and release-manifest tests, including
+  validation-before-indexing and a negative invalid-metadata regression.
+- Added `release-artifacts/evidence/` to release checksum coverage and checksum
+  tests.
+- Updated operator docs, release-artifacts README, roadmap, changelog, release
+  manifest, checksum files, and run state without Solidity changes.
+
+Validation completed locally:
+
+- `python scripts/test_non_local_release_evidence.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/test_public_beta_evidence.py`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_changelog_check.py`
+- `python scripts/check_changelog.py`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts/check.ps1`
+- `python -m py_compile scripts\check_non_local_release_evidence.py scripts\test_non_local_release_evidence.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py`
+- `git diff --check`
+- `make check`
+
 ### PR candidate: Add non-local release evidence intake runbook (Queue Item 87)
 
-Status: CodeRabbit follow-up implemented and validated locally; ready to push
-follow-up commit and wait for final CI/CodeRabbit rerun.
+Status: merged in PR #169 as
+`1d55df3bfb59ef30b833f751e60b3f77801ae860`; issue #168 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/168`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/169`.
 CodeRabbit request: issue comment `4694642716`.
@@ -7973,6 +8086,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 20:13 | Create issue #170 and select Queue Item 88 | PR #169 merged with CI run `27439897232` and CodeRabbit success on head `93917b20672e25b7edb9eb56dc22e11b9b3e7ecc`; no open issues remained, and the next no-secret Gate E/G gap is a machine-checkable metadata schema/checker for future non-local release evidence |
+| 2026-06-12 20:10 | Merge PR #169 | Non-local release evidence intake runbook merged as `1d55df3bfb59ef30b833f751e60b3f77801ae860`; CI passed on run `27439897232`, CodeRabbit status was success, all visible review threads were resolved, and issue #168 closed completed |
 | 2026-06-12 20:01 | Address PR #169 CodeRabbit review | Expanded the non-local evidence gate to production broadcast/address-book rows, added reviewed runbook metadata enforcement for complete public-beta evidence requirements, clarified checksum-backed signing wording, treated the runbook as a maintained manifest input, regenerated release artifacts, and reran focused gates plus `make check` |
 | 2026-06-12 19:42 | Fix PR #169 CI hygiene failure | GitHub Actions run `27438712570` failed repository hygiene on an extra blank line at EOF in `docs/non-local-release-evidence.md`; trimmed the EOF, regenerated release manifest/checksum artifacts, and reran focused whitespace/readiness/manifest/checksum/changelog validation |
 | 2026-06-12 19:39 | Open PR #169 and request CodeRabbit | Non-local release evidence intake PR opened against `main`, linked `Closes #168`, requested CodeRabbit in comment `4694642716`, and intentionally skipped Claude per current user instruction |

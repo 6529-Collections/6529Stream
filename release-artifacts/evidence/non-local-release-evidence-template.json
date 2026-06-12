@@ -1,0 +1,35 @@
+{
+  "schema_version": "6529stream.non-local-release-evidence.v1",
+  "evidence_id": "non-local-release-evidence-template",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "testnet",
+  "chain_id": 11155111,
+  "block_or_reference": "template-only block, transaction, explorer URL, audit report ID, CI run, or signed-tag reference",
+  "command_or_source_system": "template-only command, CI job, explorer, Safe transaction, audit portal, or signing tool",
+  "retained_path": "release-artifacts/evidence/non-local-template-retained-artifact.txt",
+  "sha256": "sha256:62a31be301ecadcfa41b110289b992bf28b69990feaacf7dd823fd56d60eddbd",
+  "redaction_statement": "Template only; no raw logs, RPC URLs, credentials, private keys, mnemonics, API tokens, or unreleased drop payloads are present.",
+  "owner": "TBD",
+  "reviewer": "TBD",
+  "public_beta_requirement_id": "testnet_deployment_rehearsal",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+  "operator_notes": "Copy this shape for real retained evidence, replace every template value with reviewed no-secret data, and link the resulting JSON from release-artifacts/latest/public-beta-evidence.json only after review."
+}

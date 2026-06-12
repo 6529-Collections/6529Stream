@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import check_non_local_release_evidence as non_local_evidence_checker
 import check_public_beta_evidence as public_beta_checker
 import check_release_signatures as release_signature_checker
 
@@ -34,6 +35,7 @@ DEFAULT_DEPLOYMENT_SCHEMA_DIR = Path("deployments/schema")
 DEFAULT_CEREMONY_EVIDENCE_DIR = Path("deployments/ceremony-evidence")
 DEFAULT_RANDOMIZER_OPERATIONS_DIR = Path("deployments/randomizer-operations")
 DEFAULT_RELEASE_SIGNATURES_DIR = Path("release-artifacts/signatures")
+DEFAULT_NON_LOCAL_EVIDENCE_DIR = Path("release-artifacts/evidence")
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/release-policy.md"),
@@ -365,6 +367,31 @@ def release_signature_record(path: Path, repo_root: Path) -> dict[str, Any]:
     return record
 
 
+def non_local_release_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    """Load, validate, and summarize non-local release evidence metadata."""
+    data = require_dict(load_json(path), str(path))
+    try:
+        non_local_evidence_checker.validate_evidence_document(data, repo_root, str(path))
+    except non_local_evidence_checker.NonLocalReleaseEvidenceError as exc:
+        raise ReleaseManifestError(f"invalid non-local release evidence {path}: {exc}") from exc
+
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "evidence_id": require_string(data.get("evidence_id"), "evidence_id"),
+            "record_type": require_string(data.get("record_type"), "record_type"),
+            "review_status": require_string(data.get("review_status"), "review_status"),
+            "environment": require_string(data.get("environment"), "environment"),
+            "public_beta_requirement_id": require_string(
+                data.get("public_beta_requirement_id"), "public_beta_requirement_id"
+            ),
+            "retained_path": require_string(data.get("retained_path"), "retained_path"),
+            "evidence": data,
+        }
+    )
+    return record
+
+
 def public_beta_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
     """Load, validate, and summarize public-beta evidence status."""
     data = require_dict(load_json(path), str(path))
@@ -511,8 +538,18 @@ def build_manifest(
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
+    non_local_evidence_dir: Path | None = None,
 ) -> dict[str, Any]:
     release_signatures_dir = repo_root / DEFAULT_RELEASE_SIGNATURES_DIR
+    resolved_non_local_evidence_dir = (
+        repo_root / DEFAULT_NON_LOCAL_EVIDENCE_DIR
+        if non_local_evidence_dir is None
+        else (
+            non_local_evidence_dir
+            if non_local_evidence_dir.is_absolute()
+            else repo_root / non_local_evidence_dir
+        )
+    )
     deployment_manifests = [
         deployment_manifest_record(path, repo_root) for path in json_files(deployment_manifest_dir)
     ]
@@ -526,6 +563,10 @@ def build_manifest(
     ]
     release_signatures = [
         release_signature_record(path, repo_root) for path in json_files(release_signatures_dir)
+    ]
+    non_local_release_evidence = [
+        non_local_release_evidence_record(path, repo_root)
+        for path in json_files(resolved_non_local_evidence_dir)
     ]
     protocol_versions = sorted(
         set(
@@ -570,6 +611,9 @@ def build_manifest(
                 randomizer_operations_dir, repo_root
             ),
             "release_signatures_dir": normalize_path(release_signatures_dir, repo_root),
+            "non_local_evidence_dir": normalize_path(
+                resolved_non_local_evidence_dir, repo_root
+            ),
         },
         "release_artifacts": {
             "contract_config": file_record(contract_config_path, repo_root, schema_required=True),
@@ -604,6 +648,7 @@ def build_manifest(
                 repo_root,
             ),
             "release_signature_evidence": release_signatures,
+            "non_local_release_evidence": non_local_release_evidence,
             "abi_compatibility_baseline": file_record(
                 baseline_path,
                 repo_root,
@@ -658,6 +703,7 @@ def build_output_text(
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
+    non_local_evidence_dir: Path | None = None,
 ) -> str:
     manifest = build_manifest(
         repo_root,
@@ -675,6 +721,7 @@ def build_output_text(
         randomizer_operations_dir,
         changelog_path,
         governance_docs,
+        non_local_evidence_dir,
     )
     return json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
 
@@ -695,6 +742,7 @@ def write_output(
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
+    non_local_evidence_dir: Path | None = None,
 ) -> Path:
     output_text = build_output_text(
         repo_root,
@@ -712,6 +760,7 @@ def write_output(
         randomizer_operations_dir,
         changelog_path,
         governance_docs,
+        non_local_evidence_dir,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(output_text, encoding="utf-8", newline="\n")
@@ -734,6 +783,7 @@ def check_output(
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
+    non_local_evidence_dir: Path | None = None,
 ) -> int:
     if not output_path.exists():
         print(f"missing {normalize_path(output_path, repo_root)}", file=sys.stderr)
@@ -759,6 +809,7 @@ def check_output(
         randomizer_operations_dir,
         changelog_path,
         governance_docs,
+        non_local_evidence_dir,
     )
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -809,6 +860,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_RANDOMIZER_OPERATIONS_DIR,
     )
+    parser.add_argument(
+        "--non-local-evidence-dir",
+        type=Path,
+        default=DEFAULT_NON_LOCAL_EVIDENCE_DIR,
+    )
     parser.add_argument("--changelog", type=Path, default=DEFAULT_CHANGELOG)
     parser.add_argument("--governance-doc", type=Path, action="append", dest="governance_docs")
     parser.add_argument("--check", action="store_true")
@@ -838,6 +894,7 @@ def main(argv: list[str]) -> int:
                 args.randomizer_operations_dir,
                 args.changelog,
                 governance_docs,
+                args.non_local_evidence_dir,
             )
         written = write_output(
             repo_root,
@@ -855,6 +912,7 @@ def main(argv: list[str]) -> int:
             args.randomizer_operations_dir,
             args.changelog,
             governance_docs,
+            args.non_local_evidence_dir,
         )
     except ReleaseManifestError as exc:
         print(f"error: {exc}", file=sys.stderr)

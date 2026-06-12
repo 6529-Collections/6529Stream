@@ -37,6 +37,11 @@ checksum-backed production-signature, signed-tag, production-address-book, or
 production-broadcast-retention requirement to `complete`. That runbook defines
 required retained artifact fields, no-secret redaction boundaries, reviewer
 expectations, and the requirement IDs that each evidence family updates.
+Rows governed by that runbook should link reviewed JSON metadata that follows
+[`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json);
+the committed
+[`release-artifacts/evidence/non-local-release-evidence-template.json`](../release-artifacts/evidence/non-local-release-evidence-template.json)
+is a checked template only.
 
 ## Status Values
 
@@ -106,7 +111,9 @@ To move a requirement to `complete`:
    production-address-book, or production-broadcast-retention proof.
 4. Keep `risk_acceptance` as `null`.
 5. Run `python scripts/check_public_beta_evidence.py`.
-6. Regenerate and check the release manifest and checksum bundle.
+6. Run `python scripts/check_non_local_release_evidence.py` for every reviewed
+   non-local evidence metadata JSON that supports the row.
+7. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`
