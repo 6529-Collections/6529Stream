@@ -35,6 +35,16 @@ credits. Auction-local tests also cover no-bid pending-claim rollback to a
 rejecting receiver, forced ETH surplus handling, and non-divisible proceeds
 rounding.
 
+Auction consistency now has a bounded sequence invariant baseline in
+`StreamAuctionInvariant.t.sol`: mixed auction-drop registration, escrow
+custody, cancellation, first bids, higher outbids, underbid rejection, late-bid
+rejection, no-bid settlement, with-bid settlement, repeat settlement attempts,
+bidder/proceeds withdrawals, emergency surplus, and forced-balance operations
+are checked after every step. The invariant reasserts token custody, active
+bid escrow, previous-bidder credits, proceeds credits, terminal ownership,
+idempotent settlement failure, and `totalOwed()`/`totalReserved()`/`surplus()`
+view coherence.
+
 `StreamDeploymentManifest.t.sol` includes local Gate E rehearsal coverage for
 the deployed stack, the auction ceremony script, and the emergency redeployment
 script: the deployment rehearsal proves local wiring and Safe-rooted admin

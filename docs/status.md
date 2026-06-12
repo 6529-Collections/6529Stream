@@ -39,6 +39,15 @@ The current Gate A smoke baseline proves:
   rejection. The invariant reasserts global and collection live supply,
   minted-ever counters, burn counters, burn audit state, and
   consumed/cancelled drop ID state after each step.
+- Auction consistency sequence fuzzing now covers mixed signed auction-drop
+  registration, escrow custody, cancellation, first bids, higher outbids,
+  underbid and late-bid rejection, no-bid and with-bid settlement, repeat
+  settlement attempts, bidder/proceeds withdrawals, emergency surplus, and
+  forced-balance operations. The invariant reasserts known token custody,
+  active highest-bid escrow, previous-bidder credits, settlement proceeds
+  credits, terminal ownership, failed invalid-operation preservation, and
+  auction-local `totalOwed()`/`totalReserved()`/`surplus()` view coherence
+  after each step.
 - Randomizer tests now cover request lifecycle views, callback validation,
   raw-output hash storage, failed post-processing state, bounded deterministic
   post-processing retry, and the conservative provider-migration policy that
