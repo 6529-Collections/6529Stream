@@ -528,8 +528,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:42f28629c10b1fe849d6dcf9e09c8883da0724f31e1eef9b9705e3675e767bd2",
-        "size_bytes": 12684
+        "sha256": "sha256:f9d9b126a912e8674b43c422f51c958f0d8884f42a41d45b6e45ddedb9fb0137",
+        "size_bytes": 12703
       },
       {
         "path": "docs/tooling.md",
