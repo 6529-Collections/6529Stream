@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/metadata-randomness-state-display` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/129` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/131` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 01:38 UTC` |
+| Last updated | `2026-06-12 01:42 UTC` |
 
 ## Packaging Notes
 
@@ -131,7 +131,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 Status: Issue #130 created; branch `codex/metadata-randomness-state-display`
 started from `main` at PR #129 merge commit
 `7ccc771017be46c9f60fb6114abaf88ca98368a5`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/131`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/130`.
 Related issues: `https://github.com/6529-Collections/6529Stream/issues/46`,
 `https://github.com/6529-Collections/6529Stream/issues/51`, and
@@ -6026,6 +6026,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 01:42 | Open PR #131 for Queue Item 68 | Pushed `codex/metadata-randomness-state-display`, opened https://github.com/6529-Collections/6529Stream/pull/131 against `main`, linked `Closes #130`, and will use CI plus CodeRabbit review only per user instruction |
 | 2026-06-12 01:38 | Finish local Queue Item 68 validation | Focused metadata golden tests, production size build, release checksum generation/checking, full `make check`, Windows `scripts\check.ps1`, touched-file formatting, and whitespace checks pass; `StreamCore` remains EIP-170 compliant at 24,319 runtime bytes with 257 bytes of headroom, and the internal 384-byte headroom shortfall is documented as size-budget debt |
 | 2026-06-12 01:23 | Implement Queue Item 68 local draft | Exposed lifecycle-aware `stale` and `failed` metadata states across `tokenMetadataState`, off-chain token URIs, and schema-v1 on-chain JSON; added stale/failed golden fixtures and tests; used a compact bounded `staticcall` fallback after rejecting two size-worse experiments |
 | 2026-06-12 00:59 | Select Queue Item 68 | PR #129 merged as `7ccc771017be46c9f60fb6114abaf88ca98368a5`; issue #130 now scopes the next Gate D slice as stale/failed randomness metadata state display across views, off-chain URI fallback, on-chain schema-v1 JSON, fixtures, docs, and traceability |
