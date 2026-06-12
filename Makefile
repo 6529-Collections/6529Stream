@@ -22,9 +22,9 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check audit-package-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check architecture-threat-model-check audit-package-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
-check: build test gas-snapshot-check size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check audit-package-check release-checksums-check changelog-check deploy-rehearsal
+check: build test gas-snapshot-check size metadata-fixtures-check release-artifacts-check source-verification-inputs-check abi-compatibility-check architecture-threat-model-check audit-package-check release-checksums-check changelog-check deploy-rehearsal
 
 build:
 	forge build
@@ -117,14 +117,18 @@ release-signatures-check:
 	$(PYTHON) scripts/test_release_signatures.py
 	$(PYTHON) scripts/check_release_signatures.py
 
+architecture-threat-model-check:
+	$(PYTHON) scripts/test_architecture_threat_model.py
+	$(PYTHON) scripts/check_architecture_threat_model.py
+
 audit-package-check:
 	$(PYTHON) scripts/test_audit_package.py
 	$(PYTHON) scripts/check_audit_package.py
 
-release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check audit-package-check
+release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check architecture-threat-model-check audit-package-check
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check audit-package-check
+release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check architecture-threat-model-check audit-package-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 

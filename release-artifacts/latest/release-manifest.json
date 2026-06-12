@@ -402,14 +402,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:8877e582bba751635ce5d727a0cbebc6e25f26daf36e483019e5d5c490be1c71",
-      "size_bytes": 11826
+      "sha256": "sha256:08253fe34b2312ab9549ae05f14df1fb27ed607876c80c23900464c59a290b37",
+      "size_bytes": 12060
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:a5f8b86cc918ad29bf1c9c7d8785f8c8ea260b1aa09126a66f17b4f49aafd740",
-        "size_bytes": 6694
+        "sha256": "sha256:796ae02be6631f9972735cde6d57ce548bd545faaf0d91f33e50f798e4d2b632",
+        "size_bytes": 6911
       },
       {
         "path": "docs/deployment.md",
@@ -432,19 +432,29 @@
         "size_bytes": 1267
       },
       {
+        "path": "docs/architecture.md",
+        "sha256": "sha256:5699ec8abacd4a4f2c3ff545b9dc8f207cf3f692272291279b0dc85382cb227e",
+        "size_bytes": 12358
+      },
+      {
+        "path": "docs/threat-model.md",
+        "sha256": "sha256:c3f8163bae8b99ba984c8584d4615174bee4c9231f48b1f2959f093adf77e2a1",
+        "size_bytes": 11017
+      },
+      {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:a7975381dae046ad9a735563c20ce8187dd5680a4e25acd40a3dfaf9606f9499",
-        "size_bytes": 9981
+        "sha256": "sha256:d789fb4e2ff4880dc449ccb9dba1e5d16b96316a5bb2ba14f51cfb9b6361b3a8",
+        "size_bytes": 10438
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:029f9cd21f05af0297a6b824f5283b6af199e377a538d794470592c24886d9f6",
-        "size_bytes": 13215
+        "sha256": "sha256:aa0e1f659ec6e8bad176dd0a1316f9d56f905ec6047e29f20f47b779f8cea57a",
+        "size_bytes": 13678
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:9a581d13f079e209a8a277f479ea0c03fb8ca57d0ac61c57ff323314b66b402b",
-        "size_bytes": 18521
+        "sha256": "sha256:1a2f475c4d85f4d758999cc66480de7273c199ad422fdb2f9dfe68795285fef9",
+        "size_bytes": 18994
       }
     ]
   },

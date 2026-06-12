@@ -45,6 +45,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_architecture_threat_model.py
+python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_release_manifest.py
@@ -128,6 +130,11 @@ changelog, governance docs, the audit package, and unavailable release-ceremony
 artifacts. It is regenerated with `python scripts/generate_release_manifest.py`
 after any covered input changes.
 
+The architecture/threat-model step validates [`architecture.md`](architecture.md)
+and [`threat-model.md`](threat-model.md), the auditor-facing map of system
+components, trust boundaries, value/custody flows, threat categories, residual
+risks, and evidence links.
+
 The audit-package step validates [`audit-package.md`](audit-package.md), the
 single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
 deployment/release evidence, known blockers, accepted local-baseline
@@ -195,6 +202,7 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -216,6 +224,7 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check

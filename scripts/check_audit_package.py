@@ -47,6 +47,8 @@ REQUIRED_LINK_TARGETS = [
     "ops/ROADMAP.md",
     "ops/AUTONOMOUS_RUN.md",
     "ops/SLITHER_BASELINE.md",
+    "docs/architecture.md",
+    "docs/threat-model.md",
     "docs/status.md",
     "docs/known-blockers.md",
     "docs/slither.md",

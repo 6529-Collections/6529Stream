@@ -88,6 +88,9 @@ the release policy in `docs/release-policy.md`.
   maturity, scope, ADRs, invariants, static-analysis disposition, local
   deployment/release evidence, known blockers, accepted local-baseline
   dispositions, and security reporting remain linked for auditors.
+- Added architecture and threat-model docs plus a local/CI checker so current
+  system components, trust boundaries, value/custody flows, threat categories,
+  residual risks, and evidence links remain complete before audit packaging.
 - Added a production dependency operations runbook covering dependency version
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen

@@ -13,7 +13,8 @@ the production size gate, a local deployment rehearsal, deterministic
 release-artifact catalog checks, ABI compatibility baseline checks, and
 deterministic local deployment manifest/address-book/checksum-bundle checks,
 plus retained source-verification inputs, a machine-readable release manifest,
-an audit-package check, and changelog gate for release-impacting changes.
+architecture/threat-model checks, an audit-package check, and changelog gate
+for release-impacting changes.
 They do not prove protocol correctness or production deployment readiness.
 Known P0 blockers and the execution roadmap are tracked in
 [`ops/ROADMAP.md`](ops/ROADMAP.md).
@@ -57,6 +58,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_architecture_threat_model.py
+python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_release_manifest.py
@@ -96,11 +99,16 @@ release-artifact hashes.
 The address-book step verifies compact generated address books under
 `deployments/address-books/` against the committed deployment manifests.
 
+The architecture/threat-model step verifies the auditor-facing system map and
+trust-boundary model under [`docs/architecture.md`](docs/architecture.md) and
+[`docs/threat-model.md`](docs/threat-model.md).
+
 The release-manifest step verifies a deterministic top-level release manifest
 under `release-artifacts/latest/release-manifest.json`. The manifest ties the
 release-artifact catalog, ABI compatibility baseline, deployment manifests,
-address books, governance docs including the audit package, and
-release-ceremony status together for integrators and maintainers.
+address books, governance docs including the architecture map, threat model,
+and audit package, and release-ceremony status together for integrators and
+maintainers.
 
 The audit-package step verifies the auditor-facing index under
 [`docs/audit-package.md`](docs/audit-package.md). The package links scope,
@@ -166,6 +174,8 @@ Current pinned versions:
 - [`ops/ROADMAP.md`](ops/ROADMAP.md)
 - [`ops/SLITHER_BASELINE.md`](ops/SLITHER_BASELINE.md)
 - [`ops/AUTONOMOUS_RUN.md`](ops/AUTONOMOUS_RUN.md)
+- [`docs/architecture.md`](docs/architecture.md)
+- [`docs/threat-model.md`](docs/threat-model.md)
 - [`docs/audit-package.md`](docs/audit-package.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)

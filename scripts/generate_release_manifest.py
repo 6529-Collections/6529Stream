@@ -39,6 +39,8 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/dependency-operations.md"),
     Path("docs/randomizer-operations.md"),
     Path("docs/release-signatures.md"),
+    Path("docs/architecture.md"),
+    Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
