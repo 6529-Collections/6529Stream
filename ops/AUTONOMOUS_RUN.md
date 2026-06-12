@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 18:28 UTC` |
+| Last updated | `2026-06-12 18:38 UTC` |
 
 ## Packaging Notes
 
@@ -139,13 +139,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
 | 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
 | 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #163 |
-| 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | In Progress |
+| 85 | Add public beta evidence status manifest | Gate G | Implement issue #164 by adding a no-secret public-beta evidence status artifact, schema, checker/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, roadmap, and run-state updates without Solidity changes | Merge-ready |
 
 ## Current PR Worklog
 
 ### PR candidate: Add public beta evidence status manifest (Queue Item 85)
 
-Status: PR #165 open; second CodeRabbit follow-up addressed; refreshed CI and final CodeRabbit status pending.
+Status: PR #165 merge-ready; CI run `27435205011` passed and CodeRabbit
+status was `success` on head
+`7aba4c7cd61d8a8dbe2611b324d4c2a073327faa`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/164`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/165`.
 CodeRabbit request: issue comment `4693993623`.
@@ -266,6 +268,10 @@ Validation so far:
   `python scripts\test_release_artifacts.py`,
   `python scripts\generate_release_artifacts.py --check`, and
   `git diff --check`.
+- Remote validation: GitHub Actions CI run `27435205011` passed on head
+  `7aba4c7cd61d8a8dbe2611b324d4c2a073327faa`; CodeRabbit status was
+  `success` on the same head; CodeRabbit marked all three visible review
+  threads resolved.
 
 ### PR #163: Add release readiness dashboard and blocker checker (Queue Item 84)
 
@@ -7766,6 +7772,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 18:38 | Mark PR #165 merge-ready | GitHub Actions CI run `27435205011` passed on head `7aba4c7cd61d8a8dbe2611b324d4c2a073327faa`, CodeRabbit status was `success`, and all visible CodeRabbit review threads were resolved |
 | 2026-06-12 18:28 | Address second CodeRabbit PR #165 review | Fixed the valid custom `--release-artifacts-dir` path bug, made ISO risk-acceptance dates parse as real dates, documented the date format, added schema minItems drift coverage, added custom release-artifact directory manifest coverage, updated checksum/governance-doc coverage docs, regenerated release evidence, and passed focused validation |
 | 2026-06-12 18:13 | Address CodeRabbit PR #165 review | Accepted the pre-merge docstring recommendation plus the low-risk ISO date, schema-count note, and secret-key false-positive hardening suggestions; focused public-beta, release-manifest, release-artifact, readiness, audit-package, checksum, and py_compile validation pass locally |
 | 2026-06-12 18:10 | Open PR #165 and request CodeRabbit | Public-beta evidence status PR opened against `main`, linked `Closes #164`, requested CodeRabbit in comment `4693993623`, and intentionally skipped Claude per current user instruction |
