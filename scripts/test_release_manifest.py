@@ -427,6 +427,33 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["docs"],
                 )
 
+    def test_generator_rejects_gas_snapshot_outside_baseline_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            foreign = root / "tmp" / "v0.1.0" / "gas-snapshot.snap"
+            write_text(foreign, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError, "canonical release baseline"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    foreign,
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
     def test_generator_rejects_missing_required_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

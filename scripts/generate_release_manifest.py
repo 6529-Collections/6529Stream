@@ -268,11 +268,12 @@ def default_gas_snapshot_path(protocol_versions: list[str]) -> Path:
 
 
 def resolve_gas_snapshot_path(
-    gas_snapshot_path: Path | None, protocol_versions: list[str]
+    gas_snapshot_path: Path | None, protocol_versions: list[str], repo_root: Path
 ) -> Path:
     expected_path = default_gas_snapshot_path(protocol_versions)
+    expected_resolved = (repo_root / expected_path).resolve()
     if gas_snapshot_path is None:
-        return expected_path
+        return expected_resolved
     if gas_snapshot_path.name != GAS_SNAPSHOT_FILENAME:
         raise ReleaseManifestError(
             f"gas snapshot path must end with {GAS_SNAPSHOT_FILENAME}: {gas_snapshot_path}"
@@ -282,7 +283,17 @@ def resolve_gas_snapshot_path(
             "gas snapshot path version does not match release protocol version "
             f"{protocol_versions[0]}: {gas_snapshot_path}"
         )
-    return gas_snapshot_path
+    candidate_resolved = (
+        gas_snapshot_path
+        if gas_snapshot_path.is_absolute()
+        else repo_root / gas_snapshot_path
+    ).resolve()
+    if candidate_resolved != expected_resolved:
+        raise ReleaseManifestError(
+            "gas snapshot path must match canonical release baseline "
+            f"{expected_path}: {gas_snapshot_path}"
+        )
+    return expected_resolved
 
 
 def checksum_bundle() -> dict[str, Any]:
@@ -347,7 +358,9 @@ def build_manifest(
             + [record["deployment_version"] for record in ceremony_evidence]
         )
     )
-    resolved_gas_snapshot_path = resolve_gas_snapshot_path(gas_snapshot_path, protocol_versions)
+    resolved_gas_snapshot_path = resolve_gas_snapshot_path(
+        gas_snapshot_path, protocol_versions, repo_root
+    )
 
     return {
         "schema_version": RELEASE_MANIFEST_SCHEMA,

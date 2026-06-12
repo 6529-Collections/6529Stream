@@ -37,7 +37,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/147` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 09:54 UTC` |
+| Last updated | `2026-06-12 10:16 UTC` |
 
 ## Packaging Notes
 
@@ -137,8 +137,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 ### PR candidate: Add local gas snapshot baseline (Queue Item 76)
 
 Status: open in PR #147 on branch `codex/local-gas-snapshot-baseline`; GitHub
-CI passed, CodeRabbit follow-up is addressed locally, and follow-up push/review
-are pending.
+CI passed on the prior head, CodeRabbit's second follow-up is addressed
+locally, full local validation passed, and push/review are pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/146`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/147`.
 CodeRabbit request: issue comment `4689622593`.
@@ -255,6 +255,28 @@ Follow-up validation:
 - `python scripts\test_release_checksums.py`
 - `python -m py_compile scripts\generate_release_manifest.py scripts\test_release_manifest.py`
 - `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `git diff --check`
+- `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+Second CodeRabbit follow-up addressed locally:
+
+- CodeRabbit review comment `3402400116` correctly noted that an explicit
+  `--gas-snapshot` override with the right version directory and filename could
+  still point outside the canonical release baseline tree.
+- Updated `scripts/generate_release_manifest.py` to resolve both the expected
+  baseline and supplied override through the repository root, then require the
+  paths to match
+  `release-artifacts/baselines/v<protocol-version>/gas-snapshot.snap`.
+- Added `scripts/test_release_manifest.py` coverage rejecting a foreign
+  `tmp/v0.1.0/gas-snapshot.snap` override.
+
+Second follow-up validation:
+
+- `python scripts\test_release_manifest.py`
+- `python -m py_compile scripts\generate_release_manifest.py scripts\test_release_manifest.py`
 - `python scripts\generate_release_manifest.py --check`
 - `python scripts\generate_release_checksums.py --check`
 - `git diff --check`
@@ -6810,6 +6832,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 10:16 | Address CodeRabbit PR #147 canonical path review | Tightened `--gas-snapshot` override validation so only the canonical release baseline path under `release-artifacts/baselines/v<protocol-version>/gas-snapshot.snap` is accepted, added a foreign-path regression, and reran focused checks, full `make check`, Windows wrapper, and whitespace checks successfully |
 | 2026-06-12 09:54 | Address CodeRabbit PR #147 review | Accepted the version-aware gas snapshot manifest fix, tooling docs parity fix, and manifest-test digest/size nitpick; regenerated release evidence and reran focused checks, full `make check`, Windows wrapper, and whitespace checks successfully |
 | 2026-06-12 09:29 | Open PR #147 and request CodeRabbit | Pushed `codex/local-gas-snapshot-baseline`, opened https://github.com/6529-Collections/6529Stream/pull/147 against `main`, linked `Closes #146`, requested CodeRabbit in comment `4689622593`, and intentionally skipped Claude per user instruction |
 | 2026-06-12 09:26 | Finish local Queue Item 76 validation | Focused gas snapshot test and snapshot regeneration/check pass, release manifest/checksum/changelog drift checks pass, full `make check` and Windows `scripts\check.ps1` pass, and `git diff --check` is clean aside from normal line-ending notices |
