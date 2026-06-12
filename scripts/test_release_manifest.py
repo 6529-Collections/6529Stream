@@ -42,6 +42,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     address_book_dir = root / "deployments" / "address-books"
     deployment_schema_dir = root / "deployments" / "schema"
     ceremony_evidence_dir = root / "deployments" / "ceremony-evidence"
+    randomizer_operations_dir = root / "deployments" / "randomizer-operations"
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
     docs = [
@@ -49,6 +50,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "deployment.md",
         root / "docs" / "tooling.md",
         root / "docs" / "status.md",
+        root / "docs" / "randomizer-operations.md",
     ]
 
     write_json(
@@ -152,6 +154,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
+        deployment_schema_dir / "randomizer-operations-evidence.schema.json",
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
         ceremony_evidence_dir / "anvil-local.json",
         {
             "schema_version": "6529stream.deployment-ceremony-evidence.v1",
@@ -169,6 +175,36 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "verification_status": {"contract_verification": "not_applicable"},
         },
     )
+    write_json(
+        randomizer_operations_dir / "anvil-randomizer-local.json",
+        {
+            "schema_version": "6529stream.randomizer-operations-evidence.v1",
+            "evidence_id": "anvil-randomizer-local",
+            "protocol_version": "0.1.0",
+            "deployment_version": "anvil-001",
+            "network": {"environment": "local", "name": "anvil", "chain_id": 31337},
+            "artifacts": {
+                "deployment_manifest": {"path": "deployments/examples/anvil.json"},
+                "address_book": {"path": "deployments/address-books/anvil.json"},
+            },
+            "provider_configuration": {
+                "vrf": {
+                    "adapter": "0x" + "8" * 40,
+                    "provider": "0x" + "5" * 40,
+                    "provider_type": "local_mock",
+                    "provider_epoch": 0,
+                    "funding_status": "not_applicable_local",
+                },
+                "arrng": {
+                    "adapter": "0x" + "9" * 40,
+                    "provider": "0x" + "6" * 40,
+                    "provider_type": "local_mock",
+                    "provider_epoch": 0,
+                    "funding_status": "not_applicable_local",
+                },
+            },
+        },
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
@@ -184,6 +220,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "address_book_dir": address_book_dir,
         "deployment_schema_dir": deployment_schema_dir,
         "ceremony_evidence_dir": ceremony_evidence_dir,
+        "randomizer_operations_dir": randomizer_operations_dir,
         "output": output,
         "changelog": changelog,
         "docs": docs,
@@ -209,6 +246,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -226,6 +264,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -278,6 +317,16 @@ class ReleaseManifestTests(unittest.TestCase):
                 "local",
             )
             self.assertEqual(
+                manifest["deployment_artifacts"]["randomizer_operations"][0]["evidence_id"],
+                "anvil-randomizer-local",
+            )
+            self.assertEqual(
+                manifest["deployment_artifacts"]["randomizer_operations"][0]["providers"]["arrng"][
+                    "funding_status"
+                ],
+                "not_applicable_local",
+            )
+            self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],
                 generator.CHECKSUM_DIGEST_STATUS,
             )
@@ -304,6 +353,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -322,6 +372,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -344,6 +395,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -364,6 +416,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -391,6 +444,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
             )
@@ -423,6 +477,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -450,6 +505,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -474,6 +530,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )
@@ -498,6 +555,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
                 )

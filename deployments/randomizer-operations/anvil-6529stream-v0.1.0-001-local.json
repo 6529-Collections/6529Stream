@@ -1,0 +1,222 @@
+{
+  "schema_version": "6529stream.randomizer-operations-evidence.v1",
+  "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
+  "protocol_version": "0.1.0",
+  "deployment_version": "anvil-6529stream-v0.1.0-001",
+  "network": {
+    "environment": "local",
+    "name": "anvil",
+    "chain_id": 31337,
+    "confirmation_depth": 0
+  },
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "local"
+  },
+  "artifacts": {
+    "deployment_manifest": {
+      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+    },
+    "address_book": {
+      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:ebec623efd4c2848f3e97b803e91e8ff7b469ec2797fbe388b7091d52aba8550"
+    },
+    "abi_checksums": {
+      "path": "release-artifacts/latest/abi-checksums.json",
+      "sha256": "sha256:2290e589f3970441cf4698e457bf6784e399cfea5dd458f1e633eb92005f18f7"
+    },
+    "release_checksum_bundle": {
+      "path": "release-artifacts/latest/SHA256SUMS",
+      "digest_status": "not_available_self_referential",
+      "reason": "The release checksum bundle covers randomizer operations evidence outputs, so its own digest is intentionally recorded by the top-level release manifest instead of this evidence file."
+    }
+  },
+  "provider_configuration": {
+    "vrf": {
+      "adapter": "0x0000000000000000000000000000000000000008",
+      "provider": "0x0000000000000000000000000000000000006535",
+      "provider_type": "local_mock",
+      "provider_epoch": 0,
+      "funding_status": "not_applicable_local",
+      "balance_wei": "0",
+      "operator_notes": "Local Anvil rehearsal uses a placeholder VRF coordinator address from the deployment manifest. Fork, testnet, and production evidence must retain the real coordinator, subscription or billing account, funding status, and health-check evidence.",
+      "evidence": [
+        {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+        },
+        {
+          "path": "docs/adr/0005-randomness.md",
+          "sha256": "sha256:0ca68ea34404ce5e41b9e1633492d5826b05947161dc16c3cd704ec10e7cfb6e"
+        }
+      ]
+    },
+    "arrng": {
+      "adapter": "0x0000000000000000000000000000000000000009",
+      "provider": "0x0000000000000000000000000000000000006536",
+      "provider_type": "local_mock",
+      "provider_epoch": 0,
+      "funding_status": "not_applicable_local",
+      "balance_wei": "0",
+      "refund_recipient": "0x0000000000000000000000000000000000000009",
+      "operator_notes": "Local Anvil rehearsal uses a placeholder arRNG controller address and treats the adapter balance as reserved/owed. Fork, testnet, and production evidence must retain request-cost funding, refund-recipient, provider payment, and adapter reserve evidence.",
+      "evidence": [
+        {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+        },
+        {
+          "path": "test/StreamRandomizerPayments.t.sol",
+          "sha256": "sha256:69ca93e1672beb7fc88039b54cb2cf33898289eec1a5955661f1cac2e00144e4"
+        }
+      ]
+    }
+  },
+  "lifecycle_controls": {
+    "request_tracking": {
+      "status": "passed",
+      "notes": "Local tests cover per-token and provider request lifecycle views for pending, fulfilled, stale, and failed post-processing states.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerLifecycle.t.sol",
+          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+        }
+      ]
+    },
+    "callback_validation": {
+      "status": "passed",
+      "notes": "Local tests cover request ID, token, collection, provider, and randomizer epoch validation before callbacks can write final randomness.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerLifecycle.t.sol",
+          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+        }
+      ]
+    },
+    "provider_epoch_migration": {
+      "status": "passed",
+      "notes": "Local tests cover provider epoch advancement and stale callback rejection after randomizer migration.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerLifecycle.t.sol",
+          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+        }
+      ]
+    },
+    "pending_request_migration_block": {
+      "status": "passed",
+      "notes": "Local tests cover the default ADR policy that blocks lifecycle-aware randomizer migration while collection requests are pending.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerLifecycle.t.sol",
+          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+        }
+      ]
+    },
+    "stale_request_policy": {
+      "status": "passed",
+      "notes": "Local tests cover stale request marking, terminal state exposure, and migration unblocking after stale marking.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerLifecycle.t.sol",
+          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+        }
+      ]
+    },
+    "failed_request_policy": {
+      "status": "passed",
+      "notes": "Local tests cover deterministic failed post-processing state, retained seed/failure-data hash, and duplicate callback rejection.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerLifecycle.t.sol",
+          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+        }
+      ]
+    },
+    "retry_policy": {
+      "status": "passed",
+      "notes": "Local tests cover bounded deterministic retry after failed post-processing for VRF and arRNG requests.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerRetry.t.sol",
+          "sha256": "sha256:c9ad1a5c49b54bdafb46e2cc912459546bf93bbea1388bd8c83b5b0921114aa5"
+        }
+      ]
+    },
+    "reserve_accounting": {
+      "status": "passed",
+      "notes": "Local tests cover direct reserve funding, request-cost spending, provider payments, fulfilled/stale/failed/retried request states, forced ETH, and zero emergency-withdrawable randomizer surplus.",
+      "evidence": [
+        {
+          "path": "test/StreamRandomizerPayments.t.sol",
+          "sha256": "sha256:69ca93e1672beb7fc88039b54cb2cf33898289eec1a5955661f1cac2e00144e4"
+        },
+        {
+          "path": "test/StreamPaymentsInvariant.t.sol",
+          "sha256": "sha256:51c6c507d43cc9128cb7a140657fdb631979cd9375380243609535e1537ee1ea"
+        }
+      ]
+    },
+    "pause_policy": {
+      "status": "passed",
+      "notes": "Local tests cover domain-scoped pause controls and emergency-recipient configuration that protect randomizer-adjacent minting, settlement, and withdrawal flows.",
+      "evidence": [
+        {
+          "path": "test/StreamEmergencyWithdraw.t.sol",
+          "sha256": "sha256:47f0ea8ce486b26fd4d21131eb92c9f7dfb42c12ae3c760b567d7299f81e7c38"
+        }
+      ]
+    },
+    "emergency_withdrawal_boundary": {
+      "status": "passed",
+      "notes": "Local tests cover unauthorized emergency withdrawal rejection and the conservative `NextGenRandomizerRNG` model where the full adapter balance remains reserved/owed.",
+      "evidence": [
+        {
+          "path": "test/StreamEmergencyWithdraw.t.sol",
+          "sha256": "sha256:47f0ea8ce486b26fd4d21131eb92c9f7dfb42c12ae3c760b567d7299f81e7c38"
+        },
+        {
+          "path": "test/StreamRandomizerPayments.t.sol",
+          "sha256": "sha256:69ca93e1672beb7fc88039b54cb2cf33898289eec1a5955661f1cac2e00144e4"
+        }
+      ]
+    }
+  },
+  "retained_artifacts": [
+    {
+      "category": "deployment_manifest",
+      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:f10e989edac956d8d7a1b7e51c70304a89143e8d4fa03f41523fc555e2817c09"
+    },
+    {
+      "category": "address_book",
+      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:ebec623efd4c2848f3e97b803e91e8ff7b469ec2797fbe388b7091d52aba8550"
+    },
+    {
+      "category": "abi_checksums",
+      "path": "release-artifacts/latest/abi-checksums.json",
+      "sha256": "sha256:2290e589f3970441cf4698e457bf6784e399cfea5dd458f1e633eb92005f18f7"
+    },
+    {
+      "category": "randomizer_adr",
+      "path": "docs/adr/0005-randomness.md",
+      "sha256": "sha256:0ca68ea34404ce5e41b9e1633492d5826b05947161dc16c3cd704ec10e7cfb6e"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "rpc_url",
+      "api_key",
+      "unreleased_drop_payload",
+      "provider_account_credentials"
+    ]
+  },
+  "operator_notes": "This is local Anvil randomizer operations evidence only. Fork, testnet, and production releases must retain real provider configuration, provider funding, request health, pending-request, stale/failed-request, migration, emergency-control, and redaction evidence without private keys or RPC credentials."
+}

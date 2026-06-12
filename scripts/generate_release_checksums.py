@@ -26,6 +26,7 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/address-books"),
     Path("deployments/schema"),
     Path("deployments/ceremony-evidence"),
+    Path("deployments/randomizer-operations"),
 ]
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
 CHECKSUM_FILE_NAME = "SHA256SUMS"

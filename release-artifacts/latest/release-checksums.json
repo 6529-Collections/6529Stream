@@ -13,14 +13,15 @@
       "deployments/examples",
       "deployments/address-books",
       "deployments/schema",
-      "deployments/ceremony-evidence"
+      "deployments/ceremony-evidence",
+      "deployments/randomizer-operations"
     ],
     "output_dir": "release-artifacts/latest"
   },
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:5897e5e6efca39dcc6a3e333fb6f203783b758b19318f0cbde10f6acd69b6b61"
+    "sha256": "sha256:30fc98161f598ba300be15fa79f462478568728ef19dd15f3aee466aa46c768b"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -68,6 +69,11 @@
       "size_bytes": 8262
     },
     {
+      "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
+      "sha256": "sha256:f6ae9e38bcaea91fe9aa2f1e94f2bc359904d0f0b685137911d47d67a41c42bd",
+      "size_bytes": 9421
+    },
+    {
       "path": "deployments/schema/address-book.schema.json",
       "sha256": "sha256:e36a4a98e66c0bdcd6f5cd6c8125e547c53bd4537a7ee2c25a69f041ec2c3d13",
       "size_bytes": 3268
@@ -81,6 +87,11 @@
       "path": "deployments/schema/deployment-manifest.schema.json",
       "sha256": "sha256:3de078b625d0bf9fd49e352137efe7320d8ef701c04b0d5dc3dbfb5e560b7cfd",
       "size_bytes": 6252
+    },
+    {
+      "path": "deployments/schema/randomizer-operations-evidence.schema.json",
+      "sha256": "sha256:b7d89e436872ef9bd8072d8a21badd8f4c691e053b6a829e9dc676b22872bf44",
+      "size_bytes": 7882
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -139,8 +150,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:41f97d93dc5990071074dbfc79a104d8197e7d620c78d2a009beab14ca927ece",
-      "size_bytes": 12672
+      "sha256": "sha256:590e7f18d1744d747b35f79f6e7cc06c89e1bce5e787d9b91f83c31e498014ae",
+      "size_bytes": 14659
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",

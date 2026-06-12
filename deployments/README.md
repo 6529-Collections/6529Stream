@@ -11,6 +11,8 @@ The current baseline includes:
 - `schema/address-book.schema.json`: the compact address-book shape.
 - `schema/ceremony-evidence.schema.json`: the retained deployment ceremony
   evidence shape.
+- `schema/randomizer-operations-evidence.schema.json`: the retained
+  randomizer operations evidence shape.
 - `broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json`: a sanitized
   Foundry broadcast fixture used to prove broadcast-derived manifest ingestion
   without committing RPC credentials or private material.
@@ -30,6 +32,10 @@ The current baseline includes:
   checksums, admin ceremony, signer setup, metadata-browser check, auction
   ceremony, emergency redeployment rehearsal, verification status, retained
   artifacts, and redaction policy together.
+- `randomizer-operations/anvil-6529stream-v0.1.0-001-local.json`: a no-secret
+  local Anvil randomizer operations bundle tying provider configuration,
+  provider funding status, lifecycle controls, reserve policy, retained
+  artifacts, and redaction policy together.
 
 Do not commit private keys, RPC credentials, unreleased drop payloads, or signer
 material in this directory. Public deployment manifests, ABI hashes, checksums,
@@ -47,6 +53,8 @@ python scripts/generate_deployment_manifest.py --config deployments/config/anvil
 python scripts/generate_address_books.py
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/test_randomizer_operations.py
+python scripts/check_randomizer_operations.py
 python scripts/generate_release_checksums.py
 ```
 
@@ -84,7 +92,17 @@ verification status, admin/signer/dependency/auction/emergency ceremony
 results, and operator notes without private keys, RPC URLs, API keys, mnemonics,
 or unreleased drop payloads.
 
-After broadcast, manifest, schema, config, address-book, or ceremony evidence
-outputs change, regenerate `release-artifacts/latest/SHA256SUMS` and
+Randomizer operations evidence bundles are retained under
+`deployments/randomizer-operations/` and validated by
+`scripts/check_randomizer_operations.py`. The committed local bundle is
+Anvil-only evidence. Fork, testnet, and production bundles must retain real VRF
+and arRNG provider configuration, funding or billing proof, provider health,
+pending/stale/failed request state, migration controls, emergency controls, and
+operator notes without private keys, RPC URLs, API keys, mnemonics, provider
+account credentials, or unreleased drop payloads.
+
+After broadcast, manifest, schema, config, address-book, ceremony evidence, or
+randomizer operations evidence outputs change, regenerate
+`release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` with
 `python scripts/generate_release_checksums.py`.

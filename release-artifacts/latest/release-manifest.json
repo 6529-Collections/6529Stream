@@ -20,7 +20,8 @@
     "deployment_manifest_dir": "deployments/examples",
     "address_book_dir": "deployments/address-books",
     "deployment_schema_dir": "deployments/schema",
-    "ceremony_evidence_dir": "deployments/ceremony-evidence"
+    "ceremony_evidence_dir": "deployments/ceremony-evidence",
+    "randomizer_operations_dir": "deployments/randomizer-operations"
   },
   "release_artifacts": {
     "contract_config": {
@@ -237,6 +238,12 @@
         "sha256": "sha256:3de078b625d0bf9fd49e352137efe7320d8ef701c04b0d5dc3dbfb5e560b7cfd",
         "size_bytes": 6252,
         "schema_version": "https://json-schema.org/draft/2020-12/schema"
+      },
+      {
+        "path": "deployments/schema/randomizer-operations-evidence.schema.json",
+        "sha256": "sha256:b7d89e436872ef9bd8072d8a21badd8f4c691e053b6a829e9dc676b22872bf44",
+        "size_bytes": 7882,
+        "schema_version": "https://json-schema.org/draft/2020-12/schema"
       }
     ],
     "ceremony_evidence": [
@@ -258,29 +265,68 @@
         "release_checksum_bundle": "release-artifacts/latest/SHA256SUMS",
         "contract_verification": "not_applicable"
       }
+    ],
+    "randomizer_operations": [
+      {
+        "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
+        "sha256": "sha256:f6ae9e38bcaea91fe9aa2f1e94f2bc359904d0f0b685137911d47d67a41c42bd",
+        "size_bytes": 9421,
+        "schema_version": "6529stream.randomizer-operations-evidence.v1",
+        "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
+        "protocol_version": "0.1.0",
+        "deployment_version": "anvil-6529stream-v0.1.0-001",
+        "network": {
+          "environment": "local",
+          "name": "anvil",
+          "chain_id": 31337
+        },
+        "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+        "address_book": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+        "providers": {
+          "vrf": {
+            "adapter": "0x0000000000000000000000000000000000000008",
+            "provider": "0x0000000000000000000000000000000000006535",
+            "provider_type": "local_mock",
+            "provider_epoch": 0,
+            "funding_status": "not_applicable_local"
+          },
+          "arrng": {
+            "adapter": "0x0000000000000000000000000000000000000009",
+            "provider": "0x0000000000000000000000000000000000006536",
+            "provider_type": "local_mock",
+            "provider_epoch": 0,
+            "funding_status": "not_applicable_local"
+          }
+        }
+      }
     ]
   },
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:cab57d825263812bc9c2b2c07b62f6a780eec72a25c08cd499581e095ed04fdd",
-      "size_bytes": 10932
+      "sha256": "sha256:e6f114e0e6d56d4ad37eac4a456cb1ca3c8d9666412f77e4e9f62ff5734efb53",
+      "size_bytes": 11161
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:5fefd31f1c3bfa3ebdb99c479eff7c277cd56f2766d4e5e363e95fca519a8416",
-        "size_bytes": 6161
+        "sha256": "sha256:a02f42eb804c0409a2a5d90f9ce8ed773245329657de6960d8a616865d7684b3",
+        "size_bytes": 6402
       },
       {
         "path": "docs/deployment.md",
-        "sha256": "sha256:b86af8c4bf4191834b0a531d67c0b6e5b80da561e0afac300245e50d3d048452",
-        "size_bytes": 12312
+        "sha256": "sha256:d540d7a1bedde685f37e1abb5ffa6486da0226182e904e5a0d00ff6b216eefff",
+        "size_bytes": 13717
       },
       {
         "path": "docs/dependency-operations.md",
         "sha256": "sha256:49bfef2fa4b4699d1cda94f1cf8caf3486ce9d0a2cb455f8296bbe91adaf1888",
         "size_bytes": 13645
+      },
+      {
+        "path": "docs/randomizer-operations.md",
+        "sha256": "sha256:94940d1cbe2efc58c056fcbf7b4de7ed3aa2c126b529cf03adc53acf2d6d5095",
+        "size_bytes": 3488
       },
       {
         "path": "docs/tooling.md",
@@ -289,8 +335,8 @@
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:31e6ab243cc8a5e0141043d16ff23e5d07b841054adf82e51e6302480df5f3b2",
-        "size_bytes": 17067
+        "sha256": "sha256:4a48e7eab135e9197edc5cbf801caf1550bf1b08b308d39db1c053cf79830b9b",
+        "size_bytes": 17527
       }
     ]
   },
