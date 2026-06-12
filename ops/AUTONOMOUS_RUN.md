@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/release-readiness-dashboard` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/161` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/163` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 16:56 UTC` |
+| Last updated | `2026-06-12 16:59 UTC` |
 
 ## Packaging Notes
 
@@ -138,16 +138,16 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 81 | Add release signature evidence baseline | Gate G support | Implement issue #156 by adding a no-secret release signature evidence schema, local placeholder bundle, validator/tests, local/CI gate wiring, release manifest/checksum coverage, docs, roadmap, and run-state updates | Merged in PR #157 |
 | 82 | Add external audit package index | Gate F | Implement issue #158 by adding an auditor-facing audit package index, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #159 |
 | 83 | Add architecture and threat model audit docs | Gate F | Implement issue #160 by adding auditor-facing architecture/threat-model docs, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Merged in PR #161 |
-| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | Validated locally; PR pending |
+| 84 | Add release readiness dashboard and blocker checker | Gate G | Implement issue #162 by adding a Gate G dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, and run-state updates without Solidity changes | PR #163 open; CI and CodeRabbit pending |
 
 ## Current PR Worklog
 
 ### PR candidate: Add release readiness dashboard and blocker checker (Queue Item 84)
 
-Status: Validated locally; PR pending.
+Status: PR #163 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/162`.
-PR: TBD.
-CodeRabbit request: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/163`.
+CodeRabbit request: issue comment `4693404700`.
 Branch: `codex/release-readiness-dashboard`.
 Branch started from PR #161 squash merge commit
 `0bddc2c93157e328c40b88b9c98e0fa7195b5acd`.
@@ -7625,6 +7625,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 16:59 | Open PR #163 and request CodeRabbit | Release-readiness dashboard PR opened against `main`, linked `Closes #162`, requested CodeRabbit in comment `4693404700`, and intentionally skipped Claude per current user instruction |
 | 2026-06-12 16:56 | Finish local Queue Item 84 validation | Release-readiness checker/tests, audit-package checks, release manifest/checksum regeneration and check modes, Python compilation, changelog gate, Unix and PowerShell syntax checks, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all pass locally with only existing Foundry and line-ending warning noise |
 | 2026-06-12 16:34 | Implement Queue Item 84 local draft | Added the release-readiness dashboard, checker/tests, local/CI gate wiring, release-manifest coverage, docs, roadmap, changelog, and run-state updates for issue #162 without Solidity behavior changes |
 | 2026-06-12 16:23 | Create issue #162 and select Queue Item 84 | PR #161 merged, no open issues remained, and Gate G still needed a checked release-readiness dashboard that distinguishes local baseline evidence from public-beta and production-release blockers |
