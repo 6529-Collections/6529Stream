@@ -34,10 +34,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/reconcile-gate-g-roadmap` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/165` |
-| Active PR | TBD for issue `https://github.com/6529-Collections/6529Stream/issues/166` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/167` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 18:52 UTC` |
+| Last updated | `2026-06-12 18:54 UTC` |
 
 ## Packaging Notes
 
@@ -147,9 +147,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile Gate G roadmap after public beta evidence merge (Queue Item 86)
 
-Status: Local validation passed; PR TBD.
+Status: PR #167 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/166`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/167`.
 Branch: `codex/reconcile-gate-g-roadmap`.
 Branch started from PR #165 squash merge commit
 `5e9a6c9f5afb569151b74b2095ef180cbbcfe884`.
@@ -189,6 +189,7 @@ Implementation notes so far:
 - Refreshed `ops/ROADMAP.md` verification metadata from PR #162 to PR #165.
 - Removed closed issue #164 from active Gate G blocker wording while preserving
   public-beta and production-release blocked status.
+- Opened PR #167 against `main`.
 
 Validation so far:
 
@@ -7834,6 +7835,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-12 18:54 | Open PR #167 | Gate G roadmap reconciliation PR opened against `main`; CodeRabbit will be requested after the PR-number state update is pushed, and Claude remains intentionally skipped per current user instruction |
 | 2026-06-12 18:52 | Finish local Queue Item 86 validation | Roadmap/run-state reconciliation is limited to `ops/ROADMAP.md` and `ops/AUTONOMOUS_RUN.md`; heading scan, whitespace check, release-readiness check, public-beta evidence check, release-manifest check, and release-checksum check pass locally |
 | 2026-06-12 18:50 | Create issue #166 and select Queue Item 86 | PR #165 merged, issue #164 closed completed, no open 6529Stream issues remained, and the roadmap/run-state needed a state-only reconciliation so Gate G no longer treats the public-beta evidence manifest as pending |
 | 2026-06-12 18:47 | Merge PR #165 | Public-beta evidence status manifest merged as `5e9a6c9f5afb569151b74b2095ef180cbbcfe884`; final head `54af773ccbf8c73c6d880a7713932039249053a5` passed CI run `27435644265`, CodeRabbit status was `success`, and issue #164 closed completed |
