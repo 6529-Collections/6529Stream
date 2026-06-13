@@ -71,6 +71,8 @@ REQUIRED_COMMANDS = [
     ),
     "python scripts/test_drop_authorization_fixtures.py",
     "python scripts/check_drop_authorization_fixtures.py",
+    "python scripts/test_drop_authorization_signing_evidence.py",
+    "python scripts/check_drop_authorization_signing_evidence.py",
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
     "make check",
@@ -95,6 +97,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/adr/0006-metadata-freeze.md",
     "docs/adr/0007-upgrade-redeployment.md",
     "release-artifacts/latest/public-beta-evidence.json",
+    "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

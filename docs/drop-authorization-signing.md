@@ -134,7 +134,43 @@ For production use, replace the placeholder `chainId`, `verifyingContract`,
 reviewed private working copy, then pass the generated typed data to the
 approved signing system. Retain the generated payload, signer identity, signer
 epoch, reviewer approval, returned signature, and command evidence separately
-under the non-local evidence process.
+under the drop authorization signing evidence process and the broader
+non-local evidence process.
+
+## Signing Evidence Template
+
+Retained drop authorization signing evidence uses
+[`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
+and the checked no-secret template at
+[`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json).
+The template points at
+[`release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt)
+to prove retained artifact hash validation without claiming public-beta or
+production readiness.
+
+The evidence checker validates:
+
+- the referenced generated payload hash and schema version;
+- EIP-712 domain fields, message fields, signer epoch, `dropId`,
+  `tokenDataHash`, domain separator, struct hash, and digest against the
+  generated unsigned payload;
+- signer identity, signer lifecycle status, custody reference, signature
+  status, verification metadata, reviewer approval, and retained artifacts;
+- no-secret redaction policy, path boundaries, duplicate retained artifact
+  categories, stale hashes, and secret-shaped keys or values.
+
+Fork, testnet, mainnet, or production evidence cannot use the local placeholder
+signer/custody/signature statuses. Production evidence must be reviewed,
+approved, signed, verified, and linked to retained signing approval, signing
+transcript, and signature-verification artifacts. The committed template stays
+local-only and blocked; it is a format contract, not a launch claim.
+
+Check the committed template with:
+
+```sh
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
+```
 
 ## Operator Signing Flow
 
@@ -152,7 +188,8 @@ Use this flow for a real signing service or an offline ceremony:
    ERC-1271 signer so `isValidSignature(digest, signature)` returns
    `0x1626ba7e`.
 8. Retain the typed-data JSON, digest, signature result, signer identity,
-   signer epoch, and reviewer approval as no-secret release evidence.
+   signer epoch, reviewer approval, and verification output as no-secret drop
+   authorization signing evidence.
 
 For local verification of the fixture EOA signatures, use the digest and
 signature fields with Foundry `cast wallet verify --no-hash --address`. In
@@ -242,6 +279,8 @@ python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 make check

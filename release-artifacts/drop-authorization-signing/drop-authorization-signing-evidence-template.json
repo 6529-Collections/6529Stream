@@ -1,0 +1,105 @@
+{
+  "schema_version": "6529stream.drop-authorization-signing-evidence.v1",
+  "evidence_id": "drop-authorization-signing-evidence-template",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "local",
+  "chain_id": 31337,
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "payload": {
+    "payload_file": {
+      "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+      "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe"
+    },
+    "payload_schema_version": "6529stream.drop-authorization-payload.v1",
+    "payload_kind": "fixed_price",
+    "typed_data_primary_type": "DropAuthorization",
+    "domain": {
+      "name": "6529StreamDrops",
+      "version": "1",
+      "chain_id": 31337,
+      "verifying_contract": "0x100000000000000000000000000000000000dead"
+    },
+    "message": {
+      "drop_id": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+      "poster": "0x0000000000000000000000000000000000001001",
+      "recipient": "0x0000000000000000000000000000000000005005",
+      "payer": "0x0000000000000000000000000000000000000000",
+      "collection_id": 1,
+      "sale_mode": 1,
+      "signer_epoch": 1,
+      "nonce": 1,
+      "deadline": 1893456000
+    },
+    "derived": {
+      "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+      "drop_id": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+      "token_data_hash": "0x8f54f1c2d0eb5771cd5bf67a6689fcd6eed9444d91a39e5ef32a9b4ae5ca14ff",
+      "domain_separator": "0xaced18559f963adb99804b4c7ca4209355b2e434ba32eab5b033561df367efa0",
+      "struct_hash": "0x0d15ce18a217fa38b136567d2f9dddc89a58f854d6750652133e4085d52815b9",
+      "digest": "0xf65815cf0254253a34051e8051e5bbb982fcbc57b7de34e4112885e5e06a0f0c"
+    }
+  },
+  "signing_identity": {
+    "signer_type": "local_placeholder",
+    "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+    "signer_epoch": 1,
+    "custody_status": "not_available_local",
+    "custody_reference": "not_available_local",
+    "signer_lifecycle_status": "not_available_local",
+    "signer_service": "not_available_local",
+    "signer_epoch_source": "not_available_local"
+  },
+  "signature": {
+    "status": "not_available_local",
+    "signature_format": "not_available_local",
+    "signature_hash": "not_available_local",
+    "verification_status": "not_available_local",
+    "verification_command": "not_available_local",
+    "returned_at": "not_available_local",
+    "evidence_note": "Template only. Real evidence must retain the signing system output and verification result outside this placeholder."
+  },
+  "review": {
+    "owner": "TBD",
+    "reviewer": "TBD",
+    "approval_status": "template",
+    "approval_reference": "TBD",
+    "reviewed_at": "not_available_local"
+  },
+  "retained_artifacts": [
+    {
+      "category": "drop_signing_schema",
+      "path": "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
+      "sha256": "sha256:60e0efe388b974d81bfad266a1c9fb10d55c3104ae24ba268e6e68441edc4370"
+    },
+    {
+      "category": "payload_output",
+      "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+      "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe"
+    },
+    {
+      "category": "retained_transcript",
+      "path": "release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt",
+      "sha256": "sha256:f0f190f1c87106e3a773735e03bda9c281f7c77e15dc8dfe5d83c431bf4f58a2"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "raw_signature",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+  "operator_notes": "Copy this shape for reviewed fork, testnet, mainnet, or production signing evidence. Pass the full typed_data payload to the approved signing system; use digest and hash fields only for comparison and retained evidence."
+}

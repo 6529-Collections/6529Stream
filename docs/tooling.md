@@ -31,6 +31,8 @@ python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/test_source_verification_inputs.py
@@ -93,6 +95,10 @@ and unsigned payload-generator examples. The generator produces canonical
 EIP-712 typed data plus derived hashes for downstream signer comparison; it
 does not accept key material, does not sign, does not broadcast, and does not
 replace production signer custody or retained non-local signing evidence.
+The drop authorization signing evidence checker validates the retained
+evidence template under `release-artifacts/drop-authorization-signing/`, ties
+it to the generated unsigned payload hash and derived digest fields, and
+rejects placeholder signer/signature states for non-local evidence.
 
 The release artifact step is the first Gate G machine-readable artifact gate.
 It verifies that `release-artifacts/latest/` matches the production `via-ir`
@@ -172,6 +178,10 @@ deterministic no-secret fixtures under
 It recomputes `dropId`, token-data hash, domain separator, struct hash, and
 EIP-712 digest for the fixed-price EOA, auction EOA, and ERC-1271 mock
 contract-signer examples.
+The drop authorization signing evidence step validates the schema, checked
+template, retained artifact hash, generated payload reference, signer epoch,
+review metadata, signature status, path boundaries, and no-secret policy for
+future signing ceremonies.
 
 The release-readiness step validates
 [`release-readiness.md`](release-readiness.md), the Gate G dashboard that
@@ -272,6 +282,8 @@ python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -305,6 +317,8 @@ python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
@@ -342,6 +356,8 @@ the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/evidence/`,
+`release-artifacts/drop-authorization-signing/`,
+`release-artifacts/schema/`,
 `release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,

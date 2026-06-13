@@ -54,6 +54,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_drop_authorization_payload.py" "--input" "test\fixtures\drop-authorization\payload-generator\auction-input.json" "--output" "test\fixtures\drop-authorization\payload-generator\auction-output.json" "--check"
 & $pythonPath @pythonArgs "scripts\test_drop_authorization_fixtures.py"
 & $pythonPath @pythonArgs "scripts\check_drop_authorization_fixtures.py"
+& $pythonPath @pythonArgs "scripts\test_drop_authorization_signing_evidence.py"
+& $pythonPath @pythonArgs "scripts\check_drop_authorization_signing_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\generate_release_artifacts.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_source_verification_inputs.py"

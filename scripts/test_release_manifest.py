@@ -45,8 +45,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     randomizer_operations_dir = root / "deployments" / "randomizer-operations"
     release_signatures_dir = root / "release-artifacts" / "signatures"
     non_local_evidence_dir = root / "release-artifacts" / "evidence"
+    drop_authorization_signing_dir = (
+        root / "release-artifacts" / "drop-authorization-signing"
+    )
     release_signature_schema = root / "release-artifacts" / "schema" / (
         "release-signature-evidence.schema.json"
+    )
+    drop_authorization_signing_schema = root / "release-artifacts" / "schema" / (
+        "drop-authorization-signing-evidence.schema.json"
     )
     public_beta_schema = root / "release-artifacts" / "schema" / (
         "public-beta-evidence.schema.json"
@@ -56,6 +62,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     non_local_retained_artifact = (
         non_local_evidence_dir / "non-local-template-retained-artifact.txt"
+    )
+    drop_authorization_retained_artifact = (
+        drop_authorization_signing_dir
+        / "drop-authorization-signing-retained-artifact.txt"
+    )
+    drop_authorization_payload_output = root / (
+        "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json"
     )
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
@@ -184,6 +197,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     write_json(
         release_signature_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
+        drop_authorization_signing_schema,
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
@@ -377,6 +394,165 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "This placeholder is not completion evidence.\n"
         ),
     )
+    drop_authorization_payload = {
+        "schema_version": "6529stream.drop-authorization-payload.v1",
+        "signing_status": "unsigned",
+        "no_secret_policy": {
+            "key_material_included": False,
+            "mnemonic_included": False,
+            "production_payload": False,
+        },
+        "typed_data": {
+            "primaryType": "DropAuthorization",
+            "domain": {
+                "name": "6529StreamDrops",
+                "version": "1",
+                "chainId": 31337,
+                "verifyingContract": "0x100000000000000000000000000000000000dEaD",
+            },
+            "message": {
+                "dropId": "0x" + "1" * 64,
+                "poster": "0x0000000000000000000000000000000000001001",
+                "recipient": "0x0000000000000000000000000000000000005005",
+                "payer": "0x0000000000000000000000000000000000000000",
+                "collectionId": "1",
+                "saleMode": 1,
+                "signerEpoch": "1",
+                "nonce": "1",
+                "deadline": "1893456000",
+            },
+        },
+        "derived": {
+            "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+            "drop_id": "0x" + "1" * 64,
+            "token_data_hash": "0x" + "2" * 64,
+            "domain_separator": "0x" + "3" * 64,
+            "struct_hash": "0x" + "4" * 64,
+            "digest": "0x" + "5" * 64,
+        },
+    }
+    write_json(drop_authorization_payload_output, drop_authorization_payload)
+    write_text(
+        drop_authorization_retained_artifact,
+        (
+            "Template retained artifact for drop authorization signing evidence tests.\n"
+            "This placeholder is not completion evidence.\n"
+        ),
+    )
+    drop_authorization_payload_ref = {
+        "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+        "sha256": generator.file_sha256(drop_authorization_payload_output),
+    }
+    write_json(
+        drop_authorization_signing_dir
+        / "drop-authorization-signing-evidence-template.json",
+        {
+            "schema_version": "6529stream.drop-authorization-signing-evidence.v1",
+            "evidence_id": "drop-authorization-signing-evidence-template",
+            "record_type": "template",
+            "review_status": "template",
+            "environment": "local",
+            "chain_id": 31337,
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "payload": {
+                "payload_file": drop_authorization_payload_ref,
+                "payload_schema_version": "6529stream.drop-authorization-payload.v1",
+                "payload_kind": "fixed_price",
+                "typed_data_primary_type": "DropAuthorization",
+                "domain": {
+                    "name": "6529StreamDrops",
+                    "version": "1",
+                    "chain_id": 31337,
+                    "verifying_contract": "0x100000000000000000000000000000000000dEaD",
+                },
+                "message": {
+                    "drop_id": "0x" + "1" * 64,
+                    "poster": "0x0000000000000000000000000000000000001001",
+                    "recipient": "0x0000000000000000000000000000000000005005",
+                    "payer": "0x0000000000000000000000000000000000000000",
+                    "collection_id": 1,
+                    "sale_mode": 1,
+                    "signer_epoch": 1,
+                    "nonce": 1,
+                    "deadline": 1893456000,
+                },
+                "derived": {
+                    "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+                    "drop_id": "0x" + "1" * 64,
+                    "token_data_hash": "0x" + "2" * 64,
+                    "domain_separator": "0x" + "3" * 64,
+                    "struct_hash": "0x" + "4" * 64,
+                    "digest": "0x" + "5" * 64,
+                },
+            },
+            "signing_identity": {
+                "signer_type": "local_placeholder",
+                "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+                "signer_epoch": 1,
+                "custody_status": "not_available_local",
+                "custody_reference": "not_available_local",
+                "signer_lifecycle_status": "not_available_local",
+                "signer_service": "not_available_local",
+                "signer_epoch_source": "not_available_local",
+            },
+            "signature": {
+                "status": "not_available_local",
+                "signature_format": "not_available_local",
+                "signature_hash": "not_available_local",
+                "verification_status": "not_available_local",
+                "verification_command": "not_available_local",
+                "returned_at": "not_available_local",
+                "evidence_note": "local placeholder signature result",
+            },
+            "review": {
+                "owner": "TBD",
+                "reviewer": "TBD",
+                "approval_status": "template",
+                "approval_reference": "TBD",
+                "reviewed_at": "not_available_local",
+            },
+            "retained_artifacts": [
+                {
+                    "category": "drop_signing_schema",
+                    "path": (
+                        "release-artifacts/schema/"
+                        "drop-authorization-signing-evidence.schema.json"
+                    ),
+                    "sha256": generator.file_sha256(drop_authorization_signing_schema),
+                },
+                {**drop_authorization_payload_ref, "category": "payload_output"},
+                {
+                    "category": "retained_transcript",
+                    "path": (
+                        "release-artifacts/drop-authorization-signing/"
+                        "drop-authorization-signing-retained-artifact.txt"
+                    ),
+                    "sha256": generator.file_sha256(
+                        drop_authorization_retained_artifact
+                    ),
+                },
+            ],
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "seed_phrase",
+                    "api_key",
+                    "rpc_url",
+                    "raw_signature",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "template_notice": "Template only. This file is not completion evidence.",
+            "operator_notes": "local template only",
+        },
+    )
     write_json(
         non_local_evidence_dir / "non-local-release-evidence-template.json",
         {
@@ -437,10 +613,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "randomizer_operations_dir": randomizer_operations_dir,
         "release_signatures_dir": release_signatures_dir,
         "non_local_evidence_dir": non_local_evidence_dir,
+        "drop_authorization_signing_dir": drop_authorization_signing_dir,
         "release_signature_schema": release_signature_schema,
+        "drop_authorization_signing_schema": drop_authorization_signing_schema,
         "public_beta_schema": public_beta_schema,
         "non_local_evidence_schema": non_local_evidence_schema,
         "non_local_retained_artifact": non_local_retained_artifact,
+        "drop_authorization_retained_artifact": drop_authorization_retained_artifact,
+        "drop_authorization_payload_output": drop_authorization_payload_output,
         "output": output,
         "changelog": changelog,
         "docs": docs,
@@ -579,6 +759,29 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
+            )
+            self.assertEqual(
+                manifest["source"]["drop_authorization_signing_dir"],
+                "release-artifacts/drop-authorization-signing",
+            )
+            drop_signing_evidence = manifest["release_artifacts"][
+                "drop_authorization_signing_evidence"
+            ][0]
+            self.assertEqual(
+                drop_signing_evidence["evidence_id"],
+                "drop-authorization-signing-evidence-template",
+            )
+            self.assertEqual(drop_signing_evidence["record_type"], "template")
+            self.assertEqual(
+                drop_signing_evidence["payload"]["payload_kind"], "fixed_price"
+            )
+            self.assertEqual(
+                drop_signing_evidence["payload"]["derived"]["digest"],
+                "0x" + "5" * 64,
+            )
+            self.assertEqual(
+                drop_signing_evidence["signature"]["status"],
+                "not_available_local",
             )
             non_local_evidence = manifest["release_artifacts"][
                 "non_local_release_evidence"
@@ -737,6 +940,40 @@ class ReleaseManifestTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 generator.ReleaseManifestError, "invalid non-local release evidence"
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    paths["gas_snapshot"],
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
+    def test_generator_rejects_invalid_drop_authorization_signing_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            evidence_path = (
+                paths["drop_authorization_signing_dir"]
+                / "drop-authorization-signing-evidence-template.json"
+            )
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            evidence["payload"]["derived"]["digest"] = "0x" + "0" * 64
+            write_json(evidence_path, evidence)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "invalid drop authorization signing evidence",
             ):
                 generator.build_manifest(
                     root,

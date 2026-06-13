@@ -240,6 +240,14 @@ The current Gate A smoke baseline proves:
   stale retained hashes and secret-like values, and reserves production
   detached checksum signatures, signed Git tags, signer identity, and
   verification output for public release ceremonies.
+- `scripts/test_drop_authorization_signing_evidence.py` and
+  `scripts/check_drop_authorization_signing_evidence.py` prove the committed
+  no-secret drop authorization signing evidence template follows
+  `release-artifacts/schema/drop-authorization-signing-evidence.schema.json`,
+  ties retained signing ceremony metadata to a generated unsigned EIP-712
+  payload, validates domain/message/digest fields, signer epoch, reviewer and
+  signature metadata, retained artifact hashes, and path boundaries, and keeps
+  production signing evidence blocked until reviewed non-local evidence exists.
 - `scripts/test_public_beta_evidence.py` and
   `scripts/check_public_beta_evidence.py` prove the committed no-secret
   public-beta evidence status follows

@@ -59,6 +59,8 @@ jobs:
             scripts/test_drop_authorization_payload_generator.py \
             scripts/check_drop_authorization_fixtures.py \
             scripts/test_drop_authorization_fixtures.py \
+            scripts/check_drop_authorization_signing_evidence.py \
+            scripts/test_drop_authorization_signing_evidence.py \
             scripts/generate_source_verification_inputs.py \
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
@@ -172,6 +174,14 @@ jobs:
           python3 scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check 2>&1 | tee ci-logs/drop-authorization-auction-payload-check.log
           python3 scripts/test_drop_authorization_fixtures.py 2>&1 | tee ci-logs/drop-authorization-fixture-tests.log
           python3 scripts/check_drop_authorization_fixtures.py 2>&1 | tee ci-logs/drop-authorization-fixture-check.log
+
+      - name: Drop authorization signing evidence
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_drop_authorization_signing_evidence.py 2>&1 | tee ci-logs/drop-authorization-signing-evidence-tests.log
+          python3 scripts/check_drop_authorization_signing_evidence.py 2>&1 | tee ci-logs/drop-authorization-signing-evidence-check.log
 
       - name: Release artifact catalog
         shell: bash

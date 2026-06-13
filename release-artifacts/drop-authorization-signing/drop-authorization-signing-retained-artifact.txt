@@ -1,0 +1,2 @@
+Template retained artifact for drop authorization signing evidence.
+This placeholder proves retained artifact hash validation and is not completion evidence.

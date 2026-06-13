@@ -55,8 +55,9 @@ The dashboard covers public beta and production release readiness.
 Release manifest, checksum bundle, source verification inputs, ceremony evidence,
 randomizer operations evidence, release-signature evidence, Slither baseline,
 public-beta evidence status, non-local release evidence, incident response,
-drop authorization signing fixtures, unsigned payload-generator examples, test matrix,
-and ADR index evidence are summarized.
+drop authorization signing fixtures, unsigned payload-generator examples,
+drop authorization signing evidence, test matrix, and ADR index evidence are
+summarized.
 
 ## Local Evidence Already Passing
 

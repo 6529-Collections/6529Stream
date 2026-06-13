@@ -43,6 +43,13 @@ the committed
 [`release-artifacts/evidence/non-local-release-evidence-template.json`](../release-artifacts/evidence/non-local-release-evidence-template.json)
 is a checked template only.
 
+Drop authorization signing evidence should also follow
+[`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
+and pass `python scripts/check_drop_authorization_signing_evidence.py` before
+any public-beta or production status row relies on it. The committed
+[`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
+is a local template only, not completion evidence.
+
 ## Status Values
 
 Each requirement uses one of these statuses:
@@ -113,7 +120,9 @@ To move a requirement to `complete`:
 5. Run `python scripts/check_public_beta_evidence.py`.
 6. Run `python scripts/check_non_local_release_evidence.py` for every reviewed
    non-local evidence metadata JSON that supports the row.
-7. Regenerate and check the release manifest and checksum bundle.
+7. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
+   retained drop authorization signing evidence that supports the row.
+8. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

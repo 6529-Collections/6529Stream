@@ -39,6 +39,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 "$python_bin" scripts/test_drop_authorization_fixtures.py
 "$python_bin" scripts/check_drop_authorization_fixtures.py
+"$python_bin" scripts/test_drop_authorization_signing_evidence.py
+"$python_bin" scripts/check_drop_authorization_signing_evidence.py
 "$python_bin" scripts/test_release_artifacts.py
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_source_verification_inputs.py

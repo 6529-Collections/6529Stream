@@ -20,6 +20,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/dependencies"),
     Path("release-artifacts/schema"),
     Path("release-artifacts/evidence"),
+    Path("release-artifacts/drop-authorization-signing"),
     Path("release-artifacts/signatures"),
     Path("release-artifacts/latest"),
     Path("release-artifacts/baselines"),

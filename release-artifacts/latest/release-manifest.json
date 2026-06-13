@@ -23,7 +23,8 @@
     "ceremony_evidence_dir": "deployments/ceremony-evidence",
     "randomizer_operations_dir": "deployments/randomizer-operations",
     "release_signatures_dir": "release-artifacts/signatures",
-    "non_local_evidence_dir": "release-artifacts/evidence"
+    "non_local_evidence_dir": "release-artifacts/evidence",
+    "drop_authorization_signing_dir": "release-artifacts/drop-authorization-signing"
   },
   "release_artifacts": {
     "contract_config": {
@@ -240,6 +241,163 @@
           },
           "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
           "operator_notes": "Copy this shape for real retained evidence, replace every template value with reviewed no-secret data, and link the resulting JSON from release-artifacts/latest/public-beta-evidence.json only after review."
+        }
+      }
+    ],
+    "drop_authorization_signing_evidence": [
+      {
+        "path": "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
+        "sha256": "sha256:6eb95e88d6766d2405a8dcbaa2c5405413ee4c879a43246447471f04b02a0755",
+        "size_bytes": 4326,
+        "schema_version": "6529stream.drop-authorization-signing-evidence.v1",
+        "evidence_id": "drop-authorization-signing-evidence-template",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "local",
+        "chain_id": 31337,
+        "payload": {
+          "payload_kind": "fixed_price",
+          "payload_file": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+          "domain": {
+            "name": "6529StreamDrops",
+            "version": "1",
+            "chain_id": 31337,
+            "verifying_contract": "0x100000000000000000000000000000000000dead"
+          },
+          "message": {
+            "drop_id": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+            "collection_id": 1,
+            "sale_mode": 1,
+            "signer_epoch": 1,
+            "nonce": 1,
+            "deadline": 1893456000
+          },
+          "derived": {
+            "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+            "digest": "0xf65815cf0254253a34051e8051e5bbb982fcbc57b7de34e4112885e5e06a0f0c",
+            "domain_separator": "0xaced18559f963adb99804b4c7ca4209355b2e434ba32eab5b033561df367efa0",
+            "struct_hash": "0x0d15ce18a217fa38b136567d2f9dddc89a58f854d6750652133e4085d52815b9"
+          }
+        },
+        "signing_identity": {
+          "signer_type": "local_placeholder",
+          "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+          "signer_epoch": 1,
+          "custody_status": "not_available_local",
+          "signer_lifecycle_status": "not_available_local"
+        },
+        "signature": {
+          "status": "not_available_local",
+          "verification_status": "not_available_local"
+        },
+        "review": {
+          "reviewer": "TBD",
+          "approval_status": "template"
+        },
+        "evidence": {
+          "schema_version": "6529stream.drop-authorization-signing-evidence.v1",
+          "evidence_id": "drop-authorization-signing-evidence-template",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "local",
+          "chain_id": 31337,
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "payload": {
+            "payload_file": {
+              "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+              "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe"
+            },
+            "payload_schema_version": "6529stream.drop-authorization-payload.v1",
+            "payload_kind": "fixed_price",
+            "typed_data_primary_type": "DropAuthorization",
+            "domain": {
+              "name": "6529StreamDrops",
+              "version": "1",
+              "chain_id": 31337,
+              "verifying_contract": "0x100000000000000000000000000000000000dead"
+            },
+            "message": {
+              "drop_id": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+              "poster": "0x0000000000000000000000000000000000001001",
+              "recipient": "0x0000000000000000000000000000000000005005",
+              "payer": "0x0000000000000000000000000000000000000000",
+              "collection_id": 1,
+              "sale_mode": 1,
+              "signer_epoch": 1,
+              "nonce": 1,
+              "deadline": 1893456000
+            },
+            "derived": {
+              "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+              "drop_id": "0xc014128025fb9a084ded426ea89f4132ca05d6b3a9f11e255923c984536444d6",
+              "token_data_hash": "0x8f54f1c2d0eb5771cd5bf67a6689fcd6eed9444d91a39e5ef32a9b4ae5ca14ff",
+              "domain_separator": "0xaced18559f963adb99804b4c7ca4209355b2e434ba32eab5b033561df367efa0",
+              "struct_hash": "0x0d15ce18a217fa38b136567d2f9dddc89a58f854d6750652133e4085d52815b9",
+              "digest": "0xf65815cf0254253a34051e8051e5bbb982fcbc57b7de34e4112885e5e06a0f0c"
+            }
+          },
+          "signing_identity": {
+            "signer_type": "local_placeholder",
+            "signer": "0xe05fcc23807536bee418f142d19fa0d21bb0cff7",
+            "signer_epoch": 1,
+            "custody_status": "not_available_local",
+            "custody_reference": "not_available_local",
+            "signer_lifecycle_status": "not_available_local",
+            "signer_service": "not_available_local",
+            "signer_epoch_source": "not_available_local"
+          },
+          "signature": {
+            "status": "not_available_local",
+            "signature_format": "not_available_local",
+            "signature_hash": "not_available_local",
+            "verification_status": "not_available_local",
+            "verification_command": "not_available_local",
+            "returned_at": "not_available_local",
+            "evidence_note": "Template only. Real evidence must retain the signing system output and verification result outside this placeholder."
+          },
+          "review": {
+            "owner": "TBD",
+            "reviewer": "TBD",
+            "approval_status": "template",
+            "approval_reference": "TBD",
+            "reviewed_at": "not_available_local"
+          },
+          "retained_artifacts": [
+            {
+              "category": "drop_signing_schema",
+              "path": "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
+              "sha256": "sha256:60e0efe388b974d81bfad266a1c9fb10d55c3104ae24ba268e6e68441edc4370"
+            },
+            {
+              "category": "payload_output",
+              "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+              "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe"
+            },
+            {
+              "category": "retained_transcript",
+              "path": "release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt",
+              "sha256": "sha256:f0f190f1c87106e3a773735e03bda9c281f7c77e15dc8dfe5d83c431bf4f58a2"
+            }
+          ],
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "raw_signature",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Copy this shape for reviewed fork, testnet, mainnet, or production signing evidence. Pass the full typed_data payload to the approved signing system; use digest and hash fields only for comparison and retained evidence."
         }
       }
     ],
@@ -467,14 +625,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:aee1870b61730ca68bb3657a65142d8cce47a05d7328d9f4db678871a1300fe8",
-      "size_bytes": 13866
+      "sha256": "sha256:f19f20dd38b66c0d3e15b85d9af1c81ee23d09715b15b21085a0bc59919c02cc",
+      "size_bytes": 14045
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:85e5fbfffc9b49525dd87cf60df9ddeb281a7dc505de3f915bb655aced3ec7ef",
-        "size_bytes": 7562
+        "sha256": "sha256:212781a51b0c347bd2e8f36b710ad4648b81465c23557d35bf225cec0f87ae81",
+        "size_bytes": 7723
       },
       {
         "path": "docs/deployment.md",
@@ -498,8 +656,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:5ea2f3c1f67a870f4cf268a87a150d1074d8fffbc359d8debd8360220a19f7f2",
-        "size_bytes": 5474
+        "sha256": "sha256:d89949805d137d7f9bea57ecf69e05168d7473a4b776d1cadd9f9e1b291b430e",
+        "size_bytes": 6228
       },
       {
         "path": "docs/non-local-release-evidence.md",
@@ -518,33 +676,33 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:398f3dad17dd70b83171f4c3fc88c04765c26e32806839316ffb0b460658d670",
-        "size_bytes": 13867
+        "sha256": "sha256:187faf5a3f45884caa344b8c49cf1aec2e93f7d0c4923e5f9b0917e1287d6c6d",
+        "size_bytes": 14804
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:eece8ba044644b661dc9190cf09c9cf0e96070dda29a439ea35509123753a5c0",
-        "size_bytes": 17471
+        "sha256": "sha256:1bd8d8b666eb1fb03bf912435c297ad10a4f30f066af61a8a3c3c4ed1c703b42",
+        "size_bytes": 18552
       },
       {
         "path": "docs/drop-authorization-signing.md",
-        "sha256": "sha256:552e8a0863808e7e06ed59a2dd2ce5b3904befeac1db1c7be7c45d7e6d1370c4",
-        "size_bytes": 12055
+        "sha256": "sha256:7ccbc89247c9f4c4e31a4e517938f46815b0f097fbd37c42cc52120476f85f15",
+        "size_bytes": 14158
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:0d0fc7fd6b8cd90843a3a3be7dfbbbb5335d7b1cfbd015f4ba10d94b843edb58",
-        "size_bytes": 14101
+        "sha256": "sha256:63539e3a0414aa8b09df5be10cd052540a072028dc2993fd7fb67b7ba0e08f13",
+        "size_bytes": 15408
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:1e729811d7c78c0b5a42e23b6f2e2f3ce2a56a9fbb83485ccc0725696931fb0a",
-        "size_bytes": 19106
+        "sha256": "sha256:b87e829bf8ffb2328657682f4597e56885de3dfc494f55f2f2d1106ded474e55",
+        "size_bytes": 20087
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:37bf2147eb290d146550da305428a44b4a85f62aa0c044ccb297955a2a0798ff",
-        "size_bytes": 20059
+        "sha256": "sha256:161ec6b66242542e097ac95f278656d1a7d906d40d6ac33679041559d59221ae",
+        "size_bytes": 20650
       }
     ]
   },
