@@ -276,6 +276,22 @@ class DropAuthorizationSigningEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, root)
 
+    def test_rejects_evidence_record_with_template_review_status(self) -> None:
+        """Evidence records cannot carry template review_status."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["record_type"] = "evidence"
+            evidence["review_status"] = "template"
+            path = root / "release-artifacts/drop-authorization-signing/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.DropAuthorizationSigningEvidenceError,
+                "evidence records cannot use template review_status",
+            ):
+                checker.validate_evidence(path, root)
+
     def test_rejects_stale_retained_hash(self) -> None:
         """Retained artifact hashes must match file content."""
         with tempfile.TemporaryDirectory() as temp_dir:

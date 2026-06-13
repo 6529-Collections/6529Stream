@@ -542,6 +542,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
                 "redacted_fields": [
                     "private_key",
                     "mnemonic",
+                    "seed_phrase",
                     "api_key",
                     "rpc_url",
                     "raw_signature",

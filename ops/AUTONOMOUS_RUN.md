@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/185` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 01:32 UTC` |
+| Last updated | `2026-06-13 01:37 UTC` |
 
 ## Packaging Notes
 
@@ -156,7 +156,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
 
-Status: PR opened; CodeRabbit requested; awaiting CI and review.
+Status: CodeRabbit minor findings addressed; awaiting CI and final review status.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/183`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/185`.
 Branch: `codex/drop-signing-evidence-schema`.
@@ -245,6 +245,23 @@ Remote validation:
   `https://github.com/6529-Collections/6529Stream/pull/185`.
 - CodeRabbit review requested in issue comment `4696975873`.
 - GitHub Actions pending.
+
+CodeRabbit follow-up:
+
+- Added a maintainer note for the intentional `SECRET_KEY_RE` final-segment
+  `secret` match and whitelist process.
+- Added regression coverage for `record_type="evidence"` paired with
+  `review_status="template"`.
+- Aligned the release-manifest test fixture redaction list with the committed
+  drop authorization signing evidence template by adding `seed_phrase`.
+
+Follow-up validation:
+
+- `python -m py_compile scripts\check_drop_authorization_signing_evidence.py scripts\test_drop_authorization_signing_evidence.py scripts\test_release_manifest.py`.
+- `python scripts\test_drop_authorization_signing_evidence.py`.
+- `python scripts\check_drop_authorization_signing_evidence.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
 
 ### PR candidate: Reconcile autonomous run state after drop authorization payload generator merge (Queue Item 94)
 
@@ -8654,6 +8671,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 01:37 | Address CodeRabbit PR #185 minor findings | Added the secret-regex maintainer note, evidence/template review-status regression, and `seed_phrase` fixture alignment; focused evidence and release-manifest checks pass |
 | 2026-06-13 01:32 | Request CodeRabbit PR #185 review | CodeRabbit review requested in issue comment `4696975873`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 01:32 | Open PR #185 | Drop authorization signing evidence schema/checker PR opened against `main`, linked `Closes #183`, and included local validation transcript |
 | 2026-06-13 01:29 | Finish local Queue Item 95 validation | Drop authorization signing evidence schema/template/checker/tests, release manifest/checksum coverage, docs checkers, changelog gate, `git diff --check`, full `make check`, and the Windows PowerShell wrapper pass locally; PR creation is next |

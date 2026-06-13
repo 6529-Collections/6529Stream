@@ -139,6 +139,8 @@ SECRET_KEY_RE = re.compile(
     r"|(^|[_\-\s])secret$",
     re.IGNORECASE,
 )
+# NOTE: SECRET_KEY_RE intentionally catches any key whose final segment is
+# "secret". Add legitimate metadata keys such as "no_secret" here before use.
 SAFE_SECRET_POLICY_KEYS = frozenset({"redaction_policy", "no_secrets", "redacted_fields"})
 SECRET_VALUE_RE = re.compile(
     r"\b(private[_ -]?key|mnemonic|seed[_ -]?phrase|rpc[_ -]?url|api[_ -]?key|"
