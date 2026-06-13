@@ -182,8 +182,8 @@ one-command live audit for label, body, and closure drift; CI runs only its
 mocked unit tests and never requires GitHub network access.
 When operators pass `--report-json` or `--report-md`, the live audit
 orchestrator writes a retained no-secret report bundle with selected profiles,
-snapshot paths, snapshot SHA-256 digests, command provenance, checker outcomes,
-and the unchanged blocked-readiness warning. Report bundles are ceremony
+repo target, snapshot paths, snapshot SHA-256 digests, command provenance,
+checker outcomes, and the unchanged blocked-readiness warning. Report bundles are ceremony
 evidence for review; they do not make any retained public-beta or production
 evidence row complete.
 

@@ -182,6 +182,9 @@ deployment manifests, address books, deployment schemas, ceremony evidence,
 changelog, governance docs, incident-response runbook, the audit package, and
 unavailable release-ceremony artifacts. It is regenerated with
 `python scripts/generate_release_manifest.py` after any covered input changes.
+The optional live audit report bundle records the repository target, selected
+issue-audit profiles, retained snapshot paths, snapshot digests, command
+provenance, checker outcomes, and the unchanged blocked-readiness warning.
 
 The architecture/threat-model step validates [`architecture.md`](architecture.md)
 and [`threat-model.md`](threat-model.md), the auditor-facing map of system
@@ -257,9 +260,9 @@ python scripts/audit_release_evidence_issue_snapshots.py
 Use `--profile labels`, `--profile bodies`, or `--profile closure` to run one
 live audit profile. The orchestrator exports UTF-8 JSON snapshots with the
 existing exporter and then runs the matching checker. To retain a no-secret
-JSON and Markdown report bundle with snapshot paths, snapshot SHA-256 digests,
-profile results, command provenance, and the unchanged blocked-readiness
-warning, pass explicit report paths:
+JSON and Markdown report bundle with the repo target, snapshot paths, snapshot
+SHA-256 digests, profile results, command provenance, and the unchanged
+blocked-readiness warning, pass explicit report paths:
 
 ```bash
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
