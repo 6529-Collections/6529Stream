@@ -9987,6 +9987,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 15:27 | Address PR #247 CodeRabbit review | CodeRabbit reviewed the initial PR head and requested replacement of PR placeholders plus a single-baseline roadmap OS-tested row. The PR placeholders were already corrected in commit `b092ad007b519db9951b8b3b19b07bb8fbce93e3`; the roadmap OS-tested row was aligned to the Queue Item 117 / PR #244 baseline in the follow-up review-response commit. |
 | 2026-06-13 15:22 | Open PR #247 for Queue Item 117 | Opened `https://github.com/6529-Collections/6529Stream/pull/247` from `codex/release-evidence-body-merge-state` at head `7d88b5c3986d493b4b7db9efac21ce160aed6b56` to reconcile PR #244 merge evidence, keep issue #246 queued as the next tracker closure/readiness hardening target, and close issue #245. CodeRabbit review was requested in comment `4698934233`. |
 | 2026-06-13 15:19 | Create issues #245 and #246, start Queue Item 117 | PR #244 merged cleanly, so issue #245 tracks body-drift merge-state reconciliation while issue #246 becomes the next no-secret Gate G implementation slice for tracker closure/readiness guards. |
 | 2026-06-13 15:17 | Merge PR #244 | Release evidence tracker body drift checks merged as `b61868599c7929e369957199bb5726fa5f819f04`; final head `378c48899bc7bca438be86e0cefb609fd139a30c` passed CI run `27470389308`, CodeRabbit status was success with no review threads, and issue #242 closed completed. |
