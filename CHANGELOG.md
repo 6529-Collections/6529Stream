@@ -10,6 +10,8 @@ the release policy in `docs/release-policy.md`.
 - Added release change approval policy and a local/CI changelog gate for
   release-impacting contract, deployment, artifact, and release-workflow
   changes.
+- Added deterministic release evidence tracker label checks with an optional
+  live GitHub issue snapshot audit mode for label drift.
 - Added a deterministic machine-readable release manifest that ties release
   artifacts, ABI compatibility, deployment manifests, address books, governance
   docs, and release-ceremony status together under `release-artifacts/latest/`.
