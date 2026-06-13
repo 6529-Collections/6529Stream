@@ -23,6 +23,7 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_snapshot.py
 ```
 
 ## Evidence Artifact
@@ -238,7 +239,7 @@ To move a requirement to `complete`:
     GitHub label drift, export a local snapshot and pass it with `--live-json`:
 
     ```bash
-    gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,labels > tmp/release-evidence-issue-labels.json
+    python scripts/export_release_evidence_issue_snapshot.py --profile labels
     python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
     ```
 
@@ -252,7 +253,7 @@ To move a requirement to `complete`:
     GitHub body drift, export a local snapshot and pass it with `--live-json`:
 
     ```bash
-    gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,body,state > tmp/release-evidence-issue-bodies.json
+    python scripts/export_release_evidence_issue_snapshot.py --profile bodies
     python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
     ```
 
@@ -267,7 +268,7 @@ To move a requirement to `complete`:
     `--live-json`:
 
     ```bash
-    gh issue list --repo 6529-Collections/6529Stream --state all --limit 100 --json number,title,state > tmp/release-evidence-issue-closure.json
+    python scripts/export_release_evidence_issue_snapshot.py --profile closure
     python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
     ```
 

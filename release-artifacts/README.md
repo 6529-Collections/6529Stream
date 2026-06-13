@@ -77,6 +77,7 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -173,6 +174,8 @@ JSON snapshot with `--live-json` before a release ceremony.
 All retained-evidence tracker issues should carry `release`, `roadmap`, and
 `evidence`; public-beta rows also carry `public-beta`, and production-release
 rows also carry `production-release`.
+Use `scripts/export_release_evidence_issue_snapshot.py` to write label, body,
+or closure snapshots as UTF-8 JSON without relying on shell redirection.
 
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and
@@ -189,9 +192,9 @@ remediation.
 tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
 artifact, packet index, and shared release evidence status manifest agree on
 tracker closure readiness. Its optional `--live-json` mode audits a
-`gh issue list --state all --json number,title,state` snapshot and fails if a
-linked tracker issue is closed while the committed evidence status is still
-`missing`, `pending`, `blocked`, or `not_applicable`.
+closure snapshot written by `scripts/export_release_evidence_issue_snapshot.py`
+and fails if a linked tracker issue is closed while the committed evidence
+status is still `missing`, `pending`, `blocked`, or `not_applicable`.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema
