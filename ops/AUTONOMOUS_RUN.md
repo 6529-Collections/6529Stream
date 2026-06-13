@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-snapshot-exporter-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/262` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/263` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/264` |
 | Next issue | TBD after issue #263 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 19:17 UTC` |
+| Last updated | `2026-06-13 19:21 UTC` |
 
 ## Packaging Notes
 
@@ -188,12 +188,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile snapshot exporter merge state (Queue Item 126)
 
-Status: local draft in progress for issue #263; PR TBD.
+Status: PR #264 open; CodeRabbit review requested.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/263`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/264`.
 Branch: `codex/reconcile-snapshot-exporter-merge-state`.
 Branch started from PR #262 squash merge commit
 `19263b048fc8dc8e0fe7c834e206e623d8fb944e`.
+Opening PR head: `8253b88197996bc15071168f3c3d5ec30e9028ce`.
+CodeRabbit request comment: `https://github.com/6529-Collections/6529Stream/pull/264#issuecomment-4699532800`.
 
 Prior queue transition:
 
