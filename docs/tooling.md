@@ -62,6 +62,8 @@ python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
+python scripts/test_release_evidence_packet_index.py
+python scripts/generate_release_evidence_packet_index.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -214,6 +216,10 @@ The generated public-beta and production-release blocker reports render that
 manifest into deterministic Markdown under `release-artifacts/latest/`, with
 the production-focused report linking each production requirement to its
 checked template under `release-artifacts/evidence/production-release-templates/`.
+The release evidence packet index maps every public-beta and production-release
+row to its blocker report, template, retained-artifact expectation, validation
+commands, and current readiness posture without treating templates as
+completion evidence.
 The non-local release evidence intake runbook in
 [`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
 operator workflow, required retained fields, redaction rules, reviewer
@@ -299,6 +305,7 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
+python scripts/generate_release_evidence_packet_index.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
@@ -338,6 +345,8 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/generate_production_release_blocker_report.py --check
+python scripts/test_release_evidence_packet_index.py
+python scripts/generate_release_evidence_packet_index.py --check
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py

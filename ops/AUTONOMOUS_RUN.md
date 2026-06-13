@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-production-blocker-report-merge` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/205` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/206` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/208` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/207` |
+| Active PR branch | `codex/release-evidence-packet-index` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/208` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/207` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/209` |
+| Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 08:44 UTC` |
+| Last updated | `2026-06-13 09:42 UTC` |
 
 ## Packaging Notes
 
@@ -162,58 +162,150 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 103 | Add per-requirement production release evidence templates | Gate G support | Implement issue #199 by adding public-safe templates for each incomplete production-release evidence row, with checks/docs and no production readiness claims | Merged in PR #201 |
 | 104 | Reconcile production release template merge state | Gate G support | Implement issue #202 by recording PR #201 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret production-readiness support target | Merged in PR #204 |
 | 105 | Add production release blocker report artifact | Gate G support | Implement issue #203 by generating a deterministic production-focused blocker report from committed evidence metadata and templates without changing readiness claims | Merged in PR #205 |
-| 106 | Reconcile production blocker report merge state | Gate G support | Implement issue #206 by recording PR #205 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret release-readiness support target | Active |
-| 107 | Add release evidence packet index and checker | Gate G support | Implement issue #207 by generating one deterministic no-secret packet index that maps public-beta and production-release blocker rows to templates, retained-artifact expectations, validation commands, and current readiness posture | Queued |
+| 106 | Reconcile production blocker report merge state | Gate G support | Implement issue #206 by recording PR #205 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret release-readiness support target | Merged in PR #208 |
+| 107 | Add release evidence packet index and checker | Gate G support | Implement issue #207 by generating one deterministic no-secret packet index that maps public-beta and production-release blocker rows to templates, retained-artifact expectations, validation commands, and current readiness posture | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile production blocker report merge state (Queue Item 106)
+### PR candidate: Add release evidence packet index and checker (Queue Item 107)
 
-Status: PR #208 open; CodeRabbit requested; GitHub Actions pending.
+Status: PR #209 open; first CI passed; CodeRabbit review fixes applied
+locally and pending follow-up push/recheck.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/207`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/209`.
+Branch: `codex/release-evidence-packet-index`.
+Branch started from PR #208 squash merge commit
+`43a9596ab429a6e46132b106655b52b848db1670`.
+
+Prior queue transition:
+
+- Queue Item 106 merged in PR #208 as squash commit
+  `43a9596ab429a6e46132b106655b52b848db1670`.
+- PR #208 final implementation head was
+  `ff909596dfd1e272619f8a5bd37fac3bb0183075`.
+- PR #208 GitHub Actions CI run `27462015238` passed on the final head.
+- PR #208 CodeRabbit status was success with no actionable comments and five
+  pre-merge checks passed.
+- Issue #206 was closed completed after merge.
+
+Goal:
+
+- Generate a deterministic no-secret release evidence packet index in JSON and
+  Markdown under `release-artifacts/latest/`.
+- Map every public-beta and production-release evidence row to its blocker
+  report row, checked template path, retained-artifact expectation, validation
+  commands, current status, and owner/reviewer posture.
+- Prove template-only evidence cannot complete a row and that the packet drifts
+  when templates, blocker reports, or generated outputs drift.
+- Wire the packet into Make, PowerShell, Unix shell, CI, release-manifest,
+  checksum, release-readiness, public-beta evidence, release-artifact, tooling,
+  roadmap, changelog, and durable run-state docs.
+- Preserve the blocked public-beta and production-release baseline; do not
+  change Solidity, deployment behavior, evidence contents, or readiness claims.
+
+Implementation summary:
+
+- Added `scripts/generate_release_evidence_packet_index.py` and
+  `scripts/test_release_evidence_packet_index.py`.
+- Added
+  `release-artifacts/latest/release-evidence-packet-index.json` and
+  `release-artifacts/latest/release-evidence-packet-index.md`.
+- Added packet-index downstream coverage to `scripts/generate_release_artifacts.py`,
+  `scripts/generate_release_manifest.py`, `scripts/test_release_artifacts.py`,
+  `scripts/test_release_manifest.py`, and regenerated the release manifest and
+  checksum bundle.
+- Wired checks into `Makefile`, `scripts/check.sh`, `scripts/check.ps1`, and
+  `.github/workflows/ci.yml`.
+- Updated `docs/public-beta-evidence.md`, `docs/release-readiness.md`,
+  `docs/tooling.md`, `release-artifacts/README.md`, `ops/ROADMAP.md`, and
+  `CHANGELOG.md`.
+
+Completed local validation:
+
+- `python -m py_compile scripts/generate_release_evidence_packet_index.py scripts/test_release_evidence_packet_index.py scripts/generate_release_manifest.py scripts/test_release_manifest.py scripts/generate_release_artifacts.py scripts/test_release_artifacts.py scripts/check_release_readiness.py`.
+- `python scripts/test_release_evidence_packet_index.py`.
+- `python scripts/generate_release_evidence_packet_index.py --check`.
+- `python scripts/test_public_beta_evidence.py`.
+- `python scripts/check_public_beta_evidence.py`.
+- `python scripts/test_public_beta_blocker_report.py`.
+- `python scripts/generate_public_beta_blocker_report.py --check`.
+- `python scripts/test_production_release_blocker_report.py`.
+- `python scripts/generate_production_release_blocker_report.py --check`.
+- `python scripts/test_non_local_release_evidence.py`.
+- `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_changelog_check.py`.
+- `python scripts/check_changelog.py`.
+- `bash -n scripts/check.sh`.
+- PowerShell parser check for `scripts/check.ps1`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/public-beta-evidence.md docs/release-readiness.md docs/tooling.md release-artifacts/README.md`.
+- `git diff --check` passed with the existing CRLF-normalization warning for
+  `scripts/check.ps1`.
+- `make check` passed with existing Solidity compiler warnings, Foundry
+  trace-source warnings, etherscan-config warning, and deployer-selection
+  warning noise only.
+
+Remote review:
+
+- PR #209 opened against `main` from head
+  `dc2a0b000dbe3855aa043c09fe67ec19a15a2c5b`.
+- CodeRabbit requested in comment `4698133258`.
+- State follow-up pushed head `8e2d9afd9328dde66abaa65a0d9d4160b5fff965`.
+- GitHub Actions run `27462987501` passed on head
+  `8e2d9afd9328dde66abaa65a0d9d4160b5fff965`.
+- CodeRabbit posted three actionable quick wins and one roadmap nit on head
+  `8e2d9afd9328dde66abaa65a0d9d4160b5fff965`.
+- Accepted all CodeRabbit findings locally: CI py_compile ordering, public-beta
+  evidence packet-index check command, derived packet test cardinality/template
+  expectations, and expanded roadmap packet-field summary.
+- Review-fix local validation: `python scripts/test_release_evidence_packet_index.py`,
+  `python scripts/generate_release_evidence_packet_index.py --check`,
+  `python -m py_compile scripts/test_release_evidence_packet_index.py scripts/generate_release_evidence_packet_index.py`,
+  `python scripts/check_release_readiness.py`, regenerated release manifest and
+  checksum bundle, and pending final drift/whitespace checks before push.
+
+### Completed: Reconcile production blocker report merge state (Queue Item 106)
+
+Status: Merged in PR #208.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/206`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/208`.
 Branch: `codex/reconcile-production-blocker-report-merge`.
 Branch started from PR #205 squash merge commit
 `bc0384a7b77b582d954d861b2545ab2fc818d860`.
 
-Prior queue transition:
+Implementation summary:
 
-- Queue Item 105 merged in PR #205 as squash commit
-  `bc0384a7b77b582d954d861b2545ab2fc818d860`.
-- PR #205 final implementation head was
-  `df5ef8342340e842725347aada48ca2ebf81a879`.
-- PR #205 GitHub Actions CI run `27461633469` passed on the final head.
-- PR #205 CodeRabbit status was success; the one actionable row-order thread
-  was resolved by CodeRabbit after commit
-  `df5ef8342340e842725347aada48ca2ebf81a879`.
-- PR #205 closed issue #203 at merge.
-- Issue #207 now tracks the next no-secret Gate G support slice: a release
-  evidence packet index/checker that maps blocker rows to templates,
-  retained-artifact expectations, validation commands, and readiness posture.
-
-Goal:
-
-- Mark Queue Item 105 merged in the durable queue.
-- Record PR #205 final CI, CodeRabbit, resolved-thread, and squash-merge
+- Marked Queue Item 105 merged in the durable queue.
+- Recorded PR #205 final CI, CodeRabbit, resolved-thread, and squash-merge
   evidence.
-- Refresh roadmap verification metadata that still says PR #205 checks are
+- Refreshed roadmap verification metadata that still said PR #205 checks were
   pending.
-- Select Queue Item 107 / issue #207 as the next no-secret release-readiness
+- Selected Queue Item 107 / issue #207 as the next no-secret release-readiness
   support target.
-- Preserve the blocked public-beta and production-release baseline; do not
-  change Solidity, deployment behavior, evidence contents, or readiness claims.
+- Preserved the blocked public-beta and production-release baseline without
+  changing Solidity, deployment behavior, evidence contents, or readiness
+  claims.
 
-Completed local validation:
+Validation and merge evidence:
 
-- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `rg -n "Queue Item 105|Queue Item 106|Queue Item 107|PR #205|27461633469|df5ef83|bc0384a|#203|#206|#207|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `git diff --check`.
-
-Remote review:
-
+- Local heading, state-reconciliation grep, and whitespace checks passed.
 - PR #208 opened against `main` from head
   `097ac7506820359388bb76eba11778021d5edfe2`.
 - CodeRabbit requested in comment `4698031592`.
+- Final head before merge: `ff909596dfd1e272619f8a5bd37fac3bb0183075`.
+- GitHub Actions CI run `27462015238` passed.
+- CodeRabbit status was success with no actionable comments and five
+  pre-merge checks passed.
+- Merged as squash commit
+  `43a9596ab429a6e46132b106655b52b848db1670`.
+- Issue #206 closed completed.
 
 ### Completed: Add production release blocker report artifact (Queue Item 105)
 

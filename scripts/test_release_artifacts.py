@@ -168,6 +168,14 @@ class ReleaseArtifactTests(unittest.TestCase):
                 "# Production Release Evidence Blocker Report\n",
             )
             write_json(
+                output_dir / "release-evidence-packet-index.json",
+                {"schema_version": "6529stream.release-evidence-packet-index.v1"},
+            )
+            write_text(
+                output_dir / "release-evidence-packet-index.md",
+                "# Release Evidence Packet Index\n",
+            )
+            write_json(
                 output_dir / "source-verification-inputs.json",
                 {"schema_version": "6529stream.source-verification-inputs.v1"},
             )

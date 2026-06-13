@@ -87,6 +87,8 @@ jobs:
             scripts/test_public_beta_blocker_report.py \
             scripts/generate_production_release_blocker_report.py \
             scripts/test_production_release_blocker_report.py \
+            scripts/test_release_evidence_packet_index.py \
+            scripts/generate_release_evidence_packet_index.py \
             scripts/check_architecture_threat_model.py \
             scripts/test_architecture_threat_model.py \
             scripts/check_audit_package.py \
@@ -291,6 +293,8 @@ jobs:
           python3 scripts/generate_public_beta_blocker_report.py --check 2>&1 | tee ci-logs/public-beta-blocker-report-check.log
           python3 scripts/test_production_release_blocker_report.py 2>&1 | tee ci-logs/production-release-blocker-report-tests.log
           python3 scripts/generate_production_release_blocker_report.py --check 2>&1 | tee ci-logs/production-release-blocker-report-check.log
+          python3 scripts/test_release_evidence_packet_index.py 2>&1 | tee ci-logs/release-evidence-packet-index-tests.log
+          python3 scripts/generate_release_evidence_packet_index.py --check 2>&1 | tee ci-logs/release-evidence-packet-index-check.log
 
       - name: Architecture and threat model
         shell: bash
