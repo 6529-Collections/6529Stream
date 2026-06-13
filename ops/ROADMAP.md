@@ -82,12 +82,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 01:44 UTC` after Queue Item 95 drop authorization signing evidence schema/template/checker/tests, local/CI wiring, release-manifest/checksum integration, docs/roadmap updates, focused evidence/readiness/audit/incident-response checks, `git diff --check`, full `make check`, the Windows PowerShell wrapper, and PR #185 GitHub Actions CI run `27452741736` passing on head `a45232dd0f685ca8e37b7baaeac746e36fcf1c2e`; CodeRabbit review-response fixes are tracked on PR #185 |
-| OS tested | Windows local for Queue Item 95 focused checks, full `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`; Linux GitHub Actions passed for PR #185 run `27452741736` on head `a45232dd0f685ca8e37b7baaeac746e36fcf1c2e`, with last merged baseline from PR #184 CI run `27451124264` |
+| Last verified | `2026-06-13 02:00 UTC` after Queue Item 95 drop authorization signing evidence schema/template/checker/tests, local/CI wiring, release-manifest/checksum integration, docs/roadmap updates, focused evidence/readiness/audit/incident-response checks, `git diff --check`, full `make check`, the Windows PowerShell wrapper, PR #185 GitHub Actions CI run `27453065590` passing on final head `fa1a6e949558dc7178564da179d576047ac428a9`, CodeRabbit success, and squash merge commit `fd453a652d228c3e43002aca27f72e1d86cd53d9` |
+| OS tested | Windows local for Queue Item 95 focused checks, full `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`; Linux GitHub Actions passed for PR #185 run `27453065590` on final head `fa1a6e949558dc7178564da179d576047ac428a9`, with merged baseline commit `fd453a652d228c3e43002aca27f72e1d86cd53d9` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | PR #185 CI run `27452741736` passed on head `a45232dd0f685ca8e37b7baaeac746e36fcf1c2e`; follow-up review-response pushes rerun CI on PR #185 as the merge gate. Last merged baseline was PR #184 CI run `27451124264` on final head `964eabe1e5a959d699f10ebf7f13c446e9838d5d`, with CodeRabbit reporting no actionable comments |
+| CI run | PR #185 CI run `27453065590` passed on final head `fa1a6e949558dc7178564da179d576047ac428a9`; CodeRabbit aggregate status was success and visible review threads were resolved before squash merge `fd453a652d228c3e43002aca27f72e1d86cd53d9` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
