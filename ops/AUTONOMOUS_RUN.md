@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-closure-readiness` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/247` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/246` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/248` |
 | Next issue | TBD after PR #246 scope opens and merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 15:52 UTC` |
+| Last updated | `2026-06-13 16:02 UTC` |
 
 ## Packaging Notes
 
@@ -180,12 +180,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Guard release evidence tracker closure and readiness state (Queue Item 118)
 
-Status: implementation in progress; PR not opened yet.
+Status: PR #248 open; waiting for GitHub Actions and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/246`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/248`.
 Branch: `codex/release-evidence-closure-readiness`.
 Branch started from PR #247 squash merge commit
 `17209f701fecabee2b6b1bf211a44b373820ff19`.
+Initial PR head: `085b5b190c49367fe9f3253b42b58e42f5240f64`.
 
 Prior queue transition:
 
