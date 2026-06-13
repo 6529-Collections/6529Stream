@@ -236,6 +236,16 @@ The release evidence issue-link map is committed at
 `release-artifacts/latest/release-evidence-issue-links.json`; run
 `python scripts/check_release_evidence_issue_links.py` to verify each generated
 backlog entry has a durable tracker issue without querying GitHub during CI.
+Run `python scripts/check_release_evidence_issue_labels.py` to verify committed
+`applied_labels` are unique and drawn from the generated suggested label set.
+To audit live GitHub label drift without adding network access to CI, export a
+snapshot and pass it to the checker:
+
+```bash
+gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,labels > tmp/release-evidence-issue-labels.json
+python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
+```
+
 The release evidence issue body sync artifact is generated as
 `release-artifacts/latest/release-evidence-issue-body-sync.json` and
 `release-artifacts/latest/release-evidence-issue-body-sync.md`; run

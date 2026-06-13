@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-body-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/236` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/237` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/238` |
-| Next issue | After issue #237, harden release evidence tracker label drift checks before attempting retained external evidence tasks |
+| Active PR branch | `codex/release-evidence-label-drift` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/238` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/239` |
+| Active PR | `TBD` |
+| Next issue | After issue #239, continue Gate G no-secret release-evidence tracker hardening before attempting retained external evidence tasks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 13:44 UTC` |
+| Last updated | `2026-06-13 14:04 UTC` |
 
 ## Packaging Notes
 
@@ -169,14 +169,63 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 110 | Link release evidence backlog entries to GitHub tracker issues | Gate G support | Implement issue #214 by committing a deterministic no-secret issue-link map for release evidence backlog rows, validating one GitHub issue per row, and wiring docs/local/CI checks without changing readiness claims | Merged in PR #232 |
 | 111 | Reconcile release evidence issue links merge state | Gate G support | Implement issue #233 by recording PR #232 merge evidence, refreshing stale roadmap verification metadata, and preserving the next tracker-issue queue posture without changing readiness claims | Merged in PR #234 |
 | 112 | Generate and apply release evidence tracker issue bodies | Gate G support | Implement issue #235 by generating exact no-secret GitHub issue body payloads from the committed backlog/link map, wiring them into local/CI/release gates, applying them to issues #215 through #231, and preserving blocked readiness claims | Merged in PR #236 |
-| 113 | Reconcile release evidence issue body sync merge state | Gate G support | Implement issue #237 by recording PR #236 merge evidence, tracker-label reconciliation, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Active |
-| 114 | Harden release evidence tracker label drift checks | Gate G support | Add a no-secret label audit/sync helper so tracker issues #215 through #231 cannot silently drift from committed `applied_labels` before retained evidence completion | Planned |
+| 113 | Reconcile release evidence issue body sync merge state | Gate G support | Implement issue #237 by recording PR #236 merge evidence, tracker-label reconciliation, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Merged in PR #238 |
+| 114 | Harden release evidence tracker label drift checks | Gate G support | Add a no-secret label audit/sync helper so tracker issues #215 through #231 cannot silently drift from committed `applied_labels` before retained evidence completion | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile release evidence issue body sync merge state (Queue Item 113)
+### PR candidate: Harden release evidence tracker label drift checks (Queue Item 114)
 
-Status: PR #238 open; CI and CodeRabbit pending.
+Status: local implementation validated; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/239`.
+PR: `TBD`.
+Branch: `codex/release-evidence-label-drift`.
+Branch started from PR #238 squash merge commit
+`3c738f51c8fa2cf623fda1f3d1fe5284db946d99`.
+
+Prior queue transition:
+
+- Queue Item 113 merged in PR #238 as squash commit
+  `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`.
+- PR #238 final implementation head was
+  `d56f7d2405fd0c52fdf2320a0f167253aceb4bf7`.
+- PR #238 GitHub Actions CI run `27468501813` passed on the final head.
+- PR #238 CodeRabbit status was success with no unresolved review threads.
+- Issue #237 closed completed after merge.
+
+Goal:
+
+- Add a deterministic no-network checker for committed
+  `release-evidence-issue-links.json` `applied_labels` posture.
+- Add an optional exported live GitHub issue snapshot audit mode for issues
+  #215 through #231, including deterministic remediation commands for missing
+  labels.
+- Wire the deterministic checker into local/CI/release-readiness gates and
+  document the optional live audit workflow without changing readiness claims.
+
+Completed local validation:
+
+- `python scripts/test_release_evidence_issue_labels.py`.
+- `python scripts/check_release_evidence_issue_labels.py`.
+- `python scripts/test_release_evidence_issue_body_sync.py`.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `bash -n scripts/check.sh`.
+- PowerShell parser check for `scripts/check.ps1`.
+- `rg -n "^#|^##|^###" docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+- Live GitHub label snapshot audit with
+  `python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json`.
+
+### Completed: Reconcile release evidence issue body sync merge state (Queue Item 113)
+
+Status: merged in PR #238.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/237`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/238`.
 Branch: `codex/release-evidence-body-state`.

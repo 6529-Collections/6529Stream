@@ -157,7 +157,10 @@ production-release readiness claims.
 `latest/release-evidence-issue-links.json` is a committed no-secret tracker map
 from each issue-backlog entry to its GitHub issue. It lets maintainers audit
 that every incomplete evidence requirement has a durable issue without making
-the issue itself completion evidence.
+the issue itself completion evidence. The
+`scripts/check_release_evidence_issue_labels.py` checker validates committed
+`applied_labels` deterministically and can audit an exported live GitHub issue
+JSON snapshot with `--live-json` before a release ceremony.
 
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and

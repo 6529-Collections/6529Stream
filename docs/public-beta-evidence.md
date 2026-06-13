@@ -215,13 +215,23 @@ To move a requirement to `complete`:
    `python scripts/test_release_evidence_issue_backlog.py`, and
    `python scripts/generate_release_evidence_issue_backlog.py --check`.
 13. Check the issue-link map with
-   `python scripts/test_release_evidence_issue_links.py` and
-   `python scripts/check_release_evidence_issue_links.py`.
-14. Regenerate and check the release evidence issue body sync artifact with
-   `python scripts/generate_release_evidence_issue_body_sync.py`,
-   `python scripts/test_release_evidence_issue_body_sync.py`, and
-   `python scripts/generate_release_evidence_issue_body_sync.py --check`.
-15. Regenerate and check the release manifest and checksum bundle.
+    `python scripts/test_release_evidence_issue_links.py` and
+    `python scripts/check_release_evidence_issue_links.py`.
+14. Check committed release evidence tracker labels with
+    `python scripts/test_release_evidence_issue_labels.py` and
+    `python scripts/check_release_evidence_issue_labels.py`. To audit live
+    GitHub label drift, export a local snapshot and pass it with `--live-json`:
+
+    ```bash
+    gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,labels > tmp/release-evidence-issue-labels.json
+    python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
+    ```
+
+15. Regenerate and check the release evidence issue body sync artifact with
+    `python scripts/generate_release_evidence_issue_body_sync.py`,
+    `python scripts/test_release_evidence_issue_body_sync.py`, and
+    `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+16. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`
