@@ -92,12 +92,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 14:20 UTC` for Queue Item 114 / PR #240 label-drift checks; local validation covered label checker tests/check, optional live GitHub label snapshot audit, body-sync check, release-readiness, manifest, checksum, changelog, shell/PowerShell syntax, heading, and whitespace checks |
-| OS tested | Windows local label-drift artifact gate for Queue Item 114; Linux GitHub Actions passed for PR #240 run `27469086354` on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4` |
+| Last verified | `2026-06-13 14:32 UTC` after PR #240 merged the release evidence label-drift checker; local validation covered label checker tests/check, optional live GitHub label snapshot audit, body-sync check, release-readiness, manifest, checksum, changelog, shell/PowerShell syntax, heading, and whitespace checks |
+| OS tested | Windows local label-drift artifact gate for Queue Item 114; Linux GitHub Actions passed for latest merged baseline PR #240 run `27469343982` on final head `e7e29f28ff9efa6b42208aefd71d73383f504204`, with merged baseline commit `a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | PR #240 CI run `27469086354` passed on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4`; CodeRabbit status was success with one provenance review thread addressed in the review-response commit |
+| CI run | Latest merged baseline PR #240 final CI run `27469343982` passed on head `e7e29f28ff9efa6b42208aefd71d73383f504204`; CodeRabbit status was success with the roadmap provenance thread resolved after review-response commit `e7e29f28ff9efa6b42208aefd71d73383f504204`, and PR #240 squash-merged as `a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
