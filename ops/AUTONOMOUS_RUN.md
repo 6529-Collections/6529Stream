@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-audit-report-schema-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/272` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/273` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/274` |
-| Next issue | TBD after issue #273 merges |
+| Active PR branch | `codex/reconcile-live-audit-report-checker-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/274` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/275` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/276` |
+| Next issue | TBD after issue #275 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 22:29 UTC` |
+| Last updated | `2026-06-13 22:45 UTC` |
 
 ## Packaging Notes
 
@@ -187,13 +187,62 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 128 | Reconcile live audit orchestrator merge state | Gate G support | Record PR #266 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Merged in PR #268 |
 | 129 | Add release evidence live audit report bundle | Gate G support | Add a retained no-secret report format for live audit runs that captures profile results, snapshot paths, snapshot digests, command provenance, and checker outcomes without changing readiness claims | Merged in PR #270 |
 | 130 | Reconcile live audit report bundle merge state | Gate G support | Record PR #270 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Merged in PR #272 |
-| 131 | Add release evidence live audit report schema and checker | Gate G support | Add an offline schema/checker for retained live audit report bundles so operators can validate JSON reports without GitHub network access or readiness-claim changes | Active |
+| 131 | Add release evidence live audit report schema and checker | Gate G support | Add an offline schema/checker for retained live audit report bundles so operators can validate JSON reports without GitHub network access or readiness-claim changes | Merged in PR #274 |
+| 132 | Reconcile live audit report checker merge state | Gate G support | Record PR #274 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Active |
+| 133 | Add release evidence live audit Markdown report parity checker | Gate G support | Add an offline checker that validates retained human-readable live audit Markdown reports against their JSON report source without GitHub network access or readiness-claim changes | Planned after Queue Item 132 |
 
 ## Current PR Worklog
 
-### PR candidate: Add release evidence live audit report schema and checker (Queue Item 131)
+### PR candidate: Reconcile live audit report checker merge state (Queue Item 132)
 
-Status: PR #274 open; CodeRabbit and CI pending.
+Status: PR #276 open; CodeRabbit review pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/275`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/276`.
+Branch: `codex/reconcile-live-audit-report-checker-merge-state`.
+Branch started from PR #274 squash merge commit
+`42c365d1beb80ce0d209049177621be0e2afb995`.
+Opening PR head: `45ea6c2c6e18d858a7a412284bee534202ee5548`.
+
+Goal:
+
+- Record PR #274 as merged and issue #273 as completed.
+- Refresh roadmap verification metadata to the PR #274 merged baseline.
+- Update the live audit report schema/checker test-matrix row from in-progress
+  to passing.
+- Preserve blocked public-beta and production-release readiness claims.
+- Select Queue Item 133 as the next no-secret implementation target.
+
+Validation plan:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "Queue Item 131|Queue Item 132|Queue Item 133|PR #274|27481075679|8cc0b4a|42c365d|#273|#275|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+Validation status:
+
+- Passed locally at `2026-06-13 22:44 UTC`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- Traceability grep for Queue Items 131-133, PR #274, issue #273, issue #275,
+  CI run `27481075679`, final head `8cc0b4a`, and merge commit `42c365d`.
+- Heading scan and `git diff --check`.
+
+Next planned implementation after this reconciliation:
+
+- Queue Item 133: add an offline Markdown parity/checker for retained release
+  evidence live audit report bundles so the human-readable report cannot drift
+  from the JSON source, profile table, command provenance, no-secret notice, or
+  blocked-readiness warning.
+
+### Completed: Add release evidence live audit report schema and checker (Queue Item 131)
+
+Status: merged in PR #274.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/273`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/274`.
 Branch: `codex/live-audit-report-schema-checker`.
@@ -202,6 +251,16 @@ Branch started from PR #272 squash merge commit
 Opening PR head: `014088f62aede568f9fc458410aebe31818b5dbf`.
 Review-request trace head: `9ac3449ef5299de00be3c7d64b0a211b55142ef9`.
 CodeRabbit initial request comment: `4699982486`.
+Final PR head: `8cc0b4acdfba32035fcedad0b32dc32688da576d`.
+Squash merge commit: `42c365d1beb80ce0d209049177621be0e2afb995`.
+CI: run `27481075679` passed.
+CodeRabbit: status success with no unresolved review threads. CodeRabbit posted
+an initial rate-limit warning for deep review availability and then responded
+to explicit review requests with incremental "review finished" replies. The PR
+included a documented autonomous maintainer merge-readiness comment
+`4700006664` because CI was green, the PR was documentation/tooling/release
+evidence only, and no actionable review thread remained.
+Issue #273: closed completed by the PR merge.
 
 Prior transition:
 
@@ -261,7 +320,9 @@ Validation status:
 
 Next planned implementation after this schema/checker PR:
 
-- TBD after issue #273 merges and CodeRabbit/CI feedback is clean.
+- Queue Item 132: reconcile the PR #274 merge state, then Queue Item 133 can
+  add a Markdown report parity/checker for the retained live audit report
+  bundle.
 
 ### Completed: Reconcile live audit report bundle merge state (Queue Item 130)
 
@@ -11016,6 +11077,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 22:45 | Open PR #276 | State-only live-audit-report-checker merge reconciliation PR opened on head `45ea6c2c6e18d858a7a412284bee534202ee5548`, links `Closes #275`, and will use CodeRabbit-only review per current user instruction. |
+| 2026-06-13 22:41 | Start Queue Item 132 | PR #274 merged as `42c365d1beb80ce0d209049177621be0e2afb995`, issue #273 closed completed, and issue #275 now tracks state-only reconciliation before the next no-secret evidence target. |
+| 2026-06-13 22:41 | Select Queue Item 133 | The retained live audit JSON report now has an offline schema/checker, so the next no-secret improvement is a Markdown report parity/checker that keeps the human-readable report aligned with the JSON source and blocked readiness posture. |
+| 2026-06-13 22:40 | Merge PR #274 | Release evidence live audit report schema/checker merged as `42c365d1beb80ce0d209049177621be0e2afb995`; final head `8cc0b4acdfba32035fcedad0b32dc32688da576d` passed CI run `27481075679`, CodeRabbit status was success with no unresolved review threads, a maintainer-decision comment documented the quota-limit context, and issue #273 closed completed. |
 | 2026-06-13 22:29 | Request CodeRabbit PR #274 review | CodeRabbit review requested in comment `4699982486` on review-request trace head `9ac3449ef5299de00be3c7d64b0a211b55142ef9`; Claude remains intentionally skipped per current user instruction. A follow-up state-only trace commit may move the PR head and should be checked from GitHub before merge. |
 | 2026-06-13 22:28 | Open PR #274 | Release evidence live audit report schema/checker PR opened on head `014088f62aede568f9fc458410aebe31818b5dbf`, links `Closes #273`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 22:26 | Finish Queue Item 131 local validation | The release evidence live audit report schema/checker draft passed focused checker tests, the committed template check, release-readiness, manifest/checksum checks, changelog, syntax, traceability, heading, whitespace checks, and the full Windows `scripts\check.ps1` gate on the final local diff. |
