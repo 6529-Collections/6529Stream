@@ -27,6 +27,10 @@ This guide covers:
 
 It does not add a production signing service, production key custody, live
 payload distribution, or public-beta readiness.
+Production signer custody readiness is tracked separately in
+[`docs/signer-custody-readiness.md`](signer-custody-readiness.md) and the
+checked no-secret template under
+[`release-artifacts/signer-custody-readiness/`](../release-artifacts/signer-custody-readiness/).
 
 ## Canonical EIP-712 Schema
 
@@ -165,11 +169,21 @@ approved, signed, verified, and linked to retained signing approval, signing
 transcript, and signature-verification artifacts. The committed template stays
 local-only and blocked; it is a format contract, not a launch claim.
 
+Signer custody readiness evidence is a separate release artifact. Before a
+public-beta drop relies on any non-local signing evidence, operators must also
+retain reviewed signer custody readiness metadata that names the custody owner,
+expected signer, signer manager, signer epoch source, signer-service class,
+ERC-1271 status, rotation and revocation drills, monitoring, and incident
+response links. That format is documented in
+[`docs/signer-custody-readiness.md`](signer-custody-readiness.md).
+
 Check the committed template with:
 
 ```sh
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 ```
 
 ## Operator Signing Flow
@@ -281,6 +295,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 make check
@@ -300,4 +316,5 @@ Required cross-links:
 - [`docs/tooling.md`](tooling.md)
 - [`docs/audit-package.md`](audit-package.md)
 - [`docs/incident-response.md`](incident-response.md)
+- [`docs/signer-custody-readiness.md`](signer-custody-readiness.md)
 - [`ops/ROADMAP.md`](../ops/ROADMAP.md)

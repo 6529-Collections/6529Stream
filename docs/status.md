@@ -248,6 +248,15 @@ The current Gate A smoke baseline proves:
   payload, validates domain/message/digest fields, signer epoch, reviewer and
   signature metadata, retained artifact hashes, and path boundaries, and keeps
   production signing evidence blocked until reviewed non-local evidence exists.
+- `scripts/test_signer_custody_readiness.py` and
+  `scripts/check_signer_custody_readiness.py` prove the committed no-secret
+  signer custody readiness template follows
+  `release-artifacts/schema/signer-custody-readiness.schema.json`, validates
+  custody owner, signer manager, signer epoch source, signer-service class,
+  ERC-1271 support status, rotation/revocation readiness, monitoring/runbook
+  references, reviewer metadata, retained artifact hashes, path boundaries, and
+  no-secret policy, and keeps public-beta readiness blocked until reviewed
+  non-local custody evidence exists.
 - `scripts/test_public_beta_evidence.py` and
   `scripts/check_public_beta_evidence.py` prove the committed no-secret
   public-beta evidence status follows

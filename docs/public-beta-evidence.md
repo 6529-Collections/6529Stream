@@ -50,6 +50,14 @@ any public-beta or production status row relies on it. The committed
 [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
 is a local template only, not completion evidence.
 
+Signer custody readiness evidence should follow
+[`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json)
+and pass `python scripts/check_signer_custody_readiness.py` before any
+public-beta or production status row relies on signer custody readiness
+evidence for non-local signing. The committed
+[`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json)
+is a checked local template only, not completion evidence.
+
 ## Status Values
 
 Each requirement uses one of these statuses:
@@ -89,6 +97,7 @@ Production release evidence must account for:
 - signed Git tag verification;
 - production address books;
 - retained production broadcast outputs;
+- reviewed signer custody readiness evidence;
 - live deployment manifests;
 - live ceremony evidence;
 - live randomizer operations evidence;
@@ -122,7 +131,9 @@ To move a requirement to `complete`:
    non-local evidence metadata JSON that supports the row.
 7. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
    retained drop authorization signing evidence that supports the row.
-8. Regenerate and check the release manifest and checksum bundle.
+8. Run `python scripts/check_signer_custody_readiness.py` for any signer
+   custody readiness evidence that supports the row.
+9. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

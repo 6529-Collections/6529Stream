@@ -24,7 +24,8 @@
     "randomizer_operations_dir": "deployments/randomizer-operations",
     "release_signatures_dir": "release-artifacts/signatures",
     "non_local_evidence_dir": "release-artifacts/evidence",
-    "drop_authorization_signing_dir": "release-artifacts/drop-authorization-signing"
+    "drop_authorization_signing_dir": "release-artifacts/drop-authorization-signing",
+    "signer_custody_readiness_dir": "release-artifacts/signer-custody-readiness"
   },
   "release_artifacts": {
     "contract_config": {
@@ -401,6 +402,144 @@
         }
       }
     ],
+    "signer_custody_readiness": [
+      {
+        "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
+        "sha256": "sha256:efdcac24c0272d955cb2cb22886af6a688c30d0c90dfcb9463f9b3c0119f00cf",
+        "size_bytes": 3470,
+        "schema_version": "6529stream.signer-custody-readiness.v1",
+        "evidence_id": "signer-custody-readiness-template",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "local",
+        "chain_id": 31337,
+        "signer_identity": {
+          "signer_type": "local_placeholder",
+          "expected_signer": "0x0000000000000000000000000000000000006532",
+          "signer_epoch": 1,
+          "signer_manager": "0x0000000000000000000000000000000000000004",
+          "signer_manager_type": "not_available_local",
+          "erc1271_support_status": "not_available_local",
+          "erc1271_support_detail": {
+            "rationale": "not_available_local",
+            "evidence_reference": "not_available_local"
+          },
+          "signer_service_class": "not_available_local"
+        },
+        "custody": {
+          "custody_status": "not_available_local",
+          "key_material_location": "not_available_local",
+          "separation_of_duties": "not_available_local"
+        },
+        "lifecycle": {
+          "rotation_status": "not_available_local",
+          "revocation_status": "not_available_local",
+          "compromise_response_status": "not_available_local",
+          "signer_epoch_rotation_tested": false,
+          "per_drop_cancellation_tested": false
+        },
+        "operations": {
+          "monitoring_status": "not_available_local",
+          "signer_service_integration_status": "not_available_local"
+        },
+        "review": {
+          "reviewer": "TBD",
+          "approval_status": "template"
+        },
+        "evidence": {
+          "schema_version": "6529stream.signer-custody-readiness.v1",
+          "evidence_id": "signer-custody-readiness-template",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "local",
+          "chain_id": 31337,
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "signer_identity": {
+            "signer_type": "local_placeholder",
+            "expected_signer": "0x0000000000000000000000000000000000006532",
+            "signer_epoch": 1,
+            "signer_epoch_source": "not_available_local",
+            "signer_manager": "0x0000000000000000000000000000000000000004",
+            "signer_manager_type": "not_available_local",
+            "erc1271_support_status": "not_available_local",
+            "erc1271_support_detail": {
+              "rationale": "not_available_local",
+              "evidence_reference": "not_available_local"
+            },
+            "signer_service_class": "not_available_local"
+          },
+          "custody": {
+            "custody_owner": "TBD",
+            "custody_status": "not_available_local",
+            "custody_system": "not_available_local",
+            "approval_workflow_reference": "TBD",
+            "key_material_location": "not_available_local",
+            "separation_of_duties": "not_available_local"
+          },
+          "lifecycle": {
+            "rotation_status": "not_available_local",
+            "revocation_status": "not_available_local",
+            "compromise_response_status": "not_available_local",
+            "signer_epoch_rotation_tested": false,
+            "per_drop_cancellation_tested": false,
+            "last_rotation_drill": "not_available_local",
+            "last_revocation_drill": "not_available_local"
+          },
+          "operations": {
+            "monitoring_status": "not_available_local",
+            "runbook": {
+              "path": "docs/signer-custody-readiness.md",
+              "sha256": "sha256:f3f89f027d8d828d4292bc65a71693d3dc8b2ae97f7533a614c52500fcf44415"
+            },
+            "alerting_reference": "TBD",
+            "incident_response_runbook": {
+              "path": "docs/incident-response.md",
+              "sha256": "sha256:bb19915fa68cf7f3839d87308a932461f97861e3e3ead6328e9e7a1e28b94cea"
+            },
+            "signer_service_integration_status": "not_available_local"
+          },
+          "review": {
+            "owner": "TBD",
+            "reviewer": "TBD",
+            "approval_status": "template",
+            "approval_reference": "TBD",
+            "reviewed_at": "not_available_local"
+          },
+          "retained_artifacts": [
+            {
+              "category": "signer_custody_schema",
+              "path": "release-artifacts/schema/signer-custody-readiness.schema.json",
+              "sha256": "sha256:f1e1d812c2e589762c2b3676a89d3bf1ddb74dfdf7dbfa403444b465eff34718"
+            },
+            {
+              "category": "readiness_transcript",
+              "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt",
+              "sha256": "sha256:f2d4e88b27a0365314e1c346fb5f824dcd364328e9d4cefc57f477b59233fc80"
+            }
+          ],
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "hsm_credentials",
+              "raw_signature",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Copy this shape for reviewed fork, testnet, mainnet, or production signer custody readiness evidence. Do not commit private keys, seed phrases, HSM credentials, signer-service secrets, RPC credentials, raw signatures, or unreleased drop payloads."
+        }
+      }
+    ],
     "abi_compatibility_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
       "sha256": "sha256:44e97807c70ed606edb985cca85eace493a893a62c345212c18e7834ba6c08be",
@@ -625,14 +764,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f19f20dd38b66c0d3e15b85d9af1c81ee23d09715b15b21085a0bc59919c02cc",
-      "size_bytes": 14045
+      "sha256": "sha256:7ca299adea431991fdcb4890e7e919ab466068ddb957f70aa17964f7b58c2203",
+      "size_bytes": 14369
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:212781a51b0c347bd2e8f36b710ad4648b81465c23557d35bf225cec0f87ae81",
-        "size_bytes": 7723
+        "sha256": "sha256:93091a3fc40800ede2e59d60e0a0e2bc3c7ef78e3d13ff3f10c01621da754478",
+        "size_bytes": 7869
       },
       {
         "path": "docs/deployment.md",
@@ -656,8 +795,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:d89949805d137d7f9bea57ecf69e05168d7473a4b776d1cadd9f9e1b291b430e",
-        "size_bytes": 6228
+        "sha256": "sha256:b87c1347465be3c3ef98fc051270762a746604b3568b61a5274c55585e453094",
+        "size_bytes": 7001
       },
       {
         "path": "docs/non-local-release-evidence.md",
@@ -676,33 +815,38 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:187faf5a3f45884caa344b8c49cf1aec2e93f7d0c4923e5f9b0917e1287d6c6d",
-        "size_bytes": 14804
+        "sha256": "sha256:3aa331af4a3fb5c3b856d56801603b636a7576c6d18059991e763b793ddb89bb",
+        "size_bytes": 16061
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:1bd8d8b666eb1fb03bf912435c297ad10a4f30f066af61a8a3c3c4ed1c703b42",
-        "size_bytes": 18552
+        "sha256": "sha256:bb19915fa68cf7f3839d87308a932461f97861e3e3ead6328e9e7a1e28b94cea",
+        "size_bytes": 19644
       },
       {
         "path": "docs/drop-authorization-signing.md",
-        "sha256": "sha256:7ccbc89247c9f4c4e31a4e517938f46815b0f097fbd37c42cc52120476f85f15",
-        "size_bytes": 14158
+        "sha256": "sha256:39ca3ad966aabd82a8029ce700ca0b239e6788a6516b9421c85ed0db3574c1e7",
+        "size_bytes": 15182
+      },
+      {
+        "path": "docs/signer-custody-readiness.md",
+        "sha256": "sha256:f3f89f027d8d828d4292bc65a71693d3dc8b2ae97f7533a614c52500fcf44415",
+        "size_bytes": 4461
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:63539e3a0414aa8b09df5be10cd052540a072028dc2993fd7fb67b7ba0e08f13",
-        "size_bytes": 15408
+        "sha256": "sha256:3eb0bee15457f950e5fc382b1e0364e45f9d446a050aa7db8c058cc6ce6072af",
+        "size_bytes": 17316
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:b87e829bf8ffb2328657682f4597e56885de3dfc494f55f2f2d1106ded474e55",
-        "size_bytes": 20087
+        "sha256": "sha256:ea96ed241032f2f3709366d913010702b36ba0afe71f43a3eba5ffef9aa5b886",
+        "size_bytes": 21074
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:161ec6b66242542e097ac95f278656d1a7d906d40d6ac33679041559d59221ae",
-        "size_bytes": 20650
+        "sha256": "sha256:dfdd32efb5b7356af97eb30e2b562ee86a9aa64618afdceea3a7870af210f0d0",
+        "size_bytes": 21241
       }
     ]
   },

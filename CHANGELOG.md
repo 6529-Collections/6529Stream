@@ -89,6 +89,11 @@ the release policy in `docs/release-policy.md`.
 - Added a no-secret drop authorization signing evidence schema, checked
   template, retained-artifact hash validation, local/CI checker, and release
   manifest/checksum coverage.
+- Added a no-secret signer custody readiness evidence schema, checked
+  template, retained-artifact hash validation, local/CI checker, and release
+  manifest/checksum coverage for production signer readiness evidence without
+  committing private keys, HSM credentials, signer-service secrets, or live
+  unreleased payloads.
 - Added a release signature evidence schema, local placeholder bundle, and
   local/CI checker covering detached checksum signatures, signed Git tags,
   signer identity, retained verification artifacts, and no-secret redaction

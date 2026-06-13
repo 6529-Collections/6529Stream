@@ -1,0 +1,92 @@
+{
+  "schema_version": "6529stream.signer-custody-readiness.v1",
+  "evidence_id": "signer-custody-readiness-template",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "local",
+  "chain_id": 31337,
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "signer_identity": {
+    "signer_type": "local_placeholder",
+    "expected_signer": "0x0000000000000000000000000000000000006532",
+    "signer_epoch": 1,
+    "signer_epoch_source": "not_available_local",
+    "signer_manager": "0x0000000000000000000000000000000000000004",
+    "signer_manager_type": "not_available_local",
+    "erc1271_support_status": "not_available_local",
+    "erc1271_support_detail": {
+      "rationale": "not_available_local",
+      "evidence_reference": "not_available_local"
+    },
+    "signer_service_class": "not_available_local"
+  },
+  "custody": {
+    "custody_owner": "TBD",
+    "custody_status": "not_available_local",
+    "custody_system": "not_available_local",
+    "approval_workflow_reference": "TBD",
+    "key_material_location": "not_available_local",
+    "separation_of_duties": "not_available_local"
+  },
+  "lifecycle": {
+    "rotation_status": "not_available_local",
+    "revocation_status": "not_available_local",
+    "compromise_response_status": "not_available_local",
+    "signer_epoch_rotation_tested": false,
+    "per_drop_cancellation_tested": false,
+    "last_rotation_drill": "not_available_local",
+    "last_revocation_drill": "not_available_local"
+  },
+  "operations": {
+    "monitoring_status": "not_available_local",
+    "runbook": {
+      "path": "docs/signer-custody-readiness.md",
+      "sha256": "sha256:f3f89f027d8d828d4292bc65a71693d3dc8b2ae97f7533a614c52500fcf44415"
+    },
+    "alerting_reference": "TBD",
+    "incident_response_runbook": {
+      "path": "docs/incident-response.md",
+      "sha256": "sha256:bb19915fa68cf7f3839d87308a932461f97861e3e3ead6328e9e7a1e28b94cea"
+    },
+    "signer_service_integration_status": "not_available_local"
+  },
+  "review": {
+    "owner": "TBD",
+    "reviewer": "TBD",
+    "approval_status": "template",
+    "approval_reference": "TBD",
+    "reviewed_at": "not_available_local"
+  },
+  "retained_artifacts": [
+    {
+      "category": "signer_custody_schema",
+      "path": "release-artifacts/schema/signer-custody-readiness.schema.json",
+      "sha256": "sha256:f1e1d812c2e589762c2b3676a89d3bf1ddb74dfdf7dbfa403444b465eff34718"
+    },
+    {
+      "category": "readiness_transcript",
+      "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt",
+      "sha256": "sha256:f2d4e88b27a0365314e1c346fb5f824dcd364328e9d4cefc57f477b59233fc80"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "hsm_credentials",
+      "raw_signature",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+  "operator_notes": "Copy this shape for reviewed fork, testnet, mainnet, or production signer custody readiness evidence. Do not commit private keys, seed phrases, HSM credentials, signer-service secrets, RPC credentials, raw signatures, or unreleased drop payloads."
+}

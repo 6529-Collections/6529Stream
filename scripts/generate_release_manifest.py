@@ -16,6 +16,7 @@ import check_drop_authorization_signing_evidence as drop_signing_evidence_checke
 import check_non_local_release_evidence as non_local_evidence_checker
 import check_public_beta_evidence as public_beta_checker
 import check_release_signatures as release_signature_checker
+import check_signer_custody_readiness as signer_custody_checker
 
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
@@ -40,6 +41,9 @@ DEFAULT_NON_LOCAL_EVIDENCE_DIR = Path("release-artifacts/evidence")
 DEFAULT_DROP_AUTHORIZATION_SIGNING_DIR = Path(
     "release-artifacts/drop-authorization-signing"
 )
+DEFAULT_SIGNER_CUSTODY_READINESS_DIR = Path(
+    "release-artifacts/signer-custody-readiness"
+)
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/release-policy.md"),
@@ -54,6 +58,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/audit-package.md"),
     Path("docs/incident-response.md"),
     Path("docs/drop-authorization-signing.md"),
+    Path("docs/signer-custody-readiness.md"),
     Path("docs/release-readiness.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
@@ -494,6 +499,115 @@ def drop_authorization_signing_record(path: Path, repo_root: Path) -> dict[str, 
     return record
 
 
+def signer_custody_readiness_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    """Load, validate, and summarize signer custody readiness evidence."""
+    data = require_dict(load_json(path), str(path))
+    try:
+        signer_custody_checker.validate_evidence_document(data, repo_root, str(path))
+    except signer_custody_checker.SignerCustodyReadinessError as exc:
+        raise ReleaseManifestError(
+            f"invalid signer custody readiness evidence {path}: {exc}"
+        ) from exc
+
+    signer_identity = require_dict(
+        data.get("signer_identity"), f"{path}.signer_identity"
+    )
+    custody = require_dict(data.get("custody"), f"{path}.custody")
+    lifecycle = require_dict(data.get("lifecycle"), f"{path}.lifecycle")
+    operations = require_dict(data.get("operations"), f"{path}.operations")
+    review = require_dict(data.get("review"), f"{path}.review")
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "evidence_id": require_string(data.get("evidence_id"), "evidence_id"),
+            "record_type": require_string(data.get("record_type"), "record_type"),
+            "review_status": require_string(data.get("review_status"), "review_status"),
+            "environment": require_string(data.get("environment"), "environment"),
+            "chain_id": data.get("chain_id"),
+            "signer_identity": {
+                "signer_type": require_string(
+                    signer_identity.get("signer_type"),
+                    "signer_identity.signer_type",
+                ),
+                "expected_signer": require_string(
+                    signer_identity.get("expected_signer"),
+                    "signer_identity.expected_signer",
+                ),
+                "signer_epoch": signer_identity.get("signer_epoch"),
+                "signer_manager": require_string(
+                    signer_identity.get("signer_manager"),
+                    "signer_identity.signer_manager",
+                ),
+                "signer_manager_type": require_string(
+                    signer_identity.get("signer_manager_type"),
+                    "signer_identity.signer_manager_type",
+                ),
+                "erc1271_support_status": require_string(
+                    signer_identity.get("erc1271_support_status"),
+                    "signer_identity.erc1271_support_status",
+                ),
+                "erc1271_support_detail": require_dict(
+                    signer_identity.get("erc1271_support_detail"),
+                    "signer_identity.erc1271_support_detail",
+                ),
+                "signer_service_class": require_string(
+                    signer_identity.get("signer_service_class"),
+                    "signer_identity.signer_service_class",
+                ),
+            },
+            "custody": {
+                "custody_status": require_string(
+                    custody.get("custody_status"), "custody.custody_status"
+                ),
+                "key_material_location": require_string(
+                    custody.get("key_material_location"),
+                    "custody.key_material_location",
+                ),
+                "separation_of_duties": require_string(
+                    custody.get("separation_of_duties"),
+                    "custody.separation_of_duties",
+                ),
+            },
+            "lifecycle": {
+                "rotation_status": require_string(
+                    lifecycle.get("rotation_status"), "lifecycle.rotation_status"
+                ),
+                "revocation_status": require_string(
+                    lifecycle.get("revocation_status"), "lifecycle.revocation_status"
+                ),
+                "compromise_response_status": require_string(
+                    lifecycle.get("compromise_response_status"),
+                    "lifecycle.compromise_response_status",
+                ),
+                "signer_epoch_rotation_tested": lifecycle.get(
+                    "signer_epoch_rotation_tested"
+                ),
+                "per_drop_cancellation_tested": lifecycle.get(
+                    "per_drop_cancellation_tested"
+                ),
+            },
+            "operations": {
+                "monitoring_status": require_string(
+                    operations.get("monitoring_status"),
+                    "operations.monitoring_status",
+                ),
+                "signer_service_integration_status": require_string(
+                    operations.get("signer_service_integration_status"),
+                    "operations.signer_service_integration_status",
+                ),
+            },
+            "review": {
+                "reviewer": require_string(review.get("reviewer"), "review.reviewer"),
+                "approval_status": require_string(
+                    review.get("approval_status"), "review.approval_status"
+                ),
+            },
+            "evidence": data,
+        }
+    )
+    return record
+
+
 def public_beta_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
     """Load, validate, and summarize public-beta evidence status."""
     data = require_dict(load_json(path), str(path))
@@ -642,6 +756,7 @@ def build_manifest(
     governance_docs: list[Path],
     non_local_evidence_dir: Path | None = None,
     drop_authorization_signing_dir: Path | None = None,
+    signer_custody_readiness_dir: Path | None = None,
 ) -> dict[str, Any]:
     release_signatures_dir = repo_root / DEFAULT_RELEASE_SIGNATURES_DIR
     resolved_non_local_evidence_dir = (
@@ -660,6 +775,15 @@ def build_manifest(
             drop_authorization_signing_dir
             if drop_authorization_signing_dir.is_absolute()
             else repo_root / drop_authorization_signing_dir
+        )
+    )
+    resolved_signer_custody_readiness_dir = (
+        repo_root / DEFAULT_SIGNER_CUSTODY_READINESS_DIR
+        if signer_custody_readiness_dir is None
+        else (
+            signer_custody_readiness_dir
+            if signer_custody_readiness_dir.is_absolute()
+            else repo_root / signer_custody_readiness_dir
         )
     )
     deployment_manifests = [
@@ -683,6 +807,10 @@ def build_manifest(
     drop_authorization_signing_evidence = [
         drop_authorization_signing_record(path, repo_root)
         for path in json_files(resolved_drop_authorization_signing_dir)
+    ]
+    signer_custody_readiness = [
+        signer_custody_readiness_record(path, repo_root)
+        for path in json_files(resolved_signer_custody_readiness_dir)
     ]
     protocol_versions = sorted(
         set(
@@ -733,6 +861,9 @@ def build_manifest(
             "drop_authorization_signing_dir": normalize_path(
                 resolved_drop_authorization_signing_dir, repo_root
             ),
+            "signer_custody_readiness_dir": normalize_path(
+                resolved_signer_custody_readiness_dir, repo_root
+            ),
         },
         "release_artifacts": {
             "contract_config": file_record(contract_config_path, repo_root, schema_required=True),
@@ -771,6 +902,7 @@ def build_manifest(
             "drop_authorization_signing_evidence": (
                 drop_authorization_signing_evidence
             ),
+            "signer_custody_readiness": signer_custody_readiness,
             "abi_compatibility_baseline": file_record(
                 baseline_path,
                 repo_root,
@@ -827,6 +959,7 @@ def build_output_text(
     governance_docs: list[Path],
     non_local_evidence_dir: Path | None = None,
     drop_authorization_signing_dir: Path | None = None,
+    signer_custody_readiness_dir: Path | None = None,
 ) -> str:
     manifest = build_manifest(
         repo_root,
@@ -846,6 +979,7 @@ def build_output_text(
         governance_docs,
         non_local_evidence_dir,
         drop_authorization_signing_dir,
+        signer_custody_readiness_dir,
     )
     return json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
 
@@ -868,6 +1002,7 @@ def write_output(
     governance_docs: list[Path],
     non_local_evidence_dir: Path | None = None,
     drop_authorization_signing_dir: Path | None = None,
+    signer_custody_readiness_dir: Path | None = None,
 ) -> Path:
     output_text = build_output_text(
         repo_root,
@@ -887,6 +1022,7 @@ def write_output(
         governance_docs,
         non_local_evidence_dir,
         drop_authorization_signing_dir,
+        signer_custody_readiness_dir,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(output_text, encoding="utf-8", newline="\n")
@@ -911,6 +1047,7 @@ def check_output(
     governance_docs: list[Path],
     non_local_evidence_dir: Path | None = None,
     drop_authorization_signing_dir: Path | None = None,
+    signer_custody_readiness_dir: Path | None = None,
 ) -> int:
     if not output_path.exists():
         print(f"missing {normalize_path(output_path, repo_root)}", file=sys.stderr)
@@ -938,6 +1075,7 @@ def check_output(
         governance_docs,
         non_local_evidence_dir,
         drop_authorization_signing_dir,
+        signer_custody_readiness_dir,
     )
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -998,6 +1136,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_DROP_AUTHORIZATION_SIGNING_DIR,
     )
+    parser.add_argument(
+        "--signer-custody-readiness-dir",
+        type=Path,
+        default=DEFAULT_SIGNER_CUSTODY_READINESS_DIR,
+    )
     parser.add_argument("--changelog", type=Path, default=DEFAULT_CHANGELOG)
     parser.add_argument("--governance-doc", type=Path, action="append", dest="governance_docs")
     parser.add_argument("--check", action="store_true")
@@ -1029,6 +1172,7 @@ def main(argv: list[str]) -> int:
                 governance_docs,
                 args.non_local_evidence_dir,
                 args.drop_authorization_signing_dir,
+                args.signer_custody_readiness_dir,
             )
         written = write_output(
             repo_root,
@@ -1048,6 +1192,7 @@ def main(argv: list[str]) -> int:
             governance_docs,
             args.non_local_evidence_dir,
             args.drop_authorization_signing_dir,
+            args.signer_custody_readiness_dir,
         )
     except ReleaseManifestError as exc:
         print(f"error: {exc}", file=sys.stderr)

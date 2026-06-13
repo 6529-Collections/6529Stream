@@ -9,6 +9,7 @@
       "release-artifacts/schema",
       "release-artifacts/evidence",
       "release-artifacts/drop-authorization-signing",
+      "release-artifacts/signer-custody-readiness",
       "release-artifacts/signatures",
       "release-artifacts/latest",
       "release-artifacts/baselines",
@@ -26,7 +27,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:261b161b3747aa0f79c38bc7b33de2c0df866f803fcb28958b3a20e9ca5f87b3"
+    "sha256": "sha256:fc130c704d51470197facf28e298a851a343c05999117bd21cd0783dc53e43e4"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -180,8 +181,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:f05b4b4dd5a6854958e4bbcb31bdef5fe072f148bb038dfe8c3ecc992edafd8a",
-      "size_bytes": 31308
+      "sha256": "sha256:0489670ff6e23f76476d4a71cdadfc9ce1f08a52e98dd03c89d2c349c9b1223a",
+      "size_bytes": 37680
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -209,9 +210,24 @@
       "size_bytes": 6295
     },
     {
+      "path": "release-artifacts/schema/signer-custody-readiness.schema.json",
+      "sha256": "sha256:f1e1d812c2e589762c2b3676a89d3bf1ddb74dfdf7dbfa403444b465eff34718",
+      "size_bytes": 9868
+    },
+    {
       "path": "release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json",
       "sha256": "sha256:0a8e8632f12613fdbe980297ea39cd3e2b2365044c08ed542745df8cc626e6d8",
       "size_bytes": 2771
+    },
+    {
+      "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt",
+      "sha256": "sha256:f2d4e88b27a0365314e1c346fb5f824dcd364328e9d4cefc57f477b59233fc80",
+      "size_bytes": 328
+    },
+    {
+      "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
+      "sha256": "sha256:efdcac24c0272d955cb2cb22886af6a688c30d0c90dfcb9463f9b3c0119f00cf",
+      "size_bytes": 3470
     },
     {
       "path": "test/fixtures/drop-authorization/auction-eoa.json",

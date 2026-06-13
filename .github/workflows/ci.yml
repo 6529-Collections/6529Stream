@@ -61,6 +61,8 @@ jobs:
             scripts/test_drop_authorization_fixtures.py \
             scripts/check_drop_authorization_signing_evidence.py \
             scripts/test_drop_authorization_signing_evidence.py \
+            scripts/check_signer_custody_readiness.py \
+            scripts/test_signer_custody_readiness.py \
             scripts/generate_source_verification_inputs.py \
             scripts/test_source_verification_inputs.py \
             scripts/check_abi_compatibility.py \
@@ -182,6 +184,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_drop_authorization_signing_evidence.py 2>&1 | tee ci-logs/drop-authorization-signing-evidence-tests.log
           python3 scripts/check_drop_authorization_signing_evidence.py 2>&1 | tee ci-logs/drop-authorization-signing-evidence-check.log
+
+      - name: Signer custody readiness
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_signer_custody_readiness.py 2>&1 | tee ci-logs/signer-custody-readiness-tests.log
+          python3 scripts/check_signer_custody_readiness.py 2>&1 | tee ci-logs/signer-custody-readiness-check.log
 
       - name: Release artifact catalog
         shell: bash

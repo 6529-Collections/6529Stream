@@ -8,10 +8,15 @@ contributors who start from the README.
   live in [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
   The same guide links no-secret unsigned payload-generator templates for
   fixed-price and auction drops, plus a checked drop authorization signing
-  evidence schema/template for future reviewed ceremonies. Production signer
-  custody, production signing service integration, retained fork/testnet/live
-  signing evidence contents, and approved external signer integration still
-  need to be completed or explicitly accepted before public beta.
+  evidence schema/template for future reviewed ceremonies. A checked
+  [`docs/signer-custody-readiness.md`](signer-custody-readiness.md) model now
+  defines the no-secret readiness evidence for custody owner, signer manager,
+  signer epoch source, signer-service class, ERC-1271 status,
+  rotation/revocation drills, monitoring, and incident-response links.
+  Production signer custody, production signing service integration, retained
+  fork/testnet/live signing evidence contents, reviewed signer custody
+  readiness evidence, and approved external signer integration still need to
+  be completed or explicitly accepted before public beta.
 - Auction custody and settlement state-machine coverage now exists for ADR 0002:
   auction NFTs are escrowed by the auction contract, no-bid and with-bid
   settlement are explicit, outbid refunds use bidder credits, and auction-local

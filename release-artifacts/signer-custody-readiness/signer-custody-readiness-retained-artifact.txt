@@ -1,0 +1,3 @@
+Template retained artifact for signer custody readiness evidence tests.
+This placeholder contains no secrets and is not completion evidence.
+Operators must retain reviewed custody approval, signer-service attestation, rotation and revocation drill output, and monitoring evidence outside this local template before public beta.

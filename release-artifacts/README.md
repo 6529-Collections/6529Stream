@@ -19,6 +19,7 @@ python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
@@ -53,6 +54,8 @@ python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
@@ -119,22 +122,33 @@ points at `drop-authorization-signing/drop-authorization-signing-retained-artifa
 plus the generated unsigned payload output to prove payload/hash/reviewer
 validation without claiming public-beta or production readiness.
 
+`signer-custody-readiness/signer-custody-readiness-template.json` is the
+checked no-secret template for future reviewed signer custody readiness
+evidence. Its schema lives at `schema/signer-custody-readiness.schema.json`,
+and the template points at
+`signer-custody-readiness/signer-custody-readiness-retained-artifact.txt`,
+`docs/signer-custody-readiness.md`, and `docs/incident-response.md` to prove
+retained artifact and runbook hash validation without claiming public-beta or
+production readiness.
+
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
-`docs/non-local-release-evidence.md`, and `docs/release-readiness.md` are the
+`docs/non-local-release-evidence.md`, `docs/signer-custody-readiness.md`, and
+`docs/release-readiness.md` are the
 auditor-facing architecture, trust-boundary, package, incident-response,
-evidence-status, non-local evidence intake, and Gate G readiness indexes for
-the current local baseline. They are validated before release manifest
-generation, and the release manifest records their hashes as governance
-documents.
+evidence-status, non-local evidence intake, signer custody readiness, and Gate G
+readiness indexes for the current local baseline. They are validated before
+release manifest generation, and the release manifest records their hashes as
+governance documents.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
 baseline, deployment manifest config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, drop
-authorization signing evidence, artifact schemas, non-local release evidence
-metadata, public-beta evidence status, and release manifest. Treat
+authorization signing evidence, signer custody readiness evidence, artifact
+schemas, non-local release evidence metadata, public-beta evidence status, and
+release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.
@@ -178,6 +192,7 @@ python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
