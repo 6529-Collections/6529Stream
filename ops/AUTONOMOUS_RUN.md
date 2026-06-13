@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-issue-bodies` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/234` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/235` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/236` |
 | Next issue | Apply generated issue-body sync payloads to open release evidence tracker issues #215 through #231, then continue the evidence tracker queue |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 13:13 UTC` |
+| Last updated | `2026-06-13 13:16 UTC` |
 
 ## Packaging Notes
 
@@ -174,9 +174,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Generate and apply release evidence tracker issue bodies (Queue Item 112)
 
-Status: local implementation in progress; PR TBD.
+Status: PR #236 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/235`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/236`.
 Branch: `codex/release-evidence-issue-bodies`.
 Branch started from PR #234 squash merge commit
 `1ac0765632f053c5a29c27375d04de8c9d75736b`.
@@ -246,7 +246,10 @@ Remote issue-body application:
 
 Remote review:
 
-- PR not opened yet.
+- PR #236 opened against `main` from head
+  `f7dc33795e45129da62e3636448f781c4bcbe251`.
+- CodeRabbit review requested in comment `4698628618`.
+- CI pending.
 
 ### Completed: Reconcile release evidence issue links merge state (Queue Item 111)
 
@@ -10357,6 +10360,7 @@ Outcome:
 | 2026-06-13 12:46 | Start Queue Item 112 | PR #234 merged as `1ac0765632f053c5a29c27375d04de8c9d75736b` after CI run `27466683865` and CodeRabbit success; issue #235 opened for deterministic release evidence issue-body sync artifacts and live tracker issue body updates |
 | 2026-06-13 12:59 | Apply generated tracker issue bodies | Issues #215 through #231 now have exact generated no-secret body payloads from `release-artifacts/latest/release-evidence-issue-body-sync.json`; live GitHub bodies verified against the artifact |
 | 2026-06-13 13:13 | Finish Queue Item 112 local validation | Focused release evidence body-sync, release-artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, full `make check`, and Windows PowerShell wrapper validation all pass with existing Foundry warning noise only |
+| 2026-06-13 13:16 | Open PR #236 and request CodeRabbit | Release evidence issue body-sync PR opened on head `f7dc33795e45129da62e3636448f781c4bcbe251`; CodeRabbit review requested in comment `4698628618` |
 
 ## Resume Instructions
 
