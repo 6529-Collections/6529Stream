@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-body-drift` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/243` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/242` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/244` |
 | Next issue | After issue #242, reconcile body-drift merge state and continue Gate G release-evidence tracker hardening |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 15:00 UTC` |
+| Last updated | `2026-06-13 15:04 UTC` |
 
 ## Packaging Notes
 
@@ -178,12 +178,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Harden release evidence tracker body drift checks (Queue Item 116)
 
-Status: local implementation validated; PR not opened yet.
+Status: PR #244 open; waiting for GitHub Actions and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/242`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/244`.
 Branch: `codex/release-evidence-body-drift`.
 Branch started from PR #243 squash merge commit
 `abe9896c266c9bb0815a8abc3c9f69e49f023244`.
+Initial PR head: `10a9e14949dc82785e1cbe3702629627229a12de`.
 
 Prior queue transition:
 
@@ -9938,6 +9939,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 15:04 | Open PR #244 for Queue Item 116 | Opened `https://github.com/6529-Collections/6529Stream/pull/244` from `codex/release-evidence-body-drift` at head `10a9e14949dc82785e1cbe3702629627229a12de` to add deterministic release evidence tracker body-drift checks and close issue #242. |
 | 2026-06-13 15:00 | Finish Queue Item 116 local validation | Added the no-secret release evidence issue body checker, optional live/snapshot body audit, deterministic body-file remediation output, docs/local/CI gates, readiness command coverage, generated body-sync validation metadata, release manifest/checksum refresh, and changelog entry. The optional live audit found drift on issues #215 through #231, deterministic body files were applied with `gh issue edit --body-file`, and a fresh live snapshot audit passed. |
 | 2026-06-13 14:55 | Merge PR #243 and start Queue Item 116 | Release evidence label drift merge-state reconciliation merged as `abe9896c266c9bb0815a8abc3c9f69e49f023244`; final head `7530f9b70ba049eb9e3c24534634be2ecc7cd97c` passed CI run `27469708279`, CodeRabbit status was success, no review threads remained, and issue #241 closed completed. Issue #242 is now active for the no-secret body-drift audit. |
 | 2026-06-13 14:36 | Open PR #243 for Queue Item 115 | Opened `https://github.com/6529-Collections/6529Stream/pull/243` from `codex/release-evidence-label-state` at head `cbde7b13642d1c09a9204820c5ec8ea218310876` to reconcile PR #240 merge evidence and keep issue #242 queued as the next body-drift hardening target. |
