@@ -93,13 +93,13 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 18:56 UTC` for active Queue Item 125 / PR #262 release evidence issue snapshot exporter local validation; latest merged-baseline verification remains Queue Item 124 / PR #260 until PR #262 merges |
-| OS tested | Windows local validation for active Queue Item 125 / PR #262; Linux GitHub Actions passed for latest merged baseline PR #260 run `27475475098` on final head `32759d33ec6e118426cc37cade36e947c960c3d4`, with merged baseline commit `779ff73bee124c646d1531b43dc61940872e1fab`; active PR #262 Linux CI is tracked in PR status while open |
+| Last verified | `2026-06-13 19:16 UTC` for Queue Item 125 / PR #262 release evidence issue snapshot exporter; PR #262 local validation covered exporter tests/help, live label/body/closure audits, release-readiness, manifest, checksum, changelog, Bash and PowerShell syntax, Python compilation, heading, and whitespace checks |
+| OS tested | Windows local validation for Queue Item 125 / PR #262; Linux GitHub Actions passed for latest merged baseline PR #262 run `27476294337` on final head `223ff4b69484af2a8a20a95b423d175c916b179c`, with merged baseline commit `19263b048fc8dc8e0fe7c834e206e623d8fb944e` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #260 final CI run `27475475098` passed on head `32759d33ec6e118426cc37cade36e947c960c3d4`; active PR #262 CI and CodeRabbit status are intentionally recorded in `ops/AUTONOMOUS_RUN.md` while the PR is open and will replace this merged-baseline row after merge |
-| Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
+| CI run | Latest merged baseline PR #262 final CI run `27476294337` passed on head `223ff4b69484af2a8a20a95b423d175c916b179c`; CodeRabbit status was success with its only actionable review thread addressed, resolved, and outdated, and PR #262 squash-merged as `19263b048fc8dc8e0fe7c834e206e623d8fb944e` |
+| Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
 
