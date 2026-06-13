@@ -13,6 +13,8 @@ Validate the evidence status with:
 ```sh
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_public_beta_blocker_report.py
+python scripts/generate_public_beta_blocker_report.py --check
 ```
 
 ## Evidence Artifact
@@ -25,6 +27,13 @@ Its schema is
 The status file is included in release manifest and checksum coverage, so
 changes to blocker status, retained evidence paths, hashes, or risk acceptance
 records must refresh the generated release artifacts before release.
+
+The generated blocker report is
+[`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md).
+It is derived from the status file, lists incomplete public-beta and production
+rows plus their evidence posture, and repeats the validation commands for the
+underlying evidence families. It does not mark any row complete or claim public
+beta or production readiness.
 
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
@@ -133,7 +142,9 @@ To move a requirement to `complete`:
    retained drop authorization signing evidence that supports the row.
 8. Run `python scripts/check_signer_custody_readiness.py` for any signer
    custody readiness evidence that supports the row.
-9. Regenerate and check the release manifest and checksum bundle.
+9. Regenerate and check the blocker report with
+   `python scripts/generate_public_beta_blocker_report.py`.
+10. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-signer-custody-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/189` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/190` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/192` |
+| Active PR branch | `codex/public-beta-blocker-report` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/192` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/191` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/193` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 03:58 UTC` |
+| Last updated | `2026-06-13 04:57 UTC` |
 
 ## Packaging Notes
 
@@ -153,14 +153,89 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Merged in PR #185 |
 | 96 | Reconcile drop authorization signing evidence merge state | Gate G support | Implement issue #186 by marking PR #185 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next no-secret signer-custody readiness target | Merged in PR #188 |
 | 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Merged in PR #189 |
-| 98 | Reconcile signer custody readiness merge state | Gate G support | Implement issue #190 by marking PR #189 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next public-beta evidence blocker-report target | Active |
-| 99 | Add public beta evidence blocker report artifact | Gate G support | Implement issue #191 by generating a deterministic no-secret report from `release-artifacts/latest/public-beta-evidence.json` that lists incomplete public-beta evidence rows and validation commands without changing readiness claims | Queued |
+| 98 | Reconcile signer custody readiness merge state | Gate G support | Implement issue #190 by marking PR #189 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next public-beta evidence blocker-report target | Merged in PR #192 |
+| 99 | Add public beta evidence blocker report artifact | Gate G support | Implement issue #191 by generating a deterministic no-secret report from `release-artifacts/latest/public-beta-evidence.json` that lists incomplete public-beta evidence rows and validation commands without changing readiness claims | Active |
 
 ## Current PR Worklog
 
+### PR candidate: Add public beta evidence blocker report artifact (Queue Item 99)
+
+Status: Open in PR #193; CI passed and CodeRabbit returned one low-value
+nitpick now being resolved.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/191`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/193`.
+Branch: `codex/public-beta-blocker-report`.
+Branch started from PR #192 squash merge commit
+`b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd`.
+
+Prior queue transition:
+
+- Queue Item 98 merged in PR #192 as squash commit
+  `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd`.
+- PR #192 final implementation head was
+  `057ae6659b4ec0b34d97bf91f89019d93fbe4964`.
+- PR #192 GitHub Actions CI run `27455898124` passed on the final head.
+- PR #192 CodeRabbit status was success with no actionable comments remaining.
+- PR #192 closed issue #190 at merge.
+- Issue #191 is the active Gate G support target.
+
+Goal:
+
+- Generate `release-artifacts/latest/public-beta-blockers.md` deterministically
+  from `release-artifacts/latest/public-beta-evidence.json`.
+- Preserve the no-secret policy and the intentionally blocked public-beta and
+  production-release status.
+- List incomplete public-beta and production rows, evidence posture, future
+  external evidence categories, reviewed external evidence rows when present,
+  and validation commands.
+- Wire report drift checks into local wrappers, `make check`, and CI.
+- Include the committed report in release manifest and checksum coverage.
+- Update docs, changelog, roadmap, and durable run state.
+
+Validation completed locally at `2026-06-13 04:40 UTC`:
+
+- `python -m py_compile scripts\generate_public_beta_blocker_report.py scripts\test_public_beta_blocker_report.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_artifacts.py scripts\test_release_artifacts.py`.
+- `python scripts\test_public_beta_blocker_report.py`.
+- `python scripts\generate_public_beta_blocker_report.py`.
+- `python scripts\generate_public_beta_blocker_report.py --check`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_artifacts.py`.
+- `python scripts\generate_release_checksums.py`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\check_public_beta_evidence.py`.
+- `python scripts\check_changelog.py`.
+- `python scripts\test_release_readiness.py`.
+- `python scripts\test_changelog_check.py`.
+- `git diff --check`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\public-beta-evidence.md docs\release-readiness.md release-artifacts\README.md release-artifacts\latest\public-beta-blockers.md`.
+- `bash -n scripts/check.sh`.
+- PowerShell parser validation for `scripts\check.ps1`.
+- `make check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+PR opened:
+
+- PR #193 opened against `main` on head
+  `21b1de2ad53792ae8c1c688964bcd6e83db988a7`.
+- CodeRabbit review requested in comment `4697524739`.
+- Follow-up state before merge:
+  - PR #193 implementation head `56f62b9ba879d20b599c112e49563f9625b1046e`
+    passed GitHub Actions CI run `27456879641`.
+  - CodeRabbit status passed with one low-value nitpick in review
+    `4490941768`.
+  - The nitpick requested deriving the blocker-report generator metadata from
+    the script name and `GENERATOR_VERSION` instead of repeating a literal
+    script/version string.
+  - A follow-up commit resolves the nitpick without changing the generated
+    report text.
+
 ### PR candidate: Reconcile signer custody readiness merge state (Queue Item 98)
 
-Status: Open in PR #192; awaiting CI and CodeRabbit.
+Status: Merged in PR #192 on `2026-06-13`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/190`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/192`.
 Branch: `codex/reconcile-signer-custody-state`.
@@ -177,10 +252,16 @@ Prior queue transition:
 - PR #189 CodeRabbit status was success, and all visible CodeRabbit review
   threads were resolved by the bot.
 - PR #189 closed issue #187 at merge.
-- Issue #190 is the active state-only reconciliation target.
-- Issue #191 is queued next for a deterministic public-beta evidence blocker
+- Issue #190 was the active state-only reconciliation target.
+- Issue #191 was queued next for a deterministic public-beta evidence blocker
   report generated from the committed evidence manifest without changing any
   public-beta or production readiness claims.
+- PR #192 final implementation head was
+  `057ae6659b4ec0b34d97bf91f89019d93fbe4964`.
+- PR #192 GitHub Actions CI run `27455898124` passed on the final head.
+- PR #192 CodeRabbit status was success with no actionable comments remaining.
+- PR #192 merged as squash commit
+  `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd`.
 
 Goal:
 
@@ -8741,6 +8822,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 04:43 | Open PR #193 and request CodeRabbit | Public-beta blocker report PR opened against `main`, linked `Closes #191`, and CodeRabbit review requested in comment `4697524739`; Claude intentionally skipped per current user instruction |
+| 2026-06-13 04:40 | Finish Queue Item 99 local validation | Focused public-beta blocker/report tests, release manifest/checksum checks, release-readiness, changelog, heading/syntax/whitespace checks, full `make check`, and the Windows PowerShell wrapper all pass locally |
+| 2026-06-13 04:22 | Implement Queue Item 99 local draft | Added a deterministic no-secret public-beta blocker report generated from `public-beta-evidence.json`, wired local/CI drift checks, release manifest/checksum coverage, docs, changelog, roadmap, and run-state updates without changing readiness claims |
+| 2026-06-13 04:02 | Merge PR #192 and start Queue Item 99 | State reconciliation merged as `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd`; issue #191 is now the active no-secret public-beta evidence blocker-report slice |
 | 2026-06-13 03:58 | Open PR #192 | State-only reconciliation PR opened against `main`, linked `Closes #190`, and will use CodeRabbit-only review per current user instruction |
 | 2026-06-13 03:53 | Create issues #190 and #191 | PR #189 merged cleanly, no open issues remained, so issue #190 tracks state reconciliation and issue #191 tracks the next no-secret public-beta evidence blocker-report slice |
 | 2026-06-13 03:51 | Merge PR #189 | Signer custody readiness evidence merged as `ae87028d7471c35faa0bc3a3555583e24be50d4d`; final head `e0c64d91cfbcfabea7b7b89d8b1d61521c8487fa` passed CI run `27455567547`, CodeRabbit status was success, all visible review threads were resolved, and issue #187 closed completed |

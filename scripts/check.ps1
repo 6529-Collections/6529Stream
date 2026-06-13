@@ -83,6 +83,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_non_local_release_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_public_beta_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_public_beta_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_public_beta_blocker_report.py"
+& $pythonPath @pythonArgs "scripts\generate_public_beta_blocker_report.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\check_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\test_audit_package.py"
