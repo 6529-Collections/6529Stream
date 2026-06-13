@@ -200,8 +200,8 @@ Branch: `codex/live-audit-report-schema-checker`.
 Branch started from PR #272 squash merge commit
 `f014477b5d1f60e3ad2e30e6db0bbab1c28fb71c`.
 Opening PR head: `014088f62aede568f9fc458410aebe31818b5dbf`.
-Current PR head: `9ac3449ef5299de00be3c7d64b0a211b55142ef9`.
-CodeRabbit request comment: `4699982486`.
+Review-request trace head: `9ac3449ef5299de00be3c7d64b0a211b55142ef9`.
+CodeRabbit initial request comment: `4699982486`.
 
 Prior transition:
 
@@ -11016,7 +11016,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
-| 2026-06-13 22:29 | Request CodeRabbit PR #274 review | CodeRabbit review requested in comment `4699982486` on final pushed head `9ac3449ef5299de00be3c7d64b0a211b55142ef9`; Claude remains intentionally skipped per current user instruction. |
+| 2026-06-13 22:29 | Request CodeRabbit PR #274 review | CodeRabbit review requested in comment `4699982486` on review-request trace head `9ac3449ef5299de00be3c7d64b0a211b55142ef9`; Claude remains intentionally skipped per current user instruction. A follow-up state-only trace commit may move the PR head and should be checked from GitHub before merge. |
 | 2026-06-13 22:28 | Open PR #274 | Release evidence live audit report schema/checker PR opened on head `014088f62aede568f9fc458410aebe31818b5dbf`, links `Closes #273`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 22:26 | Finish Queue Item 131 local validation | The release evidence live audit report schema/checker draft passed focused checker tests, the committed template check, release-readiness, manifest/checksum checks, changelog, syntax, traceability, heading, whitespace checks, and the full Windows `scripts\check.ps1` gate on the final local diff. |
 | 2026-06-13 22:08 | Start Queue Item 131 | PR #272 merged as `f014477b5d1f60e3ad2e30e6db0bbab1c28fb71c`, issue #271 closed completed, issue #273 now tracks the release evidence live audit report schema/checker, and branch `codex/live-audit-report-schema-checker` is active from the PR #272 baseline. |
