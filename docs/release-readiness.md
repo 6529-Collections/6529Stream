@@ -129,7 +129,10 @@ The current local baseline includes:
   plus the generated exact issue body payloads at
   [`release-artifacts/latest/release-evidence-issue-body-sync.json`](../release-artifacts/latest/release-evidence-issue-body-sync.json)
   and
-  [`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md);
+  [`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md),
+  plus deterministic tracker-body checks with
+  `python scripts/test_release_evidence_issue_bodies.py` and
+  `python scripts/check_release_evidence_issue_bodies.py`;
 - non-local release evidence intake requirements, schema, checked template, and
   checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
   [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),
@@ -282,8 +285,12 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_labels.py
+python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
 python scripts/generate_release_evidence_issue_body_sync.py --check
+python scripts/test_release_evidence_issue_bodies.py
+python scripts/check_release_evidence_issue_bodies.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 ```

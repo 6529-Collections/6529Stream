@@ -68,8 +68,12 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_labels.py
+python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
 python scripts/generate_release_evidence_issue_body_sync.py --check
+python scripts/test_release_evidence_issue_bodies.py
+python scripts/check_release_evidence_issue_bodies.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -254,6 +258,23 @@ exact GitHub issue body payloads and
 `python scripts/generate_release_evidence_issue_body_sync.py --check` to verify
 they still match the current backlog and issue-link map. It remains tracker-only
 and does not mark retained evidence complete.
+Run `python scripts/check_release_evidence_issue_bodies.py` to validate the
+committed body-sync payloads. To audit live GitHub body drift without adding
+network access to CI, export a snapshot and pass it to the checker:
+
+```bash
+gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,body,state > tmp/release-evidence-issue-bodies.json
+python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
+```
+
+If drift is reported, generate deterministic remediation files and update the
+affected issue with the body-file command printed by the checker:
+
+```bash
+python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/release-evidence-issue-bodies
+gh issue edit ISSUE_NUMBER --repo 6529-Collections/6529Stream --body-file tmp/release-evidence-issue-bodies/issue-ISSUE_NUMBER.md
+```
+
 The non-local release evidence intake runbook in
 [`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
 operator workflow, required retained fields, redaction rules, reviewer

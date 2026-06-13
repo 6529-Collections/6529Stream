@@ -95,6 +95,8 @@ jobs:
             scripts/check_release_evidence_issue_links.py \
             scripts/test_release_evidence_issue_body_sync.py \
             scripts/generate_release_evidence_issue_body_sync.py \
+            scripts/test_release_evidence_issue_bodies.py \
+            scripts/check_release_evidence_issue_bodies.py \
             scripts/check_architecture_threat_model.py \
             scripts/test_architecture_threat_model.py \
             scripts/check_audit_package.py \
@@ -309,6 +311,8 @@ jobs:
           python3 scripts/check_release_evidence_issue_labels.py 2>&1 | tee ci-logs/release-evidence-issue-labels-check.log
           python3 scripts/test_release_evidence_issue_body_sync.py 2>&1 | tee ci-logs/release-evidence-issue-body-sync-tests.log
           python3 scripts/generate_release_evidence_issue_body_sync.py --check 2>&1 | tee ci-logs/release-evidence-issue-body-sync-check.log
+          python3 scripts/test_release_evidence_issue_bodies.py 2>&1 | tee ci-logs/release-evidence-issue-bodies-tests.log
+          python3 scripts/check_release_evidence_issue_bodies.py 2>&1 | tee ci-logs/release-evidence-issue-bodies-check.log
 
       - name: Architecture and threat model
         shell: bash
