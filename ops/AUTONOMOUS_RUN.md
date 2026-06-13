@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-issue-links` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/213` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/214` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/232` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 11:47 UTC` |
+| Last updated | `2026-06-13 11:51 UTC` |
 
 ## Packaging Notes
 
@@ -172,9 +172,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Link release evidence backlog entries to GitHub tracker issues (Queue Item 110)
 
-Status: local implementation in progress.
+Status: PR #232 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/214`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/232`.
 Branch: `codex/release-evidence-issue-links`.
 Branch started from PR #213 squash merge commit
 `fc8df90cea2ac77fb8be88c3d2258a77693f374c`.
@@ -242,7 +242,10 @@ Next validation:
 
 Remote review:
 
-- Pending PR creation.
+- PR #232 opened against `main` from head
+  `b159a596923f16d33e6bdb8f59700a39ed9cd913`.
+- CodeRabbit requested in comment `4698436262`.
+- GitHub Actions and CodeRabbit review are pending.
 
 ### PR candidate: Add release evidence issue backlog artifact (Queue Item 109)
 
@@ -10254,6 +10257,7 @@ Outcome:
 | 2026-06-13 11:16 | Create issue #214 and child tracker issues | Opened parent issue #214, then created release-evidence tracker issues #215 through #231 from the generated issue backlog entries |
 | 2026-06-13 11:32 | Start Queue Item 110 | Created branch `codex/release-evidence-issue-links` from PR #213 squash merge and began committing the deterministic issue-link map/checker for issue #214 |
 | 2026-06-13 11:47 | Finish Queue Item 110 local validation | Focused issue-link, release-artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, and full `make check` validation pass with existing Foundry warning noise only |
+| 2026-06-13 11:51 | Open PR #232 and request CodeRabbit | Release evidence issue-link PR opened on head `b159a596923f16d33e6bdb8f59700a39ed9cd913`; CodeRabbit requested in comment `4698436262` |
 
 ## Resume Instructions
 
