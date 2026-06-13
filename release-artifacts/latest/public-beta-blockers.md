@@ -1,6 +1,6 @@
 # Public Beta Evidence Blocker Report
 
-This generated report is derived only from the committed public-beta evidence manifest. It preserves the no-secret policy and does not change readiness claims.
+This generated report is derived only from the committed shared release evidence status manifest. It preserves the no-secret policy and does not change readiness claims.
 
 The committed baseline remains intentionally blocked for public beta and production.
 
@@ -89,8 +89,8 @@ No reviewed external evidence rows are complete in the committed baseline.
 
 | Evidence Family | Command |
 | --- | --- |
-| Public beta evidence manifest | `python scripts/test_public_beta_evidence.py` |
-| Public beta evidence manifest | `python scripts/check_public_beta_evidence.py` |
+| Shared evidence status manifest | `python scripts/test_public_beta_evidence.py` |
+| Shared evidence status manifest | `python scripts/check_public_beta_evidence.py` |
 | Public beta blocker report | `python scripts/test_public_beta_blocker_report.py` |
 | Public beta blocker report | `python scripts/generate_public_beta_blocker_report.py --check` |
 | Non-local release evidence | `python scripts/test_non_local_release_evidence.py` |

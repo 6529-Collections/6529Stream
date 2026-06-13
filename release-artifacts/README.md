@@ -184,8 +184,8 @@ remediation.
 
 `scripts/check_release_evidence_issue_closure.py` validates the committed
 tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
-artifact, packet index, and public-beta evidence manifest agree on tracker
-closure readiness. Its optional `--live-json` mode audits a
+artifact, packet index, and shared release evidence status manifest agree on
+tracker closure readiness. Its optional `--live-json` mode audits a
 `gh issue list --state all --json number,title,state` snapshot and fails if a
 linked tracker issue is closed while the committed evidence status is still
 `missing`, `pending`, `blocked`, or `not_applicable`.

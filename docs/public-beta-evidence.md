@@ -31,6 +31,9 @@ The canonical status file is
 [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 Its schema is
 [`release-artifacts/schema/public-beta-evidence.schema.json`](../release-artifacts/schema/public-beta-evidence.schema.json).
+The filename is retained for compatibility with the original public-beta
+evidence gate, but the manifest is now the shared release evidence status
+manifest for both public-beta and production-release requirement rows.
 
 The status file is included in release manifest and checksum coverage, so
 changes to blocker status, retained evidence paths, hashes, or risk acceptance
@@ -86,9 +89,9 @@ make issue closure completion evidence.
 The release evidence issue closure checker,
 `scripts/check_release_evidence_issue_closure.py`, validates that the committed
 tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
-artifact, packet index, and public-beta evidence manifest agree on which
-tracker issues may close. A linked tracker issue should remain open while its
-committed evidence status is `missing`, `pending`, `blocked`, or
+artifact, packet index, and shared release evidence status manifest agree on
+which tracker issues may close. A linked tracker issue should remain open while
+its committed evidence status is `missing`, `pending`, `blocked`, or
 `not_applicable`; it may close only after the committed status is `complete` or
 `accepted_risk`.
 

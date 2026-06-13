@@ -163,7 +163,8 @@ def body_prefix(
             f"Issue-link artifact: `{issue_links_path}`",
             (
                 "Completion policy: this tracker issue can close only after reviewed "
-                "retained evidence is referenced by the release evidence manifest."
+                "retained evidence is referenced by the shared release evidence "
+                "status manifest."
             ),
             "",
             "",
