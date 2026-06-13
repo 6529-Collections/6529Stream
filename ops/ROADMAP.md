@@ -92,12 +92,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 12:46 UTC` during Queue Item 112 release evidence issue-body sync implementation; local validation covers body-sync py_compile, generator write, focused tests, and check mode, with broader gate validation pending before PR |
-| OS tested | Windows local body-sync artifact gate for Queue Item 112; Linux GitHub Actions passed for latest merged baseline PR #234 run `27466683865` on final head `2a26f748b087543147a8a756775eea0e3ff5839e`, with merged baseline commit `1ac0765632f053c5a29c27375d04de8c9d75736b` |
+| Last verified | `2026-06-13 13:38 UTC` after PR #236 merged the release evidence issue body-sync baseline; local validation covered body-sync py_compile, generator write/check, focused tests, release artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, full `make check`, and Windows PowerShell wrapper checks |
+| OS tested | Windows local body-sync artifact gate for Queue Item 112; Linux GitHub Actions passed for latest merged baseline PR #236 run `27468161616` on final head `4606bb127d491b18cb6d4411657e985faebf1c12`, with merged baseline commit `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #234 final CI run `27466683865` passed on head `2a26f748b087543147a8a756775eea0e3ff5839e`; CodeRabbit status was success with no actionable comments or unresolved review threads, and PR #234 squash-merged as `1ac0765632f053c5a29c27375d04de8c9d75736b` |
+| CI run | Latest merged baseline PR #236 final CI run `27468161616` passed on head `4606bb127d491b18cb6d4411657e985faebf1c12`; CodeRabbit status was success with no unresolved review threads after review-response commit `4606bb127d491b18cb6d4411657e985faebf1c12`, and PR #236 squash-merged as `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline

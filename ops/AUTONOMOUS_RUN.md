@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-issue-bodies` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/234` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/235` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/236` |
-| Next issue | Apply generated issue-body sync payloads to open release evidence tracker issues #215 through #231, then continue the evidence tracker queue |
+| Active PR branch | `codex/release-evidence-body-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/236` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/237` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/238` |
+| Next issue | After issue #237, harden release evidence tracker label drift checks before attempting retained external evidence tasks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 13:16 UTC` |
+| Last updated | `2026-06-13 13:44 UTC` |
 
 ## Packaging Notes
 
@@ -168,14 +168,57 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 109 | Add release evidence issue backlog artifact | Gate G support | Implement issue #212 by generating deterministic no-secret issue-ready backlog entries for every incomplete public-beta and production-release evidence requirement without auto-creating issues or changing readiness claims | Merged in PR #213 |
 | 110 | Link release evidence backlog entries to GitHub tracker issues | Gate G support | Implement issue #214 by committing a deterministic no-secret issue-link map for release evidence backlog rows, validating one GitHub issue per row, and wiring docs/local/CI checks without changing readiness claims | Merged in PR #232 |
 | 111 | Reconcile release evidence issue links merge state | Gate G support | Implement issue #233 by recording PR #232 merge evidence, refreshing stale roadmap verification metadata, and preserving the next tracker-issue queue posture without changing readiness claims | Merged in PR #234 |
-| 112 | Generate and apply release evidence tracker issue bodies | Gate G support | Implement issue #235 by generating exact no-secret GitHub issue body payloads from the committed backlog/link map, wiring them into local/CI/release gates, applying them to issues #215 through #231, and preserving blocked readiness claims | Active |
+| 112 | Generate and apply release evidence tracker issue bodies | Gate G support | Implement issue #235 by generating exact no-secret GitHub issue body payloads from the committed backlog/link map, wiring them into local/CI/release gates, applying them to issues #215 through #231, and preserving blocked readiness claims | Merged in PR #236 |
+| 113 | Reconcile release evidence issue body sync merge state | Gate G support | Implement issue #237 by recording PR #236 merge evidence, tracker-label reconciliation, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Active |
+| 114 | Harden release evidence tracker label drift checks | Gate G support | Add a no-secret label audit/sync helper so tracker issues #215 through #231 cannot silently drift from committed `applied_labels` before retained evidence completion | Planned |
 
 ## Current PR Worklog
 
-### PR candidate: Generate and apply release evidence tracker issue bodies (Queue Item 112)
+### PR candidate: Reconcile release evidence issue body sync merge state (Queue Item 113)
 
-Status: PR #236 open; initial CI passed, CodeRabbit posted two minor
-documentation findings, and the review-response fixes are prepared locally.
+Status: PR #238 open; CI and CodeRabbit pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/237`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/238`.
+Branch: `codex/release-evidence-body-state`.
+Branch started from PR #236 squash merge commit
+`1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a`.
+
+Prior queue transition:
+
+- Queue Item 112 merged in PR #236 as squash commit
+  `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a`.
+- PR #236 final implementation head was
+  `4606bb127d491b18cb6d4411657e985faebf1c12`.
+- PR #236 GitHub Actions CI run `27468161616` passed on the final head,
+  including deployment rehearsal.
+- PR #236 CodeRabbit status was success after review-response commit
+  `4606bb127d491b18cb6d4411657e985faebf1c12`; the two original review threads
+  were resolved as addressed and no unresolved review threads remained.
+- Issue #235 closed completed after merge.
+- Tracker issues #215 through #231 remain open because they require reviewed
+  retained external evidence; their live `release` and `roadmap` labels were
+  re-applied after the merge to match committed `applied_labels`.
+
+Goal:
+
+- Mark Queue Item 112 complete and record the final PR #236 evidence.
+- Refresh roadmap verification metadata to the merged PR #236 baseline.
+- Record the tracker-label reconciliation without changing readiness claims.
+- Select the next no-secret evidence-tracker hardening target.
+
+Completed local validation:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_changelog.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+### Completed: Generate and apply release evidence tracker issue bodies (Queue Item 112)
+
+Status: merged in PR #236.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/235`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/236`.
 Branch: `codex/release-evidence-issue-bodies`.
@@ -258,8 +301,18 @@ Remote review:
   `docs/tooling.md` needed to name the committed issue-link map in checksum
   coverage, and `ops/ROADMAP.md` needed to replace stale body-sync status
   wording with PR #236 / complete wording.
-- Review-response fixes are local and validated; push them, request CodeRabbit
-  again, then resolve threads after the bot is clean.
+- Review-response commit `4606bb127d491b18cb6d4411657e985faebf1c12`
+  addressed the CodeRabbit comments and regenerated release manifest/checksum
+  artifacts.
+- CodeRabbit second pass completed successfully with no new actionable threads.
+- Original CodeRabbit review threads were resolved as addressed and outdated.
+- Final GitHub Actions Foundry smoke run `27468161616` passed on head
+  `4606bb127d491b18cb6d4411657e985faebf1c12`.
+- PR #236 squash-merged as
+  `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a`, closing issue #235 as completed.
+- After merge, tracker issues #215 through #231 were reconciled to retain
+  `release` and `roadmap` labels, matching committed `applied_labels`; they
+  remain open for reviewed retained evidence.
 
 ### Completed: Reconcile release evidence issue links merge state (Queue Item 111)
 
@@ -10372,6 +10425,9 @@ Outcome:
 | 2026-06-13 13:13 | Finish Queue Item 112 local validation | Focused release evidence body-sync, release-artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, full `make check`, and Windows PowerShell wrapper validation all pass with existing Foundry warning noise only |
 | 2026-06-13 13:16 | Open PR #236 and request CodeRabbit | Release evidence issue body-sync PR opened on head `f7dc33795e45129da62e3636448f781c4bcbe251`; CodeRabbit review requested in comment `4698628618` |
 | 2026-06-13 13:31 | Address CodeRabbit PR #236 review locally | Foundry smoke run `27467859837` passed; CodeRabbit review `4491474201` requested two minor docs/roadmap wording fixes, which are prepared locally with regenerated release manifest/checksum artifacts and focused validation passing |
+| 2026-06-13 13:38 | Merge PR #236 | Release evidence issue body sync merged as `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a` after final CI run `27468161616`, CodeRabbit success, resolved review threads, and issue #235 closure |
+| 2026-06-13 13:41 | Start Queue Item 113 | Issue #237 opened to reconcile PR #236 merge evidence and roadmap metadata; tracker issues #215 through #231 had `release` and `roadmap` labels re-applied to match committed `applied_labels` |
+| 2026-06-13 13:44 | Open PR #238 | Release evidence body-sync state reconciliation PR opened on head `5d6002d78b75da03ae3ce45dbcfefecdcd4fa8b8`; CodeRabbit review will be requested after this PR-state follow-up commit |
 
 ## Resume Instructions
 
