@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD after issue #265 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 20:02 UTC` |
+| Last updated | `2026-06-13 20:27 UTC` |
 
 ## Packaging Notes
 
@@ -189,7 +189,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence live audit orchestrator (Queue Item 127)
 
-Status: PR #266 open; CodeRabbit review requested and CI pending.
+Status: PR #266 open; CI green; CodeRabbit success with one helper-deduplication
+nit addressed locally and pending push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/265`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/266`.
 Branch: `codex/release-evidence-live-audit-orchestrator`.
@@ -198,6 +199,31 @@ Branch started from PR #264 squash merge commit
 Opening PR head: `fe618aca88ba5af68196d61c6cb7af11a2ac0327`.
 CodeRabbit request comment:
 `https://github.com/6529-Collections/6529Stream/pull/266#issuecomment-4699634295`.
+CodeRabbit follow-up:
+
+- GitHub Actions CI run `27477620425` passed on head
+  `13a7b80bd2dc3cbb695a1d1ef7d6e3e29f20c005`.
+- CodeRabbit status was success and no inline review threads were open.
+- CodeRabbit review `pullrequestreview-4491985266` left one nitpick to remove
+  duplicated `positive_int` argparse parsing between
+  `scripts/export_release_evidence_issue_snapshot.py` and
+  `scripts/audit_release_evidence_issue_snapshots.py`.
+- Local follow-up extracts that parser into `scripts/argparse_helpers.py`, keeps
+  the exact `must be a positive integer` `argparse.ArgumentTypeError` text, and
+  adds focused exporter/orchestrator parser-regression assertions.
+- Follow-up validation passed:
+  `python scripts/test_release_evidence_issue_snapshot.py`,
+  `python scripts/test_release_evidence_issue_snapshot_audit.py`,
+  `python -m py_compile scripts/argparse_helpers.py scripts/export_release_evidence_issue_snapshot.py scripts/audit_release_evidence_issue_snapshots.py scripts/test_release_evidence_issue_snapshot.py scripts/test_release_evidence_issue_snapshot_audit.py`,
+  `python scripts/check_release_readiness.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`,
+  `python scripts/check_changelog.py`,
+  `bash -n scripts/check.sh`,
+  PowerShell syntax check for `scripts/check.ps1`,
+  `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md CHANGELOG.md`,
+  `git diff --check`, and
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
 
 Prior queue transition:
 

@@ -36,6 +36,16 @@ def completed(stdout: object, returncode: int = 0, stderr: str = "") -> subproce
 class ReleaseEvidenceIssueSnapshotTests(unittest.TestCase):
     """Exporter behavior for live issue snapshots."""
 
+    def test_invalid_limit_keeps_argparse_error_text(self) -> None:
+        """Invalid limits keep the shared positive-int argparse error."""
+        stderr = StringIO()
+        with self.assertRaises(SystemExit) as raised:
+            with redirect_stderr(stderr), redirect_stdout(StringIO()):
+                exporter.main(["--limit", "0"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("must be a positive integer", stderr.getvalue())
+
     def test_profile_args_match_label_audit_fields(self) -> None:
         """The labels profile exports the checker-compatible fields."""
         self.assertEqual(

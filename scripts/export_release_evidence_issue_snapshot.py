@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from argparse_helpers import positive_int
+
 
 REPO_FULL_NAME = "6529-Collections/6529Stream"
 
@@ -135,17 +137,6 @@ def write_snapshot(path: Path | None, rows: list[dict[str, Any]]) -> None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8", newline="\n")
-
-
-def positive_int(value: str) -> int:
-    """Parse a positive integer for argparse."""
-    try:
-        parsed = int(value)
-    except ValueError as exc:
-        raise argparse.ArgumentTypeError("must be a positive integer") from exc
-    if parsed <= 0:
-        raise argparse.ArgumentTypeError("must be a positive integer")
-    return parsed
 
 
 def build_parser() -> argparse.ArgumentParser:

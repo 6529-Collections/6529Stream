@@ -34,6 +34,16 @@ def script_name(command: list[str]) -> str:
 class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
     """Orchestrator behavior for live issue snapshot audits."""
 
+    def test_invalid_limit_keeps_argparse_error_text(self) -> None:
+        """Invalid limits keep the shared positive-int argparse error."""
+        stderr = StringIO()
+        with self.assertRaises(SystemExit) as raised:
+            with redirect_stderr(stderr), redirect_stdout(StringIO()):
+                auditor.main(["--limit", "0"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("must be a positive integer", stderr.getvalue())
+
     def test_default_profiles_run_export_then_check_in_order(self) -> None:
         """Default mode audits labels, bodies, and closure in order."""
         with patch.object(auditor.subprocess, "run", return_value=completed()) as run:

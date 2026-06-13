@@ -47,6 +47,7 @@ jobs:
           done
 
           python3 -m py_compile \
+            scripts/argparse_helpers.py \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
             scripts/check_metadata_fixtures.py \

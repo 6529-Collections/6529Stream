@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
+from argparse_helpers import positive_int
+
 
 REPO_FULL_NAME = "6529-Collections/6529Stream"
 DEFAULT_PROFILES = ("labels", "bodies", "closure")
@@ -32,17 +34,6 @@ PROFILE_CONFIG = {
 
 class ReleaseEvidenceIssueSnapshotAuditError(RuntimeError):
     """Raised when a live issue snapshot audit command fails."""
-
-
-def positive_int(value: str) -> int:
-    """Parse a positive integer for argparse."""
-    try:
-        parsed = int(value)
-    except ValueError as exc:
-        raise argparse.ArgumentTypeError("must be a positive integer") from exc
-    if parsed <= 0:
-        raise argparse.ArgumentTypeError("must be a positive integer")
-    return parsed
 
 
 def expand_profiles(profiles: Iterable[str] | None) -> list[str]:
