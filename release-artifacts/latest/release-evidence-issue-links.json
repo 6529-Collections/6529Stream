@@ -1,0 +1,360 @@
+{
+  "schema_version": "6529stream.release-evidence-issue-links.v1",
+  "source_backlog": {
+    "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
+    "schema_version": "6529stream.release-evidence-issue-backlog.v1"
+  },
+  "parent_issue": {
+    "issue_number": 214,
+    "issue_url": "https://github.com/6529-Collections/6529Stream/issues/214",
+    "title": "Link release evidence backlog entries to GitHub tracker issues"
+  },
+  "policy": {
+    "no_secrets": true,
+    "tracker_only": true,
+    "auto_create_issues": false,
+    "completion_requires_reviewed_retained_evidence": true
+  },
+  "links": [
+    {
+      "entry_id": "public-beta-external-audit-report",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "external_audit_report",
+      "status": "missing",
+      "title": "Retain public beta evidence: external_audit_report",
+      "issue_number": 215,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/215",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-fork-deployment-rehearsal",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_deployment_rehearsal",
+      "status": "missing",
+      "title": "Retain public beta evidence: fork_deployment_rehearsal",
+      "issue_number": 216,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/216",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-testnet-deployment-rehearsal",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "testnet_deployment_rehearsal",
+      "status": "missing",
+      "title": "Retain public beta evidence: testnet_deployment_rehearsal",
+      "issue_number": 217,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/217",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-fork-testnet-metadata-browser-evidence",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_testnet_metadata_browser_evidence",
+      "status": "missing",
+      "title": "Retain public beta evidence: fork_testnet_metadata_browser_evidence",
+      "issue_number": 218,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/218",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-fork-testnet-ceremony-evidence",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_testnet_ceremony_evidence",
+      "status": "missing",
+      "title": "Retain public beta evidence: fork_testnet_ceremony_evidence",
+      "issue_number": 219,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/219",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-fork-testnet-randomizer-operations-evidence",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_testnet_randomizer_operations_evidence",
+      "status": "missing",
+      "title": "Retain public beta evidence: fork_testnet_randomizer_operations_evidence",
+      "issue_number": 220,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/220",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-verified-deployed-addresses",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "verified_deployed_addresses",
+      "status": "missing",
+      "title": "Retain public beta evidence: verified_deployed_addresses",
+      "issue_number": 221,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/221",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "public-beta-explorer-verification-status",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "explorer_verification_status",
+      "status": "missing",
+      "title": "Retain public beta evidence: explorer_verification_status",
+      "issue_number": 222,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/222",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-production-signatures",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "production_signatures",
+      "status": "missing",
+      "title": "Retain production release evidence: production_signatures",
+      "issue_number": 223,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/223",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-signed-git-tag",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "signed_git_tag",
+      "status": "missing",
+      "title": "Retain production release evidence: signed_git_tag",
+      "issue_number": 224,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/224",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-production-address-books",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "production_address_books",
+      "status": "missing",
+      "title": "Retain production release evidence: production_address_books",
+      "issue_number": 225,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/225",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-production-broadcast-retention",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "production_broadcast_retention",
+      "status": "missing",
+      "title": "Retain production release evidence: production_broadcast_retention",
+      "issue_number": 226,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/226",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-live-deployment-manifest",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_deployment_manifest",
+      "status": "missing",
+      "title": "Retain production release evidence: live_deployment_manifest",
+      "issue_number": 227,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/227",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-live-ceremony-evidence",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_ceremony_evidence",
+      "status": "missing",
+      "title": "Retain production release evidence: live_ceremony_evidence",
+      "issue_number": 228,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/228",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-live-randomizer-operations-evidence",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_randomizer_operations_evidence",
+      "status": "missing",
+      "title": "Retain production release evidence: live_randomizer_operations_evidence",
+      "issue_number": 229,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/229",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-live-explorer-verification",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_explorer_verification",
+      "status": "missing",
+      "title": "Retain production release evidence: live_explorer_verification",
+      "issue_number": 230,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/230",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    },
+    {
+      "entry_id": "production-release-post-audit-remediation",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "post_audit_remediation",
+      "status": "missing",
+      "title": "Retain production release evidence: post_audit_remediation",
+      "issue_number": 231,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/231",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap"
+      ]
+    }
+  ]
+}

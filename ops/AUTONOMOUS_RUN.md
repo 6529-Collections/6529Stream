@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-issue-backlog` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/211` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/212` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/213` |
+| Active PR branch | `codex/release-evidence-issue-links` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/213` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/214` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/232` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 11:05 UTC` |
+| Last updated | `2026-06-13 12:09 UTC` |
 
 ## Packaging Notes
 
@@ -165,15 +165,107 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 106 | Reconcile production blocker report merge state | Gate G support | Implement issue #206 by recording PR #205 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret release-readiness support target | Merged in PR #208 |
 | 107 | Add release evidence packet index and checker | Gate G support | Implement issue #207 by generating one deterministic no-secret packet index that maps public-beta and production-release blocker rows to templates, retained-artifact expectations, validation commands, and current readiness posture | Merged in PR #209 |
 | 108 | Reconcile release evidence packet index merge state | Gate G support | Implement issue #210 by recording PR #209 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret roadmap target without changing readiness claims | Merged in PR #211 |
-| 109 | Add release evidence issue backlog artifact | Gate G support | Implement issue #212 by generating deterministic no-secret issue-ready backlog entries for every incomplete public-beta and production-release evidence requirement without auto-creating issues or changing readiness claims | Active |
+| 109 | Add release evidence issue backlog artifact | Gate G support | Implement issue #212 by generating deterministic no-secret issue-ready backlog entries for every incomplete public-beta and production-release evidence requirement without auto-creating issues or changing readiness claims | Merged in PR #213 |
+| 110 | Link release evidence backlog entries to GitHub tracker issues | Gate G support | Implement issue #214 by committing a deterministic no-secret issue-link map for release evidence backlog rows, validating one GitHub issue per row, and wiring docs/local/CI checks without changing readiness claims | Active |
 
 ## Current PR Worklog
 
+### PR candidate: Link release evidence backlog entries to GitHub tracker issues (Queue Item 110)
+
+Status: PR #232 open; CodeRabbit review fix validated locally and ready to
+push.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/214`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/232`.
+Branch: `codex/release-evidence-issue-links`.
+Branch started from PR #213 squash merge commit
+`fc8df90cea2ac77fb8be88c3d2258a77693f374c`.
+
+Prior queue transition:
+
+- Queue Item 109 merged in PR #213 as squash commit
+  `fc8df90cea2ac77fb8be88c3d2258a77693f374c`.
+- PR #213 final implementation head was
+  `6ac85e8e1d04e1fe383e81fb390f0573f3c9406f`.
+- PR #213 GitHub Actions CI run `27465004282` passed on the final head.
+- PR #213 CodeRabbit status was success with no actionable comments.
+- Issue #212 was closed completed after merge.
+- Issue #214 was opened as the parent tracker-linking issue.
+- Child release-evidence tracker issues #215 through #231 were created from
+  the generated issue backlog rows.
+
+Goal:
+
+- Commit `release-artifacts/latest/release-evidence-issue-links.json` as a
+  no-secret tracker map from every generated backlog entry to exactly one
+  GitHub issue.
+- Validate the map against
+  `release-artifacts/latest/release-evidence-issue-backlog.json`, including
+  schema, parent issue, policy flags, source backlog identity, entry parity,
+  issue URL/number matching, duplicate protection, label traceability, and
+  secret-like data scanning.
+- Wire checker tests into Makefile, shell/PowerShell wrappers, CI, release
+  manifest, checksum coverage, release-artifact downstream handling,
+  release-readiness docs, public-beta evidence docs, tooling docs, changelog,
+  roadmap, and this durable state file.
+- Preserve blocked readiness claims: tracker issues organize missing evidence
+  work, but do not satisfy external audit, fork/testnet/live, signature, or
+  production evidence gates.
+
+Completed local validation so far:
+
+- `python -m py_compile scripts/check_release_evidence_issue_links.py scripts/test_release_evidence_issue_links.py scripts/generate_release_manifest.py scripts/test_release_manifest.py scripts/check_release_readiness.py scripts/test_release_readiness.py scripts/generate_release_artifacts.py scripts/test_release_artifacts.py`.
+- `python scripts/test_release_evidence_issue_links.py`.
+- `python scripts/check_release_evidence_issue_links.py`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_changelog_check.py`.
+- `python scripts/check_changelog.py`.
+- `python scripts/generate_release_manifest.py`.
+- `python scripts/generate_release_checksums.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `bash -n scripts/check.sh`.
+- PowerShell parser check for `scripts/check.ps1`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/release-readiness.md docs/public-beta-evidence.md release-artifacts/README.md docs/tooling.md`.
+- `git diff --check` (passes with the existing Windows LF-to-CRLF warning for
+  `scripts/check.ps1`).
+- `make check` (passes with existing Solidity compiler and Foundry trace warning
+  noise only).
+- After CodeRabbit review `4491391500`, repeated
+  `python -m py_compile scripts/check_release_evidence_issue_links.py scripts/test_release_evidence_issue_links.py`,
+  `python scripts/test_release_evidence_issue_links.py`,
+  `python scripts/check_release_evidence_issue_links.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`, `git diff --check`,
+  and full `make check`; all pass with existing warning noise only.
+
+Next validation:
+
+- Open PR, request CodeRabbit review, wait for CI/review, iterate, and merge
+  only after clean review/checks.
+
+Remote review:
+
+- PR #232 opened against `main` from head
+  `b159a596923f16d33e6bdb8f59700a39ed9cd913`.
+- CodeRabbit requested in comment `4698436262`.
+- State follow-up commit `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`
+  pushed after PR creation; CodeRabbit requested again in comment
+  `4698439740`.
+- GitHub Actions CI run `27465990522` passed on head
+  `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`.
+- CodeRabbit review `4491391500` requested consistent IO/UTF-8 decode error
+  wrapping in the issue-link JSON loader.
+- Review fix adds the error wrapper plus invalid-encoding regression coverage
+  and passes focused/full local validation.
+
 ### PR candidate: Add release evidence issue backlog artifact (Queue Item 109)
 
-Status: PR #213 open; CI passed on head
-`9f20c468eb2f8cce5a42d22080773945fc0cfe46`; CodeRabbit review fix validated
-locally and ready to push.
+Status: merged in PR #213.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/212`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/213`.
 Branch: `codex/release-evidence-issue-backlog`.
@@ -230,16 +322,20 @@ Completed local validation so far:
 - `make check` (passes with existing Solidity compiler and Foundry trace warning
   noise only).
 
-Next validation:
-
-- Wait for CI and CodeRabbit review comments, then iterate until clean.
-
 Remote review:
 
 - PR #213 opened against `main` from head
   `c45d49c2cb31ceddf0d0657c532b09654b7c4207`.
 - CodeRabbit requested in comment `4698282548`.
-- GitHub Actions and CodeRabbit review are pending.
+- CodeRabbit review `4491326886` requested typed packet-field validation, a
+  missing nested-field regression, and tooling command-list parity.
+- Review fix commit `6ac85e8e1d04e1fe383e81fb390f0573f3c9406f` passed focused
+  local validation and full `make check`.
+- GitHub Actions CI run `27465004282` passed on the final head.
+- CodeRabbit status was success with no actionable comments after the review
+  fix.
+- PR #213 squash-merged as
+  `fc8df90cea2ac77fb8be88c3d2258a77693f374c`.
 
 ### Completed: Reconcile release evidence packet index merge state (Queue Item 108)
 
@@ -10173,6 +10269,12 @@ Outcome:
 | 2026-06-13 10:42 | Open PR #213 and request CodeRabbit | Release evidence issue backlog PR opened on head `c45d49c2cb31ceddf0d0657c532b09654b7c4207`; CodeRabbit requested in comment `4698282548` |
 | 2026-06-13 10:55 | Address CodeRabbit PR #213 review | CI run `27464488143` passed on head `9f20c468eb2f8cce5a42d22080773945fc0cfe46`; CodeRabbit review `4491326886` requested typed packet-field validation, a missing nested-field regression, and tooling command-list parity |
 | 2026-06-13 11:05 | Validate PR #213 review fix locally | Focused issue-backlog, manifest, checksum, release-artifact, readiness, changelog, syntax, heading, whitespace, and full `make check` validation pass with existing Foundry warning noise only |
+| 2026-06-13 11:14 | Merge PR #213 | Release evidence issue backlog PR merged as `fc8df90cea2ac77fb8be88c3d2258a77693f374c` after final CI run `27465004282`, CodeRabbit success, and issue #212 closure |
+| 2026-06-13 11:16 | Create issue #214 and child tracker issues | Opened parent issue #214, then created release-evidence tracker issues #215 through #231 from the generated issue backlog entries |
+| 2026-06-13 11:32 | Start Queue Item 110 | Created branch `codex/release-evidence-issue-links` from PR #213 squash merge and began committing the deterministic issue-link map/checker for issue #214 |
+| 2026-06-13 11:47 | Finish Queue Item 110 local validation | Focused issue-link, release-artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, and full `make check` validation pass with existing Foundry warning noise only |
+| 2026-06-13 11:51 | Open PR #232 and request CodeRabbit | Release evidence issue-link PR opened on head `b159a596923f16d33e6bdb8f59700a39ed9cd913`; CodeRabbit requested in comment `4698436262` |
+| 2026-06-13 12:09 | Address CodeRabbit PR #232 review | CI run `27465990522` passed on head `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`; CodeRabbit review `4491391500` requested IO/UTF-8 decode error wrapping, and the follow-up regression plus full `make check` validation pass locally |
 
 ## Resume Instructions
 

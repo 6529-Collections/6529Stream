@@ -56,10 +56,12 @@ Release manifest, checksum bundle, source verification inputs, ceremony evidence
 randomizer operations evidence, release-signature evidence, Slither baseline,
 public-beta evidence status, non-local release evidence, incident response,
 release evidence packet index, drop authorization signing fixtures,
-release evidence issue backlog, unsigned payload-generator examples,
-drop authorization signing evidence, signer custody readiness, test matrix, and
-ADR index evidence are
-summarized.
+release evidence issue backlog and release evidence issue links are summarized.
+The unsigned payload-generator examples are summarized.
+The drop authorization signing fixtures are summarized.
+The drop authorization signing evidence and signer custody readiness evidence
+are summarized.
+The test matrix and ADR index evidence are summarized.
 
 ## Local Evidence Already Passing
 

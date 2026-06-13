@@ -24,6 +24,8 @@ python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
+python scripts/generate_release_evidence_issue_backlog.py
+python scripts/check_release_evidence_issue_links.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -67,6 +69,10 @@ python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_release_evidence_packet_index.py
 python scripts/generate_release_evidence_packet_index.py --check
+python scripts/test_release_evidence_issue_backlog.py
+python scripts/generate_release_evidence_issue_backlog.py --check
+python scripts/test_release_evidence_issue_links.py
+python scripts/check_release_evidence_issue_links.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -144,6 +150,11 @@ public-beta and production-release packet row into an issue-ready title, label
 set, body, retained-artifact completion gate, and validation command list.
 They do not create issues automatically and do not change public-beta or
 production-release readiness claims.
+
+`latest/release-evidence-issue-links.json` is a committed no-secret tracker map
+from each issue-backlog entry to its GitHub issue. It lets maintainers audit
+that every incomplete evidence requirement has a durable issue without making
+the issue itself completion evidence.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema

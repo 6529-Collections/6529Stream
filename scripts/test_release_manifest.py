@@ -426,6 +426,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         latest / "release-evidence-issue-backlog.md",
         "# Release Evidence Issue Backlog\n\nGenerated fixture.\n",
     )
+    write_json(
+        latest / "release-evidence-issue-links.json",
+        {"schema_version": "6529stream.release-evidence-issue-links.v1"},
+    )
     write_text(
         non_local_retained_artifact,
         (
@@ -1076,6 +1080,21 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["latest"] / "release-evidence-issue-backlog.md"
                 ),
             )
+            issue_links = manifest["release_artifacts"]["release_evidence_issue_links"]
+            self.assertEqual(
+                issue_links["path"],
+                "release-artifacts/latest/release-evidence-issue-links.json",
+            )
+            self.assertEqual(
+                issue_links["schema_version"],
+                "6529stream.release-evidence-issue-links.v1",
+            )
+            self.assertEqual(
+                issue_links["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-issue-links.json"
+                ),
+            )
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
@@ -1291,6 +1310,17 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 issue_backlog["markdown"]["sha256"],
                 generator.file_sha256(custom_latest / "release-evidence-issue-backlog.md"),
+            )
+            issue_links = manifest["release_artifacts"]["release_evidence_issue_links"]
+            self.assertEqual(
+                issue_links["path"],
+                "custom-release-artifacts/latest/release-evidence-issue-links.json",
+            )
+            self.assertEqual(
+                issue_links["sha256"],
+                generator.file_sha256(
+                    custom_latest / "release-evidence-issue-links.json"
+                ),
             )
 
     def test_check_mode_accepts_current_manifest(self) -> None:

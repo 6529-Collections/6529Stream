@@ -27,6 +27,7 @@ DOWNSTREAM_RELEASE_FILES = {
     "public-beta-evidence.json",
     "release-evidence-issue-backlog.json",
     "release-evidence-issue-backlog.md",
+    "release-evidence-issue-links.json",
     "release-evidence-packet-index.json",
     "release-evidence-packet-index.md",
     "SHA256SUMS",
