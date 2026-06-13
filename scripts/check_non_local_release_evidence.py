@@ -20,6 +20,12 @@ DEFAULT_EVIDENCE = [
 ]
 PUBLIC_BETA_TEMPLATE_DIR = Path("release-artifacts/evidence/public-beta-templates")
 PUBLIC_BETA_TEMPLATE_REQUIREMENTS = frozenset(public_beta_checker.PUBLIC_BETA_REQUIREMENTS)
+PRODUCTION_RELEASE_TEMPLATE_DIR = Path(
+    "release-artifacts/evidence/production-release-templates"
+)
+PRODUCTION_RELEASE_TEMPLATE_REQUIREMENTS = frozenset(
+    public_beta_checker.PRODUCTION_REQUIREMENTS
+)
 
 TOP_LEVEL_FIELDS = frozenset(
     {
@@ -221,33 +227,52 @@ def valid_requirement_ids() -> frozenset[str]:
     )
 
 
-def public_beta_template_paths(repo_root: Path) -> list[Path]:
-    """Return committed public-beta template metadata files."""
-    template_dir = repo_root / PUBLIC_BETA_TEMPLATE_DIR
+def template_paths(repo_root: Path, template_dir_path: Path, label: str) -> list[Path]:
+    """Return committed template metadata files for one release phase."""
+    template_dir = repo_root / template_dir_path
     if not template_dir.is_dir():
         raise NonLocalReleaseEvidenceError(
-            f"missing public-beta template directory: {PUBLIC_BETA_TEMPLATE_DIR}"
+            f"missing {label} template directory: {template_dir_path}"
         )
-    return sorted(template_dir.rglob("*.json"))
+    return sorted(path for path in template_dir.rglob("*.json") if path.is_file())
+
+
+def public_beta_template_paths(repo_root: Path) -> list[Path]:
+    """Return committed public-beta template metadata files."""
+    return template_paths(repo_root, PUBLIC_BETA_TEMPLATE_DIR, "public-beta")
+
+
+def production_release_template_paths(repo_root: Path) -> list[Path]:
+    """Return committed production-release template metadata files."""
+    return template_paths(
+        repo_root, PRODUCTION_RELEASE_TEMPLATE_DIR, "production-release"
+    )
 
 
 def default_evidence_paths(repo_root: Path) -> list[Path]:
     """Return the default non-local evidence files checked by the CLI."""
-    return [repo_root / path for path in DEFAULT_EVIDENCE] + public_beta_template_paths(
-        repo_root
+    return (
+        [repo_root / path for path in DEFAULT_EVIDENCE]
+        + public_beta_template_paths(repo_root)
+        + production_release_template_paths(repo_root)
     )
 
 
-def validate_public_beta_template_set(repo_root: Path) -> None:
-    """Require one template metadata file for each public-beta requirement."""
+def validate_template_set(
+    repo_root: Path,
+    paths: list[Path],
+    expected_requirements: frozenset[str],
+    label: str,
+) -> None:
+    """Require one template metadata file for each release phase requirement."""
     by_requirement: dict[str, Path] = {}
-    for path in public_beta_template_paths(repo_root):
+    for path in paths:
         evidence = require_dict(load_json(path), str(path))
         try:
             validate_evidence_document(evidence, repo_root, str(path))
         except NonLocalReleaseEvidenceError as exc:
             raise NonLocalReleaseEvidenceError(
-                f"invalid public-beta template {path}: {exc}"
+                f"invalid {label} template {path}: {exc}"
             ) from exc
 
         record_type = require_string(evidence.get("record_type"), f"{path}.record_type")
@@ -266,22 +291,42 @@ def validate_public_beta_template_set(repo_root: Path) -> None:
             evidence.get("public_beta_requirement_id"),
             f"{path}.public_beta_requirement_id",
         )
-        if requirement_id not in PUBLIC_BETA_TEMPLATE_REQUIREMENTS:
+        if requirement_id not in expected_requirements:
             raise NonLocalReleaseEvidenceError(
-                f"{path} maps to non-public-beta requirement: {requirement_id}"
+                f"{path} maps to non-{label} requirement: {requirement_id}"
             )
         if requirement_id in by_requirement:
             raise NonLocalReleaseEvidenceError(
-                "duplicate public-beta template for "
+                f"duplicate {label} template for "
                 f"{requirement_id}: {by_requirement[requirement_id]} and {path}"
             )
         by_requirement[requirement_id] = path
 
-    missing = sorted(PUBLIC_BETA_TEMPLATE_REQUIREMENTS - set(by_requirement))
+    missing = sorted(expected_requirements - set(by_requirement))
     if missing:
         raise NonLocalReleaseEvidenceError(
-            "missing public-beta template(s): " + ", ".join(missing)
+            f"missing {label} template(s): " + ", ".join(missing)
         )
+
+
+def validate_public_beta_template_set(repo_root: Path) -> None:
+    """Require one template metadata file for each public-beta requirement."""
+    validate_template_set(
+        repo_root,
+        public_beta_template_paths(repo_root),
+        PUBLIC_BETA_TEMPLATE_REQUIREMENTS,
+        "public-beta",
+    )
+
+
+def validate_production_release_template_set(repo_root: Path) -> None:
+    """Require one template metadata file for each production-release requirement."""
+    validate_template_set(
+        repo_root,
+        production_release_template_paths(repo_root),
+        PRODUCTION_RELEASE_TEMPLATE_REQUIREMENTS,
+        "production-release",
+    )
 
 
 def validate_chain_id(environment: str, value: Any) -> None:
@@ -409,7 +454,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         help=(
             "Evidence metadata JSON files to validate. Defaults to the generic "
-            "non-local template plus every public-beta template."
+            "non-local template plus every public-beta and production-release "
+            "template."
         ),
     )
     return parser.parse_args(argv)
@@ -431,6 +477,7 @@ def main(argv: list[str] | None = None) -> int:
             validate_evidence(path, repo_root)
         if not explicit_paths:
             validate_public_beta_template_set(repo_root)
+            validate_production_release_template_set(repo_root)
     except NonLocalReleaseEvidenceError as exc:
         print(f"non-local release evidence check failed: {exc}", file=sys.stderr)
         return 1

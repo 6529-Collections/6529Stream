@@ -27,7 +27,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:c49d3a538b6fd282ec2b92937b49a6b5352717b54e09e94ef687b8a4f680451c"
+    "sha256": "sha256:f5fcd2c78a6c42be08f22aeb3ed9aba301441fc46a70688042a7f868eedf4bf5"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -150,6 +150,61 @@
       "size_bytes": 285
     },
     {
+      "path": "release-artifacts/evidence/production-release-templates/README.md",
+      "sha256": "sha256:781f27485dfc84bd794a641451648214624ac11fcc787fbe886c898a17b721f0",
+      "size_bytes": 1060
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json",
+      "sha256": "sha256:c0b2cc5b0dc2cd09bf6f1e40b552594a73d3b9cc51be2b6315b7a89c0670056c",
+      "size_bytes": 1681
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json",
+      "sha256": "sha256:716fa053608bef3fadae7b7f93b106887d6591c034e79cc497105c23264d843c",
+      "size_bytes": 1659
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json",
+      "sha256": "sha256:b2b2dda2e2b7b1d1c7d5904d5a7e73b08ce46d98a9cd7466a1f275b1dbdbf8d0",
+      "size_bytes": 1662
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json",
+      "sha256": "sha256:96e77dc2756188225e16dc9b61622dd70d2b5b9899cc3d74d3602b0a7a4554a2",
+      "size_bytes": 1728
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json",
+      "sha256": "sha256:dcd8d2fea45da3bf5ad0e7ad33d29a89fb0b2384ee0b7daab3c6a7a84f5bffad",
+      "size_bytes": 1628
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/production-address-books-template.json",
+      "sha256": "sha256:53a0f1e246d092a39076d06bb1e227f991e3e538ab7a1b4b61d666729f38051f",
+      "size_bytes": 1625
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json",
+      "sha256": "sha256:840f065ddcbd06853dbe2a981a622f61ef5266d0c71bdab002fa1160a3f815b8",
+      "size_bytes": 1626
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/production-signatures-template.json",
+      "sha256": "sha256:78dbbf46699762fbd67bc81df0058c1439ba156788871fafbfdc856f19c65920",
+      "size_bytes": 1712
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/retained-artifact-template.txt",
+      "sha256": "sha256:14c52bd76a54d453a9cf33b70f0db1cc60545e3dfa224eb7b386ea988d3fbadf",
+      "size_bytes": 616
+    },
+    {
+      "path": "release-artifacts/evidence/production-release-templates/signed-git-tag-template.json",
+      "sha256": "sha256:a07ca4585a2c5af083508ce92b37fac56dde4a4b0154dd6c72aeb7d72a747283",
+      "size_bytes": 1624
+    },
+    {
       "path": "release-artifacts/evidence/public-beta-templates/README.md",
       "sha256": "sha256:094bf96aaf399af4e8b5d85d70b7821f471648c64b91799b4c75950f58db5a03",
       "size_bytes": 1028
@@ -236,8 +291,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9d2429e8994eb2e1d16edf22df67663ec9c65cdc325ddcbeab80cadb0933a297",
-      "size_bytes": 59348
+      "sha256": "sha256:effbefa362e8298a8663b39ded6e8db8611cb573414104445bd3e8f9b27b806b",
+      "size_bytes": 83115
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",

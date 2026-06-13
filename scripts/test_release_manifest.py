@@ -659,6 +659,50 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         },
     )
     write_json(
+        non_local_evidence_dir
+        / "production-release-templates"
+        / "production-signatures-template.json",
+        {
+            "schema_version": "6529stream.non-local-release-evidence.v1",
+            "evidence_id": "production-release-template-production-signatures",
+            "record_type": "template",
+            "review_status": "template",
+            "environment": "release_signing",
+            "chain_id": "not_applicable",
+            "block_or_reference": "TBD",
+            "command_or_source_system": "TBD",
+            "retained_path": (
+                "release-artifacts/evidence/non-local-template-retained-artifact.txt"
+            ),
+            "sha256": generator.file_sha256(non_local_retained_artifact),
+            "redaction_statement": "Template contains no secrets and no completion evidence.",
+            "owner": "TBD",
+            "reviewer": "TBD",
+            "public_beta_requirement_id": "production_signatures",
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "api_key",
+                    "rpc_url",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "template_notice": (
+                "This template is not completion evidence and must be replaced "
+                "by reviewed evidence before any production status changes."
+            ),
+            "operator_notes": "nested production local template only",
+        },
+    )
+    write_json(
         non_local_evidence_dir / "public-beta-templates" / "operator-notes.json",
         {
             "schema_version": "6529stream.operator-notes.v1",
@@ -1035,6 +1079,20 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 nested_template["public_beta_requirement_id"],
                 "testnet_deployment_rehearsal",
+            )
+            production_template = {
+                row["evidence_id"]: row for row in non_local_evidence_rows
+            }["production-release-template-production-signatures"]
+            self.assertEqual(
+                production_template["path"],
+                (
+                    "release-artifacts/evidence/production-release-templates/"
+                    "production-signatures-template.json"
+                ),
+            )
+            self.assertEqual(
+                production_template["public_beta_requirement_id"],
+                "production_signatures",
             )
             self.assertNotIn(
                 "release-artifacts/evidence/public-beta-templates/operator-notes.json",

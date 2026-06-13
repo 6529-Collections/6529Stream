@@ -55,6 +55,10 @@ under
 [`release-artifacts/evidence/public-beta-templates/`](../release-artifacts/evidence/public-beta-templates/).
 They map one checked template JSON to each public-beta requirement ID, but they
 are still template-only artifacts and do not make any status row `complete`.
+Requirement-specific production-release templates live under
+[`release-artifacts/evidence/production-release-templates/`](../release-artifacts/evidence/production-release-templates/).
+They map one checked template JSON to each production-release requirement ID
+and are also template-only artifacts.
 
 Drop authorization signing evidence should also follow
 [`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
@@ -134,7 +138,9 @@ To move a requirement to `complete`:
 
 1. Start from the matching template under
    `release-artifacts/evidence/public-beta-templates/` when the row maps to a
-   public-beta requirement.
+   public-beta requirement, or under
+   `release-artifacts/evidence/production-release-templates/` when the row maps
+   to a production-release requirement.
 2. Add the retained public evidence file to the repository.
 3. Add the evidence file path and `sha256:` digest to the relevant requirement.
 4. Confirm the evidence follows the non-local release evidence intake runbook
