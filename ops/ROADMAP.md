@@ -88,12 +88,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 06:49 UTC` after PR #200 merged Queue Item 102 public-beta template merge-state reconciliation, focused release-readiness, public-beta, non-local evidence, blocker-report, release-manifest, checksum, changelog, heading, and whitespace checks, GitHub Actions CI run `27459177572` passing on final head `98b0a807a698a96748f312e0531a86991693a8c3`, CodeRabbit success, and squash merge commit `728eb7161c80f6b3690de45caf11fd3c9e01e277` |
-| OS tested | Windows local for Queue Item 102 focused checks; Linux GitHub Actions passed for latest merged baseline PR #200 run `27459177572` on final head `98b0a807a698a96748f312e0531a86991693a8c3`, with merged baseline commit `728eb7161c80f6b3690de45caf11fd3c9e01e277` |
+| Last verified | `2026-06-13 07:26 UTC` after PR #201 merged Queue Item 103 production-release evidence templates, focused release-readiness, public-beta, non-local evidence, blocker-report, release-manifest, checksum, changelog, heading, whitespace, full `make check`, and Windows wrapper checks, GitHub Actions CI run `27460093022` passing on final head `a47870ddeee096e8f9d3212fe1579d56e3163c23`, CodeRabbit success with no actionable comments, and squash merge commit `02ce230500cb016e45b67c8dbd6710c08cadc000` |
+| OS tested | Windows local for Queue Item 103 full checks; Linux GitHub Actions passed for latest merged baseline PR #201 run `27460093022` on final head `a47870ddeee096e8f9d3212fe1579d56e3163c23`, with merged baseline commit `02ce230500cb016e45b67c8dbd6710c08cadc000` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #200 final CI run `27459177572` passed on head `98b0a807a698a96748f312e0531a86991693a8c3`; CodeRabbit status was success with no actionable comments or open review threads before squash merge `728eb7161c80f6b3690de45caf11fd3c9e01e277` |
+| CI run | Latest merged baseline PR #201 final CI run `27460093022` passed on head `a47870ddeee096e8f9d3212fe1579d56e3163c23`; CodeRabbit status was success with no actionable comments or open review threads before squash merge `02ce230500cb016e45b67c8dbd6710c08cadc000` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -376,9 +376,12 @@ evidence manifest without changing readiness claims. Issue
 [#195](https://github.com/6529-Collections/6529Stream/issues/195) is complete
 for public-safe per-requirement public-beta evidence templates without changing
 readiness claims. Issue
-[#199](https://github.com/6529-Collections/6529Stream/issues/199) is active for
-public-safe per-requirement production-release evidence templates without
-changing readiness claims.
+[#199](https://github.com/6529-Collections/6529Stream/issues/199) is complete
+for public-safe per-requirement production-release evidence templates without
+changing readiness claims. Issue
+[#203](https://github.com/6529-Collections/6529Stream/issues/203) is queued for
+a focused production-release blocker report generated from the same evidence
+manifest and template set.
 
 Exit criteria:
 
