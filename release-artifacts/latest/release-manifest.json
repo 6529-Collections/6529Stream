@@ -518,13 +518,13 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:1805b74c41e6195c26f5fde61ae36755e12074df0534f06ce1ba750fbee9cd3b",
-        "size_bytes": 13359
+        "sha256": "sha256:398f3dad17dd70b83171f4c3fc88c04765c26e32806839316ffb0b460658d670",
+        "size_bytes": 13867
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:6f44c7def548e11f5f8e647c829971896d57c1b9f122e57b26d2b38297dd639d",
-        "size_bytes": 17328
+        "sha256": "sha256:eece8ba044644b661dc9190cf09c9cf0e96070dda29a439ea35509123753a5c0",
+        "size_bytes": 17471
       },
       {
         "path": "docs/drop-authorization-signing.md",

@@ -282,8 +282,10 @@ Recovery:
 - Reissue only reviewed payloads under the new signer epoch and domain.
 - Use the no-secret unsigned payload generator in
   [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) to
-  rebuild reviewed typed data, then hand the generated digest to the approved
-  signer outside the repository.
+  rebuild reviewed typed data, then pass the generated typed data to the
+  approved signing system outside the repository. Include the generated digest
+  as cross-check evidence and for ERC-1271 `isValidSignature` verification
+  inputs where applicable.
 - Retain redacted signer-rotation evidence, event logs, affected drop IDs,
   cancellation transactions, and reviewer notes.
 - Update public communications with the new active signer state and any

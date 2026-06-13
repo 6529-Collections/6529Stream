@@ -260,6 +260,9 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_public_beta_evidence.py

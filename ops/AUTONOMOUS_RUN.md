@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/181` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 00:11 UTC` |
+| Last updated | `2026-06-13 00:20 UTC` |
 
 ## Packaging Notes
 
@@ -154,7 +154,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
 
-Status: CI fix ready; awaiting rerun and CodeRabbit.
+Status: CodeRabbit fixes ready; awaiting rerun and re-review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/180`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/181`.
 Branch: `codex/drop-authorization-payload-generator`.
@@ -244,7 +244,14 @@ Remote validation:
 - Local validation after the CI fix: payload generator tests, both payload
   `--check` commands, `python scripts/generate_release_checksums.py --check`,
   `git diff --check`, and `make check`.
-- CodeRabbit pending.
+- CodeRabbit review `4489993973` reported three actionable comments:
+  mirror payload-generator checks in `docs/audit-package.md` maintenance
+  commands, pass generated typed data rather than only the digest to the
+  approved signing system in `docs/incident-response.md`, and preserve the
+  generator CLI exception chain. All three were fixed locally.
+- Local validation after CodeRabbit fixes: generator tests, audit-package tests
+  and checker, incident-response tests and checker, release manifest/checksum
+  drift checks, `git diff --check`, and `make check`.
 
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 

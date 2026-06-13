@@ -311,4 +311,4 @@ if __name__ == "__main__":
         raise SystemExit(main())
     except DropAuthorizationPayloadError as exc:
         print(f"drop authorization payload generation failed: {exc}", file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) from exc
