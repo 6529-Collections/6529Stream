@@ -27,7 +27,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:17ee607b1b2db292e65892dd762d260c412e5a6461061ebecaccc48d395bae03"
+    "sha256": "sha256:c49d3a538b6fd282ec2b92937b49a6b5352717b54e09e94ef687b8a4f680451c"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -150,6 +150,56 @@
       "size_bytes": 285
     },
     {
+      "path": "release-artifacts/evidence/public-beta-templates/README.md",
+      "sha256": "sha256:094bf96aaf399af4e8b5d85d70b7821f471648c64b91799b4c75950f58db5a03",
+      "size_bytes": 1028
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json",
+      "sha256": "sha256:f51dbdde6ec1a46707722883c97100f5dd025812f2a46cf7bafbceaeb98107c3",
+      "size_bytes": 1721
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/external-audit-report-template.json",
+      "sha256": "sha256:d78918bf21de89e5d64a3d4963eae4583b3eccef1ba19cd459a0b97097b53d08",
+      "size_bytes": 1659
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json",
+      "sha256": "sha256:f2b2eee0e1d4de09fed1440694bf3810658b9e966ac768627a5d02573ce8ea48",
+      "size_bytes": 1661
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json",
+      "sha256": "sha256:43fccbccf0bf63c78ffd08e7b4227dda84de5082126d3ff6ca9e5171205edd3d",
+      "size_bytes": 1723
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json",
+      "sha256": "sha256:c808e75cab40ec47ea3335f5396fa383c1a9ca780ccc0d56065bacc68001b823",
+      "size_bytes": 1751
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
+      "sha256": "sha256:7558def7681f92099cb2f05e800fc4e3ca0c09543524c3954d93d0b27401fb11",
+      "size_bytes": 1765
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+      "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+      "size_bytes": 600
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json",
+      "sha256": "sha256:eaf8b2f463512fb2ceecf19cb23da2d146583e6d6a3aeda0066172e71cbba089",
+      "size_bytes": 1681
+    },
+    {
+      "path": "release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json",
+      "sha256": "sha256:30da119839bf7daa4a7f4c57d998b375e61325dfac54d74a0c2e058680fed5b0",
+      "size_bytes": 1680
+    },
+    {
       "path": "release-artifacts/latest/abi-checksums.json",
       "sha256": "sha256:2290e589f3970441cf4698e457bf6784e399cfea5dd458f1e633eb92005f18f7",
       "size_bytes": 11216
@@ -186,8 +236,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:e3a43362779711ef5b6cd30380870445231deabe426c832f7a151cf511fb7974",
-      "size_bytes": 37905
+      "sha256": "sha256:9d2429e8994eb2e1d16edf22df67663ec9c65cdc325ddcbeab80cadb0933a297",
+      "size_bytes": 59348
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",

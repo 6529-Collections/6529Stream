@@ -614,6 +614,57 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "operator_notes": "local template only",
         },
     )
+    write_json(
+        non_local_evidence_dir
+        / "public-beta-templates"
+        / "testnet-deployment-rehearsal-template.json",
+        {
+            "schema_version": "6529stream.non-local-release-evidence.v1",
+            "evidence_id": "public-beta-template-testnet-deployment-rehearsal",
+            "record_type": "template",
+            "review_status": "template",
+            "environment": "testnet",
+            "chain_id": 11155111,
+            "block_or_reference": "TBD",
+            "command_or_source_system": "TBD",
+            "retained_path": (
+                "release-artifacts/evidence/non-local-template-retained-artifact.txt"
+            ),
+            "sha256": generator.file_sha256(non_local_retained_artifact),
+            "redaction_statement": "Template contains no secrets and no completion evidence.",
+            "owner": "TBD",
+            "reviewer": "TBD",
+            "public_beta_requirement_id": "testnet_deployment_rehearsal",
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "api_key",
+                    "rpc_url",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "template_notice": (
+                "This template is not completion evidence and must be replaced "
+                "by reviewed evidence before any public-beta status changes."
+            ),
+            "operator_notes": "nested local template only",
+        },
+    )
+    write_json(
+        non_local_evidence_dir / "public-beta-templates" / "operator-notes.json",
+        {
+            "schema_version": "6529stream.operator-notes.v1",
+            "notes": "release-manifest should not treat this as evidence metadata",
+        },
+    )
     write_text(
         signer_custody_retained_artifact,
         (
@@ -954,9 +1005,12 @@ class ReleaseManifestTests(unittest.TestCase):
                 signer_custody["operations"]["signer_service_integration_status"],
                 "not_available_local",
             )
-            non_local_evidence = manifest["release_artifacts"][
+            non_local_evidence_rows = manifest["release_artifacts"][
                 "non_local_release_evidence"
-            ][0]
+            ]
+            non_local_evidence = {
+                row["evidence_id"]: row for row in non_local_evidence_rows
+            }["non-local-release-evidence-template"]
             self.assertEqual(
                 non_local_evidence["evidence_id"],
                 "non-local-release-evidence-template",
@@ -970,6 +1024,21 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 non_local_evidence["evidence"]["operator_notes"],
                 "local template only",
+            )
+            nested_template = {
+                row["evidence_id"]: row for row in non_local_evidence_rows
+            }["public-beta-template-testnet-deployment-rehearsal"]
+            self.assertEqual(
+                nested_template["path"],
+                "release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json",
+            )
+            self.assertEqual(
+                nested_template["public_beta_requirement_id"],
+                "testnet_deployment_rehearsal",
+            )
+            self.assertNotIn(
+                "release-artifacts/evidence/public-beta-templates/operator-notes.json",
+                {row["path"] for row in non_local_evidence_rows},
             )
             self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],

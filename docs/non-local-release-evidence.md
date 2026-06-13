@@ -83,6 +83,12 @@ shape, replace every template value with reviewed no-secret metadata, point
 `retained_path` at the retained public artifact, and update `sha256` to match
 that file.
 
+For public-beta blockers, start from the matching checked template under
+[`release-artifacts/evidence/public-beta-templates/`](../release-artifacts/evidence/public-beta-templates/).
+The checker requires one template for each public-beta requirement ID. These
+files are still `record_type: "template"` and `review_status: "template"`;
+they are operator starting points, not reviewed evidence.
+
 Validate metadata with:
 
 ```sh
@@ -92,7 +98,8 @@ python scripts/check_non_local_release_evidence.py
 
 The checker validates the public-beta requirement ID, environment, chain ID
 policy, retained artifact path, SHA-256 digest, review status, source metadata,
-and no-secret boundary before release manifest and checksum generation.
+public-beta template-set coverage, and no-secret boundary before release
+manifest and checksum generation.
 
 ## Public-Beta Requirement Mapping
 

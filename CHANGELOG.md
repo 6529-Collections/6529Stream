@@ -126,6 +126,10 @@ the release policy in `docs/release-policy.md`.
   retained placeholder artifact, checker, and local/CI gate so future reviewed
   non-local evidence can be machine-validated before release manifest and
   checksum generation.
+- Added checked per-requirement public-beta evidence templates under
+  `release-artifacts/evidence/public-beta-templates/`, with checker coverage
+  proving every public-beta requirement has a template while readiness remains
+  blocked until reviewed non-local evidence exists.
 - Added a protocol incident-response runbook and local/CI checker covering
   stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata or
   dependency configuration, signer compromise, and release artifact/evidence

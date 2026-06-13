@@ -248,6 +248,382 @@
           "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
           "operator_notes": "Copy this shape for real retained evidence, replace every template value with reviewed no-secret data, and link the resulting JSON from release-artifacts/latest/public-beta-evidence.json only after review."
         }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json",
+        "sha256": "sha256:f51dbdde6ec1a46707722883c97100f5dd025812f2a46cf7bafbceaeb98107c3",
+        "size_bytes": 1721,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-explorer-verification-status",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "testnet",
+        "public_beta_requirement_id": "explorer_verification_status",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-explorer-verification-status",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "testnet",
+          "chain_id": 11155111,
+          "block_or_reference": "template-only explorer verification URL, submission ID, contract address, transaction hash, or reviewer reference",
+          "command_or_source_system": "template-only explorer UI, verification command, CI job, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "explorer_verification_status",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/external-audit-report-template.json",
+        "sha256": "sha256:d78918bf21de89e5d64a3d4963eae4583b3eccef1ba19cd459a0b97097b53d08",
+        "size_bytes": 1659,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-external-audit-report",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "audit",
+        "public_beta_requirement_id": "external_audit_report",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-external-audit-report",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "audit",
+          "chain_id": "not_applicable",
+          "block_or_reference": "template-only final audit report ID, public report URL, or auditor reference",
+          "command_or_source_system": "template-only auditor portal, public report, or audit package review source",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "external_audit_report",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with the final external audit report or public report reference, scope, audited commit, finding IDs, remediation links, accepted-risk references, retest status, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json",
+        "sha256": "sha256:f2b2eee0e1d4de09fed1440694bf3810658b9e966ac768627a5d02573ce8ea48",
+        "size_bytes": 1661,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-deployment-rehearsal",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "fork",
+        "public_beta_requirement_id": "fork_deployment_rehearsal",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-fork-deployment-rehearsal",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "fork",
+          "chain_id": 1,
+          "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
+          "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "fork_deployment_rehearsal",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json",
+        "sha256": "sha256:43fccbccf0bf63c78ffd08e7b4227dda84de5082126d3ff6ca9e5171205edd3d",
+        "size_bytes": 1723,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-testnet-ceremony-evidence",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "fork",
+        "public_beta_requirement_id": "fork_testnet_ceremony_evidence",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-fork-testnet-ceremony-evidence",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "fork",
+          "chain_id": 1,
+          "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
+          "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "fork_testnet_ceremony_evidence",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json",
+        "sha256": "sha256:c808e75cab40ec47ea3335f5396fa383c1a9ca780ccc0d56065bacc68001b823",
+        "size_bytes": 1751,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-testnet-metadata-browser-evidence",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "fork",
+        "public_beta_requirement_id": "fork_testnet_metadata_browser_evidence",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-fork-testnet-metadata-browser-evidence",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "fork",
+          "chain_id": 1,
+          "block_or_reference": "template-only fork or testnet block, token ID, collection ID, CI run, or browser transcript reference",
+          "command_or_source_system": "template-only browser-sandbox command, CI job, deployed contract call, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "fork_testnet_metadata_browser_evidence",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
+        "sha256": "sha256:7558def7681f92099cb2f05e800fc4e3ca0c09543524c3954d93d0b27401fb11",
+        "size_bytes": 1765,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-testnet-randomizer-operations-evidence",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "fork",
+        "public_beta_requirement_id": "fork_testnet_randomizer_operations_evidence",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-fork-testnet-randomizer-operations-evidence",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "fork",
+          "chain_id": 1,
+          "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
+          "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "fork_testnet_randomizer_operations_evidence",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json",
+        "sha256": "sha256:eaf8b2f463512fb2ceecf19cb23da2d146583e6d6a3aeda0066172e71cbba089",
+        "size_bytes": 1681,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-testnet-deployment-rehearsal",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "testnet",
+        "public_beta_requirement_id": "testnet_deployment_rehearsal",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-testnet-deployment-rehearsal",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "testnet",
+          "chain_id": 11155111,
+          "block_or_reference": "template-only testnet block, transaction hash, CI run, or deployment transcript reference",
+          "command_or_source_system": "template-only testnet deployment command, CI job, explorer, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "testnet_deployment_rehearsal",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with testnet deployment transcript, chain ID, transaction references, sanitized broadcast, generated manifest, address book, explorer verification status, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json",
+        "sha256": "sha256:30da119839bf7daa4a7f4c57d998b375e61325dfac54d74a0c2e058680fed5b0",
+        "size_bytes": 1680,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-verified-deployed-addresses",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "testnet",
+        "public_beta_requirement_id": "verified_deployed_addresses",
+        "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-verified-deployed-addresses",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "testnet",
+          "chain_id": 11155111,
+          "block_or_reference": "template-only deployment manifest, address book, explorer URL, transaction hash, or reviewer reference",
+          "command_or_source_system": "template-only address-book generator, explorer, CI job, or operator transcript",
+          "retained_path": "release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt",
+          "sha256": "sha256:3667977f968fdc458c4645d478683605009df9448eae4c9495459f655768b0a5",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "verified_deployed_addresses",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation."
+        }
       }
     ],
     "drop_authorization_signing_evidence": [
@@ -769,8 +1145,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0931ae236d6860646148866020640d80aa8d42f6769eecc87cc886c05946f5f0",
-      "size_bytes": 14622
+      "sha256": "sha256:e513a3f3b012a51c5390f895c96ff858ece0494e6f1891a0337eefcb5ef0d412",
+      "size_bytes": 14899
     },
     "governance_docs": [
       {
@@ -800,13 +1176,13 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:8b2f39236d844696402077b0e4fb244f29376f083fb69b1734978a991d905b6d",
-        "size_bytes": 7630
+        "sha256": "sha256:52f1d2b48cc4d42e7a6df2b311f400241cfd3329c5934e4a67d0cb3f431d6b11",
+        "size_bytes": 8099
       },
       {
         "path": "docs/non-local-release-evidence.md",
-        "sha256": "sha256:9140f08dde3fe2ee6b1808b8bef15125a62ead564f68924edf5892d86d23cfab",
-        "size_bytes": 14729
+        "sha256": "sha256:e2806156c25a01e74eb0e459cf1549b4f19929a545ce09bd41d8fc732c88c1aa",
+        "size_bytes": 15157
       },
       {
         "path": "docs/architecture.md",
@@ -840,13 +1216,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:0b75762b2d41e6b559d4902d0364cbef4ee0b4b5cb1c1491fa913328e3b9662e",
-        "size_bytes": 17797
+        "sha256": "sha256:a40a750a7398dd69c6ef402d6f0cb466ed25f101fd014beaaa4a5931ffefe3ca",
+        "size_bytes": 17947
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:ea96ed241032f2f3709366d913010702b36ba0afe71f43a3eba5ffef9aa5b886",
-        "size_bytes": 21074
+        "sha256": "sha256:0352139e6ef0123dce3df84a054025c8f55491d42dda8757bf1fb7aa77202e05",
+        "size_bytes": 21173
       },
       {
         "path": "docs/status.md",

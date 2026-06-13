@@ -18,6 +18,8 @@ EVIDENCE_SCHEMA = "6529stream.non-local-release-evidence.v1"
 DEFAULT_EVIDENCE = [
     Path("release-artifacts/evidence/non-local-release-evidence-template.json")
 ]
+PUBLIC_BETA_TEMPLATE_DIR = Path("release-artifacts/evidence/public-beta-templates")
+PUBLIC_BETA_TEMPLATE_REQUIREMENTS = frozenset(public_beta_checker.PUBLIC_BETA_REQUIREMENTS)
 
 TOP_LEVEL_FIELDS = frozenset(
     {
@@ -219,6 +221,69 @@ def valid_requirement_ids() -> frozenset[str]:
     )
 
 
+def public_beta_template_paths(repo_root: Path) -> list[Path]:
+    """Return committed public-beta template metadata files."""
+    template_dir = repo_root / PUBLIC_BETA_TEMPLATE_DIR
+    if not template_dir.is_dir():
+        raise NonLocalReleaseEvidenceError(
+            f"missing public-beta template directory: {PUBLIC_BETA_TEMPLATE_DIR}"
+        )
+    return sorted(template_dir.rglob("*.json"))
+
+
+def default_evidence_paths(repo_root: Path) -> list[Path]:
+    """Return the default non-local evidence files checked by the CLI."""
+    return [repo_root / path for path in DEFAULT_EVIDENCE] + public_beta_template_paths(
+        repo_root
+    )
+
+
+def validate_public_beta_template_set(repo_root: Path) -> None:
+    """Require one template metadata file for each public-beta requirement."""
+    by_requirement: dict[str, Path] = {}
+    for path in public_beta_template_paths(repo_root):
+        evidence = require_dict(load_json(path), str(path))
+        try:
+            validate_evidence_document(evidence, repo_root, str(path))
+        except NonLocalReleaseEvidenceError as exc:
+            raise NonLocalReleaseEvidenceError(
+                f"invalid public-beta template {path}: {exc}"
+            ) from exc
+
+        record_type = require_string(evidence.get("record_type"), f"{path}.record_type")
+        if record_type != "template":
+            raise NonLocalReleaseEvidenceError(
+                f"{path} must be a template record"
+            )
+        review_status = require_string(
+            evidence.get("review_status"), f"{path}.review_status"
+        )
+        if review_status != "template":
+            raise NonLocalReleaseEvidenceError(
+                f"{path} must use template review_status"
+            )
+        requirement_id = require_string(
+            evidence.get("public_beta_requirement_id"),
+            f"{path}.public_beta_requirement_id",
+        )
+        if requirement_id not in PUBLIC_BETA_TEMPLATE_REQUIREMENTS:
+            raise NonLocalReleaseEvidenceError(
+                f"{path} maps to non-public-beta requirement: {requirement_id}"
+            )
+        if requirement_id in by_requirement:
+            raise NonLocalReleaseEvidenceError(
+                "duplicate public-beta template for "
+                f"{requirement_id}: {by_requirement[requirement_id]} and {path}"
+            )
+        by_requirement[requirement_id] = path
+
+    missing = sorted(PUBLIC_BETA_TEMPLATE_REQUIREMENTS - set(by_requirement))
+    if missing:
+        raise NonLocalReleaseEvidenceError(
+            "missing public-beta template(s): " + ", ".join(missing)
+        )
+
+
 def validate_chain_id(environment: str, value: Any) -> None:
     """Validate chain ID according to environment."""
     if environment in CHAINLESS_ENVIRONMENTS:
@@ -342,8 +407,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "evidence",
         nargs="*",
         type=Path,
-        default=DEFAULT_EVIDENCE,
-        help="Evidence metadata JSON files to validate",
+        help=(
+            "Evidence metadata JSON files to validate. Defaults to the generic "
+            "non-local template plus every public-beta template."
+        ),
     )
     return parser.parse_args(argv)
 
@@ -353,13 +420,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     repo_root = args.repo_root.resolve()
     try:
-        if not args.evidence:
+        explicit_paths = bool(args.evidence)
+        evidence_paths = args.evidence if explicit_paths else default_evidence_paths(repo_root)
+        if not evidence_paths:
             raise NonLocalReleaseEvidenceError("no evidence files configured")
-        for evidence_path in args.evidence:
+        for evidence_path in evidence_paths:
             path = evidence_path
             if not path.is_absolute():
                 path = repo_root / path
             validate_evidence(path, repo_root)
+        if not explicit_paths:
+            validate_public_beta_template_set(repo_root)
     except NonLocalReleaseEvidenceError as exc:
         print(f"non-local release evidence check failed: {exc}", file=sys.stderr)
         return 1

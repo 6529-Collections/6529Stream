@@ -50,7 +50,11 @@ Rows governed by that runbook should link reviewed JSON metadata that follows
 [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json);
 the committed
 [`release-artifacts/evidence/non-local-release-evidence-template.json`](../release-artifacts/evidence/non-local-release-evidence-template.json)
-is a checked template only.
+is a checked template only. Requirement-specific public-beta templates live
+under
+[`release-artifacts/evidence/public-beta-templates/`](../release-artifacts/evidence/public-beta-templates/).
+They map one checked template JSON to each public-beta requirement ID, but they
+are still template-only artifacts and do not make any status row `complete`.
 
 Drop authorization signing evidence should also follow
 [`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
@@ -128,23 +132,26 @@ maintainer-approved reference here.
 
 To move a requirement to `complete`:
 
-1. Add the retained public evidence file to the repository.
-2. Add the evidence file path and `sha256:` digest to the relevant requirement.
-3. Confirm the evidence follows the non-local release evidence intake runbook
+1. Start from the matching template under
+   `release-artifacts/evidence/public-beta-templates/` when the row maps to a
+   public-beta requirement.
+2. Add the retained public evidence file to the repository.
+3. Add the evidence file path and `sha256:` digest to the relevant requirement.
+4. Confirm the evidence follows the non-local release evidence intake runbook
    when the requirement depends on fork, testnet, live, audit, explorer, gas,
    invariant, checksum-backed production-signature, signed-tag,
    production-address-book, or production-broadcast-retention proof.
-4. Keep `risk_acceptance` as `null`.
-5. Run `python scripts/check_public_beta_evidence.py`.
-6. Run `python scripts/check_non_local_release_evidence.py` for every reviewed
+5. Keep `risk_acceptance` as `null`.
+6. Run `python scripts/check_public_beta_evidence.py`.
+7. Run `python scripts/check_non_local_release_evidence.py` for every reviewed
    non-local evidence metadata JSON that supports the row.
-7. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
+8. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
    retained drop authorization signing evidence that supports the row.
-8. Run `python scripts/check_signer_custody_readiness.py` for any signer
+9. Run `python scripts/check_signer_custody_readiness.py` for any signer
    custody readiness evidence that supports the row.
-9. Regenerate and check the blocker report with
+10. Regenerate and check the blocker report with
    `python scripts/generate_public_beta_blocker_report.py`.
-10. Regenerate and check the release manifest and checksum bundle.
+11. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

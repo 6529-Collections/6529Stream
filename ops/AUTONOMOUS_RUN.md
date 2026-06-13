@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-public-beta-blocker-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/193` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/194` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/196` |
+| Active PR branch | `codex/public-beta-evidence-templates` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/196` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/195` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/197` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 05:16 UTC` |
+| Last updated | `2026-06-13 06:13 UTC` |
 
 ## Packaging Notes
 
@@ -155,14 +155,126 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Merged in PR #189 |
 | 98 | Reconcile signer custody readiness merge state | Gate G support | Implement issue #190 by marking PR #189 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next public-beta evidence blocker-report target | Merged in PR #192 |
 | 99 | Add public beta evidence blocker report artifact | Gate G support | Implement issue #191 by generating a deterministic no-secret report from `release-artifacts/latest/public-beta-evidence.json` that lists incomplete public-beta evidence rows and validation commands without changing readiness claims | Merged in PR #193 |
-| 100 | Reconcile public beta blocker report merge state | Gate G support | Implement issue #194 by recording PR #193 merge, CI, CodeRabbit, and next-target state without changing readiness claims | Active |
-| 101 | Add per-requirement public beta evidence templates | Gate G support | Implement issue #195 by adding public-safe templates for each incomplete public-beta evidence row, with checks/docs and no fork/testnet/live/audit readiness claims | Queued |
+| 100 | Reconcile public beta blocker report merge state | Gate G support | Implement issue #194 by recording PR #193 merge, CI, CodeRabbit, and next-target state without changing readiness claims | Merged in PR #196 |
+| 101 | Add per-requirement public beta evidence templates | Gate G support | Implement issue #195 by adding public-safe templates for each incomplete public-beta evidence row, with checks/docs and no fork/testnet/live/audit readiness claims | Active |
 
 ## Current PR Worklog
 
+### PR candidate: Add per-requirement public beta evidence templates (Queue Item 101)
+
+Status: Open in PR #197; CI and CodeRabbit review pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/195`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/197`.
+Branch: `codex/public-beta-evidence-templates`.
+Branch started from PR #196 squash merge commit
+`99b0845e81c0b81bb9105c1d35970a92b47b22a0`.
+
+Prior queue transition:
+
+- Queue Item 100 merged in PR #196 as squash commit
+  `99b0845e81c0b81bb9105c1d35970a92b47b22a0`.
+- PR #196 final implementation head was
+  `7db6a5c24a15848926dd91c778303169fea5b274`.
+- PR #196 GitHub Actions CI run `27457583246` passed on the final head.
+- PR #196 CodeRabbit status was success with no actionable comments or open
+  review threads.
+- PR #196 closed issue #194 at merge.
+- Issue #195 is now the active Gate G support target for Queue Item 101.
+
+Goal:
+
+- Add one public-safe template per public-beta evidence requirement so future
+  operators have issue-ready starting points for non-local evidence.
+- Keep `release-artifacts/latest/public-beta-evidence.json` blocked/missing for
+  public beta and production release until real reviewed evidence exists.
+- Extend the non-local evidence checker so default validation proves the
+  public-beta template set is complete, unique, and limited to public-beta
+  requirement IDs.
+- Include the templates in deterministic release-manifest/checksum coverage.
+- Update docs, changelog, roadmap, and durable run state without adding fork,
+  testnet, live, audit, signer-service, or private-key evidence.
+
+Implementation in this branch:
+
+- Added `release-artifacts/evidence/public-beta-templates/` with one JSON
+  template for each public-beta requirement ID and a shared retained-artifact
+  placeholder.
+- Extended `scripts/check_non_local_release_evidence.py` and
+  `scripts/test_non_local_release_evidence.py` to validate template coverage,
+  duplicates, and production-only requirement mistakes.
+- Updated `scripts/generate_release_manifest.py` and
+  `scripts/test_release_manifest.py` so nested non-local evidence templates are
+  included in release manifest coverage.
+- Updated public-beta, non-local evidence, release-readiness, tooling, release
+  artifact, changelog, roadmap, and run-state docs.
+- Regenerated `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json`.
+
+Validation completed locally at `2026-06-13 05:58 UTC`:
+
+- `python -m py_compile scripts\check_non_local_release_evidence.py scripts\test_non_local_release_evidence.py scripts\check_public_beta_evidence.py scripts\generate_public_beta_blocker_report.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py`.
+- `python scripts\test_non_local_release_evidence.py`.
+- `python scripts\check_non_local_release_evidence.py`.
+- `python scripts\test_public_beta_evidence.py`.
+- `python scripts\check_public_beta_evidence.py`.
+- `python scripts\test_public_beta_blocker_report.py`.
+- `python scripts\generate_public_beta_blocker_report.py --check`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\test_release_readiness.py`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\test_changelog_check.py`.
+- `python scripts\check_changelog.py`.
+- `rg -n "^#|^##|^###" docs\public-beta-evidence.md docs\non-local-release-evidence.md docs\release-readiness.md docs\tooling.md release-artifacts\README.md release-artifacts\evidence\public-beta-templates\README.md ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+- `make check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+PR opened:
+
+- PR #197 opened against `main` on head
+  `1f4b240822c80909782212dbb625a8f31ccd0665`.
+  This follow-up state commit records the concrete PR URL before CodeRabbit
+  review is requested.
+
+CodeRabbit review response:
+
+- CodeRabbit review submitted at `2026-06-13 06:10 UTC` with three actionable
+  comments.
+- Fixed `docs/public-beta-evidence.md` so the public-beta evidence workflow
+  starts from the matching template before adding retained evidence and
+  computing the `sha256:` digest.
+- Changed public-beta template discovery from top-level `glob("*.json")` to
+  recursive `rglob("*.json")`.
+- Added non-local release evidence metadata filtering in
+  `scripts/generate_release_manifest.py` so nested JSON sidecars under
+  `release-artifacts/evidence/` are not treated as evidence records unless they
+  carry the non-local evidence schema and required metadata keys.
+- Added a release-manifest fixture sidecar JSON assertion proving non-evidence
+  JSON is skipped.
+- Regenerated `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json`.
+
+Follow-up validation completed locally at `2026-06-13 06:13 UTC`:
+
+- `python -m py_compile scripts\check_non_local_release_evidence.py scripts\generate_release_manifest.py scripts\test_non_local_release_evidence.py scripts\test_release_manifest.py`.
+- `python scripts\test_non_local_release_evidence.py`.
+- `python scripts\check_non_local_release_evidence.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
+
 ### PR candidate: Reconcile public beta blocker report merge state (Queue Item 100)
 
-Status: Open in PR #196; CI and CodeRabbit review pending.
+Status: Merged in PR #196 on `2026-06-13`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/194`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/196`.
 Branch: `codex/reconcile-public-beta-blocker-state`.
@@ -209,6 +321,14 @@ PR opened:
   `d1861b4a2cd8545c312a27c46c2ba0fda9f40f83`.
   This follow-up state commit records the concrete PR URL before CodeRabbit
   review is requested.
+- Final state before merge:
+  - PR #196 final head `7db6a5c24a15848926dd91c778303169fea5b274`
+    passed GitHub Actions CI run `27457583246`.
+  - CodeRabbit status was success with no actionable comments and no open
+    review threads.
+  - PR #196 squash-merged as
+    `99b0845e81c0b81bb9105c1d35970a92b47b22a0`.
+  - Issue #194 closed completed.
 
 ### PR candidate: Add public beta evidence blocker report artifact (Queue Item 99)
 
@@ -8881,6 +9001,12 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 06:13 | Address CodeRabbit PR #197 review | Fixed the public-beta workflow order, recursive template discovery, and manifest metadata filtering for nested evidence JSON, added a fixture sidecar regression, regenerated release manifest/checksums, and reran focused validation |
+| 2026-06-13 06:01 | Open PR #197 | Per-requirement public-beta evidence template PR opened against `main`, linked `Closes #195`, and will use CodeRabbit-only review per current user instruction |
+| 2026-06-13 05:58 | Finish Queue Item 101 local validation | Focused template/checker/manifest/checksum checks, release-readiness, changelog, heading scan, whitespace check, full `make check`, and the Windows PowerShell wrapper all pass locally before PR creation |
+| 2026-06-13 05:39 | Implement Queue Item 101 local draft | Added per-requirement public-beta evidence templates, checker/test coverage, nested non-local evidence manifest coverage, docs, changelog, regenerated release artifacts, and durable run-state updates without changing readiness claims |
+| 2026-06-13 05:37 | Start Queue Item 101 | PR #196 merged cleanly, so issue #195 is now the active public-safe template slice for future non-local public-beta evidence collection |
+| 2026-06-13 05:23 | Merge PR #196 | Public-beta blocker report state reconciliation merged as `99b0845e81c0b81bb9105c1d35970a92b47b22a0`; final head `7db6a5c24a15848926dd91c778303169fea5b274` passed CI run `27457583246`, CodeRabbit status was success with no actionable comments, and issue #194 closed completed |
 | 2026-06-13 05:16 | Open PR #196 | State-only reconciliation PR opened against `main`, linked `Closes #194`, and will use CodeRabbit-only review per current user instruction |
 | 2026-06-13 05:12 | Create issue #195 and select Queue Item 101 | After the blocker report merged, the next public-safe Gate G support slice is per-requirement public-beta evidence templates that guide later non-local evidence collection without secrets or readiness claims |
 | 2026-06-13 05:09 | Create issue #194 and start Queue Item 100 | State reconciliation is needed to record PR #193 final CI, CodeRabbit, squash merge, and issue closure before starting the next implementation PR |

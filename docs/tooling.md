@@ -214,10 +214,12 @@ audit, explorer, gas, invariant, signature, and signed-tag evidence that will
 eventually unblock those status rows.
 The non-local release evidence checker validates
 `release-artifacts/evidence/non-local-release-evidence-template.json` against
-`release-artifacts/schema/non-local-release-evidence.schema.json`, confirms the
-retained artifact hash, rejects secret-shaped metadata, and lets future
-reviewed evidence become release-manifest and checksum inputs without treating
-the template as completion evidence.
+`release-artifacts/schema/non-local-release-evidence.schema.json`, validates
+every checked public-beta template under
+`release-artifacts/evidence/public-beta-templates/`, confirms retained artifact
+hashes, rejects secret-shaped metadata, and lets future reviewed evidence
+become release-manifest and checksum inputs without treating templates as
+completion evidence.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release

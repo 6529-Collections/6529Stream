@@ -82,6 +82,27 @@ def valid_evidence(root: Path, *, record_type: str = "evidence") -> dict[str, ob
     }
 
 
+def valid_public_beta_template(root: Path, requirement_id: str) -> dict[str, object]:
+    """Build a valid public-beta requirement template."""
+    retained = seed_retained_artifact(
+        root,
+        "release-artifacts/evidence/public-beta-templates/retained-artifact.txt",
+    )
+    evidence = valid_evidence(root, record_type="template")
+    evidence.update(
+        {
+            "evidence_id": f"public-beta-template-{requirement_id}",
+            "public_beta_requirement_id": requirement_id,
+            "retained_path": retained["path"],
+            "sha256": retained["sha256"],
+            "block_or_reference": "template-only reference",
+            "command_or_source_system": "template-only source",
+            "operator_notes": f"Template for {requirement_id}.",
+        }
+    )
+    return evidence
+
+
 class NonLocalReleaseEvidenceTests(unittest.TestCase):
     """Checker behavior for non-local release evidence metadata."""
 
@@ -93,6 +114,82 @@ class NonLocalReleaseEvidenceTests(unittest.TestCase):
             result = checker.main(["--repo-root", str(repo_root)])
 
         self.assertEqual(result, 0)
+
+    def test_committed_public_beta_templates_cover_required_ids(self) -> None:
+        """Default templates cover each public-beta requirement exactly once."""
+        repo_root = Path(__file__).resolve().parents[1]
+
+        paths = checker.public_beta_template_paths(repo_root)
+        requirements = {}
+        for path in paths:
+            data = checker.load_json(path)
+            requirements[data["public_beta_requirement_id"]] = data
+            self.assertEqual(data["record_type"], "template")
+            self.assertEqual(data["review_status"], "template")
+
+        self.assertEqual(
+            set(requirements),
+            set(checker.PUBLIC_BETA_TEMPLATE_REQUIREMENTS),
+        )
+        checker.validate_public_beta_template_set(repo_root)
+
+    def test_rejects_missing_public_beta_template(self) -> None:
+        """The template set must include every public-beta requirement."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template_dir = root / checker.PUBLIC_BETA_TEMPLATE_DIR
+            template_dir.mkdir(parents=True)
+            write_json(
+                template_dir / "only-one.json",
+                valid_public_beta_template(
+                    root, sorted(checker.PUBLIC_BETA_TEMPLATE_REQUIREMENTS)[0]
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "missing public-beta template",
+            ):
+                checker.validate_public_beta_template_set(root)
+
+    def test_rejects_duplicate_public_beta_template(self) -> None:
+        """The template set cannot map two files to the same requirement."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template_dir = root / checker.PUBLIC_BETA_TEMPLATE_DIR
+            template_dir.mkdir(parents=True)
+            requirement_id = sorted(checker.PUBLIC_BETA_TEMPLATE_REQUIREMENTS)[0]
+            write_json(
+                template_dir / "first.json",
+                valid_public_beta_template(root, requirement_id),
+            )
+            write_json(
+                template_dir / "second.json",
+                valid_public_beta_template(root, requirement_id),
+            )
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "duplicate public-beta template",
+            ):
+                checker.validate_public_beta_template_set(root)
+
+    def test_rejects_production_requirement_in_public_beta_template_set(self) -> None:
+        """Production-only rows do not satisfy public-beta template coverage."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template_dir = root / checker.PUBLIC_BETA_TEMPLATE_DIR
+            template_dir.mkdir(parents=True)
+            write_json(
+                template_dir / "production.json",
+                valid_public_beta_template(root, "production_signatures"),
+            )
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "non-public-beta requirement",
+            ):
+                checker.validate_public_beta_template_set(root)
 
     def test_accepts_reviewed_evidence(self) -> None:
         """Reviewed non-local evidence accepts a real reviewer."""

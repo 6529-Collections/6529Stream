@@ -1,0 +1,11 @@
+Public beta retained artifact template.
+
+This file is a public, sanitized placeholder used by the per-requirement
+metadata templates in this directory. It is not completion evidence and does
+not prove public beta or production readiness.
+
+For real evidence, replace this placeholder with a retained public artifact
+that identifies the environment, chain or audit reference, command or source
+system, reviewer, redaction boundary, and matching public-beta requirement ID.
+Keep raw operator logs, credentials, private URLs, signing material, and
+unreleased drop payloads outside the public repository.
