@@ -99,7 +99,7 @@ order.
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
 | CI run | Latest merged baseline PR #262 final CI run `27476294337` passed on head `223ff4b69484af2a8a20a95b423d175c916b179c`; CodeRabbit status was success with its only actionable review thread addressed, resolved, and outdated, and PR #262 squash-merged as `19263b048fc8dc8e0fe7c834e206e623d8fb944e` |
-| Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
+| Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
 

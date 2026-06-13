@@ -225,7 +225,7 @@ Validation target:
 - `python scripts/generate_release_manifest.py --check`.
 - `python scripts/generate_release_checksums.py --check`.
 - `python scripts/check_changelog.py`.
-- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
 - `git diff --check`.
 
 ### Completed: Add release evidence issue snapshot exporter (Queue Item 125)
