@@ -114,6 +114,7 @@
         "signer_manager",
         "signer_manager_type",
         "erc1271_support_status",
+        "erc1271_support_detail",
         "signer_service_class"
       ],
       "properties": {
@@ -139,6 +140,9 @@
         },
         "erc1271_support_status": {
           "enum": ["not_available_local", "supported", "unsupported", "not_applicable", "pending", "blocked"]
+        },
+        "erc1271_support_detail": {
+          "$ref": "#/$defs/erc1271_support_detail"
         },
         "signer_service_class": {
           "enum": [
@@ -291,6 +295,28 @@
           "minLength": 1
         },
         "reviewed_at": {
+          "anyOf": [
+            {
+              "const": "not_available_local"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      }
+    },
+    "erc1271_support_detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rationale", "evidence_reference"],
+      "properties": {
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_reference": {
           "type": "string",
           "minLength": 1
         }

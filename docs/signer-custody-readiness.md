@@ -62,8 +62,10 @@ path, rotation procedure, revocation procedure, and signer compromise response.
 The evidence must also show whether ERC-1271 contract signers are supported for
 the selected signer. If an ERC-1271 signer is used for production, support must
 be recorded as `supported`; otherwise the evidence must explicitly mark the
-status as `not_applicable`, `pending`, `blocked`, or `unsupported` with notes
-outside the template.
+status as `not_applicable`, `pending`, `blocked`, or `unsupported` and include
+machine-checked rationale in `signer_identity.erc1271_support_detail.rationale`
+plus a retained or reviewed reference in
+`signer_identity.erc1271_support_detail.evidence_reference`.
 
 Production evidence must be reviewed and approved, with rotation, revocation,
 compromise response, monitoring, signer-service integration, signer epoch

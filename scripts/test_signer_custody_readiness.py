@@ -19,6 +19,10 @@ checker = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(checker)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+COMMITTED_TEMPLATE = (
+    "release-artifacts/signer-custody-readiness/"
+    "signer-custody-readiness-template.json"
+)
 
 
 def write_text(path: Path, value: str) -> None:
@@ -94,6 +98,13 @@ def valid_evidence(
     review_status = "reviewed" if record_type == "evidence" else "template"
     approval_status = "approved" if review_status == "reviewed" else "template"
     local = environment == "local"
+    chain_ids = {
+        "local": 31337,
+        "fork": 1,
+        "testnet": 11155111,
+        "mainnet": 1,
+        "production": 1,
+    }
     retained_artifacts = [
         {**schema_ref, "category": "signer_custody_schema"},
         {**transcript_ref, "category": "readiness_transcript"},
@@ -114,7 +125,7 @@ def valid_evidence(
         "record_type": record_type,
         "review_status": review_status,
         "environment": environment,
-        "chain_id": 11155111 if environment == "testnet" else 31337,
+        "chain_id": chain_ids[environment],
         "source": {
             "repository": "https://github.com/6529-Collections/6529Stream",
             "git_commit": "0" * 40,
@@ -135,6 +146,18 @@ def valid_evidence(
             "erc1271_support_status": checker.LOCAL_PLACEHOLDER_STATUS
             if local
             else ("supported" if signer_type == "ERC1271" else "not_applicable"),
+            "erc1271_support_detail": {
+                "rationale": checker.LOCAL_PLACEHOLDER_STATUS
+                if local
+                else (
+                    "Contract signer support validated"
+                    if signer_type == "ERC1271"
+                    else "EOA signer selected; ERC-1271 not applicable"
+                ),
+                "evidence_reference": checker.LOCAL_PLACEHOLDER_STATUS
+                if local
+                else "retained signer custody readiness transcript",
+            },
             "signer_service_class": checker.LOCAL_PLACEHOLDER_STATUS
             if local
             else "managed_signer",
@@ -215,7 +238,7 @@ class SignerCustodyReadinessTests(unittest.TestCase):
     def test_accepts_committed_template(self) -> None:
         """The committed template satisfies the checker."""
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
-            result = checker.main(["--repo-root", str(REPO_ROOT)])
+            result = checker.main(["--repo-root", str(REPO_ROOT), COMMITTED_TEMPLATE])
 
         self.assertEqual(result, 0)
 
@@ -261,7 +284,63 @@ class SignerCustodyReadinessTests(unittest.TestCase):
             write_json(path, evidence)
 
             with self.assertRaisesRegex(
-                checker.SignerCustodyReadinessError, "reviewer must be set"
+                checker.SignerCustodyReadinessError, "review.reviewer"
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_reviewed_tbd_owner(self) -> None:
+        """Reviewed evidence needs a named owner."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["review"]["owner"] = "TBD"
+            path = root / "release-artifacts/signer-custody-readiness/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.SignerCustodyReadinessError, "review.owner"
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_reviewed_placeholder_approval_reference(self) -> None:
+        """Reviewed evidence needs a non-placeholder approval reference."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["review"]["approval_reference"] = "not_available_local"
+            path = root / "release-artifacts/signer-custody-readiness/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.SignerCustodyReadinessError, "approval_reference"
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_reviewed_invalid_reviewed_at(self) -> None:
+        """Reviewed timestamps must be machine-readable date-times."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["review"]["reviewed_at"] = "yesterday"
+            path = root / "release-artifacts/signer-custody-readiness/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.SignerCustodyReadinessError, "RFC3339"
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_whitespace_only_required_string(self) -> None:
+        """Whitespace-only strings do not satisfy required text fields."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["custody"]["custody_owner"] = "   "
+            path = root / "release-artifacts/signer-custody-readiness/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.SignerCustodyReadinessError, "custody_owner"
             ):
                 checker.validate_evidence(path, root)
 
@@ -278,6 +357,22 @@ class SignerCustodyReadinessTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.SignerCustodyReadinessError, "non-local"
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_non_local_placeholder_erc1271_detail(self) -> None:
+        """Non-local ERC-1271 rationale remains machine-checkable."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["signer_identity"]["erc1271_support_detail"][
+                "rationale"
+            ] = checker.LOCAL_PLACEHOLDER_STATUS
+            path = root / "release-artifacts/signer-custody-readiness/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.SignerCustodyReadinessError, "erc1271_support_detail"
             ):
                 checker.validate_evidence(path, root)
 

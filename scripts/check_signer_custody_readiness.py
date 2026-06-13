@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -53,9 +54,11 @@ SIGNER_IDENTITY_FIELDS = frozenset(
         "signer_manager",
         "signer_manager_type",
         "erc1271_support_status",
+        "erc1271_support_detail",
         "signer_service_class",
     }
 )
+ERC1271_SUPPORT_DETAIL_FIELDS = frozenset({"rationale", "evidence_reference"})
 CUSTODY_FIELDS = frozenset(
     {
         "custody_owner",
@@ -231,7 +234,7 @@ def require_list(value: Any, path: str) -> list[Any]:
 
 def require_string(value: Any, path: str) -> str:
     """Require a non-empty string."""
-    if not isinstance(value, str) or value == "":
+    if not isinstance(value, str) or value.strip() == "":
         raise SignerCustodyReadinessError(f"{path} must be a non-empty string")
     return value
 
@@ -306,6 +309,23 @@ def require_non_placeholder(value: Any, path: str) -> str:
     text = require_string(value, path)
     if text == LOCAL_PLACEHOLDER_STATUS or text.strip().upper() == "TBD":
         raise SignerCustodyReadinessError(f"{path} must not be a placeholder")
+    return text
+
+
+def require_rfc3339_datetime(value: Any, path: str) -> str:
+    """Require an RFC3339/ISO-8601 timestamp with an explicit timezone."""
+    text = require_non_placeholder(value, path)
+    normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise SignerCustodyReadinessError(
+            f"{path} must be an RFC3339 date-time"
+        ) from exc
+    if parsed.tzinfo is None:
+        raise SignerCustodyReadinessError(
+            f"{path} must include an explicit timezone"
+        )
     return text
 
 
@@ -402,6 +422,23 @@ def validate_signer_identity(value: Any, environment: str) -> dict[str, Any]:
         "signer_identity.erc1271_support_status",
         ERC1271_STATUSES,
     )
+    erc1271_detail = require_dict(
+        identity.get("erc1271_support_detail"),
+        "signer_identity.erc1271_support_detail",
+    )
+    require_exact_keys(
+        erc1271_detail,
+        "signer_identity.erc1271_support_detail",
+        ERC1271_SUPPORT_DETAIL_FIELDS,
+    )
+    require_string(
+        erc1271_detail.get("rationale"),
+        "signer_identity.erc1271_support_detail.rationale",
+    )
+    require_string(
+        erc1271_detail.get("evidence_reference"),
+        "signer_identity.erc1271_support_detail.evidence_reference",
+    )
     service_class = require_enum(
         identity.get("signer_service_class"),
         "signer_identity.signer_service_class",
@@ -428,6 +465,14 @@ def validate_signer_identity(value: Any, environment: str) -> dict[str, Any]:
             raise SignerCustodyReadinessError(
                 "non-local signer custody evidence cannot use not_available_local erc1271 status"
             )
+        require_non_placeholder(
+            erc1271_detail.get("rationale"),
+            "signer_identity.erc1271_support_detail.rationale",
+        )
+        require_non_placeholder(
+            erc1271_detail.get("evidence_reference"),
+            "signer_identity.erc1271_support_detail.evidence_reference",
+        )
     if environment in PRODUCTION_ENVIRONMENTS and signer_type == "ERC1271":
         if erc1271_status != "supported":
             raise SignerCustodyReadinessError(
@@ -584,16 +629,20 @@ def validate_review(value: Any, review_status: str) -> str:
     """Validate reviewer approval metadata."""
     review = require_dict(value, "review")
     require_exact_keys(review, "review", REVIEW_FIELDS)
-    require_string(review.get("owner"), "review.owner")
+    owner = require_string(review.get("owner"), "review.owner")
     reviewer = require_string(review.get("reviewer"), "review.reviewer")
     approval_status = require_enum(
         review.get("approval_status"), "review.approval_status", APPROVAL_STATUSES
     )
-    require_string(review.get("approval_reference"), "review.approval_reference")
-    require_string(review.get("reviewed_at"), "review.reviewed_at")
+    approval_reference = require_string(
+        review.get("approval_reference"), "review.approval_reference"
+    )
+    reviewed_at = require_string(review.get("reviewed_at"), "review.reviewed_at")
     if review_status == "reviewed":
-        if reviewer.strip().upper() == "TBD":
-            raise SignerCustodyReadinessError("review.reviewer must be set before reviewed")
+        require_non_placeholder(owner, "review.owner")
+        require_non_placeholder(reviewer, "review.reviewer")
+        require_non_placeholder(approval_reference, "review.approval_reference")
+        require_rfc3339_datetime(reviewed_at, "review.reviewed_at")
         if approval_status != "approved":
             raise SignerCustodyReadinessError(
                 "review.approval_status must be approved before reviewed"

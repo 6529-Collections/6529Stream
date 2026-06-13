@@ -275,7 +275,9 @@ Immediate checks:
   and `python scripts/check_drop_authorization_signing_evidence.py`.
 - Compare retained signer custody readiness metadata with
   [`docs/signer-custody-readiness.md`](signer-custody-readiness.md),
+  [`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json),
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json),
+  [`release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt),
   and `python scripts/check_signer_custody_readiness.py`.
 - Confirm whether any payload has already been executed.
 - Preserve EIP-712 domain and signature validation evidence without committing

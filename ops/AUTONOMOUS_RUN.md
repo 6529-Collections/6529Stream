@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/189` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 03:12 UTC` |
+| Last updated | `2026-06-13 03:34 UTC` |
 
 ## Packaging Notes
 
@@ -158,7 +158,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add production signer custody readiness evidence (Queue Item 97)
 
-Status: PR #189 opened; waiting for CI and CodeRabbit.
+Status: Addressing CodeRabbit review comments after initial PR CI passed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/187`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/189`.
 Branch: `codex/signer-custody-readiness-evidence`.
@@ -216,6 +216,23 @@ Validation completed locally at `2026-06-13 03:06 UTC`:
 - `git diff --check`.
 - `make check`.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Initial PR validation:
+
+- PR #189 GitHub Actions CI run `27454880369` passed on head
+  `0b49933d8f5c8474d23d7e4b8ce9a2c7f192c21e`.
+- CodeRabbit status reached success and reported actionable follow-up comments
+  on signer custody validation hardening.
+
+CodeRabbit follow-up in progress:
+
+- Reject whitespace-only strings in signer custody readiness evidence.
+- Require reviewed evidence owner, approval reference, and reviewed-at timestamp
+  to be non-placeholder, with `reviewed_at` parsed as an RFC3339 timestamp.
+- Add machine-checked `erc1271_support_detail` rationale/reference fields.
+- Add signer custody schema and retained-artifact links to incident-response
+  validation.
+- Replace stale roadmap PR #189 CI wording with a time-bounded status note.
 
 ### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
 
@@ -8762,6 +8779,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 03:34 | Address CodeRabbit PR #189 review | Initial PR #189 CI run `27454880369` passed on head `0b49933d8f5c8474d23d7e4b8ce9a2c7f192c21e`; CodeRabbit requested stricter string/review timestamp validation, structured ERC-1271 rationale, fuller incident-response artifact links, public-beta wording, and unambiguous roadmap CI status |
 | 2026-06-13 03:12 | Open PR #189 | Branch `codex/signer-custody-readiness-evidence` opened against `main`, linked `Closes #187`, and CodeRabbit review requested via comment `4697279178` |
 | 2026-06-13 03:06 | Complete Queue Item 97 local validation | Signer custody readiness schema/template/checker/tests/docs are wired through local and CI gates, release manifest/checksum coverage, and readiness/audit/incident docs; focused evidence checks, `git diff --check`, `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally |
 | 2026-06-13 02:45 | Start Queue Item 97 local draft | PR #188 merged cleanly as `3601a0b174f1f972d0b7daa284c19aab29a2373c`; issue #187 is the next no-secret Gate G/Gate C support slice for signer custody readiness schema/template/checker/docs without private keys or signer-service secrets |

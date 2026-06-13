@@ -91,7 +91,7 @@ order.
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Last merged baseline PR #188 CI run `27453558821` passed on final head `2ab48118605330d2a29ef83ea9115cb2a5c2029d`; CodeRabbit aggregate status was success before squash merge `3601a0b174f1f972d0b7daa284c19aab29a2373c`. Queue Item 97 branch CI is pending until PR open |
+| CI run | Last merged baseline PR #188 CI run `27453558821` passed on final head `2ab48118605330d2a29ef83ea9115cb2a5c2029d`; PR #189 Queue Item 97 initial CI run `27454880369` passed on head `0b49933d8f5c8474d23d7e4b8ce9a2c7f192c21e`. CodeRabbit follow-up fixes are pending a new PR #189 CI run as of `2026-06-13 03:24 UTC` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline

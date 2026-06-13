@@ -546,6 +546,10 @@ def signer_custody_readiness_record(path: Path, repo_root: Path) -> dict[str, An
                     signer_identity.get("erc1271_support_status"),
                     "signer_identity.erc1271_support_status",
                 ),
+                "erc1271_support_detail": require_dict(
+                    signer_identity.get("erc1271_support_detail"),
+                    "signer_identity.erc1271_support_detail",
+                ),
                 "signer_service_class": require_string(
                     signer_identity.get("signer_service_class"),
                     "signer_identity.signer_service_class",

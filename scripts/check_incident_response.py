@@ -101,7 +101,9 @@ REQUIRED_LINK_TARGETS = [
     "docs/adr/0007-upgrade-redeployment.md",
     "release-artifacts/latest/public-beta-evidence.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
+    "release-artifacts/schema/signer-custody-readiness.schema.json",
     "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
+    "release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

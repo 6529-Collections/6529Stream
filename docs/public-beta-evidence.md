@@ -53,8 +53,8 @@ is a local template only, not completion evidence.
 Signer custody readiness evidence should follow
 [`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json)
 and pass `python scripts/check_signer_custody_readiness.py` before any
-public-beta or production status row relies on non-local drop authorization
-signing. The committed
+public-beta or production status row relies on signer custody readiness
+evidence for non-local signing. The committed
 [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json)
 is a checked local template only, not completion evidence.
 

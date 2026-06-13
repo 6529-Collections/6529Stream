@@ -651,6 +651,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
                 "signer_manager": "0x0000000000000000000000000000000000000004",
                 "signer_manager_type": "not_available_local",
                 "erc1271_support_status": "not_available_local",
+                "erc1271_support_detail": {
+                    "rationale": "not_available_local",
+                    "evidence_reference": "not_available_local",
+                },
                 "signer_service_class": "not_available_local",
             },
             "custody": {
@@ -923,6 +927,12 @@ class ReleaseManifestTests(unittest.TestCase):
             )
             self.assertEqual(
                 signer_custody["custody"]["custody_status"],
+                "not_available_local",
+            )
+            self.assertEqual(
+                signer_custody["signer_identity"]["erc1271_support_detail"][
+                    "rationale"
+                ],
                 "not_available_local",
             )
             self.assertEqual(
