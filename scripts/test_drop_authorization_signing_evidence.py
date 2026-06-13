@@ -335,6 +335,22 @@ class DropAuthorizationSigningEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, root)
 
+    def test_rejects_negative_payload_numeric_fields(self) -> None:
+        """Evidence payload numeric fields follow the schema minimums."""
+        for field in ("collection_id", "signer_epoch", "nonce", "deadline"):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                evidence = valid_evidence(root)
+                evidence["payload"]["message"][field] = -1
+                path = root / "release-artifacts/drop-authorization-signing/example.json"
+                write_json(path, evidence)
+
+                with self.assertRaisesRegex(
+                    checker.DropAuthorizationSigningEvidenceError,
+                    f"payload.message.{field} must be zero or greater",
+                ):
+                    checker.validate_evidence(path, root)
+
     def test_rejects_production_payload_file(self) -> None:
         """Signing evidence must point at no-secret non-production payload files."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -366,6 +382,21 @@ class DropAuthorizationSigningEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.DropAuthorizationSigningEvidenceError,
                 "signing_identity.signer_epoch",
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_negative_signing_identity_signer_epoch(self) -> None:
+        """Signer identity epoch follows the schema minimum."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            evidence["signing_identity"]["signer_epoch"] = -1
+            path = root / "release-artifacts/drop-authorization-signing/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.DropAuthorizationSigningEvidenceError,
+                "signing_identity.signer_epoch must be zero or greater",
             ):
                 checker.validate_evidence(path, root)
 

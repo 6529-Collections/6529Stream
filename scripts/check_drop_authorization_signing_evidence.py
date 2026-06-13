@@ -238,6 +238,14 @@ def require_positive_int(value: Any, path: str) -> int:
     return number
 
 
+def require_non_negative_int(value: Any, path: str) -> int:
+    """Require a non-negative integer."""
+    number = require_int(value, path)
+    if number < 0:
+        raise DropAuthorizationSigningEvidenceError(f"{path} must be zero or greater")
+    return number
+
+
 def require_enum(value: Any, path: str, choices: frozenset[str]) -> str:
     """Require a string from an enum set."""
     text = require_string(value, path)
@@ -432,7 +440,9 @@ def validate_payload_message(evidence_message: Any, actual_message: dict[str, An
         if evidence_key == "sale_mode":
             require_positive_int(message.get(evidence_key), f"payload.message.{evidence_key}")
         else:
-            require_int(message.get(evidence_key), f"payload.message.{evidence_key}")
+            require_non_negative_int(
+                message.get(evidence_key), f"payload.message.{evidence_key}"
+            )
         require_matching_string(
             actual_message.get(payload_key),
             message.get(evidence_key),
@@ -524,7 +534,9 @@ def validate_signing_identity(
     require_exact_keys(identity, "signing_identity", SIGNING_IDENTITY_FIELDS)
     signer_type = require_enum(identity.get("signer_type"), "signing_identity.signer_type", SIGNER_TYPES)
     signer = require_address(identity.get("signer"), "signing_identity.signer")
-    signer_epoch = require_int(identity.get("signer_epoch"), "signing_identity.signer_epoch")
+    signer_epoch = require_non_negative_int(
+        identity.get("signer_epoch"), "signing_identity.signer_epoch"
+    )
     custody_status = require_enum(
         identity.get("custody_status"), "signing_identity.custody_status", CUSTODY_STATUSES
     )

@@ -357,6 +357,7 @@ the release artifact contract set.
 The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/evidence/`,
 `release-artifacts/drop-authorization-signing/`,
+`release-artifacts/schema/`,
 `release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,

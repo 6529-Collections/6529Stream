@@ -265,6 +265,10 @@ Immediate checks:
   authorization payloads.
 - Compare the payload and digest with
   [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
+- Compare retained signing evidence with
+  [`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
+  and
+  [`release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt).
 - Compare retained signing ceremony metadata with
   [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
   and `python scripts/check_drop_authorization_signing_evidence.py`.

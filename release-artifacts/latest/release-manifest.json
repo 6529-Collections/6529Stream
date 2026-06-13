@@ -681,8 +681,8 @@
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:ba599508655c4e882cd44301115118b2a981205ee983ea4c629dafafb8c264dd",
-        "size_bytes": 18150
+        "sha256": "sha256:1bd8d8b666eb1fb03bf912435c297ad10a4f30f066af61a8a3c3c4ed1c703b42",
+        "size_bytes": 18552
       },
       {
         "path": "docs/drop-authorization-signing.md",
@@ -696,8 +696,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:e562f67892c6c44465350a3a1ed6e332d8fce3657b9a04a3a381edc05ee9607c",
-        "size_bytes": 20058
+        "sha256": "sha256:b87e829bf8ffb2328657682f4597e56885de3dfc494f55f2f2d1106ded474e55",
+        "size_bytes": 20087
       },
       {
         "path": "docs/status.md",

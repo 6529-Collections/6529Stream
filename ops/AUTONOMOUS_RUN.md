@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/185` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 01:37 UTC` |
+| Last updated | `2026-06-13 01:44 UTC` |
 
 ## Packaging Notes
 
@@ -156,7 +156,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
 
-Status: CodeRabbit minor findings addressed; awaiting CI and final review status.
+Status: Addressing remaining CodeRabbit review findings after PR #185 CI passed
+on head `a45232dd0f685ca8e37b7baaeac746e36fcf1c2e`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/183`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/185`.
 Branch: `codex/drop-signing-evidence-schema`.
@@ -244,7 +245,8 @@ Remote validation:
 - PR #185 opened at
   `https://github.com/6529-Collections/6529Stream/pull/185`.
 - CodeRabbit review requested in issue comment `4696975873`.
-- GitHub Actions pending.
+- GitHub Actions CI run `27452741736` passed on head
+  `a45232dd0f685ca8e37b7baaeac746e36fcf1c2e`.
 
 CodeRabbit follow-up:
 
@@ -262,6 +264,22 @@ Follow-up validation:
 - `python scripts\check_drop_authorization_signing_evidence.py`.
 - `python scripts\test_release_manifest.py`.
 - `python scripts\generate_release_manifest.py --check`.
+
+Second CodeRabbit follow-up:
+
+- Replaced time-relative PR-creation wording in `ops/ROADMAP.md` with dated
+  PR #185 CI evidence and local-baseline wording.
+- Rephrased the docs public-beta requirement to avoid implying a completed
+  third-party review before external audit evidence exists.
+- Enforced non-negative payload numeric fields and signing identity signer
+  epoch in the drop authorization signing evidence checker, matching the JSON
+  schema minimums.
+- Added regression coverage for negative payload numeric fields and negative
+  signing identity signer epoch.
+- Documented `release-artifacts/schema/` release-checksum coverage in
+  `docs/tooling.md`.
+- Linked the drop authorization signing evidence schema and retained-artifact
+  placeholder directly from the signer-compromise incident runbook.
 
 ### PR candidate: Reconcile autonomous run state after drop authorization payload generator merge (Queue Item 94)
 
@@ -8671,6 +8689,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 01:44 | Address remaining CodeRabbit PR #185 findings | Replace stale roadmap status language, remove unsupported external-review phrasing, align numeric evidence validation with schema minimums, add focused regressions, and clarify tooling/incident-response docs before pushing the next review-response commit |
 | 2026-06-13 01:37 | Address CodeRabbit PR #185 minor findings | Added the secret-regex maintainer note, evidence/template review-status regression, and `seed_phrase` fixture alignment; focused evidence and release-manifest checks pass |
 | 2026-06-13 01:32 | Request CodeRabbit PR #185 review | CodeRabbit review requested in issue comment `4696975873`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 01:32 | Open PR #185 | Drop authorization signing evidence schema/checker PR opened against `main`, linked `Closes #183`, and included local validation transcript |
