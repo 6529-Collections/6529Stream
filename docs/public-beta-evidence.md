@@ -19,6 +19,10 @@ python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_release_evidence_packet_index.py
 python scripts/generate_release_evidence_packet_index.py --check
+python scripts/test_release_evidence_issue_backlog.py
+python scripts/generate_release_evidence_issue_backlog.py --check
+python scripts/test_release_evidence_issue_links.py
+python scripts/check_release_evidence_issue_links.py
 ```
 
 ## Evidence Artifact
@@ -63,6 +67,12 @@ It turns every incomplete packet row into an issue-ready title, label set,
 body, validation command list, and completion gate. It does not create GitHub
 issues automatically, does not mark evidence complete, and keeps
 template-only evidence out of completion criteria.
+
+The release evidence issue-link map is committed at
+[`release-artifacts/latest/release-evidence-issue-links.json`](../release-artifacts/latest/release-evidence-issue-links.json).
+It links every generated backlog entry to a durable GitHub tracker issue while
+remaining no-secret and tracker-only. Closing those tracker issues still
+requires reviewed retained evidence in the status manifest.
 
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
@@ -195,7 +205,10 @@ To move a requirement to `complete`:
    `python scripts/generate_release_evidence_issue_backlog.py`,
    `python scripts/test_release_evidence_issue_backlog.py`, and
    `python scripts/generate_release_evidence_issue_backlog.py --check`.
-13. Regenerate and check the release manifest and checksum bundle.
+13. Check the issue-link map with
+   `python scripts/test_release_evidence_issue_links.py` and
+   `python scripts/check_release_evidence_issue_links.py`.
+14. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

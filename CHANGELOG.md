@@ -130,6 +130,10 @@ the release policy in `docs/release-policy.md`.
   checks, issue-ready titles, labels, bodies, completion gates, validation
   commands, and release manifest/checksum coverage without auto-creating issues
   or changing readiness claims.
+- Added a committed release evidence issue-link map under
+  `release-artifacts/latest/`, with local/CI checks tying every generated
+  backlog entry to a GitHub tracker issue without treating tracker closure as
+  retained evidence.
 - Added a non-local release evidence intake runbook so fork/testnet/live,
   audit, explorer, gas, invariant, checksum-signature, and signed-tag evidence
   has required retained fields, no-secret redaction rules, reviewer

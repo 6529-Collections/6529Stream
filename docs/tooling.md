@@ -66,6 +66,8 @@ python scripts/test_release_evidence_packet_index.py
 python scripts/generate_release_evidence_packet_index.py --check
 python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
+python scripts/test_release_evidence_issue_links.py
+python scripts/check_release_evidence_issue_links.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -228,6 +230,10 @@ bodies, retained-evidence completion gates, and validation commands. Run
 `python scripts/generate_release_evidence_issue_backlog.py` to refresh it and
 `python scripts/generate_release_evidence_issue_backlog.py --check` to verify
 it. It does not create GitHub issues automatically or change readiness claims.
+The release evidence issue-link map is committed at
+`release-artifacts/latest/release-evidence-issue-links.json`; run
+`python scripts/check_release_evidence_issue_links.py` to verify each generated
+backlog entry has a durable tracker issue without querying GitHub during CI.
 The non-local release evidence intake runbook in
 [`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
 operator workflow, required retained fields, redaction rules, reviewer
@@ -316,6 +322,7 @@ python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
+python scripts/check_release_evidence_issue_links.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
@@ -359,6 +366,8 @@ python scripts/test_release_evidence_packet_index.py
 python scripts/generate_release_evidence_packet_index.py --check
 python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
+python scripts/test_release_evidence_issue_links.py
+python scripts/check_release_evidence_issue_links.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
