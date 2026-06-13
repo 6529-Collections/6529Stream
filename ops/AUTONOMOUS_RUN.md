@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/clarify-production-evidence-gates` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/254` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/255` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/256` |
 | Next issue | TBD after issue #255 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 17:48 UTC` |
+| Last updated | `2026-06-13 17:55 UTC` |
 
 ## Packaging Notes
 
@@ -184,9 +184,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Clarify production evidence tracker completion gates (Queue Item 122)
 
-Status: local draft in progress for issue #255; PR TBD.
+Status: PR #256 open; initial local validation passed, with CI and CodeRabbit
+pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/255`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/256`.
 Branch: `codex/clarify-production-evidence-gates`.
 Branch started from PR #254 squash merge commit
 `430c816a346dcc95d39bdceec70d6a79bd35c427`.
@@ -237,6 +238,33 @@ Validation target:
 - `python scripts/check_changelog.py`.
 - `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\public-beta-evidence.md release-artifacts\evidence\production-release-templates\README.md`.
 - `git diff --check`.
+
+Initial local validation:
+
+- `python scripts/test_public_beta_blocker_report.py` passed.
+- `python scripts/generate_public_beta_blocker_report.py --check` passed.
+- `python scripts/test_release_evidence_packet_index.py` passed.
+- `python scripts/generate_release_evidence_packet_index.py --check` passed.
+- `python scripts/test_release_evidence_issue_backlog.py` passed.
+- `python scripts/generate_release_evidence_issue_backlog.py --check` passed.
+- `python scripts/test_release_evidence_issue_body_sync.py` passed.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check` passed.
+- `python scripts/test_release_evidence_issue_bodies.py` passed.
+- `python scripts/check_release_evidence_issue_bodies.py` passed.
+- `python scripts/check_public_beta_evidence.py` passed.
+- `python scripts/test_public_beta_evidence.py` passed.
+- `python scripts/test_production_release_blocker_report.py` passed.
+- `python scripts/generate_production_release_blocker_report.py --check` passed.
+- `python scripts/check_release_readiness.py` passed.
+- `python scripts/test_release_readiness.py` passed.
+- `python scripts/generate_release_manifest.py --check` passed.
+- `python scripts/test_release_manifest.py` passed.
+- `python scripts/generate_release_checksums.py --check` passed.
+- `python scripts/test_release_checksums.py` passed.
+- `python scripts/check_changelog.py` passed.
+- `python -m py_compile scripts/generate_public_beta_blocker_report.py scripts/generate_release_evidence_issue_backlog.py scripts/generate_release_evidence_issue_body_sync.py scripts/test_release_evidence_issue_backlog.py scripts/test_release_evidence_issue_body_sync.py` passed.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\public-beta-evidence.md docs\tooling.md release-artifacts\README.md release-artifacts\evidence\production-release-templates\README.md` passed.
+- `git diff --check` passed.
 
 ### Completed: Reconcile non-local evidence generator merge state (Queue Item 121)
 
