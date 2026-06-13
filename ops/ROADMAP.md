@@ -87,12 +87,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 04:40 UTC` after Queue Item 99 public-beta blocker report generator/tests, local/CI wiring, release-manifest/checksum integration, docs/roadmap updates, focused public-beta blocker, release-manifest, release-artifact, checksum, release-readiness, changelog, heading, syntax, and whitespace checks, full `make check`, and the Windows PowerShell wrapper; last merged baseline is PR #192 GitHub Actions CI run `27455898124` passing on final head `057ae6659b4ec0b34d97bf91f89019d93fbe4964`, CodeRabbit success, and squash merge commit `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd` |
-| OS tested | Windows local for Queue Item 99 focused checks, full `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`; Linux GitHub Actions passed for last merged baseline PR #192 run `27455898124` on final head `057ae6659b4ec0b34d97bf91f89019d93fbe4964`, with merged baseline commit `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd` |
+| Last verified | `2026-06-13 05:07 UTC` after PR #193 public-beta blocker report generator/tests, local/CI wiring, release-manifest/checksum integration, docs/roadmap updates, focused public-beta blocker, release-manifest, release-artifact, checksum, release-readiness, changelog, heading, syntax, and whitespace checks, full `make check`, and the Windows PowerShell wrapper; last merged baseline is PR #193 GitHub Actions CI run `27457209173` passing on final head `61ed7e8bc259c4daa4ac3adaeb746b96904dcbda`, CodeRabbit success, and squash merge commit `69df0c1af4e63080a9c4a822e167f0284d349c74` |
+| OS tested | Windows local for Queue Item 99 focused checks, full `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`; Linux GitHub Actions passed for last merged baseline PR #193 run `27457209173` on final head `61ed7e8bc259c4daa4ac3adaeb746b96904dcbda`, with merged baseline commit `69df0c1af4e63080a9c4a822e167f0284d349c74` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Last merged baseline PR #192 final CI run `27455898124` passed on head `057ae6659b4ec0b34d97bf91f89019d93fbe4964`; CodeRabbit status was success and no actionable comments remained before squash merge `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd` |
+| CI run | Last merged baseline PR #193 final CI run `27457209173` passed on head `61ed7e8bc259c4daa4ac3adaeb746b96904dcbda`; CodeRabbit status was success and no actionable comments remained before squash merge `69df0c1af4e63080a9c4a822e167f0284d349c74` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -358,15 +358,16 @@ model docs, the `docs/release-readiness.md` dashboard, the
 `release-artifacts/latest/public-beta-evidence.json` status manifest/checker
 from PR #165, the generated
 `release-artifacts/latest/public-beta-blockers.md` blocker report from issue
-[#191](https://github.com/6529-Collections/6529Stream/issues/191), and the
+[#191](https://github.com/6529-Collections/6529Stream/issues/191) / PR #193,
+and the
 `docs/non-local-release-evidence.md` intake runbook from issue #168.
 [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
 is complete for the release-readiness dashboard and checker, and
 [`#164`](https://github.com/6529-Collections/6529Stream/issues/164) is complete
 for the public-beta evidence status manifest and checker. Issue
-[#191](https://github.com/6529-Collections/6529Stream/issues/191) is in
-progress for the deterministic no-secret blocker report generated from the
-public beta evidence manifest without changing readiness claims.
+[#191](https://github.com/6529-Collections/6529Stream/issues/191) is complete
+for the deterministic no-secret blocker report generated from the public beta
+evidence manifest without changing readiness claims.
 
 Exit criteria:
 
