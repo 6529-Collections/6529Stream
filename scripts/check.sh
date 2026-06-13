@@ -79,6 +79,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_release_evidence_issue_backlog.py --check
 "$python_bin" scripts/test_release_evidence_issue_links.py
 "$python_bin" scripts/check_release_evidence_issue_links.py
+"$python_bin" scripts/test_release_evidence_issue_snapshot.py
 "$python_bin" scripts/test_release_evidence_issue_labels.py
 "$python_bin" scripts/check_release_evidence_issue_labels.py
 "$python_bin" scripts/test_release_evidence_issue_body_sync.py

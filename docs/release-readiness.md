@@ -128,6 +128,8 @@ The current local baseline includes:
   [`release-artifacts/latest/release-evidence-issue-backlog.md`](../release-artifacts/latest/release-evidence-issue-backlog.md),
   plus the committed GitHub tracker map at
   [`release-artifacts/latest/release-evidence-issue-links.json`](../release-artifacts/latest/release-evidence-issue-links.json),
+  plus deterministic live issue snapshot exporter tests with
+  `python scripts/test_release_evidence_issue_snapshot.py`,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
@@ -293,6 +295,7 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py

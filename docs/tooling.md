@@ -69,6 +69,7 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -249,7 +250,7 @@ To audit live GitHub label drift without adding network access to CI, export a
 snapshot and pass it to the checker:
 
 ```bash
-gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,labels > tmp/release-evidence-issue-labels.json
+python scripts/export_release_evidence_issue_snapshot.py --profile labels
 python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
 ```
 
@@ -266,7 +267,7 @@ committed body-sync payloads. To audit live GitHub body drift without adding
 network access to CI, export a snapshot and pass it to the checker:
 
 ```bash
-gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,body,state > tmp/release-evidence-issue-bodies.json
+python scripts/export_release_evidence_issue_snapshot.py --profile bodies
 python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
 ```
 
@@ -286,7 +287,7 @@ without adding network access to CI, export all linked issue states and pass
 the snapshot to the checker:
 
 ```bash
-gh issue list --repo 6529-Collections/6529Stream --state all --limit 100 --json number,title,state > tmp/release-evidence-issue-closure.json
+python scripts/export_release_evidence_issue_snapshot.py --profile closure
 python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
 ```
 
@@ -441,6 +442,7 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py

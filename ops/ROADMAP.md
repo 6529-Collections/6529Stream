@@ -93,12 +93,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 18:24 UTC` for Queue Item 123 / PR #258 state reconciliation; PR #258 local validation covered release-readiness, manifest, checksum, changelog, release evidence issue body/closure checks, heading, and whitespace checks |
-| OS tested | Windows local state-reconciliation validation for Queue Item 123 / PR #258; Linux GitHub Actions passed for latest merged baseline PR #258 run `27475057686` on final head `cae33d4779bbf8c51f794727083e7801498045b7`, with merged baseline commit `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029` |
+| Last verified | `2026-06-13 18:42 UTC` for Queue Item 124 / PR #260 release evidence tracker phase labels; PR #260 local validation covered issue links, label checks, live label audit, body sync, issue bodies, release-readiness, manifest, checksum, changelog, heading, and whitespace checks |
+| OS tested | Windows local validation for Queue Item 124 / PR #260; Linux GitHub Actions passed for latest merged baseline PR #260 run `27475475098` on final head `32759d33ec6e118426cc37cade36e947c960c3d4`, with merged baseline commit `779ff73bee124c646d1531b43dc61940872e1fab` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #258 final CI run `27475057686` passed on head `cae33d4779bbf8c51f794727083e7801498045b7`; CodeRabbit status was success with no review threads opened, and PR #258 squash-merged as `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029` |
+| CI run | Latest merged baseline PR #260 final CI run `27475475098` passed on head `32759d33ec6e118426cc37cade36e947c960c3d4`; CodeRabbit status was success with no review threads opened, and PR #260 squash-merged as `779ff73bee124c646d1531b43dc61940872e1fab` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
