@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/public-beta-evidence-templates` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/196` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/195` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/197` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 05:58 UTC` |
+| Last updated | `2026-06-13 06:01 UTC` |
 
 ## Packaging Notes
 
@@ -162,9 +162,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add per-requirement public beta evidence templates (Queue Item 101)
 
-Status: Local validation complete; PR pending.
+Status: Open in PR #197; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/195`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/197`.
 Branch: `codex/public-beta-evidence-templates`.
 Branch started from PR #196 squash merge commit
 `99b0845e81c0b81bb9105c1d35970a92b47b22a0`.
@@ -232,6 +232,13 @@ Validation completed locally at `2026-06-13 05:58 UTC`:
 - `git diff --check`.
 - `make check`.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+PR opened:
+
+- PR #197 opened against `main` on head
+  `1f4b240822c80909782212dbb625a8f31ccd0665`.
+  This follow-up state commit records the concrete PR URL before CodeRabbit
+  review is requested.
 
 ### PR candidate: Reconcile public beta blocker report merge state (Queue Item 100)
 
@@ -8962,6 +8969,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 06:01 | Open PR #197 | Per-requirement public-beta evidence template PR opened against `main`, linked `Closes #195`, and will use CodeRabbit-only review per current user instruction |
 | 2026-06-13 05:58 | Finish Queue Item 101 local validation | Focused template/checker/manifest/checksum checks, release-readiness, changelog, heading scan, whitespace check, full `make check`, and the Windows PowerShell wrapper all pass locally before PR creation |
 | 2026-06-13 05:39 | Implement Queue Item 101 local draft | Added per-requirement public-beta evidence templates, checker/test coverage, nested non-local evidence manifest coverage, docs, changelog, regenerated release artifacts, and durable run-state updates without changing readiness claims |
 | 2026-06-13 05:37 | Start Queue Item 101 | PR #196 merged cleanly, so issue #195 is now the active public-safe template slice for future non-local public-beta evidence collection |
