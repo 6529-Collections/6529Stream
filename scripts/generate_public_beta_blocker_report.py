@@ -36,8 +36,8 @@ PHASES = (
     ),
 )
 VALIDATION_COMMANDS = (
-    ("Public beta evidence manifest", "python scripts/test_public_beta_evidence.py"),
-    ("Public beta evidence manifest", "python scripts/check_public_beta_evidence.py"),
+    ("Shared evidence status manifest", "python scripts/test_public_beta_evidence.py"),
+    ("Shared evidence status manifest", "python scripts/check_public_beta_evidence.py"),
     (
         "Public beta blocker report",
         "python scripts/test_public_beta_blocker_report.py",
@@ -120,7 +120,7 @@ def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
 
 
 def load_evidence_document(evidence_path: Path, repo_root: Path) -> dict[str, Any]:
-    """Load and validate the public-beta evidence manifest."""
+    """Load and validate the shared evidence status manifest."""
     resolved = resolve_repo_path(repo_root, evidence_path)
     try:
         data = evidence_checker.load_json(resolved)
@@ -279,9 +279,9 @@ def build_output_text(repo_root: Path, evidence_path: Path, output_path: Path) -
         "# Public Beta Evidence Blocker Report",
         "",
         (
-            "This generated report is derived only from the committed public-beta "
-            "evidence manifest. It preserves the no-secret policy and does not "
-            "change readiness claims."
+            "This generated report is derived only from the committed shared "
+            "release evidence status manifest. It preserves the no-secret "
+            "policy and does not change readiness claims."
         ),
         "",
         "The committed baseline remains intentionally blocked for public beta and production.",

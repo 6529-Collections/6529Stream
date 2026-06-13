@@ -21,6 +21,7 @@ SCRIPT_NAME = Path(__file__).name
 DEFAULT_PACKET_INDEX = Path("release-artifacts/latest/release-evidence-packet-index.json")
 DEFAULT_JSON_OUTPUT = Path("release-artifacts/latest/release-evidence-issue-backlog.json")
 DEFAULT_MARKDOWN_OUTPUT = Path("release-artifacts/latest/release-evidence-issue-backlog.md")
+SHARED_EVIDENCE_STATUS_MANIFEST = "release-artifacts/latest/public-beta-evidence.json"
 
 PUBLIC_BETA_PHASE = "public_beta"
 PRODUCTION_PHASE = "production_release"
@@ -147,6 +148,7 @@ def suggested_labels(row: dict[str, Any]) -> list[str]:
 
 def completion_gate(row: dict[str, Any]) -> str:
     """Describe the completion rule for one issue."""
+    phase = require_string(row.get("phase"), "row.phase")
     retained = require_dict(
         row.get("retained_artifact_expectation"),
         "row.retained_artifact_expectation",
@@ -157,12 +159,24 @@ def completion_gate(row: dict[str, Any]) -> str:
         retained.get("path"),
         "row.retained_artifact_expectation.path",
     )
+    if phase == PRODUCTION_PHASE:
+        status_manifest = (
+            f"the shared release evidence status manifest "
+            f"`{SHARED_EVIDENCE_STATUS_MANIFEST}`, which currently tracks both "
+            "public-beta and production-release requirement rows"
+        )
+    elif phase == PUBLIC_BETA_PHASE:
+        status_manifest = (
+            f"the shared release evidence status manifest "
+            f"`{SHARED_EVIDENCE_STATUS_MANIFEST}`"
+        )
+    else:
+        raise ReleaseEvidenceIssueBacklogError(f"unknown packet row phase: {phase}")
     return (
         "This issue can close only after reviewed retained evidence replaces or "
         f"supplements `{template_path}` and is referenced from "
-        "`release-artifacts/latest/public-beta-evidence.json`. The retained "
-        f"artifact expectation is `{retained_path}`. Template-only evidence "
-        "cannot complete the row."
+        f"{status_manifest}. The retained artifact expectation is "
+        f"`{retained_path}`. Template-only evidence cannot complete the row."
     )
 
 
@@ -414,7 +428,9 @@ def build_backlog(
             "completion_rule": (
                 "Backlog entries are issue preparation material only. A row can "
                 "be complete only when reviewed retained evidence is referenced "
-                "in release-artifacts/latest/public-beta-evidence.json."
+                "in the shared release evidence status manifest "
+                f"{SHARED_EVIDENCE_STATUS_MANIFEST}, whose current schema "
+                "includes both public-beta and production-release rows."
             ),
         },
         "status_summary": status_summary(entries),

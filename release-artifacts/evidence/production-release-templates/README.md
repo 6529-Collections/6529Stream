@@ -1,7 +1,10 @@
 # Production Release Evidence Templates
 
 These files are checked, public-safe templates for the production-release
-requirement rows in `release-artifacts/latest/public-beta-evidence.json`.
+requirement rows in the shared release evidence status manifest at
+`release-artifacts/latest/public-beta-evidence.json`. The path name is retained
+for compatibility; the manifest currently tracks both public-beta and
+production-release rows.
 
 They are not completion evidence. Each JSON file uses
 `record_type: "template"` and `review_status: "template"`, points at the
@@ -18,4 +21,4 @@ Before using a template for real evidence:
    unreleased drop payloads outside this repository.
 4. Run `python scripts/check_non_local_release_evidence.py` on the evidence
    JSON and `python scripts/check_public_beta_evidence.py` after linking it
-   from the public-beta evidence manifest.
+   from the shared release evidence status manifest.

@@ -14,8 +14,8 @@
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:3ac41c7b070d6ad6a858d2829d54d77b00dc44879058f60f3b01b20fce744a49",
-      "size_bytes": 9707
+      "sha256": "sha256:7cf0dd73e2f4ec27fec584a2a105334b3db441e212bf6524b3961b0dd4705b0e",
+      "size_bytes": 9721
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",

@@ -187,6 +187,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Clarified production-release evidence tracker completion gates so
+  `public-beta-evidence.json` is described as the shared release evidence
+  status manifest rather than a public-beta-only completion target.
 - Persisted collection base URI values during full collection metadata updates
   and hardened admin, minter, and randomizer marker probes so invalid targets
   revert with typed custom errors.

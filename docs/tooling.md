@@ -280,10 +280,10 @@ gh issue edit ISSUE_NUMBER --repo 6529-Collections/6529Stream --body-file tmp/re
 
 Run `python scripts/check_release_evidence_issue_closure.py` to verify the
 committed tracker map, `release-evidence-issue-backlog.json` backlog artifact,
-body-sync artifact, packet index, and public-beta evidence manifest agree on
-which tracker issues may close. To audit live GitHub closure state without
-adding network access to CI, export all linked issue states and pass the
-snapshot to the checker:
+body-sync artifact, packet index, and shared release evidence status manifest
+agree on which tracker issues may close. To audit live GitHub closure state
+without adding network access to CI, export all linked issue states and pass
+the snapshot to the checker:
 
 ```bash
 gh issue list --repo 6529-Collections/6529Stream --state all --limit 100 --json number,title,state > tmp/release-evidence-issue-closure.json

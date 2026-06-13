@@ -27,7 +27,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:e1f969d690f40d1d6ac30ab4eae3f2e91bff1fda76a3e2904b80ef41e40a439f"
+    "sha256": "sha256:a7213b69f9cc3702b93d1edfea8325c26e74a5c255d5f84ab9a2a530eae87d06"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -151,8 +151,8 @@
     },
     {
       "path": "release-artifacts/evidence/production-release-templates/README.md",
-      "sha256": "sha256:781f27485dfc84bd794a641451648214624ac11fcc787fbe886c898a17b721f0",
-      "size_bytes": 1060
+      "sha256": "sha256:eba9a06221ebb8e604834bcb3d6306a3e5ee51b59b9d3748134d89e85f9a73d4",
+      "size_bytes": 1238
     },
     {
       "path": "release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json",
@@ -281,8 +281,8 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:3ac41c7b070d6ad6a858d2829d54d77b00dc44879058f60f3b01b20fce744a49",
-      "size_bytes": 9707
+      "sha256": "sha256:7cf0dd73e2f4ec27fec584a2a105334b3db441e212bf6524b3961b0dd4705b0e",
+      "size_bytes": 9721
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -296,23 +296,23 @@
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-      "sha256": "sha256:e2c861dd4b9303b495b35a1e27e415ff38fffa731317b87949ea4c5be22a319a",
-      "size_bytes": 104389
+      "sha256": "sha256:cc29b0291bfb87030f01a2d9bf75299f1d7b0ec816c5f376b720db4bd5c65d49",
+      "size_bytes": 107463
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-backlog.md",
-      "sha256": "sha256:e5b4593223c91d46a55ece77ac8a0968136ccd627f37e03cd83df44c056948c9",
-      "size_bytes": 66023
+      "sha256": "sha256:e89f237dc32878fbe44fd86601b1323febca62c728509f4f0405128c82ce097e",
+      "size_bytes": 67500
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-      "sha256": "sha256:550b092d5b9289d640d2658f9f04732dc8048df845df7412ca21ec43be4abfde",
-      "size_bytes": 73438
+      "sha256": "sha256:56deee214ddb6720486b75522ade1421b0947e4dc926226582c427cbac94709c",
+      "size_bytes": 75153
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-      "sha256": "sha256:aa9f753d9ff5b3131c4484d99ecb5579abfe2719048891d783c9114ac3c15d54",
-      "size_bytes": 65309
+      "sha256": "sha256:6a036f5e6a53cdfca0e9a144addf9afc77710c2a6ca32aa6d7330b9a090a9bac",
+      "size_bytes": 67024
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-links.json",
@@ -321,7 +321,7 @@
     },
     {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:5c90823bb3014a0e9c05595f1e5d0c04b152faa2f98d33e284275fa431c34384",
+      "sha256": "sha256:fe54943134bf9e779373fb20b1b09998afafb77af80bcd83da16f63f3809603e",
       "size_bytes": 52592
     },
     {
@@ -331,7 +331,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:d089c0c5cdba72dbeced71ad91069379ce0afbda6acd7ae8c2ee5007b6ab25f4",
+      "sha256": "sha256:0ddfc50678f3348fb495203c2d0e1470f5c716e65d362cf7425e665ff8b0b3e1",
       "size_bytes": 85390
     },
     {

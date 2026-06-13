@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-non-local-generator-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/252` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/253` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/254` |
-| Next issue | TBD after issue #253 merges |
+| Active PR branch | `codex/clarify-production-evidence-gates` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/254` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/255` |
+| Active PR | TBD |
+| Next issue | TBD after issue #255 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 17:34 UTC` |
+| Last updated | `2026-06-13 17:48 UTC` |
 
 ## Packaging Notes
 
@@ -177,19 +177,77 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 118 | Guard release evidence tracker closure and readiness state | Gate G support | Add a no-secret closure/readiness audit so tracker issues #215 through #231 cannot be closed before their committed evidence requirement is complete or explicitly risk-accepted | Merged in PR #248 |
 | 119 | Reconcile release evidence closure merge state | Gate G support | Record PR #248 merge evidence, issue #246 closure, refreshed roadmap verification metadata, and the next autonomous queue posture without changing readiness claims | Merged in PR #250 |
 | 120 | Add non-local evidence scaffold generator | Gate E/Gate G support | Add a no-secret generator that turns a retained artifact plus committed requirement template into checker-compatible non-local evidence metadata with digest computation and `--check` drift detection | Merged in PR #252 |
-| 121 | Reconcile non-local evidence generator merge state | Gate G support | Record PR #252 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Active |
+| 121 | Reconcile non-local evidence generator merge state | Gate G support | Record PR #252 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Merged in PR #254 |
+| 122 | Clarify production evidence tracker completion gates | Gate G support | Fix generated tracker completion-gate wording so production-release rows describe the shared evidence status manifest without changing readiness claims | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile non-local evidence generator merge state (Queue Item 121)
+### PR candidate: Clarify production evidence tracker completion gates (Queue Item 122)
 
-Status: PR #254 open; initial local validation passed, with CI and CodeRabbit
-pending.
+Status: local draft in progress for issue #255; PR TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/255`.
+PR: TBD.
+Branch: `codex/clarify-production-evidence-gates`.
+Branch started from PR #254 squash merge commit
+`430c816a346dcc95d39bdceec70d6a79bd35c427`.
+
+Prior queue transition:
+
+- Queue Item 121 merged in PR #254 as squash commit
+  `430c816a346dcc95d39bdceec70d6a79bd35c427`.
+- PR #254 final implementation head was
+  `cd244bdcb5df68e0d35e3f623672afdefb7d67b9`.
+- PR #254 GitHub Actions CI run `27474041123` passed on the final head,
+  including deployment rehearsal.
+- PR #254 CodeRabbit status was success, and no review threads were opened.
+- Issue #253 closed completed after merge.
+- The remaining open issues #215 through #231 still require real reviewed
+  retained external evidence; this wording fix must not close or complete them.
+
+Goal:
+
+- Clarify generated completion-gate text for production-release tracker rows.
+- Make clear that `release-artifacts/latest/public-beta-evidence.json` is the
+  shared release evidence status manifest for both public-beta and
+  production-release rows.
+- Update focused tests, generated issue-backlog/body-sync artifacts, and
+  operator docs.
+- Preserve current readiness claims and evidence statuses.
+
+Validation target:
+
+- `python scripts/test_release_evidence_issue_backlog.py`.
+- `python scripts/generate_release_evidence_issue_backlog.py --check`.
+- `python scripts/test_release_evidence_issue_body_sync.py`.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+- `python scripts/test_release_evidence_issue_bodies.py`.
+- `python scripts/check_release_evidence_issue_bodies.py`.
+- `python scripts/check_public_beta_evidence.py`.
+- `python scripts/test_public_beta_evidence.py`.
+- `python scripts/test_public_beta_blocker_report.py`.
+- `python scripts/generate_public_beta_blocker_report.py --check`.
+- `python scripts/test_production_release_blocker_report.py`.
+- `python scripts/generate_production_release_blocker_report.py --check`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/check_changelog.py`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\public-beta-evidence.md release-artifacts\evidence\production-release-templates\README.md`.
+- `git diff --check`.
+
+### Completed: Reconcile non-local evidence generator merge state (Queue Item 121)
+
+Status: merged in PR #254.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/253`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/254`.
 Branch: `codex/reconcile-non-local-generator-merge-state`.
 Branch started from PR #252 squash merge commit
 `244ca142f5d74d715b601ec51ba22fb658199fda`.
+Final PR head: `cd244bdcb5df68e0d35e3f623672afdefb7d67b9`.
+Squash merge commit: `430c816a346dcc95d39bdceec70d6a79bd35c427`.
 
 Prior queue transition:
 
@@ -236,6 +294,10 @@ Initial local validation:
 - `python scripts/check_changelog.py` passed.
 - `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md` passed.
 - `git diff --check` passed.
+- Final GitHub Actions CI run `27474041123` passed on head
+  `cd244bdcb5df68e0d35e3f623672afdefb7d67b9`, including deployment rehearsal.
+- CodeRabbit final status was success, no review threads were opened, and issue
+  #253 closed completed.
 
 ### Completed: Add non-local evidence scaffold generator (Queue Item 120)
 

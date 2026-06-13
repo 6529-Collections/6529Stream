@@ -64,7 +64,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with the final external audit report or public report reference, scope, audited commit, finding IDs, remediation links, accepted-risk references, retest status, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/external-audit-report-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/external-audit-report-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -131,7 +131,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -198,7 +198,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with testnet deployment transcript, chain ID, transaction references, sanitized broadcast, generated manifest, address book, explorer verification status, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -265,7 +265,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -332,7 +332,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -399,7 +399,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -466,7 +466,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -533,7 +533,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -600,7 +600,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with detached checksum signature evidence, public key fingerprint, signing command, checksum bundle path and digest, custody summary, verification output, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-signatures-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-signatures-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -667,7 +667,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with signed Git tag evidence, git verify-tag output, release commit hash, tag signer and custody summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/signed-git-tag-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/signed-git-tag-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -734,7 +734,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-address-books-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-address-books-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -801,7 +801,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with sanitized live Foundry broadcast outputs, derived manifest inputs, redaction confirmation, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -868,7 +868,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with live deployment manifests generated from production inputs and broadcasts, deployment version, contract addresses, config digest, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -935,7 +935,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with admin, signer, metadata, auction, and emergency ceremony evidence, ownership transfers, role grants, Safe or multisig transaction IDs, dry-run outputs, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -1002,7 +1002,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -1069,7 +1069,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -1136,7 +1136,7 @@ Suggested issue body:
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with finding-by-finding remediation evidence, accepted risk records, retest status, release notes, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json` and is referenced from `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation

@@ -176,11 +176,33 @@ class ReleaseEvidenceIssueBacklogTests(unittest.TestCase):
             self.assertIn("evidence", first_entry["suggested_labels"])
             self.assertIn("roadmap", first_entry["suggested_labels"])
             self.assertIn("public-beta", first_entry["suggested_labels"])
+            self.assertIn(
+                "shared release evidence status manifest",
+                first_entry["completion_gate"],
+            )
             self.assertIn("Requirement ID", first_entry["issue_body"])
             self.assertIn("Validation", first_entry["issue_body"])
+            production_entry = backlog["entries"][1]
+            self.assertIn("production-release", production_entry["suggested_labels"])
+            self.assertIn(
+                "shared release evidence status manifest",
+                production_entry["completion_gate"],
+            )
+            self.assertIn(
+                "currently tracks both public-beta and production-release requirement rows",
+                production_entry["completion_gate"],
+            )
+            self.assertIn(
+                "currently tracks both public-beta and production-release requirement rows",
+                production_entry["issue_body"],
+            )
             self.assertFalse(first_entry["template_only_can_complete"])
             self.assertFalse(backlog["policy"]["template_only_can_complete"])
             self.assertFalse(backlog["policy"]["auto_create_issues"])
+            self.assertIn(
+                "shared release evidence status manifest",
+                backlog["policy"]["completion_rule"],
+            )
             self.assertEqual(backlog["status_summary"][0]["entry_count"], 1)
             self.assertEqual(backlog["status_summary"][1]["entry_count"], 1)
 

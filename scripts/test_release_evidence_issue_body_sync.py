@@ -189,6 +189,10 @@ class ReleaseEvidenceIssueBodySyncTests(unittest.TestCase):
             self.assertEqual(issue["issue_number"], 215)
             self.assertIn("Parent tracker:", issue["expected_body"])
             self.assertIn("entry_id=public-beta-audit", issue["expected_body"])
+            self.assertIn(
+                "shared release evidence status manifest",
+                issue["expected_body"],
+            )
             self.assertIn("\n\n## Evidence Requirement", issue["expected_body"])
             self.assertEqual(issue["body_sha256"], generator.sha256_text(issue["expected_body"]))
             self.assertIn("# Release Evidence Issue Body Sync", generator.markdown_for_body_sync(document))
