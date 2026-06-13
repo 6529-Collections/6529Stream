@@ -18,6 +18,9 @@ the release policy in `docs/release-policy.md`.
 - Added deterministic release evidence tracker closure/readiness checks with
   optional live GitHub issue snapshot audit mode so tracker issues cannot close
   before committed evidence is complete or explicitly risk-accepted.
+- Added a non-local release evidence metadata generator that computes retained
+  artifact digests, validates generated evidence envelopes, and supports
+  `--check` drift detection without changing release readiness claims.
 - Added a deterministic machine-readable release manifest that ties release
   artifacts, ABI compatibility, deployment manifests, address books, governance
   docs, and release-ceremony status together under `release-artifacts/latest/`.

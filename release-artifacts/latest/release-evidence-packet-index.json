@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:e7e74aab99f452901c0af3a0f68aa9a84aafa1137ffcbf664b05aad02e3f614a",
-      "size_bytes": 15512
+      "sha256": "sha256:02b584c5195340d339bfc985b29a9ec5d5a9ab6333a046b2deefb89c50e54ecc",
+      "size_bytes": 17500
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
