@@ -193,6 +193,10 @@ release-evidence-issue-closure-check: release-evidence-issue-bodies-check
 	$(PYTHON) scripts/test_release_evidence_issue_closure.py
 	$(PYTHON) scripts/check_release_evidence_issue_closure.py
 
+release-evidence-live-audit-report-check: release-evidence-issue-closure-check
+	$(PYTHON) scripts/test_release_evidence_live_audit_report.py
+	$(PYTHON) scripts/check_release_evidence_live_audit_report.py
+
 architecture-threat-model-check:
 	$(PYTHON) scripts/test_architecture_threat_model.py
 	$(PYTHON) scripts/check_architecture_threat_model.py
@@ -209,10 +213,10 @@ release-readiness-check:
 	$(PYTHON) scripts/test_release_readiness.py
 	$(PYTHON) scripts/check_release_readiness.py
 
-release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
+release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-report-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
+release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-report-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 

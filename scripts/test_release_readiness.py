@@ -59,6 +59,7 @@ release evidence packet index, drop authorization signing fixtures,
 release evidence issue backlog, release evidence issue links, release evidence issue body sync,
 release evidence issue closure readiness, and release evidence live audit report bundle
 are summarized.
+The release evidence live audit report schema is summarized.
 The unsigned payload-generator examples are summarized.
 The drop authorization signing fixtures are summarized.
 The drop authorization signing evidence and signer custody readiness evidence

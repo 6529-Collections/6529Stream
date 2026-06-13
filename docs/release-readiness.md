@@ -133,6 +133,13 @@ The current local baseline includes:
   `python scripts/test_release_evidence_issue_snapshot_audit.py`, including
   release evidence live audit report bundle coverage for retained no-secret
   JSON/Markdown audit summaries,
+  plus the release evidence live audit report schema at
+  [`release-artifacts/schema/release-evidence-live-audit-report.schema.json`](../release-artifacts/schema/release-evidence-live-audit-report.schema.json),
+  the checked no-secret template at
+  [`release-artifacts/evidence/release-evidence-live-audit-report-template.json`](../release-artifacts/evidence/release-evidence-live-audit-report-template.json),
+  and offline report validation with
+  `python scripts/test_release_evidence_live_audit_report.py` and
+  `python scripts/check_release_evidence_live_audit_report.py`,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
@@ -300,6 +307,8 @@ python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_snapshot_audit.py
+python scripts/test_release_evidence_live_audit_report.py
+python scripts/check_release_evidence_live_audit_report.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -316,6 +325,7 @@ Run the release evidence drift checks:
 
 ```sh
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+python scripts/check_release_evidence_live_audit_report.py --report-json tmp/release-evidence-live-audit-report.json
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 ```

@@ -98,6 +98,8 @@ jobs:
             scripts/test_release_evidence_issue_snapshot.py \
             scripts/audit_release_evidence_issue_snapshots.py \
             scripts/test_release_evidence_issue_snapshot_audit.py \
+            scripts/check_release_evidence_live_audit_report.py \
+            scripts/test_release_evidence_live_audit_report.py \
             scripts/test_release_evidence_issue_body_sync.py \
             scripts/generate_release_evidence_issue_body_sync.py \
             scripts/test_release_evidence_issue_bodies.py \
@@ -324,6 +326,8 @@ jobs:
           python3 scripts/check_release_evidence_issue_bodies.py 2>&1 | tee ci-logs/release-evidence-issue-bodies-check.log
           python3 scripts/test_release_evidence_issue_closure.py 2>&1 | tee ci-logs/release-evidence-issue-closure-tests.log
           python3 scripts/check_release_evidence_issue_closure.py 2>&1 | tee ci-logs/release-evidence-issue-closure-check.log
+          python3 scripts/test_release_evidence_live_audit_report.py 2>&1 | tee ci-logs/release-evidence-live-audit-report-tests.log
+          python3 scripts/check_release_evidence_live_audit_report.py 2>&1 | tee ci-logs/release-evidence-live-audit-report-check.log
 
       - name: Architecture and threat model
         shell: bash
