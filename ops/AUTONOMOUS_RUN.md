@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-packet-index` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/208` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/207` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/209` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 09:27 UTC` |
+| Last updated | `2026-06-13 09:30 UTC` |
 
 ## Packaging Notes
 
@@ -169,9 +169,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence packet index and checker (Queue Item 107)
 
-Status: local implementation and focused validation passing; PR not opened yet.
+Status: PR #209 open; CodeRabbit requested; GitHub Actions pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/207`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/209`.
 Branch: `codex/release-evidence-packet-index`.
 Branch started from PR #208 squash merge commit
 `43a9596ab429a6e46132b106655b52b848db1670`.
@@ -251,12 +251,12 @@ Completed local validation:
   trace-source warnings, etherscan-config warning, and deployer-selection
   warning noise only.
 
-Remaining before PR:
+Remote review:
 
-- Regenerate release manifest/checksum after this state update.
-- Run final manifest/checksum/checker/whitespace sanity.
-- Commit, push, open the PR, request CodeRabbit review, and wait for CI/bot
-  feedback.
+- PR #209 opened against `main` from head
+  `dc2a0b000dbe3855aa043c09fe67ec19a15a2c5b`.
+- CodeRabbit requested in comment `4698133258`.
+- GitHub Actions and CodeRabbit comments are pending.
 
 ### Completed: Reconcile production blocker report merge state (Queue Item 106)
 
