@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-report-checker-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/274` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/275` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/276` |
 | Next issue | TBD after issue #275 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 22:44 UTC` |
+| Last updated | `2026-06-13 22:45 UTC` |
 
 ## Packaging Notes
 
@@ -195,12 +195,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit report checker merge state (Queue Item 132)
 
-Status: local draft; PR not opened yet.
+Status: PR #276 open; CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/275`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/276`.
 Branch: `codex/reconcile-live-audit-report-checker-merge-state`.
 Branch started from PR #274 squash merge commit
 `42c365d1beb80ce0d209049177621be0e2afb995`.
+Opening PR head: `45ea6c2c6e18d858a7a412284bee534202ee5548`.
 
 Goal:
 
@@ -11076,6 +11077,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 22:45 | Open PR #276 | State-only live-audit-report-checker merge reconciliation PR opened on head `45ea6c2c6e18d858a7a412284bee534202ee5548`, links `Closes #275`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 22:41 | Start Queue Item 132 | PR #274 merged as `42c365d1beb80ce0d209049177621be0e2afb995`, issue #273 closed completed, and issue #275 now tracks state-only reconciliation before the next no-secret evidence target. |
 | 2026-06-13 22:41 | Select Queue Item 133 | The retained live audit JSON report now has an offline schema/checker, so the next no-secret improvement is a Markdown report parity/checker that keeps the human-readable report aligned with the JSON source and blocked readiness posture. |
 | 2026-06-13 22:40 | Merge PR #274 | Release evidence live audit report schema/checker merged as `42c365d1beb80ce0d209049177621be0e2afb995`; final head `8cc0b4acdfba32035fcedad0b32dc32688da576d` passed CI run `27481075679`, CodeRabbit status was success with no unresolved review threads, a maintainer-decision comment documented the quota-limit context, and issue #273 closed completed. |
