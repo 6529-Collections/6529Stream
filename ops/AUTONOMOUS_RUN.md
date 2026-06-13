@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-audit-report-schema-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/272` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/273` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/274` |
 | Next issue | TBD after issue #273 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 22:26 UTC` |
+| Last updated | `2026-06-13 22:28 UTC` |
 
 ## Packaging Notes
 
@@ -193,12 +193,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence live audit report schema and checker (Queue Item 131)
 
-Status: local draft; PR not opened yet.
+Status: PR #274 open; CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/273`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/274`.
 Branch: `codex/live-audit-report-schema-checker`.
 Branch started from PR #272 squash merge commit
 `f014477b5d1f60e3ad2e30e6db0bbab1c28fb71c`.
+Opening PR head: `014088f62aede568f9fc458410aebe31818b5dbf`.
 
 Prior transition:
 
@@ -11013,6 +11014,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 22:28 | Open PR #274 | Release evidence live audit report schema/checker PR opened on head `014088f62aede568f9fc458410aebe31818b5dbf`, links `Closes #273`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 22:26 | Finish Queue Item 131 local validation | The release evidence live audit report schema/checker draft passed focused checker tests, the committed template check, release-readiness, manifest/checksum checks, changelog, syntax, traceability, heading, whitespace checks, and the full Windows `scripts\check.ps1` gate on the final local diff. |
 | 2026-06-13 22:08 | Start Queue Item 131 | PR #272 merged as `f014477b5d1f60e3ad2e30e6db0bbab1c28fb71c`, issue #271 closed completed, issue #273 now tracks the release evidence live audit report schema/checker, and branch `codex/live-audit-report-schema-checker` is active from the PR #272 baseline. |
 | 2026-06-13 21:55 | Merge PR #272 | Live audit report bundle merge-state reconciliation merged as `f014477b5d1f60e3ad2e30e6db0bbab1c28fb71c`; final head `a9dfef7d7a33cb26fd03bb36b3bde1df14f61a69` passed CI run `27480079767`, CodeRabbit status was success with no unresolved review threads, and issue #271 closed completed. |
