@@ -56,6 +56,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_drop_authorization_fixtures.py"
 & $pythonPath @pythonArgs "scripts\test_drop_authorization_signing_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_drop_authorization_signing_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_signer_custody_readiness.py"
+& $pythonPath @pythonArgs "scripts\check_signer_custody_readiness.py"
 & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\generate_release_artifacts.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_source_verification_inputs.py"

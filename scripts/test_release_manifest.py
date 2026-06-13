@@ -48,11 +48,17 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     drop_authorization_signing_dir = (
         root / "release-artifacts" / "drop-authorization-signing"
     )
+    signer_custody_readiness_dir = (
+        root / "release-artifacts" / "signer-custody-readiness"
+    )
     release_signature_schema = root / "release-artifacts" / "schema" / (
         "release-signature-evidence.schema.json"
     )
     drop_authorization_signing_schema = root / "release-artifacts" / "schema" / (
         "drop-authorization-signing-evidence.schema.json"
+    )
+    signer_custody_readiness_schema = root / "release-artifacts" / "schema" / (
+        "signer-custody-readiness.schema.json"
     )
     public_beta_schema = root / "release-artifacts" / "schema" / (
         "public-beta-evidence.schema.json"
@@ -66,6 +72,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     drop_authorization_retained_artifact = (
         drop_authorization_signing_dir
         / "drop-authorization-signing-retained-artifact.txt"
+    )
+    signer_custody_retained_artifact = (
+        signer_custody_readiness_dir
+        / "signer-custody-readiness-retained-artifact.txt"
     )
     drop_authorization_payload_output = root / (
         "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json"
@@ -86,6 +96,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "audit-package.md",
         root / "docs" / "incident-response.md",
         root / "docs" / "drop-authorization-signing.md",
+        root / "docs" / "signer-custody-readiness.md",
         root / "docs" / "release-readiness.md",
     ]
 
@@ -201,6 +212,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     write_json(
         drop_authorization_signing_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
+        signer_custody_readiness_schema,
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
@@ -595,9 +610,114 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "operator_notes": "local template only",
         },
     )
+    write_text(
+        signer_custody_retained_artifact,
+        (
+            "Template retained artifact for signer custody readiness tests.\n"
+            "This placeholder is not completion evidence.\n"
+        ),
+    )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
+    signer_custody_runbook_ref = {
+        "path": "docs/signer-custody-readiness.md",
+        "sha256": generator.file_sha256(root / "docs" / "signer-custody-readiness.md"),
+    }
+    incident_response_ref = {
+        "path": "docs/incident-response.md",
+        "sha256": generator.file_sha256(root / "docs" / "incident-response.md"),
+    }
+    write_json(
+        signer_custody_readiness_dir / "signer-custody-readiness-template.json",
+        {
+            "schema_version": "6529stream.signer-custody-readiness.v1",
+            "evidence_id": "signer-custody-readiness-template",
+            "record_type": "template",
+            "review_status": "template",
+            "environment": "local",
+            "chain_id": 31337,
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "local",
+            },
+            "signer_identity": {
+                "signer_type": "local_placeholder",
+                "expected_signer": "0x0000000000000000000000000000000000006532",
+                "signer_epoch": 1,
+                "signer_epoch_source": "not_available_local",
+                "signer_manager": "0x0000000000000000000000000000000000000004",
+                "signer_manager_type": "not_available_local",
+                "erc1271_support_status": "not_available_local",
+                "signer_service_class": "not_available_local",
+            },
+            "custody": {
+                "custody_owner": "TBD",
+                "custody_status": "not_available_local",
+                "custody_system": "not_available_local",
+                "approval_workflow_reference": "TBD",
+                "key_material_location": "not_available_local",
+                "separation_of_duties": "not_available_local",
+            },
+            "lifecycle": {
+                "rotation_status": "not_available_local",
+                "revocation_status": "not_available_local",
+                "compromise_response_status": "not_available_local",
+                "signer_epoch_rotation_tested": False,
+                "per_drop_cancellation_tested": False,
+                "last_rotation_drill": "not_available_local",
+                "last_revocation_drill": "not_available_local",
+            },
+            "operations": {
+                "monitoring_status": "not_available_local",
+                "runbook": signer_custody_runbook_ref,
+                "alerting_reference": "TBD",
+                "incident_response_runbook": incident_response_ref,
+                "signer_service_integration_status": "not_available_local",
+            },
+            "review": {
+                "owner": "TBD",
+                "reviewer": "TBD",
+                "approval_status": "template",
+                "approval_reference": "TBD",
+                "reviewed_at": "not_available_local",
+            },
+            "retained_artifacts": [
+                {
+                    "category": "signer_custody_schema",
+                    "path": "release-artifacts/schema/signer-custody-readiness.schema.json",
+                    "sha256": generator.file_sha256(signer_custody_readiness_schema),
+                },
+                {
+                    "category": "readiness_transcript",
+                    "path": (
+                        "release-artifacts/signer-custody-readiness/"
+                        "signer-custody-readiness-retained-artifact.txt"
+                    ),
+                    "sha256": generator.file_sha256(
+                        signer_custody_retained_artifact
+                    ),
+                },
+            ],
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "seed_phrase",
+                    "api_key",
+                    "rpc_url",
+                    "hsm_credentials",
+                    "raw_signature",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "template_notice": "Template only. This file is not completion evidence.",
+            "operator_notes": "local template only",
+        },
+    )
 
     return {
         "latest": latest,
@@ -614,12 +734,15 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "release_signatures_dir": release_signatures_dir,
         "non_local_evidence_dir": non_local_evidence_dir,
         "drop_authorization_signing_dir": drop_authorization_signing_dir,
+        "signer_custody_readiness_dir": signer_custody_readiness_dir,
         "release_signature_schema": release_signature_schema,
         "drop_authorization_signing_schema": drop_authorization_signing_schema,
+        "signer_custody_readiness_schema": signer_custody_readiness_schema,
         "public_beta_schema": public_beta_schema,
         "non_local_evidence_schema": non_local_evidence_schema,
         "non_local_retained_artifact": non_local_retained_artifact,
         "drop_authorization_retained_artifact": drop_authorization_retained_artifact,
+        "signer_custody_retained_artifact": signer_custody_retained_artifact,
         "drop_authorization_payload_output": drop_authorization_payload_output,
         "output": output,
         "changelog": changelog,
@@ -764,6 +887,10 @@ class ReleaseManifestTests(unittest.TestCase):
                 manifest["source"]["drop_authorization_signing_dir"],
                 "release-artifacts/drop-authorization-signing",
             )
+            self.assertEqual(
+                manifest["source"]["signer_custody_readiness_dir"],
+                "release-artifacts/signer-custody-readiness",
+            )
             drop_signing_evidence = manifest["release_artifacts"][
                 "drop_authorization_signing_evidence"
             ][0]
@@ -781,6 +908,25 @@ class ReleaseManifestTests(unittest.TestCase):
             )
             self.assertEqual(
                 drop_signing_evidence["signature"]["status"],
+                "not_available_local",
+            )
+            signer_custody = manifest["release_artifacts"][
+                "signer_custody_readiness"
+            ][0]
+            self.assertEqual(
+                signer_custody["evidence_id"], "signer-custody-readiness-template"
+            )
+            self.assertEqual(signer_custody["record_type"], "template")
+            self.assertEqual(
+                signer_custody["signer_identity"]["expected_signer"],
+                "0x0000000000000000000000000000000000006532",
+            )
+            self.assertEqual(
+                signer_custody["custody"]["custody_status"],
+                "not_available_local",
+            )
+            self.assertEqual(
+                signer_custody["operations"]["signer_service_integration_status"],
                 "not_available_local",
             )
             non_local_evidence = manifest["release_artifacts"][
@@ -974,6 +1120,40 @@ class ReleaseManifestTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 generator.ReleaseManifestError,
                 "invalid drop authorization signing evidence",
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    paths["gas_snapshot"],
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["randomizer_operations_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
+    def test_generator_rejects_invalid_signer_custody_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            evidence_path = (
+                paths["signer_custody_readiness_dir"]
+                / "signer-custody-readiness-template.json"
+            )
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            evidence["signer_identity"]["signer_epoch"] = -1
+            write_json(evidence_path, evidence)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "invalid signer custody readiness evidence",
             ):
                 generator.build_manifest(
                     root,

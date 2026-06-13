@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/signer-custody-readiness.schema.json",
+  "title": "6529Stream Signer Custody Readiness Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "record_type",
+    "review_status",
+    "environment",
+    "chain_id",
+    "source",
+    "signer_identity",
+    "custody",
+    "lifecycle",
+    "operations",
+    "review",
+    "retained_artifacts",
+    "redaction_policy",
+    "template_notice",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.signer-custody-readiness.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_type": {
+      "enum": ["template", "evidence"]
+    },
+    "review_status": {
+      "enum": ["template", "pending_review", "reviewed"]
+    },
+    "environment": {
+      "enum": ["local", "fork", "testnet", "mainnet", "production"]
+    },
+    "chain_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "signer_identity": {
+      "$ref": "#/$defs/signer_identity"
+    },
+    "custody": {
+      "$ref": "#/$defs/custody"
+    },
+    "lifecycle": {
+      "$ref": "#/$defs/lifecycle"
+    },
+    "operations": {
+      "$ref": "#/$defs/operations"
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/retained_artifact"
+      }
+    },
+    "redaction_policy": {
+      "$ref": "#/$defs/redaction_policy"
+    },
+    "template_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "signer_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signer_type",
+        "expected_signer",
+        "signer_epoch",
+        "signer_epoch_source",
+        "signer_manager",
+        "signer_manager_type",
+        "erc1271_support_status",
+        "signer_service_class"
+      ],
+      "properties": {
+        "signer_type": {
+          "enum": ["EOA", "ERC1271", "external_service", "hsm", "local_placeholder"]
+        },
+        "expected_signer": {
+          "$ref": "#/$defs/address"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "signer_epoch_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signer_manager": {
+          "$ref": "#/$defs/address"
+        },
+        "signer_manager_type": {
+          "enum": ["not_available_local", "safe", "multisig", "role_manager", "eoa_breakglass"]
+        },
+        "erc1271_support_status": {
+          "enum": ["not_available_local", "supported", "unsupported", "not_applicable", "pending", "blocked"]
+        },
+        "signer_service_class": {
+          "enum": [
+            "not_available_local",
+            "offline_ceremony",
+            "managed_signer",
+            "hsm",
+            "kms",
+            "safe_module",
+            "contract_wallet",
+            "other"
+          ]
+        }
+      }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "custody_owner",
+        "custody_status",
+        "custody_system",
+        "approval_workflow_reference",
+        "key_material_location",
+        "separation_of_duties"
+      ],
+      "properties": {
+        "custody_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custody_status": {
+          "enum": ["not_available_local", "documented", "pending", "blocked"]
+        },
+        "custody_system": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_workflow_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key_material_location": {
+          "enum": [
+            "not_available_local",
+            "external_custody_only",
+            "hsm",
+            "kms",
+            "safe_contract",
+            "offline_ceremony",
+            "redacted"
+          ]
+        },
+        "separation_of_duties": {
+          "$ref": "#/$defs/readiness_status"
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rotation_status",
+        "revocation_status",
+        "compromise_response_status",
+        "signer_epoch_rotation_tested",
+        "per_drop_cancellation_tested",
+        "last_rotation_drill",
+        "last_revocation_drill"
+      ],
+      "properties": {
+        "rotation_status": {
+          "$ref": "#/$defs/readiness_status"
+        },
+        "revocation_status": {
+          "$ref": "#/$defs/readiness_status"
+        },
+        "compromise_response_status": {
+          "$ref": "#/$defs/readiness_status"
+        },
+        "signer_epoch_rotation_tested": {
+          "type": "boolean"
+        },
+        "per_drop_cancellation_tested": {
+          "type": "boolean"
+        },
+        "last_rotation_drill": {
+          "type": "string",
+          "minLength": 1
+        },
+        "last_revocation_drill": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "monitoring_status",
+        "runbook",
+        "alerting_reference",
+        "incident_response_runbook",
+        "signer_service_integration_status"
+      ],
+      "properties": {
+        "monitoring_status": {
+          "enum": ["not_available_local", "not_started", "planned", "pending", "validated", "blocked"]
+        },
+        "runbook": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "alerting_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "incident_response_runbook": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "signer_service_integration_status": {
+          "enum": ["not_available_local", "not_started", "pending", "validated", "blocked"]
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "reviewer",
+        "approval_status",
+        "approval_reference",
+        "reviewed_at"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_status": {
+          "enum": ["template", "pending", "approved", "rejected"]
+        },
+        "approval_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retained_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "path", "sha256"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "readiness_status": {
+      "enum": ["not_available_local", "not_started", "planned", "pending", "complete", "blocked"]
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^/"
+          },
+          {
+            "pattern": "\\\\"
+          },
+          {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        ]
+      }
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

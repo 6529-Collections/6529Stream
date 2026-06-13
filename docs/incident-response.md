@@ -16,7 +16,8 @@ Release-status changes should also follow
 [`docs/public-beta-evidence.md`](public-beta-evidence.md) and
 [`docs/release-policy.md`](release-policy.md).
 Signer-compromise and drop-authorization incidents should also use
-[`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
+[`docs/drop-authorization-signing.md`](drop-authorization-signing.md) and
+[`docs/signer-custody-readiness.md`](signer-custody-readiness.md).
 
 ## Maturity And Scope
 
@@ -272,6 +273,10 @@ Immediate checks:
 - Compare retained signing ceremony metadata with
   [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
   and `python scripts/check_drop_authorization_signing_evidence.py`.
+- Compare retained signer custody readiness metadata with
+  [`docs/signer-custody-readiness.md`](signer-custody-readiness.md),
+  [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json),
+  and `python scripts/check_signer_custody_readiness.py`.
 - Confirm whether any payload has already been executed.
 - Preserve EIP-712 domain and signature validation evidence without committing
   unreleased payloads.
@@ -295,8 +300,10 @@ Recovery:
   inputs where applicable.
 - Retain redacted signer-rotation evidence, event logs, affected drop IDs,
   cancellation transactions, reviewer notes, signing-system output metadata,
-  and signature verification evidence using the drop authorization signing
-  evidence schema.
+  custody approval, signer-service attestation, rotation/revocation drill
+  output, monitoring evidence, and signature verification evidence using the
+  drop authorization signing evidence schema plus signer custody readiness
+  schema.
 - Update public communications with the new active signer state and any
   affected drop status.
 
@@ -368,6 +375,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 ```
 
 Run the release evidence checks after changing this runbook or linked
@@ -405,6 +414,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check

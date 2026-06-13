@@ -33,6 +33,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/test_source_verification_inputs.py
@@ -99,6 +101,11 @@ The drop authorization signing evidence checker validates the retained
 evidence template under `release-artifacts/drop-authorization-signing/`, ties
 it to the generated unsigned payload hash and derived digest fields, and
 rejects placeholder signer/signature states for non-local evidence.
+The signer custody readiness checker validates the no-secret template under
+`release-artifacts/signer-custody-readiness/`, ties runbook and retained
+artifact references to current hashes, and rejects non-local placeholder
+signer custody, signer-service, lifecycle, monitoring, reviewer, path, and
+secret-shaped states.
 
 The release artifact step is the first Gate G machine-readable artifact gate.
 It verifies that `release-artifacts/latest/` matches the production `via-ir`
@@ -182,6 +189,11 @@ The drop authorization signing evidence step validates the schema, checked
 template, retained artifact hash, generated payload reference, signer epoch,
 review metadata, signature status, path boundaries, and no-secret policy for
 future signing ceremonies.
+The signer custody readiness step validates the schema, checked template,
+retained artifact hash, signer manager, signer epoch source, custody owner,
+ERC-1271 support status, rotation/revocation drill status, monitoring/runbook
+links, reviewer metadata, path boundaries, and no-secret policy for future
+signer custody ceremonies.
 
 The release-readiness step validates
 [`release-readiness.md`](release-readiness.md), the Gate G dashboard that
@@ -284,6 +296,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -319,6 +333,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
@@ -357,6 +373,7 @@ the release artifact contract set.
 The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/evidence/`,
 `release-artifacts/drop-authorization-signing/`,
+`release-artifacts/signer-custody-readiness/`,
 `release-artifacts/schema/`,
 `release-artifacts/latest/public-beta-evidence.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,

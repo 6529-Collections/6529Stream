@@ -32,6 +32,10 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("release-artifacts/drop-authorization-signing"),
             generator.DEFAULT_COVERED_PATHS,
         )
+        self.assertIn(
+            Path("release-artifacts/signer-custody-readiness"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)
 

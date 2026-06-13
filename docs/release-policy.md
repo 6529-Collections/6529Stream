@@ -144,6 +144,9 @@ Before a public release tag:
 - Drop authorization signing evidence follows
   `docs/drop-authorization-signing.md` and passes
   `python scripts/check_drop_authorization_signing_evidence.py`.
+- Signer custody readiness evidence follows
+  `docs/signer-custody-readiness.md` and passes
+  `python scripts/check_signer_custody_readiness.py`.
 - Public-beta evidence status follows `docs/public-beta-evidence.md`, keeps
   unresolved public-beta and production blockers visible, and passes
   `python scripts/check_public_beta_evidence.py`.

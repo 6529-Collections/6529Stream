@@ -29,8 +29,8 @@ In-scope review surfaces for this package:
 Explicitly out of scope for this package:
 
 - Fork, testnet, or mainnet deployment evidence.
-- Production signer identity, detached checksum signatures, or signed release
-  tags.
+- Production signer identity or custody completion, detached checksum
+  signatures, or signed release tags.
 - A completed external audit report.
 - Any private key, mnemonic, RPC URL, API key, or unreleased drop payload.
 - A claim that the current local gates prove production safety.
@@ -47,6 +47,7 @@ Explicitly out of scope for this package:
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
 | Incident response runbook | [`docs/incident-response.md`](incident-response.md) |
 | Drop authorization signing fixtures, unsigned payload tooling, and signing evidence | [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) |
+| Signer custody readiness evidence | [`docs/signer-custody-readiness.md`](signer-custody-readiness.md) |
 | Public-beta evidence status | [`docs/public-beta-evidence.md`](public-beta-evidence.md) |
 | Gated execution roadmap | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 | Autonomous execution state | [`ops/AUTONOMOUS_RUN.md`](../ops/AUTONOMOUS_RUN.md) |
@@ -78,6 +79,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/dependency-operations.md`](dependency-operations.md)
 - [`docs/randomizer-operations.md`](randomizer-operations.md)
 - [`docs/drop-authorization-signing.md`](drop-authorization-signing.md)
+- [`docs/signer-custody-readiness.md`](signer-custody-readiness.md)
 - [`docs/deployment.md`](deployment.md)
 - [`docs/release-policy.md`](release-policy.md)
 - [`docs/incident-response.md`](incident-response.md)
@@ -151,17 +153,26 @@ Local deployment and release evidence:
   plus
   [`release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt)
   provide the checked no-secret local template.
+- [`docs/signer-custody-readiness.md`](signer-custody-readiness.md) documents
+  the no-secret signer custody readiness evidence model, and
+  [`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json)
+  defines the retained signer custody readiness format. The checked local
+  template and retained artifact live at
+  [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json)
+  and
+  [`release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt).
 - [`release-artifacts/schema/public-beta-evidence.schema.json`](../release-artifacts/schema/public-beta-evidence.schema.json)
   defines the retained status format.
 
 The release manifest includes this audit package as a governance document. The
 release manifest also includes the architecture map, threat model, incident
-response runbook, and drop authorization signing guide as governance documents,
-and it summarizes the public-beta evidence status. The
+response runbook, drop authorization signing guide, and signer custody
+readiness guide as governance documents, and it summarizes the public-beta
+evidence status. The
 checksum bundle covers the release manifest, so changes to the audit package,
 architecture map, threat model, incident-response runbook, drop authorization
-signing guide, or public-beta evidence status must refresh release evidence
-before a release-oriented PR can pass.
+signing guide, signer custody readiness guide, or public-beta evidence status
+must refresh release evidence before a release-oriented PR can pass.
 
 ## Known Blockers And Accepted Risks
 
@@ -170,9 +181,9 @@ Known unresolved blockers are tracked in
 [`ops/ROADMAP.md`](../ops/ROADMAP.md). Current major unresolved categories
 include fork/testnet/live deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
-signatures, non-local randomizer operations evidence, non-local metadata browser
-evidence, and external audit completion. The machine-readable status for these
-categories lives in
+signatures, reviewed signer custody readiness evidence, non-local randomizer
+operations evidence, non-local metadata browser evidence, and external audit
+completion. The machine-readable status for these categories lives in
 [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 
 Accepted local-baseline dispositions are separate from unresolved production
@@ -219,6 +230,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_public_beta_evidence.py
@@ -275,6 +288,8 @@ python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
+python scripts/test_signer_custody_readiness.py
+python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py
