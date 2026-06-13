@@ -52,6 +52,7 @@ REQUIRED_READINESS_PHRASES = [
     "release evidence issue links",
     "release evidence issue body sync",
     "release evidence issue closure readiness",
+    "release evidence live audit report bundle",
     "non-local release evidence",
     "incident response",
     "drop authorization signing fixtures",
@@ -99,6 +100,11 @@ REQUIRED_COMMANDS = [
     "python scripts/check_release_evidence_issue_links.py",
     "python scripts/test_release_evidence_issue_snapshot.py",
     "python scripts/test_release_evidence_issue_snapshot_audit.py",
+    (
+        "python scripts/audit_release_evidence_issue_snapshots.py --report-json "
+        "tmp/release-evidence-live-audit-report.json --report-md "
+        "tmp/release-evidence-live-audit-report.md"
+    ),
     "python scripts/test_release_evidence_issue_labels.py",
     "python scripts/check_release_evidence_issue_labels.py",
     "python scripts/test_release_evidence_issue_body_sync.py",

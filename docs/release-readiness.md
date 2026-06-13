@@ -130,7 +130,9 @@ The current local baseline includes:
   [`release-artifacts/latest/release-evidence-issue-links.json`](../release-artifacts/latest/release-evidence-issue-links.json),
   plus deterministic live issue snapshot exporter tests with
   `python scripts/test_release_evidence_issue_snapshot.py` and
-  `python scripts/test_release_evidence_issue_snapshot_audit.py`,
+  `python scripts/test_release_evidence_issue_snapshot_audit.py`, including
+  release evidence live audit report bundle coverage for retained no-secret
+  JSON/Markdown audit summaries,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
@@ -313,6 +315,7 @@ python scripts/check_non_local_release_evidence.py
 Run the release evidence drift checks:
 
 ```sh
+python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 ```

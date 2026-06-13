@@ -180,6 +180,12 @@ or closure snapshots as UTF-8 JSON without relying on shell redirection.
 Use `scripts/audit_release_evidence_issue_snapshots.py` as the operator-only
 one-command live audit for label, body, and closure drift; CI runs only its
 mocked unit tests and never requires GitHub network access.
+When operators pass `--report-json` or `--report-md`, the live audit
+orchestrator writes a retained no-secret report bundle with selected profiles,
+snapshot paths, snapshot SHA-256 digests, command provenance, checker outcomes,
+and the unchanged blocked-readiness warning. Report bundles are ceremony
+evidence for review; they do not make any retained public-beta or production
+evidence row complete.
 
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and

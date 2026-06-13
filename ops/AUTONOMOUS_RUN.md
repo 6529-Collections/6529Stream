@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-live-audit-orchestrator-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/266` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/267` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/268` |
-| Next issue | TBD after issue #267 merges |
+| Active PR branch | `codex/release-evidence-live-audit-report-bundle` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/268` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/269` |
+| Active PR | TBD until opened |
+| Next issue | TBD after issue #269 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 20:45 UTC` |
+| Last updated | `2026-06-13 21:17 UTC` |
 
 ## Packaging Notes
 
@@ -184,35 +184,86 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 125 | Add release evidence issue snapshot exporter | Gate G support | Add a no-secret UTF-8 GitHub issue snapshot exporter for live label, body, and closure audits, update docs and local/CI gates, and preserve blocked readiness claims | Merged in PR #262 |
 | 126 | Reconcile snapshot exporter merge state | Gate G support | Record PR #262 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Merged in PR #264 |
 | 127 | Add release evidence live audit orchestrator | Gate G support | Add a no-secret operator command that exports and checks live label, body, and closure issue snapshots without adding GitHub network access to CI | Merged in PR #266 |
-| 128 | Reconcile live audit orchestrator merge state | Gate G support | Record PR #266 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Active |
-| 129 | Add release evidence live audit report bundle | Gate G support | Add a retained no-secret report format for live audit runs that captures profile results, snapshot paths, snapshot digests, command provenance, and checker outcomes without changing readiness claims | Queued after reconciliation |
+| 128 | Reconcile live audit orchestrator merge state | Gate G support | Record PR #266 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Merged in PR #268 |
+| 129 | Add release evidence live audit report bundle | Gate G support | Add a retained no-secret report format for live audit runs that captures profile results, snapshot paths, snapshot digests, command provenance, and checker outcomes without changing readiness claims | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile live audit orchestrator merge state (Queue Item 128)
+### PR candidate: Add release evidence live audit report bundle (Queue Item 129)
 
-Status: PR #268 open; CodeRabbit review requested and CI pending.
+Status: implementation complete locally; full Windows gate passed; PR not
+opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/269`.
+PR: TBD until opened.
+Branch: `codex/release-evidence-live-audit-report-bundle`.
+Branch started from PR #268 squash merge commit
+`bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`.
+
+Prior queue transition:
+
+- Queue Item 128 merged in PR #268 as squash commit
+  `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`.
+- PR #268 final implementation head was
+  `ce9f2aea8762e76386a315d72953c93d8acfb9b5`.
+- PR #268 GitHub Actions CI run `27478649600` passed on the final head,
+  including deployment rehearsal.
+- PR #268 CodeRabbit status was success; no review threads were open.
+- Issue #267 closed completed after merge.
+
+Goal:
+
+- Add a no-secret retained report bundle mode to the live issue snapshot audit
+  orchestrator.
+- Include selected profiles, snapshot paths, SHA-256 digests, command
+  provenance, checker outcomes, repo target, and an operator-supplied or
+  deterministic generated-at value.
+- Preserve the no-network CI posture by testing report behavior with mocked
+  subprocess calls and local snapshot files only.
+- Document the report bundle in tooling, release-readiness, public-beta
+  evidence, and release-artifact docs without changing readiness claims.
+- Keep issues #215 through #231 open until retained evidence is complete or
+  explicitly risk-accepted.
+
+Validation completed before PR open:
+
+- `python scripts/test_release_evidence_issue_snapshot_audit.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/audit_release_evidence_issue_snapshots.py --help`.
+- `python -m py_compile scripts\audit_release_evidence_issue_snapshots.py scripts\test_release_evidence_issue_snapshot_audit.py scripts\check_release_readiness.py scripts\test_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "release evidence live audit report bundle|release-evidence-live-audit-report|Queue Item 128|Queue Item 129|PR #268|27478649600|bb36ddb|ce9f2ea|#267|#269|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md CHANGELOG.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md`.
+- `git diff --check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed,
+  including Foundry tests, release checks, deployment rehearsal, auction
+  ceremony rehearsal, and emergency redeployment rehearsal.
+
+### Completed: Reconcile live audit orchestrator merge state (Queue Item 128)
+
+Status: merged in PR #268.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/267`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/268`.
 Branch: `codex/reconcile-live-audit-orchestrator-merge-state`.
 Branch started from PR #266 squash merge commit
 `edd5ddd8d13587af24b9b59d1c6ef3bf94291519`.
 Opening PR head: `80e37ed81bb7ba5b3bc3e38a64cacd6c228a37b1`.
+Final PR head: `ce9f2aea8762e76386a315d72953c93d8acfb9b5`.
+Squash merge commit: `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`.
 CodeRabbit request comment:
 `https://github.com/6529-Collections/6529Stream/pull/268#issuecomment-4699740897`.
 
-Prior queue transition:
+Result:
 
-- Queue Item 127 merged in PR #266 as squash commit
-  `edd5ddd8d13587af24b9b59d1c6ef3bf94291519`.
-- PR #266 final implementation head was
-  `75fa1c69f658a0edd09bf0ab186913d059b4f645`.
-- PR #266 GitHub Actions CI run `27478297193` passed on the final head,
-  including deployment rehearsal.
-- PR #266 CodeRabbit status was success; the helper-deduplication nit from
-  review `pullrequestreview-4491985266` was addressed in commit
-  `75fa1c69f658a0edd09bf0ab186913d059b4f645`, and no review threads remained.
-- Issue #265 closed completed after merge.
+- PR #268 GitHub Actions CI run `27478649600` passed on final head
+  `ce9f2aea8762e76386a315d72953c93d8acfb9b5`, including deployment
+  rehearsal.
+- CodeRabbit status was success; no review threads were open.
+- PR #268 squash-merged as
+  `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`, and issue #267 closed
+  completed.
 
 Goal:
 
@@ -225,7 +276,7 @@ Goal:
 - Select Queue Item 129 as the next no-secret retained live-audit report
   target.
 
-Validation target:
+Validation:
 
 - `python scripts/check_release_readiness.py`.
 - `python scripts/generate_release_manifest.py --check`.
@@ -10827,6 +10878,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 21:17 | Implement Queue Item 129 local draft | Added optional JSON/Markdown report output to the live audit orchestrator, deterministic digest/report tests, release-readiness validator coverage, operator docs, changelog, roadmap traceability, regenerated release evidence artifacts, and passed the full Windows `scripts\check.ps1` gate without changing readiness claims. |
+| 2026-06-13 21:05 | Start Queue Item 129 | PR #268 merged cleanly as `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`, issue #267 closed completed, and issue #269 now tracks a retained no-secret live audit report bundle for selected profiles, snapshot digests, command provenance, and checker outcomes without changing readiness claims. |
+| 2026-06-13 20:55 | Merge PR #268 | Live audit orchestrator merge-state reconciliation merged as `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`; final head `ce9f2aea8762e76386a315d72953c93d8acfb9b5` passed CI run `27478649600`, CodeRabbit status was success with no open review threads, and issue #267 closed completed. |
 | 2026-06-13 20:45 | Open PR #268 and request CodeRabbit | State-only live-audit-orchestrator merge reconciliation PR opened on head `80e37ed81bb7ba5b3bc3e38a64cacd6c228a37b1`, links `Closes #267`, and CodeRabbit review was requested in comment `4699740897`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-13 20:41 | Start Queue Item 128 | PR #266 merged cleanly, issue #265 closed completed, and issue #267 now tracks a state-only reconciliation before the next no-secret evidence target. |
 | 2026-06-13 20:40 | Select Queue Item 129 | The live audit orchestrator now proves current tracker state, so the next no-secret improvement is a retained report bundle that records profile results, snapshot digests, command provenance, and checker outcomes without changing readiness claims. |
