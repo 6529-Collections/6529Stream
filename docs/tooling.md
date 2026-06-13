@@ -74,6 +74,8 @@ python scripts/test_release_evidence_issue_body_sync.py
 python scripts/generate_release_evidence_issue_body_sync.py --check
 python scripts/test_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_bodies.py
+python scripts/test_release_evidence_issue_closure.py
+python scripts/check_release_evidence_issue_closure.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -275,6 +277,22 @@ python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/rel
 gh issue edit ISSUE_NUMBER --repo 6529-Collections/6529Stream --body-file tmp/release-evidence-issue-bodies/issue-ISSUE_NUMBER.md
 ```
 
+Run `python scripts/check_release_evidence_issue_closure.py` to verify the
+committed tracker map, `release-evidence-issue-backlog.json` backlog artifact,
+body-sync artifact, packet index, and public-beta evidence manifest agree on
+which tracker issues may close. To audit live GitHub closure state without
+adding network access to CI, export all linked issue states and pass the
+snapshot to the checker:
+
+```bash
+gh issue list --repo 6529-Collections/6529Stream --state all --limit 100 --json number,title,state > tmp/release-evidence-issue-closure.json
+python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
+```
+
+If premature closure is reported, reopen the issue with the remediation command
+printed by the checker and keep the requirement row open until the committed
+evidence status is `complete` or `accepted_risk`.
+
 The non-local release evidence intake runbook in
 [`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
 operator workflow, required retained fields, redaction rules, reviewer
@@ -364,6 +382,10 @@ python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/check_release_evidence_issue_labels.py
+python scripts/generate_release_evidence_issue_body_sync.py
+python scripts/check_release_evidence_issue_bodies.py
+python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
@@ -409,6 +431,14 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_labels.py
+python scripts/check_release_evidence_issue_labels.py
+python scripts/test_release_evidence_issue_body_sync.py
+python scripts/generate_release_evidence_issue_body_sync.py --check
+python scripts/test_release_evidence_issue_bodies.py
+python scripts/check_release_evidence_issue_bodies.py
+python scripts/test_release_evidence_issue_closure.py
+python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py

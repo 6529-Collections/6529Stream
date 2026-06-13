@@ -38,7 +38,12 @@ as the committed tracker map from those generated backlog entries to GitHub
 issues. Use
 [`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md)
 as the generated no-secret review view for exact GitHub issue body payloads
-derived from that backlog and tracker map.
+derived from that backlog and tracker map. Run
+`python scripts/check_release_evidence_issue_closure.py` before closing any
+linked tracker issue; that release evidence issue closure readiness check loads
+the tracker map, `release-evidence-issue-backlog.json` backlog artifact,
+body-sync artifact, packet index, and evidence manifest, then keeps issues open
+until committed evidence is `complete` or `accepted_risk`.
 
 ## Maturity And Scope
 
@@ -64,7 +69,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, and non-local release evidence runbook, schema, generic template, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, production signing evidence, reviewed signer custody readiness, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, and non-local release evidence runbook, schema, generic template, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, production signing evidence, reviewed signer custody readiness, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -132,7 +137,10 @@ The current local baseline includes:
   [`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md),
   plus deterministic tracker-body checks with
   `python scripts/test_release_evidence_issue_bodies.py` and
-  `python scripts/check_release_evidence_issue_bodies.py`;
+  `python scripts/check_release_evidence_issue_bodies.py`, plus release
+  evidence issue closure readiness checks with
+  `python scripts/test_release_evidence_issue_closure.py` and
+  `python scripts/check_release_evidence_issue_closure.py`;
 - non-local release evidence intake requirements, schema, checked template, and
   checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
   [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),
@@ -291,6 +299,8 @@ python scripts/test_release_evidence_issue_body_sync.py
 python scripts/generate_release_evidence_issue_body_sync.py --check
 python scripts/test_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_bodies.py
+python scripts/test_release_evidence_issue_closure.py
+python scripts/check_release_evidence_issue_closure.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 ```
