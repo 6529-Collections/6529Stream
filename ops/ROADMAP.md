@@ -93,12 +93,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 18:42 UTC` for Queue Item 124 / PR #260 release evidence tracker phase labels; PR #260 local validation covered issue links, label checks, live label audit, body sync, issue bodies, release-readiness, manifest, checksum, changelog, heading, and whitespace checks |
-| OS tested | Windows local validation for Queue Item 124 / PR #260; Linux GitHub Actions passed for latest merged baseline PR #260 run `27475475098` on final head `32759d33ec6e118426cc37cade36e947c960c3d4`, with merged baseline commit `779ff73bee124c646d1531b43dc61940872e1fab` |
+| Last verified | `2026-06-13 18:56 UTC` for active Queue Item 125 / PR #262 release evidence issue snapshot exporter local validation; latest merged-baseline verification remains Queue Item 124 / PR #260 until PR #262 merges |
+| OS tested | Windows local validation for active Queue Item 125 / PR #262; Linux GitHub Actions passed for latest merged baseline PR #260 run `27475475098` on final head `32759d33ec6e118426cc37cade36e947c960c3d4`, with merged baseline commit `779ff73bee124c646d1531b43dc61940872e1fab`; active PR #262 Linux CI is tracked in PR status while open |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #260 final CI run `27475475098` passed on head `32759d33ec6e118426cc37cade36e947c960c3d4`; CodeRabbit status was success with no review threads opened, and PR #260 squash-merged as `779ff73bee124c646d1531b43dc61940872e1fab` |
+| CI run | Latest merged baseline PR #260 final CI run `27475475098` passed on head `32759d33ec6e118426cc37cade36e947c960c3d4`; active PR #262 CI and CodeRabbit status are intentionally recorded in `ops/AUTONOMOUS_RUN.md` while the PR is open and will replace this merged-baseline row after merge |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
