@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/signer-custody-readiness-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/188` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/187` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/189` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 03:06 UTC` |
+| Last updated | `2026-06-13 03:12 UTC` |
 
 ## Packaging Notes
 
@@ -152,15 +152,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 94 | Reconcile autonomous run state after drop authorization payload generator merge | Gate G support | Implement issue #182 by marking PR #181 merged, recording CI and CodeRabbit evidence, and selecting the next no-secret signing evidence target | Merged in PR #184 |
 | 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Merged in PR #185 |
 | 96 | Reconcile drop authorization signing evidence merge state | Gate G support | Implement issue #186 by marking PR #185 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next no-secret signer-custody readiness target | Merged in PR #188 |
-| 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Ready for PR after local validation |
+| 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Open in PR #189 |
 
 ## Current PR Worklog
 
 ### PR candidate: Add production signer custody readiness evidence (Queue Item 97)
 
-Status: Local validation complete; ready to open PR.
+Status: PR #189 opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/187`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/189`.
 Branch: `codex/signer-custody-readiness-evidence`.
 Branch started from PR #188 squash merge commit
 `3601a0b174f1f972d0b7daa284c19aab29a2373c`.
@@ -8762,6 +8762,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 03:12 | Open PR #189 | Branch `codex/signer-custody-readiness-evidence` opened against `main`, linked `Closes #187`, and CodeRabbit review requested via comment `4697279178` |
 | 2026-06-13 03:06 | Complete Queue Item 97 local validation | Signer custody readiness schema/template/checker/tests/docs are wired through local and CI gates, release manifest/checksum coverage, and readiness/audit/incident docs; focused evidence checks, `git diff --check`, `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally |
 | 2026-06-13 02:45 | Start Queue Item 97 local draft | PR #188 merged cleanly as `3601a0b174f1f972d0b7daa284c19aab29a2373c`; issue #187 is the next no-secret Gate G/Gate C support slice for signer custody readiness schema/template/checker/docs without private keys or signer-service secrets |
 | 2026-06-13 02:10 | Address CodeRabbit PR #188 rationale review | Reword the Queue Item 97 selection rationale to acknowledge that issue #186 was already open for reconciliation when signer custody/readiness evidence was chosen as the next implementation slice |
