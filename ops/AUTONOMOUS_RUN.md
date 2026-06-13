@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-label-drift` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/238` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/239` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/240` |
-| Next issue | After issue #239, continue Gate G no-secret release-evidence tracker hardening before attempting retained external evidence tasks |
+| Active PR branch | `codex/release-evidence-label-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/240` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/241` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/243` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/242` for release evidence tracker body drift checks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 14:20 UTC` |
+| Last updated | `2026-06-13 14:36 UTC` |
 
 ## Packaging Notes
 
@@ -170,13 +170,57 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 111 | Reconcile release evidence issue links merge state | Gate G support | Implement issue #233 by recording PR #232 merge evidence, refreshing stale roadmap verification metadata, and preserving the next tracker-issue queue posture without changing readiness claims | Merged in PR #234 |
 | 112 | Generate and apply release evidence tracker issue bodies | Gate G support | Implement issue #235 by generating exact no-secret GitHub issue body payloads from the committed backlog/link map, wiring them into local/CI/release gates, applying them to issues #215 through #231, and preserving blocked readiness claims | Merged in PR #236 |
 | 113 | Reconcile release evidence issue body sync merge state | Gate G support | Implement issue #237 by recording PR #236 merge evidence, tracker-label reconciliation, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Merged in PR #238 |
-| 114 | Harden release evidence tracker label drift checks | Gate G support | Add a no-secret label audit/sync helper so tracker issues #215 through #231 cannot silently drift from committed `applied_labels` before retained evidence completion | Active |
+| 114 | Harden release evidence tracker label drift checks | Gate G support | Add a no-secret label audit/sync helper so tracker issues #215 through #231 cannot silently drift from committed `applied_labels` before retained evidence completion | Merged in PR #240 |
+| 115 | Reconcile release evidence label drift merge state | Gate G support | Record PR #240 merge evidence, issue #239 closure, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Active |
+| 116 | Harden release evidence tracker body drift checks | Gate G support | Add a no-secret optional live/snapshot body audit so tracker issues #215 through #231 cannot silently drift from committed body-sync payloads before retained evidence completion | Planned |
 
 ## Current PR Worklog
 
-### PR candidate: Harden release evidence tracker label drift checks (Queue Item 114)
+### PR candidate: Reconcile release evidence label drift merge state (Queue Item 115)
 
-Status: PR #240 open; CI passed, CodeRabbit provenance comments being addressed.
+Status: PR #243 open; waiting for GitHub Actions and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/241`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/243`.
+Branch: `codex/release-evidence-label-state`.
+Branch started from PR #240 squash merge commit
+`a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db`.
+Initial PR head: `cbde7b13642d1c09a9204820c5ec8ea218310876`.
+
+Prior queue transition:
+
+- Queue Item 114 merged in PR #240 as squash commit
+  `a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db`.
+- PR #240 final implementation head was
+  `e7e29f28ff9efa6b42208aefd71d73383f504204`.
+- PR #240 GitHub Actions CI run `27469343982` passed on the final head,
+  including deployment rehearsal.
+- PR #240 CodeRabbit status was success after review-response commit
+  `e7e29f28ff9efa6b42208aefd71d73383f504204`; the visible roadmap provenance
+  thread was resolved as addressed and no unresolved review threads remained.
+- Issue #239 closed completed after merge.
+- Issue #242 now tracks the next no-secret release evidence tracker body-drift
+  hardening target.
+
+Goal:
+
+- Mark Queue Item 114 complete and record the final PR #240 evidence.
+- Refresh roadmap verification metadata to the merged PR #240 baseline.
+- Record issue #242 as the next no-secret evidence-tracker hardening target.
+- Keep readiness claims blocked until reviewed retained external evidence exists.
+
+Completed local validation:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+### Completed: Harden release evidence tracker label drift checks (Queue Item 114)
+
+Status: merged in PR #240.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/239`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/240`.
 Branch: `codex/release-evidence-label-drift`.
@@ -9829,6 +9873,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 14:36 | Open PR #243 for Queue Item 115 | Opened `https://github.com/6529-Collections/6529Stream/pull/243` from `codex/release-evidence-label-state` at head `cbde7b13642d1c09a9204820c5ec8ea218310876` to reconcile PR #240 merge evidence and keep issue #242 queued as the next body-drift hardening target. |
+| 2026-06-13 14:32 | Merge PR #240 and start Queue Item 115 | Release evidence label drift checks merged as `a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db`; final head `e7e29f28ff9efa6b42208aefd71d73383f504204` passed CI run `27469343982`, CodeRabbit status was success with the roadmap provenance thread resolved, and issue #239 closed completed. Issue #241 now tracks state reconciliation, and issue #242 is the next no-secret body-drift hardening target. |
 | 2026-06-13 14:20 | Address PR #240 CodeRabbit provenance review | PR candidate: Harden release evidence tracker label drift checks (Queue Item 114). Status: PR #240 open at `https://github.com/6529-Collections/6529Stream/pull/240`; branch `codex/release-evidence-label-drift`; branch started from PR #238 squash merge commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`. Prior queue transition: Queue Item 113 merged in PR #238 as squash commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`; PR #238 final implementation head was `d56f7d2405fd0c52fdf2320a0f167253aceb4bf7`. Completed local validation: label checker tests/check, body-sync tests/check, release-readiness tests/check, release-manifest tests/check, release-checksum tests/check, changelog gate, Bash syntax, PowerShell parser syntax, heading scan, whitespace check, and live GitHub label snapshot audit. PR #240 CI run `27469086354` passed on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4`; CodeRabbit requested roadmap provenance and decision-log traceability fixes. |
 | 2026-06-13 08:44 | Open PR #208 and request CodeRabbit | State-only merge reconciliation PR opened against `main`, linked `Closes #206`, pushed head `097ac7506820359388bb76eba11778021d5edfe2`, and requested CodeRabbit review in comment `4698031592`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 08:41 | Finish Queue Item 106 local validation | Durable run state and roadmap metadata now record PR #205 final merge/CI/CodeRabbit evidence, issue #203 completion, issue #206 active reconciliation scope, issue #207 as the next no-secret packet-index target, heading scan, traceability grep, and whitespace checks |
