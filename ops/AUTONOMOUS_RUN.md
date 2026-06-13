@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/drop-signing-evidence-schema` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/184` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/183` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/185` |
+| Active PR branch | `codex/reconcile-signing-evidence-merge` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/185` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/186` |
+| Active PR | `TBD - not opened yet` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 01:44 UTC` |
+| Last updated | `2026-06-13 02:02 UTC` |
 
 ## Packaging Notes
 
@@ -150,14 +150,50 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Merged in PR #179 |
 | 93 | Add no-secret drop authorization payload generator tooling | Gate G/Gate C support | Implement issue #180 by adding a production-safe unsigned typed-data generator, derived-hash output, tests, docs links, and maintained local/CI gates without private-key handling | Merged in PR #181 |
 | 94 | Reconcile autonomous run state after drop authorization payload generator merge | Gate G support | Implement issue #182 by marking PR #181 merged, recording CI and CodeRabbit evidence, and selecting the next no-secret signing evidence target | Merged in PR #184 |
-| 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Active on `codex/drop-signing-evidence-schema` |
+| 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Merged in PR #185 |
+| 96 | Reconcile drop authorization signing evidence merge state | Gate G support | Implement issue #186 by marking PR #185 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next no-secret signer-custody readiness target | Active on `codex/reconcile-signing-evidence-merge` |
+| 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Queued |
 
 ## Current PR Worklog
 
+### PR candidate: Reconcile drop authorization signing evidence merge state (Queue Item 96)
+
+Status: Local branch in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/186`.
+PR: `TBD`.
+Branch: `codex/reconcile-signing-evidence-merge`.
+Branch started from PR #185 squash merge commit
+`fd453a652d228c3e43002aca27f72e1d86cd53d9`.
+
+Prior queue transition:
+
+- Queue Item 95 merged in PR #185 as squash commit
+  `fd453a652d228c3e43002aca27f72e1d86cd53d9`.
+- PR #185 final implementation head was
+  `fa1a6e949558dc7178564da179d576047ac428a9`.
+- PR #185 GitHub Actions CI run `27453065590` passed on the final head.
+- PR #185 CodeRabbit status was success after it resolved the three visible
+  review threads against commit `fa1a6e9`.
+- PR #185 closed issue #183 at merge.
+- Issue #187 is the next no-secret implementation target for production signer
+  custody/readiness evidence.
+
+Goal:
+
+- Mark Queue Item 95 and issue #183 completed with final evidence.
+- Refresh top-level roadmap verification metadata so it references the final
+  PR #185 head, CI run, CodeRabbit success, and squash merge commit.
+- Keep the next implementation target explicit in the queue before starting
+  signer custody/readiness evidence work.
+
+Validation target:
+
+- `git diff --check`.
+- `rg -n "^#|^##|^###" ops\AUTONOMOUS_RUN.md ops\ROADMAP.md`.
+
 ### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
 
-Status: Addressing remaining CodeRabbit review findings after PR #185 CI passed
-on head `a45232dd0f685ca8e37b7baaeac746e36fcf1c2e`.
+Status: Merged in PR #185 on `2026-06-13`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/183`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/185`.
 Branch: `codex/drop-signing-evidence-schema`.
@@ -280,6 +316,17 @@ Second CodeRabbit follow-up:
   `docs/tooling.md`.
 - Linked the drop authorization signing evidence schema and retained-artifact
   placeholder directly from the signer-compromise incident runbook.
+
+Final remote validation:
+
+- PR #185 final implementation head
+  `fa1a6e949558dc7178564da179d576047ac428a9` passed GitHub Actions CI run
+  `27453065590`.
+- CodeRabbit aggregate status was success, and all visible review threads were
+  resolved.
+- Squash merge commit:
+  `fd453a652d228c3e43002aca27f72e1d86cd53d9`.
+- Issue #183 closed completed at merge.
 
 ### PR candidate: Reconcile autonomous run state after drop authorization payload generator merge (Queue Item 94)
 
@@ -8689,6 +8736,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 02:02 | Create issue #187 and select Queue Item 97 | No open Stream issues remained after #183 closed, and signer custody/readiness evidence is the next no-secret blocker slice after payload generation and signing evidence |
+| 2026-06-13 02:01 | Create issue #186 and start Queue Item 96 | PR #185 merged cleanly, so state must record final CI/CodeRabbit evidence and refresh the roadmap before the next implementation branch starts |
+| 2026-06-13 02:00 | Merge PR #185 | Drop authorization signing evidence merged as `fd453a652d228c3e43002aca27f72e1d86cd53d9`; final head `fa1a6e949558dc7178564da179d576047ac428a9` passed CI run `27453065590`, CodeRabbit status was success, visible review threads were resolved, and issue #183 closed completed |
 | 2026-06-13 01:44 | Address remaining CodeRabbit PR #185 findings | Replace stale roadmap status language, remove unsupported external-review phrasing, align numeric evidence validation with schema minimums, add focused regressions, and clarify tooling/incident-response docs before pushing the next review-response commit |
 | 2026-06-13 01:37 | Address CodeRabbit PR #185 minor findings | Added the secret-regex maintainer note, evidence/template review-status regression, and `seed_phrase` fixture alignment; focused evidence and release-manifest checks pass |
 | 2026-06-13 01:32 | Request CodeRabbit PR #185 review | CodeRabbit review requested in issue comment `4696975873`; Claude intentionally skipped per current user instruction |
