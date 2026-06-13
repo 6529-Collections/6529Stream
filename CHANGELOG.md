@@ -16,6 +16,9 @@ the release policy in `docs/release-policy.md`.
   issues: `evidence` plus `public-beta` or `production-release` phase labels.
 - Added a release evidence issue snapshot exporter so live label, body, and
   closure audits can write UTF-8 JSON without shell redirection.
+- Added a release evidence issue snapshot audit orchestrator so operators can
+  export and check live label, body, and closure issue snapshots with one
+  no-secret command while CI stays network-free.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.

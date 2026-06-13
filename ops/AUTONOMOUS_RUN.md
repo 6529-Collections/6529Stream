@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-snapshot-exporter-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/262` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/263` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/264` |
-| Next issue | TBD after issue #263 merges |
+| Active PR branch | `codex/release-evidence-live-audit-orchestrator` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/264` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/265` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/266` |
+| Next issue | TBD after issue #265 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 19:21 UTC` |
+| Last updated | `2026-06-13 20:02 UTC` |
 
 ## Packaging Notes
 
@@ -182,20 +182,110 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 123 | Reconcile production evidence gate wording merge state | Gate G support | Record PR #256 merge evidence, live tracker body synchronization for issues #215 through #231, refreshed roadmap verification metadata, and the next no-secret queue posture | Merged in PR #258 |
 | 124 | Apply release evidence tracker phase labels | Gate G support | Apply the committed `evidence`, `public-beta`, and `production-release` tracker taxonomy to issues #215 through #231, refresh applied-label artifacts, and preserve blocked readiness claims | Merged in PR #260 |
 | 125 | Add release evidence issue snapshot exporter | Gate G support | Add a no-secret UTF-8 GitHub issue snapshot exporter for live label, body, and closure audits, update docs and local/CI gates, and preserve blocked readiness claims | Merged in PR #262 |
-| 126 | Reconcile snapshot exporter merge state | Gate G support | Record PR #262 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Active |
+| 126 | Reconcile snapshot exporter merge state | Gate G support | Record PR #262 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Merged in PR #264 |
+| 127 | Add release evidence live audit orchestrator | Gate G support | Add a no-secret operator command that exports and checks live label, body, and closure issue snapshots without adding GitHub network access to CI | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile snapshot exporter merge state (Queue Item 126)
+### PR candidate: Add release evidence live audit orchestrator (Queue Item 127)
 
-Status: PR #264 open; CodeRabbit review requested.
+Status: PR #266 open; CodeRabbit review requested and CI pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/265`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/266`.
+Branch: `codex/release-evidence-live-audit-orchestrator`.
+Branch started from PR #264 squash merge commit
+`3f32666d6c7e7e287acb041a0895cb37f1ccc4ba`.
+Opening PR head: `fe618aca88ba5af68196d61c6cb7af11a2ac0327`.
+CodeRabbit request comment:
+`https://github.com/6529-Collections/6529Stream/pull/266#issuecomment-4699634295`.
+
+Prior queue transition:
+
+- Queue Item 126 merged in PR #264 as squash commit
+  `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba`.
+- PR #264 final implementation head was
+  `ae8e5703be683b98857165b2c5c3d00526631f34`.
+- PR #264 GitHub Actions CI run `27476739656` passed on the final head,
+  including deployment rehearsal.
+- PR #264 CodeRabbit status was success; its actionable review thread was
+  addressed in commit `ae8e5703be683b98857165b2c5c3d00526631f34` and resolved.
+- Issue #263 closed completed after merge.
+
+Goal:
+
+- Add `scripts/audit_release_evidence_issue_snapshots.py` as the operator-only
+  live audit orchestrator for label, body, and closure snapshots.
+- Keep live GitHub access out of CI while adding mocked unit tests for the
+  orchestration behavior.
+- Wire the mocked audit-orchestrator tests into local and CI gates.
+- Update docs to prefer the one-command live audit while preserving individual
+  exporter/checker commands.
+- Record PR #264 merge evidence and preserve blocked readiness claims for
+  issues #215 through #231.
+
+Validation target:
+
+- `python scripts/test_release_evidence_issue_snapshot_audit.py`.
+- `python scripts/audit_release_evidence_issue_snapshots.py --help`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/audit_release_evidence_issue_snapshots.py scripts/test_release_evidence_issue_snapshot_audit.py`.
+- `bash -n scripts/check.sh`.
+- `[scriptblock]::Create((Get-Content scripts/check.ps1 -Raw)) | Out-Null`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md CHANGELOG.md`.
+- `git diff --check`.
+
+Completed local validation:
+
+- Initial `bash scripts/check.sh` failed fast because `forge` was not on
+  `PATH`; the repository bootstrap guidance was correct.
+- `powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1`
+  installed Foundry `v1.7.1`, verified the archive checksum, refreshed
+  `.venv-tools`, and made `forge` available to the current shell.
+- `python scripts/test_release_evidence_issue_snapshot_audit.py`.
+- `python scripts/audit_release_evidence_issue_snapshots.py --help`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/audit_release_evidence_issue_snapshots.py scripts/test_release_evidence_issue_snapshot_audit.py`.
+- `bash -n scripts/check.sh`.
+- `[scriptblock]::Create((Get-Content scripts/check.ps1 -Raw)) | Out-Null`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md CHANGELOG.md`.
+- `git diff --check` passed with only Git's existing line-ending warning for
+  `scripts/check.ps1`.
+- `powershell -ExecutionPolicy Bypass -File scripts/check.ps1` passed after
+  bootstrap, including Foundry build/tests, gas snapshot check, production
+  size build, all Python evidence gates, and local deployment, auction, and
+  emergency redeployment rehearsals.
+
+### Completed: Reconcile snapshot exporter merge state (Queue Item 126)
+
+Status: merged in PR #264.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/263`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/264`.
 Branch: `codex/reconcile-snapshot-exporter-merge-state`.
 Branch started from PR #262 squash merge commit
 `19263b048fc8dc8e0fe7c834e206e623d8fb944e`.
 Opening PR head: `8253b88197996bc15071168f3c3d5ec30e9028ce`.
+Final PR head: `ae8e5703be683b98857165b2c5c3d00526631f34`.
+Squash merge commit: `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba`.
 CodeRabbit request comment: `https://github.com/6529-Collections/6529Stream/pull/264#issuecomment-4699532800`.
+
+Result:
+
+- PR #264 GitHub Actions CI run `27476739656` passed on final head
+  `ae8e5703be683b98857165b2c5c3d00526631f34`.
+- CodeRabbit status was success; the actionable review thread was addressed in
+  commit `ae8e5703be683b98857165b2c5c3d00526631f34` and resolved.
+- PR #264 squash-merged as
+  `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba`, and issue #263 closed
+  completed.
 
 Prior queue transition:
 
@@ -10651,6 +10741,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 20:02 | Open PR #266 and request CodeRabbit | Release evidence live audit orchestrator PR opened on head `fe618aca88ba5af68196d61c6cb7af11a2ac0327`, links `Closes #265`, and CodeRabbit review was requested in comment `4699634295`; Claude remains intentionally skipped per current user instruction. |
+| 2026-06-13 19:43 | Start Queue Item 127 | PR #264 merged cleanly as `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba`; issue #265 tracks a no-secret one-command live audit orchestrator for label, body, and closure issue snapshots while keeping CI network-free. |
+| 2026-06-13 19:35 | Merge PR #264 | Snapshot exporter merge-state reconciliation merged as `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba`; final head `ae8e5703be683b98857165b2c5c3d00526631f34` passed CI run `27476739656`, CodeRabbit status was success with the actionable thread addressed and resolved, and issue #263 closed completed. |
 | 2026-06-13 18:49 | Implement Queue Item 125 local draft | Added the no-secret release evidence issue snapshot exporter, focused subprocess/encoding tests, local/CI gate wiring, operator docs, changelog, roadmap, and durable state updates without changing readiness claims. |
 | 2026-06-13 18:44 | Create issue #261 and start Queue Item 125 | PR #260 merged cleanly and the next live-audit pain point is reliable UTF-8 snapshot export for labels, bodies, and closure audits, so issue #261 tracks a no-secret exporter that avoids shell-redirection encoding pitfalls. |
 | 2026-06-13 18:42 | Merge PR #260 | Release evidence tracker phase labels merged as `779ff73bee124c646d1531b43dc61940872e1fab`; final head `32759d33ec6e118426cc37cade36e947c960c3d4` passed CI run `27475475098`, CodeRabbit status was success with no review threads, and issue #259 closed completed. |

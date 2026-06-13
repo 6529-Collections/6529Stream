@@ -236,7 +236,15 @@ To move a requirement to `complete`:
 14. Check committed release evidence tracker labels with
     `python scripts/test_release_evidence_issue_labels.py` and
     `python scripts/check_release_evidence_issue_labels.py`. To audit live
-    GitHub label drift, export a local snapshot and pass it with `--live-json`:
+    GitHub label, body, and closure drift together, run the operator-only
+    no-secret orchestrator:
+
+    ```bash
+    python scripts/audit_release_evidence_issue_snapshots.py
+    ```
+
+    To audit only live GitHub label drift, export a local snapshot and pass it
+    with `--live-json`:
 
     ```bash
     python scripts/export_release_evidence_issue_snapshot.py --profile labels

@@ -93,12 +93,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 19:16 UTC` for Queue Item 125 / PR #262 release evidence issue snapshot exporter; PR #262 local validation covered exporter tests/help, live label/body/closure audits, release-readiness, manifest, checksum, changelog, Bash and PowerShell syntax, Python compilation, heading, and whitespace checks |
-| OS tested | Windows local validation for Queue Item 125 / PR #262; Linux GitHub Actions passed for latest merged baseline PR #262 run `27476294337` on final head `223ff4b69484af2a8a20a95b423d175c916b179c`, with merged baseline commit `19263b048fc8dc8e0fe7c834e206e623d8fb944e` |
+| Last verified | `2026-06-13 19:35 UTC` for Queue Item 126 / PR #264 snapshot exporter merge-state reconciliation; PR #264 local validation covered release-readiness, manifest, checksum, changelog, heading, and whitespace checks |
+| OS tested | Windows local validation for Queue Item 126 / PR #264; Linux GitHub Actions passed for latest merged baseline PR #264 run `27476739656` on final head `ae8e5703be683b98857165b2c5c3d00526631f34`, with merged baseline commit `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #262 final CI run `27476294337` passed on head `223ff4b69484af2a8a20a95b423d175c916b179c`; CodeRabbit status was success with its only actionable review thread addressed, resolved, and outdated, and PR #262 squash-merged as `19263b048fc8dc8e0fe7c834e206e623d8fb944e` |
+| CI run | Latest merged baseline PR #264 final CI run `27476739656` passed on head `ae8e5703be683b98857165b2c5c3d00526631f34`; CodeRabbit status was success with its actionable review thread addressed and resolved, and PR #264 squash-merged as `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
