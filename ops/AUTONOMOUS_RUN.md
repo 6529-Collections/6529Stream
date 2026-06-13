@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/non-local-evidence-generator` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/250` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/251` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/252` |
 | Next issue | TBD after issue #251 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 16:55 UTC` |
+| Last updated | `2026-06-13 17:05 UTC` |
 
 ## Packaging Notes
 
@@ -182,9 +182,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add non-local evidence scaffold generator (Queue Item 120)
 
-Status: local implementation in progress; PR not yet opened.
+Status: PR #252 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/251`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/252`.
 Branch: `codex/non-local-evidence-generator`.
 Branch started from PR #250 squash merge commit
 `b4cde51da923354b7ef8b5afa2e14badccef955e`.
@@ -220,6 +220,18 @@ Completed local validation so far:
 - `python -m py_compile scripts/generate_non_local_release_evidence.py scripts/test_non_local_release_evidence_generator.py`.
 - `python scripts/test_non_local_release_evidence.py`.
 - `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_changelog_check.py`.
+- `python scripts/check_changelog.py`.
+- `bash -n scripts/check.sh`.
+- PowerShell parser syntax check for `scripts/check.ps1`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\non-local-release-evidence.md docs\tooling.md`.
+- `git diff --check`.
 
 ### Completed: Reconcile release evidence closure merge state (Queue Item 119)
 
@@ -10161,6 +10173,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 17:05 | Open PR #252 | Non-local evidence generator PR opened on head `e55209e9baee2c782f640d5fa5170fecd4c51a2c`; durable state follow-up records the real PR URL before CodeRabbit review. |
 | 2026-06-13 16:55 | Implement Queue Item 120 local draft | Added the non-local evidence metadata generator, focused tests, local gate wiring, operator docs, changelog, and durable state updates while preserving blocked readiness claims. |
 | 2026-06-13 16:51 | Create issue #251 and select Queue Item 120 | The remaining tracker issues require external retained evidence, so the next no-secret repo-side improvement is an evidence metadata generator that reduces operator hand-editing risk without closing those trackers. |
 | 2026-06-13 16:50 | Merge PR #250 | Release evidence closure state reconciliation merged as `b4cde51da923354b7ef8b5afa2e14badccef955e`; final head `e607b004be1323309f3d86f4023b05fb20cdae74` passed CI run `27472666858`, CodeRabbit status was success, and issue #249 closed completed. |
