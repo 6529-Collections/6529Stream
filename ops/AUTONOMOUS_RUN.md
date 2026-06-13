@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-issue-backlog` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/211` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/212` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/213` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 10:39 UTC` |
+| Last updated | `2026-06-13 10:42 UTC` |
 
 ## Packaging Notes
 
@@ -171,10 +171,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence issue backlog artifact (Queue Item 109)
 
-Status: local implementation and focused validation in progress; PR not opened
-yet.
+Status: PR #213 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/212`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/213`.
 Branch: `codex/release-evidence-issue-backlog`.
 Branch started from PR #211 squash merge commit
 `767dd61183b0b350c114f48aa034e08192a16c23`.
@@ -231,8 +230,14 @@ Completed local validation so far:
 
 Next validation:
 
-- Stage, commit, push, open the PR, request CodeRabbit, and wait for CI and
-  review comments.
+- Wait for CI and CodeRabbit review comments, then iterate until clean.
+
+Remote review:
+
+- PR #213 opened against `main` from head
+  `c45d49c2cb31ceddf0d0657c532b09654b7c4207`.
+- CodeRabbit requested in comment `4698282548`.
+- GitHub Actions and CodeRabbit review are pending.
 
 ### Completed: Reconcile release evidence packet index merge state (Queue Item 108)
 
@@ -10163,6 +10168,7 @@ Outcome:
 | 2026-06-13 10:12 | Merge PR #211 and select Queue Item 109 | PR #211 merged as `767dd61183b0b350c114f48aa034e08192a16c23` after CI run `27463609371` and CodeRabbit success; issue #210 closed completed and issue #212 opened for the release evidence issue backlog artifact |
 | 2026-06-13 10:29 | Implement Queue Item 109 local draft | Added the release evidence issue-backlog generator/tests, local/CI gate wiring, release-manifest/checksum coverage, docs, changelog, roadmap, and durable state updates without creating issues automatically or changing readiness claims |
 | 2026-06-13 10:39 | Finish Queue Item 109 local validation | Focused evidence, manifest, checksum, release-artifact, readiness, changelog, syntax, heading, and whitespace checks pass, and full `make check` passes with existing warning noise only |
+| 2026-06-13 10:42 | Open PR #213 and request CodeRabbit | Release evidence issue backlog PR opened on head `c45d49c2cb31ceddf0d0657c532b09654b7c4207`; CodeRabbit requested in comment `4698282548` |
 
 ## Resume Instructions
 
