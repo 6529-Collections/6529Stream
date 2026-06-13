@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/drop-signing-evidence-schema` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/184` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/183` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/185` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 01:29 UTC` |
+| Last updated | `2026-06-13 01:32 UTC` |
 
 ## Packaging Notes
 
@@ -156,12 +156,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
 
-Status: Local validation complete; PR not opened yet.
+Status: PR opened; CodeRabbit requested; awaiting CI and review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/183`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/185`.
 Branch: `codex/drop-signing-evidence-schema`.
 Branch started from PR #184 squash merge commit
 `1a6b0691165c6f21b31a16c2ef4cd1d3456d34a9`.
+Implementation head at PR open:
+`ca4866616e335c374afb144269cc611a26bd232e`.
 
 Prior queue transition:
 
@@ -236,6 +238,13 @@ Local validation:
 - `git diff --check`.
 - `make check`.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Remote validation:
+
+- PR #185 opened at
+  `https://github.com/6529-Collections/6529Stream/pull/185`.
+- CodeRabbit review requested in issue comment `4696975873`.
+- GitHub Actions pending.
 
 ### PR candidate: Reconcile autonomous run state after drop authorization payload generator merge (Queue Item 94)
 
@@ -8645,6 +8654,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 01:32 | Request CodeRabbit PR #185 review | CodeRabbit review requested in issue comment `4696975873`; Claude intentionally skipped per current user instruction |
+| 2026-06-13 01:32 | Open PR #185 | Drop authorization signing evidence schema/checker PR opened against `main`, linked `Closes #183`, and included local validation transcript |
 | 2026-06-13 01:29 | Finish local Queue Item 95 validation | Drop authorization signing evidence schema/template/checker/tests, release manifest/checksum coverage, docs checkers, changelog gate, `git diff --check`, full `make check`, and the Windows PowerShell wrapper pass locally; PR creation is next |
 | 2026-06-13 01:07 | Start Queue Item 95 on issue #183 | PR #184 merged cleanly, issue #182 closed completed, and the next no-secret Gate G/Gate C support slice is the retained drop authorization signing evidence schema/checker |
 | 2026-06-13 00:53 | Merge PR #184 | State-only reconciliation merged as `1a6b0691165c6f21b31a16c2ef4cd1d3456d34a9`; final head `964eabe1e5a959d699f10ebf7f13c446e9838d5d` passed CI run `27451124264`, CodeRabbit reported no actionable comments, and issue #182 closed completed |
