@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-production-evidence-gate-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/256` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/257` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/258` |
 | Next issue | TBD after issue #257 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 18:15 UTC` |
+| Last updated | `2026-06-13 18:16 UTC` |
 
 ## Packaging Notes
 
@@ -185,9 +185,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile production evidence gate wording merge state (Queue Item 123)
 
-Status: local draft in progress for issue #257; PR TBD.
+Status: PR #258 open; initial local validation passed, with CI and CodeRabbit
+pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/257`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/258`.
 Branch: `codex/reconcile-production-evidence-gate-merge-state`.
 Branch started from PR #256 squash merge commit
 `54aafe969d4647d9ea87f8adbd9eb0f7b438ace5`.
@@ -10419,6 +10420,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 18:16 | Open PR #258 | State-only production evidence gate merge reconciliation PR opened against `main` at head `efa3006ec487457077f45af98e8cc2a7c3115cef`, linked `Closes #257`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 18:13 | Create issue #257 and start Queue Item 123 | PR #256 merged cleanly, issue #255 closed completed, and live tracker issue bodies #215 through #231 were synchronized and re-audited, so issue #257 tracks durable state reconciliation before continuing the no-secret evidence queue. |
 | 2026-06-13 18:06 | Sync release evidence tracker issue bodies after PR #256 | After the production evidence gate wording fix merged, deterministic body files were applied to issues #215 through #231 and a fresh UTF-8 no-BOM live issue snapshot passed `python scripts/check_release_evidence_issue_bodies.py --live-json tmp\release-evidence-issue-bodies.json`; tracker issues remain open and readiness claims are unchanged. |
 | 2026-06-13 17:58 | Merge PR #256 | Production evidence tracker completion-gate wording merged as `54aafe969d4647d9ea87f8adbd9eb0f7b438ace5`; final head `6b866e6e8347c20723883e50c10bd7d2d6e6fdf9` passed CI run `27474552158`, CodeRabbit status was success with no review threads, and issue #255 closed completed. |
