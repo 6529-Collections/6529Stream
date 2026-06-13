@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-closure-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/248` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/249` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/250` |
 | Next issue | TBD after issue #249 reconciliation merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 16:29 UTC` |
+| Last updated | `2026-06-13 16:36 UTC` |
 
 ## Packaging Notes
 
@@ -181,9 +181,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile release evidence closure merge state (Queue Item 119)
 
-Status: local branch started; PR not yet opened.
+Status: PR #250 open; CI and CodeRabbit review in progress.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/249`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/250`.
 Branch: `codex/release-evidence-closure-merge-state`.
 Branch started from PR #248 squash merge commit
 `1c258231820cfb022b1ba859608d9be1c8970392`.
