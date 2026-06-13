@@ -137,20 +137,20 @@
     },
     "release_evidence_issue_links": {
       "path": "release-artifacts/latest/release-evidence-issue-links.json",
-      "sha256": "sha256:224aabe35324471a52d53c634d34de10a20dddd65c59d3f196e31715740e9e8b",
-      "size_bytes": 11001,
+      "sha256": "sha256:6fc7a352822ab24ff968eacbcbfd5dde4114f234199f55c67ffed0670b175d5c",
+      "size_bytes": 11795,
       "schema_version": "6529stream.release-evidence-issue-links.v1"
     },
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:56deee214ddb6720486b75522ade1421b0947e4dc926226582c427cbac94709c",
-        "size_bytes": 75153,
+        "sha256": "sha256:7c7a2f1d8b121ce989808f22deb3b1881d029f3e8b0d3bee7381530354eaf4e1",
+        "size_bytes": 75947,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:6a036f5e6a53cdfca0e9a144addf9afc77710c2a6ca32aa6d7330b9a090a9bac",
+        "sha256": "sha256:43d19d97db34a31dd8aa97535a45ff916481b1bc53c60192e688c73e74cbcc28",
         "size_bytes": 67024
       }
     },
@@ -1618,8 +1618,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:eda3f6937e2fb5483d8ba0bdce3885be2b94a676e51f03b4ef09a990d266918f",
-      "size_bytes": 17562
+      "sha256": "sha256:fbb85f4b1b41bbb4ccc01b6b23b7da0a6c28098a95966aa2e3aafcab33a38fbf",
+      "size_bytes": 17717
     },
     "governance_docs": [
       {
@@ -1649,8 +1649,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:94b8a91d6e75f7c11832afff4a323ce122d494b3123d0ccfcaeee2a4044f9d22",
-        "size_bytes": 15605
+        "sha256": "sha256:81b24efa0029b136b36baba0490316d11ed4f84dbd093ec8a63e3b88bded48de",
+        "size_bytes": 15817
       },
       {
         "path": "docs/non-local-release-evidence.md",

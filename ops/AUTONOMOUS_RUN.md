@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-production-evidence-gate-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/256` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/257` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/258` |
-| Next issue | TBD after issue #257 merges |
+| Active PR branch | `codex/release-evidence-phase-labels` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/258` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/259` |
+| Active PR | TBD |
+| Next issue | TBD after issue #259 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 18:16 UTC` |
+| Last updated | `2026-06-13 18:28 UTC` |
 
 ## Packaging Notes
 
@@ -179,19 +179,100 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 120 | Add non-local evidence scaffold generator | Gate E/Gate G support | Add a no-secret generator that turns a retained artifact plus committed requirement template into checker-compatible non-local evidence metadata with digest computation and `--check` drift detection | Merged in PR #252 |
 | 121 | Reconcile non-local evidence generator merge state | Gate G support | Record PR #252 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Merged in PR #254 |
 | 122 | Clarify production evidence tracker completion gates | Gate G support | Fix generated tracker completion-gate wording so production-release rows describe the shared evidence status manifest without changing readiness claims | Merged in PR #256 |
-| 123 | Reconcile production evidence gate wording merge state | Gate G support | Record PR #256 merge evidence, live tracker body synchronization for issues #215 through #231, refreshed roadmap verification metadata, and the next no-secret queue posture | Active |
+| 123 | Reconcile production evidence gate wording merge state | Gate G support | Record PR #256 merge evidence, live tracker body synchronization for issues #215 through #231, refreshed roadmap verification metadata, and the next no-secret queue posture | Merged in PR #258 |
+| 124 | Apply release evidence tracker phase labels | Gate G support | Apply the committed `evidence`, `public-beta`, and `production-release` tracker taxonomy to issues #215 through #231, refresh applied-label artifacts, and preserve blocked readiness claims | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile production evidence gate wording merge state (Queue Item 123)
+### PR candidate: Apply release evidence tracker phase labels (Queue Item 124)
 
-Status: PR #258 open; initial local validation passed, with CI and CodeRabbit
-pending.
+Status: local draft in progress for issue #259; PR TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/259`.
+PR: TBD.
+Branch: `codex/release-evidence-phase-labels`.
+Branch started from PR #258 squash merge commit
+`8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029`.
+
+Prior queue transition:
+
+- Queue Item 123 merged in PR #258 as squash commit
+  `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029`.
+- PR #258 final implementation head was
+  `cae33d4779bbf8c51f794727083e7801498045b7`.
+- PR #258 GitHub Actions CI run `27475057686` passed on the final head,
+  including deployment rehearsal.
+- PR #258 CodeRabbit status was success, and no review threads were opened.
+- Issue #257 closed completed after merge.
+- The only open GitHub issues are retained-evidence trackers #215 through
+  #231, which still require reviewed external retained evidence.
+
+Goal:
+
+- Create and apply the `public-beta` and `production-release` tracker labels.
+- Apply `evidence` plus the correct phase label to issues #215 through #231.
+- Update committed `applied_labels` in the release evidence issue-link map.
+- Regenerate dependent issue body-sync, release manifest, and checksum
+  artifacts.
+- Preserve blocked readiness claims and keep issues #215 through #231 open.
+
+Live tracker action:
+
+- Created GitHub labels `public-beta` and `production-release`.
+- Applied `evidence` and `public-beta` to issues #215 through #222.
+- Applied `evidence` and `production-release` to issues #223 through #231.
+
+Validation target:
+
+- `python scripts/test_release_evidence_issue_links.py`.
+- `python scripts/check_release_evidence_issue_links.py`.
+- `python scripts/test_release_evidence_issue_labels.py`.
+- `python scripts/check_release_evidence_issue_labels.py`.
+- `python scripts/check_release_evidence_issue_labels.py --live-json tmp\release-evidence-issue-labels.json`.
+- `python scripts/test_release_evidence_issue_body_sync.py`.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+- `python scripts/test_release_evidence_issue_bodies.py`.
+- `python scripts/check_release_evidence_issue_bodies.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/check_changelog.py`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\public-beta-evidence.md release-artifacts\README.md`.
+- `git diff --check`.
+
+Initial local validation:
+
+- `python scripts/test_release_evidence_issue_links.py` passed.
+- `python scripts/check_release_evidence_issue_links.py` passed.
+- `python scripts/test_release_evidence_issue_labels.py` passed.
+- `python scripts/check_release_evidence_issue_labels.py` passed.
+- `python scripts/check_release_evidence_issue_labels.py --live-json tmp\release-evidence-issue-labels.json` passed against a fresh GitHub issue snapshot.
+- `python scripts/test_release_evidence_issue_body_sync.py` passed.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check` passed.
+- `python scripts/test_release_evidence_issue_bodies.py` passed.
+- `python scripts/check_release_evidence_issue_bodies.py` passed.
+- `python scripts/check_release_readiness.py` passed.
+- `python scripts/test_release_readiness.py` passed.
+- `python scripts/generate_release_manifest.py --check` passed.
+- `python scripts/test_release_manifest.py` passed.
+- `python scripts/generate_release_checksums.py --check` passed.
+- `python scripts/test_release_checksums.py` passed.
+- `python scripts/check_changelog.py` passed.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md docs\public-beta-evidence.md release-artifacts\README.md CHANGELOG.md` passed.
+- `git diff --check` passed.
+
+### Completed: Reconcile production evidence gate wording merge state (Queue Item 123)
+
+Status: merged in PR #258.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/257`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/258`.
 Branch: `codex/reconcile-production-evidence-gate-merge-state`.
 Branch started from PR #256 squash merge commit
 `54aafe969d4647d9ea87f8adbd9eb0f7b438ace5`.
+Final PR head: `cae33d4779bbf8c51f794727083e7801498045b7`.
+Squash merge commit: `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029`.
 
 Prior queue transition:
 
@@ -246,6 +327,10 @@ Initial local validation:
 - `python scripts/check_release_evidence_issue_closure.py` passed.
 - `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md` passed.
 - `git diff --check` passed.
+- Final GitHub Actions CI run `27475057686` passed on head
+  `cae33d4779bbf8c51f794727083e7801498045b7`, including deployment rehearsal.
+- CodeRabbit final status was success, no review threads were opened, and issue
+  #257 closed completed.
 
 ### Completed: Clarify production evidence tracker completion gates (Queue Item 122)
 
@@ -10420,6 +10505,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 18:28 | Apply release evidence tracker phase labels locally | Created the `public-beta` and `production-release` labels, applied `evidence` plus the correct phase label to issues #215 through #231, updated committed `applied_labels`, and regenerated dependent body-sync, manifest, and checksum artifacts without changing readiness claims. |
+| 2026-06-13 18:26 | Create issue #259 and start Queue Item 124 | The remaining open issues are retained-evidence trackers, and the committed link map already suggested phase labels, so the next no-secret improvement is to apply and validate the tracker label taxonomy while recording PR #258's merge evidence. |
+| 2026-06-13 18:24 | Merge PR #258 | Production evidence gate merge-state reconciliation merged as `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029`; final head `cae33d4779bbf8c51f794727083e7801498045b7` passed CI run `27475057686`, CodeRabbit status was success with no review threads, and issue #257 closed completed. |
 | 2026-06-13 18:16 | Open PR #258 | State-only production evidence gate merge reconciliation PR opened against `main` at head `efa3006ec487457077f45af98e8cc2a7c3115cef`, linked `Closes #257`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 18:13 | Create issue #257 and start Queue Item 123 | PR #256 merged cleanly, issue #255 closed completed, and live tracker issue bodies #215 through #231 were synchronized and re-audited, so issue #257 tracks durable state reconciliation before continuing the no-secret evidence queue. |
 | 2026-06-13 18:06 | Sync release evidence tracker issue bodies after PR #256 | After the production evidence gate wording fix merged, deterministic body files were applied to issues #215 through #231 and a fresh UTF-8 no-BOM live issue snapshot passed `python scripts/check_release_evidence_issue_bodies.py --live-json tmp\release-evidence-issue-bodies.json`; tracker issues remain open and readiness claims are unchanged. |
