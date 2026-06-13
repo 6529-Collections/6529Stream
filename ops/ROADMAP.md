@@ -93,12 +93,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 19:35 UTC` for Queue Item 126 / PR #264 snapshot exporter merge-state reconciliation; PR #264 local validation covered release-readiness, manifest, checksum, changelog, heading, and whitespace checks |
-| OS tested | Windows local validation for Queue Item 126 / PR #264; Linux GitHub Actions passed for latest merged baseline PR #264 run `27476739656` on final head `ae8e5703be683b98857165b2c5c3d00526631f34`, with merged baseline commit `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba` |
+| Last verified | `2026-06-13 20:39 UTC` for Queue Item 127 / PR #266 release evidence live audit orchestrator; PR #266 local validation covered focused snapshot/orchestrator tests, release-readiness, manifest, checksum, changelog, heading, whitespace, and full Windows `scripts\check.ps1` checks |
+| OS tested | Windows local validation for Queue Item 127 / PR #266; Linux GitHub Actions passed for latest merged baseline PR #266 run `27478297193` on final head `75fa1c69f658a0edd09bf0ab186913d059b4f645`, with merged baseline commit `edd5ddd8d13587af24b9b59d1c6ef3bf94291519` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #264 final CI run `27476739656` passed on head `ae8e5703be683b98857165b2c5c3d00526631f34`; CodeRabbit status was success with its actionable review thread addressed and resolved, and PR #264 squash-merged as `3f32666d6c7e7e287acb041a0895cb37f1ccc4ba` |
+| CI run | Latest merged baseline PR #266 final CI run `27478297193` passed on head `75fa1c69f658a0edd09bf0ab186913d059b4f645`; CodeRabbit status was success with no open review threads after the helper-deduplication nit was addressed, and PR #266 squash-merged as `edd5ddd8d13587af24b9b59d1c6ef3bf94291519` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
