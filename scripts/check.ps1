@@ -106,6 +106,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_release_evidence_issue_closure.py"
 & $pythonPath @pythonArgs "scripts\test_release_evidence_live_audit_report.py"
 & $pythonPath @pythonArgs "scripts\check_release_evidence_live_audit_report.py"
+& $pythonPath @pythonArgs "scripts\test_release_evidence_live_audit_markdown.py"
+& $pythonPath @pythonArgs "scripts\check_release_evidence_live_audit_markdown.py"
 & $pythonPath @pythonArgs "scripts\test_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\check_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\test_audit_package.py"
