@@ -163,6 +163,10 @@ class ReleaseArtifactTests(unittest.TestCase):
                 output_dir / "public-beta-blockers.md",
                 "# Public Beta Evidence Blocker Report\n",
             )
+            write_text(
+                output_dir / "production-release-blockers.md",
+                "# Production Release Evidence Blocker Report\n",
+            )
             write_json(
                 output_dir / "source-verification-inputs.json",
                 {"schema_version": "6529stream.source-verification-inputs.v1"},

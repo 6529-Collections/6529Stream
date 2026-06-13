@@ -117,6 +117,10 @@ the release policy in `docs/release-policy.md`.
   `release-artifacts/latest/public-beta-blockers.md`, with local/CI drift
   checks and release manifest/checksum coverage for the current incomplete
   evidence rows without changing readiness claims.
+- Added a generated production-release blocker report under
+  `release-artifacts/latest/production-release-blockers.md`, with local/CI drift
+  checks, per-requirement production template links, and release
+  manifest/checksum coverage without changing readiness claims.
 - Added a non-local release evidence intake runbook so fork/testnet/live,
   audit, explorer, gas, invariant, checksum-signature, and signed-tag evidence
   has required retained fields, no-secret redaction rules, reviewer

@@ -23,7 +23,9 @@ no-secret production signer custody readiness evidence model that must
 accompany reviewed non-local signing evidence.
 Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
-as the generated blocker report for the current public-beta evidence manifest.
+and
+[`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md)
+as the generated blocker reports for the current evidence manifest.
 
 ## Maturity And Scope
 
@@ -49,7 +51,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta blocker report, and non-local release evidence runbook, schema, generic template, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, production signing evidence, reviewed signer custody readiness, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, and non-local release evidence runbook, schema, generic template, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, production signing evidence, reviewed signer custody readiness, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -94,8 +96,10 @@ The current local baseline includes:
 - no-secret public-beta evidence status under
   [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
   following [`docs/public-beta-evidence.md`](public-beta-evidence.md), plus the
-  generated blocker report at
-  [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md);
+  generated blocker reports at
+  [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
+  and
+  [`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md);
 - non-local release evidence intake requirements, schema, checked template, and
   checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
   [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),
@@ -193,6 +197,7 @@ Release artifacts:
 - [release-artifacts/latest/release-checksums.json](../release-artifacts/latest/release-checksums.json)
 - [release-artifacts/latest/public-beta-evidence.json](../release-artifacts/latest/public-beta-evidence.json)
 - [release-artifacts/latest/public-beta-blockers.md](../release-artifacts/latest/public-beta-blockers.md)
+- [release-artifacts/latest/production-release-blockers.md](../release-artifacts/latest/production-release-blockers.md)
 - [release-artifacts/latest/source-verification-inputs.json](../release-artifacts/latest/source-verification-inputs.json)
 - [release-artifacts/schema/public-beta-evidence.schema.json](../release-artifacts/schema/public-beta-evidence.schema.json)
 - [release-artifacts/schema/drop-authorization-signing-evidence.schema.json](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
@@ -232,6 +237,8 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_production_release_blocker_report.py
+python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 ```

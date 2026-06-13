@@ -64,6 +64,10 @@ python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_public_beta_blocker_report.py
+python scripts/generate_public_beta_blocker_report.py --check
+python scripts/test_production_release_blocker_report.py
+python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -134,6 +138,12 @@ The public-beta evidence step verifies
 against [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md), keeping
 public beta and production release blocked until retained non-local evidence or
 explicit risk acceptance exists.
+The generated blocker reports under
+[`release-artifacts/latest/public-beta-blockers.md`](release-artifacts/latest/public-beta-blockers.md)
+and
+[`release-artifacts/latest/production-release-blockers.md`](release-artifacts/latest/production-release-blockers.md)
+render the incomplete evidence rows into deterministic Markdown without
+changing readiness claims.
 
 The release-checksum step verifies the signable checksum bundle under
 `release-artifacts/latest/` against the committed release artifacts,
@@ -183,7 +193,7 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, public-beta evidence status, release manifest, and release checksum bundle |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, public-beta evidence status, generated blocker reports, release manifest, and release checksum bundle |
 | `docs/` | Project, security, ADR, and operational docs |
 | `ops/` | Roadmap and execution state |
 
