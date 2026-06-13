@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-production-template-merge` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/201` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/202` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/204` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/203` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 07:34 UTC` |
+| Last updated | `2026-06-13 07:33 UTC` |
 
 ## Packaging Notes
 
@@ -167,9 +167,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile production release template merge state (Queue Item 104)
 
-Status: Local branch in progress; PR not opened yet.
+Status: Open in PR #204; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/202`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/204`.
 Branch: `codex/reconcile-production-template-merge`.
 Branch started from PR #201 squash merge commit
 `02ce230500cb016e45b67c8dbd6710c08cadc000`.
@@ -199,7 +199,7 @@ Goal:
 - Do not change Solidity, deployment code, CI behavior, generated readiness
   artifacts, or public-beta/production readiness claims.
 
-Validation completed locally at `2026-06-13 07:34 UTC`:
+Validation completed locally at `2026-06-13 07:31 UTC`:
 
 - `python scripts\check_release_readiness.py`.
 - `python scripts\check_public_beta_evidence.py`.
@@ -211,6 +211,12 @@ Validation completed locally at `2026-06-13 07:34 UTC`:
 - `rg -n "Queue Item 103|Queue Item 104|Queue Item 105|PR #201|27460093022|a47870d|02ce230|#199|#202|#203|Last verified|CI run" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
 - `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
 - `git diff --check`.
+
+PR opened:
+
+- PR #204 opened against `main` on head
+  `d84d0ea119131dcaee899c25a6af6ab3b5f06297`.
+- CodeRabbit review requested in PR comment `4697878038`.
 
 ### PR candidate: Add per-requirement production release evidence templates (Queue Item 103)
 
@@ -9197,7 +9203,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
-| 2026-06-13 07:34 | Finish Queue Item 104 local validation | Focused release-readiness, public-beta evidence, non-local evidence, blocker-report, release-manifest, checksum, changelog, traceability, heading, and whitespace checks all pass for the docs-only reconciliation |
+| 2026-06-13 07:33 | Open PR #204 and request CodeRabbit | State-only production-template merge reconciliation PR opened against `main`, linked `Closes #202`, pushed head `d84d0ea119131dcaee899c25a6af6ab3b5f06297`, and requested CodeRabbit review in comment `4697878038`; Claude intentionally skipped per current user instruction |
+| 2026-06-13 07:31 | Finish Queue Item 104 local validation | Focused release-readiness, public-beta evidence, non-local evidence, blocker-report, release-manifest, checksum, changelog, traceability, heading, and whitespace checks all pass for the docs-only reconciliation |
 | 2026-06-13 07:30 | Create issues #202 and #203, start Queue Item 104 | PR #201 merged cleanly, so issue #202 tracks state reconciliation while issue #203 becomes the next no-secret Gate G implementation slice for a production-release blocker report |
 | 2026-06-13 07:26 | Merge PR #201 | Production-release evidence templates merged as `02ce230500cb016e45b67c8dbd6710c08cadc000`; final head `a47870ddeee096e8f9d3212fe1579d56e3163c23` passed CI run `27460093022`, CodeRabbit status was success with no actionable comments, and issue #199 closed completed |
 | 2026-06-13 07:14 | Open PR #201 and request CodeRabbit | Production-release evidence template PR opened against `main`, linked `Closes #199`, pushed head `f16075b6cb0c78cfa7c38d609019684e28559112`, and requested CodeRabbit review in comment `4697838014`; Claude intentionally skipped per current user instruction |
