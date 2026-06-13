@@ -93,12 +93,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 18:13 UTC` for Queue Item 122 / PR #256 production evidence tracker gate wording; PR #256 local validation covered public-beta and production blocker reports, release evidence packet index, issue backlog, body sync, issue-body checks, release-readiness, manifest, checksum, changelog, heading, and whitespace checks |
-| OS tested | Windows local validation for Queue Item 122 / PR #256; Linux GitHub Actions passed for latest merged baseline PR #256 run `27474552158` on final head `6b866e6e8347c20723883e50c10bd7d2d6e6fdf9`, with merged baseline commit `54aafe969d4647d9ea87f8adbd9eb0f7b438ace5` |
+| Last verified | `2026-06-13 18:24 UTC` for Queue Item 123 / PR #258 state reconciliation; PR #258 local validation covered release-readiness, manifest, checksum, changelog, release evidence issue body/closure checks, heading, and whitespace checks |
+| OS tested | Windows local state-reconciliation validation for Queue Item 123 / PR #258; Linux GitHub Actions passed for latest merged baseline PR #258 run `27475057686` on final head `cae33d4779bbf8c51f794727083e7801498045b7`, with merged baseline commit `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #256 final CI run `27474552158` passed on head `6b866e6e8347c20723883e50c10bd7d2d6e6fdf9`; CodeRabbit status was success with no review threads opened, and PR #256 squash-merged as `54aafe969d4647d9ea87f8adbd9eb0f7b438ace5` |
+| CI run | Latest merged baseline PR #258 final CI run `27475057686` passed on head `cae33d4779bbf8c51f794727083e7801498045b7`; CodeRabbit status was success with no review threads opened, and PR #258 squash-merged as `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline

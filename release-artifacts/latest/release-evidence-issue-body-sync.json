@@ -15,8 +15,8 @@
     },
     "issue_links": {
       "path": "release-artifacts/latest/release-evidence-issue-links.json",
-      "sha256": "sha256:224aabe35324471a52d53c634d34de10a20dddd65c59d3f196e31715740e9e8b",
-      "size_bytes": 11001,
+      "sha256": "sha256:6fc7a352822ab24ff968eacbcbfd5dde4114f234199f55c67ffed0670b175d5c",
+      "size_bytes": 11795,
       "schema_version": "6529stream.release-evidence-issue-links.v1"
     }
   },
@@ -78,7 +78,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:c96b676477a4c8a85c4be648d3ef17b8438272e89e7b806c5325753bb7d29ca9",
       "body_sha256": "sha256:38ad6e7332ebe917e33328e4f2eb4950fabe00b12251401066e070bea2f2b24d",
@@ -103,7 +105,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:bc5f48ff4ba62a61c77dc613df14e38186a794669666702e94256237d84ae1c4",
       "body_sha256": "sha256:994af26132cafed64f3d61cae420598bf708f3c5369c02804e4f85e7c7b36400",
@@ -128,7 +132,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:744bae17d09b36635977413f8a10c1eb745d091d29094417c1bc958c5ea90395",
       "body_sha256": "sha256:ae7b0769db90ab9e4832043f15cbf1f309d71389e74cf4b0b805c62d677b2875",
@@ -153,7 +159,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:b15c7e37b9b0a4d5d5a87601dff7adfe2226717e433c8420f05a7d518b7bf139",
       "body_sha256": "sha256:af916550988f50f1c5882fdab9fd8b4833534621b4b3c5567dcd4d069414340a",
@@ -178,7 +186,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:0d8dceb2519f7ea36768352632e94c3114e64b0e6eb60cc135e4c80ccc512435",
       "body_sha256": "sha256:1493c20f27c23f8b2b0ea59a253edb9aba37e7075fc8326b824aa985e69d1c2b",
@@ -203,7 +213,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:e67a303b471bb4e681796ba49bfba162315b099565bf72acca105a40952e0580",
       "body_sha256": "sha256:8fdcd103031c25006dc9dae8a7d73faef2e6631f88f09f09087960353a38b0b6",
@@ -228,7 +240,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:0cf110e76b8e4eaa1cb695f7e069085e5f0de9f9ed987f1f8fff5e69b6fe25c2",
       "body_sha256": "sha256:6c35993390e7e2695d3ee32670ff1dc0d3071073650350a10e3e346f9b47465f",
@@ -253,7 +267,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "public-beta"
       ],
       "source_issue_body_sha256": "sha256:304068c50b074fac0a43ab56dabbd454bbde84ebf3beba08ed3113785996b5b5",
       "body_sha256": "sha256:0205d5a306cc3734bba26d8aa7e61a090756bd6b87d5504849f0f4adaf94b719",
@@ -278,7 +294,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:8061907a2bd05b7b4e3ed5afd832647851b706f1d199cab1e0bc68beed02a576",
       "body_sha256": "sha256:4f0459bf397f4759dfced70caccfcf11f4ce35e1abc93064338e16c679842447",
@@ -303,7 +321,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:dfd07730fb3fd45ece5dbb8229c62dcfa2c587a475b63126bbe56d95f9225c3c",
       "body_sha256": "sha256:257a6ed50cfb216a31169c5d53f89dcd8ce8b87830a6f90234fc8da165d4cef1",
@@ -328,7 +348,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:3153d5a279d369dfbc6ca4bc241d13f1aaea99750cd9591b83dfd5e3a323dc83",
       "body_sha256": "sha256:5fc2a2a274cf8e87e1dab01751939d67d84c22ead6ee4ae23ca23f1f7156578d",
@@ -353,7 +375,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:a47640456ad9c0478dde34bf28e9572b4b50d9fb60f85a544a3b3be2ef0f7cf6",
       "body_sha256": "sha256:27b2faf50a382ca85b84d9bf5dd715e63ce9552cdcae3732f5356e78079400f1",
@@ -378,7 +402,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:7d59c23719856161b63a7e794828705a6e76e96cb58d0bcd88a0384fcddc59ee",
       "body_sha256": "sha256:4a82682d40aa8b498be8caa99ed69f7db4b19b518dbeeb500e63b29d5efd3c3b",
@@ -403,7 +429,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:86593eb6a3fd8a58ac26eec05799aece9e4cb8c7bb141219ba4185f1ccf67e7b",
       "body_sha256": "sha256:ece9d9c744c23a00979454a3b0dcd07755339759fcf34ef0cb0cd9344ea0e9a2",
@@ -428,7 +456,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:a57c7964a86f882e8aa03b7a17e1d942d71bfd1118fde4caabcf7147c63ea2cb",
       "body_sha256": "sha256:63f0c2051c705c122f090ec56ddc057d340268e796fb5b024dd7df3b5173e8d7",
@@ -453,7 +483,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:083c1607c9ddf84c791c9c1b4b4611ef0214977c3cefb13ac5627e8a833c750d",
       "body_sha256": "sha256:427ea1de5e8386eed398efb789729f7a31dbae3feb238b9e96c7ed2fca171d46",
@@ -478,7 +510,9 @@
       ],
       "applied_labels": [
         "release",
-        "roadmap"
+        "roadmap",
+        "evidence",
+        "production-release"
       ],
       "source_issue_body_sha256": "sha256:39517e34e357f71616bd6366d32c6b402812dae53568dfbe2a113af69646daf3",
       "body_sha256": "sha256:e29d33396ec6ac420e20d16b941421a1d1ef5b27eafd11f5b14f99353f3aef34",

@@ -12,6 +12,8 @@ the release policy in `docs/release-policy.md`.
   changes.
 - Added deterministic release evidence tracker label checks with an optional
   live GitHub issue snapshot audit mode for label drift.
+- Added the applied release evidence tracker label taxonomy for live tracker
+  issues: `evidence` plus `public-beta` or `production-release` phase labels.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.

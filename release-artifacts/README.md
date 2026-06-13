@@ -170,6 +170,9 @@ the issue itself completion evidence. The
 `scripts/check_release_evidence_issue_labels.py` checker validates committed
 `applied_labels` deterministically and can audit an exported live GitHub issue
 JSON snapshot with `--live-json` before a release ceremony.
+All retained-evidence tracker issues should carry `release`, `roadmap`, and
+`evidence`; public-beta rows also carry `public-beta`, and production-release
+rows also carry `production-release`.
 
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and

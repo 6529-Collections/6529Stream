@@ -76,6 +76,9 @@ The release evidence issue-link map is committed at
 It links every generated backlog entry to a durable GitHub tracker issue while
 remaining no-secret and tracker-only. Closing those tracker issues still
 requires reviewed retained evidence in the status manifest.
+Every linked tracker issue should carry `release`, `roadmap`, and `evidence`.
+Public-beta tracker issues should also carry `public-beta`; production-release
+tracker issues should also carry `production-release`.
 
 The release evidence issue body sync artifact is generated as both
 [`release-artifacts/latest/release-evidence-issue-body-sync.json`](../release-artifacts/latest/release-evidence-issue-body-sync.json)
