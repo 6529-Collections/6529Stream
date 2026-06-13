@@ -187,12 +187,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence issue snapshot exporter (Queue Item 125)
 
-Status: local draft in progress for issue #261; PR TBD.
+Status: PR #262 open; CodeRabbit review requested.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/261`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/262`.
 Branch: `codex/release-evidence-snapshot-exporter`.
 Branch started from PR #260 squash merge commit
 `779ff73bee124c646d1531b43dc61940872e1fab`.
+Opening PR head: `aed78eee68982236a8f66643ea9ecafc8339d1cc`.
+CodeRabbit request comment: `https://github.com/6529-Collections/6529Stream/pull/262#issuecomment-4699481489`.
 
 Prior queue transition:
 
