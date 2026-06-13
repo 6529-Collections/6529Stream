@@ -83,12 +83,14 @@ issue body payloads so tracker issues can be updated consistently. It remains
 no-secret and tracker-only, does not update GitHub automatically, and does not
 make issue closure completion evidence.
 
-The release evidence issue closure checker validates that the committed
-tracker map, body-sync artifact, packet index, and public-beta evidence
-manifest agree on which tracker issues may close. A linked tracker issue should
-remain open while its committed evidence status is `missing`, `pending`,
-`blocked`, or `not_applicable`; it may close only after the committed status is
-`complete` or `accepted_risk`.
+The release evidence issue closure checker,
+`scripts/check_release_evidence_issue_closure.py`, validates that the committed
+tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
+artifact, packet index, and public-beta evidence manifest agree on which
+tracker issues may close. A linked tracker issue should remain open while its
+committed evidence status is `missing`, `pending`, `blocked`, or
+`not_applicable`; it may close only after the committed status is `complete` or
+`accepted_risk`.
 
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows

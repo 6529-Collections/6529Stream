@@ -178,7 +178,10 @@ def body_sync_issues_by_entry_id(
     body_sync: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     """Validate and index body-sync tracker rows."""
-    body_checker.expected_issue_rows(body_sync)
+    try:
+        body_checker.expected_issue_rows(body_sync)
+    except body_checker.ReleaseEvidenceIssueBodiesError as exc:
+        raise ReleaseEvidenceIssueClosureError(str(exc)) from exc
 
     rows: dict[str, dict[str, Any]] = {}
     for index, raw_issue in enumerate(require_list(body_sync.get("issues"), "body_sync.issues")):

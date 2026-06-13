@@ -183,11 +183,12 @@ with `--write-body-files` for operator-run `gh issue edit --body-file`
 remediation.
 
 `scripts/check_release_evidence_issue_closure.py` validates the committed
-tracker map, body-sync artifact, packet index, and public-beta evidence
-manifest agree on tracker closure readiness. Its optional `--live-json` mode
-audits a `gh issue list --state all --json number,title,state` snapshot and
-fails if a linked tracker issue is closed while the committed evidence status
-is still `missing`, `pending`, `blocked`, or `not_applicable`.
+tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
+artifact, packet index, and public-beta evidence manifest agree on tracker
+closure readiness. Its optional `--live-json` mode audits a
+`gh issue list --state all --json number,title,state` snapshot and fails if a
+linked tracker issue is closed while the committed evidence status is still
+`missing`, `pending`, `blocked`, or `not_applicable`.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema

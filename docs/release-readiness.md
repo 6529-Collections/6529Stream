@@ -40,8 +40,10 @@ issues. Use
 as the generated no-secret review view for exact GitHub issue body payloads
 derived from that backlog and tracker map. Run
 `python scripts/check_release_evidence_issue_closure.py` before closing any
-linked tracker issue; that release evidence issue closure readiness check keeps
-issues open until committed evidence is `complete` or `accepted_risk`.
+linked tracker issue; that release evidence issue closure readiness check loads
+the tracker map, `release-evidence-issue-backlog.json` backlog artifact,
+body-sync artifact, packet index, and evidence manifest, then keeps issues open
+until committed evidence is `complete` or `accepted_risk`.
 
 ## Maturity And Scope
 

@@ -265,6 +265,29 @@ class ReleaseEvidenceIssueClosureTests(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertIn("closed while committed evidence status", stderr.getvalue())
 
+    def test_main_reports_malformed_body_sync_without_traceback(self) -> None:
+        """Body-sync validation failures stay in closure-checker error handling."""
+        repo_root = Path(__file__).resolve().parents[1]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            body_sync_path = Path(temp_dir) / "release-evidence-issue-body-sync.json"
+            write_json(body_sync_path, {})
+
+            stderr = StringIO()
+            with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(repo_root),
+                        "--body-sync",
+                        str(body_sync_path),
+                    ]
+                )
+
+        self.assertEqual(result, 1)
+        self.assertIn("release evidence issue closure check failed", stderr.getvalue())
+        self.assertNotIn("Traceback", stderr.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

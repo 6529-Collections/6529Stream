@@ -1649,8 +1649,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:e9f1d749fa2c9b28973e0d7b1cbd62fc7152aa65994f6d4527314559a13344e2",
-        "size_bytes": 15269
+        "sha256": "sha256:7c936c536686885d149f423355698a09c2d0202c19890197838371d01a311591",
+        "size_bytes": 15377
       },
       {
         "path": "docs/non-local-release-evidence.md",
@@ -1689,13 +1689,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:f6c878ac3e844f77c504c22ff366876c766c7e16ef7ec48e840abb57e5903ae5",
-        "size_bytes": 23612
+        "sha256": "sha256:94f2afaaad0711cf22b2f2143ae972d5fb452bed4df5455dac1f88ee2eb3dc29",
+        "size_bytes": 23753
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:e9879b8d92b4130b3f405c89f101c31a08b7005b7ba732f95ec4f2d4ec9a6499",
-        "size_bytes": 27897
+        "sha256": "sha256:c0be2140c67a752ca6536f1312197b8d52b1fa62f7684218d016714c414f822a",
+        "size_bytes": 27953
       },
       {
         "path": "docs/status.md",

@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD after PR #246 scope opens and merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 16:02 UTC` |
+| Last updated | `2026-06-13 16:17 UTC` |
 
 ## Packaging Notes
 
@@ -180,7 +180,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Guard release evidence tracker closure and readiness state (Queue Item 118)
 
-Status: PR #248 open; waiting for GitHub Actions and CodeRabbit.
+Status: PR #248 open; CodeRabbit review comments addressed locally, with
+follow-up push, CI rerun, and CodeRabbit re-review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/246`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/248`.
 Branch: `codex/release-evidence-closure-readiness`.
@@ -232,6 +233,25 @@ Completed local validation so far:
   `gh issue list --repo 6529-Collections/6529Stream --state all --limit 100 --json number,title,state`
   exported to `tmp\release-evidence-issue-closure.json`, then
   `python scripts/check_release_evidence_issue_closure.py --live-json tmp\release-evidence-issue-closure.json`.
+
+CodeRabbit review follow-up:
+
+- Review found that `scripts/check_release_evidence_issue_closure.py` should
+  wrap `check_release_evidence_issue_bodies.py` validation errors into the
+  closure checker's error type instead of risking a traceback.
+- Review also found that the closure-check docs should explicitly name
+  `release-evidence-issue-backlog.json` as an input.
+- Local fix adds the wrapper, a malformed body-sync CLI regression, updated
+  docs, and regenerated release manifest/checksum artifacts.
+- Follow-up validation passed:
+  `python scripts/test_release_evidence_issue_closure.py`,
+  `python -m py_compile scripts/check_release_evidence_issue_closure.py scripts/test_release_evidence_issue_closure.py`,
+  `python scripts/check_release_evidence_issue_closure.py`,
+  `python scripts/test_release_readiness.py`,
+  `python scripts/check_release_readiness.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`,
+  heading scan, and `git diff --check`.
 
 ### Completed: Reconcile release evidence body drift merge state (Queue Item 117)
 
