@@ -137,6 +137,14 @@ templates. They map every evidence row to its blocker report, template,
 retained-artifact expectation, validation commands, and current readiness
 posture without treating templates as completion evidence.
 
+`latest/release-evidence-issue-backlog.json` and
+`latest/release-evidence-issue-backlog.md` are generated from
+`latest/release-evidence-packet-index.json`. They turn every incomplete
+public-beta and production-release packet row into an issue-ready title, label
+set, body, retained-artifact completion gate, and validation command list.
+They do not create issues automatically and do not change public-beta or
+production-release readiness claims.
+
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema
 lives at `schema/non-local-release-evidence.schema.json`, and the template
@@ -186,7 +194,8 @@ baseline, deployment manifest config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, drop
 authorization signing evidence, signer custody readiness evidence, artifact
 schemas, non-local release evidence metadata and templates, public-beta
-evidence status, release evidence packet index, and release manifest. Treat
+evidence status, release evidence packet index, release evidence issue backlog,
+and release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.

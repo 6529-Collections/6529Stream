@@ -220,6 +220,12 @@ The release evidence packet index maps every public-beta and production-release
 row to its blocker report, template, retained-artifact expectation, validation
 commands, and current readiness posture without treating templates as
 completion evidence.
+The release evidence issue backlog turns those incomplete packet rows into a
+deterministic issue-preparation artifact with suggested issue titles, labels,
+bodies, retained-evidence completion gates, and validation commands. Run
+`python scripts/generate_release_evidence_issue_backlog.py` to refresh it and
+`python scripts/generate_release_evidence_issue_backlog.py --check` to verify
+it. It does not create GitHub issues automatically or change readiness claims.
 The non-local release evidence intake runbook in
 [`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
 operator workflow, required retained fields, redaction rules, reviewer
@@ -239,8 +245,9 @@ as completion evidence.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
-artifact, public-beta evidence, deployment manifest, address-book, schema,
-ceremony-evidence, and release-manifest outputs. This gives maintainers a
+artifact, public-beta evidence, release evidence issue backlog, deployment
+manifest, address-book, schema, ceremony-evidence, and release-manifest
+outputs. This gives maintainers a
 deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers

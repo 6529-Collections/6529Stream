@@ -55,6 +55,15 @@ report row, checked template path, retained-artifact expectation, validation
 commands, and current blocked posture. Template rows remain template-only and
 cannot complete evidence requirements by themselves.
 
+The release evidence issue backlog is generated as both
+[`release-artifacts/latest/release-evidence-issue-backlog.json`](../release-artifacts/latest/release-evidence-issue-backlog.json)
+and
+[`release-artifacts/latest/release-evidence-issue-backlog.md`](../release-artifacts/latest/release-evidence-issue-backlog.md).
+It turns every incomplete packet row into an issue-ready title, label set,
+body, validation command list, and completion gate. It does not create GitHub
+issues automatically, does not mark evidence complete, and keeps
+template-only evidence out of completion criteria.
+
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
 change, update the schema's `requirements.minItems` count and this document in
@@ -182,7 +191,11 @@ To move a requirement to `complete`:
    `python scripts/generate_release_evidence_packet_index.py`,
    `python scripts/test_release_evidence_packet_index.py`, and
    `python scripts/generate_release_evidence_packet_index.py --check`.
-12. Regenerate and check the release manifest and checksum bundle.
+12. Regenerate and check the release evidence issue backlog with
+   `python scripts/generate_release_evidence_issue_backlog.py`,
+   `python scripts/test_release_evidence_issue_backlog.py`, and
+   `python scripts/generate_release_evidence_issue_backlog.py --check`.
+13. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`
