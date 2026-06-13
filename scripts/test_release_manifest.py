@@ -418,6 +418,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         latest / "release-evidence-packet-index.md",
         "# Release Evidence Packet Index\n\nGenerated fixture.\n",
     )
+    write_json(
+        latest / "release-evidence-issue-backlog.json",
+        {"schema_version": "6529stream.release-evidence-issue-backlog.v1"},
+    )
+    write_text(
+        latest / "release-evidence-issue-backlog.md",
+        "# Release Evidence Issue Backlog\n\nGenerated fixture.\n",
+    )
     write_text(
         non_local_retained_artifact,
         (
@@ -1041,6 +1049,33 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["latest"] / "release-evidence-packet-index.md"
                 ),
             )
+            issue_backlog = manifest["release_artifacts"][
+                "release_evidence_issue_backlog"
+            ]
+            self.assertEqual(
+                issue_backlog["json"]["path"],
+                "release-artifacts/latest/release-evidence-issue-backlog.json",
+            )
+            self.assertEqual(
+                issue_backlog["json"]["schema_version"],
+                "6529stream.release-evidence-issue-backlog.v1",
+            )
+            self.assertEqual(
+                issue_backlog["json"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-issue-backlog.json"
+                ),
+            )
+            self.assertEqual(
+                issue_backlog["markdown"]["path"],
+                "release-artifacts/latest/release-evidence-issue-backlog.md",
+            )
+            self.assertEqual(
+                issue_backlog["markdown"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-issue-backlog.md"
+                ),
+            )
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
@@ -1235,6 +1270,27 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 packet_index["markdown"]["sha256"],
                 generator.file_sha256(custom_latest / "release-evidence-packet-index.md"),
+            )
+            issue_backlog = manifest["release_artifacts"][
+                "release_evidence_issue_backlog"
+            ]
+            self.assertEqual(
+                issue_backlog["json"]["path"],
+                "custom-release-artifacts/latest/release-evidence-issue-backlog.json",
+            )
+            self.assertEqual(
+                issue_backlog["json"]["sha256"],
+                generator.file_sha256(
+                    custom_latest / "release-evidence-issue-backlog.json"
+                ),
+            )
+            self.assertEqual(
+                issue_backlog["markdown"]["path"],
+                "custom-release-artifacts/latest/release-evidence-issue-backlog.md",
+            )
+            self.assertEqual(
+                issue_backlog["markdown"]["sha256"],
+                generator.file_sha256(custom_latest / "release-evidence-issue-backlog.md"),
             )
 
     def test_check_mode_accepts_current_manifest(self) -> None:

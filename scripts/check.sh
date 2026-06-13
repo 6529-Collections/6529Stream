@@ -74,6 +74,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_production_release_blocker_report.py --check
 "$python_bin" scripts/test_release_evidence_packet_index.py
 "$python_bin" scripts/generate_release_evidence_packet_index.py --check
+"$python_bin" scripts/test_release_evidence_issue_backlog.py
+"$python_bin" scripts/generate_release_evidence_issue_backlog.py --check
 "$python_bin" scripts/test_architecture_threat_model.py
 "$python_bin" scripts/check_architecture_threat_model.py
 "$python_bin" scripts/test_audit_package.py

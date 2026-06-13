@@ -176,6 +176,14 @@ class ReleaseArtifactTests(unittest.TestCase):
                 "# Release Evidence Packet Index\n",
             )
             write_json(
+                output_dir / "release-evidence-issue-backlog.json",
+                {"schema_version": "6529stream.release-evidence-issue-backlog.v1"},
+            )
+            write_text(
+                output_dir / "release-evidence-issue-backlog.md",
+                "# Release Evidence Issue Backlog\n",
+            )
+            write_json(
                 output_dir / "source-verification-inputs.json",
                 {"schema_version": "6529stream.source-verification-inputs.v1"},
             )
