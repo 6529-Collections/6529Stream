@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-markdown-checker-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/278` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/279` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/280` |
 | Next issue | TBD after issue #279 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 23:33 UTC` |
+| Last updated | `2026-06-13 23:40 UTC` |
 
 ## Packaging Notes
 
@@ -197,12 +197,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit Markdown checker merge state (Queue Item 134)
 
-Status: local draft before PR open.
+Status: PR #280 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/279`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/280`.
 Branch: `codex/reconcile-live-audit-markdown-checker-merge-state`.
 Branch started from PR #278 squash merge commit
 `07d9218dc916c2f7ad9eaf44998d611987648854`.
+Opening PR head: `c3e9d8186d57158a08ec559b1cbb55009f19b486`.
 
 Goal:
 
@@ -11154,6 +11155,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 23:40 | Open PR #280 | State-only live-audit-Markdown-checker reconciliation PR opened on head `c3e9d8186d57158a08ec559b1cbb55009f19b486`, links `Closes #279`, and will use CodeRabbit-only review after this trace-state update; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-13 23:33 | Start Queue Item 134 | PR #278 merged as `07d9218dc916c2f7ad9eaf44998d611987648854`, issue #277 closed completed, issue #279 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-markdown-checker-merge-state` started from the merged baseline before the next no-secret evidence target. |
 | 2026-06-13 23:30 | Merge PR #278 | Live audit Markdown parity checker merged as `07d9218dc916c2f7ad9eaf44998d611987648854`; final head `9a9ccfa74c6e7ad9021e4b50e86317804a540fbd` passed CI run `27482144262`, CodeRabbit status was success with no unresolved review threads, explicit review requests returned review-finished replies, CodeRabbit acknowledged the documented merge evidence, and issue #277 closed completed. |
 | 2026-06-13 23:20 | Open PR #278 and request CodeRabbit | Live audit Markdown parity checker PR opened on head `84cb5fde98dc9f1e5a1ffec8b11d697601e9c7e3`, links `Closes #277`, and CodeRabbit review was requested in comment `4700087685`; Claude remains intentionally skipped per current user instruction. |
