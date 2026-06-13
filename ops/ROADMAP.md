@@ -93,12 +93,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 15:00 UTC` for Queue Item 116 / release evidence body-drift checks; local validation covered body checker tests/check, body-sync tests/check, optional live GitHub body snapshot audit after deterministic issue-body remediation, release-readiness, manifest, checksum, changelog, shell/PowerShell syntax, heading, and whitespace checks |
-| OS tested | Windows local body-drift artifact gate and live GitHub issue body snapshot audit for Queue Item 116; Linux GitHub Actions passed for latest merged baseline PR #243 run `27469708279` on final head `7530f9b70ba049eb9e3c24534634be2ecc7cd97c`, with merged baseline commit `abe9896c266c9bb0815a8abc3c9f69e49f023244` |
+| Last verified | `2026-06-13 15:19 UTC` for Queue Item 117 / PR #244 merge-state reconciliation; PR #244 local validation covered body checker tests/check, body-sync tests/check, optional live GitHub body snapshot audit after deterministic issue-body remediation, release-readiness, manifest, checksum, changelog, shell/PowerShell syntax, heading, and whitespace checks |
+| OS tested | Windows local state reconciliation for Queue Item 117 / PR #244, including the body-drift artifact gate and live GitHub issue body snapshot audit inherited from PR #244 validation; Linux GitHub Actions passed for latest merged baseline PR #244 run `27470389308` on final head `378c48899bc7bca438be86e0cefb609fd139a30c`, with merged baseline commit `b61868599c7929e369957199bb5726fa5f819f04` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #243 final CI run `27469708279` passed on head `7530f9b70ba049eb9e3c24534634be2ecc7cd97c`; CodeRabbit status was success with no unresolved review threads, and PR #243 squash-merged as `abe9896c266c9bb0815a8abc3c9f69e49f023244` |
+| CI run | Latest merged baseline PR #244 final CI run `27470389308` passed on head `378c48899bc7bca438be86e0cefb609fd139a30c`; CodeRabbit status was success with no unresolved review threads, and PR #244 squash-merged as `b61868599c7929e369957199bb5726fa5f819f04` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline

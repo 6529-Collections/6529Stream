@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-body-drift` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/243` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/242` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/244` |
-| Next issue | After issue #242, reconcile body-drift merge state and continue Gate G release-evidence tracker hardening |
+| Active PR branch | `codex/release-evidence-body-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/244` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/245` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/247` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/246` for release evidence tracker closure/readiness guards |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 15:04 UTC` |
+| Last updated | `2026-06-13 15:22 UTC` |
 
 ## Packaging Notes
 
@@ -172,19 +172,63 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 113 | Reconcile release evidence issue body sync merge state | Gate G support | Implement issue #237 by recording PR #236 merge evidence, tracker-label reconciliation, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Merged in PR #238 |
 | 114 | Harden release evidence tracker label drift checks | Gate G support | Add a no-secret label audit/sync helper so tracker issues #215 through #231 cannot silently drift from committed `applied_labels` before retained evidence completion | Merged in PR #240 |
 | 115 | Reconcile release evidence label drift merge state | Gate G support | Record PR #240 merge evidence, issue #239 closure, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Merged in PR #243 |
-| 116 | Harden release evidence tracker body drift checks | Gate G support | Add a no-secret optional live/snapshot body audit so tracker issues #215 through #231 cannot silently drift from committed body-sync payloads before retained evidence completion | Active |
+| 116 | Harden release evidence tracker body drift checks | Gate G support | Add a no-secret optional live/snapshot body audit so tracker issues #215 through #231 cannot silently drift from committed body-sync payloads before retained evidence completion | Merged in PR #244 |
+| 117 | Reconcile release evidence body drift merge state | Gate G support | Record PR #244 merge evidence, issue #242 closure, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Active |
+| 118 | Guard release evidence tracker closure and readiness state | Gate G support | Add a no-secret closure/readiness audit so tracker issues #215 through #231 cannot be closed before their committed evidence requirement is complete or explicitly risk-accepted | Planned |
 
 ## Current PR Worklog
 
-### PR candidate: Harden release evidence tracker body drift checks (Queue Item 116)
+### PR candidate: Reconcile release evidence body drift merge state (Queue Item 117)
 
-Status: PR #244 open; waiting for GitHub Actions and CodeRabbit.
+Status: PR #247 open; waiting for GitHub Actions and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/245`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/247`.
+Branch: `codex/release-evidence-body-merge-state`.
+Branch started from PR #244 squash merge commit
+`b61868599c7929e369957199bb5726fa5f819f04`.
+Initial PR head: `7d88b5c3986d493b4b7db9efac21ce160aed6b56`.
+
+Prior queue transition:
+
+- Queue Item 116 merged in PR #244 as squash commit
+  `b61868599c7929e369957199bb5726fa5f819f04`.
+- PR #244 final implementation head was
+  `378c48899bc7bca438be86e0cefb609fd139a30c`.
+- PR #244 GitHub Actions CI run `27470389308` passed on the final head,
+  including deployment rehearsal.
+- PR #244 CodeRabbit status was success, and no review threads remained.
+- Issue #242 closed completed after merge.
+- Issue #246 now tracks the next no-secret release evidence tracker
+  closure/readiness guard.
+
+Goal:
+
+- Mark Queue Item 116 complete and record the final PR #244 evidence.
+- Refresh roadmap verification metadata to the merged PR #244 baseline.
+- Record issue #246 as the next no-secret evidence-tracker hardening target.
+- Keep readiness claims blocked until reviewed retained external evidence exists.
+
+Completed local validation:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+### Completed: Harden release evidence tracker body drift checks (Queue Item 116)
+
+Status: merged in PR #244.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/242`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/244`.
 Branch: `codex/release-evidence-body-drift`.
 Branch started from PR #243 squash merge commit
 `abe9896c266c9bb0815a8abc3c9f69e49f023244`.
 Initial PR head: `10a9e14949dc82785e1cbe3702629627229a12de`.
+Final PR head: `378c48899bc7bca438be86e0cefb609fd139a30c`.
+Squash merge commit: `b61868599c7929e369957199bb5726fa5f819f04`.
 
 Prior queue transition:
 
@@ -239,6 +283,10 @@ Completed local validation:
 - `python -m py_compile scripts/check_release_evidence_issue_bodies.py scripts/test_release_evidence_issue_bodies.py scripts/generate_release_evidence_issue_body_sync.py scripts/check_release_readiness.py`.
 - `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md`.
 - `git diff --check`.
+- PR #244 GitHub Actions CI run `27470389308` passed on final head
+  `378c48899bc7bca438be86e0cefb609fd139a30c`.
+- PR #244 CodeRabbit status was success with no review threads remaining.
+- Issue #242 closed completed after merge.
 
 ### Completed: Reconcile release evidence label drift merge state (Queue Item 115)
 
@@ -9939,6 +9987,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 15:27 | Address PR #247 CodeRabbit review | CodeRabbit reviewed the initial PR head and requested replacement of PR placeholders plus a single-baseline roadmap OS-tested row. The PR placeholders were already corrected in commit `b092ad007b519db9951b8b3b19b07bb8fbce93e3`; the roadmap OS-tested row was aligned to the Queue Item 117 / PR #244 baseline in the follow-up review-response commit. |
+| 2026-06-13 15:22 | Open PR #247 for Queue Item 117 | Opened `https://github.com/6529-Collections/6529Stream/pull/247` from `codex/release-evidence-body-merge-state` at head `7d88b5c3986d493b4b7db9efac21ce160aed6b56` to reconcile PR #244 merge evidence, keep issue #246 queued as the next tracker closure/readiness hardening target, and close issue #245. CodeRabbit review was requested in comment `4698934233`. |
+| 2026-06-13 15:19 | Create issues #245 and #246, start Queue Item 117 | PR #244 merged cleanly, so issue #245 tracks body-drift merge-state reconciliation while issue #246 becomes the next no-secret Gate G implementation slice for tracker closure/readiness guards. |
+| 2026-06-13 15:17 | Merge PR #244 | Release evidence tracker body drift checks merged as `b61868599c7929e369957199bb5726fa5f819f04`; final head `378c48899bc7bca438be86e0cefb609fd139a30c` passed CI run `27470389308`, CodeRabbit status was success with no review threads, and issue #242 closed completed. |
 | 2026-06-13 15:04 | Open PR #244 for Queue Item 116 | Opened `https://github.com/6529-Collections/6529Stream/pull/244` from `codex/release-evidence-body-drift` at head `10a9e14949dc82785e1cbe3702629627229a12de` to add deterministic release evidence tracker body-drift checks and close issue #242. |
 | 2026-06-13 15:00 | Finish Queue Item 116 local validation | Added the no-secret release evidence issue body checker, optional live/snapshot body audit, deterministic body-file remediation output, docs/local/CI gates, readiness command coverage, generated body-sync validation metadata, release manifest/checksum refresh, and changelog entry. The optional live audit found drift on issues #215 through #231, deterministic body files were applied with `gh issue edit --body-file`, and a fresh live snapshot audit passed. |
 | 2026-06-13 14:55 | Merge PR #243 and start Queue Item 116 | Release evidence label drift merge-state reconciliation merged as `abe9896c266c9bb0815a8abc3c9f69e49f023244`; final head `7530f9b70ba049eb9e3c24534634be2ecc7cd97c` passed CI run `27469708279`, CodeRabbit status was success, no review threads remained, and issue #241 closed completed. Issue #242 is now active for the no-secret body-drift audit. |
