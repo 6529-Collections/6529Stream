@@ -91,12 +91,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 11:47 UTC` during Queue Item 110 release evidence issue-link implementation; local validation covers Python compile, release evidence issue-link tests/check, release-artifact tests/check, release-manifest tests/check, release-checksum tests/check, release-readiness tests/check, changelog tests/check, heading scan, Unix wrapper syntax, PowerShell syntax parse, whitespace check, and full `make check` with existing warning noise only |
-| OS tested | Windows local full gate for Queue Item 110; Linux GitHub Actions passed for latest merged baseline PR #213 run `27465004282` on final head `6ac85e8e1d04e1fe383e81fb390f0573f3c9406f`, with merged baseline commit `fc8df90cea2ac77fb8be88c3d2258a77693f374c` |
+| Last verified | `2026-06-13 12:19 UTC` during Queue Item 111 release evidence issue-link state reconciliation; local validation covers roadmap/run-state heading scan, state evidence grep, and whitespace check |
+| OS tested | Windows local docs-only gate for Queue Item 111; Linux GitHub Actions passed for latest merged baseline PR #232 run `27466388746` on final head `d1a0245e3d56401fa442ac03767f346ab8f6d79b`, with merged baseline commit `acfb94230ad596de6a4578f6b269cbc6fa8fd78d` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #213 final CI run `27465004282` passed on head `6ac85e8e1d04e1fe383e81fb390f0573f3c9406f`; CodeRabbit status was success with no actionable comments, checks passed, and PR #213 squash-merged as `fc8df90cea2ac77fb8be88c3d2258a77693f374c` |
+| CI run | Latest merged baseline PR #232 final CI run `27466388746` passed on head `d1a0245e3d56401fa442ac03767f346ab8f6d79b`; CodeRabbit status was success with the only actionable thread resolved, checks passed, and PR #232 squash-merged as `acfb94230ad596de6a4578f6b269cbc6fa8fd78d` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -378,8 +378,8 @@ packet index from issue
 [#207](https://github.com/6529-Collections/6529Stream/issues/207) / PR #209,
 the release evidence issue backlog from issue
 [#212](https://github.com/6529-Collections/6529Stream/issues/212) / PR #213,
-the active release evidence issue-link map from issue
-[#214](https://github.com/6529-Collections/6529Stream/issues/214),
+the release evidence issue-link map from issue
+[#214](https://github.com/6529-Collections/6529Stream/issues/214) / PR #232,
 and the
 `docs/non-local-release-evidence.md` intake runbook from issue #168.
 [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
@@ -409,8 +409,8 @@ complete for a generated no-secret release evidence issue backlog/checker that
 turns incomplete packet rows into issue-ready titles, labels, bodies,
 completion gates, and validation commands without auto-creating GitHub issues
 or changing readiness claims. Issue
-[#214](https://github.com/6529-Collections/6529Stream/issues/214) is active for
-a deterministic no-secret release evidence issue-link map/checker that ties
+[#214](https://github.com/6529-Collections/6529Stream/issues/214) is complete
+for a deterministic no-secret release evidence issue-link map/checker that ties
 each generated backlog row to one concrete GitHub tracker issue while
 preserving blocked readiness claims until reviewed retained evidence exists.
 
