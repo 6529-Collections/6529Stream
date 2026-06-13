@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-public-beta-blocker-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/193` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/194` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/196` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 05:12 UTC` |
+| Last updated | `2026-06-13 05:16 UTC` |
 
 ## Packaging Notes
 
@@ -162,9 +162,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile public beta blocker report merge state (Queue Item 100)
 
-Status: Local draft in progress.
+Status: Open in PR #196; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/194`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/196`.
 Branch: `codex/reconcile-public-beta-blocker-state`.
 Branch started from PR #193 squash merge commit
 `69df0c1af4e63080a9c4a822e167f0284d349c74`.
@@ -191,6 +191,24 @@ Goal:
   progress.
 - Select Queue Item 101 / issue #195 as the next no-secret Gate G support
   slice.
+
+Validation completed locally at `2026-06-13 05:15 UTC`:
+
+- `python scripts\check_release_readiness.py`.
+- `python scripts\check_public_beta_evidence.py`.
+- `python scripts\generate_public_beta_blocker_report.py --check`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\generate_release_checksums.py --check`.
+- `rg -n "Queue Item 99|Queue Item 100|Queue Item 101|PR #193|27457209173|61ed7e8|69df0c1|#191|#194|#195|Issue #191|Last verified|CI run" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+PR opened:
+
+- PR #196 opened against `main` on head
+  `d1861b4a2cd8545c312a27c46c2ba0fda9f40f83`.
+  This follow-up state commit records the concrete PR URL before CodeRabbit
+  review is requested.
 
 ### PR candidate: Add public beta evidence blocker report artifact (Queue Item 99)
 
@@ -8863,6 +8881,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 05:16 | Open PR #196 | State-only reconciliation PR opened against `main`, linked `Closes #194`, and will use CodeRabbit-only review per current user instruction |
 | 2026-06-13 05:12 | Create issue #195 and select Queue Item 101 | After the blocker report merged, the next public-safe Gate G support slice is per-requirement public-beta evidence templates that guide later non-local evidence collection without secrets or readiness claims |
 | 2026-06-13 05:09 | Create issue #194 and start Queue Item 100 | State reconciliation is needed to record PR #193 final CI, CodeRabbit, squash merge, and issue closure before starting the next implementation PR |
 | 2026-06-13 05:07 | Merge PR #193 | Public-beta blocker report merged as `69df0c1af4e63080a9c4a822e167f0284d349c74`; final head `61ed7e8bc259c4daa4ac3adaeb746b96904dcbda` passed CI run `27457209173`, CodeRabbit status was success with no actionable comments after the metadata nitpick fix, and issue #191 closed completed |
