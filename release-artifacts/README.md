@@ -18,6 +18,7 @@ python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_non_local_release_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
@@ -50,6 +51,8 @@ python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_architecture_threat_model.py
@@ -108,6 +111,14 @@ lives at `schema/non-local-release-evidence.schema.json`, and the template
 points at `evidence/non-local-template-retained-artifact.txt` to prove retained
 artifact hash validation without claiming public-beta or production readiness.
 
+`drop-authorization-signing/drop-authorization-signing-evidence-template.json`
+is the checked no-secret template for future reviewed drop authorization
+signing ceremonies. Its schema lives at
+`schema/drop-authorization-signing-evidence.schema.json`, and the template
+points at `drop-authorization-signing/drop-authorization-signing-retained-artifact.txt`
+plus the generated unsigned payload output to prove payload/hash/reviewer
+validation without claiming public-beta or production readiness.
+
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`, and `docs/release-readiness.md` are the
@@ -121,9 +132,9 @@ documents.
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
 baseline, deployment manifest config/examples, address books, ceremony evidence
-bundles, randomizer operations evidence, release signature evidence, artifact
-schemas, non-local release evidence metadata, public-beta evidence status, and
-release manifest. Treat
+bundles, randomizer operations evidence, release signature evidence, drop
+authorization signing evidence, artifact schemas, non-local release evidence
+metadata, public-beta evidence status, and release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.
@@ -166,6 +177,7 @@ python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_non_local_release_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py

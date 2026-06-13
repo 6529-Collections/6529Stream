@@ -25,9 +25,13 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
-    def test_default_covered_paths_include_signature_evidence(self) -> None:
+    def test_default_covered_paths_include_evidence_artifacts(self) -> None:
         self.assertIn(Path("release-artifacts/schema"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/evidence"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(
+            Path("release-artifacts/drop-authorization-signing"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)
 

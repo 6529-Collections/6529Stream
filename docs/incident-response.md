@@ -265,6 +265,9 @@ Immediate checks:
   authorization payloads.
 - Compare the payload and digest with
   [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
+- Compare retained signing ceremony metadata with
+  [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
+  and `python scripts/check_drop_authorization_signing_evidence.py`.
 - Confirm whether any payload has already been executed.
 - Preserve EIP-712 domain and signature validation evidence without committing
   unreleased payloads.
@@ -287,7 +290,9 @@ Recovery:
   as cross-check evidence and for ERC-1271 `isValidSignature` verification
   inputs where applicable.
 - Retain redacted signer-rotation evidence, event logs, affected drop IDs,
-  cancellation transactions, and reviewer notes.
+  cancellation transactions, reviewer notes, signing-system output metadata,
+  and signature verification evidence using the drop authorization signing
+  evidence schema.
 - Update public communications with the new active signer state and any
   affected drop status.
 
@@ -357,6 +362,8 @@ python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 ```
 
 Run the release evidence checks after changing this runbook or linked
@@ -392,6 +399,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check

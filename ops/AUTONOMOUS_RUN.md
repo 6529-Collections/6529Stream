@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-payload-generator-merge` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/181` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/182` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/184` |
+| Active PR branch | `codex/drop-signing-evidence-schema` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/184` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/183` |
+| Active PR | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 00:37 UTC` |
+| Last updated | `2026-06-13 01:29 UTC` |
 
 ## Packaging Notes
 
@@ -149,14 +149,97 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 91 | Reconcile roadmap after incident response runbook merge | Gate G support | Implement issue #176 by marking PR #175 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and selecting the next signing examples target | Merged in PR #178 |
 | 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Merged in PR #179 |
 | 93 | Add no-secret drop authorization payload generator tooling | Gate G/Gate C support | Implement issue #180 by adding a production-safe unsigned typed-data generator, derived-hash output, tests, docs links, and maintained local/CI gates without private-key handling | Merged in PR #181 |
-| 94 | Reconcile autonomous run state after drop authorization payload generator merge | Gate G support | Implement issue #182 by marking PR #181 merged, recording CI and CodeRabbit evidence, and selecting the next no-secret signing evidence target | Active on `codex/reconcile-payload-generator-merge` |
-| 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Selected next after Queue Item 94 merges |
+| 94 | Reconcile autonomous run state after drop authorization payload generator merge | Gate G support | Implement issue #182 by marking PR #181 merged, recording CI and CodeRabbit evidence, and selecting the next no-secret signing evidence target | Merged in PR #184 |
+| 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Active on `codex/drop-signing-evidence-schema` |
 
 ## Current PR Worklog
 
+### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
+
+Status: Local validation complete; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/183`.
+PR: `TBD`.
+Branch: `codex/drop-signing-evidence-schema`.
+Branch started from PR #184 squash merge commit
+`1a6b0691165c6f21b31a16c2ef4cd1d3456d34a9`.
+
+Prior queue transition:
+
+- Queue Item 94 merged in PR #184 as squash commit
+  `1a6b0691165c6f21b31a16c2ef4cd1d3456d34a9`.
+- PR #184 final implementation head was
+  `964eabe1e5a959d699f10ebf7f13c446e9838d5d`.
+- PR #184 GitHub Actions CI run `27451124264` passed on the final head.
+- PR #184 CodeRabbit reported no actionable comments after explicit review
+  request `4696769792`.
+- PR #184 closed issue #182 at merge.
+- Issue #183 is the next no-secret implementation target for retained drop
+  authorization signing evidence.
+
+Goal:
+
+- Add a no-secret retained drop authorization signing evidence schema and
+  checked local template.
+- Validate the evidence against the generated unsigned drop authorization
+  payload output, signer identity, signer epoch, typed-data domain/message
+  fields, retained artifact hashes, review status, signature status, and
+  no-secret policy.
+- Wire the checker into local and CI gates, release manifest generation,
+  release checksum coverage, release-readiness/audit/incident-response docs,
+  and the roadmap.
+- Preserve the distinction between a local checked template and actual
+  fork/testnet/live production signer custody or signing evidence.
+
+Validation target:
+
+- `python -m py_compile scripts\check_drop_authorization_signing_evidence.py scripts\test_drop_authorization_signing_evidence.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py`.
+- `python scripts\test_drop_authorization_signing_evidence.py`.
+- `python scripts\check_drop_authorization_signing_evidence.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\test_release_readiness.py`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\test_audit_package.py`.
+- `python scripts\check_audit_package.py`.
+- `python scripts\test_incident_response.py`.
+- `python scripts\check_incident_response.py`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
+- Full `make check` before opening the PR.
+
+Local validation:
+
+- `python -m py_compile scripts\check_drop_authorization_signing_evidence.py scripts\test_drop_authorization_signing_evidence.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_readiness.py`.
+- `python scripts\test_drop_authorization_signing_evidence.py`.
+- `python scripts\check_drop_authorization_signing_evidence.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\test_release_readiness.py`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\test_audit_package.py`.
+- `python scripts\check_audit_package.py`.
+- `python scripts\test_incident_response.py`.
+- `python scripts\check_incident_response.py`.
+- `python scripts\test_drop_authorization_payload_generator.py`.
+- `python scripts\test_drop_authorization_fixtures.py`.
+- `python scripts\check_drop_authorization_fixtures.py`.
+- `python scripts\test_public_beta_evidence.py`.
+- `python scripts\check_public_beta_evidence.py`.
+- `python scripts\test_non_local_release_evidence.py`.
+- `python scripts\check_non_local_release_evidence.py`.
+- `python scripts\test_changelog_check.py`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
+- `make check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
 ### PR candidate: Reconcile autonomous run state after drop authorization payload generator merge (Queue Item 94)
 
-Status: PR opened; CodeRabbit requested; awaiting CI and review.
+Status: Merged in PR #184 on `2026-06-13`.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/182`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/184`.
 Branch: `codex/reconcile-payload-generator-merge`.
@@ -164,6 +247,10 @@ Branch started from PR #181 squash merge commit
 `97800f4570740c7aefd88e407cb78e47ee5e80db`.
 Implementation head at PR open:
 `2a4433de540cecb57079583b97a57d8284abb6b0`.
+Final implementation head:
+`964eabe1e5a959d699f10ebf7f13c446e9838d5d`.
+Squash merge commit:
+`1a6b0691165c6f21b31a16c2ef4cd1d3456d34a9`.
 
 Prior queue transition:
 
@@ -204,6 +291,9 @@ Remote validation:
 - PR #184 opened at
   `https://github.com/6529-Collections/6529Stream/pull/184`.
 - CodeRabbit review requested in issue comment `4696769792`.
+- GitHub Actions CI run `27451124264` passed on final head
+  `964eabe1e5a959d699f10ebf7f13c446e9838d5d`.
+- CodeRabbit reported no actionable comments.
 
 ### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
 
@@ -8555,6 +8645,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 01:29 | Finish local Queue Item 95 validation | Drop authorization signing evidence schema/template/checker/tests, release manifest/checksum coverage, docs checkers, changelog gate, `git diff --check`, full `make check`, and the Windows PowerShell wrapper pass locally; PR creation is next |
+| 2026-06-13 01:07 | Start Queue Item 95 on issue #183 | PR #184 merged cleanly, issue #182 closed completed, and the next no-secret Gate G/Gate C support slice is the retained drop authorization signing evidence schema/checker |
+| 2026-06-13 00:53 | Merge PR #184 | State-only reconciliation merged as `1a6b0691165c6f21b31a16c2ef4cd1d3456d34a9`; final head `964eabe1e5a959d699f10ebf7f13c446e9838d5d` passed CI run `27451124264`, CodeRabbit reported no actionable comments, and issue #182 closed completed |
 | 2026-06-13 00:37 | Request CodeRabbit PR #184 review | CodeRabbit review requested in issue comment `4696769792`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 00:36 | Open PR #184 | State-only reconciliation PR opened against `main`, linked `Closes #182`, and prepared for CodeRabbit-only review per the current user instruction |
 | 2026-06-13 00:34 | Create issue #183 and select Queue Item 95 | After PR #181 added no-secret unsigned payload generation, the next safe Gate G/Gate C support slice is a no-secret drop authorization signing evidence schema/checker for retained reviewed signing ceremonies without private keys, live chain access, or production-readiness claims |

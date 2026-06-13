@@ -16,7 +16,8 @@ containment, recovery, evidence retention, and reopening procedures when an
 operational incident affects release readiness.
 Use [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) for
 the local no-secret drop authorization signing fixtures, unsigned payload
-generator templates, and the EIP-712 / ERC-1271 evidence they cover.
+generator templates, drop authorization signing evidence template, and the
+EIP-712 / ERC-1271 evidence they cover.
 
 ## Maturity And Scope
 
@@ -42,7 +43,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures and unsigned payload-generator examples, public-beta evidence status, and non-local release evidence runbook, schema, checked template, and checker exist for the local baseline | Live release artifacts, production signing evidence, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, public-beta evidence status, and non-local release evidence runbook, schema, checked template, and checker exist for the local baseline | Live release artifacts, production signing evidence, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -57,9 +58,13 @@ The current local baseline includes:
   and [`docs/audit-package.md`](audit-package.md);
 - incident response procedures in
   [`docs/incident-response.md`](incident-response.md);
-- drop authorization signing fixtures and unsigned payload-generator examples in
+- drop authorization signing fixtures, unsigned payload-generator examples, and
+  checked drop authorization signing evidence template in
   [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) and
-  [`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/);
+  [`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/),
+  [`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json),
+  [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json),
+  and [`scripts/check_drop_authorization_signing_evidence.py`](../scripts/check_drop_authorization_signing_evidence.py);
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -169,6 +174,9 @@ Release artifacts:
 - [release-artifacts/latest/public-beta-evidence.json](../release-artifacts/latest/public-beta-evidence.json)
 - [release-artifacts/latest/source-verification-inputs.json](../release-artifacts/latest/source-verification-inputs.json)
 - [release-artifacts/schema/public-beta-evidence.schema.json](../release-artifacts/schema/public-beta-evidence.schema.json)
+- [release-artifacts/schema/drop-authorization-signing-evidence.schema.json](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
+- [release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
+- [release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt](../release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt)
 - [release-artifacts/schema/non-local-release-evidence.schema.json](../release-artifacts/schema/non-local-release-evidence.schema.json)
 - [release-artifacts/evidence/non-local-release-evidence-template.json](../release-artifacts/evidence/non-local-release-evidence-template.json)
 - [release-artifacts/evidence/non-local-template-retained-artifact.txt](../release-artifacts/evidence/non-local-template-retained-artifact.txt)
@@ -192,6 +200,8 @@ python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
+python scripts/test_drop_authorization_signing_evidence.py
+python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_non_local_release_evidence.py

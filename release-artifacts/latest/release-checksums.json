@@ -8,6 +8,7 @@
       "release-artifacts/dependencies",
       "release-artifacts/schema",
       "release-artifacts/evidence",
+      "release-artifacts/drop-authorization-signing",
       "release-artifacts/signatures",
       "release-artifacts/latest",
       "release-artifacts/baselines",
@@ -25,7 +26,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:236c1320e042fd59b6fb15ccc06a3e4300eafdea8b9846553ed26347883b3e2f"
+    "sha256": "sha256:36801c443cae9112bc411b9c69aaad24b56120dd4833c24bbcccbe54516a3411"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -128,6 +129,16 @@
       "size_bytes": 48
     },
     {
+      "path": "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
+      "sha256": "sha256:6eb95e88d6766d2405a8dcbaa2c5405413ee4c879a43246447471f04b02a0755",
+      "size_bytes": 4326
+    },
+    {
+      "path": "release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt",
+      "sha256": "sha256:f0f190f1c87106e3a773735e03bda9c281f7c77e15dc8dfe5d83c431bf4f58a2",
+      "size_bytes": 158
+    },
+    {
       "path": "release-artifacts/evidence/non-local-release-evidence-template.json",
       "sha256": "sha256:577180f7815fe7ad8fc4d0ddd364824b4dcf7a1cb3c5ff4920f4e282d12fdec7",
       "size_bytes": 1685
@@ -169,13 +180,18 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:09e2cf1cf07f87bf0331cf12342302bbdefb5baffd9b628039ab4289d84ea829",
-      "size_bytes": 23875
+      "sha256": "sha256:3ea2ca37bfe707bffabfdbd33adddcc1e4b1d170b77ace2b89957e0910cf0ced",
+      "size_bytes": 31308
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
       "sha256": "sha256:374fce4bc46746d61cbae487cf6cb549cb40b5db5a95951568ed4455669af33a",
       "size_bytes": 48684
+    },
+    {
+      "path": "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
+      "sha256": "sha256:60e0efe388b974d81bfad266a1c9fb10d55c3104ae24ba268e6e68441edc4370",
+      "size_bytes": 10231
     },
     {
       "path": "release-artifacts/schema/non-local-release-evidence.schema.json",

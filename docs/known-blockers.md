@@ -7,10 +7,11 @@ contributors who start from the README.
   signers, and no-secret local signing examples plus deterministic fixtures now
   live in [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
   The same guide links no-secret unsigned payload-generator templates for
-  fixed-price and auction drops. Production signer custody, production signing
-  service integration, retained fork/testnet/live signing evidence, and
-  approved external signer integration still need to be completed or explicitly
-  accepted before public beta.
+  fixed-price and auction drops, plus a checked drop authorization signing
+  evidence schema/template for future reviewed ceremonies. Production signer
+  custody, production signing service integration, retained fork/testnet/live
+  signing evidence contents, and approved external signer integration still
+  need to be completed or explicitly accepted before public beta.
 - Auction custody and settlement state-machine coverage now exists for ADR 0002:
   auction NFTs are escrowed by the auction contract, no-bid and with-bid
   settlement are explicit, outbid refunds use bidder credits, and auction-local

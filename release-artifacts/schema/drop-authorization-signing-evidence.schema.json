@@ -1,0 +1,441 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
+  "title": "6529Stream Drop Authorization Signing Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "record_type",
+    "review_status",
+    "environment",
+    "chain_id",
+    "source",
+    "payload",
+    "signing_identity",
+    "signature",
+    "review",
+    "retained_artifacts",
+    "redaction_policy",
+    "template_notice",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.drop-authorization-signing-evidence.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_type": {
+      "enum": ["template", "evidence"]
+    },
+    "review_status": {
+      "enum": ["template", "pending_review", "reviewed"]
+    },
+    "environment": {
+      "enum": ["local", "fork", "testnet", "mainnet", "production"]
+    },
+    "chain_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "payload": {
+      "$ref": "#/$defs/payload"
+    },
+    "signing_identity": {
+      "$ref": "#/$defs/signing_identity"
+    },
+    "signature": {
+      "$ref": "#/$defs/signature"
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/retained_artifact"
+      }
+    },
+    "redaction_policy": {
+      "$ref": "#/$defs/redaction_policy"
+    },
+    "template_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_file",
+        "payload_schema_version",
+        "payload_kind",
+        "typed_data_primary_type",
+        "domain",
+        "message",
+        "derived"
+      ],
+      "properties": {
+        "payload_file": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "payload_schema_version": {
+          "const": "6529stream.drop-authorization-payload.v1"
+        },
+        "payload_kind": {
+          "enum": ["fixed_price", "auction"]
+        },
+        "typed_data_primary_type": {
+          "const": "DropAuthorization"
+        },
+        "domain": {
+          "$ref": "#/$defs/payload_domain"
+        },
+        "message": {
+          "$ref": "#/$defs/payload_message"
+        },
+        "derived": {
+          "$ref": "#/$defs/payload_derived"
+        }
+      }
+    },
+    "payload_domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "chain_id", "verifying_contract"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "verifying_contract": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "payload_message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "drop_id",
+        "poster",
+        "recipient",
+        "payer",
+        "collection_id",
+        "sale_mode",
+        "signer_epoch",
+        "nonce",
+        "deadline"
+      ],
+      "properties": {
+        "drop_id": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "poster": {
+          "$ref": "#/$defs/address"
+        },
+        "recipient": {
+          "$ref": "#/$defs/address"
+        },
+        "payer": {
+          "$ref": "#/$defs/address"
+        },
+        "collection_id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sale_mode": {
+          "enum": [1, 2]
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nonce": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deadline": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "payload_derived": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signer",
+        "drop_id",
+        "token_data_hash",
+        "domain_separator",
+        "struct_hash",
+        "digest"
+      ],
+      "properties": {
+        "signer": {
+          "$ref": "#/$defs/address"
+        },
+        "drop_id": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "token_data_hash": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "domain_separator": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "struct_hash": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "digest": {
+          "$ref": "#/$defs/bytes32"
+        }
+      }
+    },
+    "signing_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signer_type",
+        "signer",
+        "signer_epoch",
+        "custody_status",
+        "custody_reference",
+        "signer_lifecycle_status",
+        "signer_service",
+        "signer_epoch_source"
+      ],
+      "properties": {
+        "signer_type": {
+          "enum": ["EOA", "ERC1271", "external_service", "hsm", "local_placeholder"]
+        },
+        "signer": {
+          "$ref": "#/$defs/address"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "custody_status": {
+          "enum": ["not_available_local", "documented", "pending", "blocked"]
+        },
+        "custody_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signer_lifecycle_status": {
+          "enum": ["not_available_local", "active", "rotated", "revoked", "pending"]
+        },
+        "signer_service": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signer_epoch_source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "signature_format",
+        "signature_hash",
+        "verification_status",
+        "verification_command",
+        "returned_at",
+        "evidence_note"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not_available_local", "pending", "signed", "blocked"]
+        },
+        "signature_format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "enum": ["not_available_local", "pending", "blocked", "redacted"]
+            }
+          ]
+        },
+        "verification_status": {
+          "enum": ["not_available_local", "pending", "verified", "blocked"]
+        },
+        "verification_command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "returned_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "reviewer",
+        "approval_status",
+        "approval_reference",
+        "reviewed_at"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_status": {
+          "enum": ["template", "pending", "approved", "rejected"]
+        },
+        "approval_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retained_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "path", "sha256"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^/"
+          },
+          {
+            "pattern": "\\\\"
+          },
+          {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        ]
+      }
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "bytes32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
