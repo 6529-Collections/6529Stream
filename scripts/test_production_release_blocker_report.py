@@ -234,6 +234,51 @@ class ProductionReleaseBlockerReportTests(unittest.TestCase):
                 )
                 self.assertIn(f"`{template_path}`", report)
 
+    def test_production_rows_are_grouped_by_status_then_requirement_id(self) -> None:
+        """Mixed-status production rows are grouped before Markdown rendering."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_production_templates(root)
+            evidence = valid_evidence(root)
+            production_ids = list(checker.PRODUCTION_REQUIREMENTS)
+            status_by_id = {
+                production_ids[0]: "pending",
+                production_ids[1]: "pending",
+                production_ids[2]: "blocked",
+                production_ids[-1]: "missing",
+            }
+            for row in evidence["requirements"]:
+                if row["phase"] != checker.PRODUCTION_PHASE:
+                    continue
+                row_id = row["id"]
+                if row_id in status_by_id:
+                    row["status"] = status_by_id[row_id]
+                    row["notes"] = f"{row_id} remains {status_by_id[row_id]}."
+            write_valid_evidence(root, evidence)
+
+            by_phase = generator.canonical_requirements(evidence)
+            templates = generator.production_template_map(root)
+            rows = generator.production_requirement_rows(
+                by_phase,
+                templates,
+                root,
+                {"missing", "pending", "blocked"},
+            )
+
+            observed = [
+                (row[1].strip("`"), row[0].strip("`"))
+                for row in rows
+                if row[0].strip("`") in status_by_id
+            ]
+            status_rank = {
+                status: index for index, status in enumerate(generator.STATUS_ORDER)
+            }
+            expected = sorted(
+                ((status, requirement_id) for requirement_id, status in status_by_id.items()),
+                key=lambda item: (status_rank[item[0]], item[1]),
+            )
+            self.assertEqual(observed, expected)
+
     def test_report_is_deterministic(self) -> None:
         """Rendering the same evidence twice produces identical text."""
         with tempfile.TemporaryDirectory() as temp_dir:

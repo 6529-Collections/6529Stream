@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 08:15 UTC` |
+| Last updated | `2026-06-13 08:26 UTC` |
 
 ## Packaging Notes
 
@@ -167,7 +167,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add production release blocker report artifact (Queue Item 105)
 
-Status: PR #205 open; GitHub Actions and CodeRabbit review pending.
+Status: PR #205 open; CodeRabbit row-order follow-up implemented locally and
+pending push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/203`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/205`.
 Branch: `codex/production-release-blocker-report`.
@@ -229,6 +230,29 @@ Validation completed locally at `2026-06-13 08:11 UTC`:
 - PowerShell syntax parse for `scripts/check.ps1`.
 - `make check`.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Bot review follow-up at `2026-06-13 08:26 UTC`:
+
+- CodeRabbit left one actionable comment on PR #205 requesting production
+  blocker rows to be grouped by shared status order before requirement ID.
+- Updated `scripts/generate_production_release_blocker_report.py` to sort
+  matching rows by `STATUS_ORDER` and requirement ID.
+- Added a mixed-status regression in
+  `scripts/test_production_release_blocker_report.py`.
+- Regenerated `release-artifacts/latest/production-release-blockers.md`,
+  `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json`.
+- Focused validation passed:
+  `python -m py_compile scripts/generate_production_release_blocker_report.py scripts/test_production_release_blocker_report.py scripts/generate_release_manifest.py scripts/test_release_manifest.py scripts/check_release_readiness.py`,
+  `python scripts/test_production_release_blocker_report.py`,
+  `python scripts/generate_production_release_blocker_report.py --check`,
+  `python scripts/test_release_manifest.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/test_release_checksums.py`,
+  `python scripts/generate_release_checksums.py --check`,
+  `python scripts/test_release_readiness.py`,
+  `python scripts/check_release_readiness.py`, and `git diff --check`.
 
 ### Completed: Reconcile production release template merge state (Queue Item 104)
 

@@ -145,10 +145,18 @@ def production_requirement_rows(
 ) -> list[list[Any]]:
     """Build production requirement rows for matching statuses."""
     rows: list[list[Any]] = []
+    status_rank = {status: index for index, status in enumerate(STATUS_ORDER)}
+    selected: list[tuple[str, str, dict[str, Any]]] = []
     for requirement_id in PRODUCTION_REQUIREMENTS:
         requirement = by_phase[PRODUCTION_PHASE][requirement_id]
-        if requirement["status"] not in statuses:
+        status = requirement["status"]
+        if status not in statuses:
             continue
+        selected.append((status, requirement_id, requirement))
+    for _, requirement_id, requirement in sorted(
+        selected,
+        key=lambda item: (status_rank[item[0]], item[1]),
+    ):
         rows.append(
             [
                 f"`{requirement_id}`",
