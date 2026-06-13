@@ -26,7 +26,10 @@ python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/check_release_evidence_issue_labels.py
 python scripts/generate_release_evidence_issue_body_sync.py
+python scripts/check_release_evidence_issue_bodies.py
+python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -74,8 +77,14 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_labels.py
+python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
 python scripts/generate_release_evidence_issue_body_sync.py --check
+python scripts/test_release_evidence_issue_bodies.py
+python scripts/check_release_evidence_issue_bodies.py
+python scripts/test_release_evidence_issue_closure.py
+python scripts/check_release_evidence_issue_closure.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -172,6 +181,13 @@ body payloads deterministically, can audit an exported live GitHub issue JSON
 snapshot with `--live-json`, and can write deterministic per-issue body files
 with `--write-body-files` for operator-run `gh issue edit --body-file`
 remediation.
+
+`scripts/check_release_evidence_issue_closure.py` validates the committed
+tracker map, body-sync artifact, packet index, and public-beta evidence
+manifest agree on tracker closure readiness. Its optional `--live-json` mode
+audits a `gh issue list --state all --json number,title,state` snapshot and
+fails if a linked tracker issue is closed while the committed evidence status
+is still `missing`, `pending`, `blocked`, or `not_applicable`.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema

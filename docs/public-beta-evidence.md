@@ -83,6 +83,13 @@ issue body payloads so tracker issues can be updated consistently. It remains
 no-secret and tracker-only, does not update GitHub automatically, and does not
 make issue closure completion evidence.
 
+The release evidence issue closure checker validates that the committed
+tracker map, body-sync artifact, packet index, and public-beta evidence
+manifest agree on which tracker issues may close. A linked tracker issue should
+remain open while its committed evidence status is `missing`, `pending`,
+`blocked`, or `not_applicable`; it may close only after the committed status is
+`complete` or `accepted_risk`.
+
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
 change, update the schema's `requirements.minItems` count and this document in
@@ -245,7 +252,21 @@ To move a requirement to `complete`:
     `python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/release-evidence-issue-bodies`
     and apply the issue-specific `gh issue edit ... --body-file ...` command
     printed by the checker.
-17. Regenerate and check the release manifest and checksum bundle.
+17. Check release evidence tracker closure readiness with
+    `python scripts/test_release_evidence_issue_closure.py` and
+    `python scripts/check_release_evidence_issue_closure.py`. To audit live
+    GitHub closure state, export all tracker issues and pass the snapshot with
+    `--live-json`:
+
+    ```bash
+    gh issue list --repo 6529-Collections/6529Stream --state all --limit 100 --json number,title,state > tmp/release-evidence-issue-closure.json
+    python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
+    ```
+
+    If premature closure is reported, reopen the issue with the remediation
+    command printed by the checker and keep it open until retained evidence is
+    complete or explicitly risk-accepted in the committed manifest.
+18. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

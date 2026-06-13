@@ -15,6 +15,9 @@ the release policy in `docs/release-policy.md`.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.
+- Added deterministic release evidence tracker closure/readiness checks with
+  optional live GitHub issue snapshot audit mode so tracker issues cannot close
+  before committed evidence is complete or explicitly risk-accepted.
 - Added a deterministic machine-readable release manifest that ties release
   artifacts, ABI compatibility, deployment manifests, address books, governance
   docs, and release-ceremony status together under `release-artifacts/latest/`.

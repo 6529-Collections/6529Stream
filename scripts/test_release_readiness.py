@@ -56,8 +56,8 @@ Release manifest, checksum bundle, source verification inputs, ceremony evidence
 randomizer operations evidence, release-signature evidence, Slither baseline,
 public-beta evidence status, non-local release evidence, incident response,
 release evidence packet index, drop authorization signing fixtures,
-release evidence issue backlog, release evidence issue links, and release evidence issue body sync
-are summarized.
+release evidence issue backlog, release evidence issue links, release evidence issue body sync,
+and release evidence issue closure readiness are summarized.
 The unsigned payload-generator examples are summarized.
 The drop authorization signing fixtures are summarized.
 The drop authorization signing evidence and signer custody readiness evidence
