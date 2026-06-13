@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-label-drift` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/238` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/239` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/240` |
 | Next issue | After issue #239, continue Gate G no-secret release-evidence tracker hardening before attempting retained external evidence tasks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 14:04 UTC` |
+| Last updated | `2026-06-13 14:10 UTC` |
 
 ## Packaging Notes
 
@@ -176,9 +176,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Harden release evidence tracker label drift checks (Queue Item 114)
 
-Status: local implementation validated; PR not opened yet.
+Status: PR #240 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/239`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/240`.
 Branch: `codex/release-evidence-label-drift`.
 Branch started from PR #238 squash merge commit
 `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`.
