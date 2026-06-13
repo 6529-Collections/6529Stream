@@ -407,6 +407,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "# Public Beta Evidence Blocker Report\n\nGenerated fixture.\n",
     )
     write_text(
+        latest / "production-release-blockers.md",
+        "# Production Release Evidence Blocker Report\n\nGenerated fixture.\n",
+    )
+    write_text(
         non_local_retained_artifact,
         (
             "Template retained artifact for non-local release evidence tests.\n"
@@ -993,6 +997,17 @@ class ReleaseManifestTests(unittest.TestCase):
                 public_beta_blockers["sha256"],
                 generator.file_sha256(paths["latest"] / "public-beta-blockers.md"),
             )
+            production_blockers = manifest["release_artifacts"][
+                "production_release_blocker_report"
+            ]
+            self.assertEqual(
+                production_blockers["path"],
+                "release-artifacts/latest/production-release-blockers.md",
+            )
+            self.assertEqual(
+                production_blockers["sha256"],
+                generator.file_sha256(paths["latest"] / "production-release-blockers.md"),
+            )
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
@@ -1159,6 +1174,17 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 blockers["sha256"],
                 generator.file_sha256(custom_latest / "public-beta-blockers.md"),
+            )
+            production_blockers = manifest["release_artifacts"][
+                "production_release_blocker_report"
+            ]
+            self.assertEqual(
+                production_blockers["path"],
+                "custom-release-artifacts/latest/production-release-blockers.md",
+            )
+            self.assertEqual(
+                production_blockers["sha256"],
+                generator.file_sha256(custom_latest / "production-release-blockers.md"),
             )
 
     def test_check_mode_accepts_current_manifest(self) -> None:

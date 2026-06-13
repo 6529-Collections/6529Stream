@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-production-template-merge` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/201` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/202` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/204` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/203` |
+| Active PR branch | `codex/production-release-blocker-report` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/204` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/203` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/205` |
+| Next issue | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 07:33 UTC` |
+| Last updated | `2026-06-13 08:26 UTC` |
 
 ## Packaging Notes
 
@@ -160,14 +160,103 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 101 | Add per-requirement public beta evidence templates | Gate G support | Implement issue #195 by adding public-safe templates for each incomplete public-beta evidence row, with checks/docs and no fork/testnet/live/audit readiness claims | Merged in PR #197 |
 | 102 | Reconcile public beta template merge state | Gate G support | Implement issue #198 by recording PR #197 merge, CI, CodeRabbit, and next-target state without changing readiness claims | Merged in PR #200 |
 | 103 | Add per-requirement production release evidence templates | Gate G support | Implement issue #199 by adding public-safe templates for each incomplete production-release evidence row, with checks/docs and no production readiness claims | Merged in PR #201 |
-| 104 | Reconcile production release template merge state | Gate G support | Implement issue #202 by recording PR #201 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret production-readiness support target | Active |
-| 105 | Add production release blocker report artifact | Gate G support | Implement issue #203 by generating a deterministic production-focused blocker report from committed evidence metadata and templates without changing readiness claims | Planned |
+| 104 | Reconcile production release template merge state | Gate G support | Implement issue #202 by recording PR #201 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret production-readiness support target | Merged in PR #204 |
+| 105 | Add production release blocker report artifact | Gate G support | Implement issue #203 by generating a deterministic production-focused blocker report from committed evidence metadata and templates without changing readiness claims | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile production release template merge state (Queue Item 104)
+### PR candidate: Add production release blocker report artifact (Queue Item 105)
 
-Status: Open in PR #204; CI and CodeRabbit review pending.
+Status: PR #205 open; CodeRabbit row-order follow-up implemented locally and
+pending push.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/203`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/205`.
+Branch: `codex/production-release-blocker-report`.
+Branch started from PR #204 squash merge commit
+`de5df8e382fbafe6c15c4f84dd978532debee90b`.
+
+Prior queue transition:
+
+- Queue Item 104 merged in PR #204 as squash commit
+  `de5df8e382fbafe6c15c4f84dd978532debee90b`.
+- PR #204 final implementation head was
+  `8b6eadc265bbbe488b10800a62bfe22d28753a36`.
+- PR #204 GitHub Actions CI run `27460486021` passed on the final head.
+- PR #204 CodeRabbit status was success with no actionable comments or open
+  review threads.
+- PR #204 closed issue #202 at merge.
+- Issue #203 now tracks the next no-secret Gate G support slice:
+  a deterministic production-release blocker report generated from committed
+  evidence metadata and production-release templates.
+
+Goal:
+
+- Add `scripts/generate_production_release_blocker_report.py` and focused
+  self-tests.
+- Generate and track
+  `release-artifacts/latest/production-release-blockers.md`.
+- Wire the report into Makefile, Windows wrapper, CI, release manifest,
+  release-artifact drift handling, release checksums, docs, changelog, roadmap,
+  and release-readiness validation.
+- Preserve the blocked public-beta and production-release baseline; do not
+  change Solidity, deployment behavior, or readiness claims.
+
+Validation completed locally at `2026-06-13 08:11 UTC`:
+
+- `python -m py_compile scripts/generate_production_release_blocker_report.py scripts/test_production_release_blocker_report.py scripts/generate_release_manifest.py scripts/test_release_manifest.py scripts/check_release_readiness.py`.
+- `python scripts/test_production_release_blocker_report.py`.
+- `python scripts/generate_production_release_blocker_report.py --check`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_public_beta_blocker_report.py --check`.
+- `python scripts/generate_release_manifest.py`.
+- `python scripts/generate_release_checksums.py`.
+- `python scripts/test_public_beta_blocker_report.py`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_public_beta_evidence.py`.
+- `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/test_changelog_check.py`.
+- `python scripts/check_changelog.py`.
+- `python scripts/test_audit_package.py`.
+- `python scripts/check_audit_package.py`.
+- `python scripts/test_architecture_threat_model.py`.
+- `python scripts/check_architecture_threat_model.py`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/public-beta-evidence.md docs/release-readiness.md release-artifacts/README.md docs/tooling.md README.md CHANGELOG.md`.
+- `git diff --check` (no whitespace errors; Git printed the existing
+  `scripts/check.ps1` line-ending warning).
+- PowerShell syntax parse for `scripts/check.ps1`.
+- `make check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Bot review follow-up at `2026-06-13 08:26 UTC`:
+
+- CodeRabbit left one actionable comment on PR #205 requesting production
+  blocker rows to be grouped by shared status order before requirement ID.
+- Updated `scripts/generate_production_release_blocker_report.py` to sort
+  matching rows by `STATUS_ORDER` and requirement ID.
+- Added a mixed-status regression in
+  `scripts/test_production_release_blocker_report.py`.
+- Regenerated `release-artifacts/latest/production-release-blockers.md`,
+  `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json`.
+- Focused validation passed:
+  `python -m py_compile scripts/generate_production_release_blocker_report.py scripts/test_production_release_blocker_report.py scripts/generate_release_manifest.py scripts/test_release_manifest.py scripts/check_release_readiness.py`,
+  `python scripts/test_production_release_blocker_report.py`,
+  `python scripts/generate_production_release_blocker_report.py --check`,
+  `python scripts/test_release_manifest.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/test_release_checksums.py`,
+  `python scripts/generate_release_checksums.py --check`,
+  `python scripts/test_release_readiness.py`,
+  `python scripts/check_release_readiness.py`, and `git diff --check`.
+
+### Completed: Reconcile production release template merge state (Queue Item 104)
+
+Status: Merged in PR #204.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/202`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/204`.
 Branch: `codex/reconcile-production-template-merge`.

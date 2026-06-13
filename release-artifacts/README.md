@@ -22,6 +22,7 @@ python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
+python scripts/generate_production_release_blocker_report.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -61,6 +62,8 @@ python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
+python scripts/test_production_release_blocker_report.py
+python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -116,6 +119,13 @@ retained or explicitly risk-accepted.
 production rows, evidence posture, future external evidence categories, and
 validation commands without changing the intentionally blocked readiness
 status.
+
+`latest/production-release-blockers.md` is generated from
+`latest/public-beta-evidence.json` and the checked templates under
+`evidence/production-release-templates/`. It lists only production-release
+requirements, their evidence posture, matching template paths, future external
+evidence categories, and validation commands without changing the intentionally
+blocked production readiness status.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema
@@ -213,6 +223,7 @@ python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
+python scripts/generate_production_release_blocker_report.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py

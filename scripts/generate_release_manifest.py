@@ -30,6 +30,7 @@ GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
+PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
@@ -936,6 +937,10 @@ def build_manifest(
             ),
             "public_beta_blocker_report": file_record(
                 release_artifacts_dir / PUBLIC_BETA_BLOCKERS_FILENAME,
+                repo_root,
+            ),
+            "production_release_blocker_report": file_record(
+                release_artifacts_dir / PRODUCTION_RELEASE_BLOCKERS_FILENAME,
                 repo_root,
             ),
             "release_signature_evidence": release_signatures,

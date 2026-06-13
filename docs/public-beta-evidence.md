@@ -15,6 +15,8 @@ python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
+python scripts/test_production_release_blocker_report.py
+python scripts/generate_production_release_blocker_report.py --check
 ```
 
 ## Evidence Artifact
@@ -34,6 +36,13 @@ It is derived from the status file, lists incomplete public-beta and production
 rows plus their evidence posture, and repeats the validation commands for the
 underlying evidence families. It does not mark any row complete or claim public
 beta or production readiness.
+
+The production-focused blocker report is
+[`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md).
+It is derived from the same status file but renders only production-release
+requirements and links the matching checked template under
+`release-artifacts/evidence/production-release-templates/` for each row.
+It also preserves the blocked baseline and does not claim production readiness.
 
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
@@ -155,8 +164,9 @@ To move a requirement to `complete`:
    retained drop authorization signing evidence that supports the row.
 9. Run `python scripts/check_signer_custody_readiness.py` for any signer
    custody readiness evidence that supports the row.
-10. Regenerate and check the blocker report with
-   `python scripts/generate_public_beta_blocker_report.py`.
+10. Regenerate and check the blocker reports with
+   `python scripts/generate_public_beta_blocker_report.py` and
+   `python scripts/generate_production_release_blocker_report.py`.
 11. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
