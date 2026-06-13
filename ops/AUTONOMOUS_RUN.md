@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/public-beta-blocker-report` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/192` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/191` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/193` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 04:40 UTC` |
+| Last updated | `2026-06-13 04:43 UTC` |
 
 ## Packaging Notes
 
@@ -160,9 +160,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add public beta evidence blocker report artifact (Queue Item 99)
 
-Status: Local implementation in progress; PR not opened yet.
+Status: Open in PR #193; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/191`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/193`.
 Branch: `codex/public-beta-blocker-report`.
 Branch started from PR #192 squash merge commit
 `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd`.
@@ -215,6 +215,12 @@ Validation completed locally at `2026-06-13 04:40 UTC`:
 - PowerShell parser validation for `scripts\check.ps1`.
 - `make check`.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+PR opened:
+
+- PR #193 opened against `main` on head
+  `21b1de2ad53792ae8c1c688964bcd6e83db988a7`.
+- CodeRabbit review requested in comment `4697524739`.
 
 ### PR candidate: Reconcile signer custody readiness merge state (Queue Item 98)
 
@@ -8805,6 +8811,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 04:43 | Open PR #193 and request CodeRabbit | Public-beta blocker report PR opened against `main`, linked `Closes #191`, and CodeRabbit review requested in comment `4697524739`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 04:40 | Finish Queue Item 99 local validation | Focused public-beta blocker/report tests, release manifest/checksum checks, release-readiness, changelog, heading/syntax/whitespace checks, full `make check`, and the Windows PowerShell wrapper all pass locally |
 | 2026-06-13 04:22 | Implement Queue Item 99 local draft | Added a deterministic no-secret public-beta blocker report generated from `public-beta-evidence.json`, wired local/CI drift checks, release manifest/checksum coverage, docs, changelog, roadmap, and run-state updates without changing readiness claims |
 | 2026-06-13 04:02 | Merge PR #192 and start Queue Item 99 | State reconciliation merged as `b222e7ef1d0a4525b00a66a9fa90b957ccdac3bd`; issue #191 is now the active no-secret public-beta evidence blocker-report slice |
