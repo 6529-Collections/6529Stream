@@ -127,6 +127,11 @@ public-beta requirement ID plus a shared retained-artifact placeholder. These
 templates are release artifacts and checksum-covered operator starting points,
 not completion evidence.
 
+`evidence/production-release-templates/` contains one checked template JSON for
+each production-release requirement ID plus a shared retained-artifact
+placeholder. These templates are release artifacts and checksum-covered
+operator starting points, not completion evidence.
+
 `drop-authorization-signing/drop-authorization-signing-evidence-template.json`
 is the checked no-secret template for future reviewed drop authorization
 signing ceremonies. Its schema lives at
@@ -160,8 +165,8 @@ artifacts, dependency artifact descriptors/source files, ABI compatibility
 baseline, deployment manifest config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, drop
 authorization signing evidence, signer custody readiness evidence, artifact
-schemas, non-local release evidence metadata, public-beta evidence status, and
-release manifest. Treat
+schemas, non-local release evidence metadata and templates, public-beta
+evidence status, and release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.

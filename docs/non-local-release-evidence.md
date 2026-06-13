@@ -88,6 +88,10 @@ For public-beta blockers, start from the matching checked template under
 The checker requires one template for each public-beta requirement ID. These
 files are still `record_type: "template"` and `review_status: "template"`;
 they are operator starting points, not reviewed evidence.
+For production-release blockers, start from the matching checked template under
+[`release-artifacts/evidence/production-release-templates/`](../release-artifacts/evidence/production-release-templates/).
+The checker requires one template for each production-release requirement ID
+and rejects public-beta-only IDs in that directory.
 
 Validate metadata with:
 
@@ -98,8 +102,8 @@ python scripts/check_non_local_release_evidence.py
 
 The checker validates the public-beta requirement ID, environment, chain ID
 policy, retained artifact path, SHA-256 digest, review status, source metadata,
-public-beta template-set coverage, and no-secret boundary before release
-manifest and checksum generation.
+public-beta and production-release template-set coverage, and no-secret
+boundary before release manifest and checksum generation.
 
 ## Public-Beta Requirement Mapping
 
