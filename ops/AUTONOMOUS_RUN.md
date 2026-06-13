@@ -36,10 +36,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/250` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/251` |
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/252` |
-| Next issue | TBD after issue #251 merges |
+| Next issue | TBD after PR #252 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 17:15 UTC` |
+| Last updated | `2026-06-13 17:17 UTC` |
 
 ## Packaging Notes
 
@@ -182,10 +182,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add non-local evidence scaffold generator (Queue Item 120)
 
-Status: PR #252 open; CI failed on stale release evidence packet index after
-the non-local evidence runbook changed. Local generated-artifact fix is
-complete and ready to push after final validation. CodeRabbit review is still
-pending with no review threads.
+Status: PR #252 open; CI repair `a61b53b` pushed after stale generated release
+evidence artifacts failed the public-beta evidence gate. CodeRabbit returned
+three minor comments; all are addressed in this follow-up docs/state patch.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/251`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/252`.
 Branch: `codex/non-local-evidence-generator`.
@@ -222,6 +221,9 @@ Completed local validation so far:
 - `python scripts/test_non_local_release_evidence_generator.py`.
 - `python -m py_compile scripts/generate_non_local_release_evidence.py scripts/test_non_local_release_evidence_generator.py`.
 - `python scripts/test_non_local_release_evidence.py`.
+- `python scripts/generate_non_local_release_evidence.py ... --check` against
+  a temporary generated output under
+  `release-artifacts/evidence/tmp-generator-check/` before deleting it.
 - `python scripts/check_non_local_release_evidence.py`.
 - `python scripts/test_release_readiness.py`.
 - `python scripts/check_release_readiness.py`.

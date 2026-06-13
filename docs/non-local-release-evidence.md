@@ -112,7 +112,9 @@ already exists and the operator needs a metadata envelope that matches the
 canonical checker. The generator copies the requirement ID and redaction policy
 from a committed public-beta or production-release template, computes the
 retained artifact digest, sets `record_type: "evidence"`, and validates the
-result with `scripts/check_non_local_release_evidence.py` before writing.
+result against the same checker rules before writing. Run
+`scripts/check_non_local_release_evidence.py` separately when you want an
+explicit verification pass.
 
 Example fork rehearsal draft:
 
