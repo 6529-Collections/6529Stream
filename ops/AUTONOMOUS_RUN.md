@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-release-packet-merge` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/209` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/210` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/211` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 09:56 UTC` |
+| Last updated | `2026-06-13 10:00 UTC` |
 
 ## Packaging Notes
 
@@ -170,9 +170,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile release evidence packet index merge state (Queue Item 108)
 
-Status: Local implementation in progress; PR not opened yet.
+Status: PR #211 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/210`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/211`.
 Branch: `codex/reconcile-release-packet-merge`.
 Branch started from PR #209 squash merge commit
 `dec345094e26304a50c5b5e098c002b002972c37`.
@@ -208,6 +208,13 @@ Completed local validation:
 
 All focused state-reconciliation checks passed locally at
 `2026-06-13 09:59 UTC`.
+
+Remote review:
+
+- PR #211 opened against `main` from head
+  `6a9ff2c3e2e4970c874b1dffd4a76a5b285d9457`.
+- CodeRabbit requested in comment `4698194605`.
+- GitHub Actions and CodeRabbit review are pending.
 
 ### Completed: Add release evidence packet index and checker (Queue Item 107)
 
@@ -10113,6 +10120,7 @@ Outcome:
 | 2026-06-13 09:55 | Merge PR #209 | Release evidence packet index merged as `dec345094e26304a50c5b5e098c002b002972c37`; CI run `27463241499` and CodeRabbit passed on final head `e571a2a2b4107c27f5c229e02d00dbe93c78381a`, and issue #207 closed completed |
 | 2026-06-13 09:56 | Create issue #210 and select Queue Item 108 | Durable state still marked PR #209 active after merge, so reconcile roadmap/run-state evidence before choosing the next substantive no-secret roadmap target |
 | 2026-06-13 09:59 | Finish Queue Item 108 local validation | Heading scan, state evidence grep, and whitespace checks pass for the roadmap/run-state reconciliation |
+| 2026-06-13 10:00 | Open PR #211 and request CodeRabbit | State reconciliation PR opened on head `6a9ff2c3e2e4970c874b1dffd4a76a5b285d9457`; CodeRabbit requested in comment `4698194605` |
 
 ## Resume Instructions
 
