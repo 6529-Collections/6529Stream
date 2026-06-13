@@ -46,6 +46,8 @@ def load_json(path: Path) -> Any:
             return json.load(handle)
     except FileNotFoundError as exc:
         raise ReleaseEvidenceIssueLinksError(f"missing required file: {path}") from exc
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ReleaseEvidenceIssueLinksError(f"unable to read {path}: {exc}") from exc
     except json.JSONDecodeError as exc:
         raise ReleaseEvidenceIssueLinksError(f"invalid JSON in {path}: {exc}") from exc
 

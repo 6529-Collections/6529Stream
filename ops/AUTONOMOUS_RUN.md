@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 11:51 UTC` |
+| Last updated | `2026-06-13 12:09 UTC` |
 
 ## Packaging Notes
 
@@ -172,7 +172,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Link release evidence backlog entries to GitHub tracker issues (Queue Item 110)
 
-Status: PR #232 open; CI and CodeRabbit pending.
+Status: PR #232 open; CodeRabbit review fix validated locally and ready to
+push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/214`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/232`.
 Branch: `codex/release-evidence-issue-links`.
@@ -234,6 +235,13 @@ Completed local validation so far:
   `scripts/check.ps1`).
 - `make check` (passes with existing Solidity compiler and Foundry trace warning
   noise only).
+- After CodeRabbit review `4491391500`, repeated
+  `python -m py_compile scripts/check_release_evidence_issue_links.py scripts/test_release_evidence_issue_links.py`,
+  `python scripts/test_release_evidence_issue_links.py`,
+  `python scripts/check_release_evidence_issue_links.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`, `git diff --check`,
+  and full `make check`; all pass with existing warning noise only.
 
 Next validation:
 
@@ -245,7 +253,15 @@ Remote review:
 - PR #232 opened against `main` from head
   `b159a596923f16d33e6bdb8f59700a39ed9cd913`.
 - CodeRabbit requested in comment `4698436262`.
-- GitHub Actions and CodeRabbit review are pending.
+- State follow-up commit `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`
+  pushed after PR creation; CodeRabbit requested again in comment
+  `4698439740`.
+- GitHub Actions CI run `27465990522` passed on head
+  `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`.
+- CodeRabbit review `4491391500` requested consistent IO/UTF-8 decode error
+  wrapping in the issue-link JSON loader.
+- Review fix adds the error wrapper plus invalid-encoding regression coverage
+  and passes focused/full local validation.
 
 ### PR candidate: Add release evidence issue backlog artifact (Queue Item 109)
 
@@ -10258,6 +10274,7 @@ Outcome:
 | 2026-06-13 11:32 | Start Queue Item 110 | Created branch `codex/release-evidence-issue-links` from PR #213 squash merge and began committing the deterministic issue-link map/checker for issue #214 |
 | 2026-06-13 11:47 | Finish Queue Item 110 local validation | Focused issue-link, release-artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, and full `make check` validation pass with existing Foundry warning noise only |
 | 2026-06-13 11:51 | Open PR #232 and request CodeRabbit | Release evidence issue-link PR opened on head `b159a596923f16d33e6bdb8f59700a39ed9cd913`; CodeRabbit requested in comment `4698436262` |
+| 2026-06-13 12:09 | Address CodeRabbit PR #232 review | CI run `27465990522` passed on head `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`; CodeRabbit review `4491391500` requested IO/UTF-8 decode error wrapping, and the follow-up regression plus full `make check` validation pass locally |
 
 ## Resume Instructions
 

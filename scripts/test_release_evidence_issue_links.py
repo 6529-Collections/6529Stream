@@ -208,6 +208,21 @@ class ReleaseEvidenceIssueLinksTests(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("release evidence issue links check failed", stderr.getvalue())
 
+    def test_main_reports_invalid_encoding(self) -> None:
+        """Unreadable UTF-8 inputs are reported as validation failures."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(root / checker.DEFAULT_ISSUE_LINKS, issue_links())
+            (root / checker.DEFAULT_BACKLOG).parent.mkdir(parents=True, exist_ok=True)
+            (root / checker.DEFAULT_BACKLOG).write_bytes(b"\xff")
+
+            stderr = StringIO()
+            with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                result = checker.main(["--repo-root", str(root)])
+
+            self.assertEqual(result, 1)
+            self.assertIn("unable to read", stderr.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
