@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-link-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/232` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/233` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/234` |
 | Next issue | Review open release evidence tracker issues #215 through #231 after state reconciliation |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 12:19 UTC` |
+| Last updated | `2026-06-13 12:23 UTC` |
 
 ## Packaging Notes
 
@@ -173,9 +173,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile release evidence issue links merge state (Queue Item 111)
 
-Status: local docs-only reconciliation validated; ready to open PR.
+Status: PR #234 open; CodeRabbit and CI pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/233`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/234`.
 Branch: `codex/release-evidence-link-state`.
 Branch started from PR #232 squash merge commit
 `acfb94230ad596de6a4578f6b269cbc6fa8fd78d`.
@@ -211,7 +211,9 @@ Completed local validation:
 
 Remote review:
 
-- Pending PR creation and CodeRabbit review.
+- PR #234 opened against `main` from head
+  `dff1c2d4aad9c3708cf19031a99840fe37bfa31e`.
+- CodeRabbit review pending.
 
 ### Completed: Link release evidence backlog entries to GitHub tracker issues (Queue Item 110)
 
@@ -10267,6 +10269,7 @@ Outcome:
 | 2026-06-13 11:51 | Open PR #232 and request CodeRabbit | Release evidence issue-link PR opened on head `b159a596923f16d33e6bdb8f59700a39ed9cd913`; CodeRabbit requested in comment `4698436262` |
 | 2026-06-13 12:09 | Address CodeRabbit PR #232 review | CI run `27465990522` passed on head `7d959c5fdc49b79dd1bb1c2240f8ff86bfd71ff9`; CodeRabbit review `4491391500` requested IO/UTF-8 decode error wrapping, and the follow-up regression plus full `make check` validation pass locally |
 | 2026-06-13 12:18 | Merge PR #232 and select Queue Item 111 | Release evidence issue links merged as `acfb94230ad596de6a4578f6b269cbc6fa8fd78d` after final CI run `27466388746`, CodeRabbit success, and issue #214 closure; issue #233 opened to reconcile durable state before continuing the child evidence tracker issues |
+| 2026-06-13 12:23 | Open PR #234 | Release evidence issue-link state reconciliation PR opened on head `dff1c2d4aad9c3708cf19031a99840fe37bfa31e`; CodeRabbit review will be requested on the PR-state head |
 
 ## Resume Instructions
 
