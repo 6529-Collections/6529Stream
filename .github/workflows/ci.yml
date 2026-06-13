@@ -47,6 +47,7 @@ jobs:
           done
 
           python3 -m py_compile \
+            scripts/argparse_helpers.py \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
             scripts/check_metadata_fixtures.py \
@@ -95,6 +96,8 @@ jobs:
             scripts/check_release_evidence_issue_links.py \
             scripts/export_release_evidence_issue_snapshot.py \
             scripts/test_release_evidence_issue_snapshot.py \
+            scripts/audit_release_evidence_issue_snapshots.py \
+            scripts/test_release_evidence_issue_snapshot_audit.py \
             scripts/test_release_evidence_issue_body_sync.py \
             scripts/generate_release_evidence_issue_body_sync.py \
             scripts/test_release_evidence_issue_bodies.py \
@@ -312,6 +315,7 @@ jobs:
           python3 scripts/test_release_evidence_issue_links.py 2>&1 | tee ci-logs/release-evidence-issue-links-tests.log
           python3 scripts/check_release_evidence_issue_links.py 2>&1 | tee ci-logs/release-evidence-issue-links-check.log
           python3 scripts/test_release_evidence_issue_snapshot.py 2>&1 | tee ci-logs/release-evidence-issue-snapshot-tests.log
+          python3 scripts/test_release_evidence_issue_snapshot_audit.py 2>&1 | tee ci-logs/release-evidence-issue-snapshot-audit-tests.log
           python3 scripts/test_release_evidence_issue_labels.py 2>&1 | tee ci-logs/release-evidence-issue-labels-tests.log
           python3 scripts/check_release_evidence_issue_labels.py 2>&1 | tee ci-logs/release-evidence-issue-labels-check.log
           python3 scripts/test_release_evidence_issue_body_sync.py 2>&1 | tee ci-logs/release-evidence-issue-body-sync-tests.log

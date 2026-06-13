@@ -98,6 +98,7 @@ REQUIRED_COMMANDS = [
     "python scripts/test_release_evidence_issue_links.py",
     "python scripts/check_release_evidence_issue_links.py",
     "python scripts/test_release_evidence_issue_snapshot.py",
+    "python scripts/test_release_evidence_issue_snapshot_audit.py",
     "python scripts/test_release_evidence_issue_labels.py",
     "python scripts/check_release_evidence_issue_labels.py",
     "python scripts/test_release_evidence_issue_body_sync.py",

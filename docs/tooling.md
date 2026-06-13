@@ -70,6 +70,7 @@ python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/test_release_evidence_issue_snapshot.py
+python scripts/test_release_evidence_issue_snapshot_audit.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -246,8 +247,17 @@ The release evidence issue-link map is committed at
 backlog entry has a durable tracker issue without querying GitHub during CI.
 Run `python scripts/check_release_evidence_issue_labels.py` to verify committed
 `applied_labels` are unique and drawn from the generated suggested label set.
-To audit live GitHub label drift without adding network access to CI, export a
-snapshot and pass it to the checker:
+To audit live GitHub tracker drift without adding network access to CI, run the
+operator-only orchestrator:
+
+```bash
+python scripts/audit_release_evidence_issue_snapshots.py
+```
+
+Use `--profile labels`, `--profile bodies`, or `--profile closure` to run one
+live audit profile. The orchestrator exports UTF-8 JSON snapshots with the
+existing exporter and then runs the matching checker. To audit live GitHub label
+drift manually, export a snapshot and pass it to the checker:
 
 ```bash
 python scripts/export_release_evidence_issue_snapshot.py --profile labels
@@ -443,6 +453,7 @@ python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/test_release_evidence_issue_snapshot.py
+python scripts/test_release_evidence_issue_snapshot_audit.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py

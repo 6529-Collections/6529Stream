@@ -174,6 +174,7 @@ release-evidence-issue-links-check: release-evidence-issue-backlog-check
 
 release-evidence-issue-labels-check: release-evidence-issue-links-check
 	$(PYTHON) scripts/test_release_evidence_issue_snapshot.py
+	$(PYTHON) scripts/test_release_evidence_issue_snapshot_audit.py
 	$(PYTHON) scripts/test_release_evidence_issue_labels.py
 	$(PYTHON) scripts/check_release_evidence_issue_labels.py
 

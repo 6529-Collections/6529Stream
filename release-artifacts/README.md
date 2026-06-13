@@ -78,6 +78,7 @@ python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/test_release_evidence_issue_snapshot.py
+python scripts/test_release_evidence_issue_snapshot_audit.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -176,6 +177,9 @@ All retained-evidence tracker issues should carry `release`, `roadmap`, and
 rows also carry `production-release`.
 Use `scripts/export_release_evidence_issue_snapshot.py` to write label, body,
 or closure snapshots as UTF-8 JSON without relying on shell redirection.
+Use `scripts/audit_release_evidence_issue_snapshots.py` as the operator-only
+one-command live audit for label, body, and closure drift; CI runs only its
+mocked unit tests and never requires GitHub network access.
 
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and
