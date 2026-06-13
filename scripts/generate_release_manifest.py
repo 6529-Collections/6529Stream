@@ -31,6 +31,8 @@ DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
 PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
+RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
+RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
@@ -943,6 +945,17 @@ def build_manifest(
                 release_artifacts_dir / PRODUCTION_RELEASE_BLOCKERS_FILENAME,
                 repo_root,
             ),
+            "release_evidence_packet_index": {
+                "json": file_record(
+                    release_artifacts_dir / RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME,
+                    repo_root,
+                    schema_required=True,
+                ),
+                "markdown": file_record(
+                    release_artifacts_dir / RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME,
+                    repo_root,
+                ),
+            },
             "release_signature_evidence": release_signatures,
             "non_local_release_evidence": non_local_release_evidence,
             "drop_authorization_signing_evidence": (

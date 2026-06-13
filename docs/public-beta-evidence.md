@@ -17,6 +17,8 @@ python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
+python scripts/test_release_evidence_packet_index.py
+python scripts/generate_release_evidence_packet_index.py --check
 ```
 
 ## Evidence Artifact
@@ -43,6 +45,15 @@ It is derived from the same status file but renders only production-release
 requirements and links the matching checked template under
 `release-artifacts/evidence/production-release-templates/` for each row.
 It also preserves the blocked baseline and does not claim production readiness.
+
+The release evidence packet index is generated as both
+[`release-artifacts/latest/release-evidence-packet-index.json`](../release-artifacts/latest/release-evidence-packet-index.json)
+and
+[`release-artifacts/latest/release-evidence-packet-index.md`](../release-artifacts/latest/release-evidence-packet-index.md).
+It maps every public-beta and production-release requirement to the blocker
+report row, checked template path, retained-artifact expectation, validation
+commands, and current blocked posture. Template rows remain template-only and
+cannot complete evidence requirements by themselves.
 
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
@@ -167,7 +178,9 @@ To move a requirement to `complete`:
 10. Regenerate and check the blocker reports with
    `python scripts/generate_public_beta_blocker_report.py` and
    `python scripts/generate_production_release_blocker_report.py`.
-11. Regenerate and check the release manifest and checksum bundle.
+11. Regenerate and check the release evidence packet index with
+   `python scripts/generate_release_evidence_packet_index.py`.
+12. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

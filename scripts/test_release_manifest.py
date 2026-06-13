@@ -410,6 +410,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         latest / "production-release-blockers.md",
         "# Production Release Evidence Blocker Report\n\nGenerated fixture.\n",
     )
+    write_json(
+        latest / "release-evidence-packet-index.json",
+        {"schema_version": "6529stream.release-evidence-packet-index.v1"},
+    )
+    write_text(
+        latest / "release-evidence-packet-index.md",
+        "# Release Evidence Packet Index\n\nGenerated fixture.\n",
+    )
     write_text(
         non_local_retained_artifact,
         (
@@ -1008,6 +1016,31 @@ class ReleaseManifestTests(unittest.TestCase):
                 production_blockers["sha256"],
                 generator.file_sha256(paths["latest"] / "production-release-blockers.md"),
             )
+            packet_index = manifest["release_artifacts"]["release_evidence_packet_index"]
+            self.assertEqual(
+                packet_index["json"]["path"],
+                "release-artifacts/latest/release-evidence-packet-index.json",
+            )
+            self.assertEqual(
+                packet_index["json"]["schema_version"],
+                "6529stream.release-evidence-packet-index.v1",
+            )
+            self.assertEqual(
+                packet_index["json"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-packet-index.json"
+                ),
+            )
+            self.assertEqual(
+                packet_index["markdown"]["path"],
+                "release-artifacts/latest/release-evidence-packet-index.md",
+            )
+            self.assertEqual(
+                packet_index["markdown"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-packet-index.md"
+                ),
+            )
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
@@ -1185,6 +1218,23 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 production_blockers["sha256"],
                 generator.file_sha256(custom_latest / "production-release-blockers.md"),
+            )
+            packet_index = manifest["release_artifacts"]["release_evidence_packet_index"]
+            self.assertEqual(
+                packet_index["json"]["path"],
+                "custom-release-artifacts/latest/release-evidence-packet-index.json",
+            )
+            self.assertEqual(
+                packet_index["json"]["sha256"],
+                generator.file_sha256(custom_latest / "release-evidence-packet-index.json"),
+            )
+            self.assertEqual(
+                packet_index["markdown"]["path"],
+                "custom-release-artifacts/latest/release-evidence-packet-index.md",
+            )
+            self.assertEqual(
+                packet_index["markdown"]["sha256"],
+                generator.file_sha256(custom_latest / "release-evidence-packet-index.md"),
             )
 
     def test_check_mode_accepts_current_manifest(self) -> None:

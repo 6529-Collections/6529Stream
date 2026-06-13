@@ -23,6 +23,7 @@ python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
+python scripts/generate_release_evidence_packet_index.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -64,6 +65,8 @@ python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
+python scripts/test_release_evidence_packet_index.py
+python scripts/generate_release_evidence_packet_index.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -127,6 +130,13 @@ requirements, their evidence posture, matching template paths, future external
 evidence categories, and validation commands without changing the intentionally
 blocked production readiness status.
 
+`latest/release-evidence-packet-index.json` and
+`latest/release-evidence-packet-index.md` are generated from the evidence
+manifest, blocker reports, and checked public-beta and production-release
+templates. They map every evidence row to its blocker report, template,
+retained-artifact expectation, validation commands, and current readiness
+posture without treating templates as completion evidence.
+
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema
 lives at `schema/non-local-release-evidence.schema.json`, and the template
@@ -176,7 +186,7 @@ baseline, deployment manifest config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, drop
 authorization signing evidence, signer custody readiness evidence, artifact
 schemas, non-local release evidence metadata and templates, public-beta
-evidence status, and release manifest. Treat
+evidence status, release evidence packet index, and release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.
@@ -224,6 +234,7 @@ python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
+python scripts/generate_release_evidence_packet_index.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
