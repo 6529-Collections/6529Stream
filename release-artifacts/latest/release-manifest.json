@@ -144,14 +144,14 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:7c65f70d34ee562125aede75378d479168f4274a9a2c02f3f450e358387d294b",
-        "size_bytes": 73317,
+        "sha256": "sha256:772c74bc81b4eb07185a9f5ab8ba1de2127f2dfd3c60fadb8246779e62ac061e",
+        "size_bytes": 73438,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:1f3f075978f3944498bab307bc67bf133f25c500fbf2f6fb42cd8bd3135828f8",
-        "size_bytes": 65190
+        "sha256": "sha256:12a1607e73bea3f52ab128e2a0f01e5c69206e426c4d7b0c6cf5f98a9c378cdb",
+        "size_bytes": 65309
       }
     },
     "release_signature_evidence": [
@@ -1618,8 +1618,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:6279d25d19b8840f96975054b796e5eb6922bde4bcdbf3bf976cabc8358ade82",
-      "size_bytes": 16739
+      "sha256": "sha256:1956b84b7db8352ebe6c616c0177be71b9fd6f2a788998eb8b34a52f6ad2ffa4",
+      "size_bytes": 16903
     },
     "governance_docs": [
       {
@@ -1649,8 +1649,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:3ef2c578c3345861896236dccbc4222db8ee1969367e851dca51d0b4646b84e9",
-        "size_bytes": 13225
+        "sha256": "sha256:c0b90e12eb14c86360ffc3201c9af926274bd8366d7518bf2a0cac72a65cb5d2",
+        "size_bytes": 14063
       },
       {
         "path": "docs/non-local-release-evidence.md",
@@ -1689,13 +1689,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:d0809f10c5685f626265c1234577250712d3467b1be7b9d9895f2e439afa6bba",
-        "size_bytes": 22668
+        "sha256": "sha256:978a8735b8e2e9ee2463795ec64fcc0a9b7bf9b3e49689a69defd9a1ddf3f2d2",
+        "size_bytes": 23048
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:1ff71d20781554a84142fd899a688e47e31dbbe535a34d69d972a4553c994763",
-        "size_bytes": 25205
+        "sha256": "sha256:a32aea9e977ef143aadb65e64b32a7db69025b01816b2eef2863d3c6ba9cb7c7",
+        "size_bytes": 26300
       },
       {
         "path": "docs/status.md",

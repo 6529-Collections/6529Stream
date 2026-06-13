@@ -231,7 +231,21 @@ To move a requirement to `complete`:
     `python scripts/generate_release_evidence_issue_body_sync.py`,
     `python scripts/test_release_evidence_issue_body_sync.py`, and
     `python scripts/generate_release_evidence_issue_body_sync.py --check`.
-16. Regenerate and check the release manifest and checksum bundle.
+16. Check committed release evidence tracker bodies with
+    `python scripts/test_release_evidence_issue_bodies.py` and
+    `python scripts/check_release_evidence_issue_bodies.py`. To audit live
+    GitHub body drift, export a local snapshot and pass it with `--live-json`:
+
+    ```bash
+    gh issue list --repo 6529-Collections/6529Stream --state open --limit 100 --json number,title,body,state > tmp/release-evidence-issue-bodies.json
+    python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
+    ```
+
+    If drift is reported, generate deterministic body files with
+    `python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/release-evidence-issue-bodies`
+    and apply the issue-specific `gh issue edit ... --body-file ...` command
+    printed by the checker.
+17. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

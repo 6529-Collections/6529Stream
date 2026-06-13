@@ -100,6 +100,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_release_evidence_issue_labels.py",
     "python scripts/test_release_evidence_issue_body_sync.py",
     "python scripts/generate_release_evidence_issue_body_sync.py --check",
+    "python scripts/test_release_evidence_issue_bodies.py",
+    "python scripts/check_release_evidence_issue_bodies.py",
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
     "make check",

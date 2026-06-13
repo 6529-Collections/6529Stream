@@ -1105,6 +1105,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 | --- |
 | `python scripts/test_release_evidence_issue_body_sync.py` |
 | `python scripts/generate_release_evidence_issue_body_sync.py --check` |
+| `python scripts/test_release_evidence_issue_bodies.py` |
+| `python scripts/check_release_evidence_issue_bodies.py` |
 | `python scripts/test_release_evidence_issue_links.py` |
 | `python scripts/check_release_evidence_issue_links.py` |
 | `python scripts/generate_release_manifest.py --check` |

@@ -166,7 +166,12 @@ JSON snapshot with `--live-json` before a release ceremony.
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and
 committed issue-link map into exact GitHub issue body payloads plus a Markdown
 review view. They are no-secret, tracker-only artifacts; they do not update
-GitHub automatically and do not make tracker closure retained evidence.
+GitHub automatically and do not make tracker closure retained evidence. The
+`scripts/check_release_evidence_issue_bodies.py` checker validates committed
+body payloads deterministically, can audit an exported live GitHub issue JSON
+snapshot with `--live-json`, and can write deterministic per-issue body files
+with `--write-body-files` for operator-run `gh issue edit --body-file`
+remediation.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema
