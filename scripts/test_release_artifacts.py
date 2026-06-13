@@ -26,6 +26,11 @@ def write_json(path: Path, value: object) -> None:
         handle.write("\n")
 
 
+def write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value, encoding="utf-8", newline="\n")
+
+
 class ReleaseArtifactTests(unittest.TestCase):
     def test_generator_outputs_event_topic_interface_id_and_hashes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -153,6 +158,10 @@ class ReleaseArtifactTests(unittest.TestCase):
             write_json(
                 output_dir / "public-beta-evidence.json",
                 {"schema_version": "6529stream.public-beta-evidence.v1"},
+            )
+            write_text(
+                output_dir / "public-beta-blockers.md",
+                "# Public Beta Evidence Blocker Report\n",
             )
             write_json(
                 output_dir / "source-verification-inputs.json",

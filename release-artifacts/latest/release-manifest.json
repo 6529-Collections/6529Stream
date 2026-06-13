@@ -99,6 +99,11 @@
         "production_release": 9
       }
     },
+    "public_beta_blocker_report": {
+      "path": "release-artifacts/latest/public-beta-blockers.md",
+      "sha256": "sha256:3ac41c7b070d6ad6a858d2829d54d77b00dc44879058f60f3b01b20fce744a49",
+      "size_bytes": 9707
+    },
     "release_signature_evidence": [
       {
         "path": "release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json",
@@ -764,8 +769,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:7ca299adea431991fdcb4890e7e919ab466068ddb957f70aa17964f7b58c2203",
-      "size_bytes": 14369
+      "sha256": "sha256:0931ae236d6860646148866020640d80aa8d42f6769eecc87cc886c05946f5f0",
+      "size_bytes": 14622
     },
     "governance_docs": [
       {
@@ -795,8 +800,8 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:b87c1347465be3c3ef98fc051270762a746604b3568b61a5274c55585e453094",
-        "size_bytes": 7001
+        "sha256": "sha256:8b2f39236d844696402077b0e4fb244f29376f083fb69b1734978a991d905b6d",
+        "size_bytes": 7630
       },
       {
         "path": "docs/non-local-release-evidence.md",
@@ -835,8 +840,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:3eb0bee15457f950e5fc382b1e0364e45f9d446a050aa7db8c058cc6ce6072af",
-        "size_bytes": 17316
+        "sha256": "sha256:0b75762b2d41e6b559d4902d0364cbef4ee0b4b5cb1c1491fa913328e3b9662e",
+        "size_bytes": 17797
       },
       {
         "path": "docs/tooling.md",

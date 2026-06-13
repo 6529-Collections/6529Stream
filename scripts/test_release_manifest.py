@@ -403,6 +403,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         },
     )
     write_text(
+        latest / "public-beta-blockers.md",
+        "# Public Beta Evidence Blocker Report\n\nGenerated fixture.\n",
+    )
+    write_text(
         non_local_retained_artifact,
         (
             "Template retained artifact for non-local release evidence tests.\n"
@@ -883,6 +887,17 @@ class ReleaseManifestTests(unittest.TestCase):
                 ],
                 len(generator.public_beta_checker.PRODUCTION_REQUIREMENTS),
             )
+            public_beta_blockers = manifest["release_artifacts"][
+                "public_beta_blocker_report"
+            ]
+            self.assertEqual(
+                public_beta_blockers["path"],
+                "release-artifacts/latest/public-beta-blockers.md",
+            )
+            self.assertEqual(
+                public_beta_blockers["sha256"],
+                generator.file_sha256(paths["latest"] / "public-beta-blockers.md"),
+            )
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
@@ -1008,6 +1023,15 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 public_beta["sha256"],
                 generator.file_sha256(custom_latest / "public-beta-evidence.json"),
+            )
+            blockers = manifest["release_artifacts"]["public_beta_blocker_report"]
+            self.assertEqual(
+                blockers["path"],
+                "custom-release-artifacts/latest/public-beta-blockers.md",
+            )
+            self.assertEqual(
+                blockers["sha256"],
+                generator.file_sha256(custom_latest / "public-beta-blockers.md"),
             )
 
     def test_check_mode_accepts_current_manifest(self) -> None:

@@ -113,6 +113,10 @@ the release policy in `docs/release-policy.md`.
   fork/testnet/live, external audit, signature, signed tag, address,
   broadcast-retention, explorer-verification, and post-audit blockers stay
   machine-checkable before any public-beta or production release claim.
+- Added a generated public-beta blocker report under
+  `release-artifacts/latest/public-beta-blockers.md`, with local/CI drift
+  checks and release manifest/checksum coverage for the current incomplete
+  evidence rows without changing readiness claims.
 - Added a non-local release evidence intake runbook so fork/testnet/live,
   audit, explorer, gas, invariant, checksum-signature, and signed-tag evidence
   has required retained fields, no-secret redaction rules, reviewer
