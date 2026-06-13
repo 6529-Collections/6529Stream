@@ -394,9 +394,11 @@ changing readiness claims. Issue
 for a focused production-release blocker report generated from the same
 evidence manifest and template set without changing readiness claims. Issue
 [#207](https://github.com/6529-Collections/6529Stream/issues/207) adds a
-no-secret release evidence packet index/checker that maps blocker rows to
-templates, retained-artifact expectations, validation commands, and readiness
-posture without changing evidence contents or readiness claims.
+no-secret release evidence packet index/checker that records phase,
+requirement ID, current status, owner/reviewer posture, blocker-report
+reference, template path, retained-artifact expectation, validation commands,
+readiness posture, and whether template-only evidence can ever complete a row
+without changing evidence contents or readiness claims.
 
 Exit criteria:
 

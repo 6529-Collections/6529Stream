@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 09:30 UTC` |
+| Last updated | `2026-06-13 09:42 UTC` |
 
 ## Packaging Notes
 
@@ -169,7 +169,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence packet index and checker (Queue Item 107)
 
-Status: PR #209 open; CodeRabbit requested; GitHub Actions pending.
+Status: PR #209 open; first CI passed; CodeRabbit review fixes applied
+locally and pending follow-up push/recheck.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/207`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/209`.
 Branch: `codex/release-evidence-packet-index`.
@@ -256,7 +257,19 @@ Remote review:
 - PR #209 opened against `main` from head
   `dc2a0b000dbe3855aa043c09fe67ec19a15a2c5b`.
 - CodeRabbit requested in comment `4698133258`.
-- GitHub Actions and CodeRabbit comments are pending.
+- State follow-up pushed head `8e2d9afd9328dde66abaa65a0d9d4160b5fff965`.
+- GitHub Actions run `27462987501` passed on head
+  `8e2d9afd9328dde66abaa65a0d9d4160b5fff965`.
+- CodeRabbit posted three actionable quick wins and one roadmap nit on head
+  `8e2d9afd9328dde66abaa65a0d9d4160b5fff965`.
+- Accepted all CodeRabbit findings locally: CI py_compile ordering, public-beta
+  evidence packet-index check command, derived packet test cardinality/template
+  expectations, and expanded roadmap packet-field summary.
+- Review-fix local validation: `python scripts/test_release_evidence_packet_index.py`,
+  `python scripts/generate_release_evidence_packet_index.py --check`,
+  `python -m py_compile scripts/test_release_evidence_packet_index.py scripts/generate_release_evidence_packet_index.py`,
+  `python scripts/check_release_readiness.py`, regenerated release manifest and
+  checksum bundle, and pending final drift/whitespace checks before push.
 
 ### Completed: Reconcile production blocker report merge state (Queue Item 106)
 

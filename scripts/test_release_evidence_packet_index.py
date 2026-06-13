@@ -257,7 +257,10 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             )
             row_ids = {(row["phase"], row["requirement_id"]) for row in packet["rows"]}
 
-            self.assertEqual(len(packet["rows"]), 17)
+            expected_rows = len(checker.PUBLIC_BETA_REQUIREMENTS) + len(
+                checker.PRODUCTION_REQUIREMENTS
+            )
+            self.assertEqual(len(packet["rows"]), expected_rows)
             for requirement_id in checker.PUBLIC_BETA_REQUIREMENTS:
                 self.assertIn((checker.PUBLIC_BETA_PHASE, requirement_id), row_ids)
             for requirement_id in checker.PRODUCTION_REQUIREMENTS:
@@ -319,10 +322,11 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_repo(root)
+            missing_requirement_id = checker.PUBLIC_BETA_REQUIREMENTS[0]
             missing_template = (
                 root
                 / non_local_checker.PUBLIC_BETA_TEMPLATE_DIR
-                / "external-audit-report-template.json"
+                / (missing_requirement_id.replace("_", "-") + "-template.json")
             )
             missing_template.unlink()
 

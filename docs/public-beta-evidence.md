@@ -179,7 +179,9 @@ To move a requirement to `complete`:
    `python scripts/generate_public_beta_blocker_report.py` and
    `python scripts/generate_production_release_blocker_report.py`.
 11. Regenerate and check the release evidence packet index with
-   `python scripts/generate_release_evidence_packet_index.py`.
+   `python scripts/generate_release_evidence_packet_index.py`,
+   `python scripts/test_release_evidence_packet_index.py`, and
+   `python scripts/generate_release_evidence_packet_index.py --check`.
 12. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
