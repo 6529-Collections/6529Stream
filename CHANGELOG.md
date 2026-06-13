@@ -134,6 +134,10 @@ the release policy in `docs/release-policy.md`.
   `release-artifacts/latest/`, with local/CI checks tying every generated
   backlog entry to a GitHub tracker issue without treating tracker closure as
   retained evidence.
+- Added generated release evidence issue body-sync artifacts under
+  `release-artifacts/latest/`, with exact no-secret GitHub issue body payloads,
+  a Markdown review view, local/CI drift checks, and release manifest/checksum
+  coverage without automatically updating GitHub or changing readiness claims.
 - Added a non-local release evidence intake runbook so fork/testnet/live,
   audit, explorer, gas, invariant, checksum-signature, and signed-tag evidence
   has required retained fields, no-secret redaction rules, reviewer

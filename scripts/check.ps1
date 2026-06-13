@@ -93,6 +93,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_release_evidence_issue_backlog.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_evidence_issue_links.py"
 & $pythonPath @pythonArgs "scripts\check_release_evidence_issue_links.py"
+& $pythonPath @pythonArgs "scripts\test_release_evidence_issue_body_sync.py"
+& $pythonPath @pythonArgs "scripts\generate_release_evidence_issue_body_sync.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\check_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\test_audit_package.py"

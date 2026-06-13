@@ -26,6 +26,7 @@ python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/generate_release_evidence_issue_body_sync.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
@@ -73,6 +74,8 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_body_sync.py
+python scripts/generate_release_evidence_issue_body_sync.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -155,6 +158,12 @@ production-release readiness claims.
 from each issue-backlog entry to its GitHub issue. It lets maintainers audit
 that every incomplete evidence requirement has a durable issue without making
 the issue itself completion evidence.
+
+`latest/release-evidence-issue-body-sync.json` and
+`latest/release-evidence-issue-body-sync.md` join the generated backlog and
+committed issue-link map into exact GitHub issue body payloads plus a Markdown
+review view. They are no-secret, tracker-only artifacts; they do not update
+GitHub automatically and do not make tracker closure retained evidence.
 
 `evidence/non-local-release-evidence-template.json` is the checked no-secret
 template for future reviewed non-local release evidence metadata. Its schema

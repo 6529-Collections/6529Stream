@@ -430,6 +430,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         latest / "release-evidence-issue-links.json",
         {"schema_version": "6529stream.release-evidence-issue-links.v1"},
     )
+    write_json(
+        latest / "release-evidence-issue-body-sync.json",
+        {"schema_version": "6529stream.release-evidence-issue-body-sync.v1"},
+    )
+    write_text(
+        latest / "release-evidence-issue-body-sync.md",
+        "# Release Evidence Issue Body Sync\n\nGenerated fixture.\n",
+    )
     write_text(
         non_local_retained_artifact,
         (
@@ -1095,6 +1103,33 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["latest"] / "release-evidence-issue-links.json"
                 ),
             )
+            issue_body_sync = manifest["release_artifacts"][
+                "release_evidence_issue_body_sync"
+            ]
+            self.assertEqual(
+                issue_body_sync["json"]["path"],
+                "release-artifacts/latest/release-evidence-issue-body-sync.json",
+            )
+            self.assertEqual(
+                issue_body_sync["json"]["schema_version"],
+                "6529stream.release-evidence-issue-body-sync.v1",
+            )
+            self.assertEqual(
+                issue_body_sync["json"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-issue-body-sync.json"
+                ),
+            )
+            self.assertEqual(
+                issue_body_sync["markdown"]["path"],
+                "release-artifacts/latest/release-evidence-issue-body-sync.md",
+            )
+            self.assertEqual(
+                issue_body_sync["markdown"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"] / "release-evidence-issue-body-sync.md"
+                ),
+            )
             self.assertEqual(
                 manifest["source"]["non_local_evidence_dir"],
                 "release-artifacts/evidence",
@@ -1320,6 +1355,29 @@ class ReleaseManifestTests(unittest.TestCase):
                 issue_links["sha256"],
                 generator.file_sha256(
                     custom_latest / "release-evidence-issue-links.json"
+                ),
+            )
+            issue_body_sync = manifest["release_artifacts"][
+                "release_evidence_issue_body_sync"
+            ]
+            self.assertEqual(
+                issue_body_sync["json"]["path"],
+                "custom-release-artifacts/latest/release-evidence-issue-body-sync.json",
+            )
+            self.assertEqual(
+                issue_body_sync["json"]["sha256"],
+                generator.file_sha256(
+                    custom_latest / "release-evidence-issue-body-sync.json"
+                ),
+            )
+            self.assertEqual(
+                issue_body_sync["markdown"]["path"],
+                "custom-release-artifacts/latest/release-evidence-issue-body-sync.md",
+            )
+            self.assertEqual(
+                issue_body_sync["markdown"]["sha256"],
+                generator.file_sha256(
+                    custom_latest / "release-evidence-issue-body-sync.md"
                 ),
             )
 
