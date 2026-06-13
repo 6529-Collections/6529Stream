@@ -55,6 +55,8 @@ jobs:
             scripts/test_metadata_browser_sandbox.py \
             scripts/check_rehearsal_metadata_browser_sandbox.py \
             scripts/test_rehearsal_metadata_browser_sandbox.py \
+            scripts/generate_drop_authorization_payload.py \
+            scripts/test_drop_authorization_payload_generator.py \
             scripts/check_drop_authorization_fixtures.py \
             scripts/test_drop_authorization_fixtures.py \
             scripts/generate_source_verification_inputs.py \
@@ -165,6 +167,9 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs
+          python3 scripts/test_drop_authorization_payload_generator.py 2>&1 | tee ci-logs/drop-authorization-payload-generator-tests.log
+          python3 scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check 2>&1 | tee ci-logs/drop-authorization-fixed-price-payload-check.log
+          python3 scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check 2>&1 | tee ci-logs/drop-authorization-auction-payload-check.log
           python3 scripts/test_drop_authorization_fixtures.py 2>&1 | tee ci-logs/drop-authorization-fixture-tests.log
           python3 scripts/check_drop_authorization_fixtures.py 2>&1 | tee ci-logs/drop-authorization-fixture-check.log
 

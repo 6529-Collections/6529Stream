@@ -280,6 +280,12 @@ Containment:
 Recovery:
 
 - Reissue only reviewed payloads under the new signer epoch and domain.
+- Use the no-secret unsigned payload generator in
+  [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) to
+  rebuild reviewed typed data, then pass the generated typed data to the
+  approved signing system outside the repository. Include the generated digest
+  as cross-check evidence and for ERC-1271 `isValidSignature` verification
+  inputs where applicable.
 - Retain redacted signer-rotation evidence, event logs, affected drop IDs,
   cancellation transactions, and reviewer notes.
 - Update public communications with the new active signer state and any
@@ -346,6 +352,9 @@ Run the incident-response checker directly:
 ```sh
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_drop_authorization_payload_generator.py
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 ```

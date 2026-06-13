@@ -34,6 +34,9 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_metadata_browser_sandbox.py
 "$python_bin" scripts/test_rehearsal_metadata_browser_sandbox.py
 "$python_bin" scripts/check_rehearsal_metadata_browser_sandbox.py
+"$python_bin" scripts/test_drop_authorization_payload_generator.py
+"$python_bin" scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+"$python_bin" scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 "$python_bin" scripts/test_drop_authorization_fixtures.py
 "$python_bin" scripts/check_drop_authorization_fixtures.py
 "$python_bin" scripts/test_release_artifacts.py

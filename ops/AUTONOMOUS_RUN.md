@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/drop-authorization-signing-examples` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/178` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/177` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
+| Active PR branch | `codex/drop-authorization-payload-generator` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/179` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/180` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/181` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:14 UTC` |
+| Last updated | `2026-06-13 00:20 UTC` |
 
 ## Packaging Notes
 
@@ -147,13 +147,116 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 89 | Reconcile Gate G roadmap after non-local evidence schema merge | Gate G support | Implement issue #172 by marking PR #171 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and preserving the next queue target | Merged in PR #174 |
 | 90 | Add protocol incident response runbooks | Gate E/Gate G support | Implement issue #173 by adding no-secret operator runbooks for stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata/dependency configuration, signer compromise, and release artifact/evidence mistakes | Merged in PR #175 |
 | 91 | Reconcile roadmap after incident response runbook merge | Gate G support | Implement issue #176 by marking PR #175 merged, refreshing stale roadmap verification metadata, recording CI and CodeRabbit evidence, and selecting the next signing examples target | Merged in PR #178 |
-| 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Active on `codex/drop-authorization-signing-examples` |
+| 92 | Add drop authorization signing examples and fixtures | Gate G/Gate C support | Implement issue #177 by adding no-secret EIP-712/ERC-1271 signing examples, deterministic fixtures, checker/tests, docs links, and release artifact coverage if needed | Merged in PR #179 |
+| 93 | Add no-secret drop authorization payload generator tooling | Gate G/Gate C support | Implement issue #180 by adding a production-safe unsigned typed-data generator, derived-hash output, tests, docs links, and maintained local/CI gates without private-key handling | Active on `codex/drop-authorization-payload-generator` |
 
 ## Current PR Worklog
 
+### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
+
+Status: CodeRabbit fixes ready; awaiting rerun and re-review.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/180`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/181`.
+Branch: `codex/drop-authorization-payload-generator`.
+Branch started from PR #179 squash merge commit
+`3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
+Implementation head at PR open:
+`01103c164b0272fa8db7e67c68f1e01b2bd60b2e`.
+
+Prior queue transition:
+
+- Queue Item 92 merged in PR #179 as squash commit
+  `3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
+- PR #179 CodeRabbit review completed after one actionable comment was fixed;
+  CodeRabbit resolved the thread and status was success on the latest head.
+- PR #179 GitHub Actions CI run `27448523471` passed on head
+  `99bf1f3044d0760da07903701419075a463caaf6`.
+- Issue #177 closed completed at merge.
+- Issue #180 created as the next local tooling slice because no open roadmap
+  issues remained.
+
+Goal:
+
+- Add a no-secret CLI or equivalent script that generates canonical unsigned
+  EIP-712 drop authorization payload JSON for fixed-price and auction drops.
+- Reuse the accepted domain/message field order and derived-hash semantics from
+  `scripts/check_drop_authorization_fixtures.py`.
+- Emit or write `dropId`, `tokenDataHash`, `domainSeparator`, `structHash`, and
+  `digest` for downstream signer comparison without accepting private keys.
+- Add focused tests for generation, sale-mode constraints, zero-address
+  rejection, stale/missing fields, and no-secret policy.
+- Link the tool from signing, tooling, known-blocker, release-readiness, audit,
+  and roadmap docs as appropriate.
+- Do not change Solidity behavior or claim production signer custody/readiness.
+
+Validation target:
+
+- Focused generator tests and existing drop-authorization fixture tests.
+- Updated docs/checker gates if the new tool becomes part of maintained release
+  evidence.
+- `git diff --check`.
+- `make check` before PR unless an implementation-specific blocker is recorded
+  here.
+
+Implementation summary:
+
+- Added `scripts/generate_drop_authorization_payload.py` as a no-secret CLI for
+  canonical unsigned fixed-price and auction EIP-712 payload artifacts.
+- Added deterministic fixed-price and auction input/output examples under
+  `test/fixtures/drop-authorization/payload-generator/`.
+- Added `scripts/test_drop_authorization_payload_generator.py` coverage for
+  committed-output drift, signed-fixture hash parity, sale-mode address rules,
+  stale output detection, missing fields, and secret-shaped input rejection.
+- Wired the generator into `make check`, Windows and Unix check scripts,
+  GitHub Actions, release-readiness/audit/incident/drop-authorization checkers,
+  release manifest/checksum artifacts, docs, changelog, and roadmap status.
+
+Local validation:
+
+- `python -m py_compile scripts\generate_drop_authorization_payload.py scripts\test_drop_authorization_payload_generator.py scripts\check_drop_authorization_fixtures.py scripts\check_audit_package.py scripts\check_incident_response.py scripts\check_release_readiness.py`
+- `python scripts\test_drop_authorization_payload_generator.py`
+- `python scripts\generate_drop_authorization_payload.py --input test\fixtures\drop-authorization\payload-generator\fixed-price-input.json --output test\fixtures\drop-authorization\payload-generator\fixed-price-output.json --check`
+- `python scripts\generate_drop_authorization_payload.py --input test\fixtures\drop-authorization\payload-generator\auction-input.json --output test\fixtures\drop-authorization\payload-generator\auction-output.json --check`
+- `python scripts\test_drop_authorization_fixtures.py`
+- `python scripts\check_drop_authorization_fixtures.py`
+- `python scripts\test_audit_package.py`
+- `python scripts\check_audit_package.py`
+- `python scripts\test_incident_response.py`
+- `python scripts\check_incident_response.py`
+- `python scripts\test_release_readiness.py`
+- `python scripts\check_release_readiness.py`
+- `python scripts\generate_release_manifest.py --check`
+- `python scripts\generate_release_checksums.py --check`
+- `python scripts\check_changelog.py`
+- `git diff --check` passed with only the existing `scripts/check.ps1` LF/CRLF
+  warning.
+- `make check`
+
+Remote validation:
+
+- PR #181 opened at
+  `https://github.com/6529-Collections/6529Stream/pull/181`.
+- GitHub Actions run `27449982026` failed at the release-checksum step after
+  all earlier gates passed. Root cause: the payload generator used default
+  Windows text newlines when writing generated output JSON, while CI checks the
+  LF-normalized checkout contents. Fix: pin generated output writes to
+  `newline="\n"` and regenerate the checksum bundle.
+- Local validation after the CI fix: payload generator tests, both payload
+  `--check` commands, `python scripts/generate_release_checksums.py --check`,
+  `git diff --check`, and `make check`.
+- CodeRabbit review `4489993973` reported three actionable comments:
+  mirror payload-generator checks in `docs/audit-package.md` maintenance
+  commands, pass generated typed data rather than only the digest to the
+  approved signing system in `docs/incident-response.md`, and preserve the
+  generator CLI exception chain. All three were fixed locally.
+- Local validation after CodeRabbit fixes: generator tests, audit-package tests
+  and checker, incident-response tests and checker, release manifest/checksum
+  drift checks, `git diff --check`, and `make check`.
+
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
-Status: CodeRabbit fix locally validated; fix commit pending.
+Status: merged in PR #179 as
+`3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`; issue #177 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/177`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/179`.
 Branch: `codex/drop-authorization-signing-examples`.
@@ -163,6 +266,10 @@ Implementation head at PR open:
 `0e3b1d10e98cdb439cd04e9ca78fd34175760887`.
 Current head after run-state update:
 `c26c05ad52174ec343794c78bd281483cbc19404`.
+Final head:
+`99bf1f3044d0760da07903701419075a463caaf6`.
+Squash merge commit:
+`3e0eedfb31ebac5d5d71c4cb0845e6882c992d9e`.
 
 Prior queue transition:
 
@@ -217,6 +324,9 @@ Remote validation:
   - `python scripts\test_drop_authorization_fixtures.py`.
   - `python scripts\check_drop_authorization_fixtures.py`.
   - `git diff --check`.
+- GitHub Actions run `27448523471` passed on the final head.
+- CodeRabbit marked the actionable thread addressed by commit `99bf1f3` and
+  resolved it.
 
 ### PR candidate: Add protocol incident response runbooks (Queue Item 90)
 

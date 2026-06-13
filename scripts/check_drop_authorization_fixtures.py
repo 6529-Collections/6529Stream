@@ -103,6 +103,19 @@ REQUIRED_GUIDE_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_drop_authorization_fixtures.py",
     "python scripts/check_drop_authorization_fixtures.py",
+    "python scripts/test_drop_authorization_payload_generator.py",
+    (
+        "python scripts/generate_drop_authorization_payload.py --input "
+        "test/fixtures/drop-authorization/payload-generator/fixed-price-input.json "
+        "--output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json "
+        "--check"
+    ),
+    (
+        "python scripts/generate_drop_authorization_payload.py --input "
+        "test/fixtures/drop-authorization/payload-generator/auction-input.json "
+        "--output test/fixtures/drop-authorization/payload-generator/auction-output.json "
+        "--check"
+    ),
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
     "make check",
@@ -123,6 +136,12 @@ REQUIRED_LINK_TARGETS = [
     "test/fixtures/drop-authorization/fixed-price-eoa.json",
     "test/fixtures/drop-authorization/auction-eoa.json",
     "test/fixtures/drop-authorization/erc1271-contract-signer.json",
+    "scripts/generate_drop_authorization_payload.py",
+    "scripts/test_drop_authorization_payload_generator.py",
+    "test/fixtures/drop-authorization/payload-generator/fixed-price-input.json",
+    "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+    "test/fixtures/drop-authorization/payload-generator/auction-input.json",
+    "test/fixtures/drop-authorization/payload-generator/auction-output.json",
 ]
 
 REQUIRED_FAILURE_CASE_IDS = {
