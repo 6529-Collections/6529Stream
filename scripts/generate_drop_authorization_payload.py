@@ -275,7 +275,7 @@ def write_or_check_output(payload: dict[str, Any], output_path: Path, check: boo
         return
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(expected, encoding="utf-8")
+    output_path.write_text(expected, encoding="utf-8", newline="\n")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

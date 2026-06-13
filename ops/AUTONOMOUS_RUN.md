@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/181` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-12 23:58 UTC` |
+| Last updated | `2026-06-13 00:11 UTC` |
 
 ## Packaging Notes
 
@@ -154,7 +154,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add no-secret drop authorization payload generator tooling (Queue Item 93)
 
-Status: PR opened; awaiting CI and CodeRabbit.
+Status: CI fix ready; awaiting rerun and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/180`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/181`.
 Branch: `codex/drop-authorization-payload-generator`.
@@ -236,8 +236,15 @@ Remote validation:
 
 - PR #181 opened at
   `https://github.com/6529-Collections/6529Stream/pull/181`.
-- GitHub Actions pending.
-- CodeRabbit pending explicit review request after this state update lands.
+- GitHub Actions run `27449982026` failed at the release-checksum step after
+  all earlier gates passed. Root cause: the payload generator used default
+  Windows text newlines when writing generated output JSON, while CI checks the
+  LF-normalized checkout contents. Fix: pin generated output writes to
+  `newline="\n"` and regenerate the checksum bundle.
+- Local validation after the CI fix: payload generator tests, both payload
+  `--check` commands, `python scripts/generate_release_checksums.py --check`,
+  `git diff --check`, and `make check`.
+- CodeRabbit pending.
 
 ### PR candidate: Add drop authorization signing examples and fixtures (Queue Item 92)
 
