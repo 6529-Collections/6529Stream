@@ -92,12 +92,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 14:04 UTC` locally for Queue Item 114 after PR #238 merged the release evidence issue body-sync reconciliation; local validation covered label checker tests/check, optional live GitHub label snapshot audit, body-sync check, release-readiness, manifest, checksum, changelog, shell/PowerShell syntax, heading, and whitespace checks |
-| OS tested | Windows local label-drift artifact gate for Queue Item 114; Linux GitHub Actions passed for latest merged baseline PR #238 run `27468501813` on final head `d56f7d2405fd0c52fdf2320a0f167253aceb4bf7`, with merged baseline commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99` |
+| Last verified | `2026-06-13 14:20 UTC` for Queue Item 114 / PR #240 label-drift checks; local validation covered label checker tests/check, optional live GitHub label snapshot audit, body-sync check, release-readiness, manifest, checksum, changelog, shell/PowerShell syntax, heading, and whitespace checks |
+| OS tested | Windows local label-drift artifact gate for Queue Item 114; Linux GitHub Actions passed for PR #240 run `27469086354` on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #238 final CI run `27468501813` passed on head `d56f7d2405fd0c52fdf2320a0f167253aceb4bf7`; CodeRabbit status was success with no unresolved review threads, and PR #238 squash-merged as `3c738f51c8fa2cf623fda1f3d1fe5284db946d99` |
+| CI run | PR #240 CI run `27469086354` passed on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4`; CodeRabbit status was success with one provenance review thread addressed in the review-response commit |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline

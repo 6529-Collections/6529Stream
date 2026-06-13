@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | After issue #239, continue Gate G no-secret release-evidence tracker hardening before attempting retained external evidence tasks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 14:10 UTC` |
+| Last updated | `2026-06-13 14:20 UTC` |
 
 ## Packaging Notes
 
@@ -176,7 +176,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Harden release evidence tracker label drift checks (Queue Item 114)
 
-Status: PR #240 open; CI and CodeRabbit pending.
+Status: PR #240 open; CI passed, CodeRabbit provenance comments being addressed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/239`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/240`.
 Branch: `codex/release-evidence-label-drift`.
@@ -9829,6 +9829,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 14:20 | Address PR #240 CodeRabbit provenance review | PR candidate: Harden release evidence tracker label drift checks (Queue Item 114). Status: PR #240 open at `https://github.com/6529-Collections/6529Stream/pull/240`; branch `codex/release-evidence-label-drift`; branch started from PR #238 squash merge commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`. Prior queue transition: Queue Item 113 merged in PR #238 as squash commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`; PR #238 final implementation head was `d56f7d2405fd0c52fdf2320a0f167253aceb4bf7`. Completed local validation: label checker tests/check, body-sync tests/check, release-readiness tests/check, release-manifest tests/check, release-checksum tests/check, changelog gate, Bash syntax, PowerShell parser syntax, heading scan, whitespace check, and live GitHub label snapshot audit. PR #240 CI run `27469086354` passed on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4`; CodeRabbit requested roadmap provenance and decision-log traceability fixes. |
 | 2026-06-13 08:44 | Open PR #208 and request CodeRabbit | State-only merge reconciliation PR opened against `main`, linked `Closes #206`, pushed head `097ac7506820359388bb76eba11778021d5edfe2`, and requested CodeRabbit review in comment `4698031592`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 08:41 | Finish Queue Item 106 local validation | Durable run state and roadmap metadata now record PR #205 final merge/CI/CodeRabbit evidence, issue #203 completion, issue #206 active reconciliation scope, issue #207 as the next no-secret packet-index target, heading scan, traceability grep, and whitespace checks |
 | 2026-06-13 08:37 | Create issues #206 and #207, start Queue Item 106 | PR #205 merged cleanly, so issue #206 tracks state reconciliation while issue #207 becomes the next no-secret Gate G implementation slice for a release evidence packet index/checker |
