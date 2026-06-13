@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-live-audit-report-bundle` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/268` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/269` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/270` |
 | Next issue | TBD after issue #269 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 21:17 UTC` |
+| Last updated | `2026-06-13 21:20 UTC` |
 
 ## Packaging Notes
 
@@ -191,13 +191,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence live audit report bundle (Queue Item 129)
 
-Status: implementation complete locally; full Windows gate passed; PR not
-opened yet.
+Status: PR #270 open; CodeRabbit review requested and CI pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/269`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/270`.
 Branch: `codex/release-evidence-live-audit-report-bundle`.
 Branch started from PR #268 squash merge commit
 `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`.
+Opening PR head: `55709abdf6bb728bd71b3b26957b430d0c3a96ed`.
+CodeRabbit request comment:
+`https://github.com/6529-Collections/6529Stream/pull/270#issuecomment-4699825688`.
 
 Prior queue transition:
 
@@ -10878,6 +10880,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 21:20 | Open PR #270 and request CodeRabbit | Release evidence live audit report bundle PR opened on head `55709abdf6bb728bd71b3b26957b430d0c3a96ed`, links `Closes #269`, and CodeRabbit review was requested in comment `4699825688`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-13 21:17 | Implement Queue Item 129 local draft | Added optional JSON/Markdown report output to the live audit orchestrator, deterministic digest/report tests, release-readiness validator coverage, operator docs, changelog, roadmap traceability, regenerated release evidence artifacts, and passed the full Windows `scripts\check.ps1` gate without changing readiness claims. |
 | 2026-06-13 21:05 | Start Queue Item 129 | PR #268 merged cleanly as `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`, issue #267 closed completed, and issue #269 now tracks a retained no-secret live audit report bundle for selected profiles, snapshot digests, command provenance, and checker outcomes without changing readiness claims. |
 | 2026-06-13 20:55 | Merge PR #268 | Live audit orchestrator merge-state reconciliation merged as `bb36ddb9bbf387accedeecfb5dd7dfb5d58b6fa4`; final head `ce9f2aea8762e76386a315d72953c93d8acfb9b5` passed CI run `27478649600`, CodeRabbit status was success with no open review threads, and issue #267 closed completed. |
