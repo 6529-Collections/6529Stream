@@ -176,6 +176,32 @@ def recursive_json_files(directory: Path) -> list[Path]:
     return files
 
 
+def is_non_local_release_evidence_metadata(value: Any) -> bool:
+    """Return whether JSON data is non-local release evidence metadata."""
+    if not isinstance(value, dict):
+        return False
+    return (
+        value.get("schema_version") == non_local_evidence_checker.EVIDENCE_SCHEMA
+        and isinstance(value.get("evidence_id"), str)
+        and isinstance(value.get("record_type"), str)
+        and isinstance(value.get("source"), dict)
+    )
+
+
+def non_local_release_evidence_files(directory: Path) -> list[Path]:
+    """Return recursive JSON files that are non-local evidence metadata."""
+    files = [
+        path
+        for path in recursive_json_files(directory)
+        if is_non_local_release_evidence_metadata(load_json(path))
+    ]
+    if not files:
+        raise ReleaseManifestError(
+            f"required directory has no non-local release evidence metadata: {directory}"
+        )
+    return files
+
+
 def deployment_manifest_record(path: Path, repo_root: Path) -> dict[str, Any]:
     data = require_dict(load_json(path), str(path))
     release_artifacts = require_dict(data.get("release_artifacts"), f"{path}.release_artifacts")
@@ -813,7 +839,7 @@ def build_manifest(
     ]
     non_local_release_evidence = [
         non_local_release_evidence_record(path, repo_root)
-        for path in recursive_json_files(resolved_non_local_evidence_dir)
+        for path in non_local_release_evidence_files(resolved_non_local_evidence_dir)
     ]
     drop_authorization_signing_evidence = [
         drop_authorization_signing_record(path, repo_root)

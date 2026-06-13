@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/197` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 06:01 UTC` |
+| Last updated | `2026-06-13 06:13 UTC` |
 
 ## Packaging Notes
 
@@ -239,6 +239,38 @@ PR opened:
   `1f4b240822c80909782212dbb625a8f31ccd0665`.
   This follow-up state commit records the concrete PR URL before CodeRabbit
   review is requested.
+
+CodeRabbit review response:
+
+- CodeRabbit review submitted at `2026-06-13 06:10 UTC` with three actionable
+  comments.
+- Fixed `docs/public-beta-evidence.md` so the public-beta evidence workflow
+  starts from the matching template before adding retained evidence and
+  computing the `sha256:` digest.
+- Changed public-beta template discovery from top-level `glob("*.json")` to
+  recursive `rglob("*.json")`.
+- Added non-local release evidence metadata filtering in
+  `scripts/generate_release_manifest.py` so nested JSON sidecars under
+  `release-artifacts/evidence/` are not treated as evidence records unless they
+  carry the non-local evidence schema and required metadata keys.
+- Added a release-manifest fixture sidecar JSON assertion proving non-evidence
+  JSON is skipped.
+- Regenerated `release-artifacts/latest/release-manifest.json`,
+  `release-artifacts/latest/SHA256SUMS`, and
+  `release-artifacts/latest/release-checksums.json`.
+
+Follow-up validation completed locally at `2026-06-13 06:13 UTC`:
+
+- `python -m py_compile scripts\check_non_local_release_evidence.py scripts\generate_release_manifest.py scripts\test_non_local_release_evidence.py scripts\test_release_manifest.py`.
+- `python scripts\test_non_local_release_evidence.py`.
+- `python scripts\check_non_local_release_evidence.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\check_release_readiness.py`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
 
 ### PR candidate: Reconcile public beta blocker report merge state (Queue Item 100)
 
@@ -8969,6 +9001,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 06:13 | Address CodeRabbit PR #197 review | Fixed the public-beta workflow order, recursive template discovery, and manifest metadata filtering for nested evidence JSON, added a fixture sidecar regression, regenerated release manifest/checksums, and reran focused validation |
 | 2026-06-13 06:01 | Open PR #197 | Per-requirement public-beta evidence template PR opened against `main`, linked `Closes #195`, and will use CodeRabbit-only review per current user instruction |
 | 2026-06-13 05:58 | Finish Queue Item 101 local validation | Focused template/checker/manifest/checksum checks, release-readiness, changelog, heading scan, whitespace check, full `make check`, and the Windows PowerShell wrapper all pass locally before PR creation |
 | 2026-06-13 05:39 | Implement Queue Item 101 local draft | Added per-requirement public-beta evidence templates, checker/test coverage, nested non-local evidence manifest coverage, docs, changelog, regenerated release artifacts, and durable run-state updates without changing readiness claims |

@@ -658,6 +658,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "operator_notes": "nested local template only",
         },
     )
+    write_json(
+        non_local_evidence_dir / "public-beta-templates" / "operator-notes.json",
+        {
+            "schema_version": "6529stream.operator-notes.v1",
+            "notes": "release-manifest should not treat this as evidence metadata",
+        },
+    )
     write_text(
         signer_custody_retained_artifact,
         (
@@ -1028,6 +1035,10 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 nested_template["public_beta_requirement_id"],
                 "testnet_deployment_rehearsal",
+            )
+            self.assertNotIn(
+                "release-artifacts/evidence/public-beta-templates/operator-notes.json",
+                {row["path"] for row in non_local_evidence_rows},
             )
             self.assertEqual(
                 manifest["checksum_bundle"]["outputs"][0]["sha256"],

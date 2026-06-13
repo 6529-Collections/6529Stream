@@ -228,7 +228,7 @@ def public_beta_template_paths(repo_root: Path) -> list[Path]:
         raise NonLocalReleaseEvidenceError(
             f"missing public-beta template directory: {PUBLIC_BETA_TEMPLATE_DIR}"
         )
-    return sorted(template_dir.glob("*.json"))
+    return sorted(template_dir.rglob("*.json"))
 
 
 def default_evidence_paths(repo_root: Path) -> list[Path]:

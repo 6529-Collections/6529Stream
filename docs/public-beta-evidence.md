@@ -132,10 +132,10 @@ maintainer-approved reference here.
 
 To move a requirement to `complete`:
 
-1. Add the retained public evidence file to the repository.
-2. Start from the matching template under
+1. Start from the matching template under
    `release-artifacts/evidence/public-beta-templates/` when the row maps to a
    public-beta requirement.
+2. Add the retained public evidence file to the repository.
 3. Add the evidence file path and `sha256:` digest to the relevant requirement.
 4. Confirm the evidence follows the non-local release evidence intake runbook
    when the requirement depends on fork, testnet, live, audit, explorer, gas,
