@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-signer-custody-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/189` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/190` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/192` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 03:53 UTC` |
+| Last updated | `2026-06-13 03:58 UTC` |
 
 ## Packaging Notes
 
@@ -160,9 +160,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile signer custody readiness merge state (Queue Item 98)
 
-Status: Local validation complete; PR creation pending.
+Status: Open in PR #192; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/190`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/192`.
 Branch: `codex/reconcile-signer-custody-state`.
 Branch started from PR #189 squash merge commit
 `ae87028d7471c35faa0bc3a3555583e24be50d4d`.
@@ -8741,6 +8741,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 03:58 | Open PR #192 | State-only reconciliation PR opened against `main`, linked `Closes #190`, and will use CodeRabbit-only review per current user instruction |
 | 2026-06-13 03:53 | Create issues #190 and #191 | PR #189 merged cleanly, no open issues remained, so issue #190 tracks state reconciliation and issue #191 tracks the next no-secret public-beta evidence blocker-report slice |
 | 2026-06-13 03:51 | Merge PR #189 | Signer custody readiness evidence merged as `ae87028d7471c35faa0bc3a3555583e24be50d4d`; final head `e0c64d91cfbcfabea7b7b89d8b1d61521c8487fa` passed CI run `27455567547`, CodeRabbit status was success, all visible review threads were resolved, and issue #187 closed completed |
 | 2026-06-13 03:34 | Address CodeRabbit PR #189 review | Initial PR #189 CI run `27454880369` passed on head `0b49933d8f5c8474d23d7e4b8ce9a2c7f192c21e`; CodeRabbit requested stricter string/review timestamp validation, structured ERC-1271 rationale, fuller incident-response artifact links, public-beta wording, and unambiguous roadmap CI status |
