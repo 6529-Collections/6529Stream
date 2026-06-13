@@ -35,10 +35,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/production-release-evidence-templates` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/200` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/199` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/201` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 07:11 UTC` |
+| Last updated | `2026-06-13 07:14 UTC` |
 
 ## Packaging Notes
 
@@ -164,9 +164,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add per-requirement production release evidence templates (Queue Item 103)
 
-Status: Local validation complete; PR TBD.
+Status: Open in PR #201; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/199`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/201`.
 Branch: `codex/production-release-evidence-templates`.
 Branch started from PR #200 squash merge commit
 `728eb7161c80f6b3690de45caf11fd3c9e01e277`.
@@ -235,6 +235,12 @@ Validation completed locally at `2026-06-13 07:11 UTC`:
 - `git diff --check`.
 - `make check`.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+PR opened:
+
+- PR #201 opened against `main` on head
+  `f16075b6cb0c78cfa7c38d609019684e28559112`.
+- CodeRabbit review requested in PR comment `4697838014`.
 
 ### PR candidate: Reconcile public beta template merge state (Queue Item 102)
 
@@ -9130,6 +9136,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 07:14 | Open PR #201 and request CodeRabbit | Production-release evidence template PR opened against `main`, linked `Closes #199`, pushed head `f16075b6cb0c78cfa7c38d609019684e28559112`, and requested CodeRabbit review in comment `4697838014`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 07:11 | Finish Queue Item 103 local validation | Production-release evidence templates, checker/test coverage, manifest/checksum refresh, docs, roadmap, changelog, focused gates, heading scan, whitespace check, full `make check`, and the Windows PowerShell wrapper all pass locally without changing readiness claims |
 | 2026-06-13 06:51 | Start Queue Item 103 | PR #200 merged cleanly, so issue #199 is now the active no-secret Gate G support slice for per-requirement production-release evidence templates without readiness claims |
 | 2026-06-13 06:49 | Merge PR #200 | Public-beta template merge-state reconciliation merged as `728eb7161c80f6b3690de45caf11fd3c9e01e277`; final head `98b0a807a698a96748f312e0531a86991693a8c3` passed CI run `27459177572`, CodeRabbit status was success, and issue #198 closed completed |
