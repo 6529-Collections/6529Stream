@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-non-local-generator-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/252` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/253` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/254` |
 | Next issue | TBD after issue #253 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 17:30 UTC` |
+| Last updated | `2026-06-13 17:34 UTC` |
 
 ## Packaging Notes
 
@@ -183,9 +183,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile non-local evidence generator merge state (Queue Item 121)
 
-Status: local draft in progress for issue #253; PR TBD.
+Status: PR #254 open; initial local validation passed, with CI and CodeRabbit
+pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/253`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/254`.
 Branch: `codex/reconcile-non-local-generator-merge-state`.
 Branch started from PR #252 squash merge commit
 `244ca142f5d74d715b601ec51ba22fb658199fda`.
@@ -223,6 +224,18 @@ Validation target:
 - `python scripts/check_changelog.py`.
 - `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
 - `git diff --check`.
+
+Initial local validation:
+
+- `python scripts/check_release_readiness.py` passed.
+- `python scripts/test_release_readiness.py` passed.
+- `python scripts/generate_release_manifest.py --check` passed.
+- `python scripts/test_release_manifest.py` passed.
+- `python scripts/generate_release_checksums.py --check` passed.
+- `python scripts/test_release_checksums.py` passed.
+- `python scripts/check_changelog.py` passed.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md` passed.
+- `git diff --check` passed.
 
 ### Completed: Add non-local evidence scaffold generator (Queue Item 120)
 
