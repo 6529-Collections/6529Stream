@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import json
 import subprocess
+import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
@@ -29,6 +32,34 @@ def completed(returncode: int = 0) -> subprocess.CompletedProcess:
 def script_name(command: list[str]) -> str:
     """Return the script basename from an orchestrated command."""
     return Path(command[1]).name
+
+
+def snapshot_text(profile: str) -> str:
+    """Return deterministic snapshot content for report tests."""
+    return json.dumps([{"profile": profile}], sort_keys=True) + "\n"
+
+
+def snapshot_digest(profile: str) -> str:
+    """Return the digest expected for the deterministic snapshot content."""
+    return hashlib.sha256(snapshot_text(profile).encode("utf-8")).hexdigest()
+
+
+def write_snapshot_for_export_command(command: list[str]) -> None:
+    """Write the snapshot requested by a mocked exporter command."""
+    profile = command[command.index("--profile") + 1]
+    output = Path(command[command.index("--output") + 1])
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(snapshot_text(profile), encoding="utf-8", newline="\n")
+
+
+def run_success_and_write_snapshots(
+    command: list[str], check: bool = False
+) -> subprocess.CompletedProcess:
+    """Mock subprocess.run while materializing exporter snapshots."""
+    del check
+    if script_name(command) == "export_release_evidence_issue_snapshot.py":
+        write_snapshot_for_export_command(command)
+    return completed()
 
 
 class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
@@ -147,6 +178,147 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         self.assertIn("17", export_command)
         self.assertIn("custom-gh", export_command)
         self.assertNotIn("custom-gh", check_command)
+
+    def test_report_json_and_markdown_are_deterministic(self) -> None:
+        """Report mode writes deterministic no-secret JSON and Markdown."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report_json = root / "reports" / "live-audit.json"
+            report_md = root / "reports" / "live-audit.md"
+
+            with patch.object(
+                auditor.subprocess,
+                "run",
+                side_effect=run_success_and_write_snapshots,
+            ):
+                with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                    result = auditor.main(
+                        [
+                            "--python",
+                            "python",
+                            "--gh",
+                            "gh",
+                            "--tmp-dir",
+                            str(root / "snapshots"),
+                            "--report-json",
+                            str(report_json),
+                            "--report-md",
+                            str(report_md),
+                            "--generated-at",
+                            "2026-06-13T20:00:00Z",
+                        ]
+                    )
+
+            self.assertEqual(result, 0)
+            report_text = report_json.read_text(encoding="utf-8")
+            report = json.loads(report_text)
+            self.assertEqual(
+                report_text,
+                json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+            )
+            self.assertEqual(
+                [profile["profile"] for profile in report["profiles"]],
+                ["labels", "bodies", "closure"],
+            )
+            self.assertEqual(report["schema_version"], auditor.REPORT_SCHEMA_VERSION)
+            self.assertEqual(report["repo"], auditor.REPO_FULL_NAME)
+            self.assertEqual(report["generated_at"], "2026-06-13T20:00:00Z")
+            self.assertEqual(report["readiness_claim"], "blocked")
+            self.assertEqual(report["validation"]["status"], "passed")
+            self.assertEqual(report["validation"]["profile_count"], 3)
+            self.assertEqual(
+                report["profiles"][0]["snapshot_sha256"],
+                snapshot_digest("labels"),
+            )
+            markdown = report_md.read_text(encoding="utf-8")
+            self.assertIn("# Release Evidence Live Audit Report", markdown)
+            self.assertIn(auditor.NO_SECRET_NOTICE, markdown)
+            self.assertIn(auditor.READINESS_WARNING, markdown)
+            self.assertIn(snapshot_digest("closure"), markdown)
+
+    def test_report_profile_selection_preserves_deduplicated_order(self) -> None:
+        """Report mode records the selected profile order after all expansion."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report_json = root / "report.json"
+
+            with patch.object(
+                auditor.subprocess,
+                "run",
+                side_effect=run_success_and_write_snapshots,
+            ):
+                with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                    result = auditor.main(
+                        [
+                            "--profile",
+                            "labels",
+                            "--profile",
+                            "all",
+                            "--python",
+                            "python",
+                            "--tmp-dir",
+                            str(root / "snapshots"),
+                            "--report-json",
+                            str(report_json),
+                        ]
+                    )
+
+            self.assertEqual(result, 0)
+            report = json.loads(report_json.read_text(encoding="utf-8"))
+            self.assertEqual(
+                [profile["profile"] for profile in report["profiles"]],
+                ["labels", "bodies", "closure"],
+            )
+            self.assertEqual(report["generated_at"], "TBD")
+
+    def test_missing_report_snapshot_fails_with_context(self) -> None:
+        """Report mode fails if the mocked exporter does not leave a snapshot."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report_json = Path(temp_dir) / "report.json"
+            stderr = StringIO()
+
+            with patch.object(auditor.subprocess, "run", return_value=completed()):
+                with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                    result = auditor.main(
+                        [
+                            "--profile",
+                            "labels",
+                            "--python",
+                            "python",
+                            "--tmp-dir",
+                            str(Path(temp_dir) / "snapshots"),
+                            "--report-json",
+                            str(report_json),
+                        ]
+                    )
+
+            self.assertEqual(result, 1)
+            self.assertFalse(report_json.exists())
+            self.assertIn("snapshot output is missing", stderr.getvalue())
+
+    def test_checker_failure_does_not_write_report(self) -> None:
+        """Failed checks stop before retained report files are written."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report_json = Path(temp_dir) / "report.json"
+            calls = [completed(0), completed(1)]
+
+            with patch.object(auditor.subprocess, "run", side_effect=calls):
+                with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                    result = auditor.main(
+                        [
+                            "--profile",
+                            "labels",
+                            "--python",
+                            "python",
+                            "--tmp-dir",
+                            str(Path(temp_dir) / "snapshots"),
+                            "--report-json",
+                            str(report_json),
+                        ]
+                    )
+
+            self.assertEqual(result, 1)
+            self.assertFalse(report_json.exists())
 
 
 if __name__ == "__main__":

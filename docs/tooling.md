@@ -182,6 +182,9 @@ deployment manifests, address books, deployment schemas, ceremony evidence,
 changelog, governance docs, incident-response runbook, the audit package, and
 unavailable release-ceremony artifacts. It is regenerated with
 `python scripts/generate_release_manifest.py` after any covered input changes.
+The optional live audit report bundle records the repository target, selected
+issue-audit profiles, retained snapshot paths, snapshot digests, command
+provenance, checker outcomes, and the unchanged blocked-readiness warning.
 
 The architecture/threat-model step validates [`architecture.md`](architecture.md)
 and [`threat-model.md`](threat-model.md), the auditor-facing map of system
@@ -256,8 +259,20 @@ python scripts/audit_release_evidence_issue_snapshots.py
 
 Use `--profile labels`, `--profile bodies`, or `--profile closure` to run one
 live audit profile. The orchestrator exports UTF-8 JSON snapshots with the
-existing exporter and then runs the matching checker. To audit live GitHub label
-drift manually, export a snapshot and pass it to the checker:
+existing exporter and then runs the matching checker. To retain a no-secret
+JSON and Markdown report bundle with the repo target, snapshot paths, snapshot
+SHA-256 digests, profile results, command provenance, and the unchanged
+blocked-readiness warning, pass explicit report paths:
+
+```bash
+python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+```
+
+Use `--generated-at` with an ISO timestamp, release ceremony ID, or other
+operator-selected evidence run ID when the report needs a retained run label.
+The default is `TBD` so deterministic tests and dry runs do not invent
+completion evidence. To audit live GitHub label drift manually, export a
+snapshot and pass it to the checker:
 
 ```bash
 python scripts/export_release_evidence_issue_snapshot.py --profile labels

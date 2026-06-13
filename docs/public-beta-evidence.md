@@ -243,6 +243,13 @@ To move a requirement to `complete`:
     python scripts/audit_release_evidence_issue_snapshots.py
     ```
 
+    To retain a no-secret JSON/Markdown report bundle for the operator run
+    without changing readiness claims, pass explicit report paths:
+
+    ```bash
+    python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+    ```
+
     To audit only live GitHub label drift, export a local snapshot and pass it
     with `--live-json`:
 

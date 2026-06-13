@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import shlex
 import subprocess
 import sys
@@ -15,6 +17,16 @@ from argparse_helpers import positive_int
 
 REPO_FULL_NAME = "6529-Collections/6529Stream"
 DEFAULT_PROFILES = ("labels", "bodies", "closure")
+REPORT_SCHEMA_VERSION = "6529stream.release-evidence-live-audit-report.v1"
+NO_SECRET_NOTICE = (
+    "This report records no-secret live issue audit evidence only. It must not "
+    "include private keys, RPC credentials, access tokens, unreleased signer "
+    "material, or secret operational metadata."
+)
+READINESS_WARNING = (
+    "The report does not mark public-beta or production-release retained "
+    "evidence complete and does not change the blocked readiness posture."
+)
 
 PROFILE_CONFIG = {
     "labels": {
@@ -72,6 +84,19 @@ def snapshot_path(tmp_dir: Path, profile: str) -> Path:
     return tmp_dir / PROFILE_CONFIG[profile]["output"]
 
 
+def sha256_file(path: Path) -> str:
+    """Return the SHA-256 digest for a retained evidence file."""
+    if not path.is_file():
+        raise ReleaseEvidenceIssueSnapshotAuditError(
+            f"snapshot output is missing: {path.as_posix()}"
+        )
+    hasher = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
 def exporter_command(
     python: str,
     profile: str,
@@ -114,18 +139,121 @@ def audit_profile(
     limit: int,
     gh: str,
     tmp_dir: Path,
-) -> None:
+    collect_report: bool = False,
+) -> dict[str, object] | None:
     """Export and check one live issue snapshot profile."""
     output = snapshot_path(tmp_dir, profile)
-    run_checked(
-        exporter_command(python, profile, repo, limit, gh, output),
-        f"{profile} snapshot export",
-    )
-    run_checked(
-        checker_command(python, profile, output),
-        f"{profile} snapshot check",
-    )
+    export_command = exporter_command(python, profile, repo, limit, gh, output)
+    check_command = checker_command(python, profile, output)
+    run_checked(export_command, f"{profile} snapshot export")
+    run_checked(check_command, f"{profile} snapshot check")
     print(f"{profile} live audit passed: {output.as_posix()}")
+    if not collect_report:
+        return None
+    return {
+        "profile": profile,
+        "snapshot_path": output.as_posix(),
+        "snapshot_sha256": sha256_file(output),
+        "export_command": command_text(export_command),
+        "checker_command": command_text(check_command),
+        "export_status": "passed",
+        "checker_status": "passed",
+    }
+
+
+def build_report(
+    repo: str,
+    generated_at: str,
+    profile_results: list[dict[str, object]],
+) -> dict[str, object]:
+    """Build a deterministic no-secret live audit report document."""
+    return {
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "repo": repo,
+        "generated_at": generated_at,
+        "readiness_claim": "blocked",
+        "no_secret_notice": NO_SECRET_NOTICE,
+        "readiness_warning": READINESS_WARNING,
+        "profiles": profile_results,
+        "validation": {
+            "status": "passed",
+            "profile_count": len(profile_results),
+        },
+    }
+
+
+def write_report_json(path: Path, report: dict[str, object]) -> None:
+    """Write a deterministic JSON live audit report."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
+def markdown_cell(value: object) -> str:
+    """Escape a value for use inside a compact Markdown table cell."""
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
+def markdown_report(report: dict[str, object]) -> str:
+    """Render a deterministic Markdown live audit report."""
+    lines = [
+        "# Release Evidence Live Audit Report",
+        "",
+        f"- Schema: `{report['schema_version']}`",
+        f"- Repository: `{report['repo']}`",
+        f"- Generated at: `{report['generated_at']}`",
+        f"- Readiness claim: `{report['readiness_claim']}`",
+        f"- Notice: {report['no_secret_notice']}",
+        f"- Warning: {report['readiness_warning']}",
+        "",
+        "| Profile | Snapshot | SHA-256 | Export status | Checker status |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for profile in report["profiles"]:
+        assert isinstance(profile, dict)
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    markdown_cell(profile["profile"]),
+                    markdown_cell(profile["snapshot_path"]),
+                    markdown_cell(profile["snapshot_sha256"]),
+                    markdown_cell(profile["export_status"]),
+                    markdown_cell(profile["checker_status"]),
+                ]
+            )
+            + " |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Command Provenance",
+            "",
+        ]
+    )
+    for profile in report["profiles"]:
+        assert isinstance(profile, dict)
+        lines.extend(
+            [
+                f"### {profile['profile']}",
+                "",
+                "```bash",
+                str(profile["export_command"]),
+                str(profile["checker_command"]),
+                "```",
+                "",
+            ]
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def write_report_markdown(path: Path, report: dict[str, object]) -> None:
+    """Write a deterministic Markdown live audit report."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(markdown_report(report), encoding="utf-8", newline="\n")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -153,6 +281,24 @@ def build_parser() -> argparse.ArgumentParser:
         default="gh",
         help="GitHub CLI executable passed through to the exporter.",
     )
+    parser.add_argument(
+        "--report-json",
+        type=Path,
+        help="Optional path for a no-secret deterministic JSON audit report.",
+    )
+    parser.add_argument(
+        "--report-md",
+        type=Path,
+        help="Optional path for a no-secret deterministic Markdown audit report.",
+    )
+    parser.add_argument(
+        "--generated-at",
+        default="TBD",
+        help=(
+            "Report generation timestamp or evidence run ID. Defaults to TBD "
+            "so test reports remain deterministic unless supplied by an operator."
+        ),
+    )
     return parser
 
 
@@ -160,17 +306,28 @@ def main(argv: list[str] | None = None) -> int:
     """Run the selected live issue snapshot audits."""
     parser = build_parser()
     args = parser.parse_args(argv)
+    collect_report = args.report_json is not None or args.report_md is not None
+    profile_results: list[dict[str, object]] = []
 
     try:
         for profile in expand_profiles(args.profile):
-            audit_profile(
+            profile_result = audit_profile(
                 args.python,
                 profile,
                 args.repo,
                 args.limit,
                 args.gh,
                 args.tmp_dir,
+                collect_report=collect_report,
             )
+            if profile_result is not None:
+                profile_results.append(profile_result)
+        if collect_report:
+            report = build_report(args.repo, args.generated_at, profile_results)
+            if args.report_json is not None:
+                write_report_json(args.report_json, report)
+            if args.report_md is not None:
+                write_report_markdown(args.report_md, report)
     except ReleaseEvidenceIssueSnapshotAuditError as exc:
         print(f"release evidence issue snapshot audit failed: {exc}", file=sys.stderr)
         return 1

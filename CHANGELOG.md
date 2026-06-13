@@ -19,6 +19,9 @@ the release policy in `docs/release-policy.md`.
 - Added a release evidence issue snapshot audit orchestrator so operators can
   export and check live label, body, and closure issue snapshots with one
   no-secret command while CI stays network-free.
+- Added a retained no-secret release evidence live audit report bundle mode for
+  the issue snapshot orchestrator, including deterministic JSON/Markdown report
+  output, snapshot digests, command provenance, and blocked-readiness warnings.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.
