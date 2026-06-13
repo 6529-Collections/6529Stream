@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-closure-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/248` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/249` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/250` |
-| Next issue | TBD after issue #249 reconciliation merges |
+| Active PR branch | `codex/non-local-evidence-generator` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/250` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/251` |
+| Active PR | TBD until opened |
+| Next issue | TBD after issue #251 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 16:36 UTC` |
+| Last updated | `2026-06-13 16:55 UTC` |
 
 ## Packaging Notes
 
@@ -175,18 +175,62 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 116 | Harden release evidence tracker body drift checks | Gate G support | Add a no-secret optional live/snapshot body audit so tracker issues #215 through #231 cannot silently drift from committed body-sync payloads before retained evidence completion | Merged in PR #244 |
 | 117 | Reconcile release evidence body drift merge state | Gate G support | Record PR #244 merge evidence, issue #242 closure, refreshed roadmap verification metadata, and the next no-secret evidence-tracker hardening target | Merged in PR #247 |
 | 118 | Guard release evidence tracker closure and readiness state | Gate G support | Add a no-secret closure/readiness audit so tracker issues #215 through #231 cannot be closed before their committed evidence requirement is complete or explicitly risk-accepted | Merged in PR #248 |
-| 119 | Reconcile release evidence closure merge state | Gate G support | Record PR #248 merge evidence, issue #246 closure, refreshed roadmap verification metadata, and the next autonomous queue posture without changing readiness claims | Active |
+| 119 | Reconcile release evidence closure merge state | Gate G support | Record PR #248 merge evidence, issue #246 closure, refreshed roadmap verification metadata, and the next autonomous queue posture without changing readiness claims | Merged in PR #250 |
+| 120 | Add non-local evidence scaffold generator | Gate E/Gate G support | Add a no-secret generator that turns a retained artifact plus committed requirement template into checker-compatible non-local evidence metadata with digest computation and `--check` drift detection | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile release evidence closure merge state (Queue Item 119)
+### PR candidate: Add non-local evidence scaffold generator (Queue Item 120)
 
-Status: PR #250 open; CI and CodeRabbit review in progress.
+Status: local implementation in progress; PR not yet opened.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/251`.
+PR: TBD until opened.
+Branch: `codex/non-local-evidence-generator`.
+Branch started from PR #250 squash merge commit
+`b4cde51da923354b7ef8b5afa2e14badccef955e`.
+
+Prior queue transition:
+
+- Queue Item 119 merged in PR #250 as squash commit
+  `b4cde51da923354b7ef8b5afa2e14badccef955e`.
+- PR #250 final implementation head was
+  `e607b004be1323309f3d86f4023b05fb20cdae74`.
+- PR #250 GitHub Actions CI run `27472666858` passed on the final head,
+  including deployment rehearsal.
+- PR #250 CodeRabbit status was success, and the single review thread was
+  resolved.
+- Issue #249 closed completed after merge.
+- Attempted subagent delegation for the next evidence-tooling audit, but the
+  workspace had reached the agent thread limit; continued in-thread.
+
+Goal:
+
+- Add a no-secret generator for non-local release evidence metadata.
+- Compute retained artifact hashes automatically from repository files.
+- Support deterministic `--check` drift detection for generated evidence
+  metadata.
+- Reuse `scripts/check_non_local_release_evidence.py` as the canonical
+  validation source.
+- Keep issues #215 through #231 open and readiness claims blocked until real
+  reviewed retained evidence exists.
+
+Completed local validation so far:
+
+- `python scripts/test_non_local_release_evidence_generator.py`.
+- `python -m py_compile scripts/generate_non_local_release_evidence.py scripts/test_non_local_release_evidence_generator.py`.
+- `python scripts/test_non_local_release_evidence.py`.
+- `python scripts/check_non_local_release_evidence.py`.
+
+### Completed: Reconcile release evidence closure merge state (Queue Item 119)
+
+Status: merged in PR #250.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/249`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/250`.
 Branch: `codex/release-evidence-closure-merge-state`.
 Branch started from PR #248 squash merge commit
 `1c258231820cfb022b1ba859608d9be1c8970392`.
+Final PR head: `e607b004be1323309f3d86f4023b05fb20cdae74`.
+Squash merge commit: `b4cde51da923354b7ef8b5afa2e14badccef955e`.
 
 Prior queue transition:
 
@@ -215,6 +259,15 @@ Completed local validation:
 - `python scripts/generate_release_checksums.py --check`.
 - `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
 - `git diff --check`.
+
+Final remote validation:
+
+- GitHub Actions run `27472666858` passed on head
+  `e607b004be1323309f3d86f4023b05fb20cdae74`, including deployment rehearsal.
+- CodeRabbit status was success after commit
+  `e607b004be1323309f3d86f4023b05fb20cdae74`, with its review thread
+  resolved.
+- Issue #249 closed completed after PR #250 merged.
 
 ### Completed: Guard release evidence tracker closure and readiness state (Queue Item 118)
 
@@ -10108,6 +10161,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 16:55 | Implement Queue Item 120 local draft | Added the non-local evidence metadata generator, focused tests, local gate wiring, operator docs, changelog, and durable state updates while preserving blocked readiness claims. |
+| 2026-06-13 16:51 | Create issue #251 and select Queue Item 120 | The remaining tracker issues require external retained evidence, so the next no-secret repo-side improvement is an evidence metadata generator that reduces operator hand-editing risk without closing those trackers. |
+| 2026-06-13 16:50 | Merge PR #250 | Release evidence closure state reconciliation merged as `b4cde51da923354b7ef8b5afa2e14badccef955e`; final head `e607b004be1323309f3d86f4023b05fb20cdae74` passed CI run `27472666858`, CodeRabbit status was success, and issue #249 closed completed. |
 | 2026-06-13 16:27 | Create issue #249 and start Queue Item 119 | PR #248 merged cleanly and issue #246 closed completed, so issue #249 tracks state reconciliation before the next substantive roadmap target. |
 | 2026-06-13 16:26 | Merge PR #248 | Release evidence tracker closure readiness merged as `1c258231820cfb022b1ba859608d9be1c8970392`; final head `9968e0f3cd476b82494edbd2b7cbd674ed778a9d` passed CI run `27472194068`, CodeRabbit status was success with no review threads, and issue #246 closed completed. |
 | 2026-06-13 16:19 | Address PR #248 CodeRabbit review | CodeRabbit requested body-sync error normalization and explicit `release-evidence-issue-backlog.json` documentation; commit `9968e0f3cd476b82494edbd2b7cbd674ed778a9d` added the wrapper regression, docs, refreshed release artifacts, and passed focused validation before re-review. |

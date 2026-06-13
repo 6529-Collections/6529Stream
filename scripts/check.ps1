@@ -79,6 +79,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_randomizer_operations.py"
 & $pythonPath @pythonArgs "scripts\test_release_signatures.py"
 & $pythonPath @pythonArgs "scripts\check_release_signatures.py"
+& $pythonPath @pythonArgs "scripts\test_non_local_release_evidence_generator.py"
 & $pythonPath @pythonArgs "scripts\test_non_local_release_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_non_local_release_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_public_beta_evidence.py"

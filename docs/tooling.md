@@ -54,6 +54,7 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/test_public_beta_evidence.py
@@ -309,6 +310,13 @@ production-release template under
 artifact hashes, rejects secret-shaped metadata, and lets future reviewed
 evidence become release-manifest and checksum inputs without treating templates
 as completion evidence.
+When a retained fork, testnet, live, audit, or release-signing artifact exists,
+use `python scripts/generate_non_local_release_evidence.py` to generate the
+metadata envelope from the matching committed requirement template and retained
+artifact path. The helper computes the artifact digest, validates the output
+with the canonical checker, and supports `--check` for drift detection. It does
+not unblock a release row until the generated evidence is independently
+reviewed and linked from `release-artifacts/latest/public-beta-evidence.json`.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
@@ -374,6 +382,7 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
@@ -420,6 +429,7 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py

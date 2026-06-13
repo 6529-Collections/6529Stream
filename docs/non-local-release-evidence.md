@@ -105,6 +105,45 @@ policy, retained artifact path, SHA-256 digest, review status, source metadata,
 public-beta and production-release template-set coverage, and no-secret
 boundary before release manifest and checksum generation.
 
+### Evidence Metadata Generator
+
+Use `scripts/generate_non_local_release_evidence.py` when a retained artifact
+already exists and the operator needs a metadata envelope that matches the
+canonical checker. The generator copies the requirement ID and redaction policy
+from a committed public-beta or production-release template, computes the
+retained artifact digest, sets `record_type: "evidence"`, and validates the
+result with `scripts/check_non_local_release_evidence.py` before writing.
+
+Example fork rehearsal draft:
+
+```sh
+python scripts/generate_non_local_release_evidence.py \
+  --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json \
+  --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-rehearsal.md \
+  --output release-artifacts/evidence/fork-deployment-rehearsal/fork-rehearsal-evidence.json \
+  --environment fork \
+  --chain-id 1 \
+  --block-or-reference "fork block 19000000" \
+  --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --rpc-url <redacted>" \
+  --owner release-operator \
+  --reviewer TBD \
+  --source-git-commit <release commit sha> \
+  --source-ci-run <ci run or TBD>
+```
+
+Use `--review-status reviewed --reviewer <reviewer>` only after independent
+review is complete. Use `--check` in follow-up PRs to prove the retained
+artifact hash and metadata fields have not drifted:
+
+```sh
+python scripts/generate_non_local_release_evidence.py ... --check
+```
+
+This helper does not create completion evidence by itself. A public-beta or
+production-release row remains blocked until the generated evidence is reviewed,
+linked from `release-artifacts/latest/public-beta-evidence.json`, and all
+release evidence gates pass.
+
 ## Public-Beta Requirement Mapping
 
 When evidence is retained, update the matching requirement row in
@@ -142,8 +181,10 @@ file with a matching digest and an independent review note.
    private audit-draft text.
 5. Convert the retained artifact to JSON or Markdown with the required artifact
    fields.
-6. Hash the retained file with SHA-256.
-7. Add the retained artifact to the appropriate repository directory.
+6. Add the retained artifact to the appropriate repository directory.
+7. Generate a metadata envelope with
+   `scripts/generate_non_local_release_evidence.py`, or manually hash the
+   retained file and copy the same fields into a checked metadata document.
 8. Update the matching `public-beta-evidence.json` requirement row with the
    retained path and digest.
 9. Set the requirement status to `pending` until review is complete.
