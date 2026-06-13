@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-label-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/240` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/241` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/243` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/242` for release evidence tracker body drift checks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 14:32 UTC` |
+| Last updated | `2026-06-13 14:36 UTC` |
 
 ## Packaging Notes
 
@@ -178,12 +178,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile release evidence label drift merge state (Queue Item 115)
 
-Status: local implementation validated; PR not opened yet.
+Status: PR #243 open; waiting for GitHub Actions and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/241`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/243`.
 Branch: `codex/release-evidence-label-state`.
 Branch started from PR #240 squash merge commit
 `a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db`.
+Initial PR head: `cbde7b13642d1c09a9204820c5ec8ea218310876`.
 
 Prior queue transition:
 
@@ -9872,6 +9873,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 14:36 | Open PR #243 for Queue Item 115 | Opened `https://github.com/6529-Collections/6529Stream/pull/243` from `codex/release-evidence-label-state` at head `cbde7b13642d1c09a9204820c5ec8ea218310876` to reconcile PR #240 merge evidence and keep issue #242 queued as the next body-drift hardening target. |
 | 2026-06-13 14:32 | Merge PR #240 and start Queue Item 115 | Release evidence label drift checks merged as `a9e8bcc4cf207181d8fa0bcd6c27ce4672ced2db`; final head `e7e29f28ff9efa6b42208aefd71d73383f504204` passed CI run `27469343982`, CodeRabbit status was success with the roadmap provenance thread resolved, and issue #239 closed completed. Issue #241 now tracks state reconciliation, and issue #242 is the next no-secret body-drift hardening target. |
 | 2026-06-13 14:20 | Address PR #240 CodeRabbit provenance review | PR candidate: Harden release evidence tracker label drift checks (Queue Item 114). Status: PR #240 open at `https://github.com/6529-Collections/6529Stream/pull/240`; branch `codex/release-evidence-label-drift`; branch started from PR #238 squash merge commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`. Prior queue transition: Queue Item 113 merged in PR #238 as squash commit `3c738f51c8fa2cf623fda1f3d1fe5284db946d99`; PR #238 final implementation head was `d56f7d2405fd0c52fdf2320a0f167253aceb4bf7`. Completed local validation: label checker tests/check, body-sync tests/check, release-readiness tests/check, release-manifest tests/check, release-checksum tests/check, changelog gate, Bash syntax, PowerShell parser syntax, heading scan, whitespace check, and live GitHub label snapshot audit. PR #240 CI run `27469086354` passed on head `5a33b9fc08d0e58f8bb43b143e7d450739c148d4`; CodeRabbit requested roadmap provenance and decision-log traceability fixes. |
 | 2026-06-13 08:44 | Open PR #208 and request CodeRabbit | State-only merge reconciliation PR opened against `main`, linked `Closes #206`, pushed head `097ac7506820359388bb76eba11778021d5edfe2`, and requested CodeRabbit review in comment `4698031592`; Claude intentionally skipped per current user instruction |
