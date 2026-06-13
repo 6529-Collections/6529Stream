@@ -382,7 +382,7 @@ the release evidence issue backlog from issue
 the release evidence issue-link map from issue
 [#214](https://github.com/6529-Collections/6529Stream/issues/214) / PR #232,
 the release evidence issue body sync artifact from issue
-[#235](https://github.com/6529-Collections/6529Stream/issues/235) / current PR,
+[#235](https://github.com/6529-Collections/6529Stream/issues/235) / PR #236,
 and the
 `docs/non-local-release-evidence.md` intake runbook from issue #168.
 [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
@@ -416,8 +416,8 @@ or changing readiness claims. Issue
 for a deterministic no-secret release evidence issue-link map/checker that ties
 each generated backlog row to one concrete GitHub tracker issue while
 preserving blocked readiness claims until reviewed retained evidence exists.
-Issue [#235](https://github.com/6529-Collections/6529Stream/issues/235) is in
-progress for a generated no-secret release evidence issue body-sync artifact
+Issue [#235](https://github.com/6529-Collections/6529Stream/issues/235) is
+complete for a generated no-secret release evidence issue body-sync artifact
 that joins the committed backlog and issue-link map into exact GitHub issue
 body payloads, plus a Markdown review view, without automatically updating
 GitHub or changing readiness claims.

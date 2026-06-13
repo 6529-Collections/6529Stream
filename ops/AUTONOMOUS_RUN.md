@@ -174,7 +174,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Generate and apply release evidence tracker issue bodies (Queue Item 112)
 
-Status: PR #236 open; CI and CodeRabbit pending.
+Status: PR #236 open; initial CI passed, CodeRabbit posted two minor
+documentation findings, and the review-response fixes are prepared locally.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/235`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/236`.
 Branch: `codex/release-evidence-issue-bodies`.
@@ -249,7 +250,16 @@ Remote review:
 - PR #236 opened against `main` from head
   `f7dc33795e45129da62e3636448f781c4bcbe251`.
 - CodeRabbit review requested in comment `4698628618`.
-- CI pending.
+- State-only follow-up commit `285b942034521e83b4b361bf8b759c30b97bd0c4`
+  recorded the PR after opening.
+- GitHub Actions Foundry smoke run `27467859837` passed on head
+  `285b942034521e83b4b361bf8b759c30b97bd0c4`.
+- CodeRabbit review `4491474201` posted two actionable comments:
+  `docs/tooling.md` needed to name the committed issue-link map in checksum
+  coverage, and `ops/ROADMAP.md` needed to replace stale body-sync status
+  wording with PR #236 / complete wording.
+- Review-response fixes are local and validated; push them, request CodeRabbit
+  again, then resolve threads after the bot is clean.
 
 ### Completed: Reconcile release evidence issue links merge state (Queue Item 111)
 
@@ -10361,6 +10371,7 @@ Outcome:
 | 2026-06-13 12:59 | Apply generated tracker issue bodies | Issues #215 through #231 now have exact generated no-secret body payloads from `release-artifacts/latest/release-evidence-issue-body-sync.json`; live GitHub bodies verified against the artifact |
 | 2026-06-13 13:13 | Finish Queue Item 112 local validation | Focused release evidence body-sync, release-artifact, manifest, checksum, readiness, changelog, syntax, heading, whitespace, full `make check`, and Windows PowerShell wrapper validation all pass with existing Foundry warning noise only |
 | 2026-06-13 13:16 | Open PR #236 and request CodeRabbit | Release evidence issue body-sync PR opened on head `f7dc33795e45129da62e3636448f781c4bcbe251`; CodeRabbit review requested in comment `4698628618` |
+| 2026-06-13 13:31 | Address CodeRabbit PR #236 review locally | Foundry smoke run `27467859837` passed; CodeRabbit review `4491474201` requested two minor docs/roadmap wording fixes, which are prepared locally with regenerated release manifest/checksum artifacts and focused validation passing |
 
 ## Resume Instructions
 

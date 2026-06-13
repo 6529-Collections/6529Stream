@@ -264,9 +264,9 @@ as completion evidence.
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, public-beta evidence, release evidence issue backlog, release
-evidence issue body sync, deployment manifest, address-book, schema, ceremony
-evidence, and release-manifest outputs. This gives maintainers a
-deterministic, signable checksum bundle. The
+evidence issue-link map, release evidence issue body sync, deployment manifest,
+address-book, schema, ceremony evidence, and release-manifest outputs. This
+gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
 `release-manifest.json`; embedding the final bundle digest in that covered file
