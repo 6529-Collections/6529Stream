@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/188` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 02:06 UTC` |
+| Last updated | `2026-06-13 02:10 UTC` |
 
 ## Packaging Notes
 
@@ -158,7 +158,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile drop authorization signing evidence merge state (Queue Item 96)
 
-Status: PR #188 opened; awaiting CodeRabbit review and CI.
+Status: Addressing CodeRabbit PR #188 wording review while CI is running.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/186`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/188`.
 Branch: `codex/reconcile-signing-evidence-merge`.
@@ -8736,8 +8736,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 02:10 | Address CodeRabbit PR #188 rationale review | Reword the Queue Item 97 selection rationale to acknowledge that issue #186 was already open for reconciliation when signer custody/readiness evidence was chosen as the next implementation slice |
 | 2026-06-13 02:06 | Open PR #188 | State-only reconciliation PR opened against `main`, linked `Closes #186`, and will use CodeRabbit-only review per current user instruction |
-| 2026-06-13 02:02 | Create issue #187 and select Queue Item 97 | No open Stream issues remained after #183 closed, and signer custody/readiness evidence is the next no-secret blocker slice after payload generation and signing evidence |
+| 2026-06-13 02:02 | Create issue #187 and select Queue Item 97 | After #183 closed, issue #186 was open only for state reconciliation; signer custody/readiness evidence is the next no-secret blocker slice after payload generation and signing evidence |
 | 2026-06-13 02:01 | Create issue #186 and start Queue Item 96 | PR #185 merged cleanly, so state must record final CI/CodeRabbit evidence and refresh the roadmap before the next implementation branch starts |
 | 2026-06-13 02:00 | Merge PR #185 | Drop authorization signing evidence merged as `fd453a652d228c3e43002aca27f72e1d86cd53d9`; final head `fa1a6e949558dc7178564da179d576047ac428a9` passed CI run `27453065590`, CodeRabbit status was success, visible review threads were resolved, and issue #183 closed completed |
 | 2026-06-13 01:44 | Address remaining CodeRabbit PR #185 findings | Replace stale roadmap status language, remove unsupported external-review phrasing, align numeric evidence validation with schema minimums, add focused regressions, and clarify tooling/incident-response docs before pushing the next review-response commit |
