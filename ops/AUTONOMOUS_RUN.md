@@ -32,13 +32,13 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/signer-custody-readiness-evidence` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/188` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/187` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/189` |
+| Active PR branch | `codex/reconcile-signer-custody-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/189` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/190` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/192` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 03:34 UTC` |
+| Last updated | `2026-06-13 03:58 UTC` |
 
 ## Packaging Notes
 
@@ -152,87 +152,49 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 94 | Reconcile autonomous run state after drop authorization payload generator merge | Gate G support | Implement issue #182 by marking PR #181 merged, recording CI and CodeRabbit evidence, and selecting the next no-secret signing evidence target | Merged in PR #184 |
 | 95 | Add drop authorization signing evidence schema and checker | Gate G/Gate C support | Implement issue #183 by adding a no-secret schema, template/example, checker, tests, docs links, and maintained local/CI gates for retained drop authorization signing evidence | Merged in PR #185 |
 | 96 | Reconcile drop authorization signing evidence merge state | Gate G support | Implement issue #186 by marking PR #185 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next no-secret signer-custody readiness target | Merged in PR #188 |
-| 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Open in PR #189 |
+| 97 | Add production signer custody readiness evidence | Gate G/Gate C support | Implement issue #187 by adding a no-secret signer custody/readiness evidence schema/template/checker/tests/docs and local/CI gates without private keys, signer-service secrets, or public-beta readiness claims | Merged in PR #189 |
+| 98 | Reconcile signer custody readiness merge state | Gate G support | Implement issue #190 by marking PR #189 merged, recording final CI/CodeRabbit evidence, refreshing roadmap verification metadata, and selecting the next public-beta evidence blocker-report target | Active |
+| 99 | Add public beta evidence blocker report artifact | Gate G support | Implement issue #191 by generating a deterministic no-secret report from `release-artifacts/latest/public-beta-evidence.json` that lists incomplete public-beta evidence rows and validation commands without changing readiness claims | Queued |
 
 ## Current PR Worklog
 
-### PR candidate: Add production signer custody readiness evidence (Queue Item 97)
+### PR candidate: Reconcile signer custody readiness merge state (Queue Item 98)
 
-Status: Addressing CodeRabbit review comments after initial PR CI passed.
-Issue: `https://github.com/6529-Collections/6529Stream/issues/187`.
-PR: `https://github.com/6529-Collections/6529Stream/pull/189`.
-Branch: `codex/signer-custody-readiness-evidence`.
-Branch started from PR #188 squash merge commit
-`3601a0b174f1f972d0b7daa284c19aab29a2373c`.
+Status: Open in PR #192; awaiting CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/190`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/192`.
+Branch: `codex/reconcile-signer-custody-state`.
+Branch started from PR #189 squash merge commit
+`ae87028d7471c35faa0bc3a3555583e24be50d4d`.
 
 Prior queue transition:
 
-- Queue Item 96 merged in PR #188 as squash commit
-  `3601a0b174f1f972d0b7daa284c19aab29a2373c`.
-- PR #188 final implementation head was
-  `2ab48118605330d2a29ef83ea9115cb2a5c2029d`.
-- PR #188 GitHub Actions CI run `27453558821` passed on the final head.
-- PR #188 CodeRabbit status was success after its rationale review thread was
-  resolved/outdated.
-- PR #188 closed issue #186 at merge.
-- Issue #187 is the active no-secret implementation target for production
-  signer custody/readiness evidence.
+- Queue Item 97 merged in PR #189 as squash commit
+  `ae87028d7471c35faa0bc3a3555583e24be50d4d`.
+- PR #189 final implementation head was
+  `e0c64d91cfbcfabea7b7b89d8b1d61521c8487fa`.
+- PR #189 GitHub Actions CI run `27455567547` passed on the final head.
+- PR #189 CodeRabbit status was success, and all visible CodeRabbit review
+  threads were resolved by the bot.
+- PR #189 closed issue #187 at merge.
+- Issue #190 is the active state-only reconciliation target.
+- Issue #191 is queued next for a deterministic public-beta evidence blocker
+  report generated from the committed evidence manifest without changing any
+  public-beta or production readiness claims.
 
 Goal:
 
-- Add a no-secret signer custody/readiness evidence schema and committed local
-  template.
-- Validate signer type, manager type, signer-service class, ERC-1271 stance,
-  custody status, signer epoch, key-material location, separation of duties,
-  lifecycle readiness, monitoring, alerting, signer-service integration,
-  retained artifact hashes, review metadata, and no-secret policy.
-- Wire the checker into local and CI gates, release manifest generation,
-  release checksum coverage, release-readiness/audit/incident docs, tooling,
-  roadmap, and run-state.
-- Preserve the distinction between a checked local template and reviewed
-  production signer custody evidence.
+- Mark Queue Item 97 merged in both durable state files.
+- Record PR #189 final CI, CodeRabbit, and squash-merge evidence.
+- Refresh stale roadmap verification metadata that still referenced PR #188 or
+  the initial PR #189 CI run.
+- Select Queue Item 99 as the next no-secret Gate G support slice.
 
-Validation completed locally at `2026-06-13 03:06 UTC`:
+Validation completed locally at `2026-06-13 03:53 UTC`:
 
-- `python -m py_compile scripts\check_signer_custody_readiness.py scripts\test_signer_custody_readiness.py scripts\generate_release_manifest.py scripts\test_release_manifest.py scripts\generate_release_checksums.py scripts\test_release_checksums.py scripts\check_release_readiness.py scripts\test_release_readiness.py scripts\check_audit_package.py scripts\check_incident_response.py`.
-- `python scripts\test_signer_custody_readiness.py`.
-- `python scripts\check_signer_custody_readiness.py`.
-- `python scripts\test_release_manifest.py`.
-- `python scripts\generate_release_manifest.py --check`.
-- `python scripts\test_release_checksums.py`.
-- `python scripts\generate_release_checksums.py --check`.
-- `python scripts\test_release_readiness.py`.
-- `python scripts\check_release_readiness.py`.
-- `python scripts\test_audit_package.py`.
-- `python scripts\check_audit_package.py`.
-- `python scripts\test_incident_response.py`.
-- `python scripts\check_incident_response.py`.
-- `python scripts\test_public_beta_evidence.py`.
-- `python scripts\check_public_beta_evidence.py`.
-- `python scripts\test_drop_authorization_signing_evidence.py`.
-- `python scripts\check_drop_authorization_signing_evidence.py`.
-- `python scripts\test_changelog_check.py`.
-- `python scripts\check_changelog.py`.
+- `rg -n "Queue Item 97|Queue Item 98|Queue Item 99|PR #189|27455567547|ae87028d|#191" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
 - `git diff --check`.
-- `make check`.
-- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
-
-Initial PR validation:
-
-- PR #189 GitHub Actions CI run `27454880369` passed on head
-  `0b49933d8f5c8474d23d7e4b8ce9a2c7f192c21e`.
-- CodeRabbit status reached success and reported actionable follow-up comments
-  on signer custody validation hardening.
-
-CodeRabbit follow-up in progress:
-
-- Reject whitespace-only strings in signer custody readiness evidence.
-- Require reviewed evidence owner, approval reference, and reviewed-at timestamp
-  to be non-placeholder, with `reviewed_at` parsed as an RFC3339 timestamp.
-- Add machine-checked `erc1271_support_detail` rationale/reference fields.
-- Add signer custody schema and retained-artifact links to incident-response
-  validation.
-- Replace stale roadmap PR #189 CI wording with a time-bounded status note.
 
 ### PR candidate: Add drop authorization signing evidence schema and checker (Queue Item 95)
 
@@ -8779,6 +8741,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 03:58 | Open PR #192 | State-only reconciliation PR opened against `main`, linked `Closes #190`, and will use CodeRabbit-only review per current user instruction |
+| 2026-06-13 03:53 | Create issues #190 and #191 | PR #189 merged cleanly, no open issues remained, so issue #190 tracks state reconciliation and issue #191 tracks the next no-secret public-beta evidence blocker-report slice |
+| 2026-06-13 03:51 | Merge PR #189 | Signer custody readiness evidence merged as `ae87028d7471c35faa0bc3a3555583e24be50d4d`; final head `e0c64d91cfbcfabea7b7b89d8b1d61521c8487fa` passed CI run `27455567547`, CodeRabbit status was success, all visible review threads were resolved, and issue #187 closed completed |
 | 2026-06-13 03:34 | Address CodeRabbit PR #189 review | Initial PR #189 CI run `27454880369` passed on head `0b49933d8f5c8474d23d7e4b8ce9a2c7f192c21e`; CodeRabbit requested stricter string/review timestamp validation, structured ERC-1271 rationale, fuller incident-response artifact links, public-beta wording, and unambiguous roadmap CI status |
 | 2026-06-13 03:12 | Open PR #189 | Branch `codex/signer-custody-readiness-evidence` opened against `main`, linked `Closes #187`, and CodeRabbit review requested via comment `4697279178` |
 | 2026-06-13 03:06 | Complete Queue Item 97 local validation | Signer custody readiness schema/template/checker/tests/docs are wired through local and CI gates, release manifest/checksum coverage, and readiness/audit/incident docs; focused evidence checks, `git diff --check`, `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally |
