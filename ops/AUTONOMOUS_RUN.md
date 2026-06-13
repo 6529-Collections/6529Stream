@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/production-release-blocker-report` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/204` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/203` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/205` |
 | Next issue | `TBD` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 08:11 UTC` |
+| Last updated | `2026-06-13 08:15 UTC` |
 
 ## Packaging Notes
 
@@ -167,9 +167,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add production release blocker report artifact (Queue Item 105)
 
-Status: Local implementation in progress; PR not opened yet.
+Status: PR #205 open; GitHub Actions and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/203`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/205`.
 Branch: `codex/production-release-blocker-report`.
 Branch started from PR #204 squash merge commit
 `de5df8e382fbafe6c15c4f84dd978532debee90b`.

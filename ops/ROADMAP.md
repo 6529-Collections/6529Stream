@@ -89,7 +89,7 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 08:11 UTC` during Queue Item 105 local implementation of the production-release blocker report, after focused Python compile, production blocker-report tests/check, public-beta blocker-report tests/check, release-artifact tests, release-manifest tests/check, release-readiness tests/check, public-beta/non-local evidence checks, release-checksum tests/check, changelog tests/check, audit-package and architecture/threat-model tests/checks, heading scan, whitespace check, PowerShell syntax parse, full `make check`, and Windows wrapper checks passed locally; GitHub Actions and CodeRabbit remain pending until this PR opens |
+| Last verified | `2026-06-13 08:11 UTC` during Queue Item 105 local implementation of the production-release blocker report for PR #205, after focused Python compile, production blocker-report tests/check, public-beta blocker-report tests/check, release-artifact tests, release-manifest tests/check, release-readiness tests/check, public-beta/non-local evidence checks, release-checksum tests/check, changelog tests/check, audit-package and architecture/threat-model tests/checks, heading scan, whitespace check, PowerShell syntax parse, full `make check`, and Windows wrapper checks passed locally; GitHub Actions and CodeRabbit are pending for PR #205 |
 | OS tested | Windows local for Queue Item 103 full checks; Linux GitHub Actions passed for latest merged baseline PR #201 run `27460093022` on final head `a47870ddeee096e8f9d3212fe1579d56e3163c23`, with merged baseline commit `02ce230500cb016e45b67c8dbd6710c08cadc000` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
