@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-report-bundle-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/270` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/271` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/272` |
 | Next issue | TBD after issue #271 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 21:42 UTC` |
+| Last updated | `2026-06-13 21:45 UTC` |
 
 ## Packaging Notes
 
@@ -193,12 +193,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit report bundle merge state (Queue Item 130)
 
-Status: local branch active; PR not opened yet.
+Status: PR #272 open; CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/271`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/272`.
 Branch: `codex/reconcile-live-audit-report-bundle-merge-state`.
 Branch started from PR #270 squash merge commit
 `774d564b690e8f90380c31244255769af7d9ff63`.
+Opening PR head: `15a916b609c21f44e041f5fb18383122b814a8f3`.
 
 Goal:
 
@@ -10936,6 +10937,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 21:45 | Open PR #272 | State-only live-audit-report-bundle merge reconciliation PR opened on head `15a916b609c21f44e041f5fb18383122b814a8f3`, links `Closes #271`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 21:42 | Start Queue Item 130 | PR #270 merged cleanly as `774d564b690e8f90380c31244255769af7d9ff63`, issue #269 closed completed, and issue #271 now tracks a state-only reconciliation before the next no-secret evidence target. |
 | 2026-06-13 21:42 | Select Queue Item 131 | The retained live audit report bundle now exists, so the next no-secret improvement is an offline schema/checker that validates report bundles without GitHub network access or readiness-claim changes. |
 | 2026-06-13 21:38 | Merge PR #270 | Release evidence live audit report bundle merged as `774d564b690e8f90380c31244255769af7d9ff63`; final head `3a71a61778baec01cf0d4de0f307f5b3db4f53e6` passed CI run `27479701303`, CodeRabbit status was success with no unresolved review threads after the docs nit was addressed, and issue #269 closed completed. |
