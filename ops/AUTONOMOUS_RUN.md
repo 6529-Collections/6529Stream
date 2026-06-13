@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-packet-index` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/208` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/207` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/209` |
+| Active PR branch | `codex/reconcile-release-packet-merge` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/209` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/210` |
+| Active PR | TBD |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 09:42 UTC` |
+| Last updated | `2026-06-13 09:56 UTC` |
 
 ## Packaging Notes
 
@@ -163,14 +163,55 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 104 | Reconcile production release template merge state | Gate G support | Implement issue #202 by recording PR #201 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret production-readiness support target | Merged in PR #204 |
 | 105 | Add production release blocker report artifact | Gate G support | Implement issue #203 by generating a deterministic production-focused blocker report from committed evidence metadata and templates without changing readiness claims | Merged in PR #205 |
 | 106 | Reconcile production blocker report merge state | Gate G support | Implement issue #206 by recording PR #205 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret release-readiness support target | Merged in PR #208 |
-| 107 | Add release evidence packet index and checker | Gate G support | Implement issue #207 by generating one deterministic no-secret packet index that maps public-beta and production-release blocker rows to templates, retained-artifact expectations, validation commands, and current readiness posture | Active |
+| 107 | Add release evidence packet index and checker | Gate G support | Implement issue #207 by generating one deterministic no-secret packet index that maps public-beta and production-release blocker rows to templates, retained-artifact expectations, validation commands, and current readiness posture | Merged in PR #209 |
+| 108 | Reconcile release evidence packet index merge state | Gate G support | Implement issue #210 by recording PR #209 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret roadmap target without changing readiness claims | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Add release evidence packet index and checker (Queue Item 107)
+### PR candidate: Reconcile release evidence packet index merge state (Queue Item 108)
 
-Status: PR #209 open; first CI passed; CodeRabbit review fixes applied
-locally and pending follow-up push/recheck.
+Status: Local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/210`.
+PR: TBD.
+Branch: `codex/reconcile-release-packet-merge`.
+Branch started from PR #209 squash merge commit
+`dec345094e26304a50c5b5e098c002b002972c37`.
+
+Prior queue transition:
+
+- Queue Item 107 merged in PR #209 as squash commit
+  `dec345094e26304a50c5b5e098c002b002972c37`.
+- PR #209 final implementation head was
+  `e571a2a2b4107c27f5c229e02d00dbe93c78381a`.
+- PR #209 GitHub Actions CI run `27463241499` passed on the final head.
+- PR #209 CodeRabbit status was success after three actionable comments and one
+  roadmap nit were addressed; the visible threads were resolved or outdated,
+  and five pre-merge checks passed.
+- Issue #207 was closed completed after merge.
+
+Goal:
+
+- Mark Queue Item 107 and PR #209 as merged in the durable run queue.
+- Record PR #209 final CI, CodeRabbit, resolved-thread, and squash-merge
+  evidence.
+- Refresh roadmap verification metadata that still referenced PR #208 or a
+  pending Queue Item 107 branch.
+- Keep the release evidence packet index represented as merged Gate G support
+  while preserving blocked public-beta and production-release readiness claims.
+- Select the next no-secret roadmap target after this reconciliation PR merges.
+
+Completed local validation:
+
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "Queue Item 107|Queue Item 108|PR #209|27463241499|e571a2a|dec3450|#207|#210|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+All focused state-reconciliation checks passed locally at
+`2026-06-13 09:59 UTC`.
+
+### Completed: Add release evidence packet index and checker (Queue Item 107)
+
+Status: Merged in PR #209.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/207`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/209`.
 Branch: `codex/release-evidence-packet-index`.
@@ -269,7 +310,15 @@ Remote review:
   `python scripts/generate_release_evidence_packet_index.py --check`,
   `python -m py_compile scripts/test_release_evidence_packet_index.py scripts/generate_release_evidence_packet_index.py`,
   `python scripts/check_release_readiness.py`, regenerated release manifest and
-  checksum bundle, and pending final drift/whitespace checks before push.
+  checksum bundle, and final drift/whitespace checks before push.
+- Final implementation head was
+  `e571a2a2b4107c27f5c229e02d00dbe93c78381a`.
+- GitHub Actions CI run `27463241499` passed on final head
+  `e571a2a2b4107c27f5c229e02d00dbe93c78381a`.
+- CodeRabbit status was success; the visible CodeRabbit threads were resolved
+  or outdated, and five pre-merge checks passed.
+- PR #209 squash-merged as
+  `dec345094e26304a50c5b5e098c002b002972c37`, closing issue #207.
 
 ### Completed: Reconcile production blocker report merge state (Queue Item 106)
 
@@ -10061,6 +10110,9 @@ Outcome:
 | 2026-06-12 07:28 | Finish PR #143 follow-up validation | Full `make check` passed after the CodeRabbit deployment-version guard fix; CI rerun and CodeRabbit re-review remain pending until the follow-up commit is pushed |
 | 2026-06-12 15:12 | Mark PR #159 merge-ready | CI run `27424138673` passed on head `207ba0d00066ccab9a0414d8f8f848aa1c3e1c4a`, CodeRabbit status was success, and the visible CodeRabbit review suggestions were addressed in the follow-up commit |
 | 2026-06-12 16:13 | Mark PR #161 merge-ready | Final CI run `27428125013` passed on head `95a70908b3470488dac8e142c427de28d022824a`, CodeRabbit status was success, and the visible review threads were resolved |
+| 2026-06-13 09:55 | Merge PR #209 | Release evidence packet index merged as `dec345094e26304a50c5b5e098c002b002972c37`; CI run `27463241499` and CodeRabbit passed on final head `e571a2a2b4107c27f5c229e02d00dbe93c78381a`, and issue #207 closed completed |
+| 2026-06-13 09:56 | Create issue #210 and select Queue Item 108 | Durable state still marked PR #209 active after merge, so reconcile roadmap/run-state evidence before choosing the next substantive no-secret roadmap target |
+| 2026-06-13 09:59 | Finish Queue Item 108 local validation | Heading scan, state evidence grep, and whitespace checks pass for the roadmap/run-state reconciliation |
 
 ## Resume Instructions
 

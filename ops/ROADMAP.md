@@ -90,12 +90,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 09:27 UTC` during Queue Item 107 local release evidence packet-index validation; local validation covered Python compile, release evidence packet-index tests/check, public-beta evidence tests/check, public-beta blocker-report tests/check, production blocker-report tests/check, non-local evidence tests/check, release-artifact tests/check, release-manifest tests/check, release-checksum tests/check, release-readiness tests/check, changelog tests/check, heading scan, Unix wrapper syntax, PowerShell syntax parse, whitespace check, and full `make check` with existing warning noise only. GitHub Actions for this branch are pending PR creation |
-| OS tested | Windows local focused checks for Queue Item 107; Linux GitHub Actions passed for latest merged baseline PR #208 run `27462015238` on final head `ff909596dfd1e272619f8a5bd37fac3bb0183075`, with merged baseline commit `43a9596ab429a6e46132b106655b52b848db1670` |
+| Last verified | `2026-06-13 09:56 UTC` during Queue Item 108 state reconciliation after PR #209 merged; latest full local validation remains the Queue Item 107 release evidence packet-index pass covering Python compile, release evidence packet-index tests/check, public-beta evidence tests/check, public-beta blocker-report tests/check, production blocker-report tests/check, non-local evidence tests/check, release-artifact tests/check, release-manifest tests/check, release-checksum tests/check, release-readiness tests/check, changelog tests/check, heading scan, Unix wrapper syntax, PowerShell syntax parse, whitespace check, and full `make check` with existing warning noise only. This reconciliation pass updates documentation/state evidence only |
+| OS tested | Windows local focused checks for Queue Item 108 state reconciliation and Queue Item 107 full local validation; Linux GitHub Actions passed for latest merged baseline PR #209 run `27463241499` on final head `e571a2a2b4107c27f5c229e02d00dbe93c78381a`, with merged baseline commit `dec345094e26304a50c5b5e098c002b002972c37` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #208 final CI run `27462015238` passed on head `ff909596dfd1e272619f8a5bd37fac3bb0183075`; CodeRabbit status was success with no actionable comments before squash merge `43a9596ab429a6e46132b106655b52b848db1670`; Queue Item 107 branch CI is pending PR creation |
+| CI run | Latest merged baseline PR #209 final CI run `27463241499` passed on head `e571a2a2b4107c27f5c229e02d00dbe93c78381a`; CodeRabbit status was success after three actionable comments and one roadmap nit were addressed, visible threads were resolved or outdated, and PR #209 squash-merged as `dec345094e26304a50c5b5e098c002b002972c37` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -365,16 +365,16 @@ from PR #165, the generated
 the per-requirement public-beta evidence templates from issue
 [#195](https://github.com/6529-Collections/6529Stream/issues/195) / PR #197,
 the per-requirement production-release evidence templates from issue
-[#199](https://github.com/6529-Collections/6529Stream/issues/199),
+[#199](https://github.com/6529-Collections/6529Stream/issues/199) / PR #201,
 the generated
 `release-artifacts/latest/production-release-blockers.md` production-focused
 blocker report from issue
-[#203](https://github.com/6529-Collections/6529Stream/issues/203),
+[#203](https://github.com/6529-Collections/6529Stream/issues/203) / PR #205,
 the generated
 `release-artifacts/latest/release-evidence-packet-index.json` and
 `release-artifacts/latest/release-evidence-packet-index.md` release evidence
 packet index from issue
-[#207](https://github.com/6529-Collections/6529Stream/issues/207),
+[#207](https://github.com/6529-Collections/6529Stream/issues/207) / PR #209,
 and the
 `docs/non-local-release-evidence.md` intake runbook from issue #168.
 [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
@@ -393,8 +393,8 @@ changing readiness claims. Issue
 [#203](https://github.com/6529-Collections/6529Stream/issues/203) is complete
 for a focused production-release blocker report generated from the same
 evidence manifest and template set without changing readiness claims. Issue
-[#207](https://github.com/6529-Collections/6529Stream/issues/207) adds a
-no-secret release evidence packet index/checker that records phase,
+[#207](https://github.com/6529-Collections/6529Stream/issues/207) is complete
+for a no-secret release evidence packet index/checker that records phase,
 requirement ID, current status, owner/reviewer posture, blocker-report
 reference, template path, retained-artifact expectation, validation commands,
 readiness posture, and whether template-only evidence can ever complete a row
