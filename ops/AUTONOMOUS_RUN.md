@@ -38,7 +38,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/193` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 04:43 UTC` |
+| Last updated | `2026-06-13 04:57 UTC` |
 
 ## Packaging Notes
 
@@ -160,7 +160,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add public beta evidence blocker report artifact (Queue Item 99)
 
-Status: Open in PR #193; awaiting CI and CodeRabbit.
+Status: Open in PR #193; CI passed and CodeRabbit returned one low-value
+nitpick now being resolved.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/191`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/193`.
 Branch: `codex/public-beta-blocker-report`.
@@ -221,6 +222,16 @@ PR opened:
 - PR #193 opened against `main` on head
   `21b1de2ad53792ae8c1c688964bcd6e83db988a7`.
 - CodeRabbit review requested in comment `4697524739`.
+- Follow-up state before merge:
+  - PR #193 implementation head `56f62b9ba879d20b599c112e49563f9625b1046e`
+    passed GitHub Actions CI run `27456879641`.
+  - CodeRabbit status passed with one low-value nitpick in review
+    `4490941768`.
+  - The nitpick requested deriving the blocker-report generator metadata from
+    the script name and `GENERATOR_VERSION` instead of repeating a literal
+    script/version string.
+  - A follow-up commit resolves the nitpick without changing the generated
+    report text.
 
 ### PR candidate: Reconcile signer custody readiness merge state (Queue Item 98)
 
