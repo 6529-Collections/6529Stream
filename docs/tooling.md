@@ -279,19 +279,28 @@ Retained JSON report bundles are validated offline with
 `release-artifacts/schema/release-evidence-live-audit-report.schema.json` and
 `scripts/check_release_evidence_live_audit_report.py`. The default checker
 target is the no-secret template report at
-`release-artifacts/evidence/release-evidence-live-audit-report-template.json`;
-operator-generated reports can be checked without GitHub network access:
+`release-artifacts/evidence/release-evidence-live-audit-report-template.json`.
+The paired Markdown template at
+`release-artifacts/evidence/release-evidence-live-audit-report-template.md`
+is validated for exact parity against the JSON report source by
+`scripts/check_release_evidence_live_audit_markdown.py`. Operator-generated
+reports can be checked without GitHub network access:
 
 ```bash
 python scripts/check_release_evidence_live_audit_report.py --report-json tmp/release-evidence-live-audit-report.json
+python scripts/check_release_evidence_live_audit_markdown.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
 ```
 
 The checker verifies the schema version, repo target, blocked-readiness posture,
 profile coverage, retained snapshot paths, snapshot SHA-256 digests, command
-provenance, passed checker statuses, and secret-shaped keys/values. It expects
-the referenced snapshots to remain in the retained bundle and does not rerun
-GitHub exports or mark any tracker issue complete. To audit live GitHub label
-drift manually, export a snapshot and pass it to the checker:
+provenance, passed checker statuses, and secret-shaped keys/values. The
+Markdown parity checker reuses that JSON validation, scans the retained
+Markdown for secret-shaped values, and fails if the profile table, command
+provenance, no-secret notice, or blocked-readiness warning drift from the
+canonical renderer. It expects the referenced snapshots to remain in the
+retained bundle and does not rerun GitHub exports or mark any tracker issue
+complete. To audit live GitHub label drift manually, export a snapshot and pass
+it to the checker:
 
 ```bash
 python scripts/export_release_evidence_issue_snapshot.py --profile labels

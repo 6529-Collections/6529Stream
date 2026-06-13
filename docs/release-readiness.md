@@ -135,11 +135,16 @@ The current local baseline includes:
   JSON/Markdown audit summaries,
   plus the release evidence live audit report schema at
   [`release-artifacts/schema/release-evidence-live-audit-report.schema.json`](../release-artifacts/schema/release-evidence-live-audit-report.schema.json),
-  the checked no-secret template at
+  the checked no-secret JSON template at
   [`release-artifacts/evidence/release-evidence-live-audit-report-template.json`](../release-artifacts/evidence/release-evidence-live-audit-report-template.json),
-  and offline report validation with
+  the checked no-secret Markdown template at
+  [`release-artifacts/evidence/release-evidence-live-audit-report-template.md`](../release-artifacts/evidence/release-evidence-live-audit-report-template.md),
+  and offline report validation plus release evidence live audit Markdown parity
+  with
   `python scripts/test_release_evidence_live_audit_report.py` and
   `python scripts/check_release_evidence_live_audit_report.py`,
+  `python scripts/test_release_evidence_live_audit_markdown.py`, and
+  `python scripts/check_release_evidence_live_audit_markdown.py`,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
@@ -260,6 +265,9 @@ Release artifacts:
 - [release-artifacts/latest/release-evidence-issue-body-sync.md](../release-artifacts/latest/release-evidence-issue-body-sync.md)
 - [release-artifacts/latest/source-verification-inputs.json](../release-artifacts/latest/source-verification-inputs.json)
 - [release-artifacts/schema/public-beta-evidence.schema.json](../release-artifacts/schema/public-beta-evidence.schema.json)
+- [release-artifacts/schema/release-evidence-live-audit-report.schema.json](../release-artifacts/schema/release-evidence-live-audit-report.schema.json)
+- [release-artifacts/evidence/release-evidence-live-audit-report-template.json](../release-artifacts/evidence/release-evidence-live-audit-report-template.json)
+- [release-artifacts/evidence/release-evidence-live-audit-report-template.md](../release-artifacts/evidence/release-evidence-live-audit-report-template.md)
 - [release-artifacts/schema/drop-authorization-signing-evidence.schema.json](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
 - [release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
 - [release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt](../release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt)
@@ -309,6 +317,8 @@ python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_snapshot_audit.py
 python scripts/test_release_evidence_live_audit_report.py
 python scripts/check_release_evidence_live_audit_report.py
+python scripts/test_release_evidence_live_audit_markdown.py
+python scripts/check_release_evidence_live_audit_markdown.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -326,6 +336,7 @@ Run the release evidence drift checks:
 ```sh
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
 python scripts/check_release_evidence_live_audit_report.py --report-json tmp/release-evidence-live-audit-report.json
+python scripts/check_release_evidence_live_audit_markdown.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 ```

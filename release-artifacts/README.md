@@ -189,13 +189,18 @@ repo target, snapshot paths, snapshot SHA-256 digests, command provenance,
 checker outcomes, and the unchanged blocked-readiness warning. The report
 schema lives at `schema/release-evidence-live-audit-report.schema.json`; the
 default no-secret template report lives at
-`evidence/release-evidence-live-audit-report-template.json`, with template
-snapshots under `evidence/live-audit-report-template/`. Run
-`scripts/check_release_evidence_live_audit_report.py` to validate retained
+`evidence/release-evidence-live-audit-report-template.json`, with the paired
+human-readable template at
+`evidence/release-evidence-live-audit-report-template.md` and template snapshots
+under `evidence/live-audit-report-template/`. Run
+`scripts/check_release_evidence_live_audit_report.py` to validate retained JSON
 report bundles offline against snapshot digests, command provenance, profile
-coverage, and the blocked-readiness posture. Report bundles are ceremony
-evidence for review; they do not make any retained public-beta or production
-evidence row complete.
+coverage, and the blocked-readiness posture. Run
+`scripts/check_release_evidence_live_audit_markdown.py` with the retained JSON
+and Markdown paths to prove the human-readable report is the canonical render of
+the validated JSON source and still contains no secret-shaped values. Report
+bundles are ceremony evidence for review; they do not make any retained
+public-beta or production evidence row complete.
 
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and

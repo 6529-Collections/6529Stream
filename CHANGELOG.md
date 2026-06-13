@@ -24,6 +24,8 @@ the release policy in `docs/release-policy.md`.
   output, snapshot digests, command provenance, and blocked-readiness warnings.
 - Added a release evidence live audit report schema, checked no-secret template,
   and offline checker for retained report bundles.
+- Added a release evidence live audit Markdown parity checker and checked
+  no-secret Markdown template for retained report bundles.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.
