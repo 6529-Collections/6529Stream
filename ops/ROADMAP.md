@@ -89,12 +89,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 08:11 UTC` during Queue Item 105 local implementation of the production-release blocker report for PR #205, after focused Python compile, production blocker-report tests/check, public-beta blocker-report tests/check, release-artifact tests, release-manifest tests/check, release-readiness tests/check, public-beta/non-local evidence checks, release-checksum tests/check, changelog tests/check, audit-package and architecture/threat-model tests/checks, heading scan, whitespace check, PowerShell syntax parse, full `make check`, and Windows wrapper checks passed locally; GitHub Actions and CodeRabbit are pending for PR #205 |
-| OS tested | Windows local for Queue Item 103 full checks; Linux GitHub Actions passed for latest merged baseline PR #201 run `27460093022` on final head `a47870ddeee096e8f9d3212fe1579d56e3163c23`, with merged baseline commit `02ce230500cb016e45b67c8dbd6710c08cadc000` |
+| Last verified | `2026-06-13 08:37 UTC` during Queue Item 106 state reconciliation after PR #205 merged; PR #205 local validation covered focused Python compile, production blocker-report tests/check, public-beta blocker-report tests/check, release-artifact tests, release-manifest tests/check, release-readiness tests/check, public-beta/non-local evidence checks, release-checksum tests/check, changelog tests/check, audit-package and architecture/threat-model tests/checks, heading scan, whitespace check, PowerShell syntax parse, full `make check`, and Windows wrapper checks, then final GitHub Actions and CodeRabbit passed on head `df5ef8342340e842725347aada48ca2ebf81a879` |
+| OS tested | Windows local for Queue Item 105 full checks; Linux GitHub Actions passed for latest merged baseline PR #205 run `27461633469` on final head `df5ef8342340e842725347aada48ca2ebf81a879`, with merged baseline commit `bc0384a7b77b582d954d861b2545ab2fc818d860` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #201 final CI run `27460093022` passed on head `a47870ddeee096e8f9d3212fe1579d56e3163c23`; CodeRabbit status was success with no actionable comments or open review threads before squash merge `02ce230500cb016e45b67c8dbd6710c08cadc000` |
+| CI run | Latest merged baseline PR #205 final CI run `27461633469` passed on head `df5ef8342340e842725347aada48ca2ebf81a879`; CodeRabbit status was success with the row-order review thread resolved before squash merge `bc0384a7b77b582d954d861b2545ab2fc818d860` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -384,9 +384,13 @@ readiness claims. Issue
 [#199](https://github.com/6529-Collections/6529Stream/issues/199) is complete
 for public-safe per-requirement production-release evidence templates without
 changing readiness claims. Issue
-[#203](https://github.com/6529-Collections/6529Stream/issues/203) is in
-progress for a focused production-release blocker report generated from the
-same evidence manifest and template set without changing readiness claims.
+[#203](https://github.com/6529-Collections/6529Stream/issues/203) is complete
+for a focused production-release blocker report generated from the same
+evidence manifest and template set without changing readiness claims. Issue
+[#207](https://github.com/6529-Collections/6529Stream/issues/207) tracks the
+next no-secret release evidence packet index/checker that will map blocker
+rows to templates, retained-artifact expectations, validation commands, and
+readiness posture without changing evidence contents or readiness claims.
 
 Exit criteria:
 
