@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-orchestrator-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/266` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/267` |
-| Active PR | TBD until opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/268` |
 | Next issue | TBD after issue #267 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 20:41 UTC` |
+| Last updated | `2026-06-13 20:45 UTC` |
 
 ## Packaging Notes
 
@@ -191,12 +191,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit orchestrator merge state (Queue Item 128)
 
-Status: local branch started; PR pending.
+Status: PR #268 open; CodeRabbit review requested and CI pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/267`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/268`.
 Branch: `codex/reconcile-live-audit-orchestrator-merge-state`.
 Branch started from PR #266 squash merge commit
 `edd5ddd8d13587af24b9b59d1c6ef3bf94291519`.
+Opening PR head: `80e37ed81bb7ba5b3bc3e38a64cacd6c228a37b1`.
+CodeRabbit request comment:
+`https://github.com/6529-Collections/6529Stream/pull/268#issuecomment-4699740897`.
 
 Prior queue transition:
 
@@ -228,7 +231,7 @@ Validation target:
 - `python scripts/generate_release_manifest.py --check`.
 - `python scripts/generate_release_checksums.py --check`.
 - `python scripts/check_changelog.py`.
-- `rg -n "Queue Item 127|Queue Item 128|Queue Item 129|PR #266|27478297193|75fa1c6|edd5ddd|#265|#267|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "Queue Item 127|Queue Item 128|Queue Item 129|PR #266|PR #268|27478297193|80e37ed|75fa1c6|edd5ddd|#265|#267|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
 - `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
 - `git diff --check`.
 
@@ -10824,6 +10827,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 20:45 | Open PR #268 and request CodeRabbit | State-only live-audit-orchestrator merge reconciliation PR opened on head `80e37ed81bb7ba5b3bc3e38a64cacd6c228a37b1`, links `Closes #267`, and CodeRabbit review was requested in comment `4699740897`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-13 20:41 | Start Queue Item 128 | PR #266 merged cleanly, issue #265 closed completed, and issue #267 now tracks a state-only reconciliation before the next no-secret evidence target. |
 | 2026-06-13 20:40 | Select Queue Item 129 | The live audit orchestrator now proves current tracker state, so the next no-secret improvement is a retained report bundle that records profile results, snapshot digests, command provenance, and checker outcomes without changing readiness claims. |
 | 2026-06-13 20:39 | Merge PR #266 | Release evidence live audit orchestrator merged as `edd5ddd8d13587af24b9b59d1c6ef3bf94291519`; final head `75fa1c69f658a0edd09bf0ab186913d059b4f645` passed CI run `27478297193`, CodeRabbit status was success with no open review threads after the helper-deduplication nit was addressed, and issue #265 closed completed. |
