@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-body-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/236` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/237` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/238` |
 | Next issue | After issue #237, harden release evidence tracker label drift checks before attempting retained external evidence tasks |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 13:41 UTC` |
+| Last updated | `2026-06-13 13:44 UTC` |
 
 ## Packaging Notes
 
@@ -176,9 +176,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile release evidence issue body sync merge state (Queue Item 113)
 
-Status: local draft for issue #237.
+Status: PR #238 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/237`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/238`.
 Branch: `codex/release-evidence-body-state`.
 Branch started from PR #236 squash merge commit
 `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a`.
@@ -206,9 +206,13 @@ Goal:
 - Record the tracker-label reconciliation without changing readiness claims.
 - Select the next no-secret evidence-tracker hardening target.
 
-Planned local validation:
+Completed local validation:
 
 - `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_changelog.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
 - `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
 - `git diff --check`.
 
@@ -10423,6 +10427,7 @@ Outcome:
 | 2026-06-13 13:31 | Address CodeRabbit PR #236 review locally | Foundry smoke run `27467859837` passed; CodeRabbit review `4491474201` requested two minor docs/roadmap wording fixes, which are prepared locally with regenerated release manifest/checksum artifacts and focused validation passing |
 | 2026-06-13 13:38 | Merge PR #236 | Release evidence issue body sync merged as `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a` after final CI run `27468161616`, CodeRabbit success, resolved review threads, and issue #235 closure |
 | 2026-06-13 13:41 | Start Queue Item 113 | Issue #237 opened to reconcile PR #236 merge evidence and roadmap metadata; tracker issues #215 through #231 had `release` and `roadmap` labels re-applied to match committed `applied_labels` |
+| 2026-06-13 13:44 | Open PR #238 | Release evidence body-sync state reconciliation PR opened on head `5d6002d78b75da03ae3ce45dbcfefecdcd4fa8b8`; CodeRabbit review will be requested after this PR-state follow-up commit |
 
 ## Resume Instructions
 
