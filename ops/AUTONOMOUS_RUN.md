@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/production-release-blocker-report` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/204` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/203` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/205` |
-| Next issue | `TBD` |
+| Active PR branch | `codex/reconcile-production-blocker-report-merge` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/205` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/206` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/208` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/207` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 08:26 UTC` |
+| Last updated | `2026-06-13 08:44 UTC` |
 
 ## Packaging Notes
 
@@ -161,14 +161,63 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 102 | Reconcile public beta template merge state | Gate G support | Implement issue #198 by recording PR #197 merge, CI, CodeRabbit, and next-target state without changing readiness claims | Merged in PR #200 |
 | 103 | Add per-requirement production release evidence templates | Gate G support | Implement issue #199 by adding public-safe templates for each incomplete production-release evidence row, with checks/docs and no production readiness claims | Merged in PR #201 |
 | 104 | Reconcile production release template merge state | Gate G support | Implement issue #202 by recording PR #201 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret production-readiness support target | Merged in PR #204 |
-| 105 | Add production release blocker report artifact | Gate G support | Implement issue #203 by generating a deterministic production-focused blocker report from committed evidence metadata and templates without changing readiness claims | Active |
+| 105 | Add production release blocker report artifact | Gate G support | Implement issue #203 by generating a deterministic production-focused blocker report from committed evidence metadata and templates without changing readiness claims | Merged in PR #205 |
+| 106 | Reconcile production blocker report merge state | Gate G support | Implement issue #206 by recording PR #205 merge evidence, refreshing stale roadmap verification metadata, and selecting the next no-secret release-readiness support target | Active |
+| 107 | Add release evidence packet index and checker | Gate G support | Implement issue #207 by generating one deterministic no-secret packet index that maps public-beta and production-release blocker rows to templates, retained-artifact expectations, validation commands, and current readiness posture | Queued |
 
 ## Current PR Worklog
 
-### PR candidate: Add production release blocker report artifact (Queue Item 105)
+### PR candidate: Reconcile production blocker report merge state (Queue Item 106)
 
-Status: PR #205 open; CodeRabbit row-order follow-up implemented locally and
-pending push.
+Status: PR #208 open; CodeRabbit requested; GitHub Actions pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/206`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/208`.
+Branch: `codex/reconcile-production-blocker-report-merge`.
+Branch started from PR #205 squash merge commit
+`bc0384a7b77b582d954d861b2545ab2fc818d860`.
+
+Prior queue transition:
+
+- Queue Item 105 merged in PR #205 as squash commit
+  `bc0384a7b77b582d954d861b2545ab2fc818d860`.
+- PR #205 final implementation head was
+  `df5ef8342340e842725347aada48ca2ebf81a879`.
+- PR #205 GitHub Actions CI run `27461633469` passed on the final head.
+- PR #205 CodeRabbit status was success; the one actionable row-order thread
+  was resolved by CodeRabbit after commit
+  `df5ef8342340e842725347aada48ca2ebf81a879`.
+- PR #205 closed issue #203 at merge.
+- Issue #207 now tracks the next no-secret Gate G support slice: a release
+  evidence packet index/checker that maps blocker rows to templates,
+  retained-artifact expectations, validation commands, and readiness posture.
+
+Goal:
+
+- Mark Queue Item 105 merged in the durable queue.
+- Record PR #205 final CI, CodeRabbit, resolved-thread, and squash-merge
+  evidence.
+- Refresh roadmap verification metadata that still says PR #205 checks are
+  pending.
+- Select Queue Item 107 / issue #207 as the next no-secret release-readiness
+  support target.
+- Preserve the blocked public-beta and production-release baseline; do not
+  change Solidity, deployment behavior, evidence contents, or readiness claims.
+
+Completed local validation:
+
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "Queue Item 105|Queue Item 106|Queue Item 107|PR #205|27461633469|df5ef83|bc0384a|#203|#206|#207|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+Remote review:
+
+- PR #208 opened against `main` from head
+  `097ac7506820359388bb76eba11778021d5edfe2`.
+- CodeRabbit requested in comment `4698031592`.
+
+### Completed: Add production release blocker report artifact (Queue Item 105)
+
+Status: Merged in PR #205.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/203`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/205`.
 Branch: `codex/production-release-blocker-report`.
@@ -253,6 +302,12 @@ Bot review follow-up at `2026-06-13 08:26 UTC`:
   `python scripts/generate_release_checksums.py --check`,
   `python scripts/test_release_readiness.py`,
   `python scripts/check_release_readiness.py`, and `git diff --check`.
+- Final GitHub Actions CI run `27461633469` passed on final head
+  `df5ef8342340e842725347aada48ca2ebf81a879`.
+- CodeRabbit status was success, and the row-order review thread was resolved
+  by CodeRabbit.
+- PR #205 squash-merged as
+  `bc0384a7b77b582d954d861b2545ab2fc818d860`, closing issue #203.
 
 ### Completed: Reconcile production release template merge state (Queue Item 104)
 
@@ -9292,6 +9347,13 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 08:44 | Open PR #208 and request CodeRabbit | State-only merge reconciliation PR opened against `main`, linked `Closes #206`, pushed head `097ac7506820359388bb76eba11778021d5edfe2`, and requested CodeRabbit review in comment `4698031592`; Claude intentionally skipped per current user instruction |
+| 2026-06-13 08:41 | Finish Queue Item 106 local validation | Durable run state and roadmap metadata now record PR #205 final merge/CI/CodeRabbit evidence, issue #203 completion, issue #206 active reconciliation scope, issue #207 as the next no-secret packet-index target, heading scan, traceability grep, and whitespace checks |
+| 2026-06-13 08:37 | Create issues #206 and #207, start Queue Item 106 | PR #205 merged cleanly, so issue #206 tracks state reconciliation while issue #207 becomes the next no-secret Gate G implementation slice for a release evidence packet index/checker |
+| 2026-06-13 08:34 | Merge PR #205 | Production-release blocker report merged as `bc0384a7b77b582d954d861b2545ab2fc818d860`; final head `df5ef8342340e842725347aada48ca2ebf81a879` passed CI run `27461633469`, CodeRabbit status was success with the row-order thread resolved, and issue #203 closed completed |
+| 2026-06-13 08:26 | Address CodeRabbit PR #205 review | Grouped production blocker rows by shared status order before requirement ID, added a mixed-status regression, regenerated report/manifest/checksum artifacts, and reran focused validation |
+| 2026-06-13 08:14 | Open PR #205 and request CodeRabbit | Production-release blocker report PR opened against `main`, linked `Closes #203`, pushed head `dac4e220efa7e116269b6aea07c61fae52eef335`, and requested CodeRabbit review in comment `4697968574`; Claude intentionally skipped per current user instruction |
+| 2026-06-13 08:11 | Finish Queue Item 105 local validation | Production-release blocker report, generator tests, manifest/checksum refresh, docs, roadmap, changelog, focused gates, heading scan, whitespace check, full `make check`, and the Windows PowerShell wrapper all pass locally without changing readiness claims |
 | 2026-06-13 07:33 | Open PR #204 and request CodeRabbit | State-only production-template merge reconciliation PR opened against `main`, linked `Closes #202`, pushed head `d84d0ea119131dcaee899c25a6af6ab3b5f06297`, and requested CodeRabbit review in comment `4697878038`; Claude intentionally skipped per current user instruction |
 | 2026-06-13 07:31 | Finish Queue Item 104 local validation | Focused release-readiness, public-beta evidence, non-local evidence, blocker-report, release-manifest, checksum, changelog, traceability, heading, and whitespace checks all pass for the docs-only reconciliation |
 | 2026-06-13 07:30 | Create issues #202 and #203, start Queue Item 104 | PR #201 merged cleanly, so issue #202 tracks state reconciliation while issue #203 becomes the next no-secret Gate G implementation slice for a production-release blocker report |
