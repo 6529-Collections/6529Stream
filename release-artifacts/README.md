@@ -122,6 +122,10 @@ template for future reviewed non-local release evidence metadata. Its schema
 lives at `schema/non-local-release-evidence.schema.json`, and the template
 points at `evidence/non-local-template-retained-artifact.txt` to prove retained
 artifact hash validation without claiming public-beta or production readiness.
+`evidence/public-beta-templates/` contains one checked template JSON for each
+public-beta requirement ID plus a shared retained-artifact placeholder. These
+templates are release artifacts and checksum-covered operator starting points,
+not completion evidence.
 
 `drop-authorization-signing/drop-authorization-signing-evidence-template.json`
 is the checked no-secret template for future reviewed drop authorization
