@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-audit-markdown-report-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/276` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/277` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/278` |
 | Next issue | TBD after issue #277 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 23:16 UTC` |
+| Last updated | `2026-06-13 23:20 UTC` |
 
 ## Packaging Notes
 
@@ -195,12 +195,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence live audit Markdown report parity checker (Queue Item 133)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #278 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/277`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/278`.
 Branch: `codex/live-audit-markdown-report-checker`.
 Branch started from PR #276 squash merge commit
 `da1691d21758825567083bedaf7010ef59b8c80d`.
+Opening PR head: `84cb5fde98dc9f1e5a1ffec8b11d697601e9c7e3`.
+CodeRabbit initial request comment: `4700087685`.
 
 Goal:
 
@@ -11122,6 +11124,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 23:20 | Open PR #278 and request CodeRabbit | Live audit Markdown parity checker PR opened on head `84cb5fde98dc9f1e5a1ffec8b11d697601e9c7e3`, links `Closes #277`, and CodeRabbit review was requested in comment `4700087685`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-13 23:16 | Finish Queue Item 133 local validation | Focused JSON/Markdown live audit report tests and checks, release-readiness, manifest, checksum, changelog, py_compile, bash syntax, traceability, heading scan, whitespace, and full Windows `scripts\check.ps1` gate all pass. |
 | 2026-06-13 23:06 | Implement Queue Item 133 local draft | Added the live audit Markdown parity checker, committed Markdown template, focused mismatch/secret/CRLF tests, local/CI gate wiring, docs/readiness wiring, durable state updates, and regenerated manifest/checksum evidence. |
 | 2026-06-13 22:57 | Start Queue Item 133 | Issue #277 opened for the release evidence live audit Markdown parity checker, branch `codex/live-audit-markdown-report-checker` started from PR #276 squash merge `da1691d21758825567083bedaf7010ef59b8c80d`, and the PR will use CodeRabbit-only review. |
