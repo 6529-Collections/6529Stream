@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-snapshot-exporter` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/260` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/261` |
+| Active PR branch | `codex/reconcile-snapshot-exporter-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/262` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/263` |
 | Active PR | TBD |
-| Next issue | TBD after issue #261 merges |
+| Next issue | TBD after issue #263 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 18:49 UTC` |
+| Last updated | `2026-06-13 19:17 UTC` |
 
 ## Packaging Notes
 
@@ -181,19 +181,62 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 122 | Clarify production evidence tracker completion gates | Gate G support | Fix generated tracker completion-gate wording so production-release rows describe the shared evidence status manifest without changing readiness claims | Merged in PR #256 |
 | 123 | Reconcile production evidence gate wording merge state | Gate G support | Record PR #256 merge evidence, live tracker body synchronization for issues #215 through #231, refreshed roadmap verification metadata, and the next no-secret queue posture | Merged in PR #258 |
 | 124 | Apply release evidence tracker phase labels | Gate G support | Apply the committed `evidence`, `public-beta`, and `production-release` tracker taxonomy to issues #215 through #231, refresh applied-label artifacts, and preserve blocked readiness claims | Merged in PR #260 |
-| 125 | Add release evidence issue snapshot exporter | Gate G support | Add a no-secret UTF-8 GitHub issue snapshot exporter for live label, body, and closure audits, update docs and local/CI gates, and preserve blocked readiness claims | Active |
+| 125 | Add release evidence issue snapshot exporter | Gate G support | Add a no-secret UTF-8 GitHub issue snapshot exporter for live label, body, and closure audits, update docs and local/CI gates, and preserve blocked readiness claims | Merged in PR #262 |
+| 126 | Reconcile snapshot exporter merge state | Gate G support | Record PR #262 merge evidence, refresh roadmap verification metadata, and preserve the next no-secret queue posture without changing retained-evidence readiness claims | Active |
 
 ## Current PR Worklog
 
-### PR candidate: Add release evidence issue snapshot exporter (Queue Item 125)
+### PR candidate: Reconcile snapshot exporter merge state (Queue Item 126)
 
-Status: PR #262 open; CodeRabbit review requested.
+Status: local draft in progress for issue #263; PR TBD.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/263`.
+PR: TBD.
+Branch: `codex/reconcile-snapshot-exporter-merge-state`.
+Branch started from PR #262 squash merge commit
+`19263b048fc8dc8e0fe7c834e206e623d8fb944e`.
+
+Prior queue transition:
+
+- Queue Item 125 merged in PR #262 as squash commit
+  `19263b048fc8dc8e0fe7c834e206e623d8fb944e`.
+- PR #262 final implementation head was
+  `223ff4b69484af2a8a20a95b423d175c916b179c`.
+- PR #262 GitHub Actions CI run `27476294337` passed on the final head,
+  including deployment rehearsal.
+- PR #262 CodeRabbit status was success; the only actionable review thread was
+  addressed in commit `223ff4b69484af2a8a20a95b423d175c916b179c`, marked
+  resolved, and outdated on the final diff.
+- Issue #261 closed completed after merge.
+
+Goal:
+
+- Mark Queue Item 125 as merged in PR #262.
+- Record PR #262 final head, squash merge commit, CI run, CodeRabbit result,
+  review-thread resolution, and issue #261 closure.
+- Refresh `ops/ROADMAP.md` verification metadata so PR #262 is the latest
+  merged baseline.
+- Preserve blocked readiness claims and keep issues #215 through #231 open.
+
+Validation target:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+### Completed: Add release evidence issue snapshot exporter (Queue Item 125)
+
+Status: merged in PR #262.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/261`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/262`.
 Branch: `codex/release-evidence-snapshot-exporter`.
 Branch started from PR #260 squash merge commit
 `779ff73bee124c646d1531b43dc61940872e1fab`.
 Opening PR head: `aed78eee68982236a8f66643ea9ecafc8339d1cc`.
+Final PR head: `223ff4b69484af2a8a20a95b423d175c916b179c`.
+Squash merge commit: `19263b048fc8dc8e0fe7c834e206e623d8fb944e`.
 CodeRabbit request comment: `https://github.com/6529-Collections/6529Stream/pull/262#issuecomment-4699481489`.
 
 Prior queue transition:
@@ -208,6 +251,12 @@ Prior queue transition:
 - Issue #259 closed completed after merge.
 - Tracker issues #215 through #231 now carry the committed `evidence` plus
   phase-specific label taxonomy.
+- PR #262 GitHub Actions CI run `27476294337` passed on the final head,
+  including deployment rehearsal.
+- PR #262 CodeRabbit status was success; its only actionable review thread was
+  addressed in commit `223ff4b69484af2a8a20a95b423d175c916b179c`, resolved, and
+  outdated on the final diff.
+- Issue #261 closed completed after merge.
 
 Goal:
 
