@@ -1,0 +1,41 @@
+{
+  "schema_version": "6529stream.release-evidence-live-audit-report.v1",
+  "repo": "6529-Collections/6529Stream",
+  "generated_at": "TEMPLATE",
+  "readiness_claim": "blocked",
+  "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.",
+  "readiness_warning": "The report does not mark public-beta or production-release retained evidence complete and does not change the blocked readiness posture.",
+  "profiles": [
+    {
+      "profile": "labels",
+      "snapshot_path": "release-artifacts/evidence/live-audit-report-template/release-evidence-issue-labels.json",
+      "snapshot_sha256": "d6fa3d89bc7ef4d0543cc8cf280c97363529099dc22ad98b7a15b049c1b251a8",
+      "export_command": "python scripts/export_release_evidence_issue_snapshot.py --profile labels --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-report-template/release-evidence-issue-labels.json --gh gh",
+      "checker_command": "python scripts/check_release_evidence_issue_labels.py --live-json release-artifacts/evidence/live-audit-report-template/release-evidence-issue-labels.json",
+      "export_status": "passed",
+      "checker_status": "passed"
+    },
+    {
+      "profile": "bodies",
+      "snapshot_path": "release-artifacts/evidence/live-audit-report-template/release-evidence-issue-bodies.json",
+      "snapshot_sha256": "5073582267fa5478883188d8c12dfee803b1799869df0c7d8e96053a755ee9a4",
+      "export_command": "python scripts/export_release_evidence_issue_snapshot.py --profile bodies --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-report-template/release-evidence-issue-bodies.json --gh gh",
+      "checker_command": "python scripts/check_release_evidence_issue_bodies.py --live-json release-artifacts/evidence/live-audit-report-template/release-evidence-issue-bodies.json",
+      "export_status": "passed",
+      "checker_status": "passed"
+    },
+    {
+      "profile": "closure",
+      "snapshot_path": "release-artifacts/evidence/live-audit-report-template/release-evidence-issue-closure.json",
+      "snapshot_sha256": "e63187faddb39cb21b398d6016988c4c018438b84d84927b535763f38c824539",
+      "export_command": "python scripts/export_release_evidence_issue_snapshot.py --profile closure --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-report-template/release-evidence-issue-closure.json --gh gh",
+      "checker_command": "python scripts/check_release_evidence_issue_closure.py --live-json release-artifacts/evidence/live-audit-report-template/release-evidence-issue-closure.json",
+      "export_status": "passed",
+      "checker_status": "passed"
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "profile_count": 3
+  }
+}

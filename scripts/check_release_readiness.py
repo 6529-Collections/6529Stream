@@ -53,6 +53,7 @@ REQUIRED_READINESS_PHRASES = [
     "release evidence issue body sync",
     "release evidence issue closure readiness",
     "release evidence live audit report bundle",
+    "release evidence live audit report schema",
     "non-local release evidence",
     "incident response",
     "drop authorization signing fixtures",
@@ -105,6 +106,8 @@ REQUIRED_COMMANDS = [
         "tmp/release-evidence-live-audit-report.json --report-md "
         "tmp/release-evidence-live-audit-report.md"
     ),
+    "python scripts/test_release_evidence_live_audit_report.py",
+    "python scripts/check_release_evidence_live_audit_report.py",
     "python scripts/test_release_evidence_issue_labels.py",
     "python scripts/check_release_evidence_issue_labels.py",
     "python scripts/test_release_evidence_issue_body_sync.py",
@@ -161,6 +164,8 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/production-release-blockers.md",
     "release-artifacts/latest/source-verification-inputs.json",
     "release-artifacts/schema/public-beta-evidence.schema.json",
+    "release-artifacts/schema/release-evidence-live-audit-report.schema.json",
+    "release-artifacts/evidence/release-evidence-live-audit-report-template.json",
     "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt",

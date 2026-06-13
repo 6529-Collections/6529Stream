@@ -27,6 +27,7 @@ python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_labels.py
+python scripts/check_release_evidence_live_audit_report.py
 python scripts/generate_release_evidence_issue_body_sync.py
 python scripts/check_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_closure.py
@@ -79,6 +80,8 @@ python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_snapshot_audit.py
+python scripts/test_release_evidence_live_audit_report.py
+python scripts/check_release_evidence_live_audit_report.py
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -183,7 +186,14 @@ mocked unit tests and never requires GitHub network access.
 When operators pass `--report-json` or `--report-md`, the live audit
 orchestrator writes a retained no-secret report bundle with selected profiles,
 repo target, snapshot paths, snapshot SHA-256 digests, command provenance,
-checker outcomes, and the unchanged blocked-readiness warning. Report bundles are ceremony
+checker outcomes, and the unchanged blocked-readiness warning. The report
+schema lives at `schema/release-evidence-live-audit-report.schema.json`; the
+default no-secret template report lives at
+`evidence/release-evidence-live-audit-report-template.json`, with template
+snapshots under `evidence/live-audit-report-template/`. Run
+`scripts/check_release_evidence_live_audit_report.py` to validate retained
+report bundles offline against snapshot digests, command provenance, profile
+coverage, and the blocked-readiness posture. Report bundles are ceremony
 evidence for review; they do not make any retained public-beta or production
 evidence row complete.
 

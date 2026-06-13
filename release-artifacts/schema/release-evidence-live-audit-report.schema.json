@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/release-evidence-live-audit-report.schema.json",
+  "title": "6529Stream Release Evidence Live Audit Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repo",
+    "generated_at",
+    "readiness_claim",
+    "no_secret_notice",
+    "readiness_warning",
+    "profiles",
+    "validation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.release-evidence-live-audit-report.v1"
+    },
+    "repo": {
+      "const": "6529-Collections/6529Stream"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "readiness_claim": {
+      "const": "blocked"
+    },
+    "no_secret_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "readiness_warning": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/profile_result"
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "profile_count"],
+      "properties": {
+        "status": {
+          "const": "passed"
+        },
+        "profile_count": {
+          "const": 3
+        }
+      }
+    }
+  },
+  "$defs": {
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^/"
+          },
+          {
+            "pattern": "\\\\"
+          },
+          {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        ]
+      }
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "profile_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "snapshot_path",
+        "snapshot_sha256",
+        "export_command",
+        "checker_command",
+        "export_status",
+        "checker_status"
+      ],
+      "properties": {
+        "profile": {
+          "enum": ["labels", "bodies", "closure"]
+        },
+        "snapshot_path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "snapshot_sha256": {
+          "$ref": "#/$defs/sha256_hex"
+        },
+        "export_command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checker_command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "export_status": {
+          "const": "passed"
+        },
+        "checker_status": {
+          "const": "passed"
+        }
+      }
+    }
+  }
+}
