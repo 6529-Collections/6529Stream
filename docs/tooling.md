@@ -64,6 +64,8 @@ python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_release_evidence_packet_index.py
 python scripts/generate_release_evidence_packet_index.py --check
+python scripts/test_release_evidence_issue_backlog.py
+python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -313,6 +315,7 @@ python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
+python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
@@ -354,6 +357,8 @@ python scripts/generate_public_beta_blocker_report.py --check
 python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_release_evidence_packet_index.py
 python scripts/generate_release_evidence_packet_index.py --check
+python scripts/test_release_evidence_issue_backlog.py
+python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py

@@ -264,6 +264,26 @@ class ReleaseEvidenceIssueBacklogTests(unittest.TestCase):
                     generator.DEFAULT_MARKDOWN_OUTPUT,
                 )
 
+    def test_rejects_missing_nested_required_fields(self) -> None:
+        """Malformed nested row data fails with the generator error type."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            bad_row = packet_row(generator.PUBLIC_BETA_PHASE, "external_audit_report")
+            template = generator.require_dict(bad_row.get("template"), "bad_row.template")
+            del template["path"]
+            write_json(root / generator.DEFAULT_PACKET_INDEX, packet(bad_row))
+
+            with self.assertRaisesRegex(
+                generator.ReleaseEvidenceIssueBacklogError,
+                "row.template.path",
+            ):
+                generator.build_backlog(
+                    root,
+                    generator.DEFAULT_PACKET_INDEX,
+                    generator.DEFAULT_JSON_OUTPUT,
+                    generator.DEFAULT_MARKDOWN_OUTPUT,
+                )
+
     def test_rejects_wrong_packet_schema(self) -> None:
         """The backlog only accepts the current packet-index schema."""
         with tempfile.TemporaryDirectory() as temp_dir:

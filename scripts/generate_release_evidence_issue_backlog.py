@@ -152,49 +152,92 @@ def completion_gate(row: dict[str, Any]) -> str:
         "row.retained_artifact_expectation",
     )
     template = require_dict(row.get("template"), "row.template")
+    template_path = require_string(template.get("path"), "row.template.path")
+    retained_path = require_string(
+        retained.get("path"),
+        "row.retained_artifact_expectation.path",
+    )
     return (
         "This issue can close only after reviewed retained evidence replaces or "
-        f"supplements `{template['path']}` and is referenced from "
+        f"supplements `{template_path}` and is referenced from "
         "`release-artifacts/latest/public-beta-evidence.json`. The retained "
-        f"artifact expectation is `{retained['path']}`. Template-only evidence "
+        f"artifact expectation is `{retained_path}`. Template-only evidence "
         "cannot complete the row."
     )
 
 
 def issue_body(row: dict[str, Any]) -> str:
     """Build issue body Markdown suitable for creating a GitHub issue."""
+    phase_label = require_string(row.get("phase_label"), "row.phase_label")
+    requirement_id = require_string(row.get("requirement_id"), "row.requirement_id")
+    status = require_string(row.get("status"), "row.status")
+    evidence_posture = require_string(
+        row.get("evidence_posture"),
+        "row.evidence_posture",
+    )
+    owner_reviewer_posture = require_string(
+        row.get("owner_reviewer_posture"),
+        "row.owner_reviewer_posture",
+    )
     blocker = require_dict(row.get("blocker_report"), "row.blocker_report")
+    blocker_path = require_string(blocker.get("path"), "row.blocker_report.path")
+    blocker_section = require_string(
+        blocker.get("section"),
+        "row.blocker_report.section",
+    )
+    blocker_marker = require_string(
+        blocker.get("requirement_marker"),
+        "row.blocker_report.requirement_marker",
+    )
     template = require_dict(row.get("template"), "row.template")
+    template_path = require_string(template.get("path"), "row.template.path")
     retained = require_dict(
         row.get("retained_artifact_expectation"),
         "row.retained_artifact_expectation",
     )
-    validation_commands = require_list(row.get("validation_commands"), "row.validation_commands")
+    retained_path = require_string(
+        retained.get("path"),
+        "row.retained_artifact_expectation.path",
+    )
+    retained_notes = require_string(
+        retained.get("operator_notes"),
+        "row.retained_artifact_expectation.operator_notes",
+    )
+    template_only_can_complete = require_bool(
+        row.get("template_only_can_complete"),
+        "row.template_only_can_complete",
+    )
+    validation_commands = [
+        require_string(command, f"row.validation_commands[{command_index}]")
+        for command_index, command in enumerate(
+            require_list(row.get("validation_commands"), "row.validation_commands")
+        )
+    ]
     command_lines = "\n".join(f"- `{command}`" for command in validation_commands)
     return "\n".join(
         [
             "## Evidence Requirement",
             "",
-            f"- Phase: `{row['phase_label']}`",
-            f"- Requirement ID: `{row['requirement_id']}`",
-            f"- Current status: `{row['status']}`",
-            f"- Evidence posture: {row['evidence_posture']}",
-            f"- Owner/reviewer posture: {row['owner_reviewer_posture']}",
+            f"- Phase: `{phase_label}`",
+            f"- Requirement ID: `{requirement_id}`",
+            f"- Current status: `{status}`",
+            f"- Evidence posture: {evidence_posture}",
+            f"- Owner/reviewer posture: {owner_reviewer_posture}",
             "",
             "## Source Links",
             "",
             (
-                f"- Blocker report: `{blocker['path']}` / "
-                f"{blocker['section']} / {blocker['requirement_marker']}"
+                f"- Blocker report: `{blocker_path}` / "
+                f"{blocker_section} / {blocker_marker}"
             ),
-            f"- Evidence template: `{template['path']}`",
-            f"- Retained artifact placeholder: `{retained['path']}`",
+            f"- Evidence template: `{template_path}`",
+            f"- Retained artifact placeholder: `{retained_path}`",
             "",
             "## Required Evidence",
             "",
-            f"- Retained artifact expectation: {retained['operator_notes']}",
+            f"- Retained artifact expectation: {retained_notes}",
             f"- Completion gate: {completion_gate(row)}",
-            f"- Template-only can complete: `{str(row['template_only_can_complete']).lower()}`",
+            f"- Template-only can complete: `{str(template_only_can_complete).lower()}`",
             "",
             "## Validation",
             "",
@@ -220,7 +263,9 @@ def backlog_entries(packet: dict[str, Any]) -> list[dict[str, Any]]:
     """Build one issue-ready backlog entry for every incomplete packet row."""
     entries: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
-    for row_index, raw_row in enumerate(packet["rows"]):
+    for row_index, raw_row in enumerate(
+        require_list(packet.get("rows"), "packet.rows")
+    ):
         row = require_dict(raw_row, f"packet.rows[{row_index}]")
         phase = require_string(row.get("phase"), f"packet.rows[{row_index}].phase")
         phase_slug = PHASE_LABEL_SLUGS.get(phase)
@@ -340,6 +385,14 @@ def build_backlog(
     resolved_markdown_output = resolve_repo_path(repo_root, markdown_output_path)
     packet = load_packet_index(resolved_packet)
     entries = backlog_entries(packet)
+    release_version = require_string(
+        packet.get("release_version"),
+        "packet.release_version",
+    )
+    release_source = require_dict(packet.get("release_source"), "packet.release_source")
+    status = require_dict(packet.get("status"), "packet.status")
+    policy = require_dict(packet.get("policy"), "packet.policy")
+    no_secrets = require_bool(policy.get("no_secrets"), "packet.policy.no_secrets")
     backlog = {
         "schema_version": BACKLOG_SCHEMA,
         "generated_by": f"scripts/{SCRIPT_NAME}:{GENERATOR_VERSION}",
@@ -351,11 +404,11 @@ def build_backlog(
         "source": {
             "packet_index": file_record(resolved_packet, repo_root),
         },
-        "release_version": packet["release_version"],
-        "release_source": packet["release_source"],
-        "status": packet["status"],
+        "release_version": release_version,
+        "release_source": release_source,
+        "status": status,
         "policy": {
-            "no_secrets": packet["policy"]["no_secrets"],
+            "no_secrets": no_secrets,
             "template_only_can_complete": False,
             "auto_create_issues": False,
             "completion_rule": (
