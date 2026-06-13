@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-phase-labels` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/258` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/259` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/260` |
 | Next issue | TBD after issue #259 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-13 18:28 UTC` |
+| Last updated | `2026-06-13 18:34 UTC` |
 
 ## Packaging Notes
 
@@ -186,9 +186,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Apply release evidence tracker phase labels (Queue Item 124)
 
-Status: local draft in progress for issue #259; PR TBD.
+Status: PR #260 open; initial local validation passed, with CI and CodeRabbit
+pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/259`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/260`.
 Branch: `codex/release-evidence-phase-labels`.
 Branch started from PR #258 squash merge commit
 `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029`.
@@ -10505,6 +10506,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-13 18:34 | Open PR #260 | Release evidence tracker phase-label PR opened against `main` at head `6752bf2dbf89a7189c8e479ec39328bef0edc542`, linked `Closes #259`, and will use CodeRabbit-only review per current user instruction. |
 | 2026-06-13 18:28 | Apply release evidence tracker phase labels locally | Created the `public-beta` and `production-release` labels, applied `evidence` plus the correct phase label to issues #215 through #231, updated committed `applied_labels`, and regenerated dependent body-sync, manifest, and checksum artifacts without changing readiness claims. |
 | 2026-06-13 18:26 | Create issue #259 and start Queue Item 124 | The remaining open issues are retained-evidence trackers, and the committed link map already suggested phase labels, so the next no-secret improvement is to apply and validate the tracker label taxonomy while recording PR #258's merge evidence. |
 | 2026-06-13 18:24 | Merge PR #258 | Production evidence gate merge-state reconciliation merged as `8f869b1c379cc4a30fcafd6ecda6ae3d5fd1e029`; final head `cae33d4779bbf8c51f794727083e7801498045b7` passed CI run `27475057686`, CodeRabbit status was success with no review threads, and issue #257 closed completed. |
