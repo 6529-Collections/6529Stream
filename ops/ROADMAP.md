@@ -87,12 +87,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-13 05:58 UTC` after Queue Item 101 per-requirement public-beta evidence templates, checker/tests, nested non-local evidence release-manifest coverage, release checksum coverage, docs/roadmap/run-state updates, focused evidence, public-beta, blocker-report, release-manifest, checksum, release-readiness, changelog, heading, syntax, and whitespace checks, full `make check`, and the Windows PowerShell wrapper; last merged baseline is PR #196 GitHub Actions CI run `27457583246` passing on final head `7db6a5c24a15848926dd91c778303169fea5b274`, CodeRabbit success, and squash merge commit `99b0845e81c0b81bb9105c1d35970a92b47b22a0` |
-| OS tested | Windows local for Queue Item 101 focused checks, full `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`; Linux GitHub Actions passed for last merged baseline PR #196 run `27457583246` on final head `7db6a5c24a15848926dd91c778303169fea5b274`, with merged baseline commit `99b0845e81c0b81bb9105c1d35970a92b47b22a0` |
+| Last verified | `2026-06-13 06:23 UTC` after PR #197 merged Queue Item 101 per-requirement public-beta evidence templates, checker/tests, nested non-local evidence release-manifest coverage, release checksum coverage, docs/roadmap/run-state updates, focused evidence, public-beta, blocker-report, release-manifest, checksum, release-readiness, changelog, heading, syntax, and whitespace checks, full `make check`, the Windows PowerShell wrapper, GitHub Actions CI run `27458794705` passing on final head `e3034c40b211497ccbb091c7b1fc318b28e2176d`, CodeRabbit success, and squash merge commit `2bd94683414fb86e0f9172b96d52bfef7fb58742` |
+| OS tested | Windows local for Queue Item 101 focused checks, full `make check`, and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`; Linux GitHub Actions passed for latest merged baseline PR #197 run `27458794705` on final head `e3034c40b211497ccbb091c7b1fc318b28e2176d`, with merged baseline commit `2bd94683414fb86e0f9172b96d52bfef7fb58742` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Last merged baseline PR #196 final CI run `27457583246` passed on head `7db6a5c24a15848926dd91c778303169fea5b274`; CodeRabbit status was success and no actionable comments remained before squash merge `99b0845e81c0b81bb9105c1d35970a92b47b22a0` |
+| CI run | Latest merged baseline PR #197 final CI run `27458794705` passed on head `e3034c40b211497ccbb091c7b1fc318b28e2176d`; CodeRabbit status was success with the earlier actionable threads marked addressed and no actionable comments in the follow-up review before squash merge `2bd94683414fb86e0f9172b96d52bfef7fb58742` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -359,6 +359,8 @@ model docs, the `docs/release-readiness.md` dashboard, the
 from PR #165, the generated
 `release-artifacts/latest/public-beta-blockers.md` blocker report from issue
 [#191](https://github.com/6529-Collections/6529Stream/issues/191) / PR #193,
+the per-requirement public-beta evidence templates from issue
+[#195](https://github.com/6529-Collections/6529Stream/issues/195) / PR #197,
 and the
 `docs/non-local-release-evidence.md` intake runbook from issue #168.
 [`#162`](https://github.com/6529-Collections/6529Stream/issues/162)
@@ -367,7 +369,12 @@ is complete for the release-readiness dashboard and checker, and
 for the public-beta evidence status manifest and checker. Issue
 [#191](https://github.com/6529-Collections/6529Stream/issues/191) is complete
 for the deterministic no-secret blocker report generated from the public beta
-evidence manifest without changing readiness claims.
+evidence manifest without changing readiness claims. Issue
+[#195](https://github.com/6529-Collections/6529Stream/issues/195) is complete
+for public-safe per-requirement public-beta evidence templates without changing
+readiness claims. Issue
+[#199](https://github.com/6529-Collections/6529Stream/issues/199) is queued next
+for per-requirement production-release evidence templates.
 
 Exit criteria:
 
