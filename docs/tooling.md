@@ -68,6 +68,8 @@ python scripts/test_release_evidence_issue_backlog.py
 python scripts/generate_release_evidence_issue_backlog.py --check
 python scripts/test_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_links.py
+python scripts/test_release_evidence_issue_body_sync.py
+python scripts/generate_release_evidence_issue_body_sync.py --check
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
@@ -234,6 +236,14 @@ The release evidence issue-link map is committed at
 `release-artifacts/latest/release-evidence-issue-links.json`; run
 `python scripts/check_release_evidence_issue_links.py` to verify each generated
 backlog entry has a durable tracker issue without querying GitHub during CI.
+The release evidence issue body sync artifact is generated as
+`release-artifacts/latest/release-evidence-issue-body-sync.json` and
+`release-artifacts/latest/release-evidence-issue-body-sync.md`; run
+`python scripts/generate_release_evidence_issue_body_sync.py` to refresh the
+exact GitHub issue body payloads and
+`python scripts/generate_release_evidence_issue_body_sync.py --check` to verify
+they still match the current backlog and issue-link map. It remains tracker-only
+and does not mark retained evidence complete.
 The non-local release evidence intake runbook in
 [`non-local-release-evidence.md`](non-local-release-evidence.md) defines the
 operator workflow, required retained fields, redaction rules, reviewer
@@ -253,10 +263,10 @@ as completion evidence.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
-artifact, public-beta evidence, release evidence issue backlog, deployment
-manifest, address-book, schema, ceremony-evidence, and release-manifest
-outputs. This gives maintainers a
-deterministic, signable checksum bundle. The
+artifact, public-beta evidence, release evidence issue backlog, release
+evidence issue-link map, release evidence issue body sync, deployment manifest,
+address-book, schema, ceremony evidence, and release-manifest outputs. This
+gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
 `release-manifest.json`; embedding the final bundle digest in that covered file

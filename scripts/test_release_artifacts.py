@@ -188,6 +188,14 @@ class ReleaseArtifactTests(unittest.TestCase):
                 {"schema_version": "6529stream.release-evidence-issue-links.v1"},
             )
             write_json(
+                output_dir / "release-evidence-issue-body-sync.json",
+                {"schema_version": "6529stream.release-evidence-issue-body-sync.v1"},
+            )
+            write_text(
+                output_dir / "release-evidence-issue-body-sync.md",
+                "# Release Evidence Issue Body Sync\n",
+            )
+            write_json(
                 output_dir / "source-verification-inputs.json",
                 {"schema_version": "6529stream.source-verification-inputs.v1"},
             )

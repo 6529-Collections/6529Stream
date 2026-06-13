@@ -36,6 +36,8 @@ RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index
 RELEASE_EVIDENCE_ISSUE_BACKLOG_JSON_FILENAME = "release-evidence-issue-backlog.json"
 RELEASE_EVIDENCE_ISSUE_BACKLOG_MARKDOWN_FILENAME = "release-evidence-issue-backlog.md"
 RELEASE_EVIDENCE_ISSUE_LINKS_JSON_FILENAME = "release-evidence-issue-links.json"
+RELEASE_EVIDENCE_ISSUE_BODY_SYNC_JSON_FILENAME = "release-evidence-issue-body-sync.json"
+RELEASE_EVIDENCE_ISSUE_BODY_SYNC_MARKDOWN_FILENAME = "release-evidence-issue-body-sync.md"
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
@@ -975,6 +977,19 @@ def build_manifest(
                 repo_root,
                 schema_required=True,
             ),
+            "release_evidence_issue_body_sync": {
+                "json": file_record(
+                    release_artifacts_dir
+                    / RELEASE_EVIDENCE_ISSUE_BODY_SYNC_JSON_FILENAME,
+                    repo_root,
+                    schema_required=True,
+                ),
+                "markdown": file_record(
+                    release_artifacts_dir
+                    / RELEASE_EVIDENCE_ISSUE_BODY_SYNC_MARKDOWN_FILENAME,
+                    repo_root,
+                ),
+            },
             "release_signature_evidence": release_signatures,
             "non_local_release_evidence": non_local_release_evidence,
             "drop_authorization_signing_evidence": (

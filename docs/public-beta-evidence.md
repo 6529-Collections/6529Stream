@@ -74,6 +74,15 @@ It links every generated backlog entry to a durable GitHub tracker issue while
 remaining no-secret and tracker-only. Closing those tracker issues still
 requires reviewed retained evidence in the status manifest.
 
+The release evidence issue body sync artifact is generated as both
+[`release-artifacts/latest/release-evidence-issue-body-sync.json`](../release-artifacts/latest/release-evidence-issue-body-sync.json)
+and
+[`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md).
+It joins the generated backlog and committed issue-link map into exact GitHub
+issue body payloads so tracker issues can be updated consistently. It remains
+no-secret and tracker-only, does not update GitHub automatically, and does not
+make issue closure completion evidence.
+
 The checker constants in `scripts/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
 change, update the schema's `requirements.minItems` count and this document in
@@ -208,7 +217,11 @@ To move a requirement to `complete`:
 13. Check the issue-link map with
    `python scripts/test_release_evidence_issue_links.py` and
    `python scripts/check_release_evidence_issue_links.py`.
-14. Regenerate and check the release manifest and checksum bundle.
+14. Regenerate and check the release evidence issue body sync artifact with
+   `python scripts/generate_release_evidence_issue_body_sync.py`,
+   `python scripts/test_release_evidence_issue_body_sync.py`, and
+   `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+15. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`
