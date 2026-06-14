@@ -66,6 +66,17 @@ TEST_COMMANDS = (
     "python scripts/test_public_beta_evidence.py",
     "python scripts/test_non_local_release_evidence.py",
 )
+FORK_DEPLOYMENT_REQUIREMENT_ID = "fork_deployment_rehearsal"
+FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/fork-deployment-rehearsal/"
+    "fork-deployment-rehearsal-retained-artifact-template.md"
+)
+ROW_VALIDATION_COMMAND_OVERRIDES = {
+    (PUBLIC_BETA_PHASE, FORK_DEPLOYMENT_REQUIREMENT_ID): (
+        "python scripts/test_fork_deployment_rehearsal_evidence.py",
+        "python scripts/check_fork_deployment_rehearsal_evidence.py",
+    )
+}
 
 
 class ReleaseEvidencePacketIndexError(RuntimeError):
@@ -202,15 +213,47 @@ def status_summary(
     return rows
 
 
-def row_validation_commands(phase_config: dict[str, Any]) -> list[str]:
+def row_validation_commands(
+    phase_config: dict[str, Any],
+    requirement_id: str,
+) -> list[str]:
     """Return commands that must stay green for one packet row."""
+    phase = str(phase_config["phase"])
     return [
         *TEST_COMMANDS,
+        *ROW_VALIDATION_COMMAND_OVERRIDES.get((phase, requirement_id), ()),
         "python scripts/test_public_beta_blocker_report.py",
         "python scripts/test_production_release_blocker_report.py",
         str(phase_config["blocker_report_check"]),
         *COMMON_VALIDATION_COMMANDS,
     ]
+
+
+def retained_artifact_expectation(
+    repo_root: Path,
+    phase: str,
+    requirement_id: str,
+    template: dict[str, Any],
+) -> dict[str, Any]:
+    """Return the retained artifact handoff record for one packet row."""
+    if phase == PUBLIC_BETA_PHASE and requirement_id == FORK_DEPLOYMENT_REQUIREMENT_ID:
+        record = file_record(
+            resolve_repo_path(repo_root, FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    else:
+        retained_path = template["retained_path"]
+        retained_sha256 = template["sha256"]
+
+    return {
+        "path": retained_path,
+        "sha256": retained_sha256,
+        "block_or_reference": template["block_or_reference"],
+        "command_or_source_system": template["command_or_source_system"],
+        "operator_notes": template["operator_notes"],
+    }
 
 
 def evidence_paths(requirement: dict[str, Any]) -> list[str]:
@@ -272,12 +315,18 @@ def packet_rows(
             phase,
             phase_config["requirements"],
         )
-        commands = row_validation_commands(phase_config)
         for requirement_id in phase_config["requirements"]:
             requirement = by_phase[phase][requirement_id]
             validate_template_only_completion(requirement)
             template_path, template = templates[requirement_id]
             template_path_text = normalize_path(template_path, repo_root)
+            retained = retained_artifact_expectation(
+                repo_root,
+                phase,
+                requirement_id,
+                template,
+            )
+            commands = row_validation_commands(phase_config, requirement_id)
             validate_blocker_reference(
                 requirement_id,
                 phase,
@@ -319,15 +368,7 @@ def packet_rows(
                         "record_type": template["record_type"],
                         "review_status": template["review_status"],
                     },
-                    "retained_artifact_expectation": {
-                        "path": template["retained_path"],
-                        "sha256": template["sha256"],
-                        "block_or_reference": template["block_or_reference"],
-                        "command_or_source_system": template[
-                            "command_or_source_system"
-                        ],
-                        "operator_notes": template["operator_notes"],
-                    },
+                    "retained_artifact_expectation": retained,
                     "validation_commands": commands,
                     "template_only_can_complete": False,
                     "completion_policy": completion_policy(requirement),

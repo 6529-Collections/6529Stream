@@ -180,6 +180,10 @@ def seed_all_templates(root: Path) -> None:
         environment="audit",
         retained_text="Public beta template retained artifact.\n",
     )
+    write_text(
+        root / generator.FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE,
+        "Fork deployment rehearsal retained artifact template.\n",
+    )
     seed_templates(
         root,
         non_local_checker.PRODUCTION_RELEASE_TEMPLATE_DIR,
@@ -289,6 +293,46 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             self.assertIn("python scripts/generate_release_evidence_packet_index.py --check", row["validation_commands"])
             self.assertIn("blocker_report", row)
             self.assertEqual(packet["policy"]["template_only_can_complete"], False)
+
+    def test_fork_rehearsal_row_uses_canonical_retained_artifact(self) -> None:
+        """Fork deployment tracker rows point at the fork-specific template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            fork_row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"] == generator.FORK_DEPLOYMENT_REQUIREMENT_ID
+            )
+
+            self.assertEqual(
+                fork_row["retained_artifact_expectation"]["path"],
+                generator.FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+            )
+            self.assertEqual(
+                fork_row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(
+                    root / generator.FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE
+                ),
+            )
+            self.assertIn(
+                "python scripts/test_fork_deployment_rehearsal_evidence.py",
+                fork_row["validation_commands"],
+            )
+            self.assertIn(
+                "python scripts/check_fork_deployment_rehearsal_evidence.py",
+                fork_row["validation_commands"],
+            )
 
     def test_outputs_are_deterministic(self) -> None:
         """Rendering the same inputs twice produces identical JSON and Markdown."""
