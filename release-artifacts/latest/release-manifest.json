@@ -1576,7 +1576,7 @@
     "ceremony_evidence": [
       {
         "path": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:6ea05600626a3168658cb1d99a82cf1943de7a3b9c497dc24fbb36884ad24814",
+        "sha256": "sha256:d19514bba9dc295983d38a4919589e99827f01dc9b79a9a9cae8f530884ea4cb",
         "size_bytes": 5668,
         "schema_version": "6529stream.deployment-ceremony-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-local",
@@ -1596,7 +1596,7 @@
     "randomizer_operations": [
       {
         "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:f6ae9e38bcaea91fe9aa2f1e94f2bc359904d0f0b685137911d47d67a41c42bd",
+        "sha256": "sha256:c2f566eb3f0846df772ab66f388a49101e1bd220161917a16fa96f43d14c6b6d",
         "size_bytes": 9421,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",

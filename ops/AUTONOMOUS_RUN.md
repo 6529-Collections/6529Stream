@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD after issue #305 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 05:19 UTC` |
+| Last updated | `2026-06-14 05:36 UTC` |
 
 ## Packaging Notes
 
@@ -209,7 +209,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Complete curator Merkle leaf domain separation (Queue Item 147)
 
-Status: PR opened; fixing CI artifact drift and waiting for replacement CI.
+Status: PR opened; second CI artifact-evidence drift fixed locally; ready to
+commit, push, and watch replacement CI.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/305`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/306`.
 Branch: `codex/curator-merkle-leaf-domain-separation`.
@@ -264,7 +265,19 @@ Validation status:
   the via-IR size build. The targeted artifact check modes and full
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally
   after the fix.
-- `git diff --check` passed.
+- CI run `27489281575` then failed at `python scripts/check_ceremony_evidence.py`
+  because retained ceremony/randomizer evidence still referenced the pre-via-IR
+  deployment manifest, address book, ABI checksum, and invariant-test hashes.
+  The retained evidence hashes and aggregate release manifest/checksum bundle
+  have been refreshed locally.
+- `python scripts\check_ceremony_evidence.py`,
+  `python scripts\check_randomizer_operations.py`,
+  `python scripts\generate_release_manifest.py --check`, and
+  `python scripts\generate_release_checksums.py --check` pass after the
+  retained-evidence refresh.
+- The full `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` gate
+  passed after the retained-evidence refresh.
+- `git diff --check` passed after the retained-evidence refresh.
 
 ### Completed: Reconcile live audit freshness guard merge state (Queue Item 146)
 
