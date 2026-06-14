@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-vendored-formatting-exemptions` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/322` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/323` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/324` |
+| Active PR branch | `codex/fork-deployment-rehearsal-evidence-path` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/324` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/325` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/326` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 09:56 UTC` |
+| Last updated | `2026-06-14 10:46 UTC` |
 
 ## Packaging Notes
 
@@ -212,21 +212,79 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 153 | Retire provider and integration Solidity formatting deferrals | Gate A/G support | Reformat the non-vendored provider and legacy integration slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave OpenZeppelin-style vendored files for later provenance-specific PRs | Merged in PR #318 |
 | 154 | Reconcile provider formatting deferral merge state | Gate G support | Record PR #318 merge evidence, close out issue #317/Queue Item 153 in roadmap state, and select the next no-secret vendored-formatting policy target | Merged in PR #321 |
 | 155 | Convert vendored Solidity formatting deferrals into explicit provenance exemptions | Gate A/G support | Rename the remaining OpenZeppelin-style formatter deferrals into documented vendored/provenance exemptions, preserve strict formatting for all non-exempt Solidity files, and refresh checker tests/docs without changing Solidity bytecode | Merged in PR #322 |
-| 156 | Reconcile vendored formatting exemption merge state | Gate G support | Record PR #322 merge evidence, close out issue #320/Queue Item 155 in roadmap state, and select the next no-secret release-evidence tracker target | Active for issue #323 |
-| 157 | Assess retained fork deployment rehearsal evidence path | Gate E/Gate G support | Inspect tracker issue #216 and either wire reviewed no-secret retained fork deployment rehearsal evidence if available or create the next no-secret support slice without changing readiness claims | Queued next after issue #323 |
+| 156 | Reconcile vendored formatting exemption merge state | Gate G support | Record PR #322 merge evidence, close out issue #320/Queue Item 155 in roadmap state, and select the next no-secret release-evidence tracker target | Merged in PR #324 |
+| 157 | Add fork deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a canonical no-secret retained fork deployment rehearsal Markdown template, offline checker/tests, local/CI gate wiring, docs, roadmap state, and release artifact coverage without completing issue #216 or changing readiness claims | Active for issue #325 |
+| 158 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile vendored formatting exemption merge state (Queue Item 156)
+### PR candidate: Add fork deployment rehearsal retained artifact checker (Queue Item 157)
 
-Status: PR open; CI and CodeRabbit review pending.
+Status: PR open; CI rerun pending after issue-backlog/body-sync drift fix.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/325`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/326`.
+Branch: `codex/fork-deployment-rehearsal-evidence-path`.
+Branch started from PR #324 squash merge commit
+`6a5c268a1ed3a60b7d557b6398e78a984ac569ab`.
+Initial PR head: `29c5de67b211e11a9c616821f47f610c0728149b`.
+CodeRabbit review requested via comment `4701475798`.
+CI run `27496127991` failed at the `Public beta evidence` step because
+`release-artifacts/latest/release-evidence-packet-index.json` was stale after
+the non-local evidence docs changed. The fix regenerates the packet index,
+release manifest, and checksum bundle.
+CI run `27496263678` then failed at the same grouped step because the generated
+release evidence issue backlog had not been refreshed from the packet index.
+The follow-up fix regenerates the issue backlog, issue body-sync artifact,
+release manifest, and checksum bundle.
+
+Goal:
+
+- Add a canonical no-secret Markdown retained-artifact template for the
+  `fork_deployment_rehearsal` public-beta evidence requirement tracked by issue
+  #216.
+- Add an offline checker and focused test suite that validate headings, fields,
+  blocked readiness posture, review state, validation commands, and secret-like
+  key/value rejection.
+- Wire the checker and tests into local `make check`, Bash, PowerShell, and CI
+  gates.
+- Update evidence docs, tooling docs, release-readiness docs, roadmap
+  traceability, changelog, release manifest, and checksum artifacts.
+- Preserve issue #216 as blocked until actual reviewed retained fork evidence is
+  available; this PR must not claim fork rehearsal completion.
+
+Validation plan:
+
+- `python scripts/test_fork_deployment_rehearsal_evidence.py`.
+- `python scripts/check_fork_deployment_rehearsal_evidence.py`.
+- `python scripts/test_non_local_release_evidence.py`.
+- `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/test_public_beta_evidence.py`.
+- `python scripts/check_public_beta_evidence.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `python scripts/test_changelog_check.py`.
+- `rg -n "fork-deployment-rehearsal-retained-artifact-template|check_fork_deployment_rehearsal_evidence|test_fork_deployment_rehearsal_evidence|#216|#325|Queue Item 157|PR #324|27495297786|4701410886|6a5c268a1ed3a60b7d557b6398e78a984ac569ab" docs ops release-artifacts scripts Makefile .github CHANGELOG.md`.
+- `git diff --check`.
+
+### Completed: Reconcile vendored formatting exemption merge state (Queue Item 156)
+
+Status: merged in PR #324.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/323`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/324`.
 Branch: `codex/reconcile-vendored-formatting-exemptions`.
 Branch started from PR #322 squash merge commit
 `e3e98e7f3284558a4cc747cf4b634bee2d8205a6`.
 Initial PR head: `105f43c72c0b302dcf6f0b48d7e72d701620e36e`.
-CodeRabbit review requested via comment `4701392005`.
+Final PR head: `c1adc247585ac2479ea9846467adfe4646de03c3`.
+Squash merge commit: `6a5c268a1ed3a60b7d557b6398e78a984ac569ab`.
+CI: run `27495297786` passed.
+CodeRabbit: explicit review request comments `4701392005` and `4701395328`;
+review-finished replies `4701392175` and `4701395575`; status success. The
+automatic rate-limit notice produced no actionable findings.
+Merge decision comment: `4701410886`.
 
 Goal:
 
@@ -238,6 +296,16 @@ Goal:
   assess, without changing public-beta or production readiness claims.
 - Preserve the blocked public-beta and production readiness posture.
 
+Outcome:
+
+- Recorded PR #322 merge evidence, issue #320 completion, PR #324 CI/review
+  evidence, and the next tracker issue posture in durable roadmap state.
+- Kept release artifacts, public-beta evidence, and production readiness claims
+  blocked pending reviewed external/fork evidence.
+- Created follow-up issue #325 after confirming issue #216 could not be
+  completed honestly from the current checkout without actual retained fork
+  evidence.
+
 Validation:
 
 - `rg -n "^#|^##|^###" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
@@ -245,6 +313,11 @@ Validation:
 - `python scripts/generate_release_manifest.py --check`.
 - `python scripts/generate_release_checksums.py --check`.
 - `git diff --check`.
+
+GitHub CI run `27495297786` passed on final head `c1adc247`; CodeRabbit status
+was success after explicit review-finished reply `4701395575`; merge-decision
+comment `4701410886` recorded the non-actionable rate-limit warning; issue #323
+closed completed when PR #324 squash-merged.
 
 ### Completed: Convert vendored formatting deferrals into provenance exemptions (Queue Item 155)
 
@@ -12212,6 +12285,11 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 10:46 | Fix PR #326 issue-backlog drift | CI run `27496263678` passed through the refreshed packet-index check, then failed at `test_release_evidence_issue_backlog.py` because the committed issue backlog still reflected the old packet index; regenerate the issue backlog and issue body-sync artifacts plus downstream release manifest/checksum files, then rerun the grouped public-beta evidence chain locally. |
+| 2026-06-14 10:40 | Fix PR #326 packet-index drift | CI run `27496127991` failed only at the `Public beta evidence` step after `test_release_evidence_packet_index.py` detected stale committed packet-index hashes for `docs/non-local-release-evidence.md`; regenerate the release evidence packet index, release manifest, and checksum bundle, then rerun the failed public-beta evidence block locally before pushing. |
+| 2026-06-14 10:33 | Open PR #326 | Fork deployment rehearsal retained-artifact checker PR #326 opened for issue #325 on head `29c5de67b211e11a9c616821f47f610c0728149b`, references issue #216 without closing it, records focused/full local validation, preserves blocked readiness claims, and requests CodeRabbit review via comment `4701475798`. |
+| 2026-06-14 10:08 | Create issue #325 and start Queue Item 157 | Issue #216 requires actual reviewed retained fork deployment rehearsal evidence, which is not present in the checkout and must not be invented; issue #325 tracks the no-secret support slice that adds a canonical retained-artifact template, checker, tests, docs, local/CI gates, roadmap traceability, and release artifact coverage without changing readiness claims. |
+| 2026-06-14 10:05 | Merge PR #324 | Reconciliation PR #324 passed CI run `27495297786` on final head `c1adc247585ac2479ea9846467adfe4646de03c3`, CodeRabbit status was success after review-finished replies `4701392175` and `4701395575`, there were no unresolved review threads, merge-decision comment `4701410886` recorded the rate-limit warning as non-actionable, squash merge commit `6a5c268a1ed3a60b7d557b6398e78a984ac569ab` landed on `main`, and issue #323 closed completed. |
 | 2026-06-14 09:56 | Open PR #324 | Reconciliation PR #324 opened for issue #323 on head `105f43c72c0b302dcf6f0b48d7e72d701620e36e`, records PR #322 merge evidence, queues tracker issue #216 as the next no-secret release-evidence target, and requests CodeRabbit review via comment `4701392005`. |
 | 2026-06-14 09:51 | Start Queue Item 156 and select issue #216 next | PR #322 merged as `e3e98e7f3284558a4cc747cf4b634bee2d8205a6`, issue #320 closed completed, issue #323 opened for merge-state reconciliation, tracker issue #216 selected as the next locally assessable release-evidence target, and branch `codex/reconcile-vendored-formatting-exemptions` started from the merged baseline. |
 | 2026-06-14 09:46 | Merge PR #322 | Vendored formatting exemption PR #322 passed CI run `27494893331` on final head `eca2cbc46b5cbba236335afbb7d11bc603af7602`, CodeRabbit status was success after explicit review-finished reply `4701354147`, there were no unresolved review threads, merge-decision comment `4701372430` recorded the rate-limit warning as non-actionable, and issue #320 closed completed. |
