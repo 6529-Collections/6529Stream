@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-retention-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/286` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/287` |
-| Active PR | TBD until Queue Item 138 is opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/288` |
 | Next issue | TBD after issue #287 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 01:37 UTC` |
+| Last updated | `2026-06-14 01:39 UTC` |
 
 ## Packaging Notes
 
@@ -201,12 +201,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit archive retention workflow merge state (Queue Item 138)
 
-Status: local implementation in progress before PR open.
+Status: PR #288 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/287`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/288`.
 Branch: `codex/reconcile-live-audit-retention-merge-state`.
 Branch started from PR #286 squash merge commit
 `ef76853783dd23d46165050fe01cd6afa031f660`.
+Opening PR head: `137215c00a11807d5b590370b39feb7df730a169`.
 
 Goal:
 
@@ -11407,6 +11408,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 01:39 | Open PR #288 | State-only live audit retention merge reconciliation PR opened on head `137215c00a11807d5b590370b39feb7df730a169`; it links issue #287, records PR #286 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the retention workflow row passing, and selects Queue Item 139 as the next no-secret evidence target. |
 | 2026-06-14 01:32 | Start Queue Item 138 | PR #286 merged as `ef76853783dd23d46165050fe01cd6afa031f660`, issue #285 closed completed, issue #287 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-retention-merge-state` started from the merged baseline before the next no-secret evidence target. |
 | 2026-06-14 01:31 | Merge PR #286 | Live audit archive retention workflow merged as `ef76853783dd23d46165050fe01cd6afa031f660`; final head `2b6301eaaeeed67fcc349a637be3baf4a80785b7` passed CI run `27484623928`, after CI run `27484559955` caught the README EOF hygiene issue; CodeRabbit status was success with no unresolved review threads, explicit review requests returned review-finished replies, and issue #285 closed completed. |
 | 2026-06-14 01:22 | Fix PR #286 repository hygiene failure | GitHub Actions run `27484559955` failed in repository hygiene because `release-artifacts/evidence/live-audit-reports/README.md` had one extra blank line at EOF; trimmed the file and regenerated release manifest/checksum evidence because the README is checksum-covered. |
