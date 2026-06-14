@@ -57,4 +57,6 @@ Assert-ThrowsWithMessage `
         Invoke-CheckedNative -FilePath $nativeHarness.FilePath -Arguments $nativeHarness.FailureArguments
     }
 
+Invoke-CheckedNative -FilePath $nativeHarness.FilePath -Arguments $nativeHarness.SuccessArguments
+
 Write-Output "Windows check helper runtime harness passed."

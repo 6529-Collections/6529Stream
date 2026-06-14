@@ -65,6 +65,12 @@ class WindowsCheckWrapperTests(unittest.TestCase):
     def test_runtime_harness_exercises_success_and_failure_paths(self) -> None:
         self.assertIn('. (Join-Path $PSScriptRoot "windows-check-helpers.ps1")', self.runtime_test_content)
         self.assertIn("Invoke-CheckedNative -FilePath $nativeHarness.FilePath", self.runtime_test_content)
+        self.assertGreaterEqual(
+            self.runtime_test_content.count(
+                "Invoke-CheckedNative -FilePath $nativeHarness.FilePath -Arguments $nativeHarness.SuccessArguments"
+            ),
+            2,
+        )
         self.assertIn("failed with exit code 7", self.runtime_test_content)
         self.assertIn('& (Join-Path $PSScriptRoot "test_windows_check_helpers.ps1")', self.check_content)
 
