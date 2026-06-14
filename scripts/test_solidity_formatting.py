@@ -31,7 +31,7 @@ Diff in smart-contracts\\Address.sol:
     def test_required_files_exclude_deferred_baseline(self) -> None:
         files = [
             "smart-contracts/Address.sol",
-            "smart-contracts/IRandomizer.sol",
+            "smart-contracts/Math.sol",
             "smart-contracts/StreamCore.sol",
         ]
 

@@ -16,29 +16,22 @@ SMART_CONTRACTS_DIR = Path("smart-contracts")
 DEFERRED_FORMATTING_FILES = frozenset(
     {
         "smart-contracts/Address.sol",
-        "smart-contracts/ArrngConsumer.sol",
         "smart-contracts/Base64.sol",
         "smart-contracts/Context.sol",
         "smart-contracts/ERC165.sol",
         "smart-contracts/ERC2981.sol",
         "smart-contracts/ERC721.sol",
         "smart-contracts/ERC721Enumerable.sol",
-        "smart-contracts/IArrngConsumer.sol",
-        "smart-contracts/IArrngController.sol",
-        "smart-contracts/IDelegationManagementContract.sol",
         "smart-contracts/IERC165.sol",
         "smart-contracts/IERC2981.sol",
         "smart-contracts/IERC721.sol",
         "smart-contracts/IERC721Metadata.sol",
         "smart-contracts/IERC721Receiver.sol",
-        "smart-contracts/IRandomizer.sol",
         "smart-contracts/Math.sol",
         "smart-contracts/MerkleProof.sol",
         "smart-contracts/Ownable.sol",
         "smart-contracts/ReentrancyGuard.sol",
         "smart-contracts/SignedMath.sol",
-        "smart-contracts/VRFConsumerBaseV2.sol",
-        "smart-contracts/VRFCoordinatorV2Interface.sol",
     }
 )
 

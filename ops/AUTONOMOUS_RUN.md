@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/retire-first-party-formatting-deferrals` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/315` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/314` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/316` |
+| Active PR branch | `codex/retire-provider-formatting-deferrals` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/316` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/317` |
+| Active PR | TBD |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 07:43 UTC` |
+| Last updated | `2026-06-14 08:16 UTC` |
 
 ## Packaging Notes
 
@@ -208,13 +208,87 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 149 | Reconcile curator Merkle state reconciliation merge | Gate G support | Record PR #308 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the formatting-triage target | Merged in PR #310 |
 | 150 | Triage Solidity formatting gate path | Gate A/G support | Triage `forge fmt --check smart-contracts`, decide first-party versus vendored/generated scope, document the accepted formatting gate path, and prepare issue-ready follow-up work without changing contract behavior | Merged in PR #312 |
 | 151 | Reconcile Solidity formatting gate merge state | Gate G support | Record PR #312 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the first deferred-formatting retirement target | Merged in PR #315 |
-| 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Active for issue #314 |
+| 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Merged in PR #316 |
+| 153 | Retire provider and integration Solidity formatting deferrals | Gate A/G support | Reformat the non-vendored provider and legacy integration slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave OpenZeppelin-style vendored files for later provenance-specific PRs | Active for issue #317 |
 
 ## Current PR Worklog
 
-### PR candidate: Retire first-party interface Solidity formatting deferrals (Queue Item 152)
+### PR candidate: Retire provider and integration Solidity formatting deferrals (Queue Item 153)
 
-Status: CI deployment-manifest drift fix pushed; waiting for CI and CodeRabbit.
+Status: implementation and full local validation passed; preparing PR.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/317`.
+PR: TBD.
+Branch: `codex/retire-provider-formatting-deferrals`.
+Branch started from PR #316 squash merge commit
+`e10f487bbe6c16a2f2a1c2643426f986cc3e339e`.
+
+Goal:
+
+- Reformat the non-vendored provider and legacy integration slice:
+  `smart-contracts/ArrngConsumer.sol`,
+  `smart-contracts/IArrngConsumer.sol`,
+  `smart-contracts/IArrngController.sol`,
+  `smart-contracts/IDelegationManagementContract.sol`,
+  `smart-contracts/IRandomizer.sol`,
+  `smart-contracts/VRFConsumerBaseV2.sol`, and
+  `smart-contracts/VRFCoordinatorV2Interface.sol`.
+- Remove successfully formatted files from `DEFERRED_FORMATTING_FILES`.
+- Keep OpenZeppelin-style vendored/provenance-sensitive files untouched for a
+  later dedicated provenance PR.
+- Refresh status, tooling, known-blocker, roadmap, changelog, run-state,
+  source-verification, release-manifest, and checksum evidence to the new
+  formatting-required / deferred baseline.
+- Preserve the blocked/non-production readiness posture.
+
+Validation:
+
+- `forge fmt --check` on the selected provider/integration files.
+- `python scripts\test_solidity_formatting.py`.
+- `python scripts\check_solidity_formatting.py`.
+- `make fmt-check`.
+- `forge build`.
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- Release artifact, source-verification, deployment/evidence, manifest,
+  checksum, changelog, and ABI compatibility drift checks as needed.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Focused local validation passed:
+
+- `forge fmt --check smart-contracts\ArrngConsumer.sol smart-contracts\IArrngConsumer.sol smart-contracts\IArrngController.sol smart-contracts\IDelegationManagementContract.sol smart-contracts\IRandomizer.sol smart-contracts\VRFConsumerBaseV2.sol smart-contracts\VRFCoordinatorV2Interface.sol`.
+- `python scripts\test_solidity_formatting.py`.
+- `python scripts\check_solidity_formatting.py`.
+- `make fmt-check`.
+- `forge build`.
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- `python scripts\test_release_artifacts.py`.
+- `python scripts\generate_release_artifacts.py --check`.
+- `python scripts\test_source_verification_inputs.py`.
+- `python scripts\generate_source_verification_inputs.py --check`.
+- `python scripts\test_deployment_manifest.py`.
+- `python scripts\generate_deployment_manifest.py --check`.
+- `python scripts\generate_deployment_manifest.py --config deployments\config\anvil-6529stream-v0.1.0-001-broadcast.json --check`.
+- `python scripts\test_address_books.py`.
+- `python scripts\generate_address_books.py --check`.
+- `python scripts\test_ceremony_evidence.py`.
+- `python scripts\check_ceremony_evidence.py`.
+- `python scripts\test_randomizer_operations.py`.
+- `python scripts\check_randomizer_operations.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\test_changelog_check.py`.
+- `python scripts\check_changelog.py`.
+- `python scripts\test_abi_compatibility.py`.
+- `python scripts\check_abi_compatibility.py --check`.
+- `python -m py_compile scripts\check_solidity_formatting.py scripts\test_solidity_formatting.py`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+### Completed: Retire first-party interface Solidity formatting deferrals (Queue Item 152)
+
+Status: merged in PR #316.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/314`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/316`.
 Branch: `codex/retire-first-party-formatting-deferrals`.
@@ -222,7 +296,12 @@ Branch started from PR #315 squash merge commit
 `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`.
 Opening head: `786e55ff4386c919f80d55189a89286d91e8cafc`.
 Latest pushed fix head: `98554aa2108d2f4a1c3440dfd1e86171b21cd9d0`.
-CodeRabbit: explicit review request comments `4701042752` and `4701081061`.
+Final PR head: `06d77acd23c15fb3193e5e9f621e33c4137cbcaf`.
+Squash merge commit: `e10f487bbe6c16a2f2a1c2643426f986cc3e339e`.
+CI: run `27492328469` passed.
+CodeRabbit: explicit review request comments `4701042752`, `4701081061`,
+and `4701089381`; CodeRabbit status success; no unresolved review threads.
+Merge decision comment: `4701109319`.
 
 Goal:
 
@@ -11991,6 +12070,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 08:16 | Finish Queue Item 153 local validation | Full Windows `scripts\check.ps1` passed after the provider/integration formatting deferral retirement and regenerated source/release/deployment/evidence artifacts; repo-owned `scripts/__pycache__` generated by Python validation was removed before staging. |
+| 2026-06-14 08:09 | Validate Queue Item 153 focused slice locally | Provider/integration files are formatted and removed from the deferred formatting baseline; `make fmt-check` reports 34 required and 17 deferred files, `forge build` and production via-IR size gate pass with unchanged `StreamCore` 24,139-byte runtime / 437-byte headroom, release/source/deployment/address/evidence/manifest/checksum/changelog/ABI drift checks pass after regenerating derived artifacts and retained evidence hashes. |
+| 2026-06-14 07:57 | Start Queue Item 153 | PR #316 merged as `e10f487bbe6c16a2f2a1c2643426f986cc3e339e`, issue #314 closed completed, issue #317 opened for the next non-vendored provider/integration formatting-deferral slice, and branch `codex/retire-provider-formatting-deferrals` started from the merged baseline. |
+| 2026-06-14 07:56 | Merge PR #316 | PR #316 merged after final head `06d77acd23c15fb3193e5e9f621e33c4137cbcaf` passed CI run `27492328469`, CodeRabbit status was success with no unresolved review threads after explicit review requests `4701042752`, `4701081061`, and `4701089381`, merge-decision comment `4701109319`, and squash commit `e10f487bbe6c16a2f2a1c2643426f986cc3e339e`. |
 | 2026-06-14 07:41 | Fix PR #316 deployment-manifest drift | CI run `27491891862` failed at `Deployment manifest` because source-formatting metadata changed release bytecode hashes and the derived deployment manifest was stale; regenerated local and broadcast deployment manifests, address books, retained ceremony/randomizer evidence hashes, release manifest, and checksum bundle, then reran the affected deployment/evidence/release checks and full Windows `scripts\check.ps1` successfully before pushing the fix. |
 | 2026-06-14 07:43 | Request CodeRabbit after PR #316 fix push | Fix commit `98554aa2108d2f4a1c3440dfd1e86171b21cd9d0` pushed refreshed deployment/evidence/release artifacts; CodeRabbit review was requested again via comment `4701081061` so the updated head is covered. |
 | 2026-06-14 07:26 | Open PR #316 | PR #316 opened on head `786e55ff4386c919f80d55189a89286d91e8cafc`, closes issue #314, retires the first-party interface formatting deferrals, records the 27-required / 24-deferred formatting baseline, and requested CodeRabbit review via comment `4701042752`. |
