@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-pr-350-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/350` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/351` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/352` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report`) |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 16:50 UTC` |
+| Last updated | `2026-06-14 16:54 UTC` |
 
 ## Packaging Notes
 
@@ -233,9 +233,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile PR #350 reviewed fork evidence merge state (Queue Item 171)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR opened; awaiting CI and CodeRabbit review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/351`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/352`.
 Branch: `codex/reconcile-pr-350-merge-state`.
 Branch started from PR #350 squash merge commit
 `8af52acb1072d106033162f251e4aa2fa321d628`.
@@ -13089,6 +13089,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 16:54 | Open PR #352 | PR #352 opened on head `277e513de3e81c739d29bc4950c0182f6afd76d5`, records PR #350 merge evidence and issue #216 completion, refreshes roadmap verification metadata, selects issue #215 as the next release-evidence target, and preserves blocked readiness claims. |
 | 2026-06-14 16:50 | Merge PR #350 and start Queue Item 171 | PR #350 squash-merged as `8af52acb1072d106033162f251e4aa2fa321d628` after CI run `27505334136` passed Windows PowerShell wrapper job `81295431136` and Foundry smoke job `81295431140`; CodeRabbit status was success with review-finished reply `4702384287`, no review threads were open, merge-decision comment `4702403805` documented the initial rate-limit warning as non-actionable, issue #216 closed completed, issue #351 opened for merge-state reconciliation, and branch `codex/reconcile-pr-350-merge-state` started from the merged baseline. |
 | 2026-06-14 16:38 | Open PR #350 | PR #350 opened on head `9a3d34f134a42432b4786eb5dd7c5d740a081e72`, marks reviewed fork deployment rehearsal evidence complete, removes issue #216 from the active evidence tracker backlog/link/body-sync set, preserves blocked public-beta and production readiness, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-14 16:12 | Start Queue Item 164 | PR #349 merged as `6e968d2702837b4f1eaa5e002e5d30748deba228` after CI run `27504228132` and CodeRabbit success; branch `codex/accept-fork-rehearsal-evidence` started from the merged baseline to accept reviewed fork rehearsal evidence and close issue #216 without changing public-beta readiness. |
