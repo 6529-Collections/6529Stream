@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-fork-tracker-retained-artifact-path` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/330` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/331` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/332` |
+| Active PR branch | `codex/record-fork-issue-216-body-sync` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/332` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/333` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/334` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 11:44 UTC` |
+| Last updated | `2026-06-14 12:01 UTC` |
 
 ## Packaging Notes
 
@@ -216,39 +216,77 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 157 | Add fork deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a canonical no-secret retained fork deployment rehearsal Markdown template, offline checker/tests, local/CI gate wiring, docs, roadmap state, and release artifact coverage without completing issue #216 or changing readiness claims | Merged in PR #326 |
 | 158 | Reconcile fork deployment rehearsal evidence checker merge state | Gate G support | Record PR #326 merge evidence, close out issue #325/Queue Item 157 in roadmap state, keep issue #216 blocked for actual reviewed retained fork evidence, and select the next no-secret tracker wording/update target | Merged in PR #328 |
 | 159 | Use canonical fork rehearsal retained artifact path in evidence tracker | Gate G support | Update the release evidence packet index, issue backlog, and issue body-sync artifacts so issue #216 points at the fork-specific retained-artifact template/checker commands instead of the generic public-beta placeholder, without changing readiness claims | Merged in PR #330 |
-| 160 | Reconcile fork tracker retained artifact merge state | Gate G support | Record PR #330 merge evidence, close out issue #329/Queue Item 159 in roadmap state, keep issue #216 blocked for actual reviewed retained fork evidence, and select the next no-secret release-evidence target | Active for issue #331 |
-| 161 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
+| 160 | Reconcile fork tracker retained artifact merge state | Gate G support | Record PR #330 merge evidence, close out issue #329/Queue Item 159 in roadmap state, keep issue #216 blocked for actual reviewed retained fork evidence, and select the next no-secret release-evidence target | Merged in PR #332 |
+| 161 | Apply fork rehearsal body sync to live issue #216 | Gate G support | Apply the committed body-sync payload for issue #216 to the live GitHub issue, verify live issue bodies against the committed artifact, and record the external sync without changing readiness claims | Active for issue #333 |
+| 162 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile fork tracker retained artifact merge state (Queue Item 160)
+### PR candidate: Apply fork rehearsal body sync to live issue #216 (Queue Item 161)
 
 Status: PR open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/333`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/334`.
+Branch: `codex/record-fork-issue-216-body-sync`.
+Branch started from PR #332 squash merge commit
+`fcb5ae5238420196999b654d88e69a507e221e85`.
+Initial PR head: `a109d0a006033b52b85e0c90d1b9634e11e990ca`.
+CodeRabbit review requested via comment `4701675356`.
+
+Goal:
+
+- Record the live issue #216 body synchronization performed from the committed
+  body-sync artifact after PR #330/#332 landed.
+- Preserve issue #216 as open/blocked until actual reviewed retained fork
+  deployment rehearsal evidence exists.
+- Record live validation that issues #215 through #231 match
+  `release-artifacts/latest/release-evidence-issue-body-sync.json`.
+- Preserve readiness claims as blocked; this PR records an external tracker
+  sync only.
+
+Validation plan:
+
+- `python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp\release-evidence-issue-bodies`.
+- `gh issue edit 216 --repo 6529-Collections/6529Stream --body-file tmp\release-evidence-issue-bodies\issue-216.md`.
+- `gh issue view 216 --repo 6529-Collections/6529Stream --json number,title,body,state`.
+- `python scripts/check_release_evidence_issue_bodies.py --live-json tmp\release-evidence-issue-bodies-live.json`.
+- `rg -n "Queue Item 160|Queue Item 161|Queue Item 162|PR #332|#331|#333|issue #216|Last verified|CI run|27497791932|fcb5ae5" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `git diff --check`.
+
+Live sync already performed:
+
+- `python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp\release-evidence-issue-bodies` wrote deterministic expected body files.
+- `gh issue edit 216 --repo 6529-Collections/6529Stream --body-file tmp\release-evidence-issue-bodies\issue-216.md` updated issue #216.
+- `gh issue view 216 --repo 6529-Collections/6529Stream --json number,title,body,state` confirmed #216 is open and references `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
+- A fresh live snapshot for issues #215 through #231 passed `python scripts/check_release_evidence_issue_bodies.py --live-json tmp\release-evidence-issue-bodies-live.json` after writing the temporary JSON as UTF-8 without BOM.
+
+### Completed: Reconcile fork tracker retained artifact merge state (Queue Item 160)
+
+Status: merged in PR #332.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/331`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/332`.
 Branch: `codex/reconcile-fork-tracker-retained-artifact-path`.
 Branch started from PR #330 squash merge commit
 `54a4e3913304df0222d971658b504e3043be8777`.
 Initial PR head: `16e6c0241d0910cedcc089b3949435c2d35350bd`.
-CodeRabbit review requested via comment `4701639516`.
+Final PR head: `523307dac087672bc840c839fcc2b83b35cc58d5`.
+Squash merge commit: `fcb5ae5238420196999b654d88e69a507e221e85`.
+CI: run `27497791932` passed.
+CodeRabbit: explicit review request comment `4701639516`;
+review-finished reply `4701639759`; status success. The automatic rate-limit
+warning comment `4701639118` produced no actionable findings.
+Merge decision comment: `4701657448`.
 
-Goal:
+Outcome:
 
-- Record PR #330 merge evidence, issue #329 completion, and final
-  CI/CodeRabbit status in durable roadmap state.
-- Mark Queue Item 159 as merged and make issue #331 the active
-  reconciliation item.
-- Keep issue #216 open and blocked until real reviewed retained fork
-  deployment rehearsal evidence exists.
-- Preserve readiness claims as blocked; this is a state-only reconciliation.
-
-Validation plan:
-
-- `rg -n "Queue Item 159|Queue Item 160|Queue Item 161|PR #330|#329|#331|Last verified|CI run|27497423363|54a4e391" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `python scripts/generate_release_manifest.py --check`.
-- `python scripts/generate_release_checksums.py --check`.
-- `git diff --check`.
+- Recorded PR #330 merge evidence, issue #329 completion, and PR #332
+  CI/CodeRabbit evidence in durable roadmap state.
+- Kept issue #216 blocked pending actual reviewed retained fork evidence.
+- Selected issue #333 as the next no-secret live tracker body-sync
+  reconciliation target.
 
 ### Completed: Use canonical fork rehearsal retained artifact path in evidence tracker (Queue Item 159)
 
@@ -12418,6 +12456,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 12:01 | Open PR #334 | State-only PR #334 opened for issue #333 on head `a109d0a006033b52b85e0c90d1b9634e11e990ca`, records the live issue #216 body sync and fresh body-checker snapshot validation, keeps issue #216 open/blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701675356`. |
+| 2026-06-14 11:56 | Start Queue Item 161 and sync live issue #216 | PR #332 merged as `fcb5ae5238420196999b654d88e69a507e221e85`, issue #331 closed completed, issue #333 opened for live issue #216 body synchronization, branch `codex/record-fork-issue-216-body-sync` started from the merged baseline, issue #216 was updated from the committed body-sync artifact via `gh issue edit`, and a fresh live snapshot for issues #215 through #231 passed `python scripts/check_release_evidence_issue_bodies.py --live-json tmp\release-evidence-issue-bodies-live.json`; issue #216 remains open and blocked pending actual reviewed retained fork evidence. |
+| 2026-06-14 11:52 | Merge PR #332 | Reconciliation PR #332 passed CI run `27497791932` on final head `523307dac087672bc840c839fcc2b83b35cc58d5`, CodeRabbit status was success after review-finished reply `4701639759`, there were no unresolved review threads, merge-decision comment `4701657448` recorded the rate-limit warning as non-actionable, squash merge commit `fcb5ae5238420196999b654d88e69a507e221e85` landed on `main`, and issue #331 closed completed. |
 | 2026-06-14 11:44 | Open PR #332 | Reconciliation PR #332 opened for issue #331 on head `16e6c0241d0910cedcc089b3949435c2d35350bd`, records PR #330 merge evidence, preserves issue #216 as blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701639516`. |
 | 2026-06-14 11:39 | Start Queue Item 160 | PR #330 merged as `54a4e3913304df0222d971658b504e3043be8777`, issue #329 closed completed, issue #331 opened for merge-state reconciliation, and branch `codex/reconcile-fork-tracker-retained-artifact-path` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 11:37 | Merge PR #330 | Fork tracker retained-artifact routing PR #330 passed CI run `27497423363` on final head `2bb2c74ccb97cc9ff286ccb282646adc6634c5d8`, CodeRabbit status was success after review-finished reply `4701604582`, there were no unresolved review threads, merge-decision comment `4701622391` recorded the rate-limit warning as non-actionable, squash merge commit `54a4e3913304df0222d971658b504e3043be8777` landed on `main`, and issue #329 closed completed. |
