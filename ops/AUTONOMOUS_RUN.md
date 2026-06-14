@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-formatting-gate-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/312` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/313` |
-| Active PR | TBD after PR open |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/315` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/314` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 06:52 UTC` |
+| Last updated | `2026-06-14 06:55 UTC` |
 
 ## Packaging Notes
 
@@ -214,12 +214,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile Solidity formatting gate merge state (Queue Item 151)
 
-Status: local validation complete; ready to commit and open PR.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/313`.
-PR: TBD after open.
+PR: `https://github.com/6529-Collections/6529Stream/pull/315`.
 Branch: `codex/reconcile-formatting-gate-merge-state`.
 Branch started from PR #312 squash merge commit
 `7f08087f25014151373ef67cbd6fc6e243ed36bd`.
+Opening head: `7b4212d8afbf1c1d2c7a66544c1390510e4d5138`.
+CodeRabbit: explicit review request comment `4700977903`.
 
 Goal:
 
@@ -11926,6 +11928,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 06:55 | Open PR #315 | PR #315 opened on head `7b4212d8afbf1c1d2c7a66544c1390510e4d5138`, closes issue #313, records PR #312 as the latest merged baseline, queues issue #314 as the next formatting-baseline cleanup, and requested CodeRabbit review via comment `4700977903`. |
 | 2026-06-14 06:52 | Start Queue Item 151 | PR #312 merged as `7f08087f25014151373ef67cbd6fc6e243ed36bd`, issue #311 closed completed, issue #313 opened for merge-state reconciliation, issue #314 opened for first-party interface formatting deferral retirement, and branch `codex/reconcile-formatting-gate-merge-state` started from the merged baseline. |
 | 2026-06-14 06:50 | Merge PR #312 | PR #312 merged as `7f08087f25014151373ef67cbd6fc6e243ed36bd`; final head `42e31f8a7a8535ef7404ea31169bbef794be4756` passed CI run `27490962706`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700938271`, review-finished reply `4700938454`, and merge-decision comment `4700968034`, and issue #311 closed completed. |
 | 2026-06-14 06:41 | Fix PR #312 release manifest drift | CI run `27490845104` passed through the new Solidity formatting step but failed at `Release manifest` because changed docs/changelog hashes were not reflected in `release-artifacts/latest/release-manifest.json`; regenerated the release manifest and checksum bundle and validated both locally. |
