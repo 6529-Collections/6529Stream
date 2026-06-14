@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-pr-354-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/354` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/355` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/356` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report` remains open for real reviewed audit evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 17:43 UTC` |
+| Last updated | `2026-06-14 17:46 UTC` |
 
 ## Packaging Notes
 
@@ -235,10 +235,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile PR #354 merge state (Queue Item 173)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #356 opened and awaiting CI plus CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/355`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/215`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/356`.
 Branch: `codex/reconcile-pr-354-merge-state`.
 Branch started from PR #354 squash merge commit
 `300d96c8e80701c3814873993650ad57decbe695`.
@@ -272,6 +272,8 @@ Current facts:
 - Live issue #215 was updated at `2026-06-14 17:42 UTC` from
   `release-artifacts/latest/release-evidence-issue-body-sync.json` and remains
   open for real reviewed external audit evidence.
+- PR #356 opened from head
+  `67aa5e96eb366d0f01aed389e0e3eee1afa6bc81`.
 
 Validation planned locally:
 
@@ -13218,6 +13220,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 17:46 | Open PR #356 | PR #356 opened on head `67aa5e96eb366d0f01aed389e0e3eee1afa6bc81`, records PR #354 merge evidence, live issue #215 body-sync status, issue #353 completion, and roadmap verification metadata while preserving issue #215 as open/missing for real reviewed audit evidence. |
 | 2026-06-14 17:43 | Merge PR #354 and start Queue Item 173 | PR #354 squash-merged as `300d96c8e80701c3814873993650ad57decbe695` after CI run `27506666878` passed Windows PowerShell wrapper job `81299029608` and Foundry smoke job `81299029630`; CodeRabbit status was success with review-finished reply `4702511950`, no review threads were open, merge-decision comment `4702529737` documented the autonomous merge basis, issue #353 closed completed, live issue #215 was updated from the generated body-sync payload to reference the dedicated external-audit retained artifact path/checker commands, issue #355 opened for merge-state reconciliation, and branch `codex/reconcile-pr-354-merge-state` started from the merged baseline. |
 | 2026-06-14 17:31 | Open PR #354 | PR #354 opened on head `4e9ae7f8798507a81f60cfa5af2f3225a8d16611`, adds the dedicated external audit report retained-artifact template/checker/tests, wires the checker into CI/local gates/generated release trackers, preserves issue #215 open and `external_audit_report` missing until real reviewed audit evidence exists, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-14 17:06 | Merge PR #352 and start Queue Item 172 | PR #352 squash-merged as `fd06316fcb14d8e0644cf9f1ca1c45156423671b` after CI run `27505721258` passed Windows PowerShell wrapper job `81296460637` and Foundry smoke job `81296460654`; CodeRabbit status was success with review-finished reply `4702421405`, no review threads were open, merge-decision comment `4702441858` documented the initial rate-limit warning as non-actionable, issue #351 closed completed, issue #353 opened for external audit retained-artifact checker support, and branch `codex/external-audit-evidence-checker` started from the merged baseline. |
