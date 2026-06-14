@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-vendored-formatting-exemptions` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/322` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/323` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/324` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 09:51 UTC` |
+| Last updated | `2026-06-14 09:56 UTC` |
 
 ## Packaging Notes
 
@@ -219,12 +219,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile vendored formatting exemption merge state (Queue Item 156)
 
-Status: local reconciliation draft.
+Status: PR open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/323`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/324`.
 Branch: `codex/reconcile-vendored-formatting-exemptions`.
 Branch started from PR #322 squash merge commit
 `e3e98e7f3284558a4cc747cf4b634bee2d8205a6`.
+Initial PR head: `105f43c72c0b302dcf6f0b48d7e72d701620e36e`.
+CodeRabbit review requested via comment `4701392005`.
 
 Goal:
 
@@ -12210,6 +12212,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 09:56 | Open PR #324 | Reconciliation PR #324 opened for issue #323 on head `105f43c72c0b302dcf6f0b48d7e72d701620e36e`, records PR #322 merge evidence, queues tracker issue #216 as the next no-secret release-evidence target, and requests CodeRabbit review via comment `4701392005`. |
 | 2026-06-14 09:51 | Start Queue Item 156 and select issue #216 next | PR #322 merged as `e3e98e7f3284558a4cc747cf4b634bee2d8205a6`, issue #320 closed completed, issue #323 opened for merge-state reconciliation, tracker issue #216 selected as the next locally assessable release-evidence target, and branch `codex/reconcile-vendored-formatting-exemptions` started from the merged baseline. |
 | 2026-06-14 09:46 | Merge PR #322 | Vendored formatting exemption PR #322 passed CI run `27494893331` on final head `eca2cbc46b5cbba236335afbb7d11bc603af7602`, CodeRabbit status was success after explicit review-finished reply `4701354147`, there were no unresolved review threads, merge-decision comment `4701372430` recorded the rate-limit warning as non-actionable, and issue #320 closed completed. |
 | 2026-06-14 09:38 | Open PR #322 | PR #322 opened for issue #320 on head `06e867ebc7cc079b41be50e22e75b4058b21db82`, converts the remaining 17 formatter entries into explicit vendored/provenance exemptions, refreshes checker tests/docs/release hashes, and requests CodeRabbit review via comment `4701353924`. |
