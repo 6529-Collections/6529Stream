@@ -442,26 +442,27 @@ make fmt-check
 ```
 
 `make fmt-check` runs `scripts/test_solidity_formatting.py` and
-`scripts/check_solidity_formatting.py`. The checker enforces a scoped baseline:
+`scripts/check_solidity_formatting.py`. The checker enforces a scoped policy:
 
-- formatting-required first-party Solidity files must pass `forge fmt --check`;
+- formatting-required non-exempt Solidity files must pass `forge fmt --check`;
 - the raw all-files diagnostic `forge fmt --check smart-contracts` may fail
-  only for the 17 explicitly deferred files listed in the checker;
-- any new unformatted Solidity file outside that deferred set fails the gate;
-- if a deferred file is formatted, the checker fails until the deferred-file
-  list and docs are updated.
+  only for the 17 explicit vendored/provenance exemptions listed in the
+  checker;
+- any new unformatted Solidity file outside that exemption set fails the gate;
+- if an exempt file becomes formatted, the checker fails until the exemption
+  list and provenance docs are updated.
 
-The current deferred set is intentionally limited to provenance-sensitive
-OpenZeppelin-style utilities and legacy ERC interfaces. The first-party
-interfaces `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol`,
-plus the arRNG/VRF provider and legacy delegation integration files
-`ArrngConsumer.sol`, `IArrngConsumer.sol`, `IArrngController.sol`,
+The current exemption set is intentionally limited to OpenZeppelin-style
+vendored utilities and legacy ERC interfaces with retained provenance notes in
+[`vendored-libraries.md`](vendored-libraries.md). The first-party interfaces
+`INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol`, plus the
+arRNG/VRF provider and legacy delegation integration files `ArrngConsumer.sol`,
+`IArrngConsumer.sol`, `IArrngController.sol`,
 `IDelegationManagementContract.sol`, `IRandomizer.sol`,
-`VRFConsumerBaseV2.sol`, and `VRFCoordinatorV2Interface.sol`, are formatted
-and enforced by the scoped gate. Do not mechanically reformat the remaining
-deferred files in feature PRs. Retire deferred files in focused formatting PRs
-that also update provenance notes, release source-verification expectations
-when applicable, and the checker baseline.
+`VRFConsumerBaseV2.sol`, and `VRFCoordinatorV2Interface.sol`, are formatted and
+enforced by the scoped gate. Do not mechanically reformat exempt vendored files
+in feature PRs. Change the exemption set only in focused provenance PRs that
+also update release source-verification expectations when applicable.
 
 Windows contributors can run:
 
@@ -669,8 +670,8 @@ while findings exist; that is expected until the baseline is accepted as a CI
 gate.
 
 `forge fmt --check smart-contracts` is intentionally listed as a raw diagnostic
-because it still prints the deferred formatting diff. The scoped `make
-fmt-check` gate is part of `make check` and CI. Slither still has a known
+because it still prints the vendored/provenance exemption diff. The scoped
+`make fmt-check` gate is part of `make check` and CI. Slither still has a known
 baseline and should become a fail-on-new-finding gate only after Slither
 baseline acceptance lands. See [`docs/slither.md`](slither.md) for the full
 Slither workflow.

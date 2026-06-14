@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the scoped Solidity formatting baseline."""
+"""Check the scoped Solidity formatting policy."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 SMART_CONTRACTS_DIR = Path("smart-contracts")
 
-DEFERRED_FORMATTING_FILES = frozenset(
+VENDORED_FORMATTING_EXEMPTIONS = frozenset(
     {
         "smart-contracts/Address.sol",
         "smart-contracts/Base64.sol",
@@ -54,7 +54,7 @@ def discover_solidity_files(repo_root: Path) -> list[str]:
 
 
 def formatting_required_files(solidity_files: list[str]) -> list[str]:
-    return sorted(path for path in solidity_files if path not in DEFERRED_FORMATTING_FILES)
+    return sorted(path for path in solidity_files if path not in VENDORED_FORMATTING_EXEMPTIONS)
 
 
 def parse_fmt_diff_files(output: str) -> list[str]:
@@ -67,29 +67,29 @@ def parse_fmt_diff_files(output: str) -> list[str]:
     return sorted(dict.fromkeys(diff_files))
 
 
-def validate_deferred_baseline(solidity_files: list[str], diff_files: list[str]) -> None:
+def validate_vendored_exemptions(solidity_files: list[str], diff_files: list[str]) -> None:
     known_files = set(solidity_files)
-    missing_deferred = sorted(DEFERRED_FORMATTING_FILES - known_files)
-    if missing_deferred:
+    missing_exemptions = sorted(VENDORED_FORMATTING_EXEMPTIONS - known_files)
+    if missing_exemptions:
         raise SolidityFormattingError(
-            "deferred formatting baseline references missing file(s): "
-            + ", ".join(missing_deferred)
+            "vendored formatting exemption references missing file(s): "
+            + ", ".join(missing_exemptions)
         )
 
     diff_set = set(diff_files)
-    unexpected = sorted(diff_set - DEFERRED_FORMATTING_FILES)
+    unexpected = sorted(diff_set - VENDORED_FORMATTING_EXEMPTIONS)
     if unexpected:
         raise SolidityFormattingError(
-            "unexpected unformatted Solidity file(s) outside the deferred baseline: "
+            "unexpected unformatted Solidity file(s) outside the vendored formatting exemptions: "
             + ", ".join(unexpected)
         )
 
-    fixed_without_baseline_update = sorted(DEFERRED_FORMATTING_FILES - diff_set)
-    if fixed_without_baseline_update:
+    formatted_without_policy_update = sorted(VENDORED_FORMATTING_EXEMPTIONS - diff_set)
+    if formatted_without_policy_update:
         raise SolidityFormattingError(
-            "deferred formatting baseline changed; remove fixed file(s) from "
-            "DEFERRED_FORMATTING_FILES and update docs: "
-            + ", ".join(fixed_without_baseline_update)
+            "vendored formatting exemption set changed; remove formatted file(s) "
+            "from VENDORED_FORMATTING_EXEMPTIONS and update provenance docs: "
+            + ", ".join(formatted_without_policy_update)
         )
 
 
@@ -170,17 +170,18 @@ def check_solidity_formatting(repo_root: Path, forge_bin: str) -> None:
             "raw forge fmt check failed without parseable formatting diffs:\n\n"
             + format_output_sample(raw_result.stdout)
         )
-    validate_deferred_baseline(solidity_files, diff_files)
+    validate_vendored_exemptions(solidity_files, diff_files)
 
     print(
         "Solidity formatting scoped gate passed: "
         f"{len(required_files)} required file(s) formatted; "
-        f"{len(DEFERRED_FORMATTING_FILES)} deferred file(s) match the documented baseline."
+        f"{len(VENDORED_FORMATTING_EXEMPTIONS)} vendored/provenance exemption file(s) "
+        "match the documented policy."
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Check the scoped Solidity formatting baseline.")
+    parser = argparse.ArgumentParser(description="Check the scoped Solidity formatting policy.")
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--forge-bin", default="forge")
     return parser

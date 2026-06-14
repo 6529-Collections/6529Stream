@@ -8,8 +8,8 @@ the release policy in `docs/release-policy.md`.
 ### Added
 
 - Added a scoped Solidity formatting gate that requires formatted first-party
-  files while tracking the current deferred legacy/provenance-sensitive
-  formatting baseline.
+  files while tracking the current vendored/provenance formatting exemption
+  policy.
 - Added curator reward Merkle root epochs and domain-separated reward leaves
   that bind proofs to the leaf domain, chain ID, pool address, collection ID,
   claimant, amount, and root epoch.
@@ -219,12 +219,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
-- Retired provider and integration files from the Solidity formatting deferral
-  baseline, so arRNG, VRF, delegation, and randomizer integration interfaces
-  are now enforced by `make fmt-check`.
-- Retired first-party interface files from the Solidity formatting deferral
-  baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and
+- Retired provider and integration files from the prior Solidity formatting
+  exception baseline, so arRNG, VRF, delegation, and randomizer integration
+  interfaces are now enforced by `make fmt-check`.
+- Retired first-party interface files from the prior Solidity formatting
+  exception baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and
   `IStreamMinter.sol` are now enforced by `make fmt-check`.
+- Converted the remaining Solidity formatter baseline from generic baseline
+  language into an explicit 17-file vendored/provenance exemption policy.
 - Clarified production-release evidence tracker completion gates so
   `public-beta-evidence.json` is described as the shared release evidence
   status manifest rather than a public-beta-only completion target.

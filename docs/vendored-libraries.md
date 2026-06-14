@@ -1,9 +1,10 @@
 # Vendored Libraries
 
-This repository currently keeps a small set of OpenZeppelin utility libraries
-under `smart-contracts/` instead of importing them from a package manager.
-Vendored files are allowed only when their provenance, local deltas, and
-static-analysis disposition are recorded here.
+This repository currently keeps a small set of OpenZeppelin contracts,
+interfaces, and utilities under `smart-contracts/` instead of importing them
+from a package manager. Vendored files are allowed only when their provenance,
+local deltas, formatting policy, and static-analysis disposition are recorded
+here.
 
 ## Manifest
 
@@ -51,12 +52,39 @@ counts change.
 
 ## Formatting
 
-The scoped Solidity formatting gate intentionally defers provenance-sensitive
-vendored files that already differ from upstream formatting. The deferred list
-lives in `scripts/check_solidity_formatting.py`; new files must not be added to
-that list without a focused provenance note. First-party interfaces and
-provider/integration interfaces are not vendored and should not be tracked in
-this manifest when their formatting deferrals are retired. When retiring a
-deferred vendored file, update this manifest, rerun `make fmt-check`, rerun the
-focused vendored library regressions above, and refresh source-verification or
-release metadata if source hashes change.
+The scoped Solidity formatting gate treats the raw
+`forge fmt --check smart-contracts` diff as a diagnostic and allows it to fail
+only for the explicit vendored/provenance exemptions below. These files are not
+mechanically reformatted in feature PRs because formatting-only churn would make
+future upstream provenance review harder without changing protocol behavior.
+
+The exemption set lives in `scripts/check_solidity_formatting.py` as
+`VENDORED_FORMATTING_EXEMPTIONS`. New files must not be added without a focused
+provenance note. First-party interfaces, provider/integration interfaces, and
+protocol-owned contracts are not vendored and must pass the scoped formatting
+gate.
+
+| Exempt file | Source family recorded in file header | Policy rationale |
+| --- | --- | --- |
+| `smart-contracts/Address.sol` | OpenZeppelin Contracts v4.8.0 `utils/Address.sol` | Retain upstream-style layout while provenance remains source-header based. |
+| `smart-contracts/Base64.sol` | OpenZeppelin Contracts v4.7.0 `utils/Base64.sol` | Hash-tracked in the manifest above; keep local formatting stable for provenance review. |
+| `smart-contracts/Context.sol` | OpenZeppelin Contracts v4.4.1 `utils/Context.sol` | Retain upstream-style layout while inherited utility provenance stays visible. |
+| `smart-contracts/ERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/ERC165.sol` | Retain upstream-style layout for the local ERC165 base. |
+| `smart-contracts/ERC2981.sol` | OpenZeppelin Contracts v5.0.0 `token/common/ERC2981.sol` | Retain upstream-style layout for royalty-standard behavior review. |
+| `smart-contracts/ERC721.sol` | OpenZeppelin Contracts v4.8.2 `token/ERC721/ERC721.sol` | Retain upstream-style layout for the local ERC721 base. |
+| `smart-contracts/ERC721Enumerable.sol` | OpenZeppelin Contracts v4.8.0 `token/ERC721/extensions/ERC721Enumerable.sol` | Retain upstream-style layout for enumerable-extension review. |
+| `smart-contracts/IERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/IERC165.sol` | Retain upstream-style layout for the ERC165 interface. |
+| `smart-contracts/IERC2981.sol` | OpenZeppelin Contracts v5.0.0 `interfaces/IERC2981.sol` | Retain upstream-style layout for royalty-interface review. |
+| `smart-contracts/IERC721.sol` | OpenZeppelin Contracts v4.8.0 `token/ERC721/IERC721.sol` | Retain upstream-style layout for the ERC721 interface. |
+| `smart-contracts/IERC721Metadata.sol` | OpenZeppelin Contracts v4.4.1 `token/ERC721/extensions/IERC721Metadata.sol` | Retain upstream-style layout for the ERC721 metadata interface. |
+| `smart-contracts/IERC721Receiver.sol` | OpenZeppelin Contracts v4.6.0 `token/ERC721/IERC721Receiver.sol` | Retain upstream-style layout for receiver-interface review. |
+| `smart-contracts/Math.sol` | OpenZeppelin Contracts v4.8.0 `utils/math/Math.sol` | Hash-tracked in the manifest above; keep local formatting stable for Slither disposition review. |
+| `smart-contracts/MerkleProof.sol` | OpenZeppelin Contracts v4.9.0 `utils/cryptography/MerkleProof.sol` | Retain upstream-style layout for Merkle-proof helper review. |
+| `smart-contracts/Ownable.sol` | OpenZeppelin Contracts v4.7.0 `access/Ownable.sol` | Retain upstream-style layout for ownership-helper review. |
+| `smart-contracts/ReentrancyGuard.sol` | OpenZeppelin Contracts v5.0.0 `utils/ReentrancyGuard.sol` | Retain upstream-style layout for reentrancy-guard review. |
+| `smart-contracts/SignedMath.sol` | OpenZeppelin Contracts v4.8.0 `utils/math/SignedMath.sol` | Hash-tracked in the manifest above; keep local formatting stable for provenance review. |
+
+When removing an exemption because a vendored file has been deliberately
+formatted or replaced with a package import, update this manifest, rerun
+`make fmt-check`, rerun the focused vendored library regressions above, and
+refresh source-verification or release metadata if source hashes change.
