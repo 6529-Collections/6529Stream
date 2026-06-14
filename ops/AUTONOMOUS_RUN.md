@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/curator-merkle-leaf-domain-separation` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/304` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/305` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/306` |
 | Next issue | TBD after issue #305 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 05:02 UTC` |
+| Last updated | `2026-06-14 05:04 UTC` |
 
 ## Packaging Notes
 
@@ -209,12 +209,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Complete curator Merkle leaf domain separation (Queue Item 147)
 
-Status: local implementation validated; PR not opened yet.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/305`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/306`.
 Branch: `codex/curator-merkle-leaf-domain-separation`.
 Branch started from PR #304 squash merge commit
 `c4019de17be8d5634d4603e3c6f008d2b4c387fb`.
+Opening head: `4ec19dc71bf9c17be4aa8af94406ffb1f90b6365`.
+CodeRabbit: explicit review request comment `4700755557`; waiting for review
+completion and status.
 
 Goal:
 
@@ -11742,6 +11745,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 05:04 | Open PR #306 | Curator Merkle leaf domain separation PR opened on head `4ec19dc71bf9c17be4aa8af94406ffb1f90b6365`, closes issue #305, includes focused/full local validation evidence, and CodeRabbit review was requested with comment `4700755557`. |
 | 2026-06-14 05:02 | Validate Queue Item 147 local implementation | Curator reward roots now advance per-collection epochs, emit `MerkleRootUpdated`, and use domain-separated ABI-encoded leaves bound to leaf domain, chain ID, pool address, collection ID, claimant, amount, and root epoch; focused curator tests, generated release artifacts, full Windows `scripts\check.ps1`, and whitespace checks pass before PR opening. |
 | 2026-06-14 04:40 | Start Queue Item 147 | PR #304 merged as `c4019de17be8d5634d4603e3c6f008d2b4c387fb`, issue #303 closed completed, issue #305 opened for curator Merkle leaf domain separation, and branch `codex/curator-merkle-leaf-domain-separation` started from the merged baseline. |
 | 2026-06-14 04:38 | Merge PR #304 | Live audit freshness guard merge-state reconciliation merged as `c4019de17be8d5634d4603e3c6f008d2b4c387fb`; final head `018f6acb043cc33b6f01f46756515493fe1ad3d2` passed CI run `27488328092`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700693868`, and issue #303 closed completed. |
