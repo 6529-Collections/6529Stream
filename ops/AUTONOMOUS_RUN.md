@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-integrity-guard-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/298` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/299` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/300` |
 | Next issue | TBD after issue #299 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 03:21 UTC` |
+| Last updated | `2026-06-14 03:25 UTC` |
 
 ## Packaging Notes
 
@@ -207,12 +207,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile retained live audit manifest/checksum guard merge state (Queue Item 144)
 
-Status: local draft; PR not opened yet.
+Status: PR open; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/299`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/300`.
 Branch: `codex/reconcile-live-audit-integrity-guard-merge-state`.
 Branch started from PR #298 squash merge commit
 `ebf38ee8f5396674b92ef49b8a566c5fd1074f87`.
+Opening head: `b5d8c6e58113895354bde8d7f387a45f3bb4799c`.
 
 Goal:
 
@@ -11616,6 +11617,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 03:25 | Open PR #300 | State-only retained live audit manifest/checksum guard merge reconciliation PR opened on head `b5d8c6e58113895354bde8d7f387a45f3bb4799c`; it links issue #299, records PR #298 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the guard row passing, and selects Queue Item 145 as the next no-secret release evidence target. |
 | 2026-06-14 03:21 | Start Queue Item 144 | PR #298 merged as `ebf38ee8f5396674b92ef49b8a566c5fd1074f87`, issue #297 closed completed, issue #299 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-integrity-guard-merge-state` started from the merged baseline before the next retained-report freshness target. |
 | 2026-06-14 03:20 | Merge PR #298 | Retained live audit release integrity coverage merged as `ebf38ee8f5396674b92ef49b8a566c5fd1074f87`; final head `7d71324e7ddec76263bac97d88a500a4ecdf3cdd` passed CI run `27486783805`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700544004`, and issue #297 closed completed. |
 | 2026-06-14 03:09 | Open PR #298 | Retained live audit release integrity coverage PR opened on head `0ce3d757f6367dd0369386da9a03834a72cbdd35`; it links issue #297, adds committed-output manifest/checksum regressions, refreshes roadmap/run-state traceability to PR #296, and preserves blocked readiness claims. |
