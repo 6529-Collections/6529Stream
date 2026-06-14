@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/accept-fork-rehearsal-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/349` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/350` |
 | Next issue | `TBD after issue #216 completion` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 16:31 UTC` |
+| Last updated | `2026-06-14 16:38 UTC` |
 
 ## Packaging Notes
 
@@ -232,9 +232,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Accept reviewed fork rehearsal evidence (Queue Item 164)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR opened; awaiting CI and CodeRabbit review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/216`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/350`.
 Branch: `codex/accept-fork-rehearsal-evidence`.
 Branch started from PR #349 squash merge commit
 `6e968d2702837b4f1eaa5e002e5d30748deba228`.
@@ -13046,6 +13046,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 16:38 | Open PR #350 | PR #350 opened on head `9a3d34f134a42432b4786eb5dd7c5d740a081e72`, marks reviewed fork deployment rehearsal evidence complete, removes issue #216 from the active evidence tracker backlog/link/body-sync set, preserves blocked public-beta and production readiness, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-14 16:12 | Start Queue Item 164 | PR #349 merged as `6e968d2702837b4f1eaa5e002e5d30748deba228` after CI run `27504228132` and CodeRabbit success; branch `codex/accept-fork-rehearsal-evidence` started from the merged baseline to accept reviewed fork rehearsal evidence and close issue #216 without changing public-beta readiness. |
 | 2026-06-14 16:05 | Merge PR #349 | Reconciled fork evidence merge state merged as `6e968d2702837b4f1eaa5e002e5d30748deba228`; CI run `27504228132` passed, CodeRabbit status was success with no review threads, issue #348 closed completed, and issue #216 remained open for evidence acceptance. |
 | 2026-06-14 15:26 | Open PR #347 and request CodeRabbit | PR #347 opened on head `d4b4d49af5f9f2dbe1732577f718949869532291`, retains pending-review fork deployment rehearsal evidence for issue #216 without closing the issue or marking readiness complete, and CodeRabbit review was requested via comment `4702188617`. |
