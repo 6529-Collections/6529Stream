@@ -83,6 +83,67 @@ class ReleaseEvidenceLiveAuditArchiveTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
 
+    def test_committed_archive_includes_retained_dry_run_bundle(self) -> None:
+        """The committed dry-run bundle stays discoverable and guarded."""
+        repo_root = SCRIPT_PATH.parent.parent
+        archive_id = "20260614T015000Z-release-evidence-live-audit-dry-run"
+        report_json = (
+            "release-artifacts/evidence/live-audit-reports/"
+            f"{archive_id}.json"
+        )
+        report_markdown = (
+            "release-artifacts/evidence/live-audit-reports/"
+            f"{archive_id}.md"
+        )
+
+        archive = generator.build_archive(
+            repo_root,
+            generator.report_checker.DEFAULT_SCHEMA,
+            generator.default_report_pairs(repo_root, generator.DEFAULT_ARCHIVE_DIR),
+            generator.DEFAULT_JSON_OUTPUT,
+            generator.DEFAULT_MARKDOWN_OUTPUT,
+            generator.DEFAULT_ARCHIVE_DIR,
+        )
+        rows = {row["archive_id"]: row for row in archive["rows"]}
+
+        self.assertIn(archive_id, rows)
+        self.assertEqual(archive["policy"]["no_secrets"], True)
+        self.assertEqual(archive["policy"]["network_access_in_ci"], False)
+        self.assertEqual(archive["policy"]["readiness_claim"], "blocked")
+        self.assertEqual(
+            archive["policy"]["no_secret_notice"],
+            generator.markdown_checker.auditor.NO_SECRET_NOTICE,
+        )
+        row = rows[archive_id]
+        self.assertEqual(row["record_type"], "retained_operator_report")
+        self.assertEqual(row["generated_at"], archive_id)
+        self.assertEqual(row["readiness_claim"], "blocked")
+        self.assertEqual(row["validation_status"], "passed")
+        self.assertEqual(
+            [profile["profile"] for profile in row["profiles"]],
+            ["labels", "bodies", "closure"],
+        )
+        self.assertEqual(row["report_json"]["path"], report_json)
+        self.assertEqual(row["report_markdown"]["path"], report_markdown)
+        self.assertIn(
+            "python scripts/check_release_evidence_live_audit_report.py "
+            f"--report-json {report_json}",
+            row["validation_commands"],
+        )
+        self.assertIn(
+            "python scripts/check_release_evidence_live_audit_markdown.py "
+            f"--report-json {report_json} --report-md {report_markdown}",
+            row["validation_commands"],
+        )
+        self.assertIn(
+            "python scripts/generate_release_evidence_live_audit_archive.py --check",
+            row["validation_commands"],
+        )
+        self.assertIn(
+            "python scripts/test_release_evidence_live_audit_archive.py",
+            archive["validation_commands"],
+        )
+
     def test_archive_indexes_valid_report_pair(self) -> None:
         """A valid JSON/Markdown pair is summarized with validation commands."""
         with tempfile.TemporaryDirectory() as temp_dir:
