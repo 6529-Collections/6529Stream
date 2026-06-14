@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/external-audit-evidence-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/352` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/353` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/354` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report` remains open for real reviewed audit evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 17:06 UTC` |
+| Last updated | `2026-06-14 17:31 UTC` |
 
 ## Packaging Notes
 
@@ -234,10 +234,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add external audit report retained artifact checker (Queue Item 172)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #354 opened and awaiting CI plus CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/353`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/215`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/354`.
 Branch: `codex/external-audit-evidence-checker`.
 Branch started from PR #352 squash merge commit
 `fd06316fcb14d8e0644cf9f1ca1c45156423671b`.
@@ -269,13 +269,30 @@ Current facts:
 - Merge-decision comment `4702441858` recorded the autonomous merge basis.
 - Issue #351 closed completed at `2026-06-14 17:02 UTC`.
 - Issue #353 tracks this no-secret support work for parent evidence issue #215.
+- PR #354 opened from head
+  `4e9ae7f8798507a81f60cfa5af2f3225a8d16611`.
 
-Validation planned locally:
+Validation completed locally:
 
 - `python scripts/test_external_audit_report_evidence.py`.
 - `python scripts/check_external_audit_report_evidence.py`.
-- Generated release evidence packet/backlog/body-sync checks.
-- Release manifest/checksum/changelog checks.
+- `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/test_release_evidence_packet_index.py`.
+- `python scripts/generate_release_evidence_packet_index.py --check`.
+- `python scripts/test_release_evidence_issue_backlog.py`.
+- `python scripts/generate_release_evidence_issue_backlog.py --check`.
+- `python scripts/test_release_evidence_issue_body_sync.py`.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+- `python scripts/test_windows_ci_wrapper.py`.
+- `python scripts/test_non_local_release_evidence.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `git diff --check`.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
 
 ### Completed: Reconcile PR #350 reviewed fork evidence merge state (Queue Item 171)
 
@@ -13138,6 +13155,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 17:31 | Open PR #354 | PR #354 opened on head `4e9ae7f8798507a81f60cfa5af2f3225a8d16611`, adds the dedicated external audit report retained-artifact template/checker/tests, wires the checker into CI/local gates/generated release trackers, preserves issue #215 open and `external_audit_report` missing until real reviewed audit evidence exists, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-14 17:06 | Merge PR #352 and start Queue Item 172 | PR #352 squash-merged as `fd06316fcb14d8e0644cf9f1ca1c45156423671b` after CI run `27505721258` passed Windows PowerShell wrapper job `81296460637` and Foundry smoke job `81296460654`; CodeRabbit status was success with review-finished reply `4702421405`, no review threads were open, merge-decision comment `4702441858` documented the initial rate-limit warning as non-actionable, issue #351 closed completed, issue #353 opened for external audit retained-artifact checker support, and branch `codex/external-audit-evidence-checker` started from the merged baseline. |
 | 2026-06-14 16:54 | Open PR #352 | PR #352 opened on head `277e513de3e81c739d29bc4950c0182f6afd76d5`, records PR #350 merge evidence and issue #216 completion, refreshes roadmap verification metadata, selects issue #215 as the next release-evidence target, and preserves blocked readiness claims. |
 | 2026-06-14 16:50 | Merge PR #350 and start Queue Item 171 | PR #350 squash-merged as `8af52acb1072d106033162f251e4aa2fa321d628` after CI run `27505334136` passed Windows PowerShell wrapper job `81295431136` and Foundry smoke job `81295431140`; CodeRabbit status was success with review-finished reply `4702384287`, no review threads were open, merge-decision comment `4702403805` documented the initial rate-limit warning as non-actionable, issue #216 closed completed, issue #351 opened for merge-state reconciliation, and branch `codex/reconcile-pr-350-merge-state` started from the merged baseline. |
