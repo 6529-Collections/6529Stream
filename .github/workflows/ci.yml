@@ -126,8 +126,11 @@ jobs:
             scripts/test_release_checksums.py \
             scripts/check_solidity_formatting.py \
             scripts/test_solidity_formatting.py \
+            scripts/test_windows_check_wrapper.py \
             scripts/check_changelog.py \
             scripts/test_changelog_check.py
+
+          python3 scripts/test_windows_check_wrapper.py
 
       - name: Install browser test tooling
         shell: bash

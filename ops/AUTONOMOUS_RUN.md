@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-pr-338-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/338` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/339` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/340` |
+| Active PR branch | `codex/windows-check-wrapper-native-failures` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/340` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/341` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/342` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 13:06 UTC` |
+| Last updated | `2026-06-14 13:37 UTC` |
 
 ## Packaging Notes
 
@@ -221,20 +221,62 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 162 | Retain live audit report after fork issue body sync | Gate G support | Commit the no-secret live audit report generated after issue #216 body sync, refresh the live-audit archive index, release manifest, and checksum evidence, and preserve blocked readiness claims | Merged in PR #336 |
 | 163 | Reconcile retained live audit report merge state | Gate G support | Record PR #336 merge evidence, close out issue #335/Queue Item 162 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #338 |
 | 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
-| 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Active for issue #339 |
+| 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #340 |
+| 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Active for issue #341 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile PR #338 merge state (Queue Item 165)
+### PR candidate: Harden Windows check wrapper native failures (Queue Item 166)
 
 Status: PR open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/341`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/342`.
+Branch: `codex/windows-check-wrapper-native-failures`.
+Branch started from PR #340 squash merge commit
+`8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`.
+Initial PR head: `b2d11dc7dcd885dea3a989963843ed70a5c22344`.
+CodeRabbit review requested via comment `4701914567`.
+
+Goal:
+
+- Make `scripts/check.ps1` fail fast when native `forge` or Python commands
+  return non-zero under Windows PowerShell 5.1 semantics.
+- Add a focused policy test that fails if the Windows wrapper loses checked
+  native-command routing.
+- Wire that test into Makefile, Bash wrapper, PowerShell wrapper, and CI.
+- Update tooling docs, changelog, roadmap, and release artifacts as needed.
+
+Validation plan:
+
+- `python scripts/test_windows_check_wrapper.py`.
+- PowerShell parser check for `scripts/check.ps1` and
+  `scripts/bootstrap-windows.ps1`.
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `git diff --check`.
+
+### Completed: Reconcile PR #338 merge state (Queue Item 165)
+
+Status: merged in PR #340.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/339`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/340`.
 Branch: `codex/reconcile-pr-338-merge-state`.
 Branch started from PR #338 squash merge commit
 `8fdcad01d67e5280f0a43a92504646149bba34df`.
 Initial PR head: `b1baac33f216f9bbcea5076c4f35d1147de9599d`.
+Final PR head: `790c24248afc5c43a6f14d3fde371f359fdb7653`.
+Squash merge commit: `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`.
+CI: run `27499976730`, job `81280968647`, passed.
 CodeRabbit review requested via comment `4701852808`.
+CodeRabbit: initial automatic rate-limit warning comment `4701852605`
+produced no actionable findings; explicit review request comment `4701852808`
+received review-finished reply `4701853050`; combined status was success; no
+review threads were open.
+Claude: automatic informational comment only; no Claude review was requested per
+current user instruction.
+Merge decision comment: `4701874979`.
 
 Goal:
 
@@ -246,14 +288,24 @@ Goal:
   PR #338.
 - Preserve public-beta and production-release readiness as blocked.
 
-Validation plan:
+Validation completed locally:
 
-- `rg -n "Queue Item 163|Queue Item 164|Queue Item 165|PR #338|#337|#339|8fdcad0|27499563930|4701834195" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `python scripts/generate_release_manifest.py --check`.
-- `python scripts/generate_release_checksums.py --check`.
-- `python scripts/check_changelog.py`.
-- `git diff --check`.
+- Roadmap/run-state traceability grep passed.
+- Roadmap/run-state heading scan passed.
+- `python scripts\generate_release_manifest.py --check` passed.
+- `python scripts\generate_release_checksums.py --check` passed.
+- `python scripts\check_changelog.py` passed with no release-impacting files
+  changed.
+- `git diff --check` passed.
+
+Outcome:
+
+- Recorded PR #338 merge evidence, issue #337 completion, CI run, CodeRabbit
+  status, and merge-decision comment in durable state.
+- Marked Queue Item 163 as merged and refreshed roadmap verification metadata
+  to the PR #338 baseline.
+- Kept issue #216 open and blocked pending actual reviewed retained fork
+  deployment rehearsal evidence.
 
 ### Completed: Reconcile retained live audit report merge state (Queue Item 163)
 
@@ -12651,6 +12703,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 13:37 | Open PR #342 | PR #342 opened for issue #341 on head `b2d11dc7dcd885dea3a989963843ed70a5c22344`, hardens Windows native-command failure handling for `forge` and Python checks, wires the focused wrapper policy test into local/CI gates, and requests CodeRabbit review via comment `4701914567`. |
+| 2026-06-14 13:23 | Start Queue Item 166 | PR #340 merged as `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`, issue #339 closed completed, issue #341 opened for Windows check-wrapper native failure hardening, and branch `codex/windows-check-wrapper-native-failures` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
+| 2026-06-14 13:20 | Merge PR #340 | State-only PR #340 passed CI run `27499976730`, job `81280968647`, on final head `790c24248afc5c43a6f14d3fde371f359fdb7653`; CodeRabbit status was success after explicit review-finished reply `4701853050`; no review threads were open; merge-decision comment `4701874979` recorded the initial rate-limit warning as non-actionable; squash merge commit `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1` landed on `main`; and issue #339 closed completed. |
 | 2026-06-14 13:12 | Open PR #340 | State-only PR #340 opened for issue #339 on head `b1baac33f216f9bbcea5076c4f35d1147de9599d`, records PR #338 merge evidence and issue #337 completion, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701852808`. |
 | 2026-06-14 13:06 | Start Queue Item 165 | PR #338 merged as `8fdcad01d67e5280f0a43a92504646149bba34df`, issue #337 closed completed, issue #339 opened for merge-state reconciliation, and branch `codex/reconcile-pr-338-merge-state` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 13:05 | Merge PR #338 | State-only reconciliation PR #338 passed CI run `27499563930`, job `81279861840`, on final head `ef514a2e6cebd7cb2a64dc13c027f6a8c8915703`; CodeRabbit status was success after explicit review-finished reply `4701812536`; no review threads were open; merge-decision comment `4701834195` recorded the initial rate-limit warning as non-actionable; squash merge commit `8fdcad01d67e5280f0a43a92504646149bba34df` landed on `main`; and issue #337 closed completed. |
