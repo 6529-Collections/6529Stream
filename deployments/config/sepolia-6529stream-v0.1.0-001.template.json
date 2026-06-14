@@ -13,7 +13,7 @@
       {
         "name": "SEPOLIA_DEPLOYER_ADDRESS",
         "retained_value": "public_address",
-        "purpose": "Address used by the approved broadcaster or wallet."
+        "purpose": "Public Forge broadcaster address matching the approved hardware, keystore, cloud, or CI signing backend."
       },
       {
         "name": "SEPOLIA_ADMIN_SAFE",
@@ -227,7 +227,7 @@
       "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
     },
     "rehearsal": {
-      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --broadcast --verify --via-ir",
+      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir",
       "anvil_passed": false,
       "fork_passed": false,
       "testnet_passed": false,

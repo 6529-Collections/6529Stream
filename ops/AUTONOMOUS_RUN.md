@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 23:12 UTC` |
+| Last updated | `2026-06-14 23:25 UTC` |
 
 ## Packaging Notes
 
@@ -242,8 +242,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
 
-Status: PR #361 opened as draft; local validation passed; awaiting CI and
-CodeRabbit review.
+Status: PR #361 opened; local validation passed after sidecar fix; awaiting CI.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/360`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/361`.
@@ -289,6 +288,11 @@ Validation completed locally:
   generator commands must start from a copied reviewed config rather than the
   placeholder template, and the non-local evidence generator command needs all
   required CLI arguments. Both were fixed before validation.
+- A second sidecar review found one P2 after PR open: the runbook needed to
+  distinguish the Forge broadcaster in `SEPOLIA_DEPLOYER_ADDRESS` from the
+  admin Safe in `SEPOLIA_ADMIN_SAFE`, and the retained command needed an
+  explicit redacted signer-backend placeholder. Fixed before the post-review
+  full gate rerun.
 - `rg -n "runSepolia|sepolia-6529stream-v0.1.0-001.template|Sepolia Deployment Rehearsal Runbook|SEPOLIA_RPC_URL|SEPOLIA_CHAIN_ID" script docs deployments scripts\test_deployment_manifest.py`.
 - `python scripts/test_deployment_manifest.py`.
 - `python scripts/generate_deployment_manifest.py --check`.

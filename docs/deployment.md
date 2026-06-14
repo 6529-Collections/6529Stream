@@ -90,7 +90,7 @@ Required operator environment variables:
 | Variable | Retain In Repo | Purpose |
 | --- | --- | --- |
 | `SEPOLIA_RPC_URL` | No, redact value | Sepolia RPC endpoint used by the operator shell. |
-| `SEPOLIA_DEPLOYER_ADDRESS` | Yes | Public broadcaster address. |
+| `SEPOLIA_DEPLOYER_ADDRESS` | Yes | Public Forge broadcaster address. Must match the approved signing backend used by the operator shell. |
 | `SEPOLIA_ADMIN_SAFE` | Yes | Safe or multisig that receives ownership/admin authority. |
 | `SEPOLIA_PAUSE_GUARDIAN` | Yes | Pause guardian address. |
 | `SEPOLIA_EMERGENCY_RECIPIENT` | Yes | Emergency recipient address. |
@@ -102,12 +102,16 @@ Required operator environment variables:
 | `SEPOLIA_VRF_SUBSCRIPTION_ID` | Yes | VRF subscription or billing identifier. |
 | `ETHERSCAN_API_KEY` | No, redact value | Explorer verification token used by the operator shell. |
 
-Use an approved signer outside the repository: hardware wallet, keystore,
-cloud signer, Safe flow, or CI secret approved for testnet. Do not commit
-private keys, mnemonics, raw signatures, RPC endpoint values, API tokens,
-signer-service credentials, or unreleased drop payloads. If a local command
-uses sensitive values, the retained transcript must replace them with
-`<redacted>`.
+Use an approved Foundry signing backend outside the repository for
+`SEPOLIA_DEPLOYER_ADDRESS`: hardware wallet, keystore, cloud signer, or CI
+secret approved for testnet. `SEPOLIA_ADMIN_SAFE` is the Safe or multisig that
+receives ownership/admin authority; it is not automatically the transaction
+broadcaster for the command below. If a Safe transaction pipeline is used for
+deployment instead of Forge broadcasting, retain that as a separate reviewed
+operator flow. Do not commit private keys, mnemonics, raw signatures, RPC
+endpoint values, API tokens, signer-service credentials, local keystore paths,
+or unreleased drop payloads. If a local command uses sensitive values, the
+retained transcript must replace them with `<redacted>`.
 
 Preflight from a clean checkout:
 
@@ -127,6 +131,7 @@ forge script script/RehearseDeployment.s.sol:RehearseDeployment \
   --sig "runSepolia()" \
   --rpc-url "$SEPOLIA_RPC_URL" \
   --sender "$SEPOLIA_DEPLOYER_ADDRESS" \
+  <approved Foundry signer flags> \
   --broadcast \
   --verify \
   --via-ir
@@ -136,7 +141,7 @@ The committed transcript must redact the RPC endpoint and any signer or API
 material. Retain the command as:
 
 ```sh
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()" --rpc-url <redacted> --sender <deployer> --broadcast --verify --via-ir
+forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir
 ```
 
 Retain and sanitize the Foundry broadcast:

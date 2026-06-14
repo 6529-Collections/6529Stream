@@ -27,7 +27,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:4cb1ee975b92a6999ebb59e6654863d5df4b1e6d6a098cc79ab9f90175f4ef44"
+    "sha256": "sha256:e0d4871a1794377f331354dc47e5bc2a5cc46d2e9ea35841732e526a235a3ff7"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -86,8 +86,8 @@
     },
     {
       "path": "deployments/config/sepolia-6529stream-v0.1.0-001.template.json",
-      "sha256": "sha256:6b9e80bc94f75d486c7420803029e9f753f4ab0fb2e7cac8006ed91be271a9d4",
-      "size_bytes": 8445
+      "sha256": "sha256:40c1d8b9e6504803592d4e6bb0f64ad212273041efdac02c9b8cdc7491516f58",
+      "size_bytes": 8559
     },
     {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -481,7 +481,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:a584f0b5baf0fddc562067e459bc9b4295c34f79b79864a43de9f301ce355624",
+      "sha256": "sha256:9b1a7cf18838e2fa53f8a9cde726ba159bb115628c97d6a5dada54c90b061c0f",
       "size_bytes": 92373
     },
     {

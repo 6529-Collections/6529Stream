@@ -249,6 +249,8 @@ class DeploymentManifestTests(unittest.TestCase):
         command = manifest["rehearsal"]["command"]
         self.assertIn('runSepolia()', command)
         self.assertIn("--rpc-url <redacted>", command)
+        self.assertIn("--sender <deployer>", command)
+        self.assertIn("<approved Foundry signer flags redacted>", command)
         self.assertNotIn("$SEPOLIA_RPC_URL", command)
         self.assertFalse(manifest["rehearsal"]["testnet_passed"])
 

@@ -1495,8 +1495,8 @@
       },
       {
         "path": "deployments/config/sepolia-6529stream-v0.1.0-001.template.json",
-        "sha256": "sha256:6b9e80bc94f75d486c7420803029e9f753f4ab0fb2e7cac8006ed91be271a9d4",
-        "size_bytes": 8445,
+        "sha256": "sha256:40c1d8b9e6504803592d4e6bb0f64ad212273041efdac02c9b8cdc7491516f58",
+        "size_bytes": 8559,
         "schema_version": "6529stream.deployment-manifest-input.v1"
       }
     ],
@@ -1764,8 +1764,8 @@
       },
       {
         "path": "docs/deployment.md",
-        "sha256": "sha256:bc998c2c05c579ed51ba72b8aba72ccc5928cc7e8baa9f2b714dd4bcdb94b80f",
-        "size_bytes": 21304
+        "sha256": "sha256:1cfa3bc241851ca0a7045e0524295daf061a90c7b18e97a2a2a7cf82d4b5bbd5",
+        "size_bytes": 21810
       },
       {
         "path": "docs/dependency-operations.md",
