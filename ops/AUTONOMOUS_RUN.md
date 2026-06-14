@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-fork-evidence-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/347` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/348` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/349` |
-| Next issue | `TBD after issue #348 reconciliation` |
+| Active PR branch | `codex/accept-fork-rehearsal-evidence` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/349` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
+| Active PR | `TBD` |
+| Next issue | `TBD after issue #216 completion` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 15:55 UTC` |
+| Last updated | `2026-06-14 16:31 UTC` |
 
 ## Packaging Notes
 
@@ -220,19 +220,78 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 161 | Apply fork rehearsal body sync to live issue #216 | Gate G support | Apply the committed body-sync payload for issue #216 to the live GitHub issue, verify live issue bodies against the committed artifact, and record the external sync without changing readiness claims | Merged in PR #334 |
 | 162 | Retain live audit report after fork issue body sync | Gate G support | Commit the no-secret live audit report generated after issue #216 body sync, refresh the live-audit archive index, release manifest, and checksum evidence, and preserve blocked readiness claims | Merged in PR #336 |
 | 163 | Reconcile retained live audit report merge state | Gate G support | Record PR #336 merge evidence, close out issue #335/Queue Item 162 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #338 |
-| 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
+| 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Active for issue #216 |
 | 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #340 |
 | 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Merged in PR #342 |
 | 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Merged in PR #344 |
 | 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Merged in PR #346 |
 | 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Merged in PR #347 |
-| 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Active for issue #348 |
+| 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Merged in PR #349 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile PR #347 fork evidence merge state (Queue Item 170)
+### PR candidate: Accept reviewed fork rehearsal evidence (Queue Item 164)
 
-Status: PR open; waiting for CI and CodeRabbit.
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/216`.
+PR: `TBD`.
+Branch: `codex/accept-fork-rehearsal-evidence`.
+Branch started from PR #349 squash merge commit
+`6e968d2702837b4f1eaa5e002e5d30748deba228`.
+
+Goal:
+
+- Mark the retained fork deployment rehearsal artifact as `reviewed` using the
+  CodeRabbit success and CI evidence from PR #347 and PR #349.
+- Regenerate the non-local evidence envelope so it records
+  `review_status: reviewed`, a non-placeholder reviewer, and the updated
+  retained-artifact digest.
+- Move `fork_deployment_rehearsal` in
+  `release-artifacts/latest/public-beta-evidence.json` from `pending` to
+  `complete` while keeping top-level public beta `blocked`.
+- Regenerate the blocker report, packet index, evidence issue backlog,
+  issue-link map, issue body-sync artifacts, release manifest, and checksums.
+- Remove #216 from the active evidence tracker backlog/link/body-sync set
+  because its committed evidence row is complete, and close #216 through the
+  PR merge after CI and CodeRabbit pass.
+- Preserve all no-secret boundaries and avoid changing Solidity code.
+
+Current facts:
+
+- PR #347 retained the sanitized mainnet-fork deployment rehearsal evidence,
+  passed CI run `27503447725`, received CodeRabbit status success, and
+  squash-merged as `25a792a43144231392e7cc7f017ec11882ae0f7f`.
+- PR #349 reconciled the live issue #216 body/audit state, passed CI run
+  `27504228132`, received CodeRabbit status success, and squash-merged as
+  `6e968d2702837b4f1eaa5e002e5d30748deba228`.
+- Issue #216 is open before this PR and should close only after this PR's
+  reviewed evidence acceptance passes CI/CodeRabbit and merges.
+- Public beta remains `blocked` because seven public-beta rows and nine
+  production-release rows still lack retained evidence.
+
+Validation completed locally so far:
+
+- `python scripts\check_fork_deployment_rehearsal_evidence.py` passed after the
+  retained artifact was marked reviewed.
+- `python scripts\check_non_local_release_evidence.py` passed after the
+  reviewed JSON evidence envelope was regenerated.
+- `python scripts\check_public_beta_evidence.py` passed after the row moved to
+  `complete`.
+- `python scripts\check_release_evidence_issue_links.py` passed after #216 was
+  removed from the active issue-link map.
+- `python scripts\generate_release_evidence_issue_body_sync.py` regenerated the
+  body-sync outputs without #216.
+- Focused release-evidence validation passed: fork rehearsal evidence,
+  non-local evidence, public-beta evidence, blocker report, packet index,
+  issue backlog, issue links, body sync, label/body/closure checks,
+  release-readiness, release manifest, release checksums, and changelog.
+- Full local `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed at `2026-06-14 16:31 UTC` with existing compiler/test warning noise
+  only.
+
+### Completed: Reconcile PR #347 fork evidence merge state (Queue Item 170)
+
+Status: merged in PR #349.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/348`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/349`.
 Branch: `codex/reconcile-fork-evidence-merge-state`.
@@ -12987,6 +13046,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 16:12 | Start Queue Item 164 | PR #349 merged as `6e968d2702837b4f1eaa5e002e5d30748deba228` after CI run `27504228132` and CodeRabbit success; branch `codex/accept-fork-rehearsal-evidence` started from the merged baseline to accept reviewed fork rehearsal evidence and close issue #216 without changing public-beta readiness. |
+| 2026-06-14 16:05 | Merge PR #349 | Reconciled fork evidence merge state merged as `6e968d2702837b4f1eaa5e002e5d30748deba228`; CI run `27504228132` passed, CodeRabbit status was success with no review threads, issue #348 closed completed, and issue #216 remained open for evidence acceptance. |
 | 2026-06-14 15:26 | Open PR #347 and request CodeRabbit | PR #347 opened on head `d4b4d49af5f9f2dbe1732577f718949869532291`, retains pending-review fork deployment rehearsal evidence for issue #216 without closing the issue or marking readiness complete, and CodeRabbit review was requested via comment `4702188617`. |
 | 2026-06-14 15:19 | Validate Queue Item 169 locally | Focused fork broadcast/evidence checks, generated public-beta and tracker evidence checks, release-readiness/changelog/manifest/checksum checks, Python syntax compilation, whitespace check, and full Windows `scripts\check.ps1` pass. The first full run caught stale default Anvil broadcast-derived output after receipt-selection logic changed; regenerated the default broadcast config, deployment manifest, address books, release manifest, and checksums before the passing full run. |
 | 2026-06-14 14:57 | Implement Queue Item 169 local draft | Retained pending-review mainnet-fork deployment rehearsal evidence for issue #216: fork block `25316366`, fork hash `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`, sanitized broadcast, generated fork broadcast config, generated fork manifest, generated fork address book, non-local evidence envelope, and public-beta evidence status `pending`; readiness remains blocked pending review acceptance. |

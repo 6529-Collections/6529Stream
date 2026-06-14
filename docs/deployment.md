@@ -216,7 +216,7 @@ their own evidence bundles from real broadcast manifests, retained transaction
 logs, source/explorer verification submissions, admin/signer/dependency
 operator notes, and incident or deprecation records where relevant.
 
-The pending-review fork-mainnet rehearsal retained for issue #216 is a
+The reviewed fork-mainnet rehearsal retained for issue #216 is a
 broadcast/manifest/address-book evidence slice, not a complete ceremony bundle.
 Its sanitized broadcast records the linked `StreamMetadataRenderer` deployment
 under `broadcast_evidence.ignored_deployments` because the library is a helper

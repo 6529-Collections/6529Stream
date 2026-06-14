@@ -10,9 +10,9 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:35ad7204b525beb69e0fd4ec93ed57644981b81782ef67c77196c5fa1c014a52` |
+| Backlog SHA-256 | `sha256:a37343d936cebfb23834b8dc26439128daa8e99d03d5469fd833ccd51f38d8cd` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
-| Issue links SHA-256 | `sha256:00af35923c34e910ab7e4bf6e6f4dc03799c9204ab1b95744f1ea7b57609c1d0` |
+| Issue links SHA-256 | `sha256:cbcefca2040b57f8dc6cc6c5107924467ee82e5015a621b29b72d9c23210c167` |
 
 ## Policy
 
@@ -28,7 +28,6 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | Issue | Entry | Status | Body SHA-256 | Lines |
 | --- | --- | --- | --- | --- |
 | [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:38ad6e7332ebe917e33328e4f2eb4950fabe00b12251401066e070bea2f2b24d` | 53 |
-| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `pending` | `sha256:98af716d7afb46c78628b61b1292d7204a88a07b387f51dfbfa48349439a6942` | 55 |
 | [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:ae7b0769db90ab9e4832043f15cbf1f309d71389e74cf4b0b805c62d677b2875` | 53 |
 | [#218](https://github.com/6529-Collections/6529Stream/issues/218) | `public-beta-fork-testnet-metadata-browser-evidence` | `missing` | `sha256:af916550988f50f1c5882fdab9fd8b4833534621b4b3c5567dcd4d069414340a` | 53 |
 | [#219](https://github.com/6529-Collections/6529Stream/issues/219) | `public-beta-fork-testnet-ceremony-evidence` | `missing` | `sha256:1493c20f27c23f8b2b0ea59a253edb9aba37e7075fc8326b824aa985e69d1c2b` | 53 |
@@ -84,70 +83,6 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
-
-## Non-Goals
-
-- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
-- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
-- Do not use the checked template alone as completion evidence.
-
-## Acceptance Criteria
-
-- Reviewed retained evidence exists and is no-secret or properly redacted.
-- The evidence manifest references the retained evidence path and hash.
-- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
-- All validation commands above pass.
-```
-
-### #216 public-beta-fork-deployment-rehearsal
-
-- Issue: https://github.com/6529-Collections/6529Stream/issues/216
-- Body SHA-256: `sha256:98af716d7afb46c78628b61b1292d7204a88a07b387f51dfbfa48349439a6942`
-- Source body SHA-256: `sha256:b4ff583c548e63fd3953576a82f1083469067a887c03d2658bdb0c300b2d5446`
-
-```markdown
-<!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-deployment-rehearsal issue_number=216 -->
-
-Parent tracker: https://github.com/6529-Collections/6529Stream/issues/214
-Source backlog entry: `release-artifacts/latest/release-evidence-issue-backlog.json` / `public-beta-fork-deployment-rehearsal`
-Issue-link artifact: `release-artifacts/latest/release-evidence-issue-links.json`
-Completion policy: this tracker issue can close only after reviewed retained evidence is referenced by the shared release evidence status manifest.
-
-## Evidence Requirement
-
-- Phase: `Public Beta`
-- Requirement ID: `fork_deployment_rehearsal`
-- Current status: `pending`
-- Evidence posture: retained-incomplete
-- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template
-
-## Source Links
-
-- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_deployment_rehearsal`
-- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`
-
-## Required Evidence
-
-- Retained artifact expectation: Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`. Template-only evidence cannot complete the row.
-- Template-only can complete: `false`
-
-## Validation
-
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_deployment_rehearsal_evidence.py`
-- `python scripts/check_fork_deployment_rehearsal_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`

@@ -2,22 +2,22 @@
   "schema_version": "6529stream.non-local-release-evidence.v1",
   "evidence_id": "fork-deployment-rehearsal-fork-evidence",
   "record_type": "evidence",
-  "review_status": "pending_review",
+  "review_status": "reviewed",
   "environment": "fork",
   "chain_id": 1,
   "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
   "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
   "retained_path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-  "sha256": "sha256:cb5138b585201f130aaa2905bba5079451c29ffd1e6d276cadff1d11db400980",
+  "sha256": "sha256:4bb92e1979a4b77c19085606efee7717c9f45dfac6f59ec2333bf4ee3c3c6b48",
   "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
   "owner": "Codex autonomous operator",
-  "reviewer": "CodeRabbit pending PR review",
+  "reviewer": "CodeRabbit status success on PR #347 and PR #349",
   "public_beta_requirement_id": "fork_deployment_rehearsal",
   "source": {
     "repository": "https://github.com/6529-Collections/6529Stream",
     "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
     "source_dirty": false,
-    "ci_run": "PR CI pending"
+    "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132"
   },
   "redaction_policy": {
     "no_secrets": true,
@@ -31,5 +31,5 @@
     ]
   },
   "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-  "operator_notes": "Generated from release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json for fork_deployment_rehearsal; replace with operator and reviewer notes before marking the requirement complete."
+  "operator_notes": "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. Public beta remains blocked on the remaining missing evidence rows."
 }

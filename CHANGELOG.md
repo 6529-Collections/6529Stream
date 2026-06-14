@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Accepted reviewed mainnet-fork deployment rehearsal evidence for issue #216,
+  moving `fork_deployment_rehearsal` to `complete`, dropping #216 from the
+  active evidence tracker backlog/link/body-sync set, and preserving blocked
+  public-beta readiness on the remaining missing evidence rows.
 - Added a retained no-secret live audit report and snapshot bundle after
   syncing issue #216 from `missing` to the committed `pending`
   fork-deployment-rehearsal body, with refreshed live-audit archive, release
