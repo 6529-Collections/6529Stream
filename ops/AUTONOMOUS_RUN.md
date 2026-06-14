@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/retain-fork-deployment-rehearsal-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/346` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/347` |
 | Next issue | `TBD after issue #216 review` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 15:19 UTC` |
+| Last updated | `2026-06-14 15:26 UTC` |
 
 ## Packaging Notes
 
@@ -231,15 +231,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Retain pending fork deployment rehearsal evidence (Queue Item 169)
 
-Status: local validation passed; PR not yet opened.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/216`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/347`.
 Branch: `codex/retain-fork-deployment-rehearsal-evidence`.
 Branch started from PR #346 squash merge commit
 `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`.
 Initial local commit before final state/digest amend:
 `e6788368c672bd33c08233c838961a170acb6823`; final PR head is recorded by Git
 and the opened pull request after push.
+Opened PR head: `d4b4d49af5f9f2dbe1732577f718949869532291`.
+CodeRabbit review requested via comment `4702188617`.
 
 Goal:
 
@@ -12909,6 +12911,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 15:26 | Open PR #347 and request CodeRabbit | PR #347 opened on head `d4b4d49af5f9f2dbe1732577f718949869532291`, retains pending-review fork deployment rehearsal evidence for issue #216 without closing the issue or marking readiness complete, and CodeRabbit review was requested via comment `4702188617`. |
 | 2026-06-14 15:19 | Validate Queue Item 169 locally | Focused fork broadcast/evidence checks, generated public-beta and tracker evidence checks, release-readiness/changelog/manifest/checksum checks, Python syntax compilation, whitespace check, and full Windows `scripts\check.ps1` pass. The first full run caught stale default Anvil broadcast-derived output after receipt-selection logic changed; regenerated the default broadcast config, deployment manifest, address books, release manifest, and checksums before the passing full run. |
 | 2026-06-14 14:57 | Implement Queue Item 169 local draft | Retained pending-review mainnet-fork deployment rehearsal evidence for issue #216: fork block `25316366`, fork hash `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`, sanitized broadcast, generated fork broadcast config, generated fork manifest, generated fork address book, non-local evidence envelope, and public-beta evidence status `pending`; readiness remains blocked pending review acceptance. |
 | 2026-06-14 14:52 | Merge PR #346 and start Queue Item 169 | PR #346 passed CI run `27501729525` with Linux job `81285737978` and Windows job `81285738002`, CodeRabbit status was success with no unresolved review threads, merge-decision comment `4702043390` recorded the autonomous merge basis, squash merge `a35c24a4f3bcbf61db73c78f2e98822f09d17d59` landed on `main`, issue #345 closed completed, and branch `codex/retain-fork-deployment-rehearsal-evidence` started for issue #216. |
