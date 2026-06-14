@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-deployment-rehearsal-evidence-path` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/324` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/325` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/326` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 10:16 UTC` |
+| Last updated | `2026-06-14 10:33 UTC` |
 
 ## Packaging Notes
 
@@ -220,12 +220,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add fork deployment rehearsal retained artifact checker (Queue Item 157)
 
-Status: local implementation in progress.
+Status: PR open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/325`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/326`.
 Branch: `codex/fork-deployment-rehearsal-evidence-path`.
 Branch started from PR #324 squash merge commit
 `6a5c268a1ed3a60b7d557b6398e78a984ac569ab`.
+Initial PR head: `29c5de67b211e11a9c616821f47f610c0728149b`.
+CodeRabbit review requested via comment `4701475798`.
 
 Goal:
 
@@ -12275,6 +12277,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 10:33 | Open PR #326 | Fork deployment rehearsal retained-artifact checker PR #326 opened for issue #325 on head `29c5de67b211e11a9c616821f47f610c0728149b`, references issue #216 without closing it, records focused/full local validation, preserves blocked readiness claims, and requests CodeRabbit review via comment `4701475798`. |
 | 2026-06-14 10:08 | Create issue #325 and start Queue Item 157 | Issue #216 requires actual reviewed retained fork deployment rehearsal evidence, which is not present in the checkout and must not be invented; issue #325 tracks the no-secret support slice that adds a canonical retained-artifact template, checker, tests, docs, local/CI gates, roadmap traceability, and release artifact coverage without changing readiness claims. |
 | 2026-06-14 10:05 | Merge PR #324 | Reconciliation PR #324 passed CI run `27495297786` on final head `c1adc247585ac2479ea9846467adfe4646de03c3`, CodeRabbit status was success after review-finished replies `4701392175` and `4701395575`, there were no unresolved review threads, merge-decision comment `4701410886` recorded the rate-limit warning as non-actionable, squash merge commit `6a5c268a1ed3a60b7d557b6398e78a984ac569ab` landed on `main`, and issue #323 closed completed. |
 | 2026-06-14 09:56 | Open PR #324 | Reconciliation PR #324 opened for issue #323 on head `105f43c72c0b302dcf6f0b48d7e72d701620e36e`, records PR #322 merge evidence, queues tracker issue #216 as the next no-secret release-evidence target, and requests CodeRabbit review via comment `4701392005`. |
