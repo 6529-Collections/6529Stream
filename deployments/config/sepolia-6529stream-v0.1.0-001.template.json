@@ -1,0 +1,237 @@
+{
+  "schema_version": "6529stream.deployment-manifest-input.v1",
+  "template_notice": "Template only. Copy this file to a non-template Sepolia config after a real reviewed broadcast replaces every placeholder address, transaction reference, and command transcript. Do not commit RPC endpoint values, signing secrets, API tokens, raw signatures, or unreleased drop payloads.",
+  "operator_runbook": "docs/deployment.md#sepolia-deployment-rehearsal-runbook",
+  "operator_inputs": {
+    "script_entrypoint": "script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\"",
+    "required_environment_variables": [
+      {
+        "name": "SEPOLIA_RPC_URL",
+        "retained_value": "redacted",
+        "purpose": "Sepolia RPC endpoint used by the operator shell only."
+      },
+      {
+        "name": "SEPOLIA_DEPLOYER_ADDRESS",
+        "retained_value": "public_address",
+        "purpose": "Public Forge broadcaster address matching the approved hardware, keystore, cloud, or CI signing backend."
+      },
+      {
+        "name": "SEPOLIA_ADMIN_SAFE",
+        "retained_value": "public_address",
+        "purpose": "Safe or multisig that receives ownership/admin authority."
+      },
+      {
+        "name": "SEPOLIA_PAUSE_GUARDIAN",
+        "retained_value": "public_address",
+        "purpose": "Address authorized for pause controls."
+      },
+      {
+        "name": "SEPOLIA_EMERGENCY_RECIPIENT",
+        "retained_value": "public_address",
+        "purpose": "Address authorized to receive emergency withdrawals where permitted."
+      },
+      {
+        "name": "SEPOLIA_DROP_SIGNER",
+        "retained_value": "public_address",
+        "purpose": "Approved drop authorization signer address."
+      },
+      {
+        "name": "SEPOLIA_PAYOUT",
+        "retained_value": "public_address",
+        "purpose": "Poster/protocol payout recipient used by deployment rehearsal drops and auctions."
+      },
+      {
+        "name": "SEPOLIA_DELEGATION_REGISTRY",
+        "retained_value": "public_address",
+        "purpose": "Delegation registry dependency for curator pool constructor args."
+      },
+      {
+        "name": "SEPOLIA_VRF_COORDINATOR",
+        "retained_value": "public_address",
+        "purpose": "Sepolia VRF coordinator dependency."
+      },
+      {
+        "name": "SEPOLIA_ARRNG_CONTROLLER",
+        "retained_value": "public_address",
+        "purpose": "Sepolia arRNG controller dependency."
+      },
+      {
+        "name": "SEPOLIA_VRF_SUBSCRIPTION_ID",
+        "retained_value": "public_number",
+        "purpose": "VRF subscription or billing identifier used by the rehearsal."
+      },
+      {
+        "name": "ETHERSCAN_API_KEY",
+        "retained_value": "redacted",
+        "purpose": "Explorer verification token used by the operator shell only."
+      }
+    ],
+    "redaction_policy": {
+      "retain_public_addresses": true,
+      "retain_transaction_hashes": true,
+      "retain_chain_id_and_block": true,
+      "redact_rpc_endpoint_values": true,
+      "redact_signer_material": true,
+      "redact_api_tokens": true,
+      "redact_raw_signatures": true,
+      "redact_unreleased_drop_payloads": true
+    }
+  },
+  "output": "deployments/examples/sepolia-6529stream-v0.1.0-001.json",
+  "manifest": {
+    "protocol_version": "0.1.0",
+    "deployment_version": "sepolia-6529stream-v0.1.0-001",
+    "lifecycle_state": "Template",
+    "network": {
+      "name": "sepolia",
+      "chain_id": 11155111,
+      "rpc_environment_variable": "SEPOLIA_RPC_URL",
+      "confirmation_depth": 12
+    },
+    "git": {
+      "repository": "https://github.com/6529-Collections/6529Stream",
+      "commit": "0000000000000000000000000000000000000000",
+      "source_dirty": false
+    },
+    "toolchain": {
+      "foundry_version": "v1.7.1",
+      "solidity_version": "0.8.19",
+      "profile": "default",
+      "optimizer": true,
+      "optimizer_runs": 200,
+      "via_ir": true
+    },
+    "contracts": [
+      {
+        "name": "StreamAdmins",
+        "address": "0x0000000000000000000000000000000000000001",
+        "constructor_args": ["$SEPOLIA_DROP_SIGNER"],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "DependencyRegistry",
+        "address": "0x0000000000000000000000000000000000000002",
+        "constructor_args": ["$DEPLOYED_STREAM_ADMINS"],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamCore",
+        "address": "0x0000000000000000000000000000000000000003",
+        "constructor_args": [
+          "6529 Stream",
+          "STREAM",
+          "$DEPLOYED_STREAM_ADMINS",
+          "$DEPLOYED_DEPENDENCY_REGISTRY"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamCuratorsPool",
+        "address": "0x0000000000000000000000000000000000000004",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_ADMINS",
+          "$SEPOLIA_DELEGATION_REGISTRY"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamMinter",
+        "address": "0x0000000000000000000000000000000000000005",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamDrops",
+        "address": "0x0000000000000000000000000000000000000006",
+        "constructor_args": [
+          "$SEPOLIA_DROP_SIGNER",
+          "$DEPLOYED_STREAM_MINTER",
+          "$DEPLOYED_STREAM_ADMINS",
+          "$SEPOLIA_PAYOUT",
+          "$DEPLOYED_STREAM_CURATORS_POOL"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamAuctions",
+        "address": "0x0000000000000000000000000000000000000007",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_MINTER",
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS",
+          "$DEPLOYED_STREAM_DROPS",
+          "$SEPOLIA_PAYOUT",
+          "$DEPLOYED_STREAM_CURATORS_POOL"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "NextGenRandomizerVRF",
+        "address": "0x0000000000000000000000000000000000000008",
+        "constructor_args": [
+          "$SEPOLIA_VRF_SUBSCRIPTION_ID",
+          "$SEPOLIA_VRF_COORDINATOR",
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "NextGenRandomizerRNG",
+        "address": "0x0000000000000000000000000000000000000009",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS",
+          "$SEPOLIA_ARRNG_CONTROLLER"
+        ],
+        "verification_status": "not_started"
+      }
+    ],
+    "admin_ceremony": {
+      "deployer": "$SEPOLIA_DEPLOYER_ADDRESS",
+      "admin_safe": "$SEPOLIA_ADMIN_SAFE",
+      "emergency_recipient": "$SEPOLIA_EMERGENCY_RECIPIENT",
+      "pause_guardians": ["$SEPOLIA_PAUSE_GUARDIAN"],
+      "unpause_admins": ["$SEPOLIA_ADMIN_SAFE"],
+      "signer_managers": ["$SEPOLIA_ADMIN_SAFE"],
+      "drop_signers": ["$SEPOLIA_DROP_SIGNER"],
+      "temporary_admins_revoked": true,
+      "ownership_transfers": [
+        {
+          "contract": "StreamAdmins",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        },
+        {
+          "contract": "StreamCore",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        }
+      ]
+    },
+    "external_dependencies": {
+      "vrf_coordinator": "$SEPOLIA_VRF_COORDINATOR",
+      "arrng_controller": "$SEPOLIA_ARRNG_CONTROLLER",
+      "delegation_registry": "$SEPOLIA_DELEGATION_REGISTRY"
+    },
+    "verification": {
+      "contract_verification": "not_started",
+      "constructor_args_retained": false,
+      "commands": [
+        "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --broadcast --verify --via-ir"
+      ]
+    },
+    "release_artifacts": {
+      "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
+    },
+    "rehearsal": {
+      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir",
+      "anvil_passed": false,
+      "fork_passed": false,
+      "testnet_passed": false,
+      "notes": "Template only. Replace placeholders with reviewed Sepolia broadcast outputs before generating a manifest or claiming public-beta evidence."
+    }
+  }
+}

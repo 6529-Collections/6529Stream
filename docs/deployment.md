@@ -72,6 +72,158 @@ This is a local Anvil release gate and does not require RPC secrets; fork,
 testnet, and production broadcasts should still retain their own manifest and
 browser evidence during the release ceremony.
 
+## Sepolia Deployment Rehearsal Runbook
+
+The Sepolia rehearsal path is a no-secret public-beta evidence workflow. It does
+not claim production readiness and it does not close
+`testnet_deployment_rehearsal` until the retained artifact is reviewed.
+
+Use the committed template at
+`deployments/config/sepolia-6529stream-v0.1.0-001.template.json` as the
+source-of-truth checklist for required public addresses, environment variables,
+and retained outputs. Do not edit the template into a real manifest in place.
+After a real broadcast, copy it to a non-template config path and replace every
+placeholder with reviewed broadcast output.
+
+Required operator environment variables:
+
+| Variable | Retain In Repo | Purpose |
+| --- | --- | --- |
+| `SEPOLIA_RPC_URL` | No, redact value | Sepolia RPC endpoint used by the operator shell. |
+| `SEPOLIA_DEPLOYER_ADDRESS` | Yes | Public Forge broadcaster address. Must match the approved signing backend used by the operator shell. |
+| `SEPOLIA_ADMIN_SAFE` | Yes | Safe or multisig that receives ownership/admin authority. |
+| `SEPOLIA_PAUSE_GUARDIAN` | Yes | Pause guardian address. |
+| `SEPOLIA_EMERGENCY_RECIPIENT` | Yes | Emergency recipient address. |
+| `SEPOLIA_DROP_SIGNER` | Yes | Drop authorization signer address. |
+| `SEPOLIA_PAYOUT` | Yes | Payout recipient used by rehearsal drops and auctions. |
+| `SEPOLIA_DELEGATION_REGISTRY` | Yes | Delegation registry dependency. |
+| `SEPOLIA_VRF_COORDINATOR` | Yes | Sepolia VRF coordinator dependency. |
+| `SEPOLIA_ARRNG_CONTROLLER` | Yes | Sepolia arRNG controller dependency. |
+| `SEPOLIA_VRF_SUBSCRIPTION_ID` | Yes | VRF subscription or billing identifier. |
+| `ETHERSCAN_API_KEY` | No, redact value | Explorer verification token used by the operator shell. |
+
+Use an approved Foundry signing backend outside the repository for
+`SEPOLIA_DEPLOYER_ADDRESS`: hardware wallet, keystore, cloud signer, or CI
+secret approved for testnet. `SEPOLIA_ADMIN_SAFE` is the Safe or multisig that
+receives ownership/admin authority; it is not automatically the transaction
+broadcaster for the command below. If a Safe transaction pipeline is used for
+deployment instead of Forge broadcasting, retain that as a separate reviewed
+operator flow. Do not commit private keys, mnemonics, raw signatures, RPC
+endpoint values, API tokens, signer-service credentials, local keystore paths,
+or unreleased drop payloads. If a local command uses sensitive values, the
+retained transcript must replace them with `<redacted>`.
+
+Preflight from a clean checkout:
+
+```sh
+forge build --sizes --via-ir --skip test --skip script --force
+forge test -vvv
+python scripts/generate_release_artifacts.py --check
+python scripts/generate_source_verification_inputs.py --check
+python scripts/test_deployment_manifest.py
+python scripts/check_testnet_deployment_rehearsal_evidence.py
+```
+
+Broadcast the Sepolia rehearsal from the operator shell:
+
+```sh
+forge script script/RehearseDeployment.s.sol:RehearseDeployment \
+  --sig "runSepolia()" \
+  --rpc-url "$SEPOLIA_RPC_URL" \
+  --sender "$SEPOLIA_DEPLOYER_ADDRESS" \
+  <approved Foundry signer flags> \
+  --broadcast \
+  --verify \
+  --via-ir
+```
+
+The committed transcript must redact the RPC endpoint and any signer or API
+material. Retain the command as:
+
+```sh
+forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir
+```
+
+Retain and sanitize the Foundry broadcast:
+
+1. Copy `broadcast/RehearseDeployment.s.sol/11155111/run-latest.json` to
+   `deployments/broadcasts/sepolia-6529stream-v0.1.0-001-run-latest.json`.
+2. Remove or redact any private RPC endpoint, signer material, API token,
+   local filesystem secret path, or unreleased drop payload.
+3. Keep public transaction hashes, deployed addresses, chain ID, receipt status,
+   block references, and constructor args.
+4. Copy the template to an operator-reviewed non-template config path such as
+   `deployments/config/sepolia-6529stream-v0.1.0-001-reviewed.json`.
+5. In that copied config, replace placeholder constructor/admin/dependency
+   values, set `manifest.lifecycle_state` to `Rehearsed`, set
+   `manifest.git.commit` to the deployed commit, set
+   `manifest.verification.contract_verification` and per-contract
+   `verification_status` to `not_started`, `submitted`, or `verified`, set
+   `manifest.verification.constructor_args_retained` to `true` once the
+   constructor arguments are retained, and set
+   `manifest.rehearsal.testnet_passed` to `true` only after the broadcast and
+   retained transcript are complete.
+6. Run the broadcast-derived manifest input generator with the copied
+   non-template config:
+
+```sh
+python scripts/generate_broadcast_manifest_input.py \
+  --template deployments/config/sepolia-6529stream-v0.1.0-001-reviewed.json \
+  --broadcast deployments/broadcasts/sepolia-6529stream-v0.1.0-001-run-latest.json \
+  --output deployments/config/sepolia-6529stream-v0.1.0-001-broadcast.json \
+  --manifest-output deployments/examples/sepolia-6529stream-v0.1.0-001-broadcast.json
+python scripts/generate_deployment_manifest.py \
+  --config deployments/config/sepolia-6529stream-v0.1.0-001-broadcast.json
+python scripts/generate_address_books.py \
+  --manifest deployments/examples/sepolia-6529stream-v0.1.0-001-broadcast.json
+python scripts/generate_source_verification_inputs.py --check
+```
+
+Then replace the template fields in
+`release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
+or a copied reviewed artifact with:
+
+- Sepolia chain ID `11155111`, block reference, and deployment transaction
+  references.
+- Redacted command transcript path.
+- Sanitized Foundry broadcast path.
+- Generated deployment manifest path and SHA-256 digest.
+- Generated address book path and SHA-256 digest.
+- Explorer verification status and links.
+- Gas or invariant summary.
+- Reviewer, review decision, and no-secret redaction confirmations.
+
+Validate and regenerate release evidence:
+
+```sh
+python scripts/test_testnet_deployment_rehearsal_evidence.py
+python scripts/check_testnet_deployment_rehearsal_evidence.py
+python scripts/generate_non_local_release_evidence.py \
+  --template release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json \
+  --retained-artifact release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md \
+  --output release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-evidence.json \
+  --environment testnet \
+  --chain-id 11155111 \
+  --block-or-reference "<sepolia block or deployment transaction reference>" \
+  --command-or-source-system "<redacted Sepolia deployment transcript>" \
+  --owner "<evidence owner>" \
+  --reviewer "<reviewer>" \
+  --review-status pending_review \
+  --source-git-commit "<40 hex commit>" \
+  --source-ci-run "<CI run URL or operator transcript>"
+python scripts/check_non_local_release_evidence.py
+python scripts/check_public_beta_evidence.py
+python scripts/generate_release_evidence_packet_index.py --check
+python scripts/generate_release_manifest.py
+python scripts/generate_release_checksums.py
+python scripts/generate_release_manifest.py --check
+python scripts/generate_release_checksums.py --check
+```
+
+Only after reviewer acceptance should the public-beta evidence row move from
+`missing` to `complete`. Until then, commit only the template/runbook/checker
+updates and keep public-beta readiness blocked.
+
 ## Manifest Requirements
 
 Deployment manifests live under `deployments/` and must include:
