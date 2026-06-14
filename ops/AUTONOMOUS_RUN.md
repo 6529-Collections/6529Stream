@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-curator-merkle-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/306` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/307` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/308` |
 | Next issue | TBD after issue #307 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 05:46 UTC` |
+| Last updated | `2026-06-14 05:50 UTC` |
 
 ## Packaging Notes
 
@@ -210,12 +210,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile curator Merkle leaf domain separation merge state (Queue Item 148)
 
-Status: local draft.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/307`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/308`.
 Branch: `codex/reconcile-curator-merkle-merge-state`.
 Branch started from PR #306 squash merge commit
 `e8d0822c7bc357a97b6a761d9126f3787502de8b`.
+Opening head: `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`.
 
 Goal:
 
@@ -11804,6 +11805,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 05:50 | Open PR #308 | Curator Merkle merge-state reconciliation PR opened on head `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`, closes issue #307, and records PR #306 as the latest merged baseline without changing readiness claims. |
 | 2026-06-14 05:46 | Start Queue Item 148 | PR #306 merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`, issue #305 closed completed, issue #307 opened for state-only merge reconciliation, and branch `codex/reconcile-curator-merkle-merge-state` started from the merged baseline. |
 | 2026-06-14 05:44 | Merge PR #306 | Curator Merkle leaf domain separation merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`; final head `51a4156f1b8de54602da5445b29a787ee638ff23` passed CI run `27489644258`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700755557`, and issue #305 closed completed. |
 | 2026-06-14 05:36 | Fix PR #306 retained evidence drift | CI run `27489281575` failed because ceremony/randomizer retained evidence still referenced pre-via-IR deployment manifest, address book, ABI checksum, and invariant-test hashes; refreshed the retained evidence plus release manifest/checksum bundle, then reran focused evidence checks, release manifest/checksum checks, full Windows `scripts\check.ps1`, and whitespace checks successfully before pushing head `51a4156f1b8de54602da5445b29a787ee638ff23`. |
