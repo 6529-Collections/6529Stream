@@ -10,6 +10,9 @@ the release policy in `docs/release-policy.md`.
 - Added a fork deployment rehearsal retained-artifact Markdown template and
   checker so future issue #216 evidence can be structurally validated without
   changing public-beta readiness claims.
+- Added fork-specific release evidence tracker routing so issue #216 points to
+  the canonical fork deployment rehearsal retained-artifact template and
+  checker commands instead of the generic public-beta placeholder.
 - Added a scoped Solidity formatting gate that requires formatted first-party
   files while tracking the current vendored/provenance formatting exemption
   policy.

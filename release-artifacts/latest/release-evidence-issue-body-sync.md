@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:08b435d90666bf2a89e961e745df91d34537b4d2687e7107cd262eee6a93565b` |
+| Backlog SHA-256 | `sha256:ef4de3f8c3ee4360ce627223ecd5889d20fbe9223b4fc2ae983e071de4df1fe6` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:6fc7a352822ab24ff968eacbcbfd5dde4114f234199f55c67ffed0670b175d5c` |
 
@@ -28,7 +28,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | Issue | Entry | Status | Body SHA-256 | Lines |
 | --- | --- | --- | --- | --- |
 | [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:38ad6e7332ebe917e33328e4f2eb4950fabe00b12251401066e070bea2f2b24d` | 53 |
-| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `missing` | `sha256:994af26132cafed64f3d61cae420598bf708f3c5369c02804e4f85e7c7b36400` | 53 |
+| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `missing` | `sha256:be17280d582eca27fd13344647dfa14434518b4a4b43162f88f9603af5be59f8` | 55 |
 | [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:ae7b0769db90ab9e4832043f15cbf1f309d71389e74cf4b0b805c62d677b2875` | 53 |
 | [#218](https://github.com/6529-Collections/6529Stream/issues/218) | `public-beta-fork-testnet-metadata-browser-evidence` | `missing` | `sha256:af916550988f50f1c5882fdab9fd8b4833534621b4b3c5567dcd4d069414340a` | 53 |
 | [#219](https://github.com/6529-Collections/6529Stream/issues/219) | `public-beta-fork-testnet-ceremony-evidence` | `missing` | `sha256:1493c20f27c23f8b2b0ea59a253edb9aba37e7075fc8326b824aa985e69d1c2b` | 53 |
@@ -110,8 +110,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #216 public-beta-fork-deployment-rehearsal
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/216
-- Body SHA-256: `sha256:994af26132cafed64f3d61cae420598bf708f3c5369c02804e4f85e7c7b36400`
-- Source body SHA-256: `sha256:bc5f48ff4ba62a61c77dc613df14e38186a794669666702e94256237d84ae1c4`
+- Body SHA-256: `sha256:be17280d582eca27fd13344647dfa14434518b4a4b43162f88f9603af5be59f8`
+- Source body SHA-256: `sha256:a62cad13c3954f56f9612a0761669e1f02fd26a55093b034f937897255281c85`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-deployment-rehearsal issue_number=216 -->
@@ -133,12 +133,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_deployment_rehearsal`
 - Evidence template: `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -146,6 +146,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_fork_deployment_rehearsal_evidence.py`
+- `python scripts/check_fork_deployment_rehearsal_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
