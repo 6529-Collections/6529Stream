@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-audit-archive-retention-docs` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/284` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/285` |
-| Active PR | TBD until Queue Item 137 is opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/286` |
 | Next issue | TBD after issue #285 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 01:07 UTC` |
+| Last updated | `2026-06-14 01:18 UTC` |
 
 ## Packaging Notes
 
@@ -200,12 +200,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Document live audit archive retention workflow (Queue Item 137)
 
-Status: local implementation in progress before PR open.
+Status: PR #286 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/285`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/286`.
 Branch: `codex/live-audit-archive-retention-docs`.
 Branch started from PR #284 squash merge commit
 `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`.
+Opening PR head: `5c96e4e7550796c0014bcfa2ad07b36629cdbf1a`.
 
 Goal:
 
@@ -11353,6 +11354,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 01:18 | Open PR #286 | Live audit archive retention workflow PR opened on head `5c96e4e7550796c0014bcfa2ad07b36629cdbf1a`; it links issue #285, adds the canonical retained-bundle directory README, strengthens release-readiness checker coverage for the workflow, refreshes release manifest/checksum evidence, and preserves blocked readiness claims. |
 | 2026-06-14 01:07 | Start Queue Item 137 | PR #284 merged as `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`, issue #283 closed completed, issue #285 opened for live audit archive retention workflow docs, and branch `codex/live-audit-archive-retention-docs` started from the merged baseline. |
 | 2026-06-14 01:01 | Merge PR #284 | Live audit archive merge-state reconciliation merged as `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`; final head `553a151a5aa785c79a6c90ad4a2847e75ce9dbc3` passed CI run `27483989654`, CodeRabbit status was success with no unresolved review threads, explicit review request returned review-finished reply `4700269219`, and issue #283 closed completed. |
 | 2026-06-14 00:50 | Open PR #284 | State-only reconciliation PR opened on head `61d4286da2b2e90875f148bf5aecb4cbdc765227`; it links issue #283, records PR #282 merge evidence, refreshes roadmap verification metadata, preserves blocked readiness claims, and queues the live audit archive retention workflow as the next no-secret release evidence target. |
