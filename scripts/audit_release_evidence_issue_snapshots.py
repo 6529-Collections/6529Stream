@@ -27,6 +27,15 @@ READINESS_WARNING = (
     "The report does not mark public-beta or production-release retained "
     "evidence complete and does not change the blocked readiness posture."
 )
+STALE_SNAPSHOT_POLICY = (
+    "Retained reports are historical snapshots; reviewers must regenerate from "
+    "live GitHub issue exports during the release ceremony before treating "
+    "issue labels, bodies, or closure status as current."
+)
+LIVE_EXPORT_FRESHNESS_STATUS = "live_export_at_generation"
+RETAINED_HISTORICAL_FRESHNESS_STATUS = "retained_historical"
+LIVE_EXPORT_CURRENTNESS_CLAIM = "current_at_generation_only"
+RETAINED_CURRENTNESS_CLAIM = "not_current"
 
 PROFILE_CONFIG = {
     "labels": {
@@ -174,6 +183,15 @@ def build_report(
         "readiness_claim": "blocked",
         "no_secret_notice": NO_SECRET_NOTICE,
         "readiness_warning": READINESS_WARNING,
+        "snapshot_freshness": {
+            "status": LIVE_EXPORT_FRESHNESS_STATUS,
+            "generated_from_live_export": True,
+            "currentness_claim": LIVE_EXPORT_CURRENTNESS_CLAIM,
+            "stale_snapshot_policy": STALE_SNAPSHOT_POLICY,
+            "profile_generated_at": {
+                str(profile["profile"]): generated_at for profile in profile_results
+            },
+        },
         "profiles": profile_results,
         "validation": {
             "status": "passed",
@@ -199,6 +217,10 @@ def markdown_cell(value: object) -> str:
 
 def markdown_report(report: dict[str, object]) -> str:
     """Render a deterministic Markdown live audit report."""
+    freshness = report["snapshot_freshness"]
+    assert isinstance(freshness, dict)
+    profile_generated_at = freshness["profile_generated_at"]
+    assert isinstance(profile_generated_at, dict)
     lines = [
         "# Release Evidence Live Audit Report",
         "",
@@ -206,20 +228,32 @@ def markdown_report(report: dict[str, object]) -> str:
         f"- Repository: `{report['repo']}`",
         f"- Generated at: `{report['generated_at']}`",
         f"- Readiness claim: `{report['readiness_claim']}`",
+        f"- Snapshot freshness: `{freshness['status']}`",
+        (
+            "- Generated from live export: "
+            f"`{str(freshness['generated_from_live_export']).lower()}`"
+        ),
+        f"- Currentness claim: `{freshness['currentness_claim']}`",
+        f"- Stale snapshot policy: {freshness['stale_snapshot_policy']}",
         f"- Notice: {report['no_secret_notice']}",
         f"- Warning: {report['readiness_warning']}",
         "",
-        "| Profile | Snapshot | SHA-256 | Export status | Checker status |",
-        "| --- | --- | --- | --- | --- |",
+        (
+            "| Profile | Snapshot | Snapshot generated at | SHA-256 | "
+            "Export status | Checker status |"
+        ),
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for profile in report["profiles"]:
         assert isinstance(profile, dict)
+        profile_name = str(profile["profile"])
         lines.append(
             "| "
             + " | ".join(
                 [
-                    markdown_cell(profile["profile"]),
+                    markdown_cell(profile_name),
                     markdown_cell(profile["snapshot_path"]),
+                    markdown_cell(profile_generated_at[profile_name]),
                     markdown_cell(profile["snapshot_sha256"]),
                     markdown_cell(profile["export_status"]),
                     markdown_cell(profile["checker_status"]),

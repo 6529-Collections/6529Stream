@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-live-audit-integrity-guard-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/298` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/299` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/300` |
-| Next issue | TBD after issue #299 merges |
+| Active PR branch | `codex/live-audit-report-freshness-guard` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/300` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/301` |
+| Active PR | TBD |
+| Next issue | TBD after issue #301 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 03:25 UTC` |
+| Last updated | `2026-06-14 03:48 UTC` |
 
 ## Packaging Notes
 
@@ -200,46 +200,82 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 141 | Add retained live audit dry-run archive guard tests | Gate G support | Add focused tests that assert the committed archive index includes the retained dry-run row, validation commands, blocked readiness posture, and no-secret policy so future changes cannot silently drop the retained bundle | Merged in PR #294 |
 | 142 | Reconcile retained live audit dry-run archive guard merge state | Gate G support | Record PR #294 merge evidence, refresh roadmap verification metadata, mark the guard row passing, preserve blocked readiness claims, and select the next no-secret release evidence target | Merged in PR #296 |
 | 143 | Guard retained live audit manifest and checksum coverage | Gate G support | Add focused tests that assert retained live audit report bundles and archive outputs remain covered by release manifest and checksum artifacts so future evidence files cannot silently fall out of release integrity coverage | Merged in PR #298 |
-| 144 | Reconcile retained live audit manifest/checksum guard merge state | Gate G support | Record the manifest/checksum guard PR merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Active |
-| 145 | Guard retained live audit report freshness against stale issue snapshots | Gate G support | Add no-secret offline checks that retained live audit reports cannot present stale issue-label, issue-body, or issue-closure snapshots as current without an explicit stale/readiness-blocked marker | Queued after issue #299 |
+| 144 | Reconcile retained live audit manifest/checksum guard merge state | Gate G support | Record the manifest/checksum guard PR merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Merged in PR #300 |
+| 145 | Guard retained live audit report freshness against stale issue snapshots | Gate G support | Add no-secret offline checks that retained live audit reports cannot present stale issue-label, issue-body, or issue-closure snapshots as current without an explicit stale/readiness-blocked marker | In progress for issue #301 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile retained live audit manifest/checksum guard merge state (Queue Item 144)
+### PR candidate: Guard retained live audit report freshness against stale issue snapshots (Queue Item 145)
 
-Status: PR open; awaiting CI and CodeRabbit.
-Issue: `https://github.com/6529-Collections/6529Stream/issues/299`.
-PR: `https://github.com/6529-Collections/6529Stream/pull/300`.
-Branch: `codex/reconcile-live-audit-integrity-guard-merge-state`.
-Branch started from PR #298 squash merge commit
-`ebf38ee8f5396674b92ef49b8a566c5fd1074f87`.
-Opening head: `b5d8c6e58113895354bde8d7f387a45f3bb4799c`.
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/301`.
+PR: TBD.
+Branch: `codex/live-audit-report-freshness-guard`.
+Branch started from PR #300 squash merge commit
+`4c231c8684adebab89cc7f31f7f519bab7418045`.
 
 Goal:
 
-- Record PR #298 as merged and issue #297 as completed.
-- Refresh roadmap verification metadata to the PR #298 merged baseline.
-- Update the retained live audit manifest/checksum coverage guard test-matrix
-  row from in-progress to passing.
-- Record final green CI/CodeRabbit evidence for PR #298.
-- Preserve blocked public-beta and production-release readiness claims.
-- Select Queue Item 145 as the next no-secret release evidence target.
+- Add explicit no-secret `snapshot_freshness`, `currentness_claim`, and
+  per-profile `profile_generated_at` markers to retained live audit reports.
+- Permit live-export reports to claim only `current_at_generation_only`.
+- Require retained template, dry-run, or historical reports to claim
+  `not_current` while keeping `readiness_claim` blocked.
+- Surface freshness/currentness in canonical Markdown and archive rows.
+- Refresh docs, release readiness wording, release manifest, and checksum
+  evidence without adding GitHub network access to CI.
 
 Validation plan:
 
+- `python scripts/test_release_evidence_live_audit_report.py`.
+- `python scripts/test_release_evidence_issue_snapshot_audit.py`.
+- `python scripts/test_release_evidence_live_audit_markdown.py`.
+- `python scripts/test_release_evidence_live_audit_archive.py`.
+- `python scripts/check_release_evidence_live_audit_report.py`.
+- `python scripts/check_release_evidence_live_audit_markdown.py`.
+- `python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json`.
+- `python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json --report-md release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md`.
+- `python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check`.
 - `python scripts/check_release_readiness.py`.
 - `python scripts/generate_release_manifest.py --check`.
 - `python scripts/generate_release_checksums.py --check`.
 - `python scripts/check_changelog.py`.
-- `rg -n "Queue Item 143|Queue Item 144|Queue Item 145|PR #298|27486783805|7d71324|ebf38ee|#297|#299|live audit manifest/checksum|freshness|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "Queue Item 145|#301|snapshot_freshness|currentness_claim|profile_generated_at|freshness" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/release-readiness.md release-artifacts/README.md release-artifacts/evidence/live-audit-reports/README.md scripts release-artifacts`.
 - `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
 - `git diff --check`.
 
 Validation status:
 
-- Passed locally at `2026-06-14 03:21 UTC`: release-readiness,
-  release-manifest, release-checksum, changelog, traceability, heading, and
-  whitespace checks.
+- Passed locally at `2026-06-14 04:05 UTC`: focused report/orchestrator/
+  Markdown/archive tests, template and retained dry-run JSON/Markdown checks,
+  archive drift check, release-readiness, release-manifest, release-checksum,
+  release-artifact, changelog, Python syntax, full Windows `scripts\check.ps1`,
+  traceability, heading, and whitespace gates.
+
+### Completed: Reconcile retained live audit manifest/checksum guard merge state (Queue Item 144)
+
+Status: merged in PR #300.
+
+Issue: `https://github.com/6529-Collections/6529Stream/issues/299`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/300`.
+Branch: `codex/reconcile-live-audit-integrity-guard-merge-state`.
+Final PR head: `f4db6463461c391a08e02fb97c9892ec18c3d0a3`.
+Squash merge commit: `4c231c8684adebab89cc7f31f7f519bab7418045`.
+CI: run `27487104812` passed on the final head.
+
+CodeRabbit: initial rate-limit warning comment `4700572647`, explicit review
+request comment `4700575512`, review-finished reply `4700575697`, final status
+success, and no unresolved review threads. Merge-readiness comment `4700591135`
+documented the clean review/CI posture before merge.
+
+Completed scope:
+
+- Recorded PR #298 as merged and issue #297 as completed.
+- Refreshed roadmap verification metadata to the PR #298 merged baseline.
+- Updated the retained live audit manifest/checksum coverage guard test-matrix
+  row from in-progress to passing.
+- Preserved blocked public-beta and production-release readiness claims.
+- Selected Queue Item 145 as the next no-secret release evidence target.
 
 ### Completed: Guard retained live audit manifest and checksum coverage (Queue Item 143)
 
@@ -11617,6 +11653,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 04:05 | Finish Queue Item 145 local validation | Focused live audit report, orchestrator, Markdown, archive, manifest, checksum, release-artifact, readiness, changelog, syntax, full Windows `scripts\check.ps1`, traceability, heading, and whitespace gates pass; public-beta/production readiness remains blocked. |
+| 2026-06-14 03:48 | Implement Queue Item 145 local draft | Added retained live audit report `snapshot_freshness` and `currentness_claim` enforcement, canonical Markdown/archive surfacing, historical/not-current markers for the committed template and dry-run, docs/readiness wording, and regenerated release manifest/checksum evidence while keeping readiness blocked. |
+| 2026-06-14 03:39 | Start Queue Item 145 | PR #300 merged as `4c231c8684adebab89cc7f31f7f519bab7418045`, issue #299 closed completed, issue #301 opened for retained live audit freshness guards, and branch `codex/live-audit-report-freshness-guard` started from the merged baseline. |
+| 2026-06-14 03:36 | Merge PR #300 | Retained live audit integrity guard merge-state reconciliation merged as `4c231c8684adebab89cc7f31f7f519bab7418045`; final head `f4db6463461c391a08e02fb97c9892ec18c3d0a3` passed CI run `27487104812`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700575512`, and issue #299 closed completed. |
 | 2026-06-14 03:25 | Open PR #300 | State-only retained live audit manifest/checksum guard merge reconciliation PR opened on head `b5d8c6e58113895354bde8d7f387a45f3bb4799c`; it links issue #299, records PR #298 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the guard row passing, and selects Queue Item 145 as the next no-secret release evidence target. |
 | 2026-06-14 03:21 | Start Queue Item 144 | PR #298 merged as `ebf38ee8f5396674b92ef49b8a566c5fd1074f87`, issue #297 closed completed, issue #299 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-integrity-guard-merge-state` started from the merged baseline before the next retained-report freshness target. |
 | 2026-06-14 03:20 | Merge PR #298 | Retained live audit release integrity coverage merged as `ebf38ee8f5396674b92ef49b8a566c5fd1074f87`; final head `7d71324e7ddec76263bac97d88a500a4ecdf3cdd` passed CI run `27486783805`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700544004`, and issue #297 closed completed. |

@@ -32,8 +32,18 @@ TOP_LEVEL_FIELDS = frozenset(
         "readiness_claim",
         "no_secret_notice",
         "readiness_warning",
+        "snapshot_freshness",
         "profiles",
         "validation",
+    }
+)
+SNAPSHOT_FRESHNESS_FIELDS = frozenset(
+    {
+        "status",
+        "generated_from_live_export",
+        "currentness_claim",
+        "stale_snapshot_policy",
+        "profile_generated_at",
     }
 )
 PROFILE_FIELDS = frozenset(
@@ -130,6 +140,13 @@ def require_non_negative_int(value: Any, path: str) -> int:
         raise ReleaseEvidenceLiveAuditReportError(
             f"{path} must be a non-negative integer"
         )
+    return value
+
+
+def require_boolean(value: Any, path: str) -> bool:
+    """Require a JSON boolean."""
+    if not isinstance(value, bool):
+        raise ReleaseEvidenceLiveAuditReportError(f"{path} must be a boolean")
     return value
 
 
@@ -257,6 +274,34 @@ def validate_schema_document(schema: Any) -> None:
             "schema.properties.validation.properties.profile_count.const must match profile coverage"
         )
 
+    freshness = require_dict(
+        properties.get("snapshot_freshness"),
+        "schema.properties.snapshot_freshness",
+    )
+    freshness_properties = require_dict(
+        freshness.get("properties"),
+        "schema.properties.snapshot_freshness.properties",
+    )
+    generated_from_live_export = require_dict(
+        freshness_properties.get("generated_from_live_export"),
+        (
+            "schema.properties.snapshot_freshness.properties."
+            "generated_from_live_export"
+        ),
+    )
+    if generated_from_live_export.get("type") != "boolean":
+        raise ReleaseEvidenceLiveAuditReportError(
+            "schema.properties.snapshot_freshness.properties.generated_from_live_export.type must be boolean"
+        )
+    profile_generated_at = require_dict(
+        freshness_properties.get("profile_generated_at"),
+        "schema.properties.snapshot_freshness.properties.profile_generated_at",
+    )
+    if profile_generated_at.get("required") != list(DEFAULT_PROFILES):
+        raise ReleaseEvidenceLiveAuditReportError(
+            "schema.properties.snapshot_freshness.properties.profile_generated_at.required must cover all live audit profiles"
+        )
+
 
 def expected_export_fragments(profile: str, snapshot_path: str) -> list[str]:
     """Return command fragments expected in the exporter command."""
@@ -339,6 +384,83 @@ def validate_profile_result(
     return profile_name
 
 
+def validate_snapshot_freshness(
+    raw_freshness: Any,
+    generated_at: str,
+    profile_names: list[str],
+) -> None:
+    """Validate explicit retained-snapshot freshness/currentness claims."""
+    freshness = require_dict(raw_freshness, "report.snapshot_freshness")
+    require_exact_keys(
+        freshness,
+        "report.snapshot_freshness",
+        SNAPSHOT_FRESHNESS_FIELDS,
+    )
+    status = require_string(
+        freshness.get("status"),
+        "report.snapshot_freshness.status",
+    )
+    generated_from_live_export = require_boolean(
+        freshness.get("generated_from_live_export"),
+        "report.snapshot_freshness.generated_from_live_export",
+    )
+    currentness_claim = require_string(
+        freshness.get("currentness_claim"),
+        "report.snapshot_freshness.currentness_claim",
+    )
+    stale_snapshot_policy = require_string(
+        freshness.get("stale_snapshot_policy"),
+        "report.snapshot_freshness.stale_snapshot_policy",
+    )
+    if stale_snapshot_policy != auditor.STALE_SNAPSHOT_POLICY:
+        raise ReleaseEvidenceLiveAuditReportError(
+            "report.snapshot_freshness.stale_snapshot_policy must match the generator policy"
+        )
+
+    profile_generated_at = require_dict(
+        freshness.get("profile_generated_at"),
+        "report.snapshot_freshness.profile_generated_at",
+    )
+    require_exact_keys(
+        profile_generated_at,
+        "report.snapshot_freshness.profile_generated_at",
+        frozenset(profile_names),
+    )
+    for profile_name in profile_names:
+        require_string(
+            profile_generated_at.get(profile_name),
+            f"report.snapshot_freshness.profile_generated_at.{profile_name}",
+        )
+
+    if generated_from_live_export:
+        if status != auditor.LIVE_EXPORT_FRESHNESS_STATUS:
+            raise ReleaseEvidenceLiveAuditReportError(
+                "report.snapshot_freshness.status must mark live export generation"
+            )
+        if currentness_claim != auditor.LIVE_EXPORT_CURRENTNESS_CLAIM:
+            raise ReleaseEvidenceLiveAuditReportError(
+                "report.snapshot_freshness.currentness_claim must be current at generation only"
+            )
+        for profile_name in profile_names:
+            if profile_generated_at[profile_name] != generated_at:
+                raise ReleaseEvidenceLiveAuditReportError(
+                    (
+                        "report.snapshot_freshness.profile_generated_at."
+                        f"{profile_name} must match report.generated_at for live exports"
+                    )
+                )
+        return
+
+    if status != auditor.RETAINED_HISTORICAL_FRESHNESS_STATUS:
+        raise ReleaseEvidenceLiveAuditReportError(
+            "report.snapshot_freshness.status must mark retained historical snapshots"
+        )
+    if currentness_claim != auditor.RETAINED_CURRENTNESS_CLAIM:
+        raise ReleaseEvidenceLiveAuditReportError(
+            "report.snapshot_freshness.currentness_claim must be not_current for retained historical snapshots"
+        )
+
+
 def validate_report_document(report: Any, repo_root: Path) -> None:
     """Validate a retained no-secret live audit report."""
     report_obj = require_dict(report, "report")
@@ -353,7 +475,7 @@ def validate_report_document(report: Any, repo_root: Path) -> None:
         raise ReleaseEvidenceLiveAuditReportError(
             f"report.repo must be {REPO_FULL_NAME}"
         )
-    require_string(report_obj.get("generated_at"), "report.generated_at")
+    generated_at = require_string(report_obj.get("generated_at"), "report.generated_at")
     if report_obj.get("readiness_claim") != "blocked":
         raise ReleaseEvidenceLiveAuditReportError(
             "report.readiness_claim must be blocked"
@@ -383,6 +505,12 @@ def validate_report_document(report: Any, repo_root: Path) -> None:
         raise ReleaseEvidenceLiveAuditReportError(
             "report.profiles must cover labels, bodies, and closure in order"
         )
+
+    validate_snapshot_freshness(
+        report_obj.get("snapshot_freshness"),
+        generated_at,
+        profile_names,
+    )
 
     validation = require_dict(report_obj.get("validation"), "report.validation")
     require_exact_keys(validation, "report.validation", VALIDATION_FIELDS)

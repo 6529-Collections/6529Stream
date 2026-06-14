@@ -224,6 +224,30 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
             self.assertEqual(report["repo"], auditor.REPO_FULL_NAME)
             self.assertEqual(report["generated_at"], "2026-06-13T20:00:00Z")
             self.assertEqual(report["readiness_claim"], "blocked")
+            self.assertEqual(
+                report["snapshot_freshness"]["status"],
+                auditor.LIVE_EXPORT_FRESHNESS_STATUS,
+            )
+            self.assertEqual(
+                report["snapshot_freshness"]["generated_from_live_export"],
+                True,
+            )
+            self.assertEqual(
+                report["snapshot_freshness"]["currentness_claim"],
+                auditor.LIVE_EXPORT_CURRENTNESS_CLAIM,
+            )
+            self.assertEqual(
+                report["snapshot_freshness"]["stale_snapshot_policy"],
+                auditor.STALE_SNAPSHOT_POLICY,
+            )
+            self.assertEqual(
+                report["snapshot_freshness"]["profile_generated_at"],
+                {
+                    "labels": "2026-06-13T20:00:00Z",
+                    "bodies": "2026-06-13T20:00:00Z",
+                    "closure": "2026-06-13T20:00:00Z",
+                },
+            )
             self.assertEqual(report["validation"]["status"], "passed")
             self.assertEqual(report["validation"]["profile_count"], 3)
             self.assertEqual(
@@ -232,6 +256,8 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
             )
             markdown = report_md.read_text(encoding="utf-8")
             self.assertIn("# Release Evidence Live Audit Report", markdown)
+            self.assertIn(auditor.LIVE_EXPORT_CURRENTNESS_CLAIM, markdown)
+            self.assertIn(auditor.STALE_SNAPSHOT_POLICY, markdown)
             self.assertIn(auditor.NO_SECRET_NOTICE, markdown)
             self.assertIn(auditor.READINESS_WARNING, markdown)
             self.assertIn(snapshot_digest("closure"), markdown)
@@ -270,6 +296,10 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
                 ["labels", "bodies", "closure"],
             )
             self.assertEqual(report["generated_at"], "TBD")
+            self.assertEqual(
+                report["snapshot_freshness"]["profile_generated_at"],
+                {"labels": "TBD", "bodies": "TBD", "closure": "TBD"},
+            )
 
     def test_missing_report_snapshot_fails_with_context(self) -> None:
         """Report mode fails if the mocked exporter does not leave a snapshot."""

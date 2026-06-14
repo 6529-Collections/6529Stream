@@ -48,6 +48,14 @@ def valid_schema() -> dict[str, object]:
                 "minItems": len(checker.DEFAULT_PROFILES),
                 "maxItems": len(checker.DEFAULT_PROFILES),
             },
+            "snapshot_freshness": {
+                "properties": {
+                    "generated_from_live_export": {"type": "boolean"},
+                    "profile_generated_at": {
+                        "required": list(checker.DEFAULT_PROFILES)
+                    },
+                },
+            },
             "validation": {
                 "properties": {
                     "profile_count": {"const": len(checker.DEFAULT_PROFILES)}
@@ -96,13 +104,23 @@ def valid_profile(root: Path, profile: str) -> dict[str, object]:
 def valid_report(root: Path) -> dict[str, object]:
     """Build a valid no-secret retained report."""
     profiles = [valid_profile(root, profile) for profile in checker.DEFAULT_PROFILES]
+    generated_at = "2026-06-13T22:00:00Z"
     return {
         "schema_version": checker.REPORT_SCHEMA_VERSION,
         "repo": checker.REPO_FULL_NAME,
-        "generated_at": "2026-06-13T22:00:00Z",
+        "generated_at": generated_at,
         "readiness_claim": "blocked",
         "no_secret_notice": checker.auditor.NO_SECRET_NOTICE,
         "readiness_warning": checker.auditor.READINESS_WARNING,
+        "snapshot_freshness": {
+            "status": checker.auditor.LIVE_EXPORT_FRESHNESS_STATUS,
+            "generated_from_live_export": True,
+            "currentness_claim": checker.auditor.LIVE_EXPORT_CURRENTNESS_CLAIM,
+            "stale_snapshot_policy": checker.auditor.STALE_SNAPSHOT_POLICY,
+            "profile_generated_at": {
+                profile: generated_at for profile in checker.DEFAULT_PROFILES
+            },
+        },
         "profiles": profiles,
         "validation": {
             "status": "passed",
@@ -206,6 +224,14 @@ class ReleaseEvidenceLiveAuditReportTests(unittest.TestCase):
                             "minItems": len(checker.DEFAULT_PROFILES),
                             "maxItems": len(checker.DEFAULT_PROFILES),
                         },
+                        "snapshot_freshness": {
+                            "properties": {
+                                "generated_from_live_export": {"type": "boolean"},
+                                "profile_generated_at": {
+                                    "required": list(checker.DEFAULT_PROFILES)
+                                },
+                            },
+                        },
                         "validation": {
                             "properties": {
                                 "profile_count": {
@@ -284,6 +310,62 @@ class ReleaseEvidenceLiveAuditReportTests(unittest.TestCase):
             report["readiness_claim"] = "ready"
 
             self.assert_checker_fails(report, root, "readiness_claim")
+
+    def test_rejects_missing_snapshot_freshness(self) -> None:
+        """Reports must explicitly mark retained snapshot freshness."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            del report["snapshot_freshness"]
+
+            self.assert_checker_fails(report, root, "snapshot_freshness")
+
+    def test_rejects_currentness_claim_without_live_export(self) -> None:
+        """Historical retained snapshots cannot claim live-export currentness."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            freshness = report["snapshot_freshness"]
+            freshness["generated_from_live_export"] = False
+            freshness["status"] = checker.auditor.RETAINED_HISTORICAL_FRESHNESS_STATUS
+
+            self.assert_checker_fails(report, root, "currentness_claim")
+
+    def test_rejects_live_export_timestamp_drift(self) -> None:
+        """Live-export freshness must timestamp every profile at report generation."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            freshness = report["snapshot_freshness"]
+            freshness["profile_generated_at"]["labels"] = "2026-06-13T21:00:00Z"
+
+            self.assert_checker_fails(report, root, "profile_generated_at.labels")
+
+    def test_rejects_missing_profile_freshness_entry(self) -> None:
+        """Freshness markers must cover labels, bodies, and closure snapshots."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            del report["snapshot_freshness"]["profile_generated_at"]["closure"]
+
+            self.assert_checker_fails(report, root, "profile_generated_at")
+
+    def test_accepts_explicit_retained_historical_freshness(self) -> None:
+        """Retained historical reports are valid only with a not-current claim."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            report["snapshot_freshness"] = {
+                "status": checker.auditor.RETAINED_HISTORICAL_FRESHNESS_STATUS,
+                "generated_from_live_export": False,
+                "currentness_claim": checker.auditor.RETAINED_CURRENTNESS_CLAIM,
+                "stale_snapshot_policy": checker.auditor.STALE_SNAPSHOT_POLICY,
+                "profile_generated_at": {
+                    profile: "TEMPLATE" for profile in checker.DEFAULT_PROFILES
+                },
+            }
+
+            checker.validate_report_document(report, root)
 
     def test_rejects_missing_profile_coverage(self) -> None:
         """All three live audit profiles must be present."""

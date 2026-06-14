@@ -4,14 +4,18 @@
 - Repository: `6529-Collections/6529Stream`
 - Generated at: `TEMPLATE`
 - Readiness claim: `blocked`
+- Snapshot freshness: `retained_historical`
+- Generated from live export: `false`
+- Currentness claim: `not_current`
+- Stale snapshot policy: Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current.
 - Notice: This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.
 - Warning: The report does not mark public-beta or production-release retained evidence complete and does not change the blocked readiness posture.
 
-| Profile | Snapshot | SHA-256 | Export status | Checker status |
-| --- | --- | --- | --- | --- |
-| labels | release-artifacts/evidence/live-audit-report-template/release-evidence-issue-labels.json | d6fa3d89bc7ef4d0543cc8cf280c97363529099dc22ad98b7a15b049c1b251a8 | passed | passed |
-| bodies | release-artifacts/evidence/live-audit-report-template/release-evidence-issue-bodies.json | 5073582267fa5478883188d8c12dfee803b1799869df0c7d8e96053a755ee9a4 | passed | passed |
-| closure | release-artifacts/evidence/live-audit-report-template/release-evidence-issue-closure.json | e63187faddb39cb21b398d6016988c4c018438b84d84927b535763f38c824539 | passed | passed |
+| Profile | Snapshot | Snapshot generated at | SHA-256 | Export status | Checker status |
+| --- | --- | --- | --- | --- | --- |
+| labels | release-artifacts/evidence/live-audit-report-template/release-evidence-issue-labels.json | TEMPLATE | d6fa3d89bc7ef4d0543cc8cf280c97363529099dc22ad98b7a15b049c1b251a8 | passed | passed |
+| bodies | release-artifacts/evidence/live-audit-report-template/release-evidence-issue-bodies.json | TEMPLATE | 5073582267fa5478883188d8c12dfee803b1799869df0c7d8e96053a755ee9a4 | passed | passed |
+| closure | release-artifacts/evidence/live-audit-report-template/release-evidence-issue-closure.json | TEMPLATE | e63187faddb39cb21b398d6016988c4c018438b84d84927b535763f38c824539 | passed | passed |
 
 ## Command Provenance
 

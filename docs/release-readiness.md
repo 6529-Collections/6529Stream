@@ -155,8 +155,9 @@ The current local baseline includes:
   [`release-artifacts/evidence/live-audit-reports/README.md`](../release-artifacts/evidence/live-audit-reports/README.md)
   for paired JSON/Markdown reports in
   `release-artifacts/evidence/live-audit-reports/`, `YYYYMMDDTHHMMSSZ`
-  `--generated-at` run labels, no secrets, and the rule that retained reports
-  are not readiness proof by themselves,
+  `--generated-at` run labels, no secrets, explicit `snapshot_freshness`,
+  `currentness_claim`, and per-profile `profile_generated_at` markers, and the
+  rule that retained reports are not readiness proof by themselves,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,

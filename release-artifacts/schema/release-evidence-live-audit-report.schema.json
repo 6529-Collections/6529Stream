@@ -11,6 +11,7 @@
     "readiness_claim",
     "no_secret_notice",
     "readiness_warning",
+    "snapshot_freshness",
     "profiles",
     "validation"
   ],
@@ -35,6 +36,50 @@
     "readiness_warning": {
       "type": "string",
       "minLength": 1
+    },
+    "snapshot_freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "generated_from_live_export",
+        "currentness_claim",
+        "stale_snapshot_policy",
+        "profile_generated_at"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["live_export_at_generation", "retained_historical"]
+        },
+        "generated_from_live_export": {
+          "type": "boolean"
+        },
+        "currentness_claim": {
+          "enum": ["current_at_generation_only", "not_current"]
+        },
+        "stale_snapshot_policy": {
+          "const": "Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current."
+        },
+        "profile_generated_at": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["labels", "bodies", "closure"],
+          "properties": {
+            "labels": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bodies": {
+              "type": "string",
+              "minLength": 1
+            },
+            "closure": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
     },
     "profiles": {
       "type": "array",

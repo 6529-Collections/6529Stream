@@ -16,7 +16,11 @@ archive row to the retained run.
 Retained reports must contain no secrets, tokens, private issue exports, or
 unredacted operator credentials. They are review evidence only: a valid archive
 row does not make any public-beta or production-release readiness claim true by
-itself.
+itself. Each retained report must include `snapshot_freshness`,
+`currentness_claim`, and per-profile `profile_generated_at` values. Live export
+reports may claim only `current_at_generation_only`; template, dry-run, or
+otherwise historical reports must claim `not_current` so stale issue labels,
+bodies, or closure snapshots are never presented as current.
 
 ## Workflow
 
