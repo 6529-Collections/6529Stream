@@ -39,6 +39,47 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)
 
+    def test_committed_checksums_cover_retained_live_audit_reports(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        expected_paths = {
+            "release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json",
+            "release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md",
+            "release-artifacts/latest/release-evidence-live-audit-report-archive.json",
+            "release-artifacts/latest/release-evidence-live-audit-report-archive.md",
+        }
+
+        checksum_text = (
+            repo_root / generator.DEFAULT_OUTPUT_DIR / generator.CHECKSUM_FILE_NAME
+        ).read_text(encoding="utf-8")
+        checksum_entries = {
+            relative_path: digest
+            for digest, relative_path in generator.parse_checksum_file(checksum_text)
+        }
+        self.assertTrue(expected_paths <= set(checksum_entries))
+
+        manifest = json.loads(
+            (
+                repo_root
+                / generator.DEFAULT_OUTPUT_DIR
+                / generator.CHECKSUM_MANIFEST_NAME
+            ).read_text(encoding="utf-8")
+        )
+        manifest_entries = {entry["path"]: entry for entry in manifest["files"]}
+
+        for relative_path in expected_paths:
+            path = repo_root / relative_path
+            expected_hash = generator.file_sha256(path)
+            self.assertEqual(
+                checksum_entries[relative_path],
+                expected_hash.removeprefix("sha256:"),
+            )
+            self.assertIn(relative_path, manifest_entries)
+            self.assertEqual(manifest_entries[relative_path]["sha256"], expected_hash)
+            self.assertEqual(
+                manifest_entries[relative_path]["size_bytes"],
+                path.stat().st_size,
+            )
+
     def test_generator_writes_sorted_checksums_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -1483,6 +1483,31 @@ class ReleaseManifestTests(unittest.TestCase):
             )
             self.assertEqual(result, 0)
 
+    def test_committed_manifest_covers_live_audit_archive_outputs(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        manifest = json.loads(
+            (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
+        )
+        archive = manifest["release_artifacts"][
+            "release_evidence_live_audit_report_archive"
+        ]
+        expected_paths = {
+            "json": "release-artifacts/latest/release-evidence-live-audit-report-archive.json",
+            "markdown": "release-artifacts/latest/release-evidence-live-audit-report-archive.md",
+        }
+
+        for key, relative_path in expected_paths.items():
+            path = repo_root / relative_path
+            record = archive[key]
+            self.assertEqual(record["path"], relative_path)
+            self.assertEqual(record["sha256"], generator.file_sha256(path))
+            self.assertEqual(record["size_bytes"], path.stat().st_size)
+
+        self.assertEqual(
+            archive["json"]["schema_version"],
+            "6529stream.release-evidence-live-audit-report-archive.v1",
+        )
+
     def test_generator_rejects_invalid_release_signature_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
