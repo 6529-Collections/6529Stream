@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-retained-live-audit-report-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/336` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/337` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/338` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 12:52 UTC` |
+| Last updated | `2026-06-14 12:56 UTC` |
 
 ## Packaging Notes
 
@@ -226,12 +226,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile retained live audit report merge state (Queue Item 163)
 
-Status: local draft; PR not opened yet.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/337`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/338`.
 Branch: `codex/reconcile-retained-live-audit-report-merge-state`.
 Branch started from PR #336 squash merge commit
 `8944dc31375cdffac22964b4ff7ac594ebee632d`.
+Initial PR head: `3c89f9410253c24a84aaabe74c099880ca04acc9`.
+CodeRabbit review requested via comment `4701812284`.
 
 Goal:
 
@@ -12597,6 +12599,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 12:56 | Open PR #338 | State-only PR #338 opened for issue #337 on head `3c89f9410253c24a84aaabe74c099880ca04acc9`, records PR #336 merge evidence and issue #335 completion, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701812284`. |
 | 2026-06-14 12:52 | Start Queue Item 163 | PR #336 merged as `8944dc31375cdffac22964b4ff7ac594ebee632d`, issue #335 closed completed, issue #337 opened for merge-state reconciliation, and branch `codex/reconcile-retained-live-audit-report-merge-state` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 12:50 | Merge PR #336 | Retained live-audit report PR #336 passed CI run `27499195206` on final head `baec6bbdaa155c88657edea2f1c3605b932470da`; CodeRabbit status was success after explicit review-finished reply `4701776166`; no review threads were open; merge-decision comment `4701798323` recorded the initial rate-limit warning as non-actionable; squash merge commit `8944dc31375cdffac22964b4ff7ac594ebee632d` landed on `main`; and issue #335 closed completed. |
 | 2026-06-14 12:41 | Open PR #336 | PR #336 opened for issue #335 on head `993d799783528f3426bf8b7dc2295526646de7e0`, retains the post-#216-sync no-secret live audit report plus snapshot bundle, refreshes archive/manifest/checksum evidence, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701775948`. |
