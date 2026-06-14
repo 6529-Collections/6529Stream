@@ -1,0 +1,502 @@
+[
+  {
+    "number": 348,
+    "state": "OPEN",
+    "title": "Reconcile PR #347 fork evidence merge state"
+  },
+  {
+    "number": 345,
+    "state": "CLOSED",
+    "title": "Add Windows PowerShell 5.1 check-wrapper CI harness"
+  },
+  {
+    "number": 343,
+    "state": "CLOSED",
+    "title": "Add executable Windows check wrapper failure harness"
+  },
+  {
+    "number": 341,
+    "state": "CLOSED",
+    "title": "Harden Windows check wrapper native command failures"
+  },
+  {
+    "number": 339,
+    "state": "CLOSED",
+    "title": "Reconcile retained audit reconciliation merge state"
+  },
+  {
+    "number": 337,
+    "state": "CLOSED",
+    "title": "Reconcile retained live audit report merge state"
+  },
+  {
+    "number": 335,
+    "state": "CLOSED",
+    "title": "Retain live audit report after fork issue body sync"
+  },
+  {
+    "number": 333,
+    "state": "CLOSED",
+    "title": "Apply fork rehearsal body sync to live issue #216"
+  },
+  {
+    "number": 331,
+    "state": "CLOSED",
+    "title": "Reconcile fork tracker retained artifact merge state"
+  },
+  {
+    "number": 329,
+    "state": "CLOSED",
+    "title": "Use canonical fork rehearsal retained artifact path in evidence tracker"
+  },
+  {
+    "number": 327,
+    "state": "CLOSED",
+    "title": "Reconcile fork deployment rehearsal evidence checker merge state"
+  },
+  {
+    "number": 325,
+    "state": "CLOSED",
+    "title": "Add fork deployment rehearsal retained artifact checker"
+  },
+  {
+    "number": 323,
+    "state": "CLOSED",
+    "title": "Reconcile vendored formatting exemption merge state"
+  },
+  {
+    "number": 320,
+    "state": "CLOSED",
+    "title": "Convert vendored Solidity formatting deferrals into explicit provenance exemptions"
+  },
+  {
+    "number": 319,
+    "state": "CLOSED",
+    "title": "Reconcile provider formatting deferral merge state"
+  },
+  {
+    "number": 317,
+    "state": "CLOSED",
+    "title": "Retire provider and integration Solidity formatting deferrals"
+  },
+  {
+    "number": 314,
+    "state": "CLOSED",
+    "title": "Retire first-party interface Solidity formatting deferrals"
+  },
+  {
+    "number": 313,
+    "state": "CLOSED",
+    "title": "Reconcile Solidity formatting gate merge state"
+  },
+  {
+    "number": 311,
+    "state": "CLOSED",
+    "title": "Triage Solidity formatting gate path"
+  },
+  {
+    "number": 309,
+    "state": "CLOSED",
+    "title": "Reconcile curator Merkle state reconciliation merge"
+  },
+  {
+    "number": 307,
+    "state": "CLOSED",
+    "title": "Reconcile curator Merkle leaf domain separation merge state"
+  },
+  {
+    "number": 305,
+    "state": "CLOSED",
+    "title": "Complete curator Merkle leaf domain separation"
+  },
+  {
+    "number": 303,
+    "state": "CLOSED",
+    "title": "Reconcile live audit freshness guard merge state"
+  },
+  {
+    "number": 301,
+    "state": "CLOSED",
+    "title": "Guard retained live audit report freshness against stale issue snapshots"
+  },
+  {
+    "number": 299,
+    "state": "CLOSED",
+    "title": "Reconcile retained live audit manifest/checksum guard merge state"
+  },
+  {
+    "number": 297,
+    "state": "CLOSED",
+    "title": "Guard retained live audit manifest and checksum coverage"
+  },
+  {
+    "number": 295,
+    "state": "CLOSED",
+    "title": "Reconcile retained live audit dry-run archive guard merge state"
+  },
+  {
+    "number": 293,
+    "state": "CLOSED",
+    "title": "Add retained live audit dry-run archive guard tests"
+  },
+  {
+    "number": 291,
+    "state": "CLOSED",
+    "title": "Reconcile retained live audit dry-run bundle merge state"
+  },
+  {
+    "number": 289,
+    "state": "CLOSED",
+    "title": "Add retained live audit dry-run bundle"
+  },
+  {
+    "number": 287,
+    "state": "CLOSED",
+    "title": "Reconcile live audit archive retention workflow merge state"
+  },
+  {
+    "number": 285,
+    "state": "CLOSED",
+    "title": "Document live audit archive retention workflow"
+  },
+  {
+    "number": 283,
+    "state": "CLOSED",
+    "title": "Reconcile live audit report archive index merge state"
+  },
+  {
+    "number": 281,
+    "state": "CLOSED",
+    "title": "Add live audit report archive index"
+  },
+  {
+    "number": 279,
+    "state": "CLOSED",
+    "title": "Reconcile live audit Markdown checker merge state"
+  },
+  {
+    "number": 277,
+    "state": "CLOSED",
+    "title": "Add live audit Markdown report parity checker"
+  },
+  {
+    "number": 275,
+    "state": "CLOSED",
+    "title": "Reconcile live audit report checker merge state"
+  },
+  {
+    "number": 273,
+    "state": "CLOSED",
+    "title": "Add live audit report schema and offline checker"
+  },
+  {
+    "number": 271,
+    "state": "CLOSED",
+    "title": "Reconcile live audit report bundle merge state"
+  },
+  {
+    "number": 269,
+    "state": "CLOSED",
+    "title": "Add release evidence live audit report bundle"
+  },
+  {
+    "number": 267,
+    "state": "CLOSED",
+    "title": "Reconcile live audit orchestrator merge state"
+  },
+  {
+    "number": 265,
+    "state": "CLOSED",
+    "title": "Add release evidence live audit orchestrator"
+  },
+  {
+    "number": 263,
+    "state": "CLOSED",
+    "title": "Reconcile snapshot exporter merge state"
+  },
+  {
+    "number": 261,
+    "state": "CLOSED",
+    "title": "Add release evidence issue snapshot exporter"
+  },
+  {
+    "number": 259,
+    "state": "CLOSED",
+    "title": "Apply release evidence tracker phase labels"
+  },
+  {
+    "number": 257,
+    "state": "CLOSED",
+    "title": "Reconcile production evidence gate wording merge state"
+  },
+  {
+    "number": 255,
+    "state": "CLOSED",
+    "title": "Clarify production evidence tracker completion gates"
+  },
+  {
+    "number": 253,
+    "state": "CLOSED",
+    "title": "Reconcile non-local evidence generator merge state"
+  },
+  {
+    "number": 251,
+    "state": "CLOSED",
+    "title": "Add non-local evidence scaffold generator"
+  },
+  {
+    "number": 249,
+    "state": "CLOSED",
+    "title": "Reconcile release evidence closure merge state"
+  },
+  {
+    "number": 246,
+    "state": "CLOSED",
+    "title": "Guard release evidence tracker closure and readiness state"
+  },
+  {
+    "number": 245,
+    "state": "CLOSED",
+    "title": "Reconcile release evidence body drift merge state"
+  },
+  {
+    "number": 242,
+    "state": "CLOSED",
+    "title": "Harden release evidence tracker body drift checks"
+  },
+  {
+    "number": 241,
+    "state": "CLOSED",
+    "title": "Reconcile release evidence label drift merge state"
+  },
+  {
+    "number": 239,
+    "state": "CLOSED",
+    "title": "Harden release evidence tracker label drift checks"
+  },
+  {
+    "number": 237,
+    "state": "CLOSED",
+    "title": "Reconcile release evidence issue body sync merge state"
+  },
+  {
+    "number": 235,
+    "state": "CLOSED",
+    "title": "Generate and apply release evidence tracker issue bodies"
+  },
+  {
+    "number": 233,
+    "state": "CLOSED",
+    "title": "Reconcile release evidence issue links merge state"
+  },
+  {
+    "number": 231,
+    "state": "OPEN",
+    "title": "Retain production release evidence: post_audit_remediation"
+  },
+  {
+    "number": 230,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_explorer_verification"
+  },
+  {
+    "number": 229,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_randomizer_operations_evidence"
+  },
+  {
+    "number": 228,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_ceremony_evidence"
+  },
+  {
+    "number": 227,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_deployment_manifest"
+  },
+  {
+    "number": 226,
+    "state": "OPEN",
+    "title": "Retain production release evidence: production_broadcast_retention"
+  },
+  {
+    "number": 225,
+    "state": "OPEN",
+    "title": "Retain production release evidence: production_address_books"
+  },
+  {
+    "number": 224,
+    "state": "OPEN",
+    "title": "Retain production release evidence: signed_git_tag"
+  },
+  {
+    "number": 223,
+    "state": "OPEN",
+    "title": "Retain production release evidence: production_signatures"
+  },
+  {
+    "number": 222,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: explorer_verification_status"
+  },
+  {
+    "number": 221,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: verified_deployed_addresses"
+  },
+  {
+    "number": 220,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: fork_testnet_randomizer_operations_evidence"
+  },
+  {
+    "number": 219,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: fork_testnet_ceremony_evidence"
+  },
+  {
+    "number": 218,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: fork_testnet_metadata_browser_evidence"
+  },
+  {
+    "number": 217,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: testnet_deployment_rehearsal"
+  },
+  {
+    "number": 216,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: fork_deployment_rehearsal"
+  },
+  {
+    "number": 215,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: external_audit_report"
+  },
+  {
+    "number": 214,
+    "state": "CLOSED",
+    "title": "Link release evidence backlog entries to GitHub tracker issues"
+  },
+  {
+    "number": 212,
+    "state": "CLOSED",
+    "title": "Add release evidence issue backlog artifact"
+  },
+  {
+    "number": 210,
+    "state": "CLOSED",
+    "title": "Reconcile release evidence packet index merge state"
+  },
+  {
+    "number": 207,
+    "state": "CLOSED",
+    "title": "Add release evidence packet index and checker"
+  },
+  {
+    "number": 206,
+    "state": "CLOSED",
+    "title": "Reconcile production blocker report merge state"
+  },
+  {
+    "number": 203,
+    "state": "CLOSED",
+    "title": "Add production release blocker report artifact"
+  },
+  {
+    "number": 202,
+    "state": "CLOSED",
+    "title": "Reconcile production release template merge state"
+  },
+  {
+    "number": 199,
+    "state": "CLOSED",
+    "title": "Add per-requirement production release evidence templates"
+  },
+  {
+    "number": 198,
+    "state": "CLOSED",
+    "title": "Reconcile public beta template merge state"
+  },
+  {
+    "number": 195,
+    "state": "CLOSED",
+    "title": "Add per-requirement public beta evidence templates"
+  },
+  {
+    "number": 194,
+    "state": "CLOSED",
+    "title": "Reconcile public beta blocker report merge state"
+  },
+  {
+    "number": 191,
+    "state": "CLOSED",
+    "title": "Add public beta evidence blocker report artifact"
+  },
+  {
+    "number": 190,
+    "state": "CLOSED",
+    "title": "Reconcile signer custody readiness merge state"
+  },
+  {
+    "number": 187,
+    "state": "CLOSED",
+    "title": "Add production signer custody readiness evidence"
+  },
+  {
+    "number": 186,
+    "state": "CLOSED",
+    "title": "Reconcile drop authorization signing evidence merge state"
+  },
+  {
+    "number": 183,
+    "state": "CLOSED",
+    "title": "Add drop authorization signing evidence schema and checker"
+  },
+  {
+    "number": 182,
+    "state": "CLOSED",
+    "title": "Reconcile autonomous run state after drop authorization payload generator merge"
+  },
+  {
+    "number": 180,
+    "state": "CLOSED",
+    "title": "Add no-secret drop authorization payload generator tooling"
+  },
+  {
+    "number": 177,
+    "state": "CLOSED",
+    "title": "Add drop authorization signing examples and fixtures"
+  },
+  {
+    "number": 176,
+    "state": "CLOSED",
+    "title": "Reconcile roadmap after incident response runbook merge"
+  },
+  {
+    "number": 173,
+    "state": "CLOSED",
+    "title": "Add protocol incident response runbooks"
+  },
+  {
+    "number": 172,
+    "state": "CLOSED",
+    "title": "Reconcile Gate G roadmap after non-local evidence schema merge"
+  },
+  {
+    "number": 170,
+    "state": "CLOSED",
+    "title": "Add non-local release evidence metadata schema and checker"
+  },
+  {
+    "number": 168,
+    "state": "CLOSED",
+    "title": "Add non-local release evidence intake runbook"
+  },
+  {
+    "number": 166,
+    "state": "CLOSED",
+    "title": "Reconcile Gate G roadmap after public beta evidence merge"
+  }
+]

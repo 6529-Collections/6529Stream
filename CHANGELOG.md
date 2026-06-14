@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a retained no-secret live audit report and snapshot bundle after
+  syncing issue #216 from `missing` to the committed `pending`
+  fork-deployment-rehearsal body, with refreshed live-audit archive, release
+  manifest, and checksum evidence while preserving blocked public-beta
+  readiness.
 - Added pending-review mainnet-fork deployment rehearsal evidence for issue
   #216, including a sanitized Foundry broadcast, generated fork deployment
   manifest, generated fork address book, non-local evidence envelope, and

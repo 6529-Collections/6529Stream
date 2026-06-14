@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/retain-fork-deployment-rehearsal-evidence` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/346` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/347` |
-| Next issue | `TBD after issue #216 review` |
+| Active PR branch | `codex/reconcile-fork-evidence-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/347` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/348` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/349` |
+| Next issue | `TBD after issue #348 reconciliation` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 15:26 UTC` |
+| Last updated | `2026-06-14 15:55 UTC` |
 
 ## Packaging Notes
 
@@ -225,13 +225,78 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Merged in PR #342 |
 | 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Merged in PR #344 |
 | 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Merged in PR #346 |
-| 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Active for issue #216 |
+| 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Merged in PR #347 |
+| 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Active for issue #348 |
 
 ## Current PR Worklog
 
-### PR candidate: Retain pending fork deployment rehearsal evidence (Queue Item 169)
+### PR candidate: Reconcile PR #347 fork evidence merge state (Queue Item 170)
 
 Status: PR open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/348`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/349`.
+Branch: `codex/reconcile-fork-evidence-merge-state`.
+Branch started from PR #347 squash merge commit
+`25a792a43144231392e7cc7f017ec11882ae0f7f`.
+Opened PR head before state amend:
+`ded85af7defcb7ecee6321dc72381254798f644d`.
+
+Goal:
+
+- Record PR #347 merge evidence and move Queue Item 169 from active to merged.
+- Keep issue #216 open and the `fork_deployment_rehearsal` public-beta row
+  `pending`, not `complete`.
+- Apply the generated issue-body sync payload for issue #216 to live GitHub so
+  the issue now reflects the committed `pending` / retained-incomplete posture
+  instead of the older `missing` text.
+- Retain the no-secret live audit report and snapshots generated after the
+  live body sync:
+  `release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json`,
+  `release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md`,
+  and
+  `release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/`.
+- Refresh the live-audit archive, release manifest, and checksum bundle so the
+  retained evidence stays covered by deterministic release artifacts.
+
+Current facts:
+
+- PR #347 was squashed into `main` as
+  `25a792a43144231392e7cc7f017ec11882ae0f7f`.
+- PR #347 CI run `27503447725` passed both jobs:
+  Foundry smoke `81290377472` and Windows PowerShell wrapper `81290377482`.
+- CodeRabbit status on PR #347 was success; no review threads were open.
+- Merge decision comment: `4702224195`.
+- Live issue #216 was updated from the generated body-sync payload at
+  `2026-06-14 15:39 UTC` and remains open.
+- Retained live audit bundle timestamp: `20260614T153950Z`.
+
+Validation completed locally so far:
+
+- `python scripts\audit_release_evidence_issue_snapshots.py --generated-at 20260614T153950Z --tmp-dir release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report-snapshots --report-json release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report.json --report-md release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report.md` passed.
+- `python scripts\test_release_evidence_issue_body_sync.py` passed.
+- `python scripts\generate_release_evidence_issue_body_sync.py --check` passed.
+- `python scripts\check_release_evidence_issue_labels.py --live-json release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report-snapshots\release-evidence-issue-labels.json` passed.
+- `python scripts\check_release_evidence_issue_bodies.py --live-json release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report-snapshots\release-evidence-issue-bodies.json` passed.
+- `python scripts\check_release_evidence_issue_closure.py --live-json release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report-snapshots\release-evidence-issue-closure.json` passed.
+- `python scripts\check_release_evidence_live_audit_report.py --report-json release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report.json` passed.
+- `python scripts\check_release_evidence_live_audit_markdown.py --report-md release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report.md --report-json release-artifacts\evidence\live-audit-reports\20260614T153950Z-release-evidence-live-audit-report.json` passed.
+- `python scripts\generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts\evidence\live-audit-reports --check` passed after regenerating the archive outputs.
+- `python scripts\test_release_evidence_live_audit_archive.py` passed.
+- `python scripts\test_release_manifest.py` passed.
+- `python scripts\generate_release_manifest.py --check` passed after
+  regenerating the release manifest/checksum pair to convergence.
+- `python scripts\test_release_checksums.py` passed.
+- `python scripts\generate_release_checksums.py --check` passed.
+- `python scripts\check_public_beta_evidence.py` passed; public beta remains
+  blocked and `fork_deployment_rehearsal` remains `pending`.
+- `python scripts\check_changelog.py` passed.
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md CHANGELOG.md` passed.
+- `git diff --check` passed.
+- Full local `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed at `2026-06-14 15:54 UTC` with existing compiler/test warning noise only.
+
+### Completed: Retain pending fork deployment rehearsal evidence (Queue Item 169)
+
+Status: merged in PR #347.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/216`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/347`.
 Branch: `codex/retain-fork-deployment-rehearsal-evidence`.
@@ -241,7 +306,14 @@ Initial local commit before final state/digest amend:
 `e6788368c672bd33c08233c838961a170acb6823`; final PR head is recorded by Git
 and the opened pull request after push.
 Opened PR head: `d4b4d49af5f9f2dbe1732577f718949869532291`.
+Final PR head: `2f3447ae41ee9896622c921c0982be89ed2e8cff`.
+Squash merge commit: `25a792a43144231392e7cc7f017ec11882ae0f7f`.
+CI: run `27503447725`, Foundry smoke job `81290377472` and Windows
+PowerShell wrapper job `81290377482`, passed.
 CodeRabbit review requested via comment `4702188617`.
+CodeRabbit: combined status was success; no review threads were open.
+Claude: no Claude review was requested per current user instruction.
+Merge decision comment: `4702224195`.
 
 Goal:
 
@@ -299,6 +371,10 @@ Validation completed locally:
   `deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json`,
   address books, release manifest, and checksums were regenerated before the
   passing full run.
+- GitHub CI run `27503447725` passed after PR creation, including the added fork
+  broadcast/manifest checks and the Windows PowerShell wrapper job.
+- Issue #216 remains open because the retained evidence row is `pending`, not
+  accepted as complete.
 
 ### Completed: Add Windows PowerShell 5.1 check-wrapper CI harness (Queue Item 168)
 
