@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/windows-powershell-wrapper-ci` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/344` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/345` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/346` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 14:16 UTC` |
+| Last updated | `2026-06-14 14:21 UTC` |
 
 ## Packaging Notes
 
@@ -230,12 +230,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add Windows PowerShell 5.1 check-wrapper CI harness (Queue Item 168)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/345`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/346`.
 Branch: `codex/windows-powershell-wrapper-ci`.
 Branch started from PR #344 squash merge commit
 `fe378036ac4686d94ee8e4f926adadd30ebef385`.
+Initial PR head: `ad8ca9d37a4ee4829195faa6ae7abca9ac7d36e3`.
+CodeRabbit review requested via comment `4702020821`.
 
 Goal:
 
@@ -12821,6 +12823,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 14:21 | Open PR #346 | PR #346 opened for issue #345 on head `ad8ca9d37a4ee4829195faa6ae7abca9ac7d36e3`, adds a lightweight Windows PowerShell CI job and workflow-wiring policy test for the checked native-command wrapper harness, and requests CodeRabbit review via comment `4702020821`. |
 | 2026-06-14 14:16 | Start Queue Item 168 | PR #344 merged as `fe378036ac4686d94ee8e4f926adadd30ebef385`, issue #343 closed completed, issue #345 opened for a lightweight Windows PowerShell 5.1 CI harness, and branch `codex/windows-powershell-wrapper-ci` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 14:13 | Merge PR #344 | Tooling PR #344 passed CI run `27501279202`, job `81284495028`, on final head `d303ad5bb340f35d5a438f5379cbe691f9d51534`; CodeRabbit status was success after explicit review-finished reply `4701972232`; no review threads were open; merge-decision comment `4702003701` recorded the initial rate-limit warning as non-actionable; squash merge commit `fe378036ac4686d94ee8e4f926adadd30ebef385` landed on `main`; and issue #343 closed completed. |
 | 2026-06-14 14:04 | Patch PR #344 CI failure | CI run `27501191515` failed in the new PowerShell runtime step after the harness caught the intentional failing native command but left PowerShell Core with a non-zero `$LASTEXITCODE`; the harness now ends by running the zero-exit native command again, and the Python policy test asserts that reset path so future edits cannot reintroduce the false failure. |
