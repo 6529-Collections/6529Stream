@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/retire-provider-formatting-deferrals` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/316` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/317` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/318` |
-| Next issue | TBD |
+| Active PR branch | `codex/reconcile-provider-formatting-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/318` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/319` |
+| Active PR | TBD |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/320` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 08:52 UTC` |
+| Last updated | `2026-06-14 09:03 UTC` |
 
 ## Packaging Notes
 
@@ -209,13 +209,42 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 150 | Triage Solidity formatting gate path | Gate A/G support | Triage `forge fmt --check smart-contracts`, decide first-party versus vendored/generated scope, document the accepted formatting gate path, and prepare issue-ready follow-up work without changing contract behavior | Merged in PR #312 |
 | 151 | Reconcile Solidity formatting gate merge state | Gate G support | Record PR #312 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the first deferred-formatting retirement target | Merged in PR #315 |
 | 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Merged in PR #316 |
-| 153 | Retire provider and integration Solidity formatting deferrals | Gate A/G support | Reformat the non-vendored provider and legacy integration slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave OpenZeppelin-style vendored files for later provenance-specific PRs | Active for issue #317 |
+| 153 | Retire provider and integration Solidity formatting deferrals | Gate A/G support | Reformat the non-vendored provider and legacy integration slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave OpenZeppelin-style vendored files for later provenance-specific PRs | Merged in PR #318 |
+| 154 | Reconcile provider formatting deferral merge state | Gate G support | Record PR #318 merge evidence, close out issue #317/Queue Item 153 in roadmap state, and select the next no-secret vendored-formatting policy target | Active for issue #319 |
+| 155 | Convert vendored Solidity formatting deferrals into explicit provenance exemptions | Gate A/G support | Rename the remaining OpenZeppelin-style formatter deferrals into documented vendored/provenance exemptions, preserve strict formatting for all non-exempt Solidity files, and refresh checker tests/docs without changing Solidity bytecode | Queued as issue #320 |
 
 ## Current PR Worklog
 
-### PR candidate: Retire provider and integration Solidity formatting deferrals (Queue Item 153)
+### PR candidate: Reconcile provider formatting deferral merge state (Queue Item 154)
 
-Status: PR open; CI and CodeRabbit green on final artifact-refresh head.
+Status: local branch started; implementation in progress.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/319`.
+PR: TBD.
+Branch: `codex/reconcile-provider-formatting-merge-state`.
+Branch started from PR #318 squash merge commit
+`e66496804adb5064361f763ae781ec153d662e21`.
+Next substantive issue:
+`https://github.com/6529-Collections/6529Stream/issues/320`.
+
+Goal:
+
+- Mark Queue Item 153, issue #317, and PR #318 as merged.
+- Record PR #318 final CI run `27493830680`, CodeRabbit success, merge
+  decision comment `4701263404`, and squash merge commit
+  `e66496804adb5064361f763ae781ec153d662e21`.
+- Refresh roadmap verification metadata for the scoped Solidity formatting gate.
+- Queue issue #320 as the next no-secret formatting/provenance policy target.
+- Preserve the blocked public-beta and production readiness posture.
+
+Validation:
+
+- `rg -n "^#|^##|^###" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
+- `rg -n "PR #318|#317|#319|#320|Queue Item 153|Queue Item 154|Queue Item 155|Last verified|Solidity formatting scoped gate" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
+- `git diff --check`.
+
+### Completed: Retire provider and integration Solidity formatting deferrals (Queue Item 153)
+
+Status: merged in PR #318.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/317`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/318`.
 Branch: `codex/retire-provider-formatting-deferrals`.
@@ -226,9 +255,13 @@ Latest pushed state head before CI fix:
 `5ba4a3aef758ec08dcc4e0c5a77dcc33cdf102ee`.
 Latest pushed artifact-refresh head:
 `1c921e307cdd38267ae0361da8c61f1aba595556`.
+Final PR head: `ee186694672e1e5330405dc8bd593c05b4e1776e`.
+Squash merge commit: `e66496804adb5064361f763ae781ec153d662e21`.
 CodeRabbit: explicit review request comment `4701163707`.
 Artifact-refresh CodeRabbit review request comment `4701229998`; CodeRabbit
 review-finished reply `4701230530`; CodeRabbit status success.
+Final state-only CodeRabbit review request comment `4701247477`;
+review-finished reply `4701248027`; CodeRabbit status success.
 CI: run `27493066062` failed at `Release artifact catalog` because
 `abi-checksums.json` and `release-artifact-manifest.json` were stale relative
 to the forced via-IR build output. Docker Linux Foundry v1.7.1 reproduction and
@@ -237,6 +270,8 @@ release/deployment/evidence manifest chain from that current build output.
 CI run `27493643910` passed on artifact-refresh head `1c921e3`, including the
 previously failing `Release artifact catalog` step and all downstream release,
 deployment, evidence, checksum, changelog, and deployment-rehearsal steps.
+Final CI run `27493830680` passed on head `ee18669`. Merge decision comment
+`4701263404`; issue #317 closed completed by the squash merge.
 
 Goal:
 
@@ -12101,6 +12136,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 09:03 | Start Queue Item 154 and queue issue #320 | PR #318 merged as `e66496804adb5064361f763ae781ec153d662e21`, issue #317 closed completed, issue #319 opened for merge-state reconciliation, issue #320 opened to convert the remaining vendored formatter deferrals into explicit provenance exemptions, and branch `codex/reconcile-provider-formatting-merge-state` started from the merged baseline. |
+| 2026-06-14 09:01 | Merge PR #318 | Provider/integration formatting deferral retirement merged after final head `ee186694672e1e5330405dc8bd593c05b4e1776e` passed CI run `27493830680`, CodeRabbit status was success with no unresolved review threads after final review-finished reply `4701248027`, merge-decision comment `4701263404`, and squash commit `e66496804adb5064361f763ae781ec153d662e21`; issue #317 closed completed. |
 | 2026-06-14 08:52 | Mark PR #318 merge-ready | Artifact-refresh head `1c921e307cdd38267ae0361da8c61f1aba595556` passed GitHub CI run `27493643910`, CodeRabbit status is success with review-finished reply `4701230530`, and there are no unresolved review threads. |
 | 2026-06-14 08:44 | Fix PR #318 release artifact catalog drift locally | CI run `27493066062` failed at `Release artifact catalog`; regenerated ABI/source-verification/deployment/address/evidence/release-manifest/checksum artifacts from the current forced via-IR build, reproduced the Linux Foundry output with Docker, confirmed fresh Windows and Linux bytecode hashes match, and reran targeted artifact-chain checks plus full Windows `scripts\check.ps1` successfully. |
 | 2026-06-14 08:19 | Open PR #318 | PR #318 opened on head `46c1e1b2431140fe6ff0e2686709c2aace50bc47`, closes issue #317, retires provider/integration formatting deferrals, records the 34-required / 17-deferred formatting baseline, and requested CodeRabbit review via comment `4701163707`. |
