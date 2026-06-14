@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/vendored-formatting-exemptions` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/321` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/320` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/322` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 09:35 UTC` |
+| Last updated | `2026-06-14 09:38 UTC` |
 
 ## Packaging Notes
 
@@ -217,12 +217,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Convert vendored formatting deferrals into provenance exemptions (Queue Item 155)
 
-Status: local implementation and validation complete; PR packaging in progress.
+Status: PR open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/320`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/322`.
 Branch: `codex/vendored-formatting-exemptions`.
 Branch started from PR #321 squash merge commit
 `38e01759204ea5eb124c3a33a134221c15d16c8d`.
+Initial PR head: `06e867ebc7cc079b41be50e22e75b4058b21db82`.
+CodeRabbit review requested via comment `4701353924`.
 
 Goal:
 
@@ -12170,6 +12172,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 09:38 | Open PR #322 | PR #322 opened for issue #320 on head `06e867ebc7cc079b41be50e22e75b4058b21db82`, converts the remaining 17 formatter entries into explicit vendored/provenance exemptions, refreshes checker tests/docs/release hashes, and requests CodeRabbit review via comment `4701353924`. |
 | 2026-06-14 09:35 | Validate Queue Item 155 locally | Focused formatting tests/checker, `make fmt-check`, terminology grep, changelog, release-readiness, release artifact, release manifest, release checksum, and full Windows `scripts\check.ps1` all pass after converting the remaining 17 formatter entries into explicit vendored/provenance exemptions and refreshing release manifest/checksum artifacts. |
 | 2026-06-14 09:24 | Start Queue Item 155 | PR #321 merged as `38e01759204ea5eb124c3a33a134221c15d16c8d`, issue #319 closed completed, issue #320 selected as the next Gate A/G formatting-provenance policy target, and branch `codex/vendored-formatting-exemptions` started from the merged baseline. |
 | 2026-06-14 09:18 | Merge PR #321 | Reconciliation PR #321 passed CI run `27494219818` on head `8fb9c46480885d92904e7e72b5d8765e07db5a81`, CodeRabbit status was success after explicit review-finished reply `4701286066`, there were no unresolved review threads, and merge-decision comment `4701307625` recorded the rate-limit warning as non-actionable. |
