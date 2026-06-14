@@ -4,9 +4,12 @@ These files are checked, public-safe templates for the public-beta requirement
 rows in `release-artifacts/latest/public-beta-evidence.json`.
 
 They are not completion evidence. Each JSON file uses
-`record_type: "template"` and `review_status: "template"`, points at the
-shared retained-artifact placeholder, and keeps public beta blocked until a
-future operator replaces the placeholder with reviewed no-secret evidence.
+`record_type: "template"` and `review_status: "template"`. Most rows point at
+the shared retained-artifact placeholder; rows with dedicated retained
+artifact formats, such as `external_audit_report` and
+`fork_deployment_rehearsal`, point at their requirement-specific Markdown
+templates. Public beta remains blocked until a future operator replaces the
+placeholder/template with reviewed no-secret evidence.
 
 Before using a template for real evidence:
 
@@ -18,3 +21,8 @@ Before using a template for real evidence:
 4. Run `python scripts/check_non_local_release_evidence.py` on the evidence
    JSON and `python scripts/check_public_beta_evidence.py` after linking it
    from the public-beta evidence manifest.
+
+For external audit report evidence, fill
+`release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`
+and run `python scripts/check_external_audit_report_evidence.py` before
+generating the non-local evidence envelope.

@@ -72,6 +72,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/test_non_local_release_evidence_generator.py
 "$python_bin" scripts/test_non_local_release_evidence.py
 "$python_bin" scripts/check_non_local_release_evidence.py
+"$python_bin" scripts/test_external_audit_report_evidence.py
+"$python_bin" scripts/check_external_audit_report_evidence.py
 "$python_bin" scripts/test_fork_deployment_rehearsal_evidence.py
 "$python_bin" scripts/check_fork_deployment_rehearsal_evidence.py
 "$python_bin" scripts/test_public_beta_evidence.py

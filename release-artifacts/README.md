@@ -290,6 +290,14 @@ readiness indexes for the current local baseline. They are validated before
 release manifest generation, and the release manifest records their hashes as
 governance documents.
 
+`evidence/external-audit-report/external-audit-report-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future
+`external_audit_report` evidence. Validate it with
+`python scripts/test_external_audit_report_evidence.py` and
+`python scripts/check_external_audit_report_evidence.py` before generating a
+non-local evidence envelope. The committed template is not audit evidence and
+does not change public-beta readiness.
+
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility

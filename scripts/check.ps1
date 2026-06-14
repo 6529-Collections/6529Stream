@@ -117,6 +117,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_non_local_release_evidence_generator.py"
 & $pythonPath @pythonArgs "scripts\test_non_local_release_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_non_local_release_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_external_audit_report_evidence.py"
+& $pythonPath @pythonArgs "scripts\check_external_audit_report_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_fork_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_fork_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_public_beta_evidence.py"
