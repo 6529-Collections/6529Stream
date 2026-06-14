@@ -12,7 +12,7 @@
     "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
     "StreamAuctions": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
     "StreamCore": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
-    "StreamCuratorsPool": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
+    "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
     "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
     "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e"
   },
@@ -91,12 +91,12 @@
     },
     "StreamCuratorsPool": {
       "creation": {
-        "sha256": "sha256:a7d82d5a839a054a316b6b8d3210d220b32269592d31693321c3da551da7fc95",
+        "sha256": "sha256:765c3818760e0379226887d1c3188992f552c95a3496061f28170c910cc9a21c",
         "linked": true,
         "hash_mode": "bytes"
       },
       "runtime": {
-        "sha256": "sha256:22eca98b3ca54dfb581536890db8a350045c3b3fe37ef2f5844dd896b8a0da9b",
+        "sha256": "sha256:0b8fd69702c5d95f095f04ab5d0ec5d95f7516e34bda7ba849d1e8bc76b0c1cd",
         "linked": true,
         "hash_mode": "bytes"
       }
@@ -220,16 +220,16 @@
     "StreamCuratorsPool": {
       "source": "smart-contracts/StreamCuratorsPool.sol",
       "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
-      "abi_sha256": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
-      "bytecode_sha256": "sha256:a7d82d5a839a054a316b6b8d3210d220b32269592d31693321c3da551da7fc95",
+      "abi_sha256": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+      "bytecode_sha256": "sha256:765c3818760e0379226887d1c3188992f552c95a3496061f28170c910cc9a21c",
       "bytecode_linked": true,
       "bytecode_hash_mode": "bytes",
-      "deployed_bytecode_sha256": "sha256:22eca98b3ca54dfb581536890db8a350045c3b3fe37ef2f5844dd896b8a0da9b",
+      "deployed_bytecode_sha256": "sha256:0b8fd69702c5d95f095f04ab5d0ec5d95f7516e34bda7ba849d1e8bc76b0c1cd",
       "deployed_bytecode_linked": true,
       "deployed_bytecode_hash_mode": "bytes",
-      "abi_entries": 25,
-      "function_count": 17,
-      "event_count": 5,
+      "abi_entries": 29,
+      "function_count": 20,
+      "event_count": 6,
       "constructor_count": 1
     },
     "StreamDrops": {

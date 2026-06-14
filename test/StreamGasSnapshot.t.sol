@@ -162,7 +162,8 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         private
         returns (bytes32[] memory proof)
     {
-        bytes32 leaf = pool.hashRewardLeaf(rewardAddress, COLLECTION_ID, amount);
+        uint256 rootEpoch = pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 leaf = pool.hashRewardLeaf(rewardAddress, COLLECTION_ID, amount, rootEpoch);
         pool.setMerkleRoot(COLLECTION_ID, leaf);
         proof = new bytes32[](0);
     }

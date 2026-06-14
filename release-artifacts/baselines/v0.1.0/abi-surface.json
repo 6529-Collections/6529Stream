@@ -16,13 +16,13 @@
     "DependencyRegistry": {
       "source": "smart-contracts/DependencyRegistry.sol",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
-      "abi_sha256": "sha256:1bda4ab3d550018a61c5f1bc26d2d18eb2d7cdf8520c6fa3793b2fee8d3551c3",
-      "abi_entries": 28,
+      "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+      "abi_entries": 33,
       "entry_counts": {
         "constructors": 1,
-        "functions": 22,
+        "functions": 25,
         "events": 2,
-        "errors": 3,
+        "errors": 5,
         "fallbacks": 0,
         "receives": 0
       },
@@ -69,6 +69,51 @@
                 "name": "",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_DEPENDENCY_PROVENANCE_BYTES()",
+            "kind": "function",
+            "name": "MAX_DEPENDENCY_PROVENANCE_BYTES",
+            "signature": "MAX_DEPENDENCY_PROVENANCE_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_DEPENDENCY_SCRIPT_CHUNKS()",
+            "kind": "function",
+            "name": "MAX_DEPENDENCY_SCRIPT_CHUNKS",
+            "signature": "MAX_DEPENDENCY_SCRIPT_CHUNKS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES()",
+            "kind": "function",
+            "name": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES",
+            "signature": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
               }
             ],
             "state_mutability": "view"
@@ -685,6 +730,42 @@
               },
               {
                 "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "DependencyFieldInvalidUTF8(bytes32)",
+            "kind": "error",
+            "name": "DependencyFieldInvalidUTF8",
+            "signature": "DependencyFieldInvalidUTF8(bytes32)",
+            "inputs": [
+              {
+                "name": "field",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "DependencyFieldTooLarge(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "DependencyFieldTooLarge",
+            "signature": "DependencyFieldTooLarge(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "field",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
                 "type": "uint256",
                 "internal_type": "uint256"
               }
@@ -5739,13 +5820,13 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:979bb597afe287b0b05d057849ceaa154bc566d361502fe7d7bd5591107f79d1",
-      "abi_entries": 95,
+      "abi_sha256": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+      "abi_entries": 120,
       "entry_counts": {
         "constructors": 1,
-        "functions": 67,
+        "functions": 74,
         "events": 11,
-        "errors": 16,
+        "errors": 34,
         "fallbacks": 0,
         "receives": 0
       },
@@ -5781,6 +5862,111 @@
           }
         ],
         "functions": [
+          {
+            "key": "MAX_COLLECTION_SCRIPT_CHUNKS()",
+            "kind": "function",
+            "name": "MAX_COLLECTION_SCRIPT_CHUNKS",
+            "signature": "MAX_COLLECTION_SCRIPT_CHUNKS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_COLLECTION_SCRIPT_CHUNK_BYTES()",
+            "kind": "function",
+            "name": "MAX_COLLECTION_SCRIPT_CHUNK_BYTES",
+            "signature": "MAX_COLLECTION_SCRIPT_CHUNK_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_COLLECTION_TEXT_BYTES()",
+            "kind": "function",
+            "name": "MAX_COLLECTION_TEXT_BYTES",
+            "signature": "MAX_COLLECTION_TEXT_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_GENERATED_TOKEN_URI_BYTES()",
+            "kind": "function",
+            "name": "MAX_GENERATED_TOKEN_URI_BYTES",
+            "signature": "MAX_GENERATED_TOKEN_URI_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_TOKEN_ATTRIBUTES_BYTES()",
+            "kind": "function",
+            "name": "MAX_TOKEN_ATTRIBUTES_BYTES",
+            "signature": "MAX_TOKEN_ATTRIBUTES_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_TOKEN_DATA_BYTES()",
+            "kind": "function",
+            "name": "MAX_TOKEN_DATA_BYTES",
+            "signature": "MAX_TOKEN_DATA_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_TOKEN_IMAGE_BYTES()",
+            "kind": "function",
+            "name": "MAX_TOKEN_IMAGE_BYTES",
+            "signature": "MAX_TOKEN_IMAGE_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
           {
             "key": "METADATA_FREEZE_MANIFEST_TYPEHASH()",
             "kind": "function",
@@ -7668,6 +7854,13 @@
         ],
         "errors": [
           {
+            "key": "ArtistSignatureUnauthorized()",
+            "kind": "error",
+            "name": "ArtistSignatureUnauthorized",
+            "signature": "ArtistSignatureUnauthorized()",
+            "inputs": []
+          },
+          {
             "key": "BurnedTokenRemintNotAllowed(uint256)",
             "kind": "error",
             "name": "BurnedTokenRemintNotAllowed",
@@ -7784,6 +7977,20 @@
             ]
           },
           {
+            "key": "CollectionSupplyReached()",
+            "kind": "error",
+            "name": "CollectionSupplyReached",
+            "signature": "CollectionSupplyReached()",
+            "inputs": []
+          },
+          {
+            "key": "CollectionSupplyTooLarge()",
+            "kind": "error",
+            "name": "CollectionSupplyTooLarge",
+            "signature": "CollectionSupplyTooLarge()",
+            "inputs": []
+          },
+          {
             "key": "ERC2981InvalidDefaultRoyalty(uint256,uint256)",
             "kind": "error",
             "name": "ERC2981InvalidDefaultRoyalty",
@@ -7856,11 +8063,96 @@
             ]
           },
           {
+            "key": "FinalSupplyTimeNotPassed()",
+            "kind": "error",
+            "name": "FinalSupplyTimeNotPassed",
+            "signature": "FinalSupplyTimeNotPassed()",
+            "inputs": []
+          },
+          {
             "key": "FrozenCollectionDependencyRegistry()",
             "kind": "error",
             "name": "FrozenCollectionDependencyRegistry",
             "signature": "FrozenCollectionDependencyRegistry()",
             "inputs": []
+          },
+          {
+            "key": "FunctionAdminUnauthorized()",
+            "kind": "error",
+            "name": "FunctionAdminUnauthorized",
+            "signature": "FunctionAdminUnauthorized()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidAdminContract()",
+            "kind": "error",
+            "name": "InvalidAdminContract",
+            "signature": "InvalidAdminContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidDependencyRegistryContract()",
+            "kind": "error",
+            "name": "InvalidDependencyRegistryContract",
+            "signature": "InvalidDependencyRegistryContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidMinterContract()",
+            "kind": "error",
+            "name": "InvalidMinterContract",
+            "signature": "InvalidMinterContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidRandomizerContract()",
+            "kind": "error",
+            "name": "InvalidRandomizerContract",
+            "signature": "InvalidRandomizerContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidTokenMetadataInput()",
+            "kind": "error",
+            "name": "InvalidTokenMetadataInput",
+            "signature": "InvalidTokenMetadataInput()",
+            "inputs": []
+          },
+          {
+            "key": "MetadataFieldInvalidUTF8(bytes32)",
+            "kind": "error",
+            "name": "MetadataFieldInvalidUTF8",
+            "signature": "MetadataFieldInvalidUTF8(bytes32)",
+            "inputs": [
+              {
+                "name": "field",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MetadataFieldTooLarge(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "MetadataFieldTooLarge",
+            "signature": "MetadataFieldTooLarge(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "field",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
           },
           {
             "key": "MetadataFrozen(uint256)",
@@ -7874,6 +8166,20 @@
                 "internal_type": "uint256"
               }
             ]
+          },
+          {
+            "key": "MetadataMutationPaused()",
+            "kind": "error",
+            "name": "MetadataMutationPaused",
+            "signature": "MetadataMutationPaused()",
+            "inputs": []
+          },
+          {
+            "key": "NotMinterContract()",
+            "kind": "error",
+            "name": "NotMinterContract",
+            "signature": "NotMinterContract()",
+            "inputs": []
           },
           {
             "key": "PendingRandomnessRequests(uint256,address,uint256)",
@@ -7899,6 +8205,20 @@
             ]
           },
           {
+            "key": "TokenNotMinted()",
+            "kind": "error",
+            "name": "TokenNotMinted",
+            "signature": "TokenNotMinted()",
+            "inputs": []
+          },
+          {
+            "key": "TokenOutsideCollectionRange()",
+            "kind": "error",
+            "name": "TokenOutsideCollectionRange",
+            "signature": "TokenOutsideCollectionRange()",
+            "inputs": []
+          },
+          {
             "key": "UnknownDependency(bytes32)",
             "kind": "error",
             "name": "UnknownDependency",
@@ -7912,6 +8232,13 @@
             ]
           },
           {
+            "key": "UnsafeMetadataURI()",
+            "kind": "error",
+            "name": "UnsafeMetadataURI",
+            "signature": "UnsafeMetadataURI()",
+            "inputs": []
+          },
+          {
             "key": "UnsafeRawAttributes(uint256)",
             "kind": "error",
             "name": "UnsafeRawAttributes",
@@ -7923,6 +8250,13 @@
                 "internal_type": "uint256"
               }
             ]
+          },
+          {
+            "key": "ZeroTokenHash()",
+            "kind": "error",
+            "name": "ZeroTokenHash",
+            "signature": "ZeroTokenHash()",
+            "inputs": []
           }
         ],
         "fallbacks": [],
@@ -7932,12 +8266,12 @@
     "StreamCuratorsPool": {
       "source": "smart-contracts/StreamCuratorsPool.sol",
       "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
-      "abi_sha256": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
-      "abi_entries": 25,
+      "abi_sha256": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+      "abi_entries": 29,
       "entry_counts": {
         "constructors": 1,
-        "functions": 17,
-        "events": 5,
+        "functions": 20,
+        "events": 6,
         "errors": 1,
         "fallbacks": 0,
         "receives": 1
@@ -7964,6 +8298,21 @@
           }
         ],
         "functions": [
+          {
+            "key": "CURATOR_REWARD_LEAF_DOMAIN()",
+            "kind": "function",
+            "name": "CURATOR_REWARD_LEAF_DOMAIN",
+            "signature": "CURATOR_REWARD_LEAF_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
           {
             "key": "claimRewards(uint256,uint256,bytes32[],address)",
             "kind": "function",
@@ -8011,6 +8360,27 @@
                 "name": "",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionMerkleRootEpoch(uint256)",
+            "kind": "function",
+            "name": "collectionMerkleRootEpoch",
+            "signature": "collectionMerkleRootEpoch(uint256)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
               }
             ],
             "state_mutability": "view"
@@ -8089,7 +8459,43 @@
                 "internal_type": "bytes32"
               }
             ],
-            "state_mutability": "pure"
+            "state_mutability": "view"
+          },
+          {
+            "key": "hashRewardLeaf(address,uint256,uint256,uint256)",
+            "kind": "function",
+            "name": "hashRewardLeaf",
+            "signature": "hashRewardLeaf(address,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_rewardAddress",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_rootEpoch",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "rewardsClaimPerAddress(uint256,address)",
@@ -8374,6 +8780,33 @@
                 "type": "uint256",
                 "internal_type": "uint256",
                 "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MerkleRootUpdated(uint256,uint256,bytes32)",
+            "kind": "event",
+            "name": "MerkleRootUpdated",
+            "signature": "MerkleRootUpdated(uint256,uint256,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionID",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "rootEpoch",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "merkleRoot",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
               }
             ]
           },

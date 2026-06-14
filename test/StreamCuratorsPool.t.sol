@@ -13,6 +13,9 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
     using Assertions for bytes32;
 
     event Reward(address indexed _add, uint256 indexed collectionID, uint256 indexed amount);
+    event MerkleRootUpdated(
+        uint256 indexed collectionID, uint256 indexed rootEpoch, bytes32 indexed merkleRoot
+    );
     event CuratorCreditCreated(
         address indexed _add, uint256 indexed collectionID, uint256 indexed funds
     );
@@ -25,7 +28,9 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
     address private constant DELEGATE = address(0x3003);
     address private constant WITHDRAW_RECIPIENT = address(0x4004);
     address private constant EMERGENCY_RECIPIENT = address(0x5005);
+    address private constant OTHER_CURATOR = address(0x6006);
     uint256 private constant COLLECTION_ID = 42;
+    uint256 private constant OTHER_COLLECTION_ID = 43;
     uint256 private constant REWARD_AMOUNT = 3 ether;
 
     function testClaimRewardsCreatesCuratorCreditWithoutPushPayment() public {
@@ -96,6 +101,112 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
         setup.pool.rewardsClaimPerAddress(COLLECTION_ID, CURATOR).assertFalse("claim consumed");
         setup.pool.curatorCredits(CURATOR).assertEq(0, "credit created");
         setup.pool.totalCuratorOwed().assertEq(0, "owed created");
+    }
+
+    function testClaimRewardsRejectsStaleRootEpochProofWithoutConsumingClaim() public {
+        PoolSetup memory setup = _deployPool();
+        uint256 staleEpoch = setup.pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 staleLeaf =
+            setup.pool.hashRewardLeaf(CURATOR, COLLECTION_ID, REWARD_AMOUNT, staleEpoch);
+        setup.pool.setMerkleRoot(COLLECTION_ID, staleLeaf);
+        setup.pool.setMerkleRoot(COLLECTION_ID, staleLeaf);
+        bytes32[] memory proof = new bytes32[](0);
+        vm.deal(address(setup.pool), REWARD_AMOUNT);
+
+        vm.prank(CURATOR);
+        (bool success,) = address(setup.pool)
+            .call(
+                abi.encodeWithSelector(
+                    setup.pool.claimRewards.selector,
+                    COLLECTION_ID,
+                    REWARD_AMOUNT,
+                    proof,
+                    address(0)
+                )
+            );
+
+        success.assertFalse("stale root epoch proof succeeded");
+        setup.pool.rewardsClaimPerAddress(COLLECTION_ID, CURATOR).assertFalse("claim consumed");
+        setup.pool.curatorCredits(CURATOR).assertEq(0, "credit created");
+        setup.pool.totalCuratorOwed().assertEq(0, "owed created");
+    }
+
+    function testClaimRewardsRejectsWrongCollectionLeafWithoutConsumingClaim() public {
+        PoolSetup memory setup = _deployPool();
+        uint256 rootEpoch = setup.pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 wrongCollectionLeaf =
+            setup.pool.hashRewardLeaf(CURATOR, OTHER_COLLECTION_ID, REWARD_AMOUNT, rootEpoch);
+        setup.pool.setMerkleRoot(COLLECTION_ID, wrongCollectionLeaf);
+        bytes32[] memory proof = new bytes32[](0);
+        vm.deal(address(setup.pool), REWARD_AMOUNT);
+
+        vm.prank(CURATOR);
+        (bool success,) = address(setup.pool)
+            .call(
+                abi.encodeWithSelector(
+                    setup.pool.claimRewards.selector,
+                    COLLECTION_ID,
+                    REWARD_AMOUNT,
+                    proof,
+                    address(0)
+                )
+            );
+
+        success.assertFalse("wrong collection proof succeeded");
+        setup.pool.rewardsClaimPerAddress(COLLECTION_ID, CURATOR).assertFalse("claim consumed");
+        setup.pool.curatorCredits(CURATOR).assertEq(0, "credit created");
+    }
+
+    function testClaimRewardsRejectsWrongClaimantLeafWithoutConsumingClaim() public {
+        PoolSetup memory setup = _deployPool();
+        uint256 rootEpoch = setup.pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 wrongClaimantLeaf =
+            setup.pool.hashRewardLeaf(OTHER_CURATOR, COLLECTION_ID, REWARD_AMOUNT, rootEpoch);
+        setup.pool.setMerkleRoot(COLLECTION_ID, wrongClaimantLeaf);
+        bytes32[] memory proof = new bytes32[](0);
+        vm.deal(address(setup.pool), REWARD_AMOUNT);
+
+        vm.prank(CURATOR);
+        (bool success,) = address(setup.pool)
+            .call(
+                abi.encodeWithSelector(
+                    setup.pool.claimRewards.selector,
+                    COLLECTION_ID,
+                    REWARD_AMOUNT,
+                    proof,
+                    address(0)
+                )
+            );
+
+        success.assertFalse("wrong claimant proof succeeded");
+        setup.pool.rewardsClaimPerAddress(COLLECTION_ID, CURATOR).assertFalse("claim consumed");
+        setup.pool.curatorCredits(CURATOR).assertEq(0, "credit created");
+    }
+
+    function testClaimRewardsRejectsWrongAmountLeafWithoutConsumingClaim() public {
+        PoolSetup memory setup = _deployPool();
+        uint256 rootEpoch = setup.pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 wrongAmountLeaf =
+            setup.pool.hashRewardLeaf(CURATOR, COLLECTION_ID, REWARD_AMOUNT + 1 wei, rootEpoch);
+        setup.pool.setMerkleRoot(COLLECTION_ID, wrongAmountLeaf);
+        bytes32[] memory proof = new bytes32[](0);
+        vm.deal(address(setup.pool), REWARD_AMOUNT);
+
+        vm.prank(CURATOR);
+        (bool success,) = address(setup.pool)
+            .call(
+                abi.encodeWithSelector(
+                    setup.pool.claimRewards.selector,
+                    COLLECTION_ID,
+                    REWARD_AMOUNT,
+                    proof,
+                    address(0)
+                )
+            );
+
+        success.assertFalse("wrong amount proof succeeded");
+        setup.pool.rewardsClaimPerAddress(COLLECTION_ID, CURATOR).assertFalse("claim consumed");
+        setup.pool.curatorCredits(CURATOR).assertEq(0, "credit created");
     }
 
     function testClaimRewardsRejectsUnfundedCreditWithoutConsumingClaim() public {
@@ -257,12 +368,66 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
         setup.pool.emergencyWithdrawable().assertEq(1 ether, "surplus not exposed");
     }
 
-    function testRewardLeafUsesAbiEncodeCompatibleHash() public {
+    function testMerkleRootUpdateAdvancesEpochAndEmitsEvent() public {
         PoolSetup memory setup = _deployPool();
-        bytes32 expected =
-            keccak256(bytes.concat(keccak256(abi.encode(CURATOR, COLLECTION_ID, REWARD_AMOUNT))));
+        uint256 rootEpoch = setup.pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 leaf = setup.pool.hashRewardLeaf(CURATOR, COLLECTION_ID, REWARD_AMOUNT, rootEpoch);
+
+        vm.expectEmit(true, true, true, true);
+        emit MerkleRootUpdated(COLLECTION_ID, rootEpoch, leaf);
+        setup.pool.setMerkleRoot(COLLECTION_ID, leaf);
+
+        setup.pool.collectionMerkleRootEpoch(COLLECTION_ID).assertEq(rootEpoch, "root epoch");
+        setup.pool.collectionMerkleRoot(COLLECTION_ID).assertEq(leaf, "root");
+    }
+
+    function testMultipleMerkleRootUpdateRejectsLengthMismatch() public {
+        PoolSetup memory setup = _deployPool();
+        setup.admins
+            .registerFunctionAdmin(
+                address(this), address(setup.pool), setup.pool.setMultipleMerkleRoots.selector, true
+            );
+        uint256[] memory collectionIds = new uint256[](2);
+        bytes32[] memory roots = new bytes32[](1);
+        collectionIds[0] = COLLECTION_ID;
+        collectionIds[1] = OTHER_COLLECTION_ID;
+        roots[0] = bytes32(uint256(1));
+
+        vm.expectRevert(bytes("Bad root input"));
+        setup.pool.setMultipleMerkleRoots(collectionIds, roots);
+    }
+
+    function testCurrentRewardLeafUsesCurrentRootEpoch() public {
+        PoolSetup memory setup = _deployPool();
+        bytes32[] memory proof = _setSingleLeafRoot(setup.pool, CURATOR, REWARD_AMOUNT);
+        proof.length.assertEq(0, "proof");
 
         setup.pool.hashRewardLeaf(CURATOR, COLLECTION_ID, REWARD_AMOUNT)
+            .assertEq(
+                setup.pool.hashRewardLeaf(CURATOR, COLLECTION_ID, REWARD_AMOUNT, 1), "current leaf"
+            );
+    }
+
+    function testRewardLeafUsesDomainSeparatedAbiEncodeCompatibleHash() public {
+        PoolSetup memory setup = _deployPool();
+        uint256 rootEpoch = 7;
+        bytes32 expected = keccak256(
+            bytes.concat(
+                keccak256(
+                    abi.encode(
+                        setup.pool.CURATOR_REWARD_LEAF_DOMAIN(),
+                        block.chainid,
+                        address(setup.pool),
+                        COLLECTION_ID,
+                        CURATOR,
+                        REWARD_AMOUNT,
+                        rootEpoch
+                    )
+                )
+            )
+        );
+
+        setup.pool.hashRewardLeaf(CURATOR, COLLECTION_ID, REWARD_AMOUNT, rootEpoch)
             .assertEq(expected, "leaf hash");
     }
 
@@ -284,7 +449,8 @@ contract StreamCuratorsPoolTest is CharacterizationTestBase {
         private
         returns (bytes32[] memory proof)
     {
-        bytes32 leaf = pool.hashRewardLeaf(rewardAddress, COLLECTION_ID, amount);
+        uint256 rootEpoch = pool.collectionMerkleRootEpoch(COLLECTION_ID) + 1;
+        bytes32 leaf = pool.hashRewardLeaf(rewardAddress, COLLECTION_ID, amount, rootEpoch);
         pool.setMerkleRoot(COLLECTION_ID, leaf);
         proof = new bytes32[](0);
     }

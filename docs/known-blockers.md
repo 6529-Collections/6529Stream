@@ -31,9 +31,10 @@ contributors who start from the README.
 - Curator reward claims now validate the Merkle claim and record
   `StreamCuratorsPool` curator credits instead of pushing ETH to the reward
   address. Curator pool emergency withdrawal is bounded by local curator credits
-  owed, and mixed payment-operation invariants now cover the current local
-  curator accounting. A unified protocol-wide ledger remains future work if the
-  project introduces that abstraction.
+  owed, reward leaves are domain-separated by chain, pool address, collection,
+  claimant, amount, and root epoch, and mixed payment-operation invariants now
+  cover the current local curator accounting. A unified protocol-wide ledger
+  remains future work if the project introduces that abstraction.
 - `StreamMinter` now treats its balance as surplus with `totalOwed() == 0` and
   emergency withdrawal bounded by `emergencyWithdrawable()`.
   `NextGenRandomizerRNG` conservatively treats its full adapter balance as

@@ -387,8 +387,8 @@
     },
     "smart-contracts/StreamCuratorsPool.sol": {
       "path": "smart-contracts/StreamCuratorsPool.sol",
-      "sha256": "sha256:2f820af1ac5896dbb73b423995527fba37d5ddc240b67c64361348fab22ce034",
-      "solc_keccak256": "0x511916cd3b7114f2e5f7626b0c1c2ad0afc245d584bdf4d2f92853d0de0621bf",
+      "sha256": "sha256:e14a6bf7ad02183cdd68202ab99b7e278d4430500450256121e377c7b8519ad0",
+      "solc_keccak256": "0x5c5315958b2d2f9d0ce83c490bef11011f1eea0ec393065b4a43488ae37b4dac",
       "license": "MIT",
       "used_by": [
         "StreamCuratorsPool"
@@ -639,7 +639,7 @@
       "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
       "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:aa3358e082d390a419b6770c90e221e2222ad4c3db6af3f9f8b6cb5f3ef57598",
+      "artifact_sha256": "sha256:6a2b58a95336a76e8ce2df2c7031b1e9cf7b5e733a29d04b062adfc4f5dd473b",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1088,10 +1088,10 @@
     },
     "StreamCuratorsPool": {
       "source": "smart-contracts/StreamCuratorsPool.sol",
-      "source_sha256": "sha256:2f820af1ac5896dbb73b423995527fba37d5ddc240b67c64361348fab22ce034",
-      "source_solc_keccak256": "0x511916cd3b7114f2e5f7626b0c1c2ad0afc245d584bdf4d2f92853d0de0621bf",
+      "source_sha256": "sha256:e14a6bf7ad02183cdd68202ab99b7e278d4430500450256121e377c7b8519ad0",
+      "source_solc_keccak256": "0x5c5315958b2d2f9d0ce83c490bef11011f1eea0ec393065b4a43488ae37b4dac",
       "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
-      "artifact_sha256": "sha256:2c0d845ba6d925280e9080ce379016b35aae9d71f9012e5df238b90c9f1acd17",
+      "artifact_sha256": "sha256:31908a69da03adda19840bca9bbcb9a8c69054b0662bb86abb4dba71041c8a0b",
       "compilation_target": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1105,19 +1105,19 @@
         "metadata_bytecode_hash": "ipfs",
         "libraries": {}
       },
-      "abi_sha256": "sha256:f5d65fb2b17cf0caae7c8c75c6736c5828c869502f55634279556ba8483e6daf",
+      "abi_sha256": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:a7d82d5a839a054a316b6b8d3210d220b32269592d31693321c3da551da7fc95",
+          "sha256": "sha256:765c3818760e0379226887d1c3188992f552c95a3496061f28170c910cc9a21c",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:a7d82d5a839a054a316b6b8d3210d220b32269592d31693321c3da551da7fc95"
+          "release_artifact_sha256": "sha256:765c3818760e0379226887d1c3188992f552c95a3496061f28170c910cc9a21c"
         },
         "runtime": {
-          "sha256": "sha256:22eca98b3ca54dfb581536890db8a350045c3b3fe37ef2f5844dd896b8a0da9b",
+          "sha256": "sha256:0b8fd69702c5d95f095f04ab5d0ec5d95f7516e34bda7ba849d1e8bc76b0c1cd",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:22eca98b3ca54dfb581536890db8a350045c3b3fe37ef2f5844dd896b8a0da9b"
+          "release_artifact_sha256": "sha256:0b8fd69702c5d95f095f04ab5d0ec5d95f7516e34bda7ba849d1e8bc76b0c1cd"
         }
       },
       "constructor": {

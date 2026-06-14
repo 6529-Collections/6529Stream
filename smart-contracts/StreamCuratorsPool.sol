@@ -19,10 +19,13 @@ import "./StreamPauseDomains.sol";
 contract StreamCuratorsPool is ReentrancyGuard {
     address private constant DELEGATION_COLLECTION = 0x8888888888888888888888888888888888888888;
     uint256 private constant CURATOR_REWARD_USE_CASE = 1;
+    bytes32 public constant CURATOR_REWARD_LEAF_DOMAIN =
+        keccak256("6529Stream.StreamCuratorsPool.curatorRewardLeaf.v2");
 
     // variables declaration
 
     mapping(uint256 => bytes32) public collectionMerkleRoot;
+    mapping(uint256 => uint256) public collectionMerkleRootEpoch;
     mapping(uint256 => mapping(address => uint256)) public rewardsPerAddress;
     mapping(uint256 => mapping(address => bool)) public rewardsClaimPerAddress;
     mapping(address => uint256) public curatorCredits;
@@ -42,6 +45,9 @@ contract StreamCuratorsPool is ReentrancyGuard {
 
     // events
     event Reward(address indexed _add, uint256 indexed collectionID, uint256 indexed amount);
+    event MerkleRootUpdated(
+        uint256 indexed collectionID, uint256 indexed rootEpoch, bytes32 indexed merkleRoot
+    );
     event CuratorCreditCreated(
         address indexed _add, uint256 indexed collectionID, uint256 indexed funds
     );
@@ -69,7 +75,9 @@ contract StreamCuratorsPool is ReentrancyGuard {
         public
         FunctionAdminRequired(this.setMerkleRoot.selector)
     {
+        collectionMerkleRootEpoch[_collectionID] += 1;
         collectionMerkleRoot[_collectionID] = _merkleRoot;
+        emit MerkleRootUpdated(_collectionID, collectionMerkleRootEpoch[_collectionID], _merkleRoot);
     }
 
     // function to set merkle root for each drop
@@ -77,8 +85,13 @@ contract StreamCuratorsPool is ReentrancyGuard {
         public
         FunctionAdminRequired(this.setMultipleMerkleRoots.selector)
     {
+        require(_collectionIDs.length == _merkleRoot.length, "Bad root input");
         for (uint256 i = 0; i < _collectionIDs.length; i++) {
+            collectionMerkleRootEpoch[_collectionIDs[i]] += 1;
             collectionMerkleRoot[_collectionIDs[i]] = _merkleRoot[i];
+            emit MerkleRootUpdated(
+                _collectionIDs[i], collectionMerkleRootEpoch[_collectionIDs[i]], _merkleRoot[i]
+            );
         }
     }
 
@@ -99,7 +112,9 @@ contract StreamCuratorsPool is ReentrancyGuard {
             rewardAddress = _delegator;
         }
 
-        bytes32 node = hashRewardLeaf(rewardAddress, _collectionID, _amount);
+        bytes32 node = hashRewardLeaf(
+            rewardAddress, _collectionID, _amount, collectionMerkleRootEpoch[_collectionID]
+        );
         require(rewardsClaimPerAddress[_collectionID][rewardAddress] == false, "Rewards Claimed");
         require(
             MerkleProof.verifyCalldata(merkleProof, collectionMerkleRoot[_collectionID], node),
@@ -135,11 +150,34 @@ contract StreamCuratorsPool is ReentrancyGuard {
 
     function hashRewardLeaf(address _rewardAddress, uint256 _collectionID, uint256 _amount)
         public
-        pure
+        view
         returns (bytes32)
     {
+        return hashRewardLeaf(
+            _rewardAddress, _collectionID, _amount, collectionMerkleRootEpoch[_collectionID]
+        );
+    }
+
+    function hashRewardLeaf(
+        address _rewardAddress,
+        uint256 _collectionID,
+        uint256 _amount,
+        uint256 _rootEpoch
+    ) public view returns (bytes32) {
         return keccak256(
-            bytes.concat(keccak256(abi.encode(_rewardAddress, _collectionID, _amount)))
+            bytes.concat(
+                keccak256(
+                    abi.encode(
+                        CURATOR_REWARD_LEAF_DOMAIN,
+                        block.chainid,
+                        address(this),
+                        _collectionID,
+                        _rewardAddress,
+                        _amount,
+                        _rootEpoch
+                    )
+                )
+            )
         );
     }
 

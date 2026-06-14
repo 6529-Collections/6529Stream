@@ -1690,6 +1690,38 @@
       ]
     },
     {
+      "topic0": "0xe7142ec587218ed60e9f6763c0f8fe53e15b8582a508ef812375a163acc3a9ff",
+      "signature": "MerkleRootUpdated(uint256,uint256,bytes32)",
+      "name": "MerkleRootUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionID",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "rootEpoch",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "merkleRoot",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamCuratorsPool"
+      ]
+    },
+    {
       "topic0": "0xe93ec9a06e5333819ff91c7118e0ba48094f8bc805e37319b6ef16f5d6121138",
       "signature": "DependencyVersionDeprecated(bytes32,uint256,address)",
       "name": "DependencyVersionDeprecated",
@@ -4127,6 +4159,35 @@
               "type": "uint256",
               "indexed": false,
               "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "MerkleRootUpdated",
+          "signature": "MerkleRootUpdated(uint256,uint256,bytes32)",
+          "topic0": "0xe7142ec587218ed60e9f6763c0f8fe53e15b8582a508ef812375a163acc3a9ff",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionID",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "rootEpoch",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "merkleRoot",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
             }
           ]
         },

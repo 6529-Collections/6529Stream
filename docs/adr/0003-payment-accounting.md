@@ -265,9 +265,14 @@ Required behavior:
 P0-PAY-005 implementation status:
 
 - `StreamCuratorsPool.claimRewards` now hashes reward leaves with
-  `abi.encode(rewardAddress, collectionID, amount)`, validates the Merkle proof,
+  `abi.encode(CURATOR_REWARD_LEAF_DOMAIN, block.chainid, address(this),
+  collectionID, rewardAddress, amount, rootEpoch)`, validates the Merkle proof,
   marks the reward address claimed, records `curatorCredits[rewardAddress]`,
   increments `totalCuratorOwed`, and emits curator credit events.
+- Curator reward root updates advance `collectionMerkleRootEpoch`, emit
+  `MerkleRootUpdated`, and bind accepted leaves to the current root epoch so a
+  retained proof cannot silently carry across root rotations or contract/chain
+  domains.
 - Claims require enough local curator-pool surplus to cover the reward before
   the claim is consumed, so the contract does not create unfunded curator
   credits. Cross-contract reserve movement into the curator pool remains future
