@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/retained-live-audit-manifest-checksum-guards` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/296` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/297` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/298` |
 | Next issue | TBD after issue #297 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 03:04 UTC` |
+| Last updated | `2026-06-14 03:09 UTC` |
 
 ## Packaging Notes
 
@@ -206,12 +206,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Guard retained live audit manifest and checksum coverage (Queue Item 143)
 
-Status: local draft; PR not opened yet.
+Status: PR open; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/297`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/298`.
 Branch: `codex/retained-live-audit-manifest-checksum-guards`.
 Branch started from PR #296 squash merge commit
 `ea40da44571a10e96b8e9f07d4fadc8e6a688763`.
+Opening head: `0ce3d757f6367dd0369386da9a03834a72cbdd35`.
 
 Goal:
 
@@ -11587,6 +11588,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 03:09 | Open PR #298 | Retained live audit release integrity coverage PR opened on head `0ce3d757f6367dd0369386da9a03834a72cbdd35`; it links issue #297, adds committed-output manifest/checksum regressions, refreshes roadmap/run-state traceability to PR #296, and preserves blocked readiness claims. |
 | 2026-06-14 03:04 | Start Queue Item 143 | PR #296 merged as `ea40da44571a10e96b8e9f07d4fadc8e6a688763`, issue #295 closed completed, issue #297 opened for retained live audit manifest/checksum coverage guards, and branch `codex/retained-live-audit-manifest-checksum-guards` started from the merged baseline. |
 | 2026-06-14 02:58 | Merge PR #296 | Retained dry-run archive guard merge-state reconciliation merged as `ea40da44571a10e96b8e9f07d4fadc8e6a688763`; final head `9a284f68b0930d6a495608618203fbcffe0317d7` passed CI run `27486374139`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700504396`, and issue #295 closed completed. |
 | 2026-06-14 02:50 | Open PR #296 | State-only retained dry-run archive guard merge reconciliation PR opened on head `fe07f21aff006b9b8b2e8f1cf34509f871727d9f`; it links issue #295, records PR #294 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the guard row passing, and selects Queue Item 143 as the next no-secret release evidence target. |
