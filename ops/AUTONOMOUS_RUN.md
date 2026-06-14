@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/vendored-formatting-exemptions` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/321` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/320` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/322` |
-| Next issue | TBD |
+| Active PR branch | `codex/reconcile-vendored-formatting-exemptions` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/322` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/323` |
+| Active PR | TBD |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 09:38 UTC` |
+| Last updated | `2026-06-14 09:51 UTC` |
 
 ## Packaging Notes
 
@@ -211,35 +211,71 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Merged in PR #316 |
 | 153 | Retire provider and integration Solidity formatting deferrals | Gate A/G support | Reformat the non-vendored provider and legacy integration slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave OpenZeppelin-style vendored files for later provenance-specific PRs | Merged in PR #318 |
 | 154 | Reconcile provider formatting deferral merge state | Gate G support | Record PR #318 merge evidence, close out issue #317/Queue Item 153 in roadmap state, and select the next no-secret vendored-formatting policy target | Merged in PR #321 |
-| 155 | Convert vendored Solidity formatting deferrals into explicit provenance exemptions | Gate A/G support | Rename the remaining OpenZeppelin-style formatter deferrals into documented vendored/provenance exemptions, preserve strict formatting for all non-exempt Solidity files, and refresh checker tests/docs without changing Solidity bytecode | Active for issue #320 |
+| 155 | Convert vendored Solidity formatting deferrals into explicit provenance exemptions | Gate A/G support | Rename the remaining OpenZeppelin-style formatter deferrals into documented vendored/provenance exemptions, preserve strict formatting for all non-exempt Solidity files, and refresh checker tests/docs without changing Solidity bytecode | Merged in PR #322 |
+| 156 | Reconcile vendored formatting exemption merge state | Gate G support | Record PR #322 merge evidence, close out issue #320/Queue Item 155 in roadmap state, and select the next no-secret release-evidence tracker target | Active for issue #323 |
+| 157 | Assess retained fork deployment rehearsal evidence path | Gate E/Gate G support | Inspect tracker issue #216 and either wire reviewed no-secret retained fork deployment rehearsal evidence if available or create the next no-secret support slice without changing readiness claims | Queued next after issue #323 |
 
 ## Current PR Worklog
 
-### PR candidate: Convert vendored formatting deferrals into provenance exemptions (Queue Item 155)
+### PR candidate: Reconcile vendored formatting exemption merge state (Queue Item 156)
 
-Status: PR open; CI and CodeRabbit review pending.
+Status: local reconciliation draft.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/323`.
+PR: TBD.
+Branch: `codex/reconcile-vendored-formatting-exemptions`.
+Branch started from PR #322 squash merge commit
+`e3e98e7f3284558a4cc747cf4b634bee2d8205a6`.
+
+Goal:
+
+- Record PR #322 as merged and issue #320 as completed.
+- Refresh roadmap verification metadata and the Solidity formatting scoped-gate
+  test-matrix row with final PR #322 CI, CodeRabbit, merge-decision, and squash
+  merge evidence.
+- Queue tracker issue #216 as the next no-secret release-evidence target to
+  assess, without changing public-beta or production readiness claims.
+- Preserve the blocked public-beta and production readiness posture.
+
+Validation:
+
+- `rg -n "^#|^##|^###" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
+- `rg -n "PR #322|#320|#323|Queue Item 155|Queue Item 156|Last verified|Solidity formatting scoped gate|27494893331|4701353924|4701354147|4701372430|e3e98e7f3284558a4cc747cf4b634bee2d8205a6" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `git diff --check`.
+
+### Completed: Convert vendored formatting deferrals into provenance exemptions (Queue Item 155)
+
+Status: merged in PR #322.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/320`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/322`.
 Branch: `codex/vendored-formatting-exemptions`.
 Branch started from PR #321 squash merge commit
 `38e01759204ea5eb124c3a33a134221c15d16c8d`.
 Initial PR head: `06e867ebc7cc079b41be50e22e75b4058b21db82`.
-CodeRabbit review requested via comment `4701353924`.
+Final PR head: `eca2cbc46b5cbba236335afbb7d11bc603af7602`.
+Squash merge commit: `e3e98e7f3284558a4cc747cf4b634bee2d8205a6`.
+CI: run `27494893331` passed.
+CodeRabbit: explicit review request comment `4701353924`;
+review-finished reply `4701354147`; status success. The automatic rate-limit
+notice produced no actionable findings.
+Merge decision comment: `4701372430`.
 
-Goal:
+Outcome:
 
-- Rename the remaining OpenZeppelin-style formatting baseline from generic
+- Renamed the remaining OpenZeppelin-style formatting baseline from generic
   deferral language to explicit vendored/provenance exemptions.
-- Preserve strict `forge fmt --check` coverage for every non-exempt Solidity
-  file and avoid changing Solidity source or bytecode.
-- Refresh checker tests, tooling docs, known-blocker/status docs,
+- Preserved strict `forge fmt --check` coverage for every non-exempt Solidity
+  file and avoided changing Solidity source or bytecode.
+- Refreshed checker tests, tooling docs, known-blocker/status docs,
   vendored-library provenance docs, changelog, roadmap, and run-state evidence.
-- Preserve the blocked public-beta and production readiness posture.
+- Refreshed release manifest and checksum artifacts after docs/script changes.
+- Preserved the blocked public-beta and production readiness posture.
 
 Validation:
 
 - `rg -n "^#|^##|^###" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
-- `rg -n "DEFERRED_FORMATTING_FILES|validate_deferred|deferred baseline|deferred set|documented deferred" scripts docs CHANGELOG.md ops/ROADMAP.md`.
+- `rg -n "DEFERRED_FORMATTING_FILES|validate_deferred|deferred baseline|deferred set|documented deferred|formatting-deferral|formatting deferral|formatting deferrals|temporary deferral" scripts docs CHANGELOG.md ops/ROADMAP.md`.
 - `python scripts/test_solidity_formatting.py`.
 - `python scripts/check_solidity_formatting.py`.
 - `make fmt-check`.
@@ -252,7 +288,9 @@ Validation:
 - `git diff --check`.
 
 Local validation passed at `2026-06-14 09:35 UTC`; release manifest and checksum
-artifacts were refreshed after docs/script/roadmap changes.
+artifacts were refreshed after docs/script/roadmap changes. GitHub CI run
+`27494893331` passed on final head `eca2cbc`, and issue #320 closed completed
+when PR #322 squash-merged.
 
 ### Completed: Reconcile provider formatting deferral merge state (Queue Item 154)
 
@@ -12172,6 +12210,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 09:51 | Start Queue Item 156 and select issue #216 next | PR #322 merged as `e3e98e7f3284558a4cc747cf4b634bee2d8205a6`, issue #320 closed completed, issue #323 opened for merge-state reconciliation, tracker issue #216 selected as the next locally assessable release-evidence target, and branch `codex/reconcile-vendored-formatting-exemptions` started from the merged baseline. |
+| 2026-06-14 09:46 | Merge PR #322 | Vendored formatting exemption PR #322 passed CI run `27494893331` on final head `eca2cbc46b5cbba236335afbb7d11bc603af7602`, CodeRabbit status was success after explicit review-finished reply `4701354147`, there were no unresolved review threads, merge-decision comment `4701372430` recorded the rate-limit warning as non-actionable, and issue #320 closed completed. |
 | 2026-06-14 09:38 | Open PR #322 | PR #322 opened for issue #320 on head `06e867ebc7cc079b41be50e22e75b4058b21db82`, converts the remaining 17 formatter entries into explicit vendored/provenance exemptions, refreshes checker tests/docs/release hashes, and requests CodeRabbit review via comment `4701353924`. |
 | 2026-06-14 09:35 | Validate Queue Item 155 locally | Focused formatting tests/checker, `make fmt-check`, terminology grep, changelog, release-readiness, release artifact, release manifest, release checksum, and full Windows `scripts\check.ps1` all pass after converting the remaining 17 formatter entries into explicit vendored/provenance exemptions and refreshing release manifest/checksum artifacts. |
 | 2026-06-14 09:24 | Start Queue Item 155 | PR #321 merged as `38e01759204ea5eb124c3a33a134221c15d16c8d`, issue #319 closed completed, issue #320 selected as the next Gate A/G formatting-provenance policy target, and branch `codex/vendored-formatting-exemptions` started from the merged baseline. |
