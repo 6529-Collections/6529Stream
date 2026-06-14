@@ -12,8 +12,34 @@ if (Test-Path $foundryBin) {
     $env:Path = "$foundryBin;$env:Path"
 }
 
-if (-not (Get-Command forge -ErrorAction SilentlyContinue)) {
+$forgeCommand = Get-Command forge -CommandType Application -ErrorAction SilentlyContinue
+if (-not $forgeCommand) {
     throw "forge was not found. Run scripts\bootstrap-windows.ps1, then retry this command."
+}
+
+$forgePath = $forgeCommand.Source
+
+function Invoke-CheckedNative {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+        [string[]]$Arguments = @()
+    )
+
+    & $FilePath @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        $displayArgs = if ($Arguments.Count -gt 0) { " " + ($Arguments -join " ") } else { "" }
+        throw "$FilePath$displayArgs failed with exit code $LASTEXITCODE."
+    }
+}
+
+function forge {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Arguments = @()
+    )
+
+    Invoke-CheckedNative -FilePath $script:forgePath -Arguments $Arguments
 }
 
 $venvPython = Join-Path $repoRoot ".venv-tools\Scripts\python.exe"
@@ -39,12 +65,28 @@ if (-not $pythonPath) {
     throw "python or py was not found. Install Python 3, then retry this command."
 }
 
+$pythonExecutable = $pythonPath
+$pythonBaseArgs = $pythonArgs
+
+function Invoke-CheckedPython {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Arguments = @()
+    )
+
+    Invoke-CheckedNative -FilePath $script:pythonExecutable -Arguments ($script:pythonBaseArgs + $Arguments)
+}
+
+$pythonPath = "Invoke-CheckedPython"
+$pythonArgs = @()
+
 forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\check_solidity_formatting.py"
+& $pythonPath @pythonArgs "scripts\test_windows_check_wrapper.py"
 & $pythonPath @pythonArgs "scripts\test_metadata_fixtures.py"
 & $pythonPath @pythonArgs "scripts\check_metadata_fixtures.py"
 & $pythonPath @pythonArgs "scripts\test_metadata_browser_sandbox.py"

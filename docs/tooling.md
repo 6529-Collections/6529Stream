@@ -481,7 +481,10 @@ powershell -ExecutionPolicy Bypass -File scripts\check.ps1
 ```
 
 The Windows script prepends `%USERPROFILE%\.foundry\bin` to the current process
-`PATH` so a fresh shell can find `forge` after bootstrap.
+`PATH` so a fresh shell can find `forge` after bootstrap. It also routes
+`forge` and the selected Python interpreter through checked native-command
+wrappers so Windows PowerShell 5.1 fails fast when a tool exits non-zero; this
+behavior is covered by `scripts/test_windows_check_wrapper.py`.
 
 ## Bootstrap
 
