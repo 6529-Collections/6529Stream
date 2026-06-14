@@ -139,12 +139,14 @@ jobs:
           python3 -m pip install -r requirements-tools.txt
           python3 -m playwright install --with-deps chromium
 
-      - name: PowerShell syntax
+      - name: PowerShell syntax and wrapper runtime
         shell: pwsh
         run: |
           $scriptPaths = @(
             "scripts/check.ps1",
-            "scripts/bootstrap-windows.ps1"
+            "scripts/bootstrap-windows.ps1",
+            "scripts/windows-check-helpers.ps1",
+            "scripts/test_windows_check_helpers.ps1"
           )
           foreach ($scriptPath in $scriptPaths) {
             $tokens = $null
@@ -159,6 +161,7 @@ jobs:
               exit 1
             }
           }
+          & ./scripts/test_windows_check_helpers.ps1
 
       - name: Build
         shell: bash

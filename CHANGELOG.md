@@ -13,6 +13,9 @@ the release policy in `docs/release-policy.md`.
 - Added Windows check-wrapper native exit-code enforcement and a focused policy
   test so `scripts/check.ps1` fails fast when `forge` or Python checks return
   non-zero under Windows PowerShell 5.1.
+- Added an executable PowerShell runtime harness for the Windows checked native
+  wrapper so zero-exit and non-zero-exit native command behavior are both
+  validated without running the full local gate.
 - Added fork-specific release evidence tracker routing so issue #216 points to
   the canonical fork deployment rehearsal retained-artifact template and
   checker commands instead of the generic public-beta placeholder.

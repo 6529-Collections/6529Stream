@@ -1,5 +1,7 @@
 ifeq ($(OS),Windows_NT)
 PYTHON ?= python
+POWERSHELL ?= powershell
+POWERSHELL_FLAGS ?= -NoProfile -ExecutionPolicy Bypass
 ifdef MSYSTEM
 FOUNDRY_BIN := $(HOME)/.foundry/bin
 REPO_ROOT := $(shell pwd)
@@ -14,6 +16,8 @@ endif
 VENV_BIN := .venv-tools/Scripts
 else
 PYTHON ?= python3
+POWERSHELL ?= pwsh
+POWERSHELL_FLAGS ?= -NoProfile
 FOUNDRY_BIN := $(HOME)/.foundry/bin
 REPO_ROOT := $(CURDIR)
 PATH_SEPARATOR := :
@@ -22,7 +26,7 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check windows-check-wrapper-policy drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check solidity-formatting-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check fork-deployment-rehearsal-evidence-check public-beta-evidence-check public-beta-blocker-report public-beta-blocker-report-check production-release-blocker-report production-release-blocker-report-check release-evidence-packet-index release-evidence-packet-index-check release-evidence-issue-backlog release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-report-check release-evidence-live-audit-markdown-check release-evidence-live-audit-archive release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check windows-check-wrapper-policy windows-check-wrapper-runtime drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check solidity-formatting-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check fork-deployment-rehearsal-evidence-check public-beta-evidence-check public-beta-blocker-report public-beta-blocker-report-check production-release-blocker-report production-release-blocker-report-check release-evidence-packet-index release-evidence-packet-index-check release-evidence-issue-backlog release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-report-check release-evidence-live-audit-markdown-check release-evidence-live-audit-archive release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
 check: build test gas-snapshot-check size solidity-formatting-check windows-check-wrapper-policy metadata-fixtures-check drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check release-artifacts-check source-verification-inputs-check abi-compatibility-check non-local-release-evidence-check fork-deployment-rehearsal-evidence-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-checksums-check changelog-check deploy-rehearsal
 
@@ -56,6 +60,9 @@ metadata-fixtures-check:
 
 windows-check-wrapper-policy:
 	$(PYTHON) scripts/test_windows_check_wrapper.py
+
+windows-check-wrapper-runtime:
+	$(POWERSHELL) $(POWERSHELL_FLAGS) -File scripts/test_windows_check_helpers.ps1
 
 drop-authorization-fixtures-check:
 	$(PYTHON) scripts/test_drop_authorization_payload_generator.py
