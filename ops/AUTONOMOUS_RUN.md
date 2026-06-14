@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/windows-check-wrapper-runtime-harness` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/342` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/343` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/344` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 13:50 UTC` |
+| Last updated | `2026-06-14 14:01 UTC` |
 
 ## Packaging Notes
 
@@ -229,12 +229,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add executable Windows check wrapper failure harness (Queue Item 167)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/343`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/344`.
 Branch: `codex/windows-check-wrapper-runtime-harness`.
 Branch started from PR #342 squash merge commit
 `770326ddbc9cc84ed64e66e135e56e2029ce8b4b`.
+Initial PR head: `66ee11c839c030dd5611da3975ecd254f7ff2892`.
+CodeRabbit review requested via comment `4701972035`.
 
 Goal:
 
@@ -12763,6 +12765,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 14:01 | Open PR #344 | PR #344 opened for issue #343 on head `66ee11c839c030dd5611da3975ecd254f7ff2892`, adds an executable PowerShell zero/non-zero native-command harness for the checked Windows wrapper, wires it into CI/local targeted gates, and requests CodeRabbit review via comment `4701972035`. |
 | 2026-06-14 13:50 | Start Queue Item 167 | PR #342 merged as `770326ddbc9cc84ed64e66e135e56e2029ce8b4b`, issue #341 closed completed, issue #343 opened for an executable Windows check-wrapper failure harness, and branch `codex/windows-check-wrapper-runtime-harness` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 13:45 | Merge PR #342 | Tooling PR #342 passed CI run `27500588477`, job `81282624570`, on final head `0e4e1411a87b7d3a7211e679b776c2714fa4737b`; CodeRabbit status was success after explicit review-finished reply `4701914757`; no review threads were open; merge-decision comment `4701935996` recorded the initial rate-limit warning as non-actionable; squash merge commit `770326ddbc9cc84ed64e66e135e56e2029ce8b4b` landed on `main`; and issue #341 closed completed. |
 | 2026-06-14 13:37 | Open PR #342 | PR #342 opened for issue #341 on head `b2d11dc7dcd885dea3a989963843ed70a5c22344`, hardens Windows native-command failure handling for `forge` and Python checks, wires the focused wrapper policy test into local/CI gates, and requests CodeRabbit review via comment `4701914567`. |
