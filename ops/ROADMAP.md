@@ -100,12 +100,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-14 12:50 UTC` for merged PR #336 retained live-audit report baseline; local validation included retained report JSON/Markdown checks, archive check, manifest/checksum checks, changelog gate, focused tests, roadmap/run-state traceability, heading, whitespace, and full Windows `scripts\check.ps1`; GitHub CI run `27499195206` passed on final head `baec6bbdaa155c88657edea2f1c3605b932470da` before squash merge `8944dc31375cdffac22964b4ff7ac594ebee632d` |
-| OS tested | Windows local validation for issue #335; Linux GitHub Actions passed for latest merged baseline PR #336 final CI run `27499195206` on head `baec6bbdaa155c88657edea2f1c3605b932470da`, with merged baseline commit `8944dc31375cdffac22964b4ff7ac594ebee632d` |
+| Last verified | `2026-06-14 13:05 UTC` for merged PR #338 retained live-audit report reconciliation baseline; local validation included roadmap/run-state traceability, heading, release manifest/checksum, changelog, and whitespace checks; GitHub CI run `27499563930`, job `81279861840`, passed on final head `ef514a2e6cebd7cb2a64dc13c027f6a8c8915703` before squash merge `8fdcad01d67e5280f0a43a92504646149bba34df` |
+| OS tested | Windows local validation for issue #337; Linux GitHub Actions passed for latest merged baseline PR #338 CI run `27499563930` on head `ef514a2e6cebd7cb2a64dc13c027f6a8c8915703`, with merged baseline commit `8fdcad01d67e5280f0a43a92504646149bba34df` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #336 final CI run `27499195206` passed on head `baec6bbdaa155c88657edea2f1c3605b932470da`; CodeRabbit status was success with no unresolved review threads after explicit review request comment `4701775948` and review-finished reply `4701776166`; initial rate-limit warning comment `4701775805` produced no actionable findings; merge-decision comment `4701798323`; PR #336 squash-merged as `8944dc31375cdffac22964b4ff7ac594ebee632d` |
+| CI run | Latest merged baseline PR #338 CI run `27499563930`, job `81279861840`, passed on head `ef514a2e6cebd7cb2a64dc13c027f6a8c8915703`; CodeRabbit status was success with no unresolved review threads after explicit review request comment `4701812284` and review-finished reply `4701812536`; initial rate-limit warning comment `4701812128` produced no actionable findings; merge-decision comment `4701834195`; PR #338 squash-merged as `8fdcad01d67e5280f0a43a92504646149bba34df` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
