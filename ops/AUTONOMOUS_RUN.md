@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD after issue #311 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 06:36 UTC` |
+| Last updated | `2026-06-14 06:41 UTC` |
 
 ## Packaging Notes
 
@@ -212,7 +212,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Triage Solidity formatting gate path (Queue Item 150)
 
-Status: PR opened; waiting for CI and CodeRabbit.
+Status: fixing first CI failure; release manifest/checksum drift regenerated locally.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/311`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/312`.
 Branch: `codex/solidity-formatting-gate-triage`.
@@ -230,7 +230,8 @@ Goal:
   `scripts\check.ps1`, Bash `scripts/check.sh`, and GitHub CI.
 - Document the accepted deferred baseline and the raw all-files diagnostic.
 - Update roadmap/run-state/changelog traceability without changing Solidity
-  behavior, ABI, bytecode, or release artifacts.
+  behavior, ABI, or bytecode. Deterministic release manifest/checksum artifacts
+  are updated only to reflect changed docs/tooling hashes.
 
 Validation:
 
@@ -239,6 +240,10 @@ Validation:
 - `make fmt-check`.
 - `python scripts\test_changelog_check.py`.
 - `python scripts\check_changelog.py`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
 - `python -m py_compile scripts\check_solidity_formatting.py scripts\test_solidity_formatting.py scripts\check_changelog.py scripts\test_changelog_check.py`.
 - `bash -n scripts/check.sh`.
 - PowerShell parser check for `scripts\check.ps1`.
@@ -11884,6 +11889,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 06:41 | Fix PR #312 release manifest drift | CI run `27490845104` passed through the new Solidity formatting step but failed at `Release manifest` because changed docs/changelog hashes were not reflected in `release-artifacts/latest/release-manifest.json`; regenerated the release manifest and checksum bundle and validated both locally. |
 | 2026-06-14 06:36 | Open PR #312 | PR #312 opened on head `d1ef54f074e60541ddc3b70ad564672540222277`, closes issue #311, adds the scoped Solidity formatting gate, and requested CodeRabbit review via comment `4700938271`. |
 | 2026-06-14 06:34 | Validate Queue Item 150 locally | The scoped formatting checker, checker tests, `make fmt-check`, changelog tests/checker, Python syntax compilation, Bash syntax check, PowerShell parser check, and whitespace check passed before commit. |
 | 2026-06-14 06:21 | Start Queue Item 150 | PR #310 merged as `e622e61ad076a8c65dad1b7c3bc332e17c36b531`, issue #309 closed completed, issue #311 opened for Solidity formatting gate triage, and branch `codex/solidity-formatting-gate-triage` started from the merged baseline. |
