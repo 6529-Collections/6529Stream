@@ -151,6 +151,12 @@ The current local baseline includes:
   [`release-artifacts/latest/release-evidence-live-audit-report-archive.md`](../release-artifacts/latest/release-evidence-live-audit-report-archive.md),
   checked with `python scripts/test_release_evidence_live_audit_archive.py` and
   `python scripts/generate_release_evidence_live_audit_archive.py --check`,
+  plus the future live audit archive retention workflow under
+  [`release-artifacts/evidence/live-audit-reports/README.md`](../release-artifacts/evidence/live-audit-reports/README.md)
+  for paired JSON/Markdown reports in
+  `release-artifacts/evidence/live-audit-reports/`, `YYYYMMDDTHHMMSSZ`
+  `--generated-at` run labels, no secrets, and the rule that retained reports
+  are not readiness proof by themselves,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
@@ -274,6 +280,7 @@ Release artifacts:
 - [release-artifacts/schema/release-evidence-live-audit-report.schema.json](../release-artifacts/schema/release-evidence-live-audit-report.schema.json)
 - [release-artifacts/evidence/release-evidence-live-audit-report-template.json](../release-artifacts/evidence/release-evidence-live-audit-report-template.json)
 - [release-artifacts/evidence/release-evidence-live-audit-report-template.md](../release-artifacts/evidence/release-evidence-live-audit-report-template.md)
+- [release-artifacts/evidence/live-audit-reports/README.md](../release-artifacts/evidence/live-audit-reports/README.md)
 - [release-artifacts/latest/release-evidence-live-audit-report-archive.json](../release-artifacts/latest/release-evidence-live-audit-report-archive.json)
 - [release-artifacts/latest/release-evidence-live-audit-report-archive.md](../release-artifacts/latest/release-evidence-live-audit-report-archive.md)
 - [release-artifacts/schema/drop-authorization-signing-evidence.schema.json](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
@@ -345,8 +352,13 @@ Run the release evidence drift checks:
 
 ```sh
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+python scripts/audit_release_evidence_issue_snapshots.py --generated-at YYYYMMDDTHHMMSSZ --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
 python scripts/check_release_evidence_live_audit_report.py --report-json tmp/release-evidence-live-audit-report.json
+python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json
 python scripts/check_release_evidence_live_audit_markdown.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
+python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports
+python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check
 python scripts/generate_release_evidence_live_audit_archive.py --check
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check

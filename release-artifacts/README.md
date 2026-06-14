@@ -213,6 +213,18 @@ committed template pair plus any future no-secret bundles retained under
 `evidence/live-audit-reports/`, record JSON/Markdown digests and validation
 commands, and keep CI network-free.
 
+Future live audit report bundles must be retained as paired JSON/Markdown files
+under `evidence/live-audit-reports/`. Use a stable lowercase archive ID that
+starts with the UTC run label, for example
+`20260614T010000Z-release-evidence-live-audit-report.json` and
+`20260614T010000Z-release-evidence-live-audit-report.md`, and pass the same
+label to the report generator with `--generated-at`. The paired files must be
+no-secret review evidence only; they cannot contain tokens, private exports, or
+unredacted operator credentials, and they do not make public-beta or
+production-release readiness true by themselves. See
+`evidence/live-audit-reports/README.md` for the exact retention workflow and
+validation command sequence.
+
 `latest/release-evidence-issue-body-sync.json` and
 `latest/release-evidence-issue-body-sync.md` join the generated backlog and
 committed issue-link map into exact GitHub issue body payloads plus a Markdown
