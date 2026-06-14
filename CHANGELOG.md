@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a dedicated testnet deployment rehearsal retained-artifact template and
+  checker for issue #217, wiring it into local/CI evidence gates and generated
+  release evidence trackers while keeping `testnet_deployment_rehearsal`
+  missing until real reviewed Sepolia evidence is retained. Added
+  `ops/EXECUTION_BACKLOG.md` as the PR-sized 10/10 implementation map for the
+  combined roadmap, external assessment, and integration-readiness work.
 - Added a dedicated external audit report retained-artifact template and
   checker for issue #215, wiring it into local/CI evidence gates and generated
   release evidence trackers while keeping `external_audit_report` missing until

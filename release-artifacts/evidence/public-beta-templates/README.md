@@ -26,3 +26,8 @@ For external audit report evidence, fill
 `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`
 and run `python scripts/check_external_audit_report_evidence.py` before
 generating the non-local evidence envelope.
+
+For testnet deployment rehearsal evidence, fill
+`release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
+and run `python scripts/check_testnet_deployment_rehearsal_evidence.py` before
+generating the non-local evidence envelope.

@@ -298,6 +298,14 @@ is the checked no-secret retained-artifact template for future
 non-local evidence envelope. The committed template is not audit evidence and
 does not change public-beta readiness.
 
+`evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future
+`testnet_deployment_rehearsal` evidence. Validate it with
+`python scripts/test_testnet_deployment_rehearsal_evidence.py` and
+`python scripts/check_testnet_deployment_rehearsal_evidence.py` before
+generating a non-local evidence envelope. The committed template is not testnet
+evidence and does not change public-beta readiness.
+
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility

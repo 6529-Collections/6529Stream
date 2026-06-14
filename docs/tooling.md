@@ -447,6 +447,15 @@ private RPC details redacted and public-beta readiness still blocked. Issue
 #216 closed completed after review accepted the retained artifact, non-local
 evidence envelope, public-beta evidence row, and generated
 manifest/address-book references.
+Testnet deployment rehearsal evidence for issue #217 has its own Markdown
+retained artifact path at
+`release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`.
+Run `python scripts/test_testnet_deployment_rehearsal_evidence.py` and
+`python scripts/check_testnet_deployment_rehearsal_evidence.py` before
+generating the metadata envelope. The committed file is template-only and keeps
+`testnet_deployment_rehearsal` missing until a reviewed testnet transcript,
+transaction references, sanitized broadcast, generated manifest/address book,
+explorer status, and reviewer confirmation are retained.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
