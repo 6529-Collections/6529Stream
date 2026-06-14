@@ -29,7 +29,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | `blocked` | 8 | 0 | 0 | 0 | 0 | 0 | 8 |
+| Public Beta | `blocked` | 7 | 1 | 0 | 0 | 0 | 0 | 8 |
 | Production Release | `blocked` | 9 | 0 | 0 | 0 | 0 | 0 | 9 |
 
 ## Incomplete Public Beta Rows
@@ -37,7 +37,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Requirement | Status | Owner | Evidence Posture | Evidence Count | Risk Acceptance | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `external_audit_report` | `missing` | TBD | external/future | 0 | none | A completed external audit report and issue-linked remediation status are not yet retained. |
-| `fork_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A fork deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
+| `fork_deployment_rehearsal` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | Pending-review mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, and generated fork address book. Public beta remains blocked until review is accepted. |
 | `testnet_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | `fork_testnet_metadata_browser_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained. |
 | `fork_testnet_ceremony_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet deployment ceremony evidence is not yet retained. |
@@ -68,7 +68,6 @@ No reviewed external evidence rows are complete in the committed baseline.
 | Phase | Requirement | Status | Required Retained Evidence |
 | --- | --- | --- | --- |
 | Public Beta | `external_audit_report` | `missing` | A completed external audit report and issue-linked remediation status are not yet retained. |
-| Public Beta | `fork_deployment_rehearsal` | `missing` | A fork deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | Public Beta | `testnet_deployment_rehearsal` | `missing` | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | Public Beta | `fork_testnet_metadata_browser_evidence` | `missing` | Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained. |
 | Public Beta | `fork_testnet_ceremony_evidence` | `missing` | Fork or testnet deployment ceremony evidence is not yet retained. |

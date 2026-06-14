@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/windows-powershell-wrapper-ci` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/344` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/345` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/346` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
+| Active PR branch | `codex/retain-fork-deployment-rehearsal-evidence` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/346` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
+| Active PR | `TBD` |
+| Next issue | `TBD after issue #216 review` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 14:21 UTC` |
+| Last updated | `2026-06-14 15:19 UTC` |
 
 ## Packaging Notes
 
@@ -224,20 +224,96 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #340 |
 | 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Merged in PR #342 |
 | 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Merged in PR #344 |
-| 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Active for issue #345 |
+| 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Merged in PR #346 |
+| 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Active for issue #216 |
 
 ## Current PR Worklog
 
-### PR candidate: Add Windows PowerShell 5.1 check-wrapper CI harness (Queue Item 168)
+### PR candidate: Retain pending fork deployment rehearsal evidence (Queue Item 169)
 
-Status: PR open; waiting for CI and CodeRabbit.
+Status: local validation passed; PR not yet opened.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/216`.
+PR: `TBD`.
+Branch: `codex/retain-fork-deployment-rehearsal-evidence`.
+Branch started from PR #346 squash merge commit
+`a35c24a4f3bcbf61db73c78f2e98822f09d17d59`.
+Initial local commit before final state/digest amend:
+`e6788368c672bd33c08233c838961a170acb6823`; final PR head is recorded by Git
+and the opened pull request after push.
+
+Goal:
+
+- Retain pending-review mainnet-fork deployment rehearsal evidence for issue
+  #216 without claiming public-beta readiness.
+- Commit the sanitized Foundry fork broadcast, generated fork broadcast config,
+  generated fork deployment manifest, generated fork address book, and
+  generated non-local evidence envelope.
+- Update `release-artifacts/latest/public-beta-evidence.json` from `missing`
+  to `pending` for `fork_deployment_rehearsal`, while keeping overall public
+  beta `blocked`.
+- Add local/CI drift checks for the fork broadcast-derived config and manifest,
+  and include the fork address book in default address-book drift checks.
+- Teach the broadcast manifest generator to record explicit ignored linked
+  library/helper deployments and to tolerate Foundry unlocked-broadcast receipt
+  hash drift only when the receipt order, success status, and deployed address
+  still prove the same deployment.
+
+Current retained fork facts:
+
+- Fork RPC source: public endpoint only; private RPC URLs are not committed.
+- Fork block: `25316366`.
+- Fork block hash:
+  `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`.
+- Source commit rehearsed: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`.
+- Retained broadcast:
+  `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json`.
+- Generated manifest:
+  `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`.
+- Generated address book:
+  `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`.
+- Retained artifact:
+  `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
+- Evidence envelope:
+  `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json`.
+- Review status: `pending_review`.
+- Readiness claim: `blocked`.
+
+Validation completed locally:
+
+- `python scripts\test_broadcast_manifest_input.py`.
+- `python scripts\generate_broadcast_manifest_input.py --template deployments\config\fork-mainnet-6529stream-v0.1.0-001.json --broadcast deployments\broadcasts\fork-mainnet-6529stream-v0.1.0-001-run-latest.json --output deployments\config\fork-mainnet-6529stream-v0.1.0-001-broadcast.json --manifest-output deployments\examples\fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`.
+- `python scripts\generate_deployment_manifest.py --config deployments\config\fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`.
+- `python scripts\generate_address_books.py --check`.
+- `python scripts\test_fork_deployment_rehearsal_evidence.py`.
+- `python scripts\check_fork_deployment_rehearsal_evidence.py`.
+- `python scripts\check_non_local_release_evidence.py`.
+- `python scripts\check_public_beta_evidence.py`.
+- Release blocker/index/backlog/body-sync, release manifest, release checksum,
+  release-readiness, changelog, syntax, and whitespace checks passed.
+- Full local `scripts\check.ps1` passed at `2026-06-14 15:19 UTC` with
+  `$env:Path` including `$HOME\.foundry\bin`. The first full run caught stale
+  default Anvil broadcast-derived output after the generator logic change;
+  `deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`,
+  `deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json`,
+  address books, release manifest, and checksums were regenerated before the
+  passing full run.
+
+### Completed: Add Windows PowerShell 5.1 check-wrapper CI harness (Queue Item 168)
+
+Status: merged in PR #346.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/345`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/346`.
 Branch: `codex/windows-powershell-wrapper-ci`.
 Branch started from PR #344 squash merge commit
 `fe378036ac4686d94ee8e4f926adadd30ebef385`.
 Initial PR head: `ad8ca9d37a4ee4829195faa6ae7abca9ac7d36e3`.
+Final PR head: `b70e9592fb6e54dff52ab9937a3b241004d06705`.
+Squash merge commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`.
+CI: run `27501729525`, jobs `81285737978` and `81285738002`, passed.
 CodeRabbit review requested via comment `4702020821`.
+CodeRabbit: combined status was success; no review threads were open.
+Claude: no Claude review was requested per current user instruction.
+Merge decision comment: `4702043390`.
 
 Goal:
 
@@ -249,17 +325,27 @@ Goal:
 - Update tooling docs, changelog, roadmap, run-state, and generated release
   artifacts as needed.
 
-Validation plan:
+Validation completed locally:
 
-- PowerShell parser check for the CI workflow shape by review plus GitHub CI.
-- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1`.
-- `python scripts\test_windows_check_wrapper.py`.
-- `python scripts\test_windows_ci_wrapper.py`.
-- `make windows-check-wrapper-policy`.
-- `python scripts\generate_release_manifest.py --check`.
-- `python scripts\generate_release_checksums.py --check`.
-- `python scripts\check_changelog.py`.
-- `git diff --check`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1` passed.
+- `python scripts\test_windows_check_wrapper.py` passed.
+- `python scripts\test_windows_ci_wrapper.py` passed.
+- `make windows-check-wrapper-policy` passed.
+- `python scripts\test_release_manifest.py` passed.
+- `python scripts\generate_release_manifest.py --check` passed.
+- `python scripts\test_release_checksums.py` passed.
+- `python scripts\generate_release_checksums.py --check` passed.
+- `python scripts\check_changelog.py` passed.
+- `git diff --check` passed with expected local line-ending warnings for
+  PowerShell scripts.
+
+Outcome:
+
+- `.github/workflows/ci.yml` now includes a lightweight Windows PowerShell job
+  for the checked native-command wrapper harness.
+- CI run `27501729525` passed both Linux and Windows jobs on final PR head
+  `b70e9592fb6e54dff52ab9937a3b241004d06705`.
+- Issue #345 closed completed when PR #346 merged.
 
 ### Completed: Add executable Windows check wrapper failure harness (Queue Item 167)
 
@@ -12823,6 +12909,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 15:19 | Validate Queue Item 169 locally | Focused fork broadcast/evidence checks, generated public-beta and tracker evidence checks, release-readiness/changelog/manifest/checksum checks, Python syntax compilation, whitespace check, and full Windows `scripts\check.ps1` pass. The first full run caught stale default Anvil broadcast-derived output after receipt-selection logic changed; regenerated the default broadcast config, deployment manifest, address books, release manifest, and checksums before the passing full run. |
+| 2026-06-14 14:57 | Implement Queue Item 169 local draft | Retained pending-review mainnet-fork deployment rehearsal evidence for issue #216: fork block `25316366`, fork hash `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`, sanitized broadcast, generated fork broadcast config, generated fork manifest, generated fork address book, non-local evidence envelope, and public-beta evidence status `pending`; readiness remains blocked pending review acceptance. |
+| 2026-06-14 14:52 | Merge PR #346 and start Queue Item 169 | PR #346 passed CI run `27501729525` with Linux job `81285737978` and Windows job `81285738002`, CodeRabbit status was success with no unresolved review threads, merge-decision comment `4702043390` recorded the autonomous merge basis, squash merge `a35c24a4f3bcbf61db73c78f2e98822f09d17d59` landed on `main`, issue #345 closed completed, and branch `codex/retain-fork-deployment-rehearsal-evidence` started for issue #216. |
 | 2026-06-14 14:21 | Open PR #346 | PR #346 opened for issue #345 on head `ad8ca9d37a4ee4829195faa6ae7abca9ac7d36e3`, adds a lightweight Windows PowerShell CI job and workflow-wiring policy test for the checked native-command wrapper harness, and requests CodeRabbit review via comment `4702020821`. |
 | 2026-06-14 14:16 | Start Queue Item 168 | PR #344 merged as `fe378036ac4686d94ee8e4f926adadd30ebef385`, issue #343 closed completed, issue #345 opened for a lightweight Windows PowerShell 5.1 CI harness, and branch `codex/windows-powershell-wrapper-ci` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 14:13 | Merge PR #344 | Tooling PR #344 passed CI run `27501279202`, job `81284495028`, on final head `d303ad5bb340f35d5a438f5379cbe691f9d51534`; CodeRabbit status was success after explicit review-finished reply `4701972232`; no review threads were open; merge-decision comment `4702003701` recorded the initial rate-limit warning as non-actionable; squash merge commit `fe378036ac4686d94ee8e4f926adadd30ebef385` landed on `main`; and issue #343 closed completed. |

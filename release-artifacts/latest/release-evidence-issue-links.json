@@ -43,7 +43,7 @@
       "phase": "public_beta",
       "phase_label": "Public Beta",
       "requirement_id": "fork_deployment_rehearsal",
-      "status": "missing",
+      "status": "pending",
       "title": "Retain public beta evidence: fork_deployment_rehearsal",
       "issue_number": 216,
       "issue_url": "https://github.com/6529-Collections/6529Stream/issues/216",

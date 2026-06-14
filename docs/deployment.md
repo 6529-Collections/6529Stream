@@ -159,7 +159,8 @@ Address book generation validates the deployment manifest contract set against
 the release artifact baseline, rejects invalid or duplicate deployed contract
 addresses, and fails check mode when the committed address-book JSON drifts.
 The default address-book set includes both the placeholder Anvil manifest and
-the sanitized broadcast-derived manifest.
+the sanitized broadcast-derived manifest, plus the pending-review
+fork-mainnet broadcast-derived manifest retained for issue #216.
 
 Source verification input generation writes
 `release-artifacts/latest/source-verification-inputs.json` from the production
@@ -214,6 +215,13 @@ Anvil evidence only. Fork, testnet, and production ceremonies must produce
 their own evidence bundles from real broadcast manifests, retained transaction
 logs, source/explorer verification submissions, admin/signer/dependency
 operator notes, and incident or deprecation records where relevant.
+
+The pending-review fork-mainnet rehearsal retained for issue #216 is a
+broadcast/manifest/address-book evidence slice, not a complete ceremony bundle.
+Its sanitized broadcast records the linked `StreamMetadataRenderer` deployment
+under `broadcast_evidence.ignored_deployments` because the library is a helper
+deployment used to link `StreamCore`, while the release contract set remains the
+core/drops/auction/curator/randomizer/delegation surface.
 
 ## Randomizer Operations Evidence
 

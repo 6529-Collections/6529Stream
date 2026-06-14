@@ -50,9 +50,10 @@ until committed evidence is `complete` or `accepted_risk`.
 Current maturity:
 
 - Repository status: pre-audit and not production-ready.
-- Evidence status: local baseline only.
-- Public beta status: blocked by missing fork/testnet/live evidence and
-  external audit completion.
+- Evidence status: local baseline plus pending-review mainnet-fork deployment
+  rehearsal evidence.
+- Public beta status: blocked by pending fork evidence review, missing
+  testnet/live evidence, and external audit completion.
 - Production release status: blocked by missing production signatures, signed
   Git tags, verified deployed addresses, explorer verification, non-local
   retained evidence, and post-audit remediation evidence.
@@ -68,9 +69,9 @@ local tests prove protocol correctness.
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package exists; completed external audit report and post-audit remediation do not exist | Yes | Yes |
-| Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist | Fork/testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, and non-local release evidence runbook, schema, generic template, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, production signing evidence, reviewed signer custody readiness, and reviewed non-local evidence missing | Production signatures and signed Git tags missing |
-| Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork/testnet/live invariant and gas evidence missing | External audit and production evidence missing |
+| Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; pending-review mainnet-fork deployment rehearsal evidence is retained | Fork review acceptance plus testnet/live evidence missing | Production broadcast retention, verified deployed addresses, and explorer verification missing |
+| Release artifacts | Release manifest, checksum bundle, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, pending-review fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, production signing evidence, reviewed signer custody readiness, and review-accepted non-local evidence missing | Production signatures and signed Git tags missing |
+| Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Fork review acceptance plus testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
 

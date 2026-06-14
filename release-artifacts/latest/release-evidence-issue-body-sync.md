@@ -10,9 +10,9 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:ef4de3f8c3ee4360ce627223ecd5889d20fbe9223b4fc2ae983e071de4df1fe6` |
+| Backlog SHA-256 | `sha256:35ad7204b525beb69e0fd4ec93ed57644981b81782ef67c77196c5fa1c014a52` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
-| Issue links SHA-256 | `sha256:6fc7a352822ab24ff968eacbcbfd5dde4114f234199f55c67ffed0670b175d5c` |
+| Issue links SHA-256 | `sha256:00af35923c34e910ab7e4bf6e6f4dc03799c9204ab1b95744f1ea7b57609c1d0` |
 
 ## Policy
 
@@ -28,7 +28,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | Issue | Entry | Status | Body SHA-256 | Lines |
 | --- | --- | --- | --- | --- |
 | [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:38ad6e7332ebe917e33328e4f2eb4950fabe00b12251401066e070bea2f2b24d` | 53 |
-| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `missing` | `sha256:be17280d582eca27fd13344647dfa14434518b4a4b43162f88f9603af5be59f8` | 55 |
+| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `pending` | `sha256:98af716d7afb46c78628b61b1292d7204a88a07b387f51dfbfa48349439a6942` | 55 |
 | [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:ae7b0769db90ab9e4832043f15cbf1f309d71389e74cf4b0b805c62d677b2875` | 53 |
 | [#218](https://github.com/6529-Collections/6529Stream/issues/218) | `public-beta-fork-testnet-metadata-browser-evidence` | `missing` | `sha256:af916550988f50f1c5882fdab9fd8b4833534621b4b3c5567dcd4d069414340a` | 53 |
 | [#219](https://github.com/6529-Collections/6529Stream/issues/219) | `public-beta-fork-testnet-ceremony-evidence` | `missing` | `sha256:1493c20f27c23f8b2b0ea59a253edb9aba37e7075fc8326b824aa985e69d1c2b` | 53 |
@@ -110,8 +110,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #216 public-beta-fork-deployment-rehearsal
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/216
-- Body SHA-256: `sha256:be17280d582eca27fd13344647dfa14434518b4a4b43162f88f9603af5be59f8`
-- Source body SHA-256: `sha256:a62cad13c3954f56f9612a0761669e1f02fd26a55093b034f937897255281c85`
+- Body SHA-256: `sha256:98af716d7afb46c78628b61b1292d7204a88a07b387f51dfbfa48349439a6942`
+- Source body SHA-256: `sha256:b4ff583c548e63fd3953576a82f1083469067a887c03d2658bdb0c300b2d5446`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-deployment-rehearsal issue_number=216 -->
@@ -125,9 +125,9 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Phase: `Public Beta`
 - Requirement ID: `fork_deployment_rehearsal`
-- Current status: `missing`
-- Evidence posture: external/future
-- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
+- Current status: `pending`
+- Evidence posture: retained-incomplete
+- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template
 
 ## Source Links
 

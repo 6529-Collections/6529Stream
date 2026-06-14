@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:3b75cde36f75662061011af793d4c9240a1fec6447294ce0e3ee1d331d729b4d",
-      "size_bytes": 6296
+      "sha256": "sha256:dccff7b20ac18113244d03072992a0578cab416114bd453e33affe02f02511ad",
+      "size_bytes": 6696
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:7cf0dd73e2f4ec27fec584a2a105334b3db441e212bf6524b3961b0dd4705b0e",
-      "size_bytes": 9721
+      "sha256": "sha256:6e703f9aa6e6841c0b6d534dc8b8674a99b94494943b442a2a01ed0b5695d80e",
+      "size_bytes": 9714
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:aeed5f533b9854e35883f78080ff312d12e181e2790108a9ed00e1129b85148f",
-      "size_bytes": 18833
+      "sha256": "sha256:3dbbcfbc96e7334d29330ad71fbb63b097f062654857af933ae1a217705c819d",
+      "size_bytes": 19510
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -47,8 +47,8 @@
       "label": "Public Beta",
       "overall_status": "blocked",
       "counts": {
-        "missing": 8,
-        "pending": 0,
+        "missing": 7,
+        "pending": 1,
         "blocked": 0,
         "accepted_risk": 0,
         "not_applicable": 0,
@@ -138,15 +138,17 @@
       "phase": "public_beta",
       "phase_label": "Public Beta",
       "requirement_id": "fork_deployment_rehearsal",
-      "status": "missing",
-      "evidence_posture": "external/future",
-      "evidence_count": 0,
-      "evidence_paths": [],
-      "owner": "TBD",
+      "status": "pending",
+      "evidence_posture": "retained-incomplete",
+      "evidence_count": 1,
+      "evidence_paths": [
+        "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json"
+      ],
+      "owner": "Codex autonomous operator",
       "template_owner": "TBD",
       "reviewer": "TBD",
       "review_status": "template",
-      "owner_reviewer_posture": "requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template",
       "blocker_report": {
         "path": "release-artifacts/latest/public-beta-blockers.md",
         "section": "Incomplete Public Beta Rows",
@@ -161,7 +163,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:88827a6455d8f9b9aa9c84a76b409c9d7e773e838ac1f1f59641e10f1c6f17e6",
+        "sha256": "sha256:cb5138b585201f130aaa2905bba5079451c29ffd1e6d276cadff1d11db400980",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
@@ -183,7 +185,7 @@
       ],
       "template_only_can_complete": false,
       "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "A fork deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained."
+      "notes": "Pending-review mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, and generated fork address book. Public beta remains blocked until review is accepted."
     },
     {
       "phase": "public_beta",
