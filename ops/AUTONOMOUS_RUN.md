@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-archive-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/282` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/283` |
-| Active PR | TBD until Queue Item 136 is opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/284` |
 | Next issue | TBD after issue #283 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 00:45 UTC` |
+| Last updated | `2026-06-14 00:50 UTC` |
 
 ## Packaging Notes
 
@@ -199,12 +199,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit report archive index merge state (Queue Item 136)
 
-Status: local implementation in progress before PR open.
+Status: PR #284 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/283`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/284`.
 Branch: `codex/reconcile-live-audit-archive-merge-state`.
 Branch started from PR #282 squash merge commit
 `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`.
+Opening PR head: `61d4286da2b2e90875f148bf5aecb4cbdc765227`.
 
 Goal:
 
@@ -11289,6 +11290,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 00:50 | Open PR #284 | State-only reconciliation PR opened on head `61d4286da2b2e90875f148bf5aecb4cbdc765227`; it links issue #283, records PR #282 merge evidence, refreshes roadmap verification metadata, preserves blocked readiness claims, and queues the live audit archive retention workflow as the next no-secret release evidence target. |
 | 2026-06-14 00:45 | Start Queue Item 136 | PR #282 merged as `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`, issue #281 closed completed, issue #283 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-archive-merge-state` started from the merged baseline before the next no-secret evidence target. |
 | 2026-06-14 00:43 | Merge PR #282 | Live audit report archive index merged as `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`; final head `91b4aaca6fda564f175ef988e3ba03d10aedea65` passed CI run `27483665398`, CodeRabbit status was success with no unresolved review threads, explicit review requests returned review-finished replies, and issue #281 closed completed. |
 | 2026-06-14 00:34 | Fix PR #282 release artifact catalog CI failure | CI run `27483379787` failed because the release-artifact catalog allowlist did not include the new archive JSON/Markdown outputs; added them to `DOWNSTREAM_RELEASE_FILES`, extended `scripts/test_release_artifacts.py`, and reran focused release-artifact checks plus full Windows `scripts\check.ps1` successfully. |
