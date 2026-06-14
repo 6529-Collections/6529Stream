@@ -219,6 +219,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Retired provider and integration files from the Solidity formatting deferral
+  baseline, so arRNG, VRF, delegation, and randomizer integration interfaces
+  are now enforced by `make fmt-check`.
 - Retired first-party interface files from the Solidity formatting deferral
   baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and
   `IStreamMinter.sol` are now enforced by `make fmt-check`.
