@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/solidity-formatting-gate-triage` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/310` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/311` |
-| Active PR | TBD after PR open |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/312` |
 | Next issue | TBD after issue #311 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 06:34 UTC` |
+| Last updated | `2026-06-14 06:36 UTC` |
 
 ## Packaging Notes
 
@@ -212,12 +212,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Triage Solidity formatting gate path (Queue Item 150)
 
-Status: local validation complete; ready to commit and open PR.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/311`.
-PR: TBD after open.
+PR: `https://github.com/6529-Collections/6529Stream/pull/312`.
 Branch: `codex/solidity-formatting-gate-triage`.
 Branch started from PR #310 squash merge commit
 `e622e61ad076a8c65dad1b7c3bc332e17c36b531`.
+Opening head: `d1ef54f074e60541ddc3b70ad564672540222277`.
+CodeRabbit: explicit review request comment `4700938271`.
 
 Goal:
 
@@ -11882,6 +11884,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 06:36 | Open PR #312 | PR #312 opened on head `d1ef54f074e60541ddc3b70ad564672540222277`, closes issue #311, adds the scoped Solidity formatting gate, and requested CodeRabbit review via comment `4700938271`. |
 | 2026-06-14 06:34 | Validate Queue Item 150 locally | The scoped formatting checker, checker tests, `make fmt-check`, changelog tests/checker, Python syntax compilation, Bash syntax check, PowerShell parser check, and whitespace check passed before commit. |
 | 2026-06-14 06:21 | Start Queue Item 150 | PR #310 merged as `e622e61ad076a8c65dad1b7c3bc332e17c36b531`, issue #309 closed completed, issue #311 opened for Solidity formatting gate triage, and branch `codex/solidity-formatting-gate-triage` started from the merged baseline. |
 | 2026-06-14 06:19 | Merge PR #310 | PR #310 merged as `e622e61ad076a8c65dad1b7c3bc332e17c36b531`; final head `e339df55d746a73d496898703fe0530ea9989cb0` passed CI run `27490294219`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700885497` and review-finished reply `4700885685`, and issue #309 closed completed. |
