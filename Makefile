@@ -147,6 +147,10 @@ non-local-release-evidence-check:
 	$(PYTHON) scripts/test_non_local_release_evidence.py
 	$(PYTHON) scripts/check_non_local_release_evidence.py
 
+external-audit-report-evidence-check:
+	$(PYTHON) scripts/test_external_audit_report_evidence.py
+	$(PYTHON) scripts/check_external_audit_report_evidence.py
+
 fork-deployment-rehearsal-evidence-check:
 	$(PYTHON) scripts/test_fork_deployment_rehearsal_evidence.py
 	$(PYTHON) scripts/check_fork_deployment_rehearsal_evidence.py

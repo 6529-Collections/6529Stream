@@ -345,6 +345,22 @@ Retain:
 Map the final report to `external_audit_report` and the remediation evidence to
 `post_audit_remediation`.
 
+The external audit report row has a dedicated retained-artifact template at
+`release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`.
+Before generating the non-local metadata envelope for `external_audit_report`,
+run:
+
+```sh
+python scripts/test_external_audit_report_evidence.py
+python scripts/check_external_audit_report_evidence.py
+```
+
+The committed template is not completion evidence. Issue #215 remains open and
+the public-beta row remains `missing` until a final reviewed audit report,
+audited commit/scope, finding remediation map, retest or accepted-risk status,
+and reviewer confirmation are retained and linked from the shared
+public-beta evidence manifest.
+
 ### Release Signing Evidence
 
 Retain:

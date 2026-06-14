@@ -118,6 +118,8 @@ jobs:
             scripts/test_release_signatures.py \
             scripts/check_non_local_release_evidence.py \
             scripts/test_non_local_release_evidence.py \
+            scripts/check_external_audit_report_evidence.py \
+            scripts/test_external_audit_report_evidence.py \
             scripts/check_fork_deployment_rehearsal_evidence.py \
             scripts/test_fork_deployment_rehearsal_evidence.py \
             scripts/check_public_beta_evidence.py \
@@ -360,6 +362,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_non_local_release_evidence.py 2>&1 | tee ci-logs/non-local-release-evidence-tests.log
           python3 scripts/check_non_local_release_evidence.py 2>&1 | tee ci-logs/non-local-release-evidence-check.log
+          python3 scripts/test_external_audit_report_evidence.py 2>&1 | tee ci-logs/external-audit-report-evidence-tests.log
+          python3 scripts/check_external_audit_report_evidence.py 2>&1 | tee ci-logs/external-audit-report-evidence-check.log
           python3 scripts/test_fork_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/fork-deployment-rehearsal-evidence-tests.log
           python3 scripts/check_fork_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/fork-deployment-rehearsal-evidence-check.log
 

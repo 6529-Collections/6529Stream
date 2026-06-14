@@ -59,6 +59,8 @@ python scripts/check_release_signatures.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
+python scripts/test_external_audit_report_evidence.py
+python scripts/check_external_audit_report_evidence.py
 python scripts/test_fork_deployment_rehearsal_evidence.py
 python scripts/check_fork_deployment_rehearsal_evidence.py
 python scripts/test_public_beta_evidence.py
@@ -426,16 +428,24 @@ artifact path. The helper computes the artifact digest, validates the output
 with the canonical checker, and supports `--check` for drift detection. It does
 not unblock a release row until the generated evidence is independently
 reviewed and linked from `release-artifacts/latest/public-beta-evidence.json`.
+External audit report evidence for issue #215 has a Markdown retained artifact
+path at
+`release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`.
+Run `python scripts/test_external_audit_report_evidence.py` and
+`python scripts/check_external_audit_report_evidence.py` before generating the
+metadata envelope. The committed file is template-only and keeps
+`external_audit_report` missing until a final reviewed audit report, scope,
+finding/remediation map, retest status, and reviewer confirmation are retained.
 Fork deployment rehearsal evidence for issue #216 also has a Markdown retained
 artifact path at
 `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
 Run `python scripts/test_fork_deployment_rehearsal_evidence.py` and
 `python scripts/check_fork_deployment_rehearsal_evidence.py` before generating
-the metadata envelope. The committed file now contains pending-review
+the metadata envelope. The committed file now contains reviewed
 mainnet-fork rehearsal evidence captured at fork block `25316366`, with
 private RPC details redacted and public-beta readiness still blocked. Issue
-#216 can move to complete only after review accepts the retained artifact,
-non-local evidence envelope, public-beta evidence row, and generated
+#216 closed completed after review accepted the retained artifact, non-local
+evidence envelope, public-beta evidence row, and generated
 manifest/address-book references.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and

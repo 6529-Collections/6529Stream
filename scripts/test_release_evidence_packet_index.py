@@ -181,6 +181,10 @@ def seed_all_templates(root: Path) -> None:
         retained_text="Public beta template retained artifact.\n",
     )
     write_text(
+        root / generator.EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE,
+        "External audit report retained artifact template.\n",
+    )
+    write_text(
         root / generator.FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE,
         "Fork deployment rehearsal retained artifact template.\n",
     )
@@ -285,7 +289,11 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
                 generator.DEFAULT_JSON_OUTPUT,
                 generator.DEFAULT_MARKDOWN_OUTPUT,
             )
-            row = packet["rows"][0]
+            row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"] == "testnet_deployment_rehearsal"
+            )
 
             self.assertEqual(row["template_only_can_complete"], False)
             self.assertIn("review_status=template", row["owner_reviewer_posture"])
@@ -293,6 +301,46 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             self.assertIn("python scripts/generate_release_evidence_packet_index.py --check", row["validation_commands"])
             self.assertIn("blocker_report", row)
             self.assertEqual(packet["policy"]["template_only_can_complete"], False)
+
+    def test_external_audit_row_uses_canonical_retained_artifact(self) -> None:
+        """External audit tracker rows point at the audit-specific template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            audit_row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"] == generator.EXTERNAL_AUDIT_REQUIREMENT_ID
+            )
+
+            self.assertEqual(
+                audit_row["retained_artifact_expectation"]["path"],
+                generator.EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+            )
+            self.assertEqual(
+                audit_row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(
+                    root / generator.EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE
+                ),
+            )
+            self.assertIn(
+                "python scripts/test_external_audit_report_evidence.py",
+                audit_row["validation_commands"],
+            )
+            self.assertIn(
+                "python scripts/check_external_audit_report_evidence.py",
+                audit_row["validation_commands"],
+            )
 
     def test_fork_rehearsal_row_uses_canonical_retained_artifact(self) -> None:
         """Fork deployment tracker rows point at the fork-specific template."""

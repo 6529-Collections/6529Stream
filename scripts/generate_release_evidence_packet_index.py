@@ -71,7 +71,16 @@ FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/fork-deployment-rehearsal/"
     "fork-deployment-rehearsal-retained-artifact-template.md"
 )
+EXTERNAL_AUDIT_REQUIREMENT_ID = "external_audit_report"
+EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/external-audit-report/"
+    "external-audit-report-retained-artifact-template.md"
+)
 ROW_VALIDATION_COMMAND_OVERRIDES = {
+    (PUBLIC_BETA_PHASE, EXTERNAL_AUDIT_REQUIREMENT_ID): (
+        "python scripts/test_external_audit_report_evidence.py",
+        "python scripts/check_external_audit_report_evidence.py",
+    ),
     (PUBLIC_BETA_PHASE, FORK_DEPLOYMENT_REQUIREMENT_ID): (
         "python scripts/test_fork_deployment_rehearsal_evidence.py",
         "python scripts/check_fork_deployment_rehearsal_evidence.py",
@@ -239,6 +248,13 @@ def retained_artifact_expectation(
     if phase == PUBLIC_BETA_PHASE and requirement_id == FORK_DEPLOYMENT_REQUIREMENT_ID:
         record = file_record(
             resolve_repo_path(repo_root, FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif phase == PUBLIC_BETA_PHASE and requirement_id == EXTERNAL_AUDIT_REQUIREMENT_ID:
+        record = file_record(
+            resolve_repo_path(repo_root, EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE),
             repo_root,
         )
         retained_path = record["path"]

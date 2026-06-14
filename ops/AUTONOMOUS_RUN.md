@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-pr-350-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/350` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/351` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/352` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report`) |
+| Active PR branch | `codex/external-audit-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/352` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/353` |
+| Active PR | `TBD` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report` remains open for real reviewed audit evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 16:54 UTC` |
+| Last updated | `2026-06-14 17:06 UTC` |
 
 ## Packaging Notes
 
@@ -227,13 +227,59 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Merged in PR #346 |
 | 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Merged in PR #347 |
 | 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Merged in PR #349 |
-| 171 | Reconcile PR #350 reviewed fork evidence merge state | Gate G support | Record PR #350 merge evidence, close out issue #216/Queue Item 164 in durable state, refresh roadmap verification metadata, and select issue #215 as the next release-evidence target without changing readiness claims | Active for issue #351 |
+| 171 | Reconcile PR #350 reviewed fork evidence merge state | Gate G support | Record PR #350 merge evidence, close out issue #216/Queue Item 164 in durable state, refresh roadmap verification metadata, and select issue #215 as the next release-evidence target without changing readiness claims | Merged in PR #352 |
+| 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Active for issue #353 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile PR #350 reviewed fork evidence merge state (Queue Item 171)
+### PR candidate: Add external audit report retained artifact checker (Queue Item 172)
 
-Status: PR opened; awaiting CI and CodeRabbit review.
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/353`.
+Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/215`.
+PR: `TBD`.
+Branch: `codex/external-audit-evidence-checker`.
+Branch started from PR #352 squash merge commit
+`fd06316fcb14d8e0644cf9f1ca1c45156423671b`.
+
+Goal:
+
+- Add a dedicated retained-artifact Markdown template for
+  `external_audit_report`.
+- Add a focused offline checker and tests for audit scope, audited commit,
+  report reference, finding/remediation map, accepted-risk references, retest
+  status, reviewer decision, and no-secret redaction fields.
+- Wire the checker into local and CI evidence gates.
+- Point the generated packet index, issue backlog, and issue body-sync payloads
+  at the dedicated audit retained artifact path.
+- Preserve issue #215 as open and `external_audit_report` as `missing` until a
+  real reviewed external audit report is retained.
+
+Current facts:
+
+- PR #352 merged as squash commit
+  `fd06316fcb14d8e0644cf9f1ca1c45156423671b`.
+- PR #352 final head
+  `59be4b76e2800563a359106790f9f976092f8df4` passed CI run
+  `27505721258`: Windows PowerShell wrapper job `81296460637` and Foundry
+  smoke job `81296460654`.
+- CodeRabbit status was success. The explicit review request comment
+  `4702421230` received review-finished reply `4702421405`; no review threads
+  were open.
+- Merge-decision comment `4702441858` recorded the autonomous merge basis.
+- Issue #351 closed completed at `2026-06-14 17:02 UTC`.
+- Issue #353 tracks this no-secret support work for parent evidence issue #215.
+
+Validation planned locally:
+
+- `python scripts/test_external_audit_report_evidence.py`.
+- `python scripts/check_external_audit_report_evidence.py`.
+- Generated release evidence packet/backlog/body-sync checks.
+- Release manifest/checksum/changelog checks.
+
+### Completed: Reconcile PR #350 reviewed fork evidence merge state (Queue Item 171)
+
+Status: merged in PR #352; issue #351 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/351`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/352`.
 Branch: `codex/reconcile-pr-350-merge-state`.
@@ -264,6 +310,9 @@ Current facts:
 - Merge-decision comment `4702403805` recorded the autonomous merge basis.
 - Issue #216 auto-closed as completed at `2026-06-14 16:47 UTC`.
 - Issue #351 tracks this reconciliation.
+- PR #352 passed CI run `27505721258`, received CodeRabbit status success,
+  squash-merged as `fd06316fcb14d8e0644cf9f1ca1c45156423671b`, and closed
+  issue #351 as completed.
 
 Validation planned locally:
 
@@ -13089,6 +13138,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 17:06 | Merge PR #352 and start Queue Item 172 | PR #352 squash-merged as `fd06316fcb14d8e0644cf9f1ca1c45156423671b` after CI run `27505721258` passed Windows PowerShell wrapper job `81296460637` and Foundry smoke job `81296460654`; CodeRabbit status was success with review-finished reply `4702421405`, no review threads were open, merge-decision comment `4702441858` documented the initial rate-limit warning as non-actionable, issue #351 closed completed, issue #353 opened for external audit retained-artifact checker support, and branch `codex/external-audit-evidence-checker` started from the merged baseline. |
 | 2026-06-14 16:54 | Open PR #352 | PR #352 opened on head `277e513de3e81c739d29bc4950c0182f6afd76d5`, records PR #350 merge evidence and issue #216 completion, refreshes roadmap verification metadata, selects issue #215 as the next release-evidence target, and preserves blocked readiness claims. |
 | 2026-06-14 16:50 | Merge PR #350 and start Queue Item 171 | PR #350 squash-merged as `8af52acb1072d106033162f251e4aa2fa321d628` after CI run `27505334136` passed Windows PowerShell wrapper job `81295431136` and Foundry smoke job `81295431140`; CodeRabbit status was success with review-finished reply `4702384287`, no review threads were open, merge-decision comment `4702403805` documented the initial rate-limit warning as non-actionable, issue #216 closed completed, issue #351 opened for merge-state reconciliation, and branch `codex/reconcile-pr-350-merge-state` started from the merged baseline. |
 | 2026-06-14 16:38 | Open PR #350 | PR #350 opened on head `9a3d34f134a42432b4786eb5dd7c5d740a081e72`, marks reviewed fork deployment rehearsal evidence complete, removes issue #216 from the active evidence tracker backlog/link/body-sync set, preserves blocked public-beta and production readiness, and awaits CI plus CodeRabbit review before merge. |

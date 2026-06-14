@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a dedicated external audit report retained-artifact template and
+  checker for issue #215, wiring it into local/CI evidence gates and generated
+  release evidence trackers while keeping `external_audit_report` missing until
+  a real reviewed audit report is retained.
 - Accepted reviewed mainnet-fork deployment rehearsal evidence for issue #216,
   moving `fork_deployment_rehearsal` to `complete`, dropping #216 from the
   active evidence tracker backlog/link/body-sync set, and preserving blocked
