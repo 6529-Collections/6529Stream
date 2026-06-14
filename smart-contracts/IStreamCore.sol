@@ -28,6 +28,10 @@ interface IStreamCore {
         view
         returns (bytes32);
 
+    function previewArtistApprovalHash(uint256 _collectionID) external view returns (bytes32);
+
+    function artistApprovalHashes(uint256 _collectionID) external view returns (bytes32);
+
     function collectionDependencyVersionState(uint256 _collectionID)
         external
         view

@@ -106,6 +106,8 @@ the release policy in `docs/release-policy.md`.
   strict verifier now also requires an explicit good-signature marker, a
   mandatory signer fingerprint matched as a bounded token, and a tighter
   Git-safe release tag name.
+- Added on-chain artist approval hashes for finalized collection state and
+  refreshed release/deployment artifact catalogs.
 - Added a reusable ADV-001 protocol state-machine smoke harness with
   deterministic cross-contract coverage for fixed-price minting, auction
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,

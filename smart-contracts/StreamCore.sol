@@ -45,6 +45,13 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     );
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
+    bytes32 public constant ARTIST_APPROVAL_TYPEHASH = keccak256(
+        "6529StreamArtistApproval(uint256 collectionId,bytes32 schemaVersionHash,address artist,bytes32 collectionStateHash,bytes32 supplyStateHash,bytes32 liveTokenMetadataHash,bytes32 integrationStateHash,address core,uint256 chainId)"
+    );
+    bytes32 private constant _ARTIST_APPROVAL_SUPPLY_STATE_TYPEHASH = keccak256(
+        "6529StreamArtistApprovalSupplyState(uint256 maxCollectionPurchases,uint256 circulationSupply,uint256 collectionTotalSupply,uint256 reservedMinTokenId,uint256 reservedMaxTokenId,uint256 finalSupplyDelay,uint256 burnCount)"
+    );
+    string public constant ARTIST_APPROVAL_SCHEMA_VERSION = "6529stream-artist-approval-v1";
     string private constant _METADATA_STATE_PENDING = "pending";
     string private constant _METADATA_STATE_STALE = "stale";
     string private constant _METADATA_STATE_FAILED = "failed";
@@ -178,6 +185,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     // artist signature per collection
     mapping(uint256 => string) public artistsSignatures;
 
+    // canonical collection state hash approved by the artist signature
+    mapping(uint256 => bytes32) public artistApprovalHashes;
+
     // additional metadata per token
     mapping(uint256 => string) public tokenData;
 
@@ -249,6 +259,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         uint256 indexed _tokenId,
         address indexed operator,
         address owner
+    );
+    event ArtistApprovalRecorded(
+        uint256 indexed _collectionID,
+        address indexed artist,
+        bytes32 indexed approvalHash,
+        string signature
     );
 
     // constructor
@@ -544,8 +560,11 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         ) {
             revert ArtistSignatureUnauthorized();
         }
+        bytes32 approvalHash = _artistApprovalHash(_collectionID);
         artistsSignatures[_collectionID] = _signature;
+        artistApprovalHashes[_collectionID] = approvalHash;
         artistSigned[_collectionID] = true;
+        emit ArtistApprovalRecorded(_collectionID, msg.sender, approvalHash, _signature);
     }
 
     // function to change the metadata view of a collection
@@ -938,6 +957,11 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         returns (bytes32)
     {
         return _collectionFreezeManifestHash(_collectionID);
+    }
+
+    /// @notice Computes the artist approval hash for the collection's current state.
+    function previewArtistApprovalHash(uint256 _collectionID) public view returns (bytes32) {
+        return _artistApprovalHash(_collectionID);
     }
 
     function collectionDependencyVersionState(uint256 _collectionID)
@@ -1337,6 +1361,39 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
                 _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH,
                 bytes32(collectionLiveTokenMetadataAccumulators[_collectionID]),
                 totalSupplyOfCollection(_collectionID)
+            )
+        );
+    }
+
+    function _artistApprovalHash(uint256 _collectionID) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                ARTIST_APPROVAL_TYPEHASH,
+                _collectionID,
+                keccak256(bytes(ARTIST_APPROVAL_SCHEMA_VERSION)),
+                collectionAdditionalData[_collectionID].collectionArtistAddress,
+                _freezeCollectionStateHash(_collectionID),
+                _artistApprovalSupplyStateHash(_collectionID),
+                _liveTokenMetadataHash(_collectionID),
+                _freezeIntegrationStateHash(_collectionID),
+                address(this),
+                block.chainid
+            )
+        );
+    }
+
+    function _artistApprovalSupplyStateHash(uint256 _collectionID) private view returns (bytes32) {
+        collectionAdditonalDataStructure storage data = collectionAdditionalData[_collectionID];
+        return keccak256(
+            abi.encode(
+                _ARTIST_APPROVAL_SUPPLY_STATE_TYPEHASH,
+                data.maxCollectionPurchases,
+                data.collectionCirculationSupply,
+                data.collectionTotalSupply,
+                data.reservedMinTokensIndex,
+                data.reservedMaxTokensIndex,
+                data.setFinalSupplyTimeAfterMint,
+                burnAmount[_collectionID]
             )
         );
     }
