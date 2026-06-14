@@ -60,6 +60,7 @@ metadata-fixtures-check:
 
 windows-check-wrapper-policy:
 	$(PYTHON) scripts/test_windows_check_wrapper.py
+	$(PYTHON) scripts/test_windows_ci_wrapper.py
 
 windows-check-wrapper-runtime:
 	$(POWERSHELL) $(POWERSHELL_FLAGS) -File scripts/test_windows_check_helpers.ps1

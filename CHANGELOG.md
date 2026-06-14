@@ -16,6 +16,10 @@ the release policy in `docs/release-policy.md`.
 - Added an executable PowerShell runtime harness for the Windows checked native
   wrapper so zero-exit and non-zero-exit native command behavior are both
   validated without running the full local gate.
+- Added a lightweight Windows PowerShell CI job for the checked native-command
+  wrapper harness so Windows-specific native exit handling is covered without
+  running the full Foundry gate on Windows, plus a focused policy test for the
+  workflow wiring.
 - Added fork-specific release evidence tracker routing so issue #216 points to
   the canonical fork deployment rehearsal retained-artifact template and
   checker commands instead of the generic public-beta placeholder.

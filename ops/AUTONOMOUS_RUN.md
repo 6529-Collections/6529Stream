@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/windows-check-wrapper-runtime-harness` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/342` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/343` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/344` |
+| Active PR branch | `codex/windows-powershell-wrapper-ci` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/344` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/345` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/346` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 14:01 UTC` |
+| Last updated | `2026-06-14 14:21 UTC` |
 
 ## Packaging Notes
 
@@ -223,20 +223,64 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
 | 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #340 |
 | 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Merged in PR #342 |
-| 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Active for issue #343 |
+| 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Merged in PR #344 |
+| 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Active for issue #345 |
 
 ## Current PR Worklog
 
-### PR candidate: Add executable Windows check wrapper failure harness (Queue Item 167)
+### PR candidate: Add Windows PowerShell 5.1 check-wrapper CI harness (Queue Item 168)
 
 Status: PR open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/345`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/346`.
+Branch: `codex/windows-powershell-wrapper-ci`.
+Branch started from PR #344 squash merge commit
+`fe378036ac4686d94ee8e4f926adadd30ebef385`.
+Initial PR head: `ad8ca9d37a4ee4829195faa6ae7abca9ac7d36e3`.
+CodeRabbit review requested via comment `4702020821`.
+
+Goal:
+
+- Add a lightweight `windows-latest` CI job that runs the checked-native
+  wrapper harness under Windows PowerShell semantics.
+- Keep the job no-secret, no-RPC, and low-cost by avoiding full Foundry,
+  browser, or release gates on Windows.
+- Preserve the existing Ubuntu PowerShell Core syntax/runtime gate.
+- Update tooling docs, changelog, roadmap, run-state, and generated release
+  artifacts as needed.
+
+Validation plan:
+
+- PowerShell parser check for the CI workflow shape by review plus GitHub CI.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1`.
+- `python scripts\test_windows_check_wrapper.py`.
+- `python scripts\test_windows_ci_wrapper.py`.
+- `make windows-check-wrapper-policy`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
+
+### Completed: Add executable Windows check wrapper failure harness (Queue Item 167)
+
+Status: merged in PR #344.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/343`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/344`.
 Branch: `codex/windows-check-wrapper-runtime-harness`.
 Branch started from PR #342 squash merge commit
 `770326ddbc9cc84ed64e66e135e56e2029ce8b4b`.
 Initial PR head: `66ee11c839c030dd5611da3975ecd254f7ff2892`.
+Final PR head: `d303ad5bb340f35d5a438f5379cbe691f9d51534`.
+Squash merge commit: `fe378036ac4686d94ee8e4f926adadd30ebef385`.
+CI: run `27501279202`, job `81284495028`, passed.
 CodeRabbit review requested via comment `4701972035`.
+CodeRabbit: initial automatic rate-limit warning comment `4701971874`
+produced no actionable findings; explicit review request comment `4701972035`
+received review-finished reply `4701972232`; combined status was success; no
+review threads were open.
+Claude: automatic informational comment only; no Claude review was requested per
+current user instruction.
+Merge decision comment: `4702003701`.
 
 Goal:
 
@@ -249,18 +293,32 @@ Goal:
 - Update tooling docs, changelog, roadmap, run-state, and generated release
   artifacts as needed.
 
-Validation plan:
+Validation completed locally:
 
-- `powershell -NoProfile -File scripts\test_windows_check_helpers.ps1`.
-- `python scripts\test_windows_check_wrapper.py`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1` passed.
+- `python scripts\test_windows_check_wrapper.py` passed.
 - PowerShell parser check for `scripts/check.ps1`,
   `scripts/bootstrap-windows.ps1`, `scripts/windows-check-helpers.ps1`, and
-  `scripts/test_windows_check_helpers.ps1`.
-- `make windows-check-wrapper-runtime`.
-- `python scripts\generate_release_manifest.py --check`.
-- `python scripts\generate_release_checksums.py --check`.
-- `python scripts\check_changelog.py`.
-- `git diff --check`.
+  `scripts/test_windows_check_helpers.ps1` passed.
+- `make windows-check-wrapper-runtime` passed.
+- `python scripts\generate_release_manifest.py --check` passed.
+- `python scripts\generate_release_checksums.py --check` passed.
+- `python scripts\check_changelog.py` passed.
+- `git diff --check` passed with expected local line-ending warnings for
+  PowerShell scripts.
+- `python scripts\test_release_manifest.py` passed.
+- `python scripts\test_release_checksums.py` passed.
+- `python -m py_compile scripts\test_windows_check_wrapper.py scripts\generate_release_manifest.py scripts\generate_release_checksums.py scripts\check_changelog.py` passed.
+
+Outcome:
+
+- The checked native-command helper is now in
+  `scripts/windows-check-helpers.ps1`.
+- The executable runtime harness proves zero-exit native commands succeed and
+  non-zero native commands throw without running the full Foundry gate.
+- CI run `27501279202` passed on final PR head
+  `d303ad5bb340f35d5a438f5379cbe691f9d51534`.
+- Issue #343 closed completed when PR #344 merged.
 
 ### Completed: Harden Windows check wrapper native failures (Queue Item 166)
 
@@ -12765,6 +12823,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 14:21 | Open PR #346 | PR #346 opened for issue #345 on head `ad8ca9d37a4ee4829195faa6ae7abca9ac7d36e3`, adds a lightweight Windows PowerShell CI job and workflow-wiring policy test for the checked native-command wrapper harness, and requests CodeRabbit review via comment `4702020821`. |
+| 2026-06-14 14:16 | Start Queue Item 168 | PR #344 merged as `fe378036ac4686d94ee8e4f926adadd30ebef385`, issue #343 closed completed, issue #345 opened for a lightweight Windows PowerShell 5.1 CI harness, and branch `codex/windows-powershell-wrapper-ci` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
+| 2026-06-14 14:13 | Merge PR #344 | Tooling PR #344 passed CI run `27501279202`, job `81284495028`, on final head `d303ad5bb340f35d5a438f5379cbe691f9d51534`; CodeRabbit status was success after explicit review-finished reply `4701972232`; no review threads were open; merge-decision comment `4702003701` recorded the initial rate-limit warning as non-actionable; squash merge commit `fe378036ac4686d94ee8e4f926adadd30ebef385` landed on `main`; and issue #343 closed completed. |
 | 2026-06-14 14:04 | Patch PR #344 CI failure | CI run `27501191515` failed in the new PowerShell runtime step after the harness caught the intentional failing native command but left PowerShell Core with a non-zero `$LASTEXITCODE`; the harness now ends by running the zero-exit native command again, and the Python policy test asserts that reset path so future edits cannot reintroduce the false failure. |
 | 2026-06-14 14:01 | Open PR #344 | PR #344 opened for issue #343 on head `66ee11c839c030dd5611da3975ecd254f7ff2892`, adds an executable PowerShell zero/non-zero native-command harness for the checked Windows wrapper, wires it into CI/local targeted gates, and requests CodeRabbit review via comment `4701972035`. |
 | 2026-06-14 13:50 | Start Queue Item 167 | PR #342 merged as `770326ddbc9cc84ed64e66e135e56e2029ce8b4b`, issue #341 closed completed, issue #343 opened for an executable Windows check-wrapper failure harness, and branch `codex/windows-check-wrapper-runtime-harness` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |

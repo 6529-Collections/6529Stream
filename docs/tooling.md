@@ -500,6 +500,12 @@ available through:
 make windows-check-wrapper-runtime
 ```
 
+CI runs the harness twice: once in the Linux Foundry job under PowerShell Core,
+and once in a lightweight `windows-latest` job under Windows PowerShell so
+native-command exit handling is covered in the environment that motivated the
+wrapper. The workflow wiring is protected by
+`scripts/test_windows_ci_wrapper.py`.
+
 ## Bootstrap
 
 Linux or EC2:
