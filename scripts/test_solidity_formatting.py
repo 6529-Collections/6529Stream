@@ -28,7 +28,7 @@ Diff in smart-contracts\\Address.sol:
             ["smart-contracts/Address.sol", "smart-contracts/Math.sol"],
         )
 
-    def test_required_files_exclude_deferred_baseline(self) -> None:
+    def test_required_files_exclude_vendored_exemptions(self) -> None:
         files = [
             "smart-contracts/Address.sol",
             "smart-contracts/Math.sol",
@@ -40,31 +40,39 @@ Diff in smart-contracts\\Address.sol:
             ["smart-contracts/StreamCore.sol"],
         )
 
-    def test_deferred_baseline_accepts_exact_current_diff_set(self) -> None:
-        files = sorted(checker.DEFERRED_FORMATTING_FILES | {"smart-contracts/StreamCore.sol"})
-        checker.validate_deferred_baseline(files, sorted(checker.DEFERRED_FORMATTING_FILES))
+    def test_vendored_exemptions_accept_exact_current_diff_set(self) -> None:
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"})
+        checker.validate_vendored_exemptions(
+            files, sorted(checker.VENDORED_FORMATTING_EXEMPTIONS)
+        )
 
-    def test_deferred_baseline_rejects_new_unformatted_file(self) -> None:
-        files = sorted(checker.DEFERRED_FORMATTING_FILES | {"smart-contracts/StreamCore.sol"})
+    def test_vendored_exemptions_reject_new_unformatted_file(self) -> None:
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"})
 
         with self.assertRaisesRegex(checker.SolidityFormattingError, "unexpected"):
-            checker.validate_deferred_baseline(
+            checker.validate_vendored_exemptions(
                 files,
-                sorted(checker.DEFERRED_FORMATTING_FILES | {"smart-contracts/StreamCore.sol"}),
+                sorted(
+                    checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"}
+                ),
             )
 
-    def test_deferred_baseline_rejects_fixed_file_without_manifest_update(self) -> None:
-        files = sorted(checker.DEFERRED_FORMATTING_FILES | {"smart-contracts/StreamCore.sol"})
-        diff_files = sorted(checker.DEFERRED_FORMATTING_FILES - {"smart-contracts/Address.sol"})
+    def test_vendored_exemptions_reject_formatted_file_without_policy_update(self) -> None:
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"})
+        diff_files = sorted(
+            checker.VENDORED_FORMATTING_EXEMPTIONS - {"smart-contracts/Address.sol"}
+        )
 
-        with self.assertRaisesRegex(checker.SolidityFormattingError, "baseline changed"):
-            checker.validate_deferred_baseline(files, diff_files)
+        with self.assertRaisesRegex(checker.SolidityFormattingError, "exemption set changed"):
+            checker.validate_vendored_exemptions(files, diff_files)
 
-    def test_deferred_baseline_rejects_missing_baseline_file(self) -> None:
-        files = sorted(checker.DEFERRED_FORMATTING_FILES - {"smart-contracts/Address.sol"})
+    def test_vendored_exemptions_reject_missing_exempt_file(self) -> None:
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS - {"smart-contracts/Address.sol"})
 
         with self.assertRaisesRegex(checker.SolidityFormattingError, "missing file"):
-            checker.validate_deferred_baseline(files, sorted(checker.DEFERRED_FORMATTING_FILES))
+            checker.validate_vendored_exemptions(
+                files, sorted(checker.VENDORED_FORMATTING_EXEMPTIONS)
+            )
 
 
 if __name__ == "__main__":

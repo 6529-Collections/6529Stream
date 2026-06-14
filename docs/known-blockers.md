@@ -5,10 +5,10 @@ contributors who start from the README.
 
 - The scoped Solidity formatting gate now passes for formatting-required
   first-party and provider/integration files and blocks any new unformatted
-  file outside the documented deferred set. The raw
+  file outside the documented vendored/provenance exemption set. The raw
   `forge fmt --check smart-contracts` diagnostic still fails on 17
-  legacy/provenance-sensitive files; those should be retired through focused
-  formatting/provenance PRs, not mixed into behavior changes.
+  vendored OpenZeppelin-style files; any change to that exemption set requires
+  a focused provenance review and must not be mixed into behavior changes.
 - Drop execution uses EIP-712 authorization for EOA and ERC-1271 contract
   signers, and no-secret local signing examples plus deterministic fixtures now
   live in [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
