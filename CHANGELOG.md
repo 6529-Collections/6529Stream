@@ -219,6 +219,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Retired first-party interface files from the Solidity formatting deferral
+  baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and
+  `IStreamMinter.sol` are now enforced by `make fmt-check`.
 - Clarified production-release evidence tracker completion gates so
   `public-beta-evidence.json` is described as the shared release evidence
   status manifest rather than a public-beta-only completion target.

@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:9b7348c6ca9cadb47cad603285762969d67ff0aea3be7d6bad6b2fdbc2b7f8f2",
+    "deployment_manifest_sha256": "sha256:f62ebd6bac35d645a5901f45624b215b453307b4685b0a5f3feea296f6f82856",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -58,7 +58,7 @@
       "source": "smart-contracts/AuctionContract.sol",
       "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
       "abi_hash": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
-      "runtime_bytecode_hash": "sha256:80ba0faf189dd5be498533e62c424c4935eaf2ea6ab69b0272e3b4ef63e4d3b8",
+      "runtime_bytecode_hash": "sha256:4acfa2d5f7866a9eefa701506eec12d1aa396b1dbccc2efdd928ce62db8f212f",
       "verification_status": "not_applicable"
     },
     "StreamCore": {
@@ -66,7 +66,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
-      "runtime_bytecode_hash": "sha256:c9931953b4c9edd6acfecef362ab40cfe8841be5cae848365d71d02bdf118ce7",
+      "runtime_bytecode_hash": "sha256:f1ed538dd01228d3e1183573179c692014030f41e3b4b7abaeeb5590d315cde5",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -82,7 +82,7 @@
       "source": "smart-contracts/StreamDrops.sol",
       "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
       "abi_hash": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
-      "runtime_bytecode_hash": "sha256:667c471aa08207931d8c0dae1133f39537585df4ffba498084ae60c8156ad75a",
+      "runtime_bytecode_hash": "sha256:f3e6af9cb5113a49a2662511358ff18ec1b17adc4497099288af4f000adfd4cf",
       "verification_status": "not_applicable"
     },
     "StreamMinter": {
