@@ -196,6 +196,18 @@ class ReleaseArtifactTests(unittest.TestCase):
                 "# Release Evidence Issue Body Sync\n",
             )
             write_json(
+                output_dir / "release-evidence-live-audit-report-archive.json",
+                {
+                    "schema_version": (
+                        "6529stream.release-evidence-live-audit-report-archive.v1"
+                    )
+                },
+            )
+            write_text(
+                output_dir / "release-evidence-live-audit-report-archive.md",
+                "# Release Evidence Live Audit Report Archive\n",
+            )
+            write_json(
                 output_dir / "source-verification-inputs.json",
                 {"schema_version": "6529stream.source-verification-inputs.v1"},
             )

@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD after issue #281 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 00:21 UTC` |
+| Last updated | `2026-06-14 00:34 UTC` |
 
 ## Packaging Notes
 
@@ -259,6 +259,13 @@ Validation status:
 - PR opened at `2026-06-14 00:20 UTC`; this trace-state commit moves the PR
   head after the initial opening commit and should be checked from GitHub before
   merge.
+- CI run `27483379787` failed in the release artifact catalog step because
+  `scripts/generate_release_artifacts.py --check` still treated the new archive
+  JSON/Markdown as unexpected downstream files.
+- Fixed by adding the archive JSON/Markdown files to
+  `DOWNSTREAM_RELEASE_FILES` and the release artifact checker fixture; focused
+  release-artifact checks and full Windows `scripts\check.ps1` passed locally at
+  `2026-06-14 00:34 UTC`.
 
 ### Completed: Reconcile live audit Markdown checker merge state (Queue Item 134)
 
@@ -11232,6 +11239,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 00:34 | Fix PR #282 release artifact catalog CI failure | CI run `27483379787` failed because the release-artifact catalog allowlist did not include the new archive JSON/Markdown outputs; added them to `DOWNSTREAM_RELEASE_FILES`, extended `scripts/test_release_artifacts.py`, and reran focused release-artifact checks plus full Windows `scripts\check.ps1` successfully. |
 | 2026-06-14 00:21 | Open PR #282 and request CodeRabbit | Live audit report archive index PR opened on head `dac472995cc100585b72e82f3f7a9066933d7e4a`, links `Closes #281`, and CodeRabbit review was requested in comment `4700204401`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-14 00:17 | Finish Queue Item 135 local validation | Focused archive/report/Markdown tests and checks, release-readiness, manifest, checksum, changelog, py_compile, Bash syntax, traceability, heading scan, line-ending normalization, whitespace, and full Windows `scripts\check.ps1` gate all pass before opening the PR. |
 | 2026-06-14 00:03 | Implement Queue Item 135 local draft | Added a deterministic release evidence live audit report archive generator, focused tests, local/CI gate wiring, docs/readiness wiring, manifest coverage, and durable trace-state updates while preserving blocked readiness claims and avoiding GitHub network access in CI. |
