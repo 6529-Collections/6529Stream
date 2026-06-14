@@ -13,6 +13,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
     using Assertions for string;
 
     uint256 private constant COLLECTION_ID = 1;
+    uint256 private constant TOKEN_ID = 10_000_000_000;
     address private constant ARTIST = address(0xA11CE);
     uint256 private constant ARTIST_PRIVATE_KEY = 0xA11CE;
 
@@ -116,6 +117,51 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         deployed.core.artistSignature(COLLECTION_ID, "typed-artist-approval", staleProof);
     }
 
+    function testApprovedCollectionMutationInvalidatesArtistSignature() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        vm.prank(ARTIST);
+        deployed.core.artistSignature(COLLECTION_ID, "artist-approved-genesis");
+        bytes32 previousApprovalHash = deployed.core.artistApprovalHashes(COLLECTION_ID);
+
+        deployed.core.setCollectionData(COLLECTION_ID, ARTIST, 9, 10, 2 days);
+
+        deployed.core.artistSigned(COLLECTION_ID).assertFalse("artist approval not invalidated");
+        deployed.core.artistApprovalHashes(COLLECTION_ID)
+            .assertEq(previousApprovalHash, "stale approval hash not retained");
+        (deployed.core.hashArtistApproval(COLLECTION_ID) != previousApprovalHash)
+        .assertTrue("approval hash did not change");
+
+        vm.prank(ARTIST);
+        deployed.core.artistSignature(COLLECTION_ID, "artist-reapproved-genesis");
+        deployed.core.artistSigned(COLLECTION_ID).assertTrue("artist could not reapprove");
+    }
+
+    function testArtistCanSignFinalFrozenCollectionState() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        _mintToken(deployed);
+
+        vm.prank(ARTIST);
+        deployed.core.artistSignature(COLLECTION_ID, "pre-freeze-approval");
+        deployed.core.artistSigned(COLLECTION_ID).assertTrue("artist approval not stored");
+
+        _warpPastFinalSupplyWindow();
+        deployed.core.freezeCollection(COLLECTION_ID);
+        deployed.core.artistSigned(COLLECTION_ID)
+            .assertFalse("supply finalization did not invalidate approval");
+
+        vm.prank(ARTIST);
+        deployed.core.artistSignature(COLLECTION_ID, "final-frozen-approval");
+
+        deployed.core.collectionFreezeStatus(COLLECTION_ID).assertTrue("collection not frozen");
+        deployed.core.artistSigned(COLLECTION_ID).assertTrue("final frozen approval not stored");
+        deployed.core.artistApprovalHashes(COLLECTION_ID)
+            .assertEq(
+                deployed.core.hashArtistApproval(COLLECTION_ID),
+                "final approval hash does not match frozen state"
+            );
+    }
+
     function _signArtistApproval(StreamCore core, uint256 privateKey)
         private
         returns (bytes memory)
@@ -123,5 +169,14 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         (uint8 v, bytes32 r, bytes32 s) =
             vm.sign(privateKey, core.hashArtistApproval(COLLECTION_ID));
         return abi.encodePacked(r, s, v);
+    }
+
+    function _mintToken(DeployedStream memory deployed) private {
+        vm.prank(address(deployed.minter));
+        deployed.core.mint(TOKEN_ID, ARTIST, "1,2,3", 7, COLLECTION_ID);
+    }
+
+    function _warpPastFinalSupplyWindow() private {
+        vm.warp(block.timestamp + 31 days + 2);
     }
 }

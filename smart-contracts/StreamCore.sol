@@ -223,8 +223,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     uint256 private frozenCollectionCount;
 
     // checks if an artist signed its collection
-    mapping(uint256 => bool) public artistSigned;
-
     // external contracts declaration
     IStreamAdmins private adminsContract;
     IDependencyRegistry private dependencyRegistry;
@@ -350,7 +348,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
                 (_collectionID * _COLLECTION_TOKEN_RANGE) + _collectionTotalSupply - 1;
             wereDataAdded[_collectionID] = true;
         } else {
-            if (!artistSigned[_collectionID]) {
+            if (!artistSigned(_collectionID)) {
                 collectionData.collectionArtistAddress = _collectionArtistAddress;
             }
             collectionData.maxCollectionPurchases = _maxCollectionPurchases;
@@ -563,16 +561,15 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         private
     {
         _requireMetadataMutationNotPaused();
+        bytes32 approvalHash = _hashArtistApproval(_collectionID);
         if (
             _artist != collectionAdditionalData[_collectionID].collectionArtistAddress
-                || artistSigned[_collectionID]
+                || artistApprovalHashes[_collectionID] == approvalHash
         ) {
             revert ArtistSignatureUnauthorized();
         }
-        bytes32 approvalHash = _hashArtistApproval(_collectionID);
         artistsSignatures[_collectionID] = _signature;
         artistApprovalHashes[_collectionID] = approvalHash;
-        artistSigned[_collectionID] = true;
     }
 
     // function to change the metadata view of a collection
@@ -971,6 +968,11 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         return _hashArtistApproval(_collectionID);
     }
 
+    function artistSigned(uint256 _collectionID) public view returns (bool) {
+        bytes32 approvalHash = artistApprovalHashes[_collectionID];
+        return approvalHash != bytes32(0) && approvalHash == _hashArtistApproval(_collectionID);
+    }
+
     function collectionDependencyVersionState(uint256 _collectionID)
         public
         view
@@ -1288,9 +1290,12 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     function _finalizeCollectionSupply(uint256 _collectionID) private {
         uint256 finalSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply;
         uint256 reservedMin = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
+        uint256 reservedMax = finalSupply == 0 ? reservedMin - 1 : reservedMin + finalSupply - 1;
+        bool changed = collectionAdditionalData[_collectionID].collectionTotalSupply != finalSupply
+            || collectionAdditionalData[_collectionID].reservedMaxTokensIndex != reservedMax;
         collectionAdditionalData[_collectionID].collectionTotalSupply = finalSupply;
-        collectionAdditionalData[_collectionID].reservedMaxTokensIndex =
-            finalSupply == 0 ? reservedMin - 1 : reservedMin + finalSupply - 1;
+        collectionAdditionalData[_collectionID].reservedMaxTokensIndex = reservedMax;
+        if (changed) { }
     }
 
     function _collectionFreezeManifestHash(uint256 _collectionID) private view returns (bytes32) {
