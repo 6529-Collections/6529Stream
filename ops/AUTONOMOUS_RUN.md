@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-rehearsal-tracker-retained-artifact-path` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/328` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/329` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/330` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 11:13 UTC` |
+| Last updated | `2026-06-14 11:28 UTC` |
 
 ## Packaging Notes
 
@@ -222,12 +222,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Use canonical fork rehearsal retained artifact path in evidence tracker (Queue Item 159)
 
-Status: branch in progress.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/329`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/330`.
 Branch: `codex/fork-rehearsal-tracker-retained-artifact-path`.
 Branch started from PR #328 squash merge commit
 `49e2434e0699c989e89d7cfd20ac2a8726875123`.
+Initial PR head: `12714f6d56363458e24600ff4f4337e25b6e99be`.
+CodeRabbit review requested via comment `4701604373`.
 
 Goal:
 
@@ -12370,6 +12372,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 11:28 | Open PR #330 | PR #330 opened for issue #329 on head `12714f6d56363458e24600ff4f4337e25b6e99be`, routes the `fork_deployment_rehearsal` tracker row to the canonical retained-artifact template/checker commands, preserves issue #216 as blocked, records full Windows check validation, and requests CodeRabbit review via comment `4701604373`. |
 | 2026-06-14 11:13 | Start Queue Item 159 | PR #328 merged as `49e2434e0699c989e89d7cfd20ac2a8726875123`, issue #327 closed completed, issue #329 opened to make the generated fork deployment tracker row point at the canonical retained-artifact template/checker commands, and branch `codex/fork-rehearsal-tracker-retained-artifact-path` started from the merged baseline. |
 | 2026-06-14 11:11 | Merge PR #328 | Reconciliation PR #328 passed CI run `27496787719` on final head `756728b15a6771acf6ff55106a04cbe7452a9a70`, CodeRabbit status was success after review-finished reply `4701540159`, there were no unresolved review threads, merge-decision comment `4701560832` recorded the rate-limit warning as non-actionable, squash merge commit `49e2434e0699c989e89d7cfd20ac2a8726875123` landed on `main`, and issue #327 closed completed. |
 | 2026-06-14 11:02 | Open PR #328 | Reconciliation PR #328 opened for issue #327 on head `8f3e2892abacef5aa1b075ea9c671752e2cea36a`, records PR #326 merge evidence, preserves issue #216 as blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701539951`. |
