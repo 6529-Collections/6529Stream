@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/sepolia-deployment-rehearsal-runbook` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/359` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/360` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/361` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 23:10 UTC` |
+| Last updated | `2026-06-14 23:12 UTC` |
 
 ## Packaging Notes
 
@@ -236,16 +236,17 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Merged in PR #354 |
 | 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Merged in PR #356 |
 | 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Merged in PR #359 |
-| 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | Ready to open PR for issue #360 |
+| 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | PR #361 opened |
 
 ## Current PR Worklog
 
 ### PR candidate: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
 
-Status: locally validated; issue #360 opened; PR not opened yet.
+Status: PR #361 opened as draft; local validation passed; awaiting CI and
+CodeRabbit review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/360`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/361`.
 Branch: `codex/sepolia-deployment-rehearsal-runbook`.
 Branch started from PR #359 squash merge commit
 `c79244ad6c5bcfa1d8a1cf74e450fda7c8f3608f`.
