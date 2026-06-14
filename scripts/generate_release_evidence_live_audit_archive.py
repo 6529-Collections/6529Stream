@@ -197,6 +197,13 @@ def validate_report_pair(
         "repo": report["repo"],
         "generated_at": report["generated_at"],
         "readiness_claim": report["readiness_claim"],
+        "snapshot_freshness": {
+            "status": report["snapshot_freshness"]["status"],
+            "generated_from_live_export": report["snapshot_freshness"][
+                "generated_from_live_export"
+            ],
+            "currentness_claim": report["snapshot_freshness"]["currentness_claim"],
+        },
         "validation_status": report["validation"]["status"],
         "profile_count": report["validation"]["profile_count"],
         "profiles": [
@@ -271,6 +278,7 @@ def build_archive(
             "readiness_claim": "blocked",
             "readiness_warning": markdown_checker.auditor.READINESS_WARNING,
             "no_secret_notice": markdown_checker.auditor.NO_SECRET_NOTICE,
+            "stale_snapshot_policy": markdown_checker.auditor.STALE_SNAPSHOT_POLICY,
         },
         "report_count": len(rows),
         "rows": rows,
@@ -338,6 +346,8 @@ def markdown_for_archive(archive: dict[str, Any]) -> str:
                 "Archive ID",
                 "Type",
                 "Generated At",
+                "Snapshot Freshness",
+                "Currentness Claim",
                 "Profiles",
                 "Validation",
                 "JSON",
@@ -349,6 +359,8 @@ def markdown_for_archive(archive: dict[str, Any]) -> str:
                     f"`{row['archive_id']}`",
                     f"`{row['record_type']}`",
                     f"`{row['generated_at']}`",
+                    f"`{row['snapshot_freshness']['status']}`",
+                    f"`{row['snapshot_freshness']['currentness_claim']}`",
                     ", ".join(f"`{profile['profile']}`" for profile in row["profiles"]),
                     f"`{row['validation_status']}`",
                     f"`{row['report_json']['path']}`",

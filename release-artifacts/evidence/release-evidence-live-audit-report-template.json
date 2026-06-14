@@ -5,6 +5,17 @@
   "readiness_claim": "blocked",
   "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.",
   "readiness_warning": "The report does not mark public-beta or production-release retained evidence complete and does not change the blocked readiness posture.",
+  "snapshot_freshness": {
+    "status": "retained_historical",
+    "generated_from_live_export": false,
+    "currentness_claim": "not_current",
+    "stale_snapshot_policy": "Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current.",
+    "profile_generated_at": {
+      "labels": "TEMPLATE",
+      "bodies": "TEMPLATE",
+      "closure": "TEMPLATE"
+    }
+  },
   "profiles": [
     {
       "profile": "labels",

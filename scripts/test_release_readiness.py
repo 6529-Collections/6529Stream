@@ -63,7 +63,8 @@ The release evidence live audit report schema is summarized.
 The release evidence live audit Markdown parity is summarized.
 The release evidence live audit report archive is summarized.
 Future retained live audit reports use release-artifacts/evidence/live-audit-reports/
-with YYYYMMDDTHHMMSSZ archive IDs, --generated-at labels, no secrets, and are
+with YYYYMMDDTHHMMSSZ archive IDs, --generated-at labels, no secrets,
+snapshot_freshness, currentness_claim, profile_generated_at markers, and are
 not readiness proof by themselves.
 The unsigned payload-generator examples are summarized.
 The drop authorization signing fixtures are summarized.

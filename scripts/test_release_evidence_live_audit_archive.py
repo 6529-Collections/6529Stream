@@ -111,6 +111,10 @@ class ReleaseEvidenceLiveAuditArchiveTests(unittest.TestCase):
         self.assertEqual(archive["policy"]["network_access_in_ci"], False)
         self.assertEqual(archive["policy"]["readiness_claim"], "blocked")
         self.assertEqual(
+            archive["policy"]["stale_snapshot_policy"],
+            generator.markdown_checker.auditor.STALE_SNAPSHOT_POLICY,
+        )
+        self.assertEqual(
             archive["policy"]["no_secret_notice"],
             generator.markdown_checker.auditor.NO_SECRET_NOTICE,
         )
@@ -118,6 +122,18 @@ class ReleaseEvidenceLiveAuditArchiveTests(unittest.TestCase):
         self.assertEqual(row["record_type"], "retained_operator_report")
         self.assertEqual(row["generated_at"], archive_id)
         self.assertEqual(row["readiness_claim"], "blocked")
+        self.assertEqual(
+            row["snapshot_freshness"]["status"],
+            generator.markdown_checker.auditor.RETAINED_HISTORICAL_FRESHNESS_STATUS,
+        )
+        self.assertEqual(
+            row["snapshot_freshness"]["generated_from_live_export"],
+            False,
+        )
+        self.assertEqual(
+            row["snapshot_freshness"]["currentness_claim"],
+            generator.markdown_checker.auditor.RETAINED_CURRENTNESS_CLAIM,
+        )
         self.assertEqual(row["validation_status"], "passed")
         self.assertEqual(
             [profile["profile"] for profile in row["profiles"]],
@@ -164,6 +180,10 @@ class ReleaseEvidenceLiveAuditArchiveTests(unittest.TestCase):
             row = archive["rows"][0]
             self.assertEqual(row["archive_id"], "template")
             self.assertEqual(row["validation_status"], "passed")
+            self.assertEqual(
+                row["snapshot_freshness"]["currentness_claim"],
+                generator.markdown_checker.auditor.LIVE_EXPORT_CURRENTNESS_CLAIM,
+            )
             self.assertIn(
                 "python scripts/check_release_evidence_live_audit_report.py "
                 "--report-json release-artifacts/evidence/"

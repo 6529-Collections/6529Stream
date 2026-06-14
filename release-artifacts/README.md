@@ -190,16 +190,17 @@ mocked unit tests and never requires GitHub network access.
 When operators pass `--report-json` or `--report-md`, the live audit
 orchestrator writes a retained no-secret report bundle with selected profiles,
 repo target, snapshot paths, snapshot SHA-256 digests, command provenance,
-checker outcomes, and the unchanged blocked-readiness warning. The report
-schema lives at `schema/release-evidence-live-audit-report.schema.json`; the
-default no-secret template report lives at
+checker outcomes, explicit snapshot freshness/currentness markers, and the
+unchanged blocked-readiness warning. The report schema lives at
+`schema/release-evidence-live-audit-report.schema.json`; the default no-secret
+template report lives at
 `evidence/release-evidence-live-audit-report-template.json`, with the paired
 human-readable template at
 `evidence/release-evidence-live-audit-report-template.md` and template snapshots
 under `evidence/live-audit-report-template/`. Run
 `scripts/check_release_evidence_live_audit_report.py` to validate retained JSON
 report bundles offline against snapshot digests, command provenance, profile
-coverage, and the blocked-readiness posture. Run
+coverage, freshness/currentness claims, and the blocked-readiness posture. Run
 `scripts/check_release_evidence_live_audit_markdown.py` with the retained JSON
 and Markdown paths to prove the human-readable report is the canonical render of
 the validated JSON source and still contains no secret-shaped values. Report
@@ -220,8 +221,11 @@ starts with the UTC run label, for example
 `20260614T010000Z-release-evidence-live-audit-report.md`, and pass the same
 label to the report generator with `--generated-at`. The paired files must be
 no-secret review evidence only; they cannot contain tokens, private exports, or
-unredacted operator credentials, and they do not make public-beta or
-production-release readiness true by themselves. See
+unredacted operator credentials. They must include `snapshot_freshness`,
+`currentness_claim`, and per-profile `profile_generated_at` values so retained
+label, body, and closure snapshots are never implied to be current after the
+fact. They do not make public-beta or production-release readiness true by
+themselves. See
 `evidence/live-audit-reports/README.md` for the exact retention workflow and
 validation command sequence.
 

@@ -190,7 +190,8 @@ unavailable release-ceremony artifacts. It is regenerated with
 `python scripts/generate_release_manifest.py` after any covered input changes.
 The optional live audit report bundle records the repository target, selected
 issue-audit profiles, retained snapshot paths, snapshot digests, command
-provenance, checker outcomes, and the unchanged blocked-readiness warning.
+provenance, checker outcomes, explicit snapshot freshness/currentness claims,
+and the unchanged blocked-readiness warning.
 
 The architecture/threat-model step validates [`architecture.md`](architecture.md)
 and [`threat-model.md`](threat-model.md), the auditor-facing map of system
@@ -268,7 +269,10 @@ live audit profile. The orchestrator exports UTF-8 JSON snapshots with the
 existing exporter and then runs the matching checker. To retain a no-secret
 JSON and Markdown report bundle with the repo target, snapshot paths, snapshot
 SHA-256 digests, profile results, command provenance, and the unchanged
-blocked-readiness warning, pass explicit report paths:
+blocked-readiness warning. Generated reports mark live snapshots as current at
+generation time only; retained template or dry-run reports must explicitly mark
+themselves historical and not current. To retain a bundle, pass explicit report
+paths:
 
 ```bash
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
@@ -297,14 +301,15 @@ python scripts/generate_release_evidence_live_audit_archive.py --check
 ```
 
 The checker verifies the schema version, repo target, blocked-readiness posture,
-profile coverage, retained snapshot paths, snapshot SHA-256 digests, command
-provenance, passed checker statuses, and secret-shaped keys/values. The
+profile coverage, snapshot freshness/currentness markers, retained snapshot
+paths, snapshot SHA-256 digests, command provenance, passed checker statuses,
+and secret-shaped keys/values. The
 Markdown parity checker reuses that JSON validation, scans the retained
 Markdown for secret-shaped values, and fails if the profile table, command
-provenance, no-secret notice, or blocked-readiness warning drift from the
-canonical renderer. It expects the referenced snapshots to remain in the
-retained bundle and does not rerun GitHub exports or mark any tracker issue
-complete.
+provenance, freshness/currentness summary, no-secret notice, or
+blocked-readiness warning drift from the canonical renderer. It expects the
+referenced snapshots to remain in the retained bundle and does not rerun GitHub
+exports or mark any tracker issue complete.
 
 `scripts/generate_release_evidence_live_audit_archive.py` indexes
 the committed template pair plus future no-secret report bundles retained under
@@ -319,8 +324,11 @@ archive ID, for example
 label to `--generated-at` so the archive row, retained report, and operator
 notes agree. Before committing a future bundle, confirm the report contains no
 secrets, tokens, private exports, or unredacted operator credentials; the
-checker also scans for secret-shaped keys and values. A valid retained bundle
-is review evidence only and is not readiness proof by itself.
+checker also scans for secret-shaped keys and values. The report must include
+`snapshot_freshness`, `currentness_claim`, and per-profile
+`profile_generated_at` values so old label, body, or closure snapshots are not
+presented as current. A valid retained bundle is review evidence only and is
+not readiness proof by itself.
 
 The canonical future-bundle workflow is:
 

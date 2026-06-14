@@ -9,8 +9,8 @@
   "source": {
     "report_schema": {
       "path": "release-artifacts/schema/release-evidence-live-audit-report.schema.json",
-      "sha256": "2893fb2ab4b5306114d216a5d98bf3e8aaf93c98615e4f07661f06a897e8d4a5",
-      "size_bytes": 2698
+      "sha256": "d0a291e8540b1d6c1cf6b416dbd8bdbcc33f2c9b02eca16addddc5d7d26cf27c",
+      "size_bytes": 4084
     },
     "template_json": "release-artifacts/evidence/release-evidence-live-audit-report-template.json",
     "template_markdown": "release-artifacts/evidence/release-evidence-live-audit-report-template.md",
@@ -21,7 +21,8 @@
     "network_access_in_ci": false,
     "readiness_claim": "blocked",
     "readiness_warning": "The report does not mark public-beta or production-release retained evidence complete and does not change the blocked readiness posture.",
-    "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata."
+    "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.",
+    "stale_snapshot_policy": "Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current."
   },
   "report_count": 2,
   "rows": [
@@ -31,6 +32,11 @@
       "repo": "6529-Collections/6529Stream",
       "generated_at": "20260614T015000Z-release-evidence-live-audit-dry-run",
       "readiness_claim": "blocked",
+      "snapshot_freshness": {
+        "status": "retained_historical",
+        "generated_from_live_export": false,
+        "currentness_claim": "not_current"
+      },
       "validation_status": "passed",
       "profile_count": 3,
       "profiles": [
@@ -58,13 +64,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json",
-        "sha256": "e0f3ea88ae1fc8e1daa81d1b29e653d5c81070e0408e10aa507dacb493df29fe",
-        "size_bytes": 2947
+        "sha256": "8a3aa3e1102b1d7e9c3ed874499d5687dcdb1c2d589bccbd18ed979fe19f7c7e",
+        "size_bytes": 3444
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md",
-        "sha256": "aec01dc02a30c7b7216329c9b6138e074f024a881aafa73a422a0fdace9ed820",
-        "size_bytes": 2500
+        "sha256": "7fc2e7fcd7dcf8d4ad99fde4181bc0e2ba3ce48599245deddbd2e16b8dd44eac",
+        "size_bytes": 2901
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json",
@@ -78,6 +84,11 @@
       "repo": "6529-Collections/6529Stream",
       "generated_at": "TEMPLATE",
       "readiness_claim": "blocked",
+      "snapshot_freshness": {
+        "status": "retained_historical",
+        "generated_from_live_export": false,
+        "currentness_claim": "not_current"
+      },
       "validation_status": "passed",
       "profile_count": 3,
       "profiles": [
@@ -105,13 +116,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/release-evidence-live-audit-report-template.json",
-        "sha256": "30135a7f9b189619ca22b2e88620e4b9c1505027d13d22c20f685aeaccb1cc3d",
-        "size_bytes": 2903
+        "sha256": "b5efd4cbd2ad950f2f8d2c6e756bf0877a55b27254b278a049d75b2f032504d8",
+        "size_bytes": 3400
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/release-evidence-live-audit-report-template.md",
-        "sha256": "0ec736df0a5fe6cec3b758de91c7de0a628e205f927dc2a516a847dbc73cc45e",
-        "size_bytes": 2456
+        "sha256": "5a41934f1e1346b006df2434adfb1edb8c56a58a16c4d6053a2001af438bb7e9",
+        "size_bytes": 2857
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json",

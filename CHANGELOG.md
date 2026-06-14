@@ -35,6 +35,9 @@ the release policy in `docs/release-policy.md`.
 - Added a deterministic retained live audit dry-run report bundle under the
   canonical archive directory, with regenerated archive, release manifest, and
   checksum evidence.
+- Added snapshot freshness/currentness guards for retained live audit reports
+  so historical issue-label, issue-body, and issue-closure snapshots cannot be
+  presented as current without explicit blocked-readiness markers.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.
