@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/windows-check-wrapper-native-failures` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/340` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/341` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/342` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 13:23 UTC` |
+| Last updated | `2026-06-14 13:37 UTC` |
 
 ## Packaging Notes
 
@@ -228,12 +228,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Harden Windows check wrapper native failures (Queue Item 166)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/341`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/342`.
 Branch: `codex/windows-check-wrapper-native-failures`.
 Branch started from PR #340 squash merge commit
 `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`.
+Initial PR head: `b2d11dc7dcd885dea3a989963843ed70a5c22344`.
+CodeRabbit review requested via comment `4701914567`.
 
 Goal:
 
@@ -12701,6 +12703,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 13:37 | Open PR #342 | PR #342 opened for issue #341 on head `b2d11dc7dcd885dea3a989963843ed70a5c22344`, hardens Windows native-command failure handling for `forge` and Python checks, wires the focused wrapper policy test into local/CI gates, and requests CodeRabbit review via comment `4701914567`. |
 | 2026-06-14 13:23 | Start Queue Item 166 | PR #340 merged as `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`, issue #339 closed completed, issue #341 opened for Windows check-wrapper native failure hardening, and branch `codex/windows-check-wrapper-native-failures` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 13:20 | Merge PR #340 | State-only PR #340 passed CI run `27499976730`, job `81280968647`, on final head `790c24248afc5c43a6f14d3fde371f359fdb7653`; CodeRabbit status was success after explicit review-finished reply `4701853050`; no review threads were open; merge-decision comment `4701874979` recorded the initial rate-limit warning as non-actionable; squash merge commit `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1` landed on `main`; and issue #339 closed completed. |
 | 2026-06-14 13:12 | Open PR #340 | State-only PR #340 opened for issue #339 on head `b1baac33f216f9bbcea5076c4f35d1147de9599d`, records PR #338 merge evidence and issue #337 completion, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701852808`. |
