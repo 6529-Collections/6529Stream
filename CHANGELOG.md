@@ -32,6 +32,9 @@ the release policy in `docs/release-policy.md`.
 - Added the live audit report archive retention workflow, including the
   canonical retained-bundle directory, naming convention, no-secret rule,
   validation command sequence, and readiness-claim boundary.
+- Added a deterministic retained live audit dry-run report bundle under the
+  canonical archive directory, with regenerated archive, release manifest, and
+  checksum evidence.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.
