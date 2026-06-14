@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/record-fork-issue-216-body-sync` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/332` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/333` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/334` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 11:56 UTC` |
+| Last updated | `2026-06-14 12:01 UTC` |
 
 ## Packaging Notes
 
@@ -224,13 +224,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Apply fork rehearsal body sync to live issue #216 (Queue Item 161)
 
-Status: branch open; live issue #216 body synced and verified; preparing
-state-only reconciliation PR.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/333`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/334`.
 Branch: `codex/record-fork-issue-216-body-sync`.
 Branch started from PR #332 squash merge commit
 `fcb5ae5238420196999b654d88e69a507e221e85`.
+Initial PR head: `a109d0a006033b52b85e0c90d1b9634e11e990ca`.
+CodeRabbit review requested via comment `4701675356`.
 
 Goal:
 
@@ -12455,6 +12456,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 12:01 | Open PR #334 | State-only PR #334 opened for issue #333 on head `a109d0a006033b52b85e0c90d1b9634e11e990ca`, records the live issue #216 body sync and fresh body-checker snapshot validation, keeps issue #216 open/blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701675356`. |
 | 2026-06-14 11:56 | Start Queue Item 161 and sync live issue #216 | PR #332 merged as `fcb5ae5238420196999b654d88e69a507e221e85`, issue #331 closed completed, issue #333 opened for live issue #216 body synchronization, branch `codex/record-fork-issue-216-body-sync` started from the merged baseline, issue #216 was updated from the committed body-sync artifact via `gh issue edit`, and a fresh live snapshot for issues #215 through #231 passed `python scripts/check_release_evidence_issue_bodies.py --live-json tmp\release-evidence-issue-bodies-live.json`; issue #216 remains open and blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 11:52 | Merge PR #332 | Reconciliation PR #332 passed CI run `27497791932` on final head `523307dac087672bc840c839fcc2b83b35cc58d5`, CodeRabbit status was success after review-finished reply `4701639759`, there were no unresolved review threads, merge-decision comment `4701657448` recorded the rate-limit warning as non-actionable, squash merge commit `fcb5ae5238420196999b654d88e69a507e221e85` landed on `main`, and issue #331 closed completed. |
 | 2026-06-14 11:44 | Open PR #332 | Reconciliation PR #332 opened for issue #331 on head `16e6c0241d0910cedcc089b3949435c2d35350bd`, records PR #330 merge evidence, preserves issue #216 as blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701639516`. |
