@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/retire-first-party-formatting-deferrals` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/315` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/314` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/316` |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 07:23 UTC` |
+| Last updated | `2026-06-14 07:26 UTC` |
 
 ## Packaging Notes
 
@@ -214,14 +214,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Retire first-party interface Solidity formatting deferrals (Queue Item 152)
 
-Status: local validation passed; preparing PR.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/314`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/316`.
 Branch: `codex/retire-first-party-formatting-deferrals`.
 Branch started from PR #315 squash merge commit
 `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`.
-Opening head: TBD.
-CodeRabbit: pending PR creation.
+Opening head: `786e55ff4386c919f80d55189a89286d91e8cafc`.
+CodeRabbit: explicit review request comment `4701042752`.
 
 Goal:
 
@@ -11981,6 +11981,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 07:26 | Open PR #316 | PR #316 opened on head `786e55ff4386c919f80d55189a89286d91e8cafc`, closes issue #314, retires the first-party interface formatting deferrals, records the 27-required / 24-deferred formatting baseline, and requested CodeRabbit review via comment `4701042752`. |
 | 2026-06-14 07:23 | Validate Queue Item 152 locally | `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are formatted and removed from the deferred formatting baseline; focused formatting checks, release artifact/source-verification/manifest/checksum drift checks, changelog, ABI compatibility, production via-IR size gate, and full Windows `scripts\check.ps1` validation pass before PR opening. |
 | 2026-06-14 07:08 | Start Queue Item 152 | PR #315 merged as `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`, issue #313 closed completed, issue #314 is the next focused formatting-baseline cleanup, and branch `codex/retire-first-party-formatting-deferrals` started from the merged baseline. |
 | 2026-06-14 07:05 | Merge PR #315 | PR #315 merged as `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`; final head `f038205ea0d1cfb591e8d78b5c9c93316e4466fd` passed CI run `27491250707`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700977903`, review-finished reply `4700978066`, and merge-decision comment `4700999733`, and issue #313 closed completed. |
