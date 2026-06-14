@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-audit-report-freshness-guard` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/300` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/301` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/302` |
-| Next issue | TBD after issue #301 merges |
+| Active PR branch | `codex/reconcile-live-audit-freshness-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/302` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/303` |
+| Active PR | TBD |
+| Next issue | TBD after issue #303 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 04:09 UTC` |
+| Last updated | `2026-06-14 04:27 UTC` |
 
 ## Packaging Notes
 
@@ -201,32 +201,68 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 142 | Reconcile retained live audit dry-run archive guard merge state | Gate G support | Record PR #294 merge evidence, refresh roadmap verification metadata, mark the guard row passing, preserve blocked readiness claims, and select the next no-secret release evidence target | Merged in PR #296 |
 | 143 | Guard retained live audit manifest and checksum coverage | Gate G support | Add focused tests that assert retained live audit report bundles and archive outputs remain covered by release manifest and checksum artifacts so future evidence files cannot silently fall out of release integrity coverage | Merged in PR #298 |
 | 144 | Reconcile retained live audit manifest/checksum guard merge state | Gate G support | Record the manifest/checksum guard PR merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Merged in PR #300 |
-| 145 | Guard retained live audit report freshness against stale issue snapshots | Gate G support | Add no-secret offline checks that retained live audit reports cannot present stale issue-label, issue-body, or issue-closure snapshots as current without an explicit stale/readiness-blocked marker | In progress for issue #301 |
+| 145 | Guard retained live audit report freshness against stale issue snapshots | Gate G support | Add no-secret offline checks that retained live audit reports cannot present stale issue-label, issue-body, or issue-closure snapshots as current without an explicit stale/readiness-blocked marker | Merged in PR #302 |
+| 146 | Reconcile live audit freshness guard merge state | Gate G support | Record PR #302 merge evidence, refresh roadmap verification metadata, mark the freshness guard passing, preserve blocked readiness claims, and select the next no-secret roadmap target | Active for issue #303 |
+| 147 | Complete curator Merkle leaf domain separation | Gate D | Expand curator reward Merkle leaf domain separation to include collection, claimant, amount, root epoch/domain metadata, with duplicate/ambiguous leaf and double-claim tests plus docs/traceability updates | Planned after issue #303 |
 
 ## Current PR Worklog
 
-### PR candidate: Guard retained live audit report freshness against stale issue snapshots (Queue Item 145)
+### PR candidate: Reconcile live audit freshness guard merge state (Queue Item 146)
 
-Status: PR open; awaiting CI and CodeRabbit.
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/303`.
+PR: TBD.
+Branch: `codex/reconcile-live-audit-freshness-merge-state`.
+Branch started from PR #302 squash merge commit
+`96c1e7cd63a3129f04658d16eab56229063e4718`.
+
+Goal:
+
+- Record PR #302 as merged and issue #301 as closed completed.
+- Refresh `ops/ROADMAP.md` verification metadata to the PR #302 merged
+  baseline.
+- Mark the retained live audit report freshness guard row passing with final
+  CI, CodeRabbit, final-head, and squash-merge evidence.
+- Preserve blocked public-beta and production-release readiness claims.
+- Select Queue Item 147, curator Merkle leaf domain separation, as the next
+  no-secret roadmap target after this state-only PR.
+
+Validation plan:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "Queue Item 145|Queue Item 146|Queue Item 147|PR #302|27487986670|8f52a4a|96c1e7c|#301|#303|Merkle leaf|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+Validation status:
+
+- Passed locally at `2026-06-14 04:27 UTC`: release-readiness,
+  release-manifest, release-checksum, changelog, traceability, heading, and
+  whitespace gates.
+
+### Completed: Guard retained live audit report freshness against stale issue snapshots (Queue Item 145)
+
+Status: merged in PR #302.
+
 Issue: `https://github.com/6529-Collections/6529Stream/issues/301`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/302`.
 Branch: `codex/live-audit-report-freshness-guard`.
 Branch started from PR #300 squash merge commit
 `4c231c8684adebab89cc7f31f7f519bab7418045`.
 Opening head: `30195e922fdd7eada56301092196f31235e764ed`.
+Final PR head: `8f52a4ad71082209d596e60dc70525dfd1d32622`.
+Squash merge commit: `96c1e7cd63a3129f04658d16eab56229063e4718`.
+CI: run `27487986670` passed on the final head.
 
-Goal:
+CodeRabbit: initial rate-limit warning comment `4700652214`, explicit review
+request comment `4700659492`, review-finished reply `4700659639`, final status
+success, and no unresolved review threads. Merge-readiness comment `4700672996`
+documented the clean CI/review posture before merge.
 
-- Add explicit no-secret `snapshot_freshness`, `currentness_claim`, and
-  per-profile `profile_generated_at` markers to retained live audit reports.
-- Permit live-export reports to claim only `current_at_generation_only`.
-- Require retained template, dry-run, or historical reports to claim
-  `not_current` while keeping `readiness_claim` blocked.
-- Surface freshness/currentness in canonical Markdown and archive rows.
-- Refresh docs, release readiness wording, release manifest, and checksum
-  evidence without adding GitHub network access to CI.
-
-Validation plan:
+Local validation:
 
 - `python scripts/test_release_evidence_live_audit_report.py`.
 - `python scripts/test_release_evidence_issue_snapshot_audit.py`.
@@ -241,17 +277,25 @@ Validation plan:
 - `python scripts/generate_release_manifest.py --check`.
 - `python scripts/generate_release_checksums.py --check`.
 - `python scripts/check_changelog.py`.
-- `rg -n "Queue Item 145|#301|snapshot_freshness|currentness_claim|profile_generated_at|freshness" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md docs/tooling.md docs/release-readiness.md release-artifacts/README.md release-artifacts/evidence/live-audit-reports/README.md scripts release-artifacts`.
-- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- `git diff --check`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/test_release_readiness.py`.
+- `python -m py_compile scripts/audit_release_evidence_issue_snapshots.py scripts/check_release_evidence_live_audit_report.py scripts/generate_release_evidence_live_audit_archive.py scripts/check_release_readiness.py`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- Traceability, heading, and whitespace checks.
 
-Validation status:
+Completed scope:
 
-- Passed locally at `2026-06-14 04:05 UTC`: focused report/orchestrator/
-  Markdown/archive tests, template and retained dry-run JSON/Markdown checks,
-  archive drift check, release-readiness, release-manifest, release-checksum,
-  release-artifact, changelog, Python syntax, full Windows `scripts\check.ps1`,
-  traceability, heading, and whitespace gates.
+- Added explicit `snapshot_freshness`, `currentness_claim`, and
+  per-profile `profile_generated_at` markers to retained live audit reports.
+- Limited live-export reports to `current_at_generation_only`.
+- Required committed template and retained dry-run reports to claim
+  `not_current` while keeping `readiness_claim` blocked.
+- Surfaced freshness/currentness in canonical Markdown and archive rows.
+- Refreshed docs, release-readiness wording, release manifest, and checksum
+  evidence without adding GitHub network access to CI.
+
+Issue #301: closed completed at `2026-06-14T04:20:05Z`.
 
 ### Completed: Reconcile retained live audit manifest/checksum guard merge state (Queue Item 144)
 
@@ -11654,6 +11698,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 04:23 | Start Queue Item 146 | PR #302 merged as `96c1e7cd63a3129f04658d16eab56229063e4718`, issue #301 closed completed, issue #303 opened for state-only merge reconciliation, and branch `codex/reconcile-live-audit-freshness-merge-state` started from the merged baseline. |
+| 2026-06-14 04:20 | Merge PR #302 | Retained live audit report freshness guard merged as `96c1e7cd63a3129f04658d16eab56229063e4718`; final head `8f52a4ad71082209d596e60dc70525dfd1d32622` passed CI run `27487986670`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700659492`, and issue #301 closed completed. |
 | 2026-06-14 04:09 | Open PR #302 | Retained live audit freshness guard PR opened on head `30195e922fdd7eada56301092196f31235e764ed`; it links issue #301, adds explicit freshness/currentness enforcement and committed historical/not-current retained reports, refreshes release evidence artifacts, and preserves blocked readiness claims. |
 | 2026-06-14 04:05 | Finish Queue Item 145 local validation | Focused live audit report, orchestrator, Markdown, archive, manifest, checksum, release-artifact, readiness, changelog, syntax, full Windows `scripts\check.ps1`, traceability, heading, and whitespace gates pass; public-beta/production readiness remains blocked. |
 | 2026-06-14 03:48 | Implement Queue Item 145 local draft | Added retained live audit report `snapshot_freshness` and `currentness_claim` enforcement, canonical Markdown/archive surfacing, historical/not-current markers for the committed template and dry-run, docs/readiness wording, and regenerated release manifest/checksum evidence while keeping readiness blocked. |
