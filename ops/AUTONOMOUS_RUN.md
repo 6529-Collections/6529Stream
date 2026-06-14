@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/curator-merkle-leaf-domain-separation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/304` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/305` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/306` |
-| Next issue | TBD after issue #305 merges |
+| Active PR branch | `codex/reconcile-curator-merkle-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/306` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/307` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/308` |
+| Next issue | TBD after issue #307 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 05:36 UTC` |
+| Last updated | `2026-06-14 05:50 UTC` |
 
 ## Packaging Notes
 
@@ -203,22 +203,56 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 144 | Reconcile retained live audit manifest/checksum guard merge state | Gate G support | Record the manifest/checksum guard PR merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Merged in PR #300 |
 | 145 | Guard retained live audit report freshness against stale issue snapshots | Gate G support | Add no-secret offline checks that retained live audit reports cannot present stale issue-label, issue-body, or issue-closure snapshots as current without an explicit stale/readiness-blocked marker | Merged in PR #302 |
 | 146 | Reconcile live audit freshness guard merge state | Gate G support | Record PR #302 merge evidence, refresh roadmap verification metadata, mark the freshness guard passing, preserve blocked readiness claims, and select the next no-secret roadmap target | Merged in PR #304 |
-| 147 | Complete curator Merkle leaf domain separation | Gate D | Expand curator reward Merkle leaf domain separation to include collection, claimant, amount, root epoch/domain metadata, with duplicate/ambiguous leaf and double-claim tests plus docs/traceability updates | Active for issue #305 |
+| 147 | Complete curator Merkle leaf domain separation | Gate D | Expand curator reward Merkle leaf domain separation to include collection, claimant, amount, root epoch/domain metadata, with duplicate/ambiguous leaf and double-claim tests plus docs/traceability updates | Merged in PR #306 |
+| 148 | Reconcile curator Merkle leaf domain separation merge state | Gate G support | Record PR #306 merge evidence, refresh roadmap verification metadata, mark the Merkle traceability row passing, and select the next no-secret roadmap target without changing readiness claims | Active for issue #307 |
 
 ## Current PR Worklog
 
-### PR candidate: Complete curator Merkle leaf domain separation (Queue Item 147)
+### PR candidate: Reconcile curator Merkle leaf domain separation merge state (Queue Item 148)
 
-Status: PR opened; second CI artifact-evidence drift fixed locally; ready to
-commit, push, and watch replacement CI.
+Status: PR opened; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/307`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/308`.
+Branch: `codex/reconcile-curator-merkle-merge-state`.
+Branch started from PR #306 squash merge commit
+`e8d0822c7bc357a97b6a761d9126f3787502de8b`.
+Opening head: `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`.
+
+Goal:
+
+- Mark Queue Item 147 and issue #305 as completed by PR #306.
+- Record the PR #306 final CI, CodeRabbit, and squash-merge evidence.
+- Update `ops/ROADMAP.md` so the Merkle leaf ambiguity row is passing rather
+  than in progress.
+- Refresh top-level verification metadata to the latest merged baseline.
+- Keep this PR to roadmap/run-state reconciliation only and avoid new readiness
+  claims.
+
+Validation plan:
+
+- `rg -n "Queue Item 147|Queue Item 148|PR #306|#305|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- Confirm the stale issue #305 in-progress wording is absent from
+  `ops/ROADMAP.md` and this run-state file.
+- `git diff --check`.
+
+### Completed: Complete curator Merkle leaf domain separation (Queue Item 147)
+
+Status: merged in PR #306.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/305`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/306`.
 Branch: `codex/curator-merkle-leaf-domain-separation`.
 Branch started from PR #304 squash merge commit
 `c4019de17be8d5634d4603e3c6f008d2b4c387fb`.
 Opening head: `4ec19dc71bf9c17be4aa8af94406ffb1f90b6365`.
-CodeRabbit: explicit review request comment `4700755557`; waiting for review
-completion and status.
+Final PR head: `51a4156f1b8de54602da5445b29a787ee638ff23`.
+Squash merge commit: `e8d0822c7bc357a97b6a761d9126f3787502de8b`.
+CI: run `27489644258` passed on the final head.
+
+CodeRabbit: explicit review request comment `4700755557`, automatic
+rate-limit/status comment `4700755632`, review-finished reply `4700755739`,
+final status success, and no unresolved review threads. Claude was not requested
+per user instruction; only the passive manual-review availability comment was
+present.
 
 Goal:
 
@@ -278,6 +312,10 @@ Validation status:
 - The full `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` gate
   passed after the retained-evidence refresh.
 - `git diff --check` passed after the retained-evidence refresh.
+- Final GitHub CI run `27489644258` passed all steps, including release artifact
+  catalog, deployment manifest, address books, ceremony evidence, randomizer
+  operations evidence, release manifest, release checksums, changelog gate, and
+  deployment rehearsal.
 
 ### Completed: Reconcile live audit freshness guard merge state (Queue Item 146)
 
@@ -11767,6 +11805,10 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 05:50 | Open PR #308 | Curator Merkle merge-state reconciliation PR opened on head `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`, closes issue #307, and records PR #306 as the latest merged baseline without changing readiness claims. |
+| 2026-06-14 05:46 | Start Queue Item 148 | PR #306 merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`, issue #305 closed completed, issue #307 opened for state-only merge reconciliation, and branch `codex/reconcile-curator-merkle-merge-state` started from the merged baseline. |
+| 2026-06-14 05:44 | Merge PR #306 | Curator Merkle leaf domain separation merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`; final head `51a4156f1b8de54602da5445b29a787ee638ff23` passed CI run `27489644258`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700755557`, and issue #305 closed completed. |
+| 2026-06-14 05:36 | Fix PR #306 retained evidence drift | CI run `27489281575` failed because ceremony/randomizer retained evidence still referenced pre-via-IR deployment manifest, address book, ABI checksum, and invariant-test hashes; refreshed the retained evidence plus release manifest/checksum bundle, then reran focused evidence checks, release manifest/checksum checks, full Windows `scripts\check.ps1`, and whitespace checks successfully before pushing head `51a4156f1b8de54602da5445b29a787ee638ff23`. |
 | 2026-06-14 05:19 | Fix PR #306 CI artifact drift | CI run `27488998572` failed because `generate_release_artifacts.py --check` runs after the production via-IR size build and found stale `abi-checksums.json`/`release-artifact-manifest.json`; regenerated the release/deployment artifacts after the via-IR build order and reran the targeted artifact checks plus full Windows `scripts\check.ps1` successfully. |
 | 2026-06-14 05:04 | Open PR #306 | Curator Merkle leaf domain separation PR opened on head `4ec19dc71bf9c17be4aa8af94406ffb1f90b6365`, closes issue #305, includes focused/full local validation evidence, and CodeRabbit review was requested with comment `4700755557`. |
 | 2026-06-14 05:02 | Validate Queue Item 147 local implementation | Curator reward roots now advance per-collection epochs, emit `MerkleRootUpdated`, and use domain-separated ABI-encoded leaves bound to leaf domain, chain ID, pool address, collection ID, claimant, amount, and root epoch; focused curator tests, generated release artifacts, full Windows `scripts\check.ps1`, and whitespace checks pass before PR opening. |
