@@ -14,6 +14,42 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  windows-wrapper:
+    name: Windows PowerShell wrapper
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: PowerShell syntax and wrapper runtime
+        shell: powershell
+        run: |
+          $scriptPaths = @(
+            "scripts\check.ps1",
+            "scripts\bootstrap-windows.ps1",
+            "scripts\windows-check-helpers.ps1",
+            "scripts\test_windows_check_helpers.ps1"
+          )
+          foreach ($scriptPath in $scriptPaths) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $scriptPath,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List
+              exit 1
+            }
+          }
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1
+
   foundry:
     name: Foundry smoke
     runs-on: ubuntu-latest
@@ -127,10 +163,12 @@ jobs:
             scripts/check_solidity_formatting.py \
             scripts/test_solidity_formatting.py \
             scripts/test_windows_check_wrapper.py \
+            scripts/test_windows_ci_wrapper.py \
             scripts/check_changelog.py \
             scripts/test_changelog_check.py
 
           python3 scripts/test_windows_check_wrapper.py
+          python3 scripts/test_windows_ci_wrapper.py
 
       - name: Install browser test tooling
         shell: bash

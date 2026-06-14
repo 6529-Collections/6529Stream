@@ -1631,8 +1631,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:921c9554d0b350093e619d765db699e69c67fdd4d467b60ff2f7dbdc37a31fa4",
-      "size_bytes": 21292
+      "sha256": "sha256:08606de155b2a8588df3d1dff5886e80a192866b4f2f1f4ac3081a76fad5169b",
+      "size_bytes": 21547
     },
     "governance_docs": [
       {
@@ -1707,8 +1707,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:3d3542fa40543a2f81833f8f7560db7d04b6929a284156a022b22bd4ade55560",
-        "size_bytes": 38202
+        "sha256": "sha256:e0a42c125fba41ff18a805b4ceb495fdd36e346faf05c1c7e11e19745cf101af",
+        "size_bytes": 38519
       },
       {
         "path": "docs/status.md",
