@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-curator-merkle-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/306` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/307` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/308` |
-| Next issue | TBD after issue #307 merges |
+| Active PR branch | `codex/reconcile-pr-308-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/308` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/309` |
+| Active PR | TBD after PR open |
+| Next issue | Formatting triage / documented formatting gate path after issue #309 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 05:50 UTC` |
+| Last updated | `2026-06-14 06:04 UTC` |
 
 ## Packaging Notes
 
@@ -204,19 +204,55 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 145 | Guard retained live audit report freshness against stale issue snapshots | Gate G support | Add no-secret offline checks that retained live audit reports cannot present stale issue-label, issue-body, or issue-closure snapshots as current without an explicit stale/readiness-blocked marker | Merged in PR #302 |
 | 146 | Reconcile live audit freshness guard merge state | Gate G support | Record PR #302 merge evidence, refresh roadmap verification metadata, mark the freshness guard passing, preserve blocked readiness claims, and select the next no-secret roadmap target | Merged in PR #304 |
 | 147 | Complete curator Merkle leaf domain separation | Gate D | Expand curator reward Merkle leaf domain separation to include collection, claimant, amount, root epoch/domain metadata, with duplicate/ambiguous leaf and double-claim tests plus docs/traceability updates | Merged in PR #306 |
-| 148 | Reconcile curator Merkle leaf domain separation merge state | Gate G support | Record PR #306 merge evidence, refresh roadmap verification metadata, mark the Merkle traceability row passing, and select the next no-secret roadmap target without changing readiness claims | Active for issue #307 |
+| 148 | Reconcile curator Merkle leaf domain separation merge state | Gate G support | Record PR #306 merge evidence, refresh roadmap verification metadata, mark the Merkle traceability row passing, and select the next no-secret roadmap target without changing readiness claims | Merged in PR #308 |
+| 149 | Reconcile curator Merkle state reconciliation merge | Gate G support | Record PR #308 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the formatting-triage target | Active for issue #309 |
+| 150 | Triage Solidity formatting gate path | Gate A/G support | Triage `forge fmt --check smart-contracts`, decide first-party versus vendored/generated scope, document the accepted formatting gate path, and prepare issue-ready follow-up work without changing contract behavior | Queued after issue #309 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile curator Merkle leaf domain separation merge state (Queue Item 148)
+### PR candidate: Reconcile curator Merkle state reconciliation merge (Queue Item 149)
 
-Status: PR opened; waiting for CI and CodeRabbit.
+Status: local edits in progress.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/309`.
+PR: TBD after open.
+Branch: `codex/reconcile-pr-308-merge-state`.
+Branch started from PR #308 squash merge commit
+`1f85b002c981998d327d468c06996818f9cacfaf`.
+
+Goal:
+
+- Mark Queue Item 148 and issue #307 as completed by PR #308.
+- Record the PR #308 final CI, CodeRabbit, and squash-merge evidence.
+- Refresh top-level verification metadata to the latest merged baseline.
+- Select formatting triage as the next no-secret roadmap target.
+- Keep this PR to roadmap/run-state reconciliation only and avoid new readiness
+  claims.
+
+Validation plan:
+
+- `rg -n "Queue Item 148|Queue Item 149|Queue Item 150|PR #308|#307|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- Confirm the stale issue #307 active-PR wording is absent from
+  `ops/ROADMAP.md` and this run-state file.
+- `git diff --check`.
+
+### Completed: Reconcile curator Merkle leaf domain separation merge state (Queue Item 148)
+
+Status: merged in PR #308.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/307`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/308`.
 Branch: `codex/reconcile-curator-merkle-merge-state`.
 Branch started from PR #306 squash merge commit
 `e8d0822c7bc357a97b6a761d9126f3787502de8b`.
 Opening head: `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`.
+Final PR head: `02b07cc33f8b8d29f48c7dd7a35065cafbc35983`.
+Squash merge commit: `1f85b002c981998d327d468c06996818f9cacfaf`.
+CI: run `27489933581` passed on the final head.
+
+CodeRabbit: explicit review request comment `4700850379`, automatic
+rate-limit/status comment `4700846648`, review-finished reply `4700850541`,
+final status success, and no unresolved review threads. Claude was not requested
+per user instruction; only the passive manual-review availability comment was
+present.
 
 Goal:
 
@@ -228,11 +264,10 @@ Goal:
 - Keep this PR to roadmap/run-state reconciliation only and avoid new readiness
   claims.
 
-Validation plan:
+Validation:
 
 - `rg -n "Queue Item 147|Queue Item 148|PR #306|#305|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
-- Confirm the stale issue #305 in-progress wording is absent from
-  `ops/ROADMAP.md` and this run-state file.
+- `rg -n "In Progress locally for issue #305|TBD after issue #305|Active for issue #305|PR opened; second CI" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
 - `git diff --check`.
 
 ### Completed: Complete curator Merkle leaf domain separation (Queue Item 147)
@@ -11805,6 +11840,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 06:04 | Start Queue Item 149 | PR #308 merged as `1f85b002c981998d327d468c06996818f9cacfaf`, issue #307 closed completed, issue #309 opened for state-only reconciliation, and branch `codex/reconcile-pr-308-merge-state` started from the merged baseline while selecting formatting triage as the next no-secret target. |
+| 2026-06-14 05:59 | Merge PR #308 | Curator Merkle merge-state reconciliation merged as `1f85b002c981998d327d468c06996818f9cacfaf`; final head `02b07cc33f8b8d29f48c7dd7a35065cafbc35983` passed CI run `27489933581`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700850379`, and issue #307 closed completed. |
 | 2026-06-14 05:50 | Open PR #308 | Curator Merkle merge-state reconciliation PR opened on head `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`, closes issue #307, and records PR #306 as the latest merged baseline without changing readiness claims. |
 | 2026-06-14 05:46 | Start Queue Item 148 | PR #306 merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`, issue #305 closed completed, issue #307 opened for state-only merge reconciliation, and branch `codex/reconcile-curator-merkle-merge-state` started from the merged baseline. |
 | 2026-06-14 05:44 | Merge PR #306 | Curator Merkle leaf domain separation merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`; final head `51a4156f1b8de54602da5445b29a787ee638ff23` passed CI run `27489644258`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700755557`, and issue #305 closed completed. |

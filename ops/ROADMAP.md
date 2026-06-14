@@ -96,12 +96,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-14 05:44 UTC` for Queue Item 147 / PR #306 curator Merkle leaf domain separation; PR #306 local validation covered focused curator-pool tests, release artifact drift checks, retained ceremony/randomizer evidence checks, release manifest/checksum checks, full Windows `scripts\check.ps1`, and whitespace checks |
-| OS tested | Windows local validation for Queue Item 147 / PR #306; Linux GitHub Actions passed for latest merged baseline PR #306 run `27489644258` on final head `51a4156f1b8de54602da5445b29a787ee638ff23`, with merged baseline commit `e8d0822c7bc357a97b6a761d9126f3787502de8b` |
+| Last verified | `2026-06-14 05:59 UTC` for latest merged baseline PR #308 curator Merkle merge-state reconciliation; PR #308 local validation covered roadmap/run-state traceability scans and whitespace checks without changing readiness claims |
+| OS tested | Windows local validation for Queue Item 148 / PR #308; Linux GitHub Actions passed for latest merged baseline PR #308 run `27489933581` on final head `02b07cc33f8b8d29f48c7dd7a35065cafbc35983`, with merged baseline commit `1f85b002c981998d327d468c06996818f9cacfaf` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #306 final CI run `27489644258` passed on head `51a4156f1b8de54602da5445b29a787ee638ff23`; CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700755557`, and PR #306 squash-merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b` |
+| CI run | Latest merged baseline PR #308 final CI run `27489933581` passed on head `02b07cc33f8b8d29f48c7dd7a35065cafbc35983`; CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700850379`, and PR #308 squash-merged as `1f85b002c981998d327d468c06996818f9cacfaf` |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
