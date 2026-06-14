@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/retained-live-audit-after-fork-sync` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/334` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/335` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/336` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 12:39 UTC` |
+| Last updated | `2026-06-14 12:41 UTC` |
 
 ## Packaging Notes
 
@@ -225,12 +225,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Retain live audit report after fork issue body sync (Queue Item 162)
 
-Status: local validation passed; PR not opened yet.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/335`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/336`.
 Branch: `codex/retained-live-audit-after-fork-sync`.
 Branch started from PR #334 squash merge commit
 `262fa484a15864efa2df4589fec1a338f3f1960b`.
+Initial PR head: `993d799783528f3426bf8b7dc2295526646de7e0`.
+CodeRabbit review requested via comment `4701775948`.
 
 Goal:
 
@@ -12537,6 +12539,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 12:41 | Open PR #336 | PR #336 opened for issue #335 on head `993d799783528f3426bf8b7dc2295526646de7e0`, retains the post-#216-sync no-secret live audit report plus snapshot bundle, refreshes archive/manifest/checksum evidence, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701775948`. |
 | 2026-06-14 12:10 | Start Queue Item 162 | PR #334 merged as `262fa484a15864efa2df4589fec1a338f3f1960b`, issue #333 closed completed, issue #335 opened for retaining the no-secret live audit report generated after issue #216 body sync, branch `codex/retained-live-audit-after-fork-sync` started from the merged baseline, and the retained report pair, snapshot bundle, and refreshed live-audit archive/manifest/checksum evidence were generated locally; issue #216 remains open and blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 12:06 | Merge PR #334 | State-only PR #334 passed CI run `27498186187` on final head `d7e12cd58c4b04e5bab11849ca96333c73b3d6cb`, CodeRabbit status was success after review-finished reply `4701675585`, there were no unresolved review threads, merge-decision comment `4701693482` recorded the rate-limit warning as non-actionable, squash merge commit `262fa484a15864efa2df4589fec1a338f3f1960b` landed on `main`, and issue #333 closed completed. |
 | 2026-06-14 12:01 | Open PR #334 | State-only PR #334 opened for issue #333 on head `a109d0a006033b52b85e0c90d1b9634e11e990ca`, records the live issue #216 body sync and fresh body-checker snapshot validation, keeps issue #216 open/blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701675356`. |
