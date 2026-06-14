@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-audit-report-archive-index` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/280` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/281` |
-| Active PR | TBD until Queue Item 135 is opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/282` |
 | Next issue | TBD after issue #281 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 00:17 UTC` |
+| Last updated | `2026-06-14 00:21 UTC` |
 
 ## Packaging Notes
 
@@ -198,12 +198,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add release evidence live audit report archive index (Queue Item 135)
 
-Status: local implementation and validation in progress before PR open.
+Status: PR #282 open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/281`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/282`.
 Branch: `codex/live-audit-report-archive-index`.
 Branch started from PR #280 squash merge commit
 `e1d8a762687c40166b82807634d6365d2eac77a7`.
+Opening PR head: `dac472995cc100585b72e82f3f7a9066933d7e4a`.
+CodeRabbit review requested in comment `4700204401`.
 
 Goal:
 
@@ -254,6 +256,9 @@ Validation status:
   line-ending check, and `git diff --check` passed.
 - Full Windows local gate passed: `powershell -ExecutionPolicy Bypass -File
   scripts\check.ps1`.
+- PR opened at `2026-06-14 00:20 UTC`; this trace-state commit moves the PR
+  head after the initial opening commit and should be checked from GitHub before
+  merge.
 
 ### Completed: Reconcile live audit Markdown checker merge state (Queue Item 134)
 
@@ -11227,6 +11232,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 00:21 | Open PR #282 and request CodeRabbit | Live audit report archive index PR opened on head `dac472995cc100585b72e82f3f7a9066933d7e4a`, links `Closes #281`, and CodeRabbit review was requested in comment `4700204401`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-14 00:17 | Finish Queue Item 135 local validation | Focused archive/report/Markdown tests and checks, release-readiness, manifest, checksum, changelog, py_compile, Bash syntax, traceability, heading scan, line-ending normalization, whitespace, and full Windows `scripts\check.ps1` gate all pass before opening the PR. |
 | 2026-06-14 00:03 | Implement Queue Item 135 local draft | Added a deterministic release evidence live audit report archive generator, focused tests, local/CI gate wiring, docs/readiness wiring, manifest coverage, and durable trace-state updates while preserving blocked readiness claims and avoiding GitHub network access in CI. |
 | 2026-06-13 23:54 | Start Queue Item 135 | PR #280 merged as `e1d8a762687c40166b82807634d6365d2eac77a7`, issue #279 closed completed, issue #281 opened for the live audit report archive index, and branch `codex/live-audit-report-archive-index` started from the merged baseline. |
