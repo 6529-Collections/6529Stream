@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 10:33 UTC` |
+| Last updated | `2026-06-14 10:40 UTC` |
 
 ## Packaging Notes
 
@@ -220,7 +220,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add fork deployment rehearsal retained artifact checker (Queue Item 157)
 
-Status: PR open; CI and CodeRabbit review pending.
+Status: PR open; CI rerun pending after packet-index drift fix.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/325`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/326`.
 Branch: `codex/fork-deployment-rehearsal-evidence-path`.
@@ -228,6 +228,10 @@ Branch started from PR #324 squash merge commit
 `6a5c268a1ed3a60b7d557b6398e78a984ac569ab`.
 Initial PR head: `29c5de67b211e11a9c616821f47f610c0728149b`.
 CodeRabbit review requested via comment `4701475798`.
+CI run `27496127991` failed at the `Public beta evidence` step because
+`release-artifacts/latest/release-evidence-packet-index.json` was stale after
+the non-local evidence docs changed. The fix regenerates the packet index,
+release manifest, and checksum bundle.
 
 Goal:
 
@@ -12277,6 +12281,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 10:40 | Fix PR #326 packet-index drift | CI run `27496127991` failed only at the `Public beta evidence` step after `test_release_evidence_packet_index.py` detected stale committed packet-index hashes for `docs/non-local-release-evidence.md`; regenerate the release evidence packet index, release manifest, and checksum bundle, then rerun the failed public-beta evidence block locally before pushing. |
 | 2026-06-14 10:33 | Open PR #326 | Fork deployment rehearsal retained-artifact checker PR #326 opened for issue #325 on head `29c5de67b211e11a9c616821f47f610c0728149b`, references issue #216 without closing it, records focused/full local validation, preserves blocked readiness claims, and requests CodeRabbit review via comment `4701475798`. |
 | 2026-06-14 10:08 | Create issue #325 and start Queue Item 157 | Issue #216 requires actual reviewed retained fork deployment rehearsal evidence, which is not present in the checkout and must not be invented; issue #325 tracks the no-secret support slice that adds a canonical retained-artifact template, checker, tests, docs, local/CI gates, roadmap traceability, and release artifact coverage without changing readiness claims. |
 | 2026-06-14 10:05 | Merge PR #324 | Reconciliation PR #324 passed CI run `27495297786` on final head `c1adc247585ac2479ea9846467adfe4646de03c3`, CodeRabbit status was success after review-finished replies `4701392175` and `4701395575`, there were no unresolved review threads, merge-decision comment `4701410886` recorded the rate-limit warning as non-actionable, squash merge commit `6a5c268a1ed3a60b7d557b6398e78a984ac569ab` landed on `main`, and issue #323 closed completed. |
