@@ -249,6 +249,9 @@ Validation status:
   live-audit archive, release-manifest, release-checksum, release-artifact,
   changelog, Python bytecode, traceability, heading, whitespace, and full
   Windows `scripts\check.ps1` gates.
+- GitHub Actions run `27484559955` failed repository hygiene on an extra blank
+  line at EOF in `release-artifacts/evidence/live-audit-reports/README.md`;
+  the README was trimmed and release manifest/checksum evidence refreshed.
 
 ### Completed: Reconcile live audit report archive index merge state (Queue Item 136)
 
@@ -11354,6 +11357,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 01:22 | Fix PR #286 repository hygiene failure | GitHub Actions run `27484559955` failed in repository hygiene because `release-artifacts/evidence/live-audit-reports/README.md` had one extra blank line at EOF; trimmed the file and regenerated release manifest/checksum evidence because the README is checksum-covered. |
 | 2026-06-14 01:18 | Open PR #286 | Live audit archive retention workflow PR opened on head `5c96e4e7550796c0014bcfa2ad07b36629cdbf1a`; it links issue #285, adds the canonical retained-bundle directory README, strengthens release-readiness checker coverage for the workflow, refreshes release manifest/checksum evidence, and preserves blocked readiness claims. |
 | 2026-06-14 01:07 | Start Queue Item 137 | PR #284 merged as `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`, issue #283 closed completed, issue #285 opened for live audit archive retention workflow docs, and branch `codex/live-audit-archive-retention-docs` started from the merged baseline. |
 | 2026-06-14 01:01 | Merge PR #284 | Live audit archive merge-state reconciliation merged as `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`; final head `553a151a5aa785c79a6c90ad4a2847e75ce9dbc3` passed CI run `27483989654`, CodeRabbit status was success with no unresolved review threads, explicit review request returned review-finished reply `4700269219`, and issue #283 closed completed. |
