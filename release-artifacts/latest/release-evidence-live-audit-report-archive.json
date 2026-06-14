@@ -24,7 +24,7 @@
     "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.",
     "stale_snapshot_policy": "Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current."
   },
-  "report_count": 3,
+  "report_count": 4,
   "rows": [
     {
       "archive_id": "20260614T015000Z-release-evidence-live-audit-dry-run",
@@ -131,6 +131,58 @@
       ]
     },
     {
+      "archive_id": "20260614T153950Z-release-evidence-live-audit-report",
+      "record_type": "retained_operator_report",
+      "repo": "6529-Collections/6529Stream",
+      "generated_at": "20260614T153950Z",
+      "readiness_claim": "blocked",
+      "snapshot_freshness": {
+        "status": "live_export_at_generation",
+        "generated_from_live_export": true,
+        "currentness_claim": "current_at_generation_only"
+      },
+      "validation_status": "passed",
+      "profile_count": 3,
+      "profiles": [
+        {
+          "profile": "labels",
+          "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
+          "snapshot_sha256": "f54c0a6e641646b3446a4a68157eea4d9afcb4409937a4e476b91282dab0a0bb",
+          "export_status": "passed",
+          "checker_status": "passed"
+        },
+        {
+          "profile": "bodies",
+          "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
+          "snapshot_sha256": "86a27ca5c51e22656f313c5e579c7ddcd71d2eecafbdb907c1cda3d31c4ffdb5",
+          "export_status": "passed",
+          "checker_status": "passed"
+        },
+        {
+          "profile": "closure",
+          "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
+          "snapshot_sha256": "1fe388d46175b648d88bc3eaeaae06c9b42335f9b02f01d2c1352db3d3cee6ac",
+          "export_status": "passed",
+          "checker_status": "passed"
+        }
+      ],
+      "report_json": {
+        "path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
+        "sha256": "e29065d73a6e4099f4ce647ca87724812537bb8d640ffe085b480525aef85bd8",
+        "size_bytes": 4652
+      },
+      "report_markdown": {
+        "path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md",
+        "sha256": "43ea52160080b9f23f11db29ea96aeb5d17472efa6259ba3e79565380d406426",
+        "size_bytes": 4037
+      },
+      "validation_commands": [
+        "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
+        "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md",
+        "python scripts/generate_release_evidence_live_audit_archive.py --check"
+      ]
+    },
+    {
       "archive_id": "template",
       "record_type": "template",
       "repo": "6529-Collections/6529Stream",
@@ -186,9 +238,11 @@
   "validation_commands": [
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json --report-md release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md",
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.md",
+    "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md",
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json --report-md release-artifacts/evidence/release-evidence-live-audit-report-template.md",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json",
+    "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json",
     "python scripts/generate_release_evidence_live_audit_archive.py --check",
     "python scripts/test_release_evidence_live_audit_archive.py"
