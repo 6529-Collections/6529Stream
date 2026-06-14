@@ -93,6 +93,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_release_evidence_live_audit_report.py
 "$python_bin" scripts/test_release_evidence_live_audit_markdown.py
 "$python_bin" scripts/check_release_evidence_live_audit_markdown.py
+"$python_bin" scripts/test_release_evidence_live_audit_archive.py
+"$python_bin" scripts/generate_release_evidence_live_audit_archive.py --check
 "$python_bin" scripts/test_architecture_threat_model.py
 "$python_bin" scripts/check_architecture_threat_model.py
 "$python_bin" scripts/test_audit_package.py

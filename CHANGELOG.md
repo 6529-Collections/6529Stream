@@ -26,6 +26,9 @@ the release policy in `docs/release-policy.md`.
   and offline checker for retained report bundles.
 - Added a release evidence live audit Markdown parity checker and checked
   no-secret Markdown template for retained report bundles.
+- Added a deterministic release evidence live audit report archive index for
+  retained JSON/Markdown report bundles, with no-secret validation and
+  local/CI drift checks.
 - Added deterministic release evidence tracker body checks with optional
   live GitHub issue snapshot audit mode and body-file remediation output for
   body drift.

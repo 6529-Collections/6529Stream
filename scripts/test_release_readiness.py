@@ -61,6 +61,7 @@ release evidence issue closure readiness, and release evidence live audit report
 are summarized.
 The release evidence live audit report schema is summarized.
 The release evidence live audit Markdown parity is summarized.
+The release evidence live audit report archive is summarized.
 The unsigned payload-generator examples are summarized.
 The drop authorization signing fixtures are summarized.
 The drop authorization signing evidence and signer custody readiness evidence

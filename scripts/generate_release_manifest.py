@@ -33,6 +33,12 @@ PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
 PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
 RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
 RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
+RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME = (
+    "release-evidence-live-audit-report-archive.json"
+)
+RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_MARKDOWN_FILENAME = (
+    "release-evidence-live-audit-report-archive.md"
+)
 RELEASE_EVIDENCE_ISSUE_BACKLOG_JSON_FILENAME = "release-evidence-issue-backlog.json"
 RELEASE_EVIDENCE_ISSUE_BACKLOG_MARKDOWN_FILENAME = "release-evidence-issue-backlog.md"
 RELEASE_EVIDENCE_ISSUE_LINKS_JSON_FILENAME = "release-evidence-issue-links.json"
@@ -958,6 +964,19 @@ def build_manifest(
                 ),
                 "markdown": file_record(
                     release_artifacts_dir / RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME,
+                    repo_root,
+                ),
+            },
+            "release_evidence_live_audit_report_archive": {
+                "json": file_record(
+                    release_artifacts_dir
+                    / RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME,
+                    repo_root,
+                    schema_required=True,
+                ),
+                "markdown": file_record(
+                    release_artifacts_dir
+                    / RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_MARKDOWN_FILENAME,
                     repo_root,
                 ),
             },
