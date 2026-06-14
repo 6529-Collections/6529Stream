@@ -24,16 +24,16 @@
     {
       "id": "fork_deployment_rehearsal",
       "phase": "public_beta",
-      "status": "pending",
+      "status": "complete",
       "owner": "Codex autonomous operator",
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:799db7010614b9ef788764cbb41af1a2062e935aff6155300b829b92e7e9dff1"
+          "sha256": "sha256:f4aa310c817de26d7211bee8ee6a885e940a61397e4881efa3acaef52c014060"
         }
       ],
       "risk_acceptance": null,
-      "notes": "Pending-review mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, and generated fork address book. Public beta remains blocked until review is accepted."
+      "notes": "Reviewed mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, generated fork address book, and CodeRabbit/CI acceptance evidence from PR #347 and PR #349. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "id": "testnet_deployment_rehearsal",

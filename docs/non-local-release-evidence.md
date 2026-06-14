@@ -156,15 +156,16 @@ sanitized deployment transcript, sanitized broadcast, generated manifest,
 address book, verification status, gas or invariant summary, redaction
 confirmation, and reviewer decision.
 
-The committed file currently contains pending-review mainnet-fork rehearsal
-evidence captured at block `25316366` with fork hash
+The committed file currently contains reviewed mainnet-fork rehearsal evidence
+captured at block `25316366` with fork hash
 `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`.
 It is linked to
 [`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json),
 which records the retained artifact digest for the public-beta evidence row.
-The row remains `pending`, and public beta remains blocked, until review
-accepts the fork command, chain reference, generated manifest/address book,
-redaction boundary, and readiness claim.
+The row is `complete`; public beta remains blocked by the remaining missing
+evidence rows, including external audit, testnet rehearsal, verified deployed
+addresses, explorer verification, and fork/testnet ceremony, metadata browser,
+and randomizer operations evidence.
 
 The retained artifact is checked separately from the JSON metadata envelope:
 

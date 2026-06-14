@@ -162,7 +162,7 @@ The broadcast manifest input step parses the sanitized Foundry fixtures under
 missing-contract, unexpected-contract, duplicate, invalid-address, and
 secret-like-key inputs, and checks the generated broadcast-derived configs
 under `deployments/config/`. The default check covers both the local Anvil
-fixture and the pending-review mainnet-fork rehearsal fixture for issue #216.
+fixture and the reviewed mainnet-fork rehearsal fixture for issue #216.
 If a broadcast contains a linked library or helper deployment that is not part
 of the public release contract set, list it explicitly in
 `broadcast_evidence.ignored_deployments`; the generator records those ignored
@@ -173,7 +173,7 @@ The deployment manifest step generates the local Anvil example from
 runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`,
 generates the sanitized broadcast-derived manifest from
 `deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`, generates the
-pending-review fork broadcast manifest from
+reviewed fork broadcast manifest from
 `deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`, and
 checks that all committed examples have not drifted.
 
@@ -185,7 +185,7 @@ full ceremony and constructor-argument details from deployment manifests. They
 follow `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and are regenerated with `python scripts/generate_address_books.py`.
 The default drift check includes the Anvil placeholder, Anvil broadcast-derived,
-and pending-review fork-mainnet broadcast-derived address books.
+and reviewed fork-mainnet broadcast-derived address books.
 
 The ceremony-evidence step validates retained no-secret deployment evidence
 bundles under `deployments/ceremony-evidence/`. The committed Anvil bundle ties
@@ -241,7 +241,7 @@ signer custody ceremonies.
 
 The release-readiness step validates
 [`release-readiness.md`](release-readiness.md), the Gate G dashboard that
-separates passing local evidence and pending-review fork evidence from missing
+separates passing local evidence and reviewed fork evidence from missing
 testnet/live evidence, production signatures, signed Git tags, verified
 deployed addresses, explorer verification, external audit, and post-audit
 remediation blockers.

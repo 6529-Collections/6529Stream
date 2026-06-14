@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:dccff7b20ac18113244d03072992a0578cab416114bd453e33affe02f02511ad",
-      "size_bytes": 6696
+      "sha256": "sha256:297276d12c08ab5af18bb14f010274195749acf0fcd1d3832c11a44ffcc5f073",
+      "size_bytes": 6765
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:6e703f9aa6e6841c0b6d534dc8b8674a99b94494943b442a2a01ed0b5695d80e",
-      "size_bytes": 9714
+      "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb",
+      "size_bytes": 9772
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:3dbbcfbc96e7334d29330ad71fbb63b097f062654857af933ae1a217705c819d",
-      "size_bytes": 19510
+      "sha256": "sha256:733b93edb122f983e16c08abd1a4967ce82f6871312058b77a24522c656f5897",
+      "size_bytes": 19583
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -48,13 +48,13 @@
       "overall_status": "blocked",
       "counts": {
         "missing": 7,
-        "pending": 1,
+        "pending": 0,
         "blocked": 0,
         "accepted_risk": 0,
         "not_applicable": 0,
-        "complete": 0
+        "complete": 1
       },
-      "incomplete": 8
+      "incomplete": 7
     },
     {
       "phase": "production_release",
@@ -138,8 +138,8 @@
       "phase": "public_beta",
       "phase_label": "Public Beta",
       "requirement_id": "fork_deployment_rehearsal",
-      "status": "pending",
-      "evidence_posture": "retained-incomplete",
+      "status": "complete",
+      "evidence_posture": "reviewed-external",
       "evidence_count": 1,
       "evidence_paths": [
         "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json"
@@ -163,7 +163,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:cb5138b585201f130aaa2905bba5079451c29ffd1e6d276cadff1d11db400980",
+        "sha256": "sha256:4bb92e1979a4b77c19085606efee7717c9f45dfac6f59ec2333bf4ee3c3c6b48",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
@@ -184,8 +184,8 @@
         "python scripts/generate_release_checksums.py --check"
       ],
       "template_only_can_complete": false,
-      "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "Pending-review mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, and generated fork address book. Public beta remains blocked until review is accepted."
+      "completion_policy": "reviewed retained evidence is recorded in the evidence manifest",
+      "notes": "Reviewed mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, generated fork address book, and CodeRabbit/CI acceptance evidence from PR #347 and PR #349. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "phase": "public_beta",

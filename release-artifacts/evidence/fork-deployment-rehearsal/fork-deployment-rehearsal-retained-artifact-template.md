@@ -3,7 +3,7 @@
 ## Evidence Status
 
 - Requirement ID: `fork_deployment_rehearsal`
-- Review status: `pending_review`
+- Review status: `reviewed`
 - Readiness claim: `blocked`
 - Environment: `fork`
 - Chain ID: `1`
@@ -12,7 +12,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `local transcript captured 2026-06-14T14:39Z; PR CI pending`
+- CI run or operator transcript: `local transcript captured 2026-06-14T14:39Z; PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed`
 - Fork block number: `25316366`
 - Fork block hash: `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir`
@@ -38,8 +38,8 @@
 ## Review
 
 - Operator: `Codex autonomous operator`
-- Reviewer: `CodeRabbit pending PR review`
-- Review decision: `pending_review`
+- Reviewer: `CodeRabbit status success on PR #347 and PR #349`
+- Review decision: `reviewed`
 
 ## Redaction
 
@@ -53,7 +53,7 @@
 ```sh
 python scripts/test_fork_deployment_rehearsal_evidence.py
 python scripts/check_fork_deployment_rehearsal_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir" --owner "Codex autonomous operator" --reviewer "CodeRabbit pending PR review" --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR CI pending"
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir" --owner "Codex autonomous operator" --reviewer "CodeRabbit status success on PR #347 and PR #349" --review-status reviewed --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132" --operator-notes "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. Public beta remains blocked on the remaining missing evidence rows."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -71,6 +71,6 @@ python scripts/generate_release_checksums.py --check
 - Foundry reported `ONCHAIN EXECUTION COMPLETE & SUCCESSFUL`, produced the
   retained broadcast JSON, and the generated fork manifest/address book were
   derived from that broadcast.
-- The public-beta requirement remains blocked until this pending evidence is
-  reviewed and the shared evidence manifest is advanced according to the
-  release runbook.
+- The public-beta requirement row can now be advanced to `complete` for this
+  fork rehearsal evidence. Public beta as a release phase remains blocked on
+  the remaining missing evidence rows in the shared evidence manifest.
