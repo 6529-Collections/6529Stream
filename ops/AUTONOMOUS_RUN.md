@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/external-audit-evidence-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/352` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/353` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/354` |
+| Active PR branch | `codex/reconcile-pr-354-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/354` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/355` |
+| Active PR | `TBD` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report` remains open for real reviewed audit evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 17:31 UTC` |
+| Last updated | `2026-06-14 17:43 UTC` |
 
 ## Packaging Notes
 
@@ -228,13 +228,62 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Merged in PR #347 |
 | 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Merged in PR #349 |
 | 171 | Reconcile PR #350 reviewed fork evidence merge state | Gate G support | Record PR #350 merge evidence, close out issue #216/Queue Item 164 in durable state, refresh roadmap verification metadata, and select issue #215 as the next release-evidence target without changing readiness claims | Merged in PR #352 |
-| 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Active for issue #353 |
+| 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Merged in PR #354 |
+| 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Active for issue #355 |
 
 ## Current PR Worklog
 
-### PR candidate: Add external audit report retained artifact checker (Queue Item 172)
+### PR candidate: Reconcile PR #354 merge state (Queue Item 173)
 
-Status: PR #354 opened and awaiting CI plus CodeRabbit.
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/355`.
+Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/215`.
+PR: `TBD`.
+Branch: `codex/reconcile-pr-354-merge-state`.
+Branch started from PR #354 squash merge commit
+`300d96c8e80701c3814873993650ad57decbe695`.
+
+Goal:
+
+- Record that PR #354 merged and issue #353 closed as completed.
+- Move Queue Item 172 to merged and make Queue Item 173 the active
+  reconciliation item.
+- Refresh roadmap verification metadata to the PR #354 merged baseline.
+- Record that live issue #215 was updated from the generated body-sync payload
+  to reference the dedicated external-audit retained artifact path and checker
+  commands.
+- Preserve issue #215 as open, `external_audit_report` as `missing`, and
+  public-beta/production readiness as blocked until real reviewed audit
+  evidence exists.
+
+Current facts:
+
+- PR #354 merged as squash commit
+  `300d96c8e80701c3814873993650ad57decbe695`.
+- PR #354 final head
+  `859749113b2c141542317af4406fd7a19a039054` passed CI run
+  `27506666878`: Windows PowerShell wrapper job `81299029608` and Foundry
+  smoke job `81299029630`.
+- CodeRabbit status was success. The explicit review request comment
+  `4702511746` received review-finished reply `4702511950`; no review threads
+  were open.
+- Merge-decision comment `4702529737` recorded the autonomous merge basis.
+- Issue #353 closed completed at `2026-06-14 17:40 UTC`.
+- Live issue #215 was updated at `2026-06-14 17:42 UTC` from
+  `release-artifacts/latest/release-evidence-issue-body-sync.json` and remains
+  open for real reviewed external audit evidence.
+
+Validation planned locally:
+
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
+
+### Completed: Add external audit report retained artifact checker (Queue Item 172)
+
+Status: merged in PR #354; issue #353 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/353`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/215`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/354`.
@@ -271,6 +320,20 @@ Current facts:
 - Issue #353 tracks this no-secret support work for parent evidence issue #215.
 - PR #354 opened from head
   `4e9ae7f8798507a81f60cfa5af2f3225a8d16611`.
+- PR #354 final head
+  `859749113b2c141542317af4406fd7a19a039054` passed CI run
+  `27506666878`: Windows PowerShell wrapper job `81299029608` and Foundry
+  smoke job `81299029630`.
+- CodeRabbit status was success. The explicit review request comment
+  `4702511746` received review-finished reply `4702511950`; no review threads
+  were open.
+- Merge-decision comment `4702529737` recorded the autonomous merge basis.
+- PR #354 squash-merged as
+  `300d96c8e80701c3814873993650ad57decbe695` and closed issue #353 as
+  completed.
+- Live issue #215 was updated from the generated body-sync payload to reference
+  the dedicated external-audit retained artifact path and validation commands;
+  issue #215 remains open for real reviewed audit evidence.
 
 Validation completed locally:
 
@@ -13155,6 +13218,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 17:43 | Merge PR #354 and start Queue Item 173 | PR #354 squash-merged as `300d96c8e80701c3814873993650ad57decbe695` after CI run `27506666878` passed Windows PowerShell wrapper job `81299029608` and Foundry smoke job `81299029630`; CodeRabbit status was success with review-finished reply `4702511950`, no review threads were open, merge-decision comment `4702529737` documented the autonomous merge basis, issue #353 closed completed, live issue #215 was updated from the generated body-sync payload to reference the dedicated external-audit retained artifact path/checker commands, issue #355 opened for merge-state reconciliation, and branch `codex/reconcile-pr-354-merge-state` started from the merged baseline. |
 | 2026-06-14 17:31 | Open PR #354 | PR #354 opened on head `4e9ae7f8798507a81f60cfa5af2f3225a8d16611`, adds the dedicated external audit report retained-artifact template/checker/tests, wires the checker into CI/local gates/generated release trackers, preserves issue #215 open and `external_audit_report` missing until real reviewed audit evidence exists, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-14 17:06 | Merge PR #352 and start Queue Item 172 | PR #352 squash-merged as `fd06316fcb14d8e0644cf9f1ca1c45156423671b` after CI run `27505721258` passed Windows PowerShell wrapper job `81296460637` and Foundry smoke job `81296460654`; CodeRabbit status was success with review-finished reply `4702421405`, no review threads were open, merge-decision comment `4702441858` documented the initial rate-limit warning as non-actionable, issue #351 closed completed, issue #353 opened for external audit retained-artifact checker support, and branch `codex/external-audit-evidence-checker` started from the merged baseline. |
 | 2026-06-14 16:54 | Open PR #352 | PR #352 opened on head `277e513de3e81c739d29bc4950c0182f6afd76d5`, records PR #350 merge evidence and issue #216 completion, refreshes roadmap verification metadata, selects issue #215 as the next release-evidence target, and preserves blocked readiness claims. |
