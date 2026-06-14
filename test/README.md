@@ -73,9 +73,11 @@ credits instead of pushing ETH to the reward address; duplicate and invalid
 claims fail without increasing credit; delegated claims credit the delegator;
 unfunded claims fail before consuming the Merkle claim;
 rejecting reward recipients cannot block claim consumption; failed withdrawals
-preserve credits; withdrawal reentrancy cannot overdraw; reward leaves use
-`abi.encode`-based hashing; and curator pool emergency withdrawal can withdraw
-only surplus over local curator credits owed, including forced surplus.
+preserve credits; withdrawal reentrancy cannot overdraw; reward leaves are
+domain-separated by leaf domain, chain ID, pool address, collection ID, claimant,
+amount, and root epoch; stale or wrong-domain proofs do not consume claims; and
+curator pool emergency withdrawal can withdraw only surplus over local curator
+credits owed, including forced surplus.
 
 StreamMinter and randomizer emergency-withdrawal boundaries now have
 target-state coverage in `StreamEmergencyWithdraw.t.sol`: `StreamMinter`

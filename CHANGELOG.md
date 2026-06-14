@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added curator reward Merkle root epochs and domain-separated reward leaves
+  that bind proofs to the leaf domain, chain ID, pool address, collection ID,
+  claimant, amount, and root epoch.
 - Added release change approval policy and a local/CI changelog gate for
   release-impacting contract, deployment, artifact, and release-workflow
   changes.

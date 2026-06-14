@@ -295,7 +295,8 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
             amount = 1 wei;
         }
         address curator = _curator(curatorSeed);
-        bytes32 leaf = curatorsPool.hashRewardLeaf(curator, collectionId, amount);
+        uint256 rootEpoch = curatorsPool.collectionMerkleRootEpoch(collectionId) + 1;
+        bytes32 leaf = curatorsPool.hashRewardLeaf(curator, collectionId, amount, rootEpoch);
         bytes32[] memory proof = new bytes32[](0);
 
         curatorsPool.setMerkleRoot(collectionId, leaf);
