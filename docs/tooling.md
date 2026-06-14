@@ -59,6 +59,8 @@ python scripts/check_release_signatures.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
+python scripts/test_fork_deployment_rehearsal_evidence.py
+python scripts/check_fork_deployment_rehearsal_evidence.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_public_beta_blocker_report.py
@@ -414,6 +416,14 @@ artifact path. The helper computes the artifact digest, validates the output
 with the canonical checker, and supports `--check` for drift detection. It does
 not unblock a release row until the generated evidence is independently
 reviewed and linked from `release-artifacts/latest/public-beta-evidence.json`.
+Fork deployment rehearsal evidence for issue #216 also has a Markdown retained
+artifact template at
+`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
+Run `python scripts/test_fork_deployment_rehearsal_evidence.py` and
+`python scripts/check_fork_deployment_rehearsal_evidence.py` before generating
+the metadata envelope. The committed template remains blocked until a reviewed
+fork artifact replaces the placeholders and is linked from the shared evidence
+manifest.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
@@ -513,6 +523,8 @@ python scripts/check_release_signatures.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
+python scripts/test_fork_deployment_rehearsal_evidence.py
+python scripts/check_fork_deployment_rehearsal_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
@@ -562,6 +574,8 @@ python scripts/check_release_signatures.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
+python scripts/test_fork_deployment_rehearsal_evidence.py
+python scripts/check_fork_deployment_rehearsal_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/generate_production_release_blocker_report.py --check

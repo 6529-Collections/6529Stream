@@ -175,9 +175,12 @@ The current local baseline includes:
   checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
   [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),
   [`release-artifacts/evidence/non-local-release-evidence-template.json`](../release-artifacts/evidence/non-local-release-evidence-template.json),
+  [`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md),
   [`release-artifacts/evidence/public-beta-templates/`](../release-artifacts/evidence/public-beta-templates/),
   [`release-artifacts/evidence/production-release-templates/`](../release-artifacts/evidence/production-release-templates/),
-  and [`scripts/check_non_local_release_evidence.py`](../scripts/check_non_local_release_evidence.py);
+  [`scripts/check_non_local_release_evidence.py`](../scripts/check_non_local_release_evidence.py),
+  and
+  [`scripts/check_fork_deployment_rehearsal_evidence.py`](../scripts/check_fork_deployment_rehearsal_evidence.py);
 - Slither baseline evidence in [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md)
   and [`docs/slither.md`](slither.md);
 - the test matrix in [`ops/ROADMAP.md`](../ops/ROADMAP.md#appendix-b-test-matrix);

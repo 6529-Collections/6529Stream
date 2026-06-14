@@ -146,6 +146,29 @@ production-release row remains blocked until the generated evidence is reviewed,
 linked from `release-artifacts/latest/public-beta-evidence.json`, and all
 release evidence gates pass.
 
+### Fork Deployment Retained Artifact Template
+
+Tracker issue #216 requires a reviewed retained fork deployment rehearsal
+artifact before `fork_deployment_rehearsal` can move out of `missing`. Use
+[`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md)
+as the retained transcript shape. It records the fork block reference,
+sanitized deployment transcript, sanitized broadcast, generated manifest,
+address book, verification status, gas or invariant summary, redaction
+confirmation, and reviewer decision.
+
+The retained artifact is checked separately from the JSON metadata envelope:
+
+```sh
+python scripts/test_fork_deployment_rehearsal_evidence.py
+python scripts/check_fork_deployment_rehearsal_evidence.py
+```
+
+The committed file is template-only and keeps the public-beta row blocked. A
+reviewed fork artifact must replace the `TBD` values, remove the template-only
+notice, pass the checker, receive a generated non-local evidence envelope, and
+be linked from `release-artifacts/latest/public-beta-evidence.json` before issue
+#216 can close.
+
 ## Public-Beta Requirement Mapping
 
 When evidence is retained, update the matching requirement row in
@@ -202,6 +225,8 @@ The required validation sequence is:
 python scripts/check_public_beta_evidence.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
+python scripts/test_fork_deployment_rehearsal_evidence.py
+python scripts/check_fork_deployment_rehearsal_evidence.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
