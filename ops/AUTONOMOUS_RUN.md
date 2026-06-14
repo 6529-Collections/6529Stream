@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/accept-fork-rehearsal-evidence` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/349` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/350` |
-| Next issue | `TBD after issue #216 completion` |
+| Active PR branch | `codex/reconcile-pr-350-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/350` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/351` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/352` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report`) |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 16:38 UTC` |
+| Last updated | `2026-06-14 16:54 UTC` |
 
 ## Packaging Notes
 
@@ -220,19 +220,61 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 161 | Apply fork rehearsal body sync to live issue #216 | Gate G support | Apply the committed body-sync payload for issue #216 to the live GitHub issue, verify live issue bodies against the committed artifact, and record the external sync without changing readiness claims | Merged in PR #334 |
 | 162 | Retain live audit report after fork issue body sync | Gate G support | Commit the no-secret live audit report generated after issue #216 body sync, refresh the live-audit archive index, release manifest, and checksum evidence, and preserve blocked readiness claims | Merged in PR #336 |
 | 163 | Reconcile retained live audit report merge state | Gate G support | Record PR #336 merge evidence, close out issue #335/Queue Item 162 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #338 |
-| 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Active for issue #216 |
+| 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Merged in PR #350 |
 | 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #340 |
 | 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Merged in PR #342 |
 | 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Merged in PR #344 |
 | 168 | Add Windows PowerShell 5.1 check-wrapper CI harness | Gate A/Gate G support | Add a lightweight `windows-latest` CI job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell semantics without running the full Foundry gate | Merged in PR #346 |
 | 169 | Retain pending fork deployment rehearsal evidence | Gate E/Gate G support | Retain no-secret mainnet-fork deployment rehearsal evidence for issue #216, including sanitized broadcast, generated fork manifest/address book, non-local evidence envelope, public-beta evidence linkage, and local/CI drift checks while keeping readiness `pending` until review acceptance | Merged in PR #347 |
 | 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Merged in PR #349 |
+| 171 | Reconcile PR #350 reviewed fork evidence merge state | Gate G support | Record PR #350 merge evidence, close out issue #216/Queue Item 164 in durable state, refresh roadmap verification metadata, and select issue #215 as the next release-evidence target without changing readiness claims | Active for issue #351 |
 
 ## Current PR Worklog
 
-### PR candidate: Accept reviewed fork rehearsal evidence (Queue Item 164)
+### PR candidate: Reconcile PR #350 reviewed fork evidence merge state (Queue Item 171)
 
 Status: PR opened; awaiting CI and CodeRabbit review.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/351`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/352`.
+Branch: `codex/reconcile-pr-350-merge-state`.
+Branch started from PR #350 squash merge commit
+`8af52acb1072d106033162f251e4aa2fa321d628`.
+
+Goal:
+
+- Record that PR #350 merged and issue #216 closed as completed.
+- Move Queue Item 164 to merged and make Queue Item 171 the active
+  reconciliation item.
+- Refresh roadmap verification metadata to the PR #350 merged baseline.
+- Select issue #215 (`external_audit_report`) as the next release-evidence
+  target while preserving blocked public-beta and production-release readiness.
+- Avoid Solidity, release evidence status, and generated artifact changes.
+
+Current facts:
+
+- PR #350 merged as squash commit
+  `8af52acb1072d106033162f251e4aa2fa321d628`.
+- PR #350 final head
+  `978a44eccf2ccfe1405aa4697c70853f9fa2fcfb` passed CI run
+  `27505334136`: Windows PowerShell wrapper job `81295431136` and Foundry
+  smoke job `81295431140`.
+- CodeRabbit status was success. The explicit review request comment
+  `4702384067` received review-finished reply `4702384287`; no review threads
+  were open.
+- Merge-decision comment `4702403805` recorded the autonomous merge basis.
+- Issue #216 auto-closed as completed at `2026-06-14 16:47 UTC`.
+- Issue #351 tracks this reconciliation.
+
+Validation planned locally:
+
+- `rg -n "^#|^##|^###" ops\ROADMAP.md ops\AUTONOMOUS_RUN.md`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\generate_release_checksums.py --check`.
+- `git diff --check`.
+
+### Completed: Accept reviewed fork rehearsal evidence (Queue Item 164)
+
+Status: merged in PR #350; issue #216 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/216`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/350`.
 Branch: `codex/accept-fork-rehearsal-evidence`.
@@ -264,8 +306,9 @@ Current facts:
 - PR #349 reconciled the live issue #216 body/audit state, passed CI run
   `27504228132`, received CodeRabbit status success, and squash-merged as
   `6e968d2702837b4f1eaa5e002e5d30748deba228`.
-- Issue #216 is open before this PR and should close only after this PR's
-  reviewed evidence acceptance passes CI/CodeRabbit and merges.
+- PR #350 passed CI run `27505334136`, received CodeRabbit status success,
+  squash-merged as `8af52acb1072d106033162f251e4aa2fa321d628`, and closed
+  issue #216 as completed.
 - Public beta remains `blocked` because seven public-beta rows and nine
   production-release rows still lack retained evidence.
 
@@ -13046,6 +13089,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 16:54 | Open PR #352 | PR #352 opened on head `277e513de3e81c739d29bc4950c0182f6afd76d5`, records PR #350 merge evidence and issue #216 completion, refreshes roadmap verification metadata, selects issue #215 as the next release-evidence target, and preserves blocked readiness claims. |
+| 2026-06-14 16:50 | Merge PR #350 and start Queue Item 171 | PR #350 squash-merged as `8af52acb1072d106033162f251e4aa2fa321d628` after CI run `27505334136` passed Windows PowerShell wrapper job `81295431136` and Foundry smoke job `81295431140`; CodeRabbit status was success with review-finished reply `4702384287`, no review threads were open, merge-decision comment `4702403805` documented the initial rate-limit warning as non-actionable, issue #216 closed completed, issue #351 opened for merge-state reconciliation, and branch `codex/reconcile-pr-350-merge-state` started from the merged baseline. |
 | 2026-06-14 16:38 | Open PR #350 | PR #350 opened on head `9a3d34f134a42432b4786eb5dd7c5d740a081e72`, marks reviewed fork deployment rehearsal evidence complete, removes issue #216 from the active evidence tracker backlog/link/body-sync set, preserves blocked public-beta and production readiness, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-14 16:12 | Start Queue Item 164 | PR #349 merged as `6e968d2702837b4f1eaa5e002e5d30748deba228` after CI run `27504228132` and CodeRabbit success; branch `codex/accept-fork-rehearsal-evidence` started from the merged baseline to accept reviewed fork rehearsal evidence and close issue #216 without changing public-beta readiness. |
 | 2026-06-14 16:05 | Merge PR #349 | Reconciled fork evidence merge state merged as `6e968d2702837b4f1eaa5e002e5d30748deba228`; CI run `27504228132` passed, CodeRabbit status was success with no review threads, issue #348 closed completed, and issue #216 remained open for evidence acceptance. |
