@@ -484,7 +484,21 @@ The Windows script prepends `%USERPROFILE%\.foundry\bin` to the current process
 `PATH` so a fresh shell can find `forge` after bootstrap. It also routes
 `forge` and the selected Python interpreter through checked native-command
 wrappers so Windows PowerShell 5.1 fails fast when a tool exits non-zero; this
-behavior is covered by `scripts/test_windows_check_wrapper.py`.
+behavior is covered by `scripts/test_windows_check_wrapper.py` and the
+executable harness in `scripts/test_windows_check_helpers.ps1`.
+
+To run only the executable Windows wrapper harness:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1
+```
+
+On systems with PowerShell Core installed as `pwsh`, the same harness is also
+available through:
+
+```bash
+make windows-check-wrapper-runtime
+```
 
 ## Bootstrap
 

@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/windows-check-wrapper-native-failures` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/340` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/341` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/342` |
+| Active PR branch | `codex/windows-check-wrapper-runtime-harness` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/342` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/343` |
+| Active PR | `TBD` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 13:37 UTC` |
+| Last updated | `2026-06-14 13:50 UTC` |
 
 ## Packaging Notes
 
@@ -222,20 +222,64 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 163 | Reconcile retained live audit report merge state | Gate G support | Record PR #336 merge evidence, close out issue #335/Queue Item 162 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #338 |
 | 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
 | 165 | Reconcile PR #338 merge state | Gate G support | Record PR #338 merge evidence, close out issue #337/Queue Item 163 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed fork evidence | Merged in PR #340 |
-| 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Active for issue #341 |
+| 166 | Harden Windows check wrapper native failures | Gate A/Gate G support | Route Windows `scripts/check.ps1` native `forge` and Python calls through checked wrappers, add a focused policy test, wire it into local/CI gates, and document the fail-fast behavior | Merged in PR #342 |
+| 167 | Add executable Windows check wrapper failure harness | Gate A/Gate G support | Factor the checked native-command helper into a dot-sourceable PowerShell helper, add an executable zero/non-zero native exit harness, wire it into Windows local and CI PowerShell gates, and document the targeted command | Active for issue #343 |
 
 ## Current PR Worklog
 
-### PR candidate: Harden Windows check wrapper native failures (Queue Item 166)
+### PR candidate: Add executable Windows check wrapper failure harness (Queue Item 167)
 
-Status: PR open; waiting for CI and CodeRabbit.
+Status: local implementation in progress; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/343`.
+PR: `TBD`.
+Branch: `codex/windows-check-wrapper-runtime-harness`.
+Branch started from PR #342 squash merge commit
+`770326ddbc9cc84ed64e66e135e56e2029ce8b4b`.
+
+Goal:
+
+- Add an executable PowerShell harness proving checked native-command handling
+  succeeds on zero-exit native commands and throws on non-zero native exits.
+- Keep the harness independent of the full Foundry/Python local gate so it is
+  cheap enough for focused local and CI validation.
+- Preserve PR #342 behavior for `forge` and selected Python routing through
+  checked native-command handling.
+- Update tooling docs, changelog, roadmap, run-state, and generated release
+  artifacts as needed.
+
+Validation plan:
+
+- `powershell -NoProfile -File scripts\test_windows_check_helpers.ps1`.
+- `python scripts\test_windows_check_wrapper.py`.
+- PowerShell parser check for `scripts/check.ps1`,
+  `scripts/bootstrap-windows.ps1`, `scripts/windows-check-helpers.ps1`, and
+  `scripts/test_windows_check_helpers.ps1`.
+- `make windows-check-wrapper-runtime`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\check_changelog.py`.
+- `git diff --check`.
+
+### Completed: Harden Windows check wrapper native failures (Queue Item 166)
+
+Status: merged in PR #342.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/341`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/342`.
 Branch: `codex/windows-check-wrapper-native-failures`.
 Branch started from PR #340 squash merge commit
 `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`.
 Initial PR head: `b2d11dc7dcd885dea3a989963843ed70a5c22344`.
+Final PR head: `0e4e1411a87b7d3a7211e679b776c2714fa4737b`.
+Squash merge commit: `770326ddbc9cc84ed64e66e135e56e2029ce8b4b`.
+CI: run `27500588477`, job `81282624570`, passed.
 CodeRabbit review requested via comment `4701914567`.
+CodeRabbit: initial automatic rate-limit warning comment `4701914443`
+produced no actionable findings; explicit review request comment `4701914567`
+received review-finished reply `4701914757`; combined status was success; no
+review threads were open.
+Claude: automatic informational comment only; no Claude review was requested per
+current user instruction.
+Merge decision comment: `4701935996`.
 
 Goal:
 
@@ -246,16 +290,32 @@ Goal:
 - Wire that test into Makefile, Bash wrapper, PowerShell wrapper, and CI.
 - Update tooling docs, changelog, roadmap, and release artifacts as needed.
 
-Validation plan:
+Validation completed locally:
 
-- `python scripts/test_windows_check_wrapper.py`.
+- `python scripts\test_windows_check_wrapper.py` passed.
 - PowerShell parser check for `scripts/check.ps1` and
-  `scripts/bootstrap-windows.ps1`.
-- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh`.
-- `python scripts/generate_release_manifest.py --check`.
-- `python scripts/generate_release_checksums.py --check`.
-- `python scripts/check_changelog.py`.
-- `git diff --check`.
+  `scripts/bootstrap-windows.ps1` passed.
+- `bash -n scripts/check.sh scripts/bootstrap-ec2.sh` passed.
+- `python scripts\generate_release_manifest.py --check` passed.
+- `python scripts\generate_release_checksums.py --check` passed.
+- `python scripts\check_changelog.py` passed.
+- `git diff --check` passed with the expected local line-ending warning for
+  `scripts/check.ps1`.
+- `make windows-check-wrapper-policy` passed.
+- `python scripts\test_release_manifest.py` passed.
+- `python scripts\test_release_checksums.py` passed.
+- `python scripts\test_changelog_check.py` passed.
+- `python -m py_compile scripts\test_windows_check_wrapper.py scripts\generate_release_manifest.py scripts\generate_release_checksums.py scripts\check_changelog.py` passed.
+
+Outcome:
+
+- `scripts/check.ps1` routes native `forge` and selected Python calls through
+  checked wrappers that throw on non-zero `$LASTEXITCODE`.
+- `scripts/test_windows_check_wrapper.py` protects the helper/routing policy in
+  CI and local gates.
+- CI run `27500588477` passed on final PR head
+  `0e4e1411a87b7d3a7211e679b776c2714fa4737b`.
+- Issue #341 closed completed when PR #342 merged.
 
 ### Completed: Reconcile PR #338 merge state (Queue Item 165)
 
@@ -12703,6 +12763,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 13:50 | Start Queue Item 167 | PR #342 merged as `770326ddbc9cc84ed64e66e135e56e2029ce8b4b`, issue #341 closed completed, issue #343 opened for an executable Windows check-wrapper failure harness, and branch `codex/windows-check-wrapper-runtime-harness` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
+| 2026-06-14 13:45 | Merge PR #342 | Tooling PR #342 passed CI run `27500588477`, job `81282624570`, on final head `0e4e1411a87b7d3a7211e679b776c2714fa4737b`; CodeRabbit status was success after explicit review-finished reply `4701914757`; no review threads were open; merge-decision comment `4701935996` recorded the initial rate-limit warning as non-actionable; squash merge commit `770326ddbc9cc84ed64e66e135e56e2029ce8b4b` landed on `main`; and issue #341 closed completed. |
 | 2026-06-14 13:37 | Open PR #342 | PR #342 opened for issue #341 on head `b2d11dc7dcd885dea3a989963843ed70a5c22344`, hardens Windows native-command failure handling for `forge` and Python checks, wires the focused wrapper policy test into local/CI gates, and requests CodeRabbit review via comment `4701914567`. |
 | 2026-06-14 13:23 | Start Queue Item 166 | PR #340 merged as `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1`, issue #339 closed completed, issue #341 opened for Windows check-wrapper native failure hardening, and branch `codex/windows-check-wrapper-native-failures` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 13:20 | Merge PR #340 | State-only PR #340 passed CI run `27499976730`, job `81280968647`, on final head `790c24248afc5c43a6f14d3fde371f359fdb7653`; CodeRabbit status was success after explicit review-finished reply `4701853050`; no review threads were open; merge-decision comment `4701874979` recorded the initial rate-limit warning as non-actionable; squash merge commit `8cc2bfbf4a9a84a8294ca77a383758b35ca7eaf1` landed on `main`; and issue #339 closed completed. |

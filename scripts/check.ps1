@@ -7,6 +7,8 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $repoRoot
 
+. (Join-Path $PSScriptRoot "windows-check-helpers.ps1")
+
 $foundryBin = Join-Path $HOME ".foundry\bin"
 if (Test-Path $foundryBin) {
     $env:Path = "$foundryBin;$env:Path"
@@ -18,20 +20,6 @@ if (-not $forgeCommand) {
 }
 
 $forgePath = $forgeCommand.Source
-
-function Invoke-CheckedNative {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$FilePath,
-        [string[]]$Arguments = @()
-    )
-
-    & $FilePath @Arguments
-    if ($LASTEXITCODE -ne 0) {
-        $displayArgs = if ($Arguments.Count -gt 0) { " " + ($Arguments -join " ") } else { "" }
-        throw "$FilePath$displayArgs failed with exit code $LASTEXITCODE."
-    }
-}
 
 function forge {
     param(
@@ -80,6 +68,7 @@ function Invoke-CheckedPython {
 $pythonPath = "Invoke-CheckedPython"
 $pythonArgs = @()
 
+& (Join-Path $PSScriptRoot "test_windows_check_helpers.ps1")
 forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
