@@ -37,6 +37,8 @@ RELEASE_IMPACTING_PATHS = {
         "scripts/generate_address_books.py",
         "scripts/generate_release_checksums.py",
         "scripts/check_changelog.py",
+        "scripts/check_solidity_formatting.py",
+        "scripts/test_solidity_formatting.py",
         "docs/tooling.md",
         "docs/release-policy.md",
     ),

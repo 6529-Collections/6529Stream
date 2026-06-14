@@ -28,6 +28,8 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+"$python_bin" scripts/test_solidity_formatting.py
+"$python_bin" scripts/check_solidity_formatting.py
 "$python_bin" scripts/test_metadata_fixtures.py
 "$python_bin" scripts/check_metadata_fixtures.py
 "$python_bin" scripts/test_metadata_browser_sandbox.py

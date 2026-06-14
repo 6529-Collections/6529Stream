@@ -26,6 +26,8 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_solidity_formatting.py
+python scripts/check_solidity_formatting.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
@@ -431,6 +433,31 @@ release workflow files, `CHANGELOG.md` must be part of the change and its
 `Unreleased` section must contain a non-placeholder bullet. The release-impact
 rules are documented in [`release-policy.md`](release-policy.md).
 
+## Solidity Formatting
+
+The canonical formatting gate is:
+
+```bash
+make fmt-check
+```
+
+`make fmt-check` runs `scripts/test_solidity_formatting.py` and
+`scripts/check_solidity_formatting.py`. The checker enforces a scoped baseline:
+
+- formatting-required first-party Solidity files must pass `forge fmt --check`;
+- the raw all-files diagnostic `forge fmt --check smart-contracts` may fail
+  only for the 27 explicitly deferred files listed in the checker;
+- any new unformatted Solidity file outside that deferred set fails the gate;
+- if a deferred file is formatted, the checker fails until the deferred-file
+  list and docs are updated.
+
+The current deferred set is intentionally limited to provenance-sensitive
+OpenZeppelin-style utilities, Chainlink/arRNG provider interfaces or consumers,
+and legacy integration interfaces. Do not mechanically reformat those files in
+feature PRs. Retire deferred files in focused formatting PRs that also update
+provenance notes, release source-verification expectations when applicable, and
+the checker baseline.
+
 Windows contributors can run:
 
 ```powershell
@@ -621,8 +648,8 @@ refreshing the checksum bundle after changing any covered artifact.
 These commands are intentionally not part of `make check` yet:
 
 ```bash
-make fmt-check
 make slither
+forge fmt --check smart-contracts
 ```
 
 `make slither` runs:
@@ -636,6 +663,9 @@ The current Slither high/medium baseline is tracked in
 while findings exist; that is expected until the baseline is accepted as a CI
 gate.
 
-Formatting and Slither have known baselines and should become gates only after
-the roadmap items for formatting triage and Slither baseline acceptance land.
-See [`docs/slither.md`](slither.md) for the full Slither workflow.
+`forge fmt --check smart-contracts` is intentionally listed as a raw diagnostic
+because it still prints the deferred formatting diff. The scoped `make
+fmt-check` gate is part of `make check` and CI. Slither still has a known
+baseline and should become a fail-on-new-finding gate only after Slither
+baseline acceptance lands. See [`docs/slither.md`](slither.md) for the full
+Slither workflow.

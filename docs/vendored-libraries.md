@@ -48,3 +48,13 @@ forge test --match-path test\StreamVendoredLibraries.t.sol -vvv
 When a vendored file changes, update this manifest, rerun the focused
 regressions, and refresh `ops/SLITHER_BASELINE.md` if static-analysis status or
 counts change.
+
+## Formatting
+
+The scoped Solidity formatting gate intentionally defers provenance-sensitive
+vendored files that already differ from upstream formatting. The deferred list
+lives in `scripts/check_solidity_formatting.py`; new files must not be added to
+that list without a focused provenance note. When retiring a deferred vendored
+file, update this manifest, rerun `make fmt-check`, rerun the focused vendored
+library regressions above, and refresh source-verification or release metadata
+if source hashes change.

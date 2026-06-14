@@ -100,6 +100,8 @@ class ChangelogGateTests(unittest.TestCase):
                 "CHANGELOG.md",
                 ".github/workflows/ci.yml",
                 "scripts/check_changelog.py",
+                "scripts/check_solidity_formatting.py",
+                "scripts/test_solidity_formatting.py",
             ],
             VALID_CHANGELOG,
         )
@@ -110,6 +112,8 @@ class ChangelogGateTests(unittest.TestCase):
             [
                 (".github/workflows/ci.yml", "release-tooling"),
                 ("scripts/check_changelog.py", "release-tooling"),
+                ("scripts/check_solidity_formatting.py", "release-tooling"),
+                ("scripts/test_solidity_formatting.py", "release-tooling"),
             ],
         )
 
