@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-audit-archive-retention-docs` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/284` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/285` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/286` |
-| Next issue | TBD after issue #285 merges |
+| Active PR branch | `codex/reconcile-live-audit-retention-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/286` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/287` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/288` |
+| Next issue | TBD after issue #287 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 01:18 UTC` |
+| Last updated | `2026-06-14 01:39 UTC` |
 
 ## Packaging Notes
 
@@ -193,20 +193,71 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 134 | Reconcile live audit Markdown checker merge state | Gate G support | Record PR #278 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Merged in PR #280 |
 | 135 | Add release evidence live audit report archive index | Gate G support | Add a deterministic no-secret index for retained live audit report JSON/Markdown bundles and validation commands without adding GitHub network access to CI or changing readiness claims | Merged in PR #282 |
 | 136 | Reconcile live audit report archive index merge state | Gate G support | Record PR #282 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Merged in PR #284 |
-| 137 | Document live audit archive retention workflow | Gate G support | Add operator-facing no-secret guidance for naming, retaining, validating, and indexing future live audit report bundles under `release-artifacts/evidence/live-audit-reports/` without changing readiness claims | Active |
-| 138 | Reconcile live audit archive retention workflow merge state | Gate G support | Record PR #285 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Queued after issue #285 |
+| 137 | Document live audit archive retention workflow | Gate G support | Add operator-facing no-secret guidance for naming, retaining, validating, and indexing future live audit report bundles under `release-artifacts/evidence/live-audit-reports/` without changing readiness claims | Merged in PR #286 |
+| 138 | Reconcile live audit archive retention workflow merge state | Gate G support | Record PR #286 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Active |
+| 139 | Add retained live audit dry-run bundle | Gate G support | Commit a deterministic no-secret dry-run live audit report bundle under `release-artifacts/evidence/live-audit-reports/` so the generated archive index exercises future-bundle discovery in committed release artifacts without changing readiness claims | Queued after issue #287 |
 
 ## Current PR Worklog
 
-### PR candidate: Document live audit archive retention workflow (Queue Item 137)
+### PR candidate: Reconcile live audit archive retention workflow merge state (Queue Item 138)
 
-Status: PR #286 open; CI and CodeRabbit review pending.
+Status: PR #288 open; CI and CodeRabbit review pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/287`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/288`.
+Branch: `codex/reconcile-live-audit-retention-merge-state`.
+Branch started from PR #286 squash merge commit
+`ef76853783dd23d46165050fe01cd6afa031f660`.
+Opening PR head: `137215c00a11807d5b590370b39feb7df730a169`.
+
+Goal:
+
+- Record PR #286 as merged and issue #285 as completed.
+- Refresh roadmap verification metadata to the PR #286 merged baseline.
+- Update the live audit archive retention workflow test-matrix row from
+  in-progress to passing.
+- Record the CI hygiene failure/fix and final green CI/CodeRabbit evidence.
+- Preserve blocked public-beta and production-release readiness claims.
+- Select Queue Item 139 as the next no-secret release evidence target.
+
+Validation plan:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "Queue Item 137|Queue Item 138|Queue Item 139|PR #286|27484559955|27484623928|2b6301e|ef76853|#285|#287|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+Validation status:
+
+- Passed locally at `2026-06-14 01:37 UTC`: release-readiness,
+  release-manifest, release-checksum, changelog, traceability, heading, and
+  whitespace checks.
+
+### Completed: Document live audit archive retention workflow (Queue Item 137)
+
+Status: merged in PR #286.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/285`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/286`.
 Branch: `codex/live-audit-archive-retention-docs`.
 Branch started from PR #284 squash merge commit
 `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`.
 Opening PR head: `5c96e4e7550796c0014bcfa2ad07b36629cdbf1a`.
+Trace-state head: `7c413fe4a2c17f5773289f114f1c4f08f469686b`.
+Final PR head: `2b6301eaaeeed67fcc349a637be3baf4a80785b7`.
+Squash merge commit: `ef76853783dd23d46165050fe01cd6afa031f660`.
+CI: run `27484623928` passed after run `27484559955` exposed the extra blank
+line at EOF in `release-artifacts/evidence/live-audit-reports/README.md`.
+CodeRabbit: initial rate-limit warning comment `4700321727`, explicit review
+request comments `4700325108` and `4700331667`, review-finished replies
+`4700325280` and `4700331827`, final status success, and no unresolved review
+threads. Merge-readiness comment `4700344955` documented green CI, the prior
+CI hygiene failure/fix, CodeRabbit status, no Solidity/deployment behavior
+changes, and the local validation record before merge. Claude posted its
+default manual-review notice, but Claude review was not requested per current
+user instruction.
+Issue #285: closed completed by the PR merge.
 
 Goal:
 
@@ -11357,6 +11408,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 01:39 | Open PR #288 | State-only live audit retention merge reconciliation PR opened on head `137215c00a11807d5b590370b39feb7df730a169`; it links issue #287, records PR #286 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the retention workflow row passing, and selects Queue Item 139 as the next no-secret evidence target. |
+| 2026-06-14 01:32 | Start Queue Item 138 | PR #286 merged as `ef76853783dd23d46165050fe01cd6afa031f660`, issue #285 closed completed, issue #287 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-retention-merge-state` started from the merged baseline before the next no-secret evidence target. |
+| 2026-06-14 01:31 | Merge PR #286 | Live audit archive retention workflow merged as `ef76853783dd23d46165050fe01cd6afa031f660`; final head `2b6301eaaeeed67fcc349a637be3baf4a80785b7` passed CI run `27484623928`, after CI run `27484559955` caught the README EOF hygiene issue; CodeRabbit status was success with no unresolved review threads, explicit review requests returned review-finished replies, and issue #285 closed completed. |
 | 2026-06-14 01:22 | Fix PR #286 repository hygiene failure | GitHub Actions run `27484559955` failed in repository hygiene because `release-artifacts/evidence/live-audit-reports/README.md` had one extra blank line at EOF; trimmed the file and regenerated release manifest/checksum evidence because the README is checksum-covered. |
 | 2026-06-14 01:18 | Open PR #286 | Live audit archive retention workflow PR opened on head `5c96e4e7550796c0014bcfa2ad07b36629cdbf1a`; it links issue #285, adds the canonical retained-bundle directory README, strengthens release-readiness checker coverage for the workflow, refreshes release manifest/checksum evidence, and preserves blocked readiness claims. |
 | 2026-06-14 01:07 | Start Queue Item 137 | PR #284 merged as `b6b3d1fc5007b0a44b4f774a3356298b2ebc7c00`, issue #283 closed completed, issue #285 opened for live audit archive retention workflow docs, and branch `codex/live-audit-archive-retention-docs` started from the merged baseline. |
