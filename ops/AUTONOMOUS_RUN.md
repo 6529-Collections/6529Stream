@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-retained-live-audit-dry-run-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/290` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/291` |
-| Active PR | TBD until Queue Item 140 is opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/292` |
 | Next issue | TBD after issue #291 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 02:16 UTC` |
+| Last updated | `2026-06-14 02:19 UTC` |
 
 ## Packaging Notes
 
@@ -203,12 +203,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile retained live audit dry-run bundle merge state (Queue Item 140)
 
-Status: local implementation in progress before PR open.
+Status: PR open; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/291`.
-PR: TBD until opened.
+PR: `https://github.com/6529-Collections/6529Stream/pull/292`.
 Branch: `codex/reconcile-retained-live-audit-dry-run-merge-state`.
 Branch started from PR #290 squash merge commit
 `441b390f2fe0f9fd3ca1fb64beb613132768ae21`.
+Opening head: `3bfc1bc50a80fee389c4bba97c32f664f91234e4`.
 
 Goal:
 
@@ -11483,6 +11484,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 02:19 | Open PR #292 | State-only retained dry-run merge reconciliation PR opened on head `3bfc1bc50a80fee389c4bba97c32f664f91234e4`; it links issue #291, records PR #290 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the retained dry-run bundle row passing, and selects Queue Item 141 as the next no-secret guard-test target. |
 | 2026-06-14 02:12 | Start Queue Item 140 | PR #290 merged as `441b390f2fe0f9fd3ca1fb64beb613132768ae21`, issue #289 closed completed, issue #291 opened for state-only reconciliation, and branch `codex/reconcile-retained-live-audit-dry-run-merge-state` started from the merged baseline before the next no-secret guard-test target. |
 | 2026-06-14 02:11 | Merge PR #290 | Retained live audit dry-run bundle merged as `441b390f2fe0f9fd3ca1fb64beb613132768ae21`; final head `e5cbe22483538d1231988510ab3a6bb0f453fe3c` passed CI run `27485413902`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700407445`, and issue #289 closed completed. |
 | 2026-06-14 02:01 | Open PR #290 | Retained live audit dry-run bundle PR opened on head `3eb529d3d7d14371bf6f02cf1264feb0b4a354aa`; it links issue #289, adds the deterministic no-secret dry-run JSON/Markdown report pair, regenerates the archive index, refreshes release manifest/checksum evidence, and preserves blocked readiness claims. |
