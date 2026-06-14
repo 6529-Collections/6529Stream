@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fork-deployment-rehearsal-evidence-path` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/324` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/325` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/326` |
+| Active PR branch | `codex/reconcile-fork-evidence-checker-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/326` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/327` |
+| Active PR | `TBD` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 10:46 UTC` |
+| Last updated | `2026-06-14 10:58 UTC` |
 
 ## Packaging Notes
 
@@ -213,21 +213,59 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 154 | Reconcile provider formatting deferral merge state | Gate G support | Record PR #318 merge evidence, close out issue #317/Queue Item 153 in roadmap state, and select the next no-secret vendored-formatting policy target | Merged in PR #321 |
 | 155 | Convert vendored Solidity formatting deferrals into explicit provenance exemptions | Gate A/G support | Rename the remaining OpenZeppelin-style formatter deferrals into documented vendored/provenance exemptions, preserve strict formatting for all non-exempt Solidity files, and refresh checker tests/docs without changing Solidity bytecode | Merged in PR #322 |
 | 156 | Reconcile vendored formatting exemption merge state | Gate G support | Record PR #322 merge evidence, close out issue #320/Queue Item 155 in roadmap state, and select the next no-secret release-evidence tracker target | Merged in PR #324 |
-| 157 | Add fork deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a canonical no-secret retained fork deployment rehearsal Markdown template, offline checker/tests, local/CI gate wiring, docs, roadmap state, and release artifact coverage without completing issue #216 or changing readiness claims | Active for issue #325 |
-| 158 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
+| 157 | Add fork deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a canonical no-secret retained fork deployment rehearsal Markdown template, offline checker/tests, local/CI gate wiring, docs, roadmap state, and release artifact coverage without completing issue #216 or changing readiness claims | Merged in PR #326 |
+| 158 | Reconcile fork deployment rehearsal evidence checker merge state | Gate G support | Record PR #326 merge evidence, close out issue #325/Queue Item 157 in roadmap state, keep issue #216 blocked for actual reviewed retained fork evidence, and select the next no-secret tracker wording/update target | Active for issue #327 |
+| 159 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
 
 ## Current PR Worklog
 
-### PR candidate: Add fork deployment rehearsal retained artifact checker (Queue Item 157)
+### PR candidate: Reconcile fork deployment rehearsal evidence checker merge state (Queue Item 158)
 
-Status: PR open; CI rerun pending after issue-backlog/body-sync drift fix.
+Status: branch in progress.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/327`.
+PR: `TBD`.
+Branch: `codex/reconcile-fork-evidence-checker-merge-state`.
+Branch started from PR #326 squash merge commit
+`9ff5106834994de16a9f3bd55396743de8b98c77`.
+
+Goal:
+
+- Record PR #326 as merged and issue #325 as completed.
+- Refresh roadmap verification metadata and fork deployment test-matrix rows
+  with final PR #326 CI, CodeRabbit, merge-decision, and squash-merge
+  evidence.
+- Preserve issue #216 as blocked until actual reviewed retained fork evidence
+  exists.
+- Record that the generated tracker issue wording still points issue #216 at
+  the generic retained-artifact placeholder and should be handled as a separate
+  no-secret follow-up before real retained fork evidence is produced.
+- Keep public-beta and production-release readiness claims blocked.
+
+Validation plan:
+
+- `rg -n "PR #326|#325|#216|Queue Item 157|fork deployment rehearsal retained artifact|27496425459|4701508377|4701523477|9ff5106834994de16a9f3bd55396743de8b98c77" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md`.
+- `rg -n "Retained artifact placeholder|fork-deployment-rehearsal-retained-artifact-template|issue #216" ops/AUTONOMOUS_RUN.md ops/ROADMAP.md release-artifacts/latest/release-evidence-issue-body-sync.md release-artifacts/latest/release-evidence-issue-backlog.md`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `git diff --check`.
+
+### Completed: Add fork deployment rehearsal retained artifact checker (Queue Item 157)
+
+Status: merged in PR #326.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/325`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/326`.
 Branch: `codex/fork-deployment-rehearsal-evidence-path`.
 Branch started from PR #324 squash merge commit
 `6a5c268a1ed3a60b7d557b6398e78a984ac569ab`.
 Initial PR head: `29c5de67b211e11a9c616821f47f610c0728149b`.
-CodeRabbit review requested via comment `4701475798`.
+Final PR head: `e580be8f4116d81ab2e55a671d748aeda714262b`.
+Squash merge commit: `9ff5106834994de16a9f3bd55396743de8b98c77`.
+CI: run `27496425459` passed.
+CodeRabbit: explicit review request comments `4701475798`, `4701478039`,
+`4701491393`, and `4701508153`; review-finished replies `4701476016`,
+`4701478207`, `4701491623`, and `4701508377`; status success. The automatic
+rate-limit notice produced no actionable findings.
+Merge decision comment: `4701523477`.
 CI run `27496127991` failed at the `Public beta evidence` step because
 `release-artifacts/latest/release-evidence-packet-index.json` was stale after
 the non-local evidence docs changed. The fix regenerates the packet index,
@@ -236,6 +274,18 @@ CI run `27496263678` then failed at the same grouped step because the generated
 release evidence issue backlog had not been refreshed from the packet index.
 The follow-up fix regenerates the issue backlog, issue body-sync artifact,
 release manifest, and checksum bundle.
+
+Outcome:
+
+- Added a canonical no-secret retained fork deployment rehearsal template,
+  offline checker, focused checker tests, local/CI gate wiring, docs,
+  changelog, release manifest coverage, and checksum coverage.
+- Kept the committed artifact template-only and blocked; issue #216 remains
+  open until a real reviewed retained fork deployment rehearsal artifact
+  replaces placeholder values, passes the checker, generates non-local evidence
+  metadata, and is linked from public-beta evidence.
+- Merged after final CI passed, CodeRabbit reported success, and no unresolved
+  review threads remained.
 
 Goal:
 
@@ -12285,6 +12335,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 10:58 | Start Queue Item 158 | PR #326 merged as `9ff5106834994de16a9f3bd55396743de8b98c77`, issue #325 closed completed, issue #327 opened for merge-state reconciliation, and branch `codex/reconcile-fork-evidence-checker-merge-state` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
+| 2026-06-14 10:55 | Merge PR #326 | Fork deployment rehearsal retained-artifact checker PR #326 passed CI run `27496425459` on final head `e580be8f4116d81ab2e55a671d748aeda714262b`, CodeRabbit status was success after review-finished reply `4701508377`, there were no unresolved review threads, merge-decision comment `4701523477` recorded the rate-limit warning as non-actionable, squash merge commit `9ff5106834994de16a9f3bd55396743de8b98c77` landed on `main`, and issue #325 closed completed. |
 | 2026-06-14 10:46 | Fix PR #326 issue-backlog drift | CI run `27496263678` passed through the refreshed packet-index check, then failed at `test_release_evidence_issue_backlog.py` because the committed issue backlog still reflected the old packet index; regenerate the issue backlog and issue body-sync artifacts plus downstream release manifest/checksum files, then rerun the grouped public-beta evidence chain locally. |
 | 2026-06-14 10:40 | Fix PR #326 packet-index drift | CI run `27496127991` failed only at the `Public beta evidence` step after `test_release_evidence_packet_index.py` detected stale committed packet-index hashes for `docs/non-local-release-evidence.md`; regenerate the release evidence packet index, release manifest, and checksum bundle, then rerun the failed public-beta evidence block locally before pushing. |
 | 2026-06-14 10:33 | Open PR #326 | Fork deployment rehearsal retained-artifact checker PR #326 opened for issue #325 on head `29c5de67b211e11a9c616821f47f610c0728149b`, references issue #216 without closing it, records focused/full local validation, preserves blocked readiness claims, and requests CodeRabbit review via comment `4701475798`. |
