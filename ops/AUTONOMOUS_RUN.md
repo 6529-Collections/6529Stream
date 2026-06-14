@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-provider-formatting-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/318` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/319` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/321` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/320` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 09:03 UTC` |
+| Last updated | `2026-06-14 09:10 UTC` |
 
 ## Packaging Notes
 
@@ -217,14 +217,16 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile provider formatting deferral merge state (Queue Item 154)
 
-Status: local branch started; implementation in progress.
+Status: PR open; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/319`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/321`.
 Branch: `codex/reconcile-provider-formatting-merge-state`.
 Branch started from PR #318 squash merge commit
 `e66496804adb5064361f763ae781ec153d662e21`.
 Next substantive issue:
 `https://github.com/6529-Collections/6529Stream/issues/320`.
+Head: `7520458aea5439eec4b36b8aebaf1a5b77818fec`.
+CodeRabbit review requested via comment `4701285848`.
 
 Goal:
 
@@ -12136,6 +12138,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 09:10 | Open PR #321 | Reconciliation PR opened for issue #319 on head `7520458aea5439eec4b36b8aebaf1a5b77818fec`, records PR #318 merge evidence and issue #320 as the next vendored/provenance formatting-policy target, and requests CodeRabbit review via comment `4701285848`. |
 | 2026-06-14 09:03 | Start Queue Item 154 and queue issue #320 | PR #318 merged as `e66496804adb5064361f763ae781ec153d662e21`, issue #317 closed completed, issue #319 opened for merge-state reconciliation, issue #320 opened to convert the remaining vendored formatter deferrals into explicit provenance exemptions, and branch `codex/reconcile-provider-formatting-merge-state` started from the merged baseline. |
 | 2026-06-14 09:01 | Merge PR #318 | Provider/integration formatting deferral retirement merged after final head `ee186694672e1e5330405dc8bd593c05b4e1776e` passed CI run `27493830680`, CodeRabbit status was success with no unresolved review threads after final review-finished reply `4701248027`, merge-decision comment `4701263404`, and squash commit `e66496804adb5064361f763ae781ec153d662e21`; issue #317 closed completed. |
 | 2026-06-14 08:52 | Mark PR #318 merge-ready | Artifact-refresh head `1c921e307cdd38267ae0361da8c61f1aba595556` passed GitHub CI run `27493643910`, CodeRabbit status is success with review-finished reply `4701230530`, and there are no unresolved review threads. |
