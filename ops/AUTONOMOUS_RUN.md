@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD after issue #305 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 05:04 UTC` |
+| Last updated | `2026-06-14 05:19 UTC` |
 
 ## Packaging Notes
 
@@ -209,7 +209,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Complete curator Merkle leaf domain separation (Queue Item 147)
 
-Status: PR opened; waiting for CI and CodeRabbit.
+Status: PR opened; fixing CI artifact drift and waiting for replacement CI.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/305`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/306`.
 Branch: `codex/curator-merkle-leaf-domain-separation`.
@@ -255,6 +255,15 @@ Validation status:
   rehearsal scripts. Existing warning noise included Natspec/lint warnings,
   Foundry trace source parsing warnings, missing local Etherscan config, and the
   existing multi-deployer rehearsal warning.
+- CI run `27488998572` failed at the release artifact catalog step because the
+  checked artifacts were generated from the pre-size-build `forge build`
+  outputs, while CI checks them after
+  `forge build --sizes --via-ir --skip test --skip script --force`.
+- Regenerated `abi-checksums.json`, `source-verification-inputs.json`,
+  deployment examples/address books, release manifest, and checksum bundle after
+  the via-IR size build. The targeted artifact check modes and full
+  `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally
+  after the fix.
 - `git diff --check` passed.
 
 ### Completed: Reconcile live audit freshness guard merge state (Queue Item 146)
@@ -11745,6 +11754,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 05:19 | Fix PR #306 CI artifact drift | CI run `27488998572` failed because `generate_release_artifacts.py --check` runs after the production via-IR size build and found stale `abi-checksums.json`/`release-artifact-manifest.json`; regenerated the release/deployment artifacts after the via-IR build order and reran the targeted artifact checks plus full Windows `scripts\check.ps1` successfully. |
 | 2026-06-14 05:04 | Open PR #306 | Curator Merkle leaf domain separation PR opened on head `4ec19dc71bf9c17be4aa8af94406ffb1f90b6365`, closes issue #305, includes focused/full local validation evidence, and CodeRabbit review was requested with comment `4700755557`. |
 | 2026-06-14 05:02 | Validate Queue Item 147 local implementation | Curator reward roots now advance per-collection epochs, emit `MerkleRootUpdated`, and use domain-separated ABI-encoded leaves bound to leaf domain, chain ID, pool address, collection ID, claimant, amount, and root epoch; focused curator tests, generated release artifacts, full Windows `scripts\check.ps1`, and whitespace checks pass before PR opening. |
 | 2026-06-14 04:40 | Start Queue Item 147 | PR #304 merged as `c4019de17be8d5634d4603e3c6f008d2b4c387fb`, issue #303 closed completed, issue #305 opened for curator Merkle leaf domain separation, and branch `codex/curator-merkle-leaf-domain-separation` started from the merged baseline. |
