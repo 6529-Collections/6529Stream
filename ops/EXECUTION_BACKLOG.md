@@ -399,7 +399,7 @@ Acceptance criteria:
   references, sanitized broadcast, manifest, address book, and validation
   commands.
 - The public-beta evidence row for `testnet_deployment_rehearsal` can move from
-  missing to reviewed only if all checker requirements pass.
+  missing to complete only if all checker requirements pass.
 
 Evidence artifacts:
 

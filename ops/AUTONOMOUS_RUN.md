@@ -241,7 +241,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add testnet deployment rehearsal retained artifact checker (Queue Item 174)
 
-Status: PR #359 opened; awaiting CI and CodeRabbit.
+Status: PR #359 opened; initial CI passed; CodeRabbit feedback addressed
+locally and ready for rerun.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/357`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/359`.
@@ -303,6 +304,12 @@ Validation completed locally:
   evidence now requires successful `yes` result fields, rejects CLI-style
   private key/RPC/token material, scans referenced retained files, and ignores
   Python bytecode caches through `.gitignore`.
+- CodeRabbit review at `2026-06-14 22:23 UTC` raised two valid doc/backlog
+  fixes: add explicit operator redaction requirements to the testnet deployment
+  rehearsal tooling guidance and change the `testnet_deployment_rehearsal`
+  evidence-row transition wording from `missing -> reviewed` to
+  `missing -> complete`. Both are fixed locally with regenerated release
+  manifest/checksum artifacts.
 
 ### Completed: Reconcile PR #354 merge state (Queue Item 173)
 

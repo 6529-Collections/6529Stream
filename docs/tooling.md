@@ -455,7 +455,10 @@ Run `python scripts/test_testnet_deployment_rehearsal_evidence.py` and
 generating the metadata envelope. The committed file is template-only and keeps
 `testnet_deployment_rehearsal` missing until a reviewed testnet transcript,
 transaction references, sanitized broadcast, generated manifest/address book,
-explorer status, and reviewer confirmation are retained.
+explorer status, and reviewer confirmation are retained. Operators must redact
+or omit private keys, tokens, private RPC URLs, bearer credentials, and other
+sensitive values before retaining any transcript, command line, broadcast, or
+linked artifact because the checker enforces the same no-secret policy.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
