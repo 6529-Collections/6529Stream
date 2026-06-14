@@ -16,7 +16,7 @@ The committed baseline remains blocked for public beta and production release.
 | Template JSON | `release-artifacts/evidence/release-evidence-live-audit-report-template.json` |
 | Template Markdown | `release-artifacts/evidence/release-evidence-live-audit-report-template.md` |
 | Optional archive dir | `release-artifacts/evidence/live-audit-reports` |
-| Report count | 1 |
+| Report count | 2 |
 | No secrets | `true` |
 | Network access in CI | `false` |
 | Readiness claim | `blocked` |
@@ -25,13 +25,16 @@ The committed baseline remains blocked for public beta and production release.
 
 | Archive ID | Type | Generated At | Profiles | Validation | JSON | Markdown | Validation Commands |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| `20260614T015000Z-release-evidence-live-audit-dry-run` | `retained_operator_report` | `20260614T015000Z-release-evidence-live-audit-dry-run` | `labels`, `bodies`, `closure` | `passed` | `release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json` | `release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md` | `python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json`; `python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json --report-md release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md`; `python scripts/generate_release_evidence_live_audit_archive.py --check` |
 | `template` | `template` | `TEMPLATE` | `labels`, `bodies`, `closure` | `passed` | `release-artifacts/evidence/release-evidence-live-audit-report-template.json` | `release-artifacts/evidence/release-evidence-live-audit-report-template.md` | `python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json`; `python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json --report-md release-artifacts/evidence/release-evidence-live-audit-report-template.md`; `python scripts/generate_release_evidence_live_audit_archive.py --check` |
 
 ## Validation Commands
 
 | Command |
 | --- |
+| `python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json --report-md release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.md` |
 | `python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json --report-md release-artifacts/evidence/release-evidence-live-audit-report-template.md` |
+| `python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json` |
 | `python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json` |
 | `python scripts/generate_release_evidence_live_audit_archive.py --check` |
 | `python scripts/test_release_evidence_live_audit_archive.py` |
