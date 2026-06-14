@@ -6,7 +6,7 @@ contributors who start from the README.
 - The scoped Solidity formatting gate now passes for formatting-required
   first-party files and blocks any new unformatted file outside the documented
   deferred set. The raw `forge fmt --check smart-contracts` diagnostic still
-  fails on 27 legacy/provenance-sensitive files; those should be retired through
+  fails on 24 legacy/provenance-sensitive files; those should be retired through
   focused formatting/provenance PRs, not mixed into behavior changes.
 - Drop execution uses EIP-712 authorization for EOA and ERC-1271 contract
   signers, and no-secret local signing examples plus deterministic fixtures now

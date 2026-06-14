@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-formatting-gate-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/312` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/313` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/315` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/314` |
+| Active PR branch | `codex/retire-first-party-formatting-deferrals` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/315` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/314` |
+| Active PR | TBD |
+| Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 06:55 UTC` |
+| Last updated | `2026-06-14 07:23 UTC` |
 
 ## Packaging Notes
 
@@ -207,21 +207,74 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 148 | Reconcile curator Merkle leaf domain separation merge state | Gate G support | Record PR #306 merge evidence, refresh roadmap verification metadata, mark the Merkle traceability row passing, and select the next no-secret roadmap target without changing readiness claims | Merged in PR #308 |
 | 149 | Reconcile curator Merkle state reconciliation merge | Gate G support | Record PR #308 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the formatting-triage target | Merged in PR #310 |
 | 150 | Triage Solidity formatting gate path | Gate A/G support | Triage `forge fmt --check smart-contracts`, decide first-party versus vendored/generated scope, document the accepted formatting gate path, and prepare issue-ready follow-up work without changing contract behavior | Merged in PR #312 |
-| 151 | Reconcile Solidity formatting gate merge state | Gate G support | Record PR #312 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the first deferred-formatting retirement target | Active for issue #313 |
-| 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Queued for issue #314 |
+| 151 | Reconcile Solidity formatting gate merge state | Gate G support | Record PR #312 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the first deferred-formatting retirement target | Merged in PR #315 |
+| 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Active for issue #314 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile Solidity formatting gate merge state (Queue Item 151)
+### PR candidate: Retire first-party interface Solidity formatting deferrals (Queue Item 152)
 
-Status: PR opened; waiting for CI and CodeRabbit.
+Status: local validation passed; preparing PR.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/314`.
+PR: TBD.
+Branch: `codex/retire-first-party-formatting-deferrals`.
+Branch started from PR #315 squash merge commit
+`e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`.
+Opening head: TBD.
+CodeRabbit: pending PR creation.
+
+Goal:
+
+- Reformat only `smart-contracts/INextGenCore2.sol`,
+  `smart-contracts/IStreamDrops.sol`, and
+  `smart-contracts/IStreamMinter.sol` with `forge fmt`.
+- Remove those first-party interfaces from `DEFERRED_FORMATTING_FILES`.
+- Update the scoped formatting checker tests so they still cover a genuinely
+  deferred legacy/provider file.
+- Refresh status, tooling, known-blocker, vendored-library, roadmap,
+  changelog, run-state, source-verification, release-manifest, and checksum
+  evidence to the new 27-required / 24-deferred baseline.
+- Preserve the blocked/non-production readiness posture and leave remaining
+  vendored/provider formatting deferrals for later focused PRs.
+
+Validation:
+
+- `forge fmt --check smart-contracts\INextGenCore2.sol smart-contracts\IStreamDrops.sol smart-contracts\IStreamMinter.sol`.
+- `python scripts\test_solidity_formatting.py`.
+- `python scripts\check_solidity_formatting.py`.
+- `make fmt-check`.
+- `forge build`.
+- `python scripts\test_source_verification_inputs.py`.
+- `python scripts\generate_source_verification_inputs.py --check`.
+- `python scripts\test_release_manifest.py`.
+- `python scripts\generate_release_manifest.py --check`.
+- `python scripts\test_release_checksums.py`.
+- `python scripts\generate_release_checksums.py --check`.
+- `python scripts\test_changelog_check.py`.
+- `python scripts\check_changelog.py`.
+- `python -m py_compile scripts\check_solidity_formatting.py scripts\test_solidity_formatting.py`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `rg -n "27 formatting-required|24 documented deferred|24 explicitly deferred|Queue Item 152|#314" docs/status.md docs/known-blockers.md docs/tooling.md ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+### Completed: Reconcile Solidity formatting gate merge state (Queue Item 151)
+
+Status: merged in PR #315.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/313`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/315`.
 Branch: `codex/reconcile-formatting-gate-merge-state`.
 Branch started from PR #312 squash merge commit
 `7f08087f25014151373ef67cbd6fc6e243ed36bd`.
 Opening head: `7b4212d8afbf1c1d2c7a66544c1390510e4d5138`.
-CodeRabbit: explicit review request comment `4700977903`.
+Final PR head: `f038205ea0d1cfb591e8d78b5c9c93316e4466fd`.
+Squash merge commit: `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`.
+CI: run `27491250707` passed on the final head.
+
+CodeRabbit: explicit review request comment `4700977903`, automatic
+rate-limit/status comment `4700977767`, review-finished reply `4700978066`,
+merge-decision comment `4700999733`, final status success, and no unresolved
+review threads. Claude was not requested per user instruction; only the passive
+manual-review availability comment was present.
 
 Goal:
 
@@ -11928,6 +11981,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 07:23 | Validate Queue Item 152 locally | `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are formatted and removed from the deferred formatting baseline; focused formatting checks, release artifact/source-verification/manifest/checksum drift checks, changelog, ABI compatibility, production via-IR size gate, and full Windows `scripts\check.ps1` validation pass before PR opening. |
+| 2026-06-14 07:08 | Start Queue Item 152 | PR #315 merged as `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`, issue #313 closed completed, issue #314 is the next focused formatting-baseline cleanup, and branch `codex/retire-first-party-formatting-deferrals` started from the merged baseline. |
+| 2026-06-14 07:05 | Merge PR #315 | PR #315 merged as `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`; final head `f038205ea0d1cfb591e8d78b5c9c93316e4466fd` passed CI run `27491250707`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700977903`, review-finished reply `4700978066`, and merge-decision comment `4700999733`, and issue #313 closed completed. |
 | 2026-06-14 06:55 | Open PR #315 | PR #315 opened on head `7b4212d8afbf1c1d2c7a66544c1390510e4d5138`, closes issue #313, records PR #312 as the latest merged baseline, queues issue #314 as the next formatting-baseline cleanup, and requested CodeRabbit review via comment `4700977903`. |
 | 2026-06-14 06:52 | Start Queue Item 151 | PR #312 merged as `7f08087f25014151373ef67cbd6fc6e243ed36bd`, issue #311 closed completed, issue #313 opened for merge-state reconciliation, issue #314 opened for first-party interface formatting deferral retirement, and branch `codex/reconcile-formatting-gate-merge-state` started from the merged baseline. |
 | 2026-06-14 06:50 | Merge PR #312 | PR #312 merged as `7f08087f25014151373ef67cbd6fc6e243ed36bd`; final head `42e31f8a7a8535ef7404ea31169bbef794be4756` passed CI run `27490962706`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700938271`, review-finished reply `4700938454`, and merge-decision comment `4700968034`, and issue #311 closed completed. |

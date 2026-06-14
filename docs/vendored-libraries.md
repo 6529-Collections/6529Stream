@@ -54,7 +54,9 @@ counts change.
 The scoped Solidity formatting gate intentionally defers provenance-sensitive
 vendored files that already differ from upstream formatting. The deferred list
 lives in `scripts/check_solidity_formatting.py`; new files must not be added to
-that list without a focused provenance note. When retiring a deferred vendored
-file, update this manifest, rerun `make fmt-check`, rerun the focused vendored
-library regressions above, and refresh source-verification or release metadata
-if source hashes change.
+that list without a focused provenance note. First-party interfaces are not
+vendored and should not be tracked in this manifest when their formatting
+deferral is retired. When retiring a deferred vendored file, update this
+manifest, rerun `make fmt-check`, rerun the focused vendored library
+regressions above, and refresh source-verification or release metadata if
+source hashes change.

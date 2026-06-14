@@ -446,17 +446,19 @@ make fmt-check
 
 - formatting-required first-party Solidity files must pass `forge fmt --check`;
 - the raw all-files diagnostic `forge fmt --check smart-contracts` may fail
-  only for the 27 explicitly deferred files listed in the checker;
+  only for the 24 explicitly deferred files listed in the checker;
 - any new unformatted Solidity file outside that deferred set fails the gate;
 - if a deferred file is formatted, the checker fails until the deferred-file
   list and docs are updated.
 
 The current deferred set is intentionally limited to provenance-sensitive
 OpenZeppelin-style utilities, Chainlink/arRNG provider interfaces or consumers,
-and legacy integration interfaces. Do not mechanically reformat those files in
-feature PRs. Retire deferred files in focused formatting PRs that also update
-provenance notes, release source-verification expectations when applicable, and
-the checker baseline.
+and legacy integration interfaces. The first-party interfaces
+`INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are formatted
+and enforced by the scoped gate. Do not mechanically reformat the remaining
+deferred files in feature PRs. Retire deferred files in focused formatting PRs
+that also update provenance notes, release source-verification expectations
+when applicable, and the checker baseline.
 
 Windows contributors can run:
 

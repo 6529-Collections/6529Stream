@@ -15,9 +15,9 @@ The current Gate A smoke baseline proves:
   explicitly accept a size-budget exception.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
-  formatting baseline: 24 formatting-required first-party files pass `forge
+  formatting baseline: 27 formatting-required first-party files pass `forge
   fmt --check`, and the raw all-files diagnostic is allowed to fail only for
-  the 27 documented deferred legacy/provenance-sensitive files.
+  the 24 documented deferred legacy/provenance-sensitive files.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271
