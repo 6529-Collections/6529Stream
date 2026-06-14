@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/retained-live-audit-after-fork-sync` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/334` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/335` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/336` |
+| Active PR branch | `codex/reconcile-retained-live-audit-report-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/336` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/337` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/338` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 12:41 UTC` |
+| Last updated | `2026-06-14 12:56 UTC` |
 
 ## Packaging Notes
 
@@ -218,21 +218,68 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 159 | Use canonical fork rehearsal retained artifact path in evidence tracker | Gate G support | Update the release evidence packet index, issue backlog, and issue body-sync artifacts so issue #216 points at the fork-specific retained-artifact template/checker commands instead of the generic public-beta placeholder, without changing readiness claims | Merged in PR #330 |
 | 160 | Reconcile fork tracker retained artifact merge state | Gate G support | Record PR #330 merge evidence, close out issue #329/Queue Item 159 in roadmap state, keep issue #216 blocked for actual reviewed retained fork evidence, and select the next no-secret release-evidence target | Merged in PR #332 |
 | 161 | Apply fork rehearsal body sync to live issue #216 | Gate G support | Apply the committed body-sync payload for issue #216 to the live GitHub issue, verify live issue bodies against the committed artifact, and record the external sync without changing readiness claims | Merged in PR #334 |
-| 162 | Retain live audit report after fork issue body sync | Gate G support | Commit the no-secret live audit report generated after issue #216 body sync, refresh the live-audit archive index, release manifest, and checksum evidence, and preserve blocked readiness claims | Active for issue #335 |
-| 163 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
+| 162 | Retain live audit report after fork issue body sync | Gate G support | Commit the no-secret live audit report generated after issue #216 body sync, refresh the live-audit archive index, release manifest, and checksum evidence, and preserve blocked readiness claims | Merged in PR #336 |
+| 163 | Reconcile retained live audit report merge state | Gate G support | Record PR #336 merge evidence, close out issue #335/Queue Item 162 in durable state, refresh roadmap verification metadata, and preserve issue #216 as blocked for actual reviewed retained fork evidence | Active for issue #337 |
+| 164 | Retain reviewed fork deployment rehearsal evidence | Gate E/Gate G support | Replace the template-only retained artifact with reviewed fork deployment rehearsal evidence, generate non-local evidence metadata, link it from public-beta evidence, and satisfy issue #216 once real fork evidence exists | Blocked pending reviewed retained fork evidence |
 
 ## Current PR Worklog
 
-### PR candidate: Retain live audit report after fork issue body sync (Queue Item 162)
+### PR candidate: Reconcile retained live audit report merge state (Queue Item 163)
 
 Status: PR open; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/337`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/338`.
+Branch: `codex/reconcile-retained-live-audit-report-merge-state`.
+Branch started from PR #336 squash merge commit
+`8944dc31375cdffac22964b4ff7ac594ebee632d`.
+Initial PR head: `3c89f9410253c24a84aaabe74c099880ca04acc9`.
+CodeRabbit review requested via comment `4701812284`.
+
+Goal:
+
+- Record PR #336 merge evidence, issue #335 completion, CI run, CodeRabbit
+  status, and merge-decision comment in durable state.
+- Mark Queue Item 162 as merged and move the actual reviewed fork deployment
+  rehearsal evidence back to the blocked queue.
+- Refresh roadmap verification metadata so the latest baseline is PR #336.
+- Preserve public-beta and production-release readiness as blocked.
+
+Validation plan:
+
+- `rg -n "Queue Item 162|Queue Item 163|Queue Item 164|PR #336|#335|#337|8944dc3|27499195206|4701798323" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `git diff --check`.
+
+Validation completed locally:
+
+- Roadmap/run-state traceability grep passed.
+- Roadmap/run-state heading scan passed.
+- `python scripts\generate_release_manifest.py --check` passed.
+- `python scripts\generate_release_checksums.py --check` passed.
+- `git diff --check` passed.
+
+### Completed: Retain live audit report after fork issue body sync (Queue Item 162)
+
+Status: merged in PR #336.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/335`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/336`.
 Branch: `codex/retained-live-audit-after-fork-sync`.
 Branch started from PR #334 squash merge commit
 `262fa484a15864efa2df4589fec1a338f3f1960b`.
 Initial PR head: `993d799783528f3426bf8b7dc2295526646de7e0`.
+Final PR head: `baec6bbdaa155c88657edea2f1c3605b932470da`.
+Squash merge commit: `8944dc31375cdffac22964b4ff7ac594ebee632d`.
+CI: run `27499195206` passed.
 CodeRabbit review requested via comment `4701775948`.
+CodeRabbit: initial automatic rate-limit warning comment `4701775805`
+produced no actionable findings; explicit review request comment `4701775948`
+received review-finished reply `4701776166`; combined status was success; no
+review threads were open.
+Claude: automatic informational comment only; no Claude review was requested per
+current user instruction.
+Merge decision comment: `4701798323`.
 
 Goal:
 
@@ -276,6 +323,19 @@ Validation completed locally:
 - Full `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed on
   Windows after the retained-snapshot correction, with existing Foundry warning
   noise only.
+
+Outcome:
+
+- Retained the no-secret post-sync live audit report pair and the label, body,
+  and closure snapshot bundle under
+  `release-artifacts/evidence/live-audit-reports/`.
+- Refreshed the live-audit archive index, release manifest, and checksum
+  bundle.
+- Updated the archive README so retained reports use retained `--tmp-dir`
+  snapshot paths instead of disposable `tmp/` paths.
+- Closed issue #335 as completed through PR #336.
+- Kept issue #216 open and blocked pending actual reviewed retained fork
+  deployment rehearsal evidence.
 
 Validation plan:
 
@@ -12539,6 +12599,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 12:56 | Open PR #338 | State-only PR #338 opened for issue #337 on head `3c89f9410253c24a84aaabe74c099880ca04acc9`, records PR #336 merge evidence and issue #335 completion, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701812284`. |
+| 2026-06-14 12:52 | Start Queue Item 163 | PR #336 merged as `8944dc31375cdffac22964b4ff7ac594ebee632d`, issue #335 closed completed, issue #337 opened for merge-state reconciliation, and branch `codex/reconcile-retained-live-audit-report-merge-state` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
+| 2026-06-14 12:50 | Merge PR #336 | Retained live-audit report PR #336 passed CI run `27499195206` on final head `baec6bbdaa155c88657edea2f1c3605b932470da`; CodeRabbit status was success after explicit review-finished reply `4701776166`; no review threads were open; merge-decision comment `4701798323` recorded the initial rate-limit warning as non-actionable; squash merge commit `8944dc31375cdffac22964b4ff7ac594ebee632d` landed on `main`; and issue #335 closed completed. |
 | 2026-06-14 12:41 | Open PR #336 | PR #336 opened for issue #335 on head `993d799783528f3426bf8b7dc2295526646de7e0`, retains the post-#216-sync no-secret live audit report plus snapshot bundle, refreshes archive/manifest/checksum evidence, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701775948`. |
 | 2026-06-14 12:10 | Start Queue Item 162 | PR #334 merged as `262fa484a15864efa2df4589fec1a338f3f1960b`, issue #333 closed completed, issue #335 opened for retaining the no-secret live audit report generated after issue #216 body sync, branch `codex/retained-live-audit-after-fork-sync` started from the merged baseline, and the retained report pair, snapshot bundle, and refreshed live-audit archive/manifest/checksum evidence were generated locally; issue #216 remains open and blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 12:06 | Merge PR #334 | State-only PR #334 passed CI run `27498186187` on final head `d7e12cd58c4b04e5bab11849ca96333c73b3d6cb`, CodeRabbit status was success after review-finished reply `4701675585`, there were no unresolved review threads, merge-decision comment `4701693482` recorded the rate-limit warning as non-actionable, squash merge commit `262fa484a15864efa2df4589fec1a338f3f1960b` landed on `main`, and issue #333 closed completed. |
