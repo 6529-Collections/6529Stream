@@ -13,6 +13,9 @@ the release policy in `docs/release-policy.md`.
 - Added fork-specific release evidence tracker routing so issue #216 points to
   the canonical fork deployment rehearsal retained-artifact template and
   checker commands instead of the generic public-beta placeholder.
+- Added a retained live audit report and snapshot bundle after the fork issue
+  #216 body sync, with refreshed live-audit archive, release manifest, and
+  checksum evidence while preserving blocked public-beta readiness.
 - Added a scoped Solidity formatting gate that requires formatted first-party
   files while tracking the current vendored/provenance formatting exemption
   policy.

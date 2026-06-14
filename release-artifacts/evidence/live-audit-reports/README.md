@@ -27,8 +27,13 @@ bodies, or closure snapshots are never presented as current.
 Generate a retained report pair:
 
 ```sh
-python scripts/audit_release_evidence_issue_snapshots.py --generated-at YYYYMMDDTHHMMSSZ --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
+python scripts/audit_release_evidence_issue_snapshots.py --generated-at YYYYMMDDTHHMMSSZ --tmp-dir release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report-snapshots --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
 ```
+
+Use a retained `--tmp-dir` under this directory when keeping the report in git.
+The report checker validates referenced snapshot paths and digests, so a
+report that points at disposable `tmp/` files is not a valid retained archive
+bundle after cleanup.
 
 Validate the JSON schema/checker and Markdown parity:
 
