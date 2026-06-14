@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/solidity-formatting-gate-triage` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/310` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/311` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/312` |
-| Next issue | TBD after issue #311 merges |
+| Active PR branch | `codex/reconcile-formatting-gate-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/312` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/313` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/315` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/314` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 06:41 UTC` |
+| Last updated | `2026-06-14 06:55 UTC` |
 
 ## Packaging Notes
 
@@ -206,20 +206,59 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 147 | Complete curator Merkle leaf domain separation | Gate D | Expand curator reward Merkle leaf domain separation to include collection, claimant, amount, root epoch/domain metadata, with duplicate/ambiguous leaf and double-claim tests plus docs/traceability updates | Merged in PR #306 |
 | 148 | Reconcile curator Merkle leaf domain separation merge state | Gate G support | Record PR #306 merge evidence, refresh roadmap verification metadata, mark the Merkle traceability row passing, and select the next no-secret roadmap target without changing readiness claims | Merged in PR #308 |
 | 149 | Reconcile curator Merkle state reconciliation merge | Gate G support | Record PR #308 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the formatting-triage target | Merged in PR #310 |
-| 150 | Triage Solidity formatting gate path | Gate A/G support | Triage `forge fmt --check smart-contracts`, decide first-party versus vendored/generated scope, document the accepted formatting gate path, and prepare issue-ready follow-up work without changing contract behavior | Active for issue #311 |
+| 150 | Triage Solidity formatting gate path | Gate A/G support | Triage `forge fmt --check smart-contracts`, decide first-party versus vendored/generated scope, document the accepted formatting gate path, and prepare issue-ready follow-up work without changing contract behavior | Merged in PR #312 |
+| 151 | Reconcile Solidity formatting gate merge state | Gate G support | Record PR #312 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the first deferred-formatting retirement target | Active for issue #313 |
+| 152 | Retire first-party interface Solidity formatting deferrals | Gate A/G support | Reformat only the first-party interface slice of the deferred baseline, shrink `DEFERRED_FORMATTING_FILES`, refresh docs/artifacts, and leave vendored/provider files for later focused PRs | Queued for issue #314 |
 
 ## Current PR Worklog
 
-### PR candidate: Triage Solidity formatting gate path (Queue Item 150)
+### PR candidate: Reconcile Solidity formatting gate merge state (Queue Item 151)
 
-Status: fixing first CI failure; release manifest/checksum drift regenerated locally.
+Status: PR opened; waiting for CI and CodeRabbit.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/313`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/315`.
+Branch: `codex/reconcile-formatting-gate-merge-state`.
+Branch started from PR #312 squash merge commit
+`7f08087f25014151373ef67cbd6fc6e243ed36bd`.
+Opening head: `7b4212d8afbf1c1d2c7a66544c1390510e4d5138`.
+CodeRabbit: explicit review request comment `4700977903`.
+
+Goal:
+
+- Mark Queue Item 150 and issue #311 as completed by PR #312.
+- Record the PR #312 final CI, CodeRabbit, and squash-merge evidence.
+- Refresh top-level roadmap verification metadata to the latest merged
+  baseline.
+- Select issue #314, first-party interface formatting deferral retirement, as
+  the next no-secret roadmap target.
+- Keep this PR to roadmap/run-state reconciliation only and avoid new readiness
+  claims.
+
+Validation:
+
+- `rg -n "Queue Item 150|Queue Item 151|Queue Item 152|PR #312|#311|#313|#314|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- Confirm stale active issue #311 / PR #312 wording is absent from the current
+  top-state fields.
+- `git diff --check`.
+
+### Completed: Triage Solidity formatting gate path (Queue Item 150)
+
+Status: merged in PR #312.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/311`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/312`.
 Branch: `codex/solidity-formatting-gate-triage`.
 Branch started from PR #310 squash merge commit
 `e622e61ad076a8c65dad1b7c3bc332e17c36b531`.
 Opening head: `d1ef54f074e60541ddc3b70ad564672540222277`.
-CodeRabbit: explicit review request comment `4700938271`.
+Final PR head: `42e31f8a7a8535ef7404ea31169bbef794be4756`.
+Squash merge commit: `7f08087f25014151373ef67cbd6fc6e243ed36bd`.
+CI: run `27490962706` passed on the final head.
+
+CodeRabbit: explicit review request comment `4700938271`, automatic
+rate-limit/status comment `4700938260`, review-finished reply `4700938454`,
+merge-decision comment `4700968034`, final status success, and no unresolved
+review threads. Claude was not requested per user instruction; only the passive
+manual-review availability comment was present.
 
 Goal:
 
@@ -11889,6 +11928,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 06:55 | Open PR #315 | PR #315 opened on head `7b4212d8afbf1c1d2c7a66544c1390510e4d5138`, closes issue #313, records PR #312 as the latest merged baseline, queues issue #314 as the next formatting-baseline cleanup, and requested CodeRabbit review via comment `4700977903`. |
+| 2026-06-14 06:52 | Start Queue Item 151 | PR #312 merged as `7f08087f25014151373ef67cbd6fc6e243ed36bd`, issue #311 closed completed, issue #313 opened for merge-state reconciliation, issue #314 opened for first-party interface formatting deferral retirement, and branch `codex/reconcile-formatting-gate-merge-state` started from the merged baseline. |
+| 2026-06-14 06:50 | Merge PR #312 | PR #312 merged as `7f08087f25014151373ef67cbd6fc6e243ed36bd`; final head `42e31f8a7a8535ef7404ea31169bbef794be4756` passed CI run `27490962706`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700938271`, review-finished reply `4700938454`, and merge-decision comment `4700968034`, and issue #311 closed completed. |
 | 2026-06-14 06:41 | Fix PR #312 release manifest drift | CI run `27490845104` passed through the new Solidity formatting step but failed at `Release manifest` because changed docs/changelog hashes were not reflected in `release-artifacts/latest/release-manifest.json`; regenerated the release manifest and checksum bundle and validated both locally. |
 | 2026-06-14 06:36 | Open PR #312 | PR #312 opened on head `d1ef54f074e60541ddc3b70ad564672540222277`, closes issue #311, adds the scoped Solidity formatting gate, and requested CodeRabbit review via comment `4700938271`. |
 | 2026-06-14 06:34 | Validate Queue Item 150 locally | The scoped formatting checker, checker tests, `make fmt-check`, changelog tests/checker, Python syntax compilation, Bash syntax check, PowerShell parser check, and whitespace check passed before commit. |
