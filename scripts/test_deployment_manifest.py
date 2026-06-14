@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -13,6 +14,45 @@ from pathlib import Path
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_deployment_manifest.py")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SEPOLIA_TEMPLATE = (
+    REPO_ROOT / "deployments" / "config" / "sepolia-6529stream-v0.1.0-001.template.json"
+)
+SEPOLIA_REQUIRED_ENV_VARS = {
+    "SEPOLIA_RPC_URL",
+    "SEPOLIA_DEPLOYER_ADDRESS",
+    "SEPOLIA_ADMIN_SAFE",
+    "SEPOLIA_PAUSE_GUARDIAN",
+    "SEPOLIA_EMERGENCY_RECIPIENT",
+    "SEPOLIA_DROP_SIGNER",
+    "SEPOLIA_PAYOUT",
+    "SEPOLIA_DELEGATION_REGISTRY",
+    "SEPOLIA_VRF_COORDINATOR",
+    "SEPOLIA_ARRNG_CONTROLLER",
+    "SEPOLIA_VRF_SUBSCRIPTION_ID",
+    "ETHERSCAN_API_KEY",
+}
+SEPOLIA_EXPECTED_CONTRACTS = {
+    "StreamAdmins",
+    "DependencyRegistry",
+    "StreamCore",
+    "StreamCuratorsPool",
+    "StreamMinter",
+    "StreamDrops",
+    "StreamAuctions",
+    "NextGenRandomizerVRF",
+    "NextGenRandomizerRNG",
+}
+TEMPLATE_FORBIDDEN_SECRET_RE = re.compile(
+    r"("
+    r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b|"
+    r"\bAuthorization\s*:\s*Bearer\s+\S+|"
+    r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"https?://[^\s\"`]*(?:alchemy|infura|quicknode|api[_-]?key|apikey|token|secret)[^\s\"`]*|"
+    r"\bSEPOLIA_(?:PRIVATE|MNEMONIC|SEED|TOKEN|API_KEY)"
+    r")",
+    re.IGNORECASE,
+)
 SPEC = importlib.util.spec_from_file_location("generate_deployment_manifest", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 generator = importlib.util.module_from_spec(SPEC)
@@ -169,6 +209,48 @@ class DeploymentManifestTests(unittest.TestCase):
 
             with self.assertRaisesRegex(generator.ManifestError, "omits release contracts"):
                 generator.build_manifest(config_path, release_dir)
+
+    def test_sepolia_template_is_placeholder_scoped_and_no_secret(self) -> None:
+        template_text = SEPOLIA_TEMPLATE.read_text(encoding="utf-8")
+        self.assertIsNone(TEMPLATE_FORBIDDEN_SECRET_RE.search(template_text))
+
+        template = json.loads(template_text)
+        self.assertEqual(template["schema_version"], generator.INPUT_SCHEMA)
+        self.assertIn("Template only", template["template_notice"])
+        self.assertEqual(
+            template["operator_runbook"],
+            "docs/deployment.md#sepolia-deployment-rehearsal-runbook",
+        )
+
+        env_vars = {
+            value["name"]
+            for value in template["operator_inputs"]["required_environment_variables"]
+        }
+        self.assertEqual(env_vars, SEPOLIA_REQUIRED_ENV_VARS)
+        self.assertEqual(
+            template["operator_inputs"]["script_entrypoint"],
+            'script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()"',
+        )
+
+        manifest = template["manifest"]
+        self.assertEqual(manifest["lifecycle_state"], "Template")
+        self.assertEqual(manifest["network"]["name"], "sepolia")
+        self.assertEqual(manifest["network"]["chain_id"], 11155111)
+        self.assertEqual(manifest["network"]["rpc_environment_variable"], "SEPOLIA_RPC_URL")
+        self.assertEqual(manifest["network"]["confirmation_depth"], 12)
+        self.assertEqual(manifest["git"]["commit"], "0" * 40)
+
+        contract_names = {contract["name"] for contract in manifest["contracts"]}
+        self.assertEqual(contract_names, SEPOLIA_EXPECTED_CONTRACTS)
+        for contract in manifest["contracts"]:
+            self.assertEqual(contract["verification_status"], "not_started")
+        self.assertEqual(manifest["verification"]["contract_verification"], "not_started")
+
+        command = manifest["rehearsal"]["command"]
+        self.assertIn('runSepolia()', command)
+        self.assertIn("--rpc-url <redacted>", command)
+        self.assertNotIn("$SEPOLIA_RPC_URL", command)
+        self.assertFalse(manifest["rehearsal"]["testnet_passed"])
 
 
 if __name__ == "__main__":

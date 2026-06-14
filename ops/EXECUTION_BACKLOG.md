@@ -320,7 +320,7 @@ Dependencies: Issue `#217`; active issue `#357`.
 
 ### EXT-002: Add Sepolia Deployment Config And Rehearsal Runbook
 
-Status: Planned.
+Status: In progress on issue #360.
 
 Gate: E.
 

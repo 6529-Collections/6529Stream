@@ -14,6 +14,8 @@ import "../smart-contracts/StreamMinter.sol";
 interface ScriptVm {
     function startBroadcast(address broadcaster) external;
     function stopBroadcast() external;
+    function envAddress(string calldata key) external view returns (address value);
+    function envUint(string calldata key) external view returns (uint256 value);
 }
 
 contract RehearseDeployment {
@@ -23,6 +25,8 @@ contract RehearseDeployment {
     string public constant MANIFEST_SCHEMA_VERSION = "6529stream.deployment-manifest.v1";
     string public constant PROTOCOL_VERSION = "0.1.0";
     string public constant DEPLOYMENT_VERSION = "anvil-6529stream-v0.1.0-001";
+    string public constant SEPOLIA_DEPLOYMENT_VERSION = "sepolia-6529stream-v0.1.0-001";
+    uint256 public constant SEPOLIA_CHAIN_ID = 11_155_111;
     bytes32 public constant LOCAL_DEPENDENCY_KEY =
         keccak256("6529Stream.local.rehearsal.dependency.v1");
 
@@ -77,6 +81,33 @@ contract RehearseDeployment {
 
     function run() external returns (DeploymentResult memory result) {
         result = deployLocal(defaultLocalConfig());
+    }
+
+    function runSepolia() external returns (DeploymentResult memory result) {
+        require(block.chainid == SEPOLIA_CHAIN_ID, "Wrong Sepolia chain");
+        result = deployLocal(sepoliaConfigFromEnv());
+    }
+
+    function sepoliaConfigFromEnv() public view returns (DeploymentConfig memory config) {
+        uint256 subscriptionId = vm.envUint("SEPOLIA_VRF_SUBSCRIPTION_ID");
+        require(subscriptionId <= type(uint64).max, "VRF subscription too large");
+
+        config = DeploymentConfig({
+            protocolVersion: PROTOCOL_VERSION,
+            deploymentVersion: SEPOLIA_DEPLOYMENT_VERSION,
+            deployer: vm.envAddress("SEPOLIA_DEPLOYER_ADDRESS"),
+            adminSafe: vm.envAddress("SEPOLIA_ADMIN_SAFE"),
+            pauseGuardian: vm.envAddress("SEPOLIA_PAUSE_GUARDIAN"),
+            emergencyRecipient: vm.envAddress("SEPOLIA_EMERGENCY_RECIPIENT"),
+            tdhSigner: vm.envAddress("SEPOLIA_DROP_SIGNER"),
+            payout: vm.envAddress("SEPOLIA_PAYOUT"),
+            delegation: vm.envAddress("SEPOLIA_DELEGATION_REGISTRY"),
+            vrfCoordinator: vm.envAddress("SEPOLIA_VRF_COORDINATOR"),
+            arrngController: vm.envAddress("SEPOLIA_ARRNG_CONTROLLER"),
+            // Bound checked above; keep the script config ABI compact.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            vrfSubscriptionId: uint64(subscriptionId)
+        });
     }
 
     function deployLocal(DeploymentConfig memory config)

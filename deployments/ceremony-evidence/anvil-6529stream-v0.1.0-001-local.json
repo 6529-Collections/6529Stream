@@ -48,7 +48,7 @@
       "evidence": [
         {
           "path": "script/RehearseDeployment.s.sol",
-          "sha256": "sha256:45bf3da3bcd41edb2d1432910513617fe71eb6d08796ffbf58bc1d8cdebd8fd4"
+          "sha256": "sha256:323bce37a19326a9e1b59bdf04f261160e3072270adeb20deb88c867cc462d3e"
         }
       ],
       "notes": "Local Anvil rehearsal transfers StreamAdmins and StreamCore ownership to the Safe placeholder and removes the temporary deployer global admin."

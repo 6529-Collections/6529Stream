@@ -7,7 +7,9 @@ Current scripts:
 - `RehearseDeployment.s.sol`: deploys and wires a local non-production
   6529Stream stack, creates a sample collection, configures sample admin
   ceremony state, revokes the temporary deployment admin, and transfers Ownable
-  control to the configured Safe placeholder.
+  control to the configured Safe placeholder. It also exposes `runSepolia()`,
+  which reads public Sepolia rehearsal addresses from environment variables and
+  refuses to run unless `block.chainid` is Sepolia `11155111`.
 - `RehearseMetadataBrowser.s.sol`: builds on the local stack, registers a
   deterministic metadata dependency, mints through the EIP-712 drop
   authorization path, finalizes token metadata inputs, and returns generated
@@ -40,3 +42,9 @@ requires fork/testnet dry runs, production metadata browser evidence, real
 manifest generation from broadcast outputs, contract verification inputs, ABI
 checksums, retained live-ceremony evidence, and retained live emergency
 redeployment evidence before public beta.
+
+For Sepolia, use the no-secret template at
+`deployments/config/sepolia-6529stream-v0.1.0-001.template.json` and the
+runbook in `docs/deployment.md#sepolia-deployment-rehearsal-runbook`. Retained
+command transcripts must redact RPC endpoint values, signing material, API
+tokens, and unreleased drop payloads before they are committed.

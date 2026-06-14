@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret Sepolia deployment rehearsal config template, a
+  `runSepolia()` Foundry script entrypoint, deployment/runbook documentation,
+  and template regression coverage for issue #360 while keeping
+  `testnet_deployment_rehearsal` missing until real reviewed Sepolia evidence
+  is retained.
 - Added a dedicated testnet deployment rehearsal retained-artifact template and
   checker for issue #217, wiring it into local/CI evidence gates and generated
   release evidence trackers while keeping `testnet_deployment_rehearsal`

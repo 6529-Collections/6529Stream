@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/testnet-deployment-rehearsal-evidence-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/356` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/357` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/359` |
+| Active PR branch | `codex/sepolia-deployment-rehearsal-runbook` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/359` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/360` |
+| Active PR | `TBD` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 21:59 UTC` |
+| Last updated | `2026-06-14 23:10 UTC` |
 
 ## Packaging Notes
 
@@ -235,14 +235,90 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 171 | Reconcile PR #350 reviewed fork evidence merge state | Gate G support | Record PR #350 merge evidence, close out issue #216/Queue Item 164 in durable state, refresh roadmap verification metadata, and select issue #215 as the next release-evidence target without changing readiness claims | Merged in PR #352 |
 | 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Merged in PR #354 |
 | 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Merged in PR #356 |
-| 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Active for issue #357 |
+| 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Merged in PR #359 |
+| 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | Ready to open PR for issue #360 |
 
 ## Current PR Worklog
 
-### PR candidate: Add testnet deployment rehearsal retained artifact checker (Queue Item 174)
+### PR candidate: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
 
-Status: PR #359 opened; initial CI passed; CodeRabbit feedback addressed
-locally and ready for rerun.
+Status: locally validated; issue #360 opened; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/360`.
+Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
+PR: `TBD`.
+Branch: `codex/sepolia-deployment-rehearsal-runbook`.
+Branch started from PR #359 squash merge commit
+`c79244ad6c5bcfa1d8a1cf74e450fda7c8f3608f`.
+
+Goal:
+
+- Add a no-secret Sepolia deployment manifest-input template with explicit
+  environment variable names, placeholder addresses, redaction policy, and
+  `testnet_deployment_rehearsal` scope.
+- Add a parameterized `runSepolia()` Foundry script entrypoint that reads public
+  deployment config from environment variables and refuses non-Sepolia chains.
+- Document the no-secret operator sequence for broadcast, retained transcript
+  redaction, sanitized broadcast retention, manifest/address-book/source
+  verification generation, retained evidence review, and release artifact
+  regeneration.
+- Extend deployment-manifest tests so the committed Sepolia template remains
+  placeholder-scoped and does not include live RPC endpoints, signing material,
+  API tokens, bearer credentials, or private signing flags.
+- Preserve issue #217 as open and `testnet_deployment_rehearsal` as `missing`
+  until real reviewed Sepolia evidence is retained.
+
+Current facts:
+
+- PR #359 merged as squash commit
+  `c79244ad6c5bcfa1d8a1cf74e450fda7c8f3608f`.
+- PR #359 final head
+  `7776646bc29e2d48aef7917c591c2a2805c9852e` passed CI run
+  `27514114821`: Windows PowerShell wrapper job `81319572869` and Foundry
+  smoke job `81319572874`.
+- CodeRabbit status was success and both prior actionable threads were marked
+  addressed before merge.
+- Merge-decision comment `4703304431` recorded the autonomous merge basis.
+- Issue #357 closed completed at `2026-06-14 22:39 UTC`.
+- Issue #360 now tracks EXT-002 for the Sepolia config template and no-secret
+  rehearsal runbook.
+
+Validation completed locally:
+
+- Sidecar review found two runbook/template issues before PR open:
+  generator commands must start from a copied reviewed config rather than the
+  placeholder template, and the non-local evidence generator command needs all
+  required CLI arguments. Both were fixed before validation.
+- `rg -n "runSepolia|sepolia-6529stream-v0.1.0-001.template|Sepolia Deployment Rehearsal Runbook|SEPOLIA_RPC_URL|SEPOLIA_CHAIN_ID" script docs deployments scripts\test_deployment_manifest.py`.
+- `python scripts/test_deployment_manifest.py`.
+- `python scripts/generate_deployment_manifest.py --check`.
+- `python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check`.
+- `python scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`.
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- `forge fmt --check script/RehearseDeployment.s.sol`.
+- `forge build --via-ir script/RehearseDeployment.s.sol`.
+- `python scripts/test_testnet_deployment_rehearsal_evidence.py`.
+- `python scripts/check_testnet_deployment_rehearsal_evidence.py`.
+- `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/check_public_beta_evidence.py`.
+- `python scripts/test_ceremony_evidence.py`.
+- `python scripts/check_ceremony_evidence.py`.
+- `python scripts/test_release_evidence_packet_index.py`.
+- `python scripts/generate_release_evidence_packet_index.py --check`.
+- `python scripts/test_release_evidence_issue_backlog.py`.
+- `python scripts/generate_release_evidence_issue_backlog.py --check`.
+- `python scripts/test_release_evidence_issue_body_sync.py`.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+- `python scripts/test_release_evidence_issue_bodies.py`.
+- `python scripts/check_release_evidence_issue_bodies.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-14.
+- `git diff --check` passed with only the existing CRLF warning for
+  `scripts/test_deployment_manifest.py`.
+
+### Completed: Add testnet deployment rehearsal retained artifact checker (Queue Item 174)
+
+Status: merged in PR #359; issue #357 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/357`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/359`.

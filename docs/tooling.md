@@ -459,6 +459,11 @@ explorer status, and reviewer confirmation are retained. Operators must redact
 or omit private keys, tokens, private RPC URLs, bearer credentials, and other
 sensitive values before retaining any transcript, command line, broadcast, or
 linked artifact because the checker enforces the same no-secret policy.
+The Sepolia setup template lives at
+`deployments/config/sepolia-6529stream-v0.1.0-001.template.json`; use it with
+`docs/deployment.md#sepolia-deployment-rehearsal-runbook` and
+`script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()"`
+when preparing future reviewed testnet evidence.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release

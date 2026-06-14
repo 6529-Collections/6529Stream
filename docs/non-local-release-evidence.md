@@ -194,6 +194,13 @@ decision.
 The committed file is template-only. It is not evidence that a testnet
 deployment rehearsal occurred, and issue #217 remains open until reviewed
 retained evidence is linked from the shared public-beta evidence manifest.
+Use
+[`deployments/config/sepolia-6529stream-v0.1.0-001.template.json`](../deployments/config/sepolia-6529stream-v0.1.0-001.template.json)
+and
+[`docs/deployment.md#sepolia-deployment-rehearsal-runbook`](deployment.md#sepolia-deployment-rehearsal-runbook)
+for the operator command sequence, required Sepolia environment variable names,
+broadcast sanitization, manifest/address-book generation, and no-secret
+redaction requirements before replacing this retained artifact template.
 
 The retained artifact is checked separately from the JSON metadata envelope:
 
