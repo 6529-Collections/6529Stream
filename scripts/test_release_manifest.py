@@ -419,6 +419,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "# Release Evidence Packet Index\n\nGenerated fixture.\n",
     )
     write_json(
+        latest / "release-evidence-live-audit-report-archive.json",
+        {"schema_version": "6529stream.release-evidence-live-audit-report-archive.v1"},
+    )
+    write_text(
+        latest / "release-evidence-live-audit-report-archive.md",
+        "# Release Evidence Live Audit Report Archive\n\nGenerated fixture.\n",
+    )
+    write_json(
         latest / "release-evidence-issue-backlog.json",
         {"schema_version": "6529stream.release-evidence-issue-backlog.v1"},
     )
@@ -1061,6 +1069,35 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["latest"] / "release-evidence-packet-index.md"
                 ),
             )
+            live_audit_archive = manifest["release_artifacts"][
+                "release_evidence_live_audit_report_archive"
+            ]
+            self.assertEqual(
+                live_audit_archive["json"]["path"],
+                "release-artifacts/latest/release-evidence-live-audit-report-archive.json",
+            )
+            self.assertEqual(
+                live_audit_archive["json"]["schema_version"],
+                "6529stream.release-evidence-live-audit-report-archive.v1",
+            )
+            self.assertEqual(
+                live_audit_archive["json"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"]
+                    / "release-evidence-live-audit-report-archive.json"
+                ),
+            )
+            self.assertEqual(
+                live_audit_archive["markdown"]["path"],
+                "release-artifacts/latest/release-evidence-live-audit-report-archive.md",
+            )
+            self.assertEqual(
+                live_audit_archive["markdown"]["sha256"],
+                generator.file_sha256(
+                    paths["latest"]
+                    / "release-evidence-live-audit-report-archive.md"
+                ),
+            )
             issue_backlog = manifest["release_artifacts"][
                 "release_evidence_issue_backlog"
             ]
@@ -1324,6 +1361,29 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 packet_index["markdown"]["sha256"],
                 generator.file_sha256(custom_latest / "release-evidence-packet-index.md"),
+            )
+            live_audit_archive = manifest["release_artifacts"][
+                "release_evidence_live_audit_report_archive"
+            ]
+            self.assertEqual(
+                live_audit_archive["json"]["path"],
+                "custom-release-artifacts/latest/release-evidence-live-audit-report-archive.json",
+            )
+            self.assertEqual(
+                live_audit_archive["json"]["sha256"],
+                generator.file_sha256(
+                    custom_latest / "release-evidence-live-audit-report-archive.json"
+                ),
+            )
+            self.assertEqual(
+                live_audit_archive["markdown"]["path"],
+                "custom-release-artifacts/latest/release-evidence-live-audit-report-archive.md",
+            )
+            self.assertEqual(
+                live_audit_archive["markdown"]["sha256"],
+                generator.file_sha256(
+                    custom_latest / "release-evidence-live-audit-report-archive.md"
+                ),
             )
             issue_backlog = manifest["release_artifacts"][
                 "release_evidence_issue_backlog"

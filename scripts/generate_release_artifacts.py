@@ -30,6 +30,8 @@ DOWNSTREAM_RELEASE_FILES = {
     "release-evidence-issue-body-sync.json",
     "release-evidence-issue-body-sync.md",
     "release-evidence-issue-links.json",
+    "release-evidence-live-audit-report-archive.json",
+    "release-evidence-live-audit-report-archive.md",
     "release-evidence-packet-index.json",
     "release-evidence-packet-index.md",
     "SHA256SUMS",

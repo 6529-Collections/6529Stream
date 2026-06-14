@@ -73,6 +73,10 @@ python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_snapshot_audit.py
 python scripts/test_release_evidence_live_audit_report.py
 python scripts/check_release_evidence_live_audit_report.py
+python scripts/test_release_evidence_live_audit_markdown.py
+python scripts/check_release_evidence_live_audit_markdown.py
+python scripts/test_release_evidence_live_audit_archive.py
+python scripts/generate_release_evidence_live_audit_archive.py --check
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
@@ -289,6 +293,7 @@ reports can be checked without GitHub network access:
 ```bash
 python scripts/check_release_evidence_live_audit_report.py --report-json tmp/release-evidence-live-audit-report.json
 python scripts/check_release_evidence_live_audit_markdown.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+python scripts/generate_release_evidence_live_audit_archive.py --check
 ```
 
 The checker verifies the schema version, repo target, blocked-readiness posture,
@@ -299,8 +304,15 @@ Markdown for secret-shaped values, and fails if the profile table, command
 provenance, no-secret notice, or blocked-readiness warning drift from the
 canonical renderer. It expects the referenced snapshots to remain in the
 retained bundle and does not rerun GitHub exports or mark any tracker issue
-complete. To audit live GitHub label drift manually, export a snapshot and pass
-it to the checker:
+complete.
+
+`scripts/generate_release_evidence_live_audit_archive.py` indexes
+the committed template pair plus future no-secret report bundles retained under
+`release-artifacts/evidence/live-audit-reports/`, records JSON/Markdown
+digests and validation commands, and keeps CI network-free.
+
+To audit live GitHub label drift manually, export a snapshot and pass it to the
+checker:
 
 ```bash
 python scripts/export_release_evidence_issue_snapshot.py --profile labels
@@ -447,6 +459,7 @@ python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/check_release_evidence_live_audit_report.py
+python scripts/generate_release_evidence_live_audit_archive.py
 python scripts/generate_release_evidence_issue_body_sync.py
 python scripts/check_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_closure.py
@@ -500,6 +513,10 @@ python scripts/test_release_evidence_issue_snapshot.py
 python scripts/test_release_evidence_issue_snapshot_audit.py
 python scripts/test_release_evidence_live_audit_report.py
 python scripts/check_release_evidence_live_audit_report.py
+python scripts/test_release_evidence_live_audit_markdown.py
+python scripts/check_release_evidence_live_audit_markdown.py
+python scripts/test_release_evidence_live_audit_archive.py
+python scripts/generate_release_evidence_live_audit_archive.py --check
 python scripts/test_release_evidence_issue_labels.py
 python scripts/check_release_evidence_issue_labels.py
 python scripts/test_release_evidence_issue_body_sync.py
