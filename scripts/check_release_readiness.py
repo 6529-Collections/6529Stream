@@ -56,6 +56,11 @@ REQUIRED_READINESS_PHRASES = [
     "release evidence live audit report schema",
     "release evidence live audit Markdown parity",
     "release evidence live audit report archive",
+    "release-artifacts/evidence/live-audit-reports/",
+    "YYYYMMDDTHHMMSSZ",
+    "--generated-at",
+    "no secrets",
+    "not readiness proof by themselves",
     "non-local release evidence",
     "incident response",
     "drop authorization signing fixtures",
@@ -114,6 +119,34 @@ REQUIRED_COMMANDS = [
     "python scripts/check_release_evidence_live_audit_markdown.py",
     "python scripts/test_release_evidence_live_audit_archive.py",
     "python scripts/generate_release_evidence_live_audit_archive.py --check",
+    (
+        "python scripts/audit_release_evidence_issue_snapshots.py --generated-at "
+        "YYYYMMDDTHHMMSSZ --report-json "
+        "release-artifacts/evidence/live-audit-reports/"
+        "YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md "
+        "release-artifacts/evidence/live-audit-reports/"
+        "YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md"
+    ),
+    (
+        "python scripts/check_release_evidence_live_audit_report.py --report-json "
+        "release-artifacts/evidence/live-audit-reports/"
+        "YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json"
+    ),
+    (
+        "python scripts/check_release_evidence_live_audit_markdown.py --report-json "
+        "release-artifacts/evidence/live-audit-reports/"
+        "YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md "
+        "release-artifacts/evidence/live-audit-reports/"
+        "YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md"
+    ),
+    (
+        "python scripts/generate_release_evidence_live_audit_archive.py "
+        "--archive-dir release-artifacts/evidence/live-audit-reports"
+    ),
+    (
+        "python scripts/generate_release_evidence_live_audit_archive.py "
+        "--archive-dir release-artifacts/evidence/live-audit-reports --check"
+    ),
     "python scripts/test_release_evidence_issue_labels.py",
     "python scripts/check_release_evidence_issue_labels.py",
     "python scripts/test_release_evidence_issue_body_sync.py",
@@ -175,6 +208,7 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/schema/release-evidence-live-audit-report.schema.json",
     "release-artifacts/evidence/release-evidence-live-audit-report-template.json",
     "release-artifacts/evidence/release-evidence-live-audit-report-template.md",
+    "release-artifacts/evidence/live-audit-reports/README.md",
     "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt",

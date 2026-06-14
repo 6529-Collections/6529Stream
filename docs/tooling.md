@@ -311,6 +311,27 @@ the committed template pair plus future no-secret report bundles retained under
 `release-artifacts/evidence/live-audit-reports/`, records JSON/Markdown
 digests and validation commands, and keeps CI network-free.
 
+Future retained bundles should live in paired files under
+`release-artifacts/evidence/live-audit-reports/` using a stable lowercase
+archive ID, for example
+`20260614T010000Z-release-evidence-live-audit-report.json` and
+`20260614T010000Z-release-evidence-live-audit-report.md`. Pass the same UTC run
+label to `--generated-at` so the archive row, retained report, and operator
+notes agree. Before committing a future bundle, confirm the report contains no
+secrets, tokens, private exports, or unredacted operator credentials; the
+checker also scans for secret-shaped keys and values. A valid retained bundle
+is review evidence only and is not readiness proof by itself.
+
+The canonical future-bundle workflow is:
+
+```bash
+python scripts/audit_release_evidence_issue_snapshots.py --generated-at YYYYMMDDTHHMMSSZ --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
+python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json
+python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
+python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports
+python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check
+```
+
 To audit live GitHub label drift manually, export a snapshot and pass it to the
 checker:
 
