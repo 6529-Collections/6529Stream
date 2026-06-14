@@ -32,14 +32,14 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-audit-report-archive-index` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/280` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/281` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/282` |
-| Next issue | TBD after issue #281 merges |
+| Active PR branch | `codex/reconcile-live-audit-archive-merge-state` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/282` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/283` |
+| Active PR | TBD until Queue Item 136 is opened |
+| Next issue | TBD after issue #283 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 00:34 UTC` |
+| Last updated | `2026-06-14 00:45 UTC` |
 
 ## Packaging Notes
 
@@ -191,21 +191,68 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 132 | Reconcile live audit report checker merge state | Gate G support | Record PR #274 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Merged in PR #276 |
 | 133 | Add release evidence live audit Markdown report parity checker | Gate G support | Add an offline checker that validates retained human-readable live audit Markdown reports against their JSON report source without GitHub network access or readiness-claim changes | Merged in PR #278 |
 | 134 | Reconcile live audit Markdown checker merge state | Gate G support | Record PR #278 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret evidence target | Merged in PR #280 |
-| 135 | Add release evidence live audit report archive index | Gate G support | Add a deterministic no-secret index for retained live audit report JSON/Markdown bundles and validation commands without adding GitHub network access to CI or changing readiness claims | Active |
-| 136 | Reconcile live audit report archive index merge state | Gate G support | Record PR #281 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Queued after issue #281 |
+| 135 | Add release evidence live audit report archive index | Gate G support | Add a deterministic no-secret index for retained live audit report JSON/Markdown bundles and validation commands without adding GitHub network access to CI or changing readiness claims | Merged in PR #282 |
+| 136 | Reconcile live audit report archive index merge state | Gate G support | Record PR #282 merge evidence, refresh roadmap verification metadata, preserve blocked readiness claims, and select the next no-secret release evidence target | Active |
+| 137 | Document live audit archive retention workflow | Gate G support | Add operator-facing no-secret guidance for naming, retaining, validating, and indexing future live audit report bundles under `release-artifacts/evidence/live-audit-reports/` without changing readiness claims | Queued after issue #283 |
 
 ## Current PR Worklog
 
-### PR candidate: Add release evidence live audit report archive index (Queue Item 135)
+### PR candidate: Reconcile live audit report archive index merge state (Queue Item 136)
 
-Status: PR #282 open; CI and CodeRabbit review pending.
+Status: local implementation in progress before PR open.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/283`.
+PR: TBD until opened.
+Branch: `codex/reconcile-live-audit-archive-merge-state`.
+Branch started from PR #282 squash merge commit
+`b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`.
+
+Goal:
+
+- Record PR #282 as merged and issue #281 as completed.
+- Refresh roadmap verification metadata to the PR #282 merged baseline.
+- Update the live audit report archive index test-matrix row from in-progress
+  to passing.
+- Preserve blocked public-beta and production-release readiness claims.
+- Select Queue Item 137 as the next no-secret release evidence target.
+
+Validation plan:
+
+- `python scripts/check_release_readiness.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `rg -n "Queue Item 135|Queue Item 136|Queue Item 137|PR #282|27483665398|91b4aac|b678307|#281|#283|Last verified|CI run" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `rg -n "^#|^##|^###" ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- `git diff --check`.
+
+Validation status:
+
+- Passed locally at `2026-06-14 00:45 UTC`: release-readiness,
+  release-manifest, release-checksum, changelog, traceability, heading, and
+  whitespace checks.
+
+### Completed: Add release evidence live audit report archive index (Queue Item 135)
+
+Status: merged in PR #282.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/281`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/282`.
 Branch: `codex/live-audit-report-archive-index`.
 Branch started from PR #280 squash merge commit
 `e1d8a762687c40166b82807634d6365d2eac77a7`.
 Opening PR head: `dac472995cc100585b72e82f3f7a9066933d7e4a`.
-CodeRabbit review requested in comment `4700204401`.
+Trace-state head: `5c6e29ed244a5a146844530fa4683f2e6a25c4f8`.
+Final PR head: `91b4aaca6fda564f175ef988e3ba03d10aedea65`.
+Squash merge commit: `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`.
+CI: run `27483665398` passed after run `27483379787` exposed the
+release-artifact allowlist gap.
+CodeRabbit: initial rate-limit warning comment `4700204203`, explicit review
+request comments `4700204401` and `4700237635`, review-finished replies
+`4700204604` and `4700237797`, final status success, and no unresolved review
+threads. Merge-readiness comment `4700251893` documented green CI, CodeRabbit
+status, no contract/deployment behavior changes, and the local validation
+record before merge. Claude posted its default manual-review notice, but Claude
+review was not requested per current user instruction.
+Issue #281: closed completed by the PR merge.
 
 Goal:
 
@@ -266,6 +313,9 @@ Validation status:
   `DOWNSTREAM_RELEASE_FILES` and the release artifact checker fixture; focused
   release-artifact checks and full Windows `scripts\check.ps1` passed locally at
   `2026-06-14 00:34 UTC`.
+- Final GitHub Actions run `27483665398` passed on head
+  `91b4aaca6fda564f175ef988e3ba03d10aedea65` before squash merge
+  `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`.
 
 ### Completed: Reconcile live audit Markdown checker merge state (Queue Item 134)
 
@@ -11239,6 +11289,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 00:45 | Start Queue Item 136 | PR #282 merged as `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`, issue #281 closed completed, issue #283 opened for state-only reconciliation, and branch `codex/reconcile-live-audit-archive-merge-state` started from the merged baseline before the next no-secret evidence target. |
+| 2026-06-14 00:43 | Merge PR #282 | Live audit report archive index merged as `b6783072edf41cfc5b5e38bc9b41c8d1ccfbd2e0`; final head `91b4aaca6fda564f175ef988e3ba03d10aedea65` passed CI run `27483665398`, CodeRabbit status was success with no unresolved review threads, explicit review requests returned review-finished replies, and issue #281 closed completed. |
 | 2026-06-14 00:34 | Fix PR #282 release artifact catalog CI failure | CI run `27483379787` failed because the release-artifact catalog allowlist did not include the new archive JSON/Markdown outputs; added them to `DOWNSTREAM_RELEASE_FILES`, extended `scripts/test_release_artifacts.py`, and reran focused release-artifact checks plus full Windows `scripts\check.ps1` successfully. |
 | 2026-06-14 00:21 | Open PR #282 and request CodeRabbit | Live audit report archive index PR opened on head `dac472995cc100585b72e82f3f7a9066933d7e4a`, links `Closes #281`, and CodeRabbit review was requested in comment `4700204401`; Claude remains intentionally skipped per current user instruction. |
 | 2026-06-14 00:17 | Finish Queue Item 135 local validation | Focused archive/report/Markdown tests and checks, release-readiness, manifest, checksum, changelog, py_compile, Bash syntax, traceability, heading scan, line-ending normalization, whitespace, and full Windows `scripts\check.ps1` gate all pass before opening the PR. |
