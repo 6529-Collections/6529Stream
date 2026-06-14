@@ -12,7 +12,10 @@ the release policy in `docs/release-policy.md`.
   release evidence trackers while keeping `testnet_deployment_rehearsal`
   missing until real reviewed Sepolia evidence is retained. Added
   `ops/EXECUTION_BACKLOG.md` as the PR-sized 10/10 implementation map for the
-  combined roadmap, external assessment, and integration-readiness work.
+  combined roadmap, external assessment, and integration-readiness work, now
+  including reviewer-supplied 1/1 product-excellence items for contract-level
+  metadata, collector provenance, royalty philosophy, permanence packaging,
+  marketplace/indexer evidence, Core size discipline, and warning burn-down.
 - Added a dedicated external audit report retained-artifact template and
   checker for issue #215, wiring it into local/CI evidence gates and generated
   release evidence trackers while keeping `external_audit_report` missing until

@@ -100,6 +100,15 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   headroom, above the 384-byte minimum release floor but below the 512-byte
   warning threshold. Large non-trivial Core work should recover headroom or
   explicitly spend an approved size budget first.
+- A clean-main reviewer reassessment at commit
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` reported that
+  `forge build`, `forge test -vvv` with 316 tests, gas snapshot checks, and the
+  production size build passed. Treat that as a useful status correction, not a
+  production-readiness claim: the remaining "10/10 open-source NFT protocol"
+  work is now concentrated in production trust evidence, testnet/live release
+  proof, marketplace/indexer evidence, contract-level metadata, 1/1 provenance,
+  collector-verifiable permanence, explicit royalty philosophy, quiet
+  warning/lint baselines, and continued `StreamCore` size discipline.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -652,6 +661,15 @@ later sections.
 - If ERC-4906 is implemented, test `supportsInterface(0x49064906)`.
 - Emit `MetadataUpdate` / `BatchMetadataUpdate` only when JSON metadata changes,
   not merely on mint or burn unless intentionally documented.
+- Decide whether to implement ERC-7572-style `contractURI()` and
+  `ContractURIUpdated`. ERC-7572 is draft status, but contract-level metadata is
+  already marketplace-relevant and should be explicit before public beta.
+- Treat 1/1 provenance as a first-class NFT surface: artist statement,
+  certificate/authenticity hash, curation notes, exhibition/history records,
+  collector-facing provenance events, and frozen provenance manifests.
+- Decide the royalty product philosophy before release: ERC-2981 information
+  only, richer per-collection/per-token policy, or optional creator-fee
+  enforcement with a documented transfer-composability tradeoff.
 - Define ABI and interface stability expectations.
 - Maintain a changelog for external API, interface, event, and deployment
   changes.
@@ -1923,6 +1941,25 @@ Acceptance criteria:
     future ADR accepts the bytecode/gas cost.
   - Decide realistic collection sizes and gas targets before promising large
     ranges publicly.
+- Add contract-level metadata as a tracked standards item rather than a hidden
+  marketplace assumption:
+  - Decide ERC-7572-style `contractURI()` support, event naming, JSON schema,
+    mutability/freeze policy, and interface exposure.
+  - Keep the implementation out of `StreamCore` unless a size-budget exception
+    is accepted; prefer satellite contracts, libraries, or metadata adapters
+    while `StreamCore` headroom is below the warning threshold.
+- Add royalty policy as an explicit governance/product ADR:
+  - Current ERC-2981 behavior exposes royalty information but does not enforce
+    secondary-sale payment.
+  - Decide default royalty governance, per-token or per-collection overrides,
+    recipient rotation, marketplace display expectations, and whether any
+    optional transfer-validator or creator-fee enforcement is in scope.
+- Treat release-grade compiler and linter quietness as product polish:
+  - Burn down unused randomizer parameters or document intentional interface
+    compatibility.
+  - Burn down pure/view mutability suggestions where safe.
+  - Remove invalid NatSpec tags or record explicit third-party/vendored
+    dispositions.
 - Establish gas budgets for mint, bid, settle, curator claim, `tokenURI`, and
   dependency/script reads.
 - Replace ambiguous revert strings with custom errors for security-relevant
@@ -2094,6 +2131,10 @@ No P0 contract PR may merge without:
   converting the 17-file residual baseline into reviewed exemptions while
   preserving strict formatting for all non-exempt Solidity files.
 - Burn down invalid NatSpec tags and warning baseline.
+- Burn down release-grade warning noise: unused parameters, pure/view
+  suggestions, invalid NatSpec tags, and any remaining lint diagnostics must be
+  fixed, renamed, or documented with reviewed dispositions before a top-tier
+  release claim.
 - Normalize Solidity pragmas across source, interfaces, tests, and vendored
   files.
 - Add Markdown lint.
@@ -2442,6 +2483,15 @@ No P0 contract PR may merge without:
 - Manifold or other common collector tooling.
 - ERC-2981 royalty note: `royaltyInfo()` exposes royalty information, but
   payment depends on marketplace or external payment logic.
+- Contract-level metadata evidence: marketplace reads `contractURI()` or the
+  documented fallback, displays collection metadata correctly, and observes
+  `ContractURIUpdated` if implemented.
+- Metadata refresh evidence: OpenSea, Reservoir, Blur, Manifold, or equivalent
+  collector tooling can refresh token metadata, display animation output, show
+  royalty information, and survive stale/failed/frozen/burned metadata states.
+- Transfer/sale smoke evidence: at least one testnet or fork marketplace/indexer
+  path proves transfer, listing or simulated sale, royalty display, event replay,
+  and metadata cache invalidation assumptions without leaking secrets.
 
 ## 13. P3 Content, Legal, Privacy, And Long-Term Scale
 
@@ -2458,6 +2508,20 @@ No P0 contract PR may merge without:
 - Add malware or hostile script review.
 - Add PII/secrets accidental inclusion playbook.
 - Add jurisdiction and sanctions escalation path for payout recipients.
+- Add a first-class 1/1 provenance layer:
+  - Artist statement and collector-facing work description.
+  - Certificate/authenticity hash and signed provenance statement.
+  - Curation notes, exhibition/history records, and provenance update policy.
+  - Collector-facing provenance events or retained evidence if events are kept
+    out of Core for size reasons.
+  - Frozen provenance manifest tied to collection/token freeze manifests.
+- Add a collector-verifiable permanence package:
+  - Deterministic renderer and dependency/source archive.
+  - Token output hashes and replay instructions.
+  - Browser proof for final token output.
+  - Clear guarantees for fully on-chain data versus decentralized-storage,
+    gateway, or external dependency assumptions.
+  - Release artifact bundle that collectors can verify independently.
 
 ### Pre-Mint Content Checklist
 

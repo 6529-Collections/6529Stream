@@ -310,6 +310,16 @@ Validation completed locally:
   evidence-row transition wording from `missing -> reviewed` to
   `missing -> complete`. Both are fixed locally with regenerated release
   manifest/checksum artifacts.
+- User supplied a clean-main reviewer reassessment after that fix pass. The
+  reviewer reported that commit
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` passes `forge build`,
+  `forge test -vvv` with 316 tests, gas snapshot checks, and production size
+  build, while `StreamCore` remains tight at 24,139 runtime bytes with 437
+  bytes of EIP-170 headroom. The roadmap/backlog now records the remaining
+  "world-class 1/1 NFT" gaps as `ONE-*` work: ERC-7572-style contract-level
+  metadata, collector provenance, royalty philosophy, permanence package,
+  marketplace/indexer evidence, satellite-extension size discipline, and
+  warning/lint/NatSpec burn-down.
 
 ### Completed: Reconcile PR #354 merge state (Queue Item 173)
 

@@ -74,6 +74,7 @@ Each implementable item should be refined into this shape before work starts:
 | `REL` | Release engineering, signatures, artifact integrity, reproducibility |
 | `GOV` | Governance, Safe, signer, pause, incident, monitoring operations |
 | `INT` | Frontend, SDK, indexer, mobile, Electron, and product integration readiness |
+| `ONE` | World-class 1/1 NFT product surfaces: provenance, permanence, royalties, marketplaces |
 | `AUD` | Audit packet, risk register, finding intake, external-audit closure |
 | `OSS` | README, contributor, security, issue/PR templates, repo experience |
 
@@ -102,6 +103,11 @@ The important distinction is:
 - Local deployment, auction ceremony, emergency redeployment, release artifact,
   manifest, checksum, and evidence scaffolds exist.
 - At least one reviewed fork deployment rehearsal artifact exists.
+- A clean-main reviewer reassessment at
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` reported passing `forge build`,
+  `forge test -vvv` with 316 tests, gas snapshot checks, and the production size
+  build. This confirms the near-term focus should shift from generic "basic
+  contract missing" work to evidence, product standards, and integration proof.
 
 ### What Still Blocks 10/10
 
@@ -114,6 +120,25 @@ The important distinction is:
   auction/drop/randomizer/admin interaction surface.
 - Integrator documentation is not yet sufficient for a 6529.io-style frontend,
   mobile app, Electron app, indexer, or operator dashboard.
+- Contract-level metadata is not yet a first-class release item. ERC-7572-style
+  `contractURI()` is draft-standard work, but marketplaces already depend on
+  contract-level metadata surfaces.
+- 1/1 collector trust surfaces need a stronger product layer: artist statement,
+  certificate/authenticity hash, curation notes, exhibition/history records,
+  provenance events or retained evidence, and frozen provenance manifests.
+- Royalty philosophy is not explicit enough for a high-value 1/1 drop:
+  ERC-2981 disclosure, governance controls, per-token/per-collection strategy,
+  and optional creator-fee enforcement must be a deliberate decision.
+- Permanence needs an independently replayable collector package: renderer,
+  dependencies, source archive, token output hashes, browser proof, and storage
+  guarantees.
+- Marketplace/indexer compatibility needs retained evidence, not just local
+  metadata checks.
+- `StreamCore` bytecode headroom remains tight, so new feature surfaces should
+  prefer satellite contracts, libraries, adapters, or explicit size-budget
+  exceptions.
+- Compiler/lint/NatSpec warning noise should be burned down or dispositioned
+  before making "world-class" release claims.
 - The repo has accumulated too much run-state bookkeeping relative to
   substantive maturity work.
 
@@ -1970,6 +1995,18 @@ unless an external dependency changes.
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | `CON-001` |
 | `CON-007` | Add interface/version views for frontend compatibility | G | `INT-001` |
 
+### 1/1 Product Excellence
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | size budget, `INT-001` |
+| `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | metadata freeze model |
+| `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | governance ADR update |
+| `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | dependency artifact manifest |
+| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |
+| `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is tight | G | `CON-005` |
+| `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | formatting/static-analysis gates |
+
 ### Release Engineering
 
 | Item | Intended PR | Gate | Dependency |
@@ -2089,6 +2126,9 @@ flowchart TD
   incident-response readiness evidence exists.
 - Integrator docs are sufficient for frontend, mobile, Electron, indexer, and
   operator surfaces.
+- Contract-level metadata, royalty policy, 1/1 provenance, collector
+  permanence, marketplace/indexer evidence, and release-grade warning
+  dispositions are complete or explicitly waived with owner/risk/expiry.
 
 ### Integrator Ready
 
@@ -2101,6 +2141,8 @@ flowchart TD
   depth, reorg policy, and rescan strategy.
 - Metadata docs define pending, stale, failed, final, frozen, burned, cache, and
   ERC-4906 behavior.
+- Contract-level metadata, royalty display, provenance manifest, and permanence
+  package expectations are documented for product teams and collector tooling.
 - React/mobile/Electron guidance exists and consumes release artifacts instead
   of hardcoded addresses.
 
