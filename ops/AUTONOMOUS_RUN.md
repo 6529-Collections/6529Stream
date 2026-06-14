@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-pr-308-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/308` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/309` |
-| Active PR | TBD after PR open |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/310` |
 | Next issue | Formatting triage / documented formatting gate path after issue #309 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 06:04 UTC` |
+| Last updated | `2026-06-14 06:08 UTC` |
 
 ## Packaging Notes
 
@@ -212,12 +212,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile curator Merkle state reconciliation merge (Queue Item 149)
 
-Status: local edits in progress.
+Status: PR opened; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/309`.
-PR: TBD after open.
+PR: `https://github.com/6529-Collections/6529Stream/pull/310`.
 Branch: `codex/reconcile-pr-308-merge-state`.
 Branch started from PR #308 squash merge commit
 `1f85b002c981998d327d468c06996818f9cacfaf`.
+Opening head: `e8d4f833ea7eade00c00e7abaa407b7f3cbf1646`.
 
 Goal:
 
@@ -11840,6 +11841,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 06:08 | Open PR #310 | PR #310 opened on head `e8d4f833ea7eade00c00e7abaa407b7f3cbf1646`, closes issue #309, records PR #308 as the latest merged baseline, and queues formatting triage as Queue Item 150 without changing readiness claims. |
 | 2026-06-14 06:04 | Start Queue Item 149 | PR #308 merged as `1f85b002c981998d327d468c06996818f9cacfaf`, issue #307 closed completed, issue #309 opened for state-only reconciliation, and branch `codex/reconcile-pr-308-merge-state` started from the merged baseline while selecting formatting triage as the next no-secret target. |
 | 2026-06-14 05:59 | Merge PR #308 | Curator Merkle merge-state reconciliation merged as `1f85b002c981998d327d468c06996818f9cacfaf`; final head `02b07cc33f8b8d29f48c7dd7a35065cafbc35983` passed CI run `27489933581`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700850379`, and issue #307 closed completed. |
 | 2026-06-14 05:50 | Open PR #308 | Curator Merkle merge-state reconciliation PR opened on head `4aed89e54eb515359aaf78c6a9cc76d1366d2e8c`, closes issue #307, and records PR #306 as the latest merged baseline without changing readiness claims. |
