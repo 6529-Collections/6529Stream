@@ -224,6 +224,81 @@ class BroadcastManifestInputTests(unittest.TestCase):
                     root / "manifest.json",
                 )
 
+    def test_generator_records_explicitly_ignored_deployments(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = template_config(root)
+            template_data = generator.load_json(template)
+            template_data["broadcast_evidence"] = {
+                "ignored_deployments": ["LinkedLibrary"],
+            }
+            write_json(template, template_data)
+
+            broadcast = broadcast_file(root)
+            data = generator.load_json(broadcast)
+            data["transactions"].append(
+                {
+                    "transactionType": "CREATE2",
+                    "contractName": "LinkedLibrary",
+                    "contractAddress": "0x1000000000000000000000000000000000000003",
+                    "hash": tx_hash("3"),
+                }
+            )
+            data["receipts"].append(
+                {
+                    "transactionHash": tx_hash("3"),
+                    "status": "0x1",
+                    "contractAddress": "0x1000000000000000000000000000000000000003",
+                }
+            )
+            write_json(broadcast, data)
+
+            generated = generator.build_manifest_input(
+                template,
+                broadcast,
+                root / "out.json",
+                root / "manifest.json",
+            )
+
+            self.assertEqual(
+                generated["broadcast_evidence"]["ignored_deployments"],
+                [
+                    {
+                        "contract": "LinkedLibrary",
+                        "address": "0x1000000000000000000000000000000000000003",
+                        "transaction_hash": tx_hash("3"),
+                    }
+                ],
+            )
+            self.assertNotIn(
+                "LinkedLibrary",
+                [
+                    deployment["contract"]
+                    for deployment in generated["broadcast_evidence"]["deployments"]
+                ],
+            )
+
+    def test_generator_accepts_sequential_receipt_for_unlocked_broadcast(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = template_config(root)
+            broadcast = broadcast_file(root)
+            data = generator.load_json(broadcast)
+            data["transactions"][2]["hash"] = tx_hash("9")
+            write_json(broadcast, data)
+
+            generated = generator.build_manifest_input(
+                template,
+                broadcast,
+                root / "out.json",
+                root / "manifest.json",
+            )
+
+            self.assertEqual(
+                generated["broadcast_evidence"]["deployments"][1]["transaction_hash"],
+                tx_hash("2"),
+            )
+
     def test_generator_rejects_failed_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -7,9 +7,20 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
-- Added a fork deployment rehearsal retained-artifact Markdown template and
-  checker so future issue #216 evidence can be structurally validated without
-  changing public-beta readiness claims.
+- Added pending-review mainnet-fork deployment rehearsal evidence for issue
+  #216, including a sanitized Foundry broadcast, generated fork deployment
+  manifest, generated fork address book, non-local evidence envelope, and
+  refreshed public-beta evidence artifacts while keeping public-beta readiness
+  blocked until review is accepted.
+- Added fork-mainnet broadcast-derived manifest and address-book drift checks
+  to the local and CI deployment-manifest gates.
+- Added broadcast manifest generator support for explicitly ignored linked
+  library/helper deployments and Foundry unlocked-broadcast receipt-hash drift
+  fallback when the receipt order and deployed address still prove the same
+  deployment.
+- Added a fork deployment rehearsal retained-artifact Markdown shape and
+  checker so issue #216 evidence can be structurally validated without changing
+  public-beta readiness claims.
 - Added Windows check-wrapper native exit-code enforcement and a focused policy
   test so `scripts/check.ps1` fails fast when `forge` or Python checks return
   non-zero under Windows PowerShell 5.1.

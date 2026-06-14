@@ -146,15 +146,25 @@ production-release row remains blocked until the generated evidence is reviewed,
 linked from `release-artifacts/latest/public-beta-evidence.json`, and all
 release evidence gates pass.
 
-### Fork Deployment Retained Artifact Template
+### Fork Deployment Retained Artifact
 
 Tracker issue #216 requires a reviewed retained fork deployment rehearsal
-artifact before `fork_deployment_rehearsal` can move out of `missing`. Use
+artifact before `fork_deployment_rehearsal` can move to `complete`. Use
 [`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md)
-as the retained transcript shape. It records the fork block reference,
+as the canonical retained transcript path. It records the fork block reference,
 sanitized deployment transcript, sanitized broadcast, generated manifest,
 address book, verification status, gas or invariant summary, redaction
 confirmation, and reviewer decision.
+
+The committed file currently contains pending-review mainnet-fork rehearsal
+evidence captured at block `25316366` with fork hash
+`0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`.
+It is linked to
+[`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json),
+which records the retained artifact digest for the public-beta evidence row.
+The row remains `pending`, and public beta remains blocked, until review
+accepts the fork command, chain reference, generated manifest/address book,
+redaction boundary, and readiness claim.
 
 The retained artifact is checked separately from the JSON metadata envelope:
 
@@ -163,11 +173,11 @@ python scripts/test_fork_deployment_rehearsal_evidence.py
 python scripts/check_fork_deployment_rehearsal_evidence.py
 ```
 
-The committed file is template-only and keeps the public-beta row blocked. A
-reviewed fork artifact must replace the `TBD` values, remove the template-only
-notice, pass the checker, receive a generated non-local evidence envelope, and
-be linked from `release-artifacts/latest/public-beta-evidence.json` before issue
-#216 can close.
+The retained artifact can remain in `pending_review` only while a PR review is
+in progress. Issue #216 can close only after the review decision is accepted,
+the generated non-local evidence envelope remains in sync, and
+`release-artifacts/latest/public-beta-evidence.json` is updated consistently
+with the accepted retained artifact.
 
 ## Public-Beta Requirement Mapping
 

@@ -148,23 +148,49 @@ def expected_contract_names(template: dict[str, Any]) -> list[str]:
     return names
 
 
+def ignored_deployment_names(template: dict[str, Any]) -> set[str]:
+    """Return explicitly ignored deployment helpers from the input template."""
+    evidence = template.get("broadcast_evidence")
+    if evidence is None:
+        return set()
+    evidence_dict = require_dict(evidence, "broadcast_evidence")
+    ignored = evidence_dict.get("ignored_deployments", [])
+    ignored_values = require_list(ignored, "broadcast_evidence.ignored_deployments")
+    names = [
+        require_string(value, "broadcast_evidence.ignored_deployments[]")
+        for value in ignored_values
+    ]
+    duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
+    if duplicates:
+        raise BroadcastManifestError(
+            f"broadcast_evidence.ignored_deployments has duplicate entries: {', '.join(duplicates)}"
+        )
+    return set(names)
+
+
 def template_chain_id(template: dict[str, Any]) -> int:
     manifest = require_dict(template.get("manifest"), "manifest")
     network = require_dict(manifest.get("network"), "manifest.network")
     return require_positive_int(network.get("chain_id"), "manifest.network.chain_id")
 
 
-def receipt_map(receipts: Any) -> dict[str, dict[str, Any]]:
-    mapped: dict[str, dict[str, Any]] = {}
+def receipt_list(receipts: Any) -> list[dict[str, Any]]:
+    """Return broadcast receipts in deterministic order."""
     if isinstance(receipts, dict):
         iterable = receipts.values()
     elif isinstance(receipts, list):
         iterable = receipts
     else:
         raise BroadcastManifestError("broadcast.receipts must be an array or object")
+    return [
+        require_dict(receipt_value, f"broadcast.receipts[{index}]")
+        for index, receipt_value in enumerate(iterable)
+    ]
 
-    for index, receipt_value in enumerate(iterable):
-        receipt = require_dict(receipt_value, f"broadcast.receipts[{index}]")
+
+def receipt_map(receipts: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    mapped: dict[str, dict[str, Any]] = {}
+    for index, receipt in enumerate(receipts):
         tx_hash = receipt.get("transactionHash") or receipt.get("hash")
         normalized_hash = normalize_tx_hash(tx_hash, f"broadcast.receipts[{index}].transactionHash")
         if normalized_hash in mapped:
@@ -205,6 +231,57 @@ def require_success_receipt(
             raise BroadcastManifestError(f"{contract_name} receipt address does not match transaction")
 
 
+def receipt_matches_deployment(receipt: dict[str, Any], address: str) -> bool:
+    """Return whether a receipt proves a successful deployment at address."""
+    if not is_success_status(receipt.get("status")):
+        return False
+    receipt_address = receipt.get("contractAddress")
+    if receipt_address is None:
+        return True
+    try:
+        normalized_receipt_address = normalize_address(
+            receipt_address,
+            "receipt.contractAddress",
+        )
+    except BroadcastManifestError:
+        return False
+    return normalized_receipt_address == address
+
+
+def select_deployment_receipt(
+    receipt_by_hash: dict[str, dict[str, Any]],
+    receipts: list[dict[str, Any]],
+    deployment_index: int,
+    contract_name: str,
+    tx_hash: str,
+    address: str,
+) -> tuple[str, dict[str, Any]]:
+    """Select the receipt that proves a deployment transaction.
+
+    Some Foundry unlocked-broadcast outputs retain simulated transaction hashes
+    on deployment entries while the receipt list carries the actual hash. Prefer
+    exact hash matches, then fall back to deployment-order receipts only when
+    the receipt status and contract address still prove the same deployment.
+    """
+    receipt = receipt_by_hash.get(tx_hash)
+    if receipt is not None and receipt_matches_deployment(receipt, address):
+        require_success_receipt(receipt, contract_name, tx_hash, address)
+        return tx_hash, receipt
+
+    if deployment_index < len(receipts):
+        sequential_receipt = receipts[deployment_index]
+        if receipt_matches_deployment(sequential_receipt, address):
+            sequential_hash = normalize_tx_hash(
+                sequential_receipt.get("transactionHash") or sequential_receipt.get("hash"),
+                f"receipt.{contract_name}.transactionHash",
+            )
+            return sequential_hash, sequential_receipt
+
+    if receipt is not None:
+        require_success_receipt(receipt, contract_name, tx_hash, address)
+    raise BroadcastManifestError(f"missing receipt for {contract_name} deployment")
+
+
 def is_success_status(value: Any) -> bool:
     if isinstance(value, bool):
         return False
@@ -219,8 +296,10 @@ def extract_deployments(
     broadcast: dict[str, Any],
     expected_names: list[str],
     expected_chain_id: int,
-) -> dict[str, dict[str, str]]:
+    ignored_names: set[str] | None = None,
+) -> tuple[dict[str, dict[str, str]], list[dict[str, str]]]:
     assert_no_secret_keys(broadcast)
+    ignored_names = ignored_names or set()
 
     chain_id = require_positive_int(broadcast.get("chain"), "broadcast.chain")
     if chain_id != expected_chain_id:
@@ -229,8 +308,11 @@ def extract_deployments(
         )
 
     transactions = require_list(broadcast.get("transactions"), "broadcast.transactions")
-    receipts = receipt_map(broadcast.get("receipts"))
+    receipts = receipt_list(broadcast.get("receipts"))
+    receipt_by_hash = receipt_map(receipts)
     deployments: dict[str, dict[str, str]] = {}
+    ignored_deployments: list[dict[str, str]] = []
+    deployment_index = 0
 
     for index, transaction_value in enumerate(transactions):
         transaction = require_dict(transaction_value, f"broadcast.transactions[{index}]")
@@ -248,16 +330,30 @@ def extract_deployments(
             transaction.get("hash") or transaction.get("transactionHash"),
             f"broadcast.transactions[{index}].hash",
         )
+        selected_hash, _receipt = select_deployment_receipt(
+            receipt_by_hash,
+            receipts,
+            deployment_index,
+            contract_name,
+            tx_hash,
+            address,
+        )
+        deployment_index += 1
 
         if contract_name in deployments:
             raise BroadcastManifestError(f"duplicate deployment transaction for {contract_name}")
-        receipt = receipts.get(tx_hash)
-        if receipt is None:
-            raise BroadcastManifestError(f"missing receipt for {contract_name} deployment")
-        require_success_receipt(receipt, contract_name, tx_hash, address)
+        if contract_name in ignored_names:
+            ignored_deployments.append(
+                {
+                    "contract": contract_name,
+                    "address": address,
+                    "transaction_hash": selected_hash,
+                }
+            )
+            continue
         deployments[contract_name] = {
             "address": address,
-            "transaction_hash": tx_hash,
+            "transaction_hash": selected_hash,
         }
 
     expected_set = set(expected_names)
@@ -279,7 +375,7 @@ def extract_deployments(
             "duplicate deployment addresses: " + ", ".join(duplicate_addresses)
         )
 
-    return deployments
+    return deployments, ignored_deployments
 
 
 def build_manifest_input(
@@ -292,7 +388,13 @@ def build_manifest_input(
     broadcast = require_dict(load_json(broadcast_path), str(broadcast_path))
     names = expected_contract_names(template)
     chain_id = template_chain_id(template)
-    deployments = extract_deployments(broadcast, names, chain_id)
+    ignored_names = ignored_deployment_names(template)
+    deployments, ignored_deployments = extract_deployments(
+        broadcast,
+        names,
+        chain_id,
+        ignored_names,
+    )
 
     generated = copy.deepcopy(template)
     generated["output"] = normalize_path(manifest_output_path)
@@ -312,6 +414,7 @@ def build_manifest_input(
             }
             for name in names
         ],
+        "ignored_deployments": ignored_deployments,
     }
 
     manifest = require_dict(generated.get("manifest"), "manifest")

@@ -23,7 +23,7 @@ The committed baseline remains blocked for public beta and production release.
 
 | Phase | Issue Entries | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
+| Public Beta | 8 | 7 | 1 | 0 | 0 | 0 | 0 |
 | Production Release | 9 | 9 | 0 | 0 | 0 | 0 | 0 |
 
 ## Issue Entries
@@ -102,10 +102,10 @@ Suggested issue body:
 | Entry ID | `public-beta-fork-deployment-rehearsal` |
 | Phase | `Public Beta` |
 | Requirement ID | `fork_deployment_rehearsal` |
-| Status | `missing` |
-| Evidence posture | external/future |
+| Status | `pending` |
+| Evidence posture | retained-incomplete |
 | Suggested labels | `release`, `evidence`, `roadmap`, `public-beta` |
-| Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
+| Owner/reviewer posture | requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
 | Template | `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` |
 | Retained artifact expectation | `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`; Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation. |
@@ -118,9 +118,9 @@ Suggested issue body:
 
 - Phase: `Public Beta`
 - Requirement ID: `fork_deployment_rehearsal`
-- Current status: `missing`
-- Evidence posture: external/future
-- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
+- Current status: `pending`
+- Evidence posture: retained-incomplete
+- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template
 
 ## Source Links
 

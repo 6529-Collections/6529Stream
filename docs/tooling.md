@@ -157,18 +157,25 @@ removed or changed functions, events, custom errors, constructors, fallback, or
 receive entries. Additive entries are reported as compatible for this first
 baseline so maintainers can pair them with release notes and version policy.
 
-The broadcast manifest input step parses the sanitized Foundry fixture under
+The broadcast manifest input step parses the sanitized Foundry fixtures under
 `deployments/broadcasts/`, rejects wrong-chain, failed-receipt,
 missing-contract, unexpected-contract, duplicate, invalid-address, and
-secret-like-key inputs, and checks the generated broadcast-derived config under
-`deployments/config/`.
+secret-like-key inputs, and checks the generated broadcast-derived configs
+under `deployments/config/`. The default check covers both the local Anvil
+fixture and the pending-review mainnet-fork rehearsal fixture for issue #216.
+If a broadcast contains a linked library or helper deployment that is not part
+of the public release contract set, list it explicitly in
+`broadcast_evidence.ignored_deployments`; the generator records those ignored
+deployments in the derived config instead of silently hiding them.
 
 The deployment manifest step generates the local Anvil example from
 `deployments/config/anvil-6529stream-v0.1.0-001.json`, fills contract ABI and
 runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`,
 generates the sanitized broadcast-derived manifest from
-`deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`, and checks that
-both committed examples have not drifted.
+`deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`, generates the
+pending-review fork broadcast manifest from
+`deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`, and
+checks that all committed examples have not drifted.
 
 The address-book step projects committed deployment manifests into compact
 integrator-facing JSON under `deployments/address-books/`. Address books keep
@@ -177,6 +184,8 @@ paths, ABI hashes, runtime bytecode hashes, and verification status without the
 full ceremony and constructor-argument details from deployment manifests. They
 follow `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and are regenerated with `python scripts/generate_address_books.py`.
+The default drift check includes the Anvil placeholder, Anvil broadcast-derived,
+and pending-review fork-mainnet broadcast-derived address books.
 
 The ceremony-evidence step validates retained no-secret deployment evidence
 bundles under `deployments/ceremony-evidence/`. The committed Anvil bundle ties
@@ -232,9 +241,10 @@ signer custody ceremonies.
 
 The release-readiness step validates
 [`release-readiness.md`](release-readiness.md), the Gate G dashboard that
-separates passing local evidence from missing fork/testnet/live evidence,
-production signatures, signed Git tags, verified deployed addresses, explorer
-verification, external audit, and post-audit remediation blockers.
+separates passing local evidence and pending-review fork evidence from missing
+testnet/live evidence, production signatures, signed Git tags, verified
+deployed addresses, explorer verification, external audit, and post-audit
+remediation blockers.
 
 The public-beta evidence step validates
 [`public-beta-evidence.md`](public-beta-evidence.md) and
@@ -417,13 +427,16 @@ with the canonical checker, and supports `--check` for drift detection. It does
 not unblock a release row until the generated evidence is independently
 reviewed and linked from `release-artifacts/latest/public-beta-evidence.json`.
 Fork deployment rehearsal evidence for issue #216 also has a Markdown retained
-artifact template at
+artifact path at
 `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
 Run `python scripts/test_fork_deployment_rehearsal_evidence.py` and
 `python scripts/check_fork_deployment_rehearsal_evidence.py` before generating
-the metadata envelope. The committed template remains blocked until a reviewed
-fork artifact replaces the placeholders and is linked from the shared evidence
-manifest.
+the metadata envelope. The committed file now contains pending-review
+mainnet-fork rehearsal evidence captured at fork block `25316366`, with
+private RPC details redacted and public-beta readiness still blocked. Issue
+#216 can move to complete only after review accepts the retained artifact,
+non-local evidence envelope, public-beta evidence row, and generated
+manifest/address-book references.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release

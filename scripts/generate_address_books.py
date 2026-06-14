@@ -20,6 +20,7 @@ GENERATOR_VERSION = "1"
 DEFAULT_MANIFESTS = [
     Path("deployments/examples/anvil-6529stream-v0.1.0-001.json"),
     Path("deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json"),
+    Path("deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json"),
 ]
 DEFAULT_OUTPUT_DIR = Path("deployments/address-books")
 DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
