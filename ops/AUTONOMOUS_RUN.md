@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/testnet-deployment-rehearsal-evidence-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/356` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/357` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/359` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 21:57 UTC` |
+| Last updated | `2026-06-14 21:59 UTC` |
 
 ## Packaging Notes
 
@@ -241,10 +241,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add testnet deployment rehearsal retained artifact checker (Queue Item 174)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR #359 opened; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/357`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/359`.
 Branch: `codex/testnet-deployment-rehearsal-evidence-checker`.
 Branch started from PR #356 squash merge commit
 `dd61e79d1fba5dbfec105b46ee0544fed105b95e`.
@@ -286,6 +286,7 @@ Current facts:
 - User requested a more detailed implementation map for the combined 10/10
   roadmap; this branch now carries `ops/EXECUTION_BACKLOG.md` and roadmap/run
   state links so future PR selection survives compaction.
+- PR #359 opened at `2026-06-14 21:59 UTC`.
 
 Validation completed locally:
 
