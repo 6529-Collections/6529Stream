@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-audit-report-freshness-guard` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/300` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/301` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/302` |
 | Next issue | TBD after issue #301 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 03:48 UTC` |
+| Last updated | `2026-06-14 04:09 UTC` |
 
 ## Packaging Notes
 
@@ -207,12 +207,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Guard retained live audit report freshness against stale issue snapshots (Queue Item 145)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR open; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/301`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/302`.
 Branch: `codex/live-audit-report-freshness-guard`.
 Branch started from PR #300 squash merge commit
 `4c231c8684adebab89cc7f31f7f519bab7418045`.
+Opening head: `30195e922fdd7eada56301092196f31235e764ed`.
 
 Goal:
 
@@ -11653,6 +11654,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 04:09 | Open PR #302 | Retained live audit freshness guard PR opened on head `30195e922fdd7eada56301092196f31235e764ed`; it links issue #301, adds explicit freshness/currentness enforcement and committed historical/not-current retained reports, refreshes release evidence artifacts, and preserves blocked readiness claims. |
 | 2026-06-14 04:05 | Finish Queue Item 145 local validation | Focused live audit report, orchestrator, Markdown, archive, manifest, checksum, release-artifact, readiness, changelog, syntax, full Windows `scripts\check.ps1`, traceability, heading, and whitespace gates pass; public-beta/production readiness remains blocked. |
 | 2026-06-14 03:48 | Implement Queue Item 145 local draft | Added retained live audit report `snapshot_freshness` and `currentness_claim` enforcement, canonical Markdown/archive surfacing, historical/not-current markers for the committed template and dry-run, docs/readiness wording, and regenerated release manifest/checksum evidence while keeping readiness blocked. |
 | 2026-06-14 03:39 | Start Queue Item 145 | PR #300 merged as `4c231c8684adebab89cc7f31f7f519bab7418045`, issue #299 closed completed, issue #301 opened for retained live audit freshness guards, and branch `codex/live-audit-report-freshness-guard` started from the merged baseline. |
