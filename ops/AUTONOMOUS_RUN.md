@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-fork-evidence-checker-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/326` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/327` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/328` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 10:58 UTC` |
+| Last updated | `2026-06-14 11:02 UTC` |
 
 ## Packaging Notes
 
@@ -221,12 +221,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile fork deployment rehearsal evidence checker merge state (Queue Item 158)
 
-Status: branch in progress.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/327`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/328`.
 Branch: `codex/reconcile-fork-evidence-checker-merge-state`.
 Branch started from PR #326 squash merge commit
 `9ff5106834994de16a9f3bd55396743de8b98c77`.
+Initial PR head: `8f3e2892abacef5aa1b075ea9c671752e2cea36a`.
+CodeRabbit review requested via comment `4701539951`.
 
 Goal:
 
@@ -12335,6 +12337,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 11:02 | Open PR #328 | Reconciliation PR #328 opened for issue #327 on head `8f3e2892abacef5aa1b075ea9c671752e2cea36a`, records PR #326 merge evidence, preserves issue #216 as blocked for actual reviewed retained fork evidence, and requests CodeRabbit review via comment `4701539951`. |
 | 2026-06-14 10:58 | Start Queue Item 158 | PR #326 merged as `9ff5106834994de16a9f3bd55396743de8b98c77`, issue #325 closed completed, issue #327 opened for merge-state reconciliation, and branch `codex/reconcile-fork-evidence-checker-merge-state` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 10:55 | Merge PR #326 | Fork deployment rehearsal retained-artifact checker PR #326 passed CI run `27496425459` on final head `e580be8f4116d81ab2e55a671d748aeda714262b`, CodeRabbit status was success after review-finished reply `4701508377`, there were no unresolved review threads, merge-decision comment `4701523477` recorded the rate-limit warning as non-actionable, squash merge commit `9ff5106834994de16a9f3bd55396743de8b98c77` landed on `main`, and issue #325 closed completed. |
 | 2026-06-14 10:46 | Fix PR #326 issue-backlog drift | CI run `27496263678` passed through the refreshed packet-index check, then failed at `test_release_evidence_issue_backlog.py` because the committed issue backlog still reflected the old packet index; regenerate the issue backlog and issue body-sync artifacts plus downstream release manifest/checksum files, then rerun the grouped public-beta evidence chain locally. |
