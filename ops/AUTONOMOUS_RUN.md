@@ -39,7 +39,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 07:26 UTC` |
+| Last updated | `2026-06-14 07:41 UTC` |
 
 ## Packaging Notes
 
@@ -214,7 +214,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Retire first-party interface Solidity formatting deferrals (Queue Item 152)
 
-Status: PR opened; waiting for CI and CodeRabbit.
+Status: CI deployment-manifest drift fixed locally; preparing push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/314`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/316`.
 Branch: `codex/retire-first-party-formatting-deferrals`.
@@ -250,6 +250,15 @@ Validation:
 - `python scripts\generate_release_manifest.py --check`.
 - `python scripts\test_release_checksums.py`.
 - `python scripts\generate_release_checksums.py --check`.
+- `python scripts\test_deployment_manifest.py`.
+- `python scripts\generate_deployment_manifest.py --check`.
+- `python scripts\generate_deployment_manifest.py --config deployments\config\anvil-6529stream-v0.1.0-001-broadcast.json --check`.
+- `python scripts\test_address_books.py`.
+- `python scripts\generate_address_books.py --check`.
+- `python scripts\test_ceremony_evidence.py`.
+- `python scripts\check_ceremony_evidence.py`.
+- `python scripts\test_randomizer_operations.py`.
+- `python scripts\check_randomizer_operations.py`.
 - `python scripts\test_changelog_check.py`.
 - `python scripts\check_changelog.py`.
 - `python -m py_compile scripts\check_solidity_formatting.py scripts\test_solidity_formatting.py`.
@@ -11981,6 +11990,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 07:41 | Fix PR #316 deployment-manifest drift | CI run `27491891862` failed at `Deployment manifest` because source-formatting metadata changed release bytecode hashes and the derived deployment manifest was stale; regenerated local and broadcast deployment manifests, address books, retained ceremony/randomizer evidence hashes, release manifest, and checksum bundle, then reran the affected deployment/evidence/release checks and full Windows `scripts\check.ps1` successfully before pushing the fix. |
 | 2026-06-14 07:26 | Open PR #316 | PR #316 opened on head `786e55ff4386c919f80d55189a89286d91e8cafc`, closes issue #314, retires the first-party interface formatting deferrals, records the 27-required / 24-deferred formatting baseline, and requested CodeRabbit review via comment `4701042752`. |
 | 2026-06-14 07:23 | Validate Queue Item 152 locally | `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are formatted and removed from the deferred formatting baseline; focused formatting checks, release artifact/source-verification/manifest/checksum drift checks, changelog, ABI compatibility, production via-IR size gate, and full Windows `scripts\check.ps1` validation pass before PR opening. |
 | 2026-06-14 07:08 | Start Queue Item 152 | PR #315 merged as `e6cb5ce4029ee1f0eb2428b1fb8637041e6cba83`, issue #313 closed completed, issue #314 is the next focused formatting-baseline cleanup, and branch `codex/retire-first-party-formatting-deferrals` started from the merged baseline. |
