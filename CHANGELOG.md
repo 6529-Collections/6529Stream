@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a scoped Solidity formatting gate that requires formatted first-party
+  files while tracking the current deferred legacy/provenance-sensitive
+  formatting baseline.
 - Added curator reward Merkle root epochs and domain-separated reward leaves
   that bind proofs to the leaf domain, chain ID, pool address, collection ID,
   claimant, amount, and root epoch.

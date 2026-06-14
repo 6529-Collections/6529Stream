@@ -122,6 +122,8 @@ jobs:
             scripts/test_release_manifest.py \
             scripts/generate_release_checksums.py \
             scripts/test_release_checksums.py \
+            scripts/check_solidity_formatting.py \
+            scripts/test_solidity_formatting.py \
             scripts/check_changelog.py \
             scripts/test_changelog_check.py
 
@@ -180,6 +182,14 @@ jobs:
           set -o pipefail
           mkdir -p ci-logs
           forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
+
+      - name: Solidity formatting
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_solidity_formatting.py 2>&1 | tee ci-logs/solidity-formatting-tests.log
+          python3 scripts/check_solidity_formatting.py 2>&1 | tee ci-logs/solidity-formatting-check.log
 
       - name: Metadata fixture safety
         shell: bash
