@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:bd652a64b9388aff753109a0178784e7c66b123d110435f2ab30a08a822f2fb6",
+    "deployment_manifest_sha256": "sha256:fd79af401340b7f07fdd544b785ce57c4633b7839fd133018834648a8741a00a",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -34,7 +34,7 @@
       "source": "smart-contracts/RandomizerRNG.sol",
       "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
       "abi_hash": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
-      "runtime_bytecode_hash": "sha256:30b57c9919d840066b144bddbeea76fd5b44ec45b5a8dbc948cd21eb194c6799",
+      "runtime_bytecode_hash": "sha256:2d7cf99b30ed6616f1b8e98dae541a1fb8cf24925329b96d696c7d112a6e5fa9",
       "verification_status": "not_applicable"
     },
     "NextGenRandomizerVRF": {
@@ -42,7 +42,7 @@
       "source": "smart-contracts/RandomizerVRF.sol",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
       "abi_hash": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
-      "runtime_bytecode_hash": "sha256:69eb8b659d401911b9571a78576b60fe0363bcc4038fa9c91cdabe8708f32087",
+      "runtime_bytecode_hash": "sha256:428915bc7c191109700a6b3632f73e540b2e3829de195a125411487bda9b708e",
       "verification_status": "not_applicable"
     },
     "StreamAdmins": {
@@ -65,8 +65,8 @@
       "address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_hash": "sha256:d6f0423c319685c6cb976cc31929e3fa1d0a0fa3a6681080c8b503597dfc4d6b",
-      "runtime_bytecode_hash": "sha256:f7e02e71f851cdfa0419ae8558ce5b62c1fe0e5dde24ff190c83b193e50fc945",
+      "abi_hash": "sha256:b53d51f0532016726326d0a178b8aab449bd424864f4771077ef76a2cbfd725a",
+      "runtime_bytecode_hash": "sha256:2043cb8c2f8af661e4665e53eaa85c7f4b030e9435c4be5f6264efeb01d169eb",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -90,7 +90,7 @@
       "source": "smart-contracts/StreamMinter.sol",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
       "abi_hash": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
-      "runtime_bytecode_hash": "sha256:79d07a78dafdeaaae2b199cb7e1e16b075dbbbf91bb2e3a5dbf1c42ad45ed5ee",
+      "runtime_bytecode_hash": "sha256:8d9bebc4b9345e08c101e799214b185a0a3755c21f124c8fbb19423afdd3a3c6",
       "verification_status": "not_applicable"
     }
   }

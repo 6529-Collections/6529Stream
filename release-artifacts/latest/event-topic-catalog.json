@@ -103,45 +103,6 @@
       ]
     },
     {
-      "topic0": "0x16d060323a3077ffe326584a1327e288e6e7e7ac514309a093e053ad820ae7aa",
-      "signature": "ArtistApprovalRecorded(uint256,address,bytes32,string)",
-      "name": "ArtistApprovalRecorded",
-      "anonymous": false,
-      "inputs": [
-        {
-          "index": 0,
-          "name": "_collectionID",
-          "type": "uint256",
-          "indexed": true,
-          "internal_type": "uint256"
-        },
-        {
-          "index": 1,
-          "name": "artist",
-          "type": "address",
-          "indexed": true,
-          "internal_type": "address"
-        },
-        {
-          "index": 2,
-          "name": "approvalHash",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 3,
-          "name": "signature",
-          "type": "string",
-          "indexed": false,
-          "internal_type": "string"
-        }
-      ],
-      "emitted_by": [
-        "StreamCore"
-      ]
-    },
-    {
       "topic0": "0x16debb77644999724cf3499d2c3fd8ac65383bc44cc1bf5303185410bc5254ef",
       "signature": "GlobalAdminUpdated(address,bool,address)",
       "name": "GlobalAdminUpdated",
@@ -3837,42 +3798,6 @@
               "type": "bool",
               "indexed": false,
               "internal_type": "bool"
-            }
-          ]
-        },
-        {
-          "name": "ArtistApprovalRecorded",
-          "signature": "ArtistApprovalRecorded(uint256,address,bytes32,string)",
-          "topic0": "0x16d060323a3077ffe326584a1327e288e6e7e7ac514309a093e053ad820ae7aa",
-          "anonymous": false,
-          "inputs": [
-            {
-              "index": 0,
-              "name": "_collectionID",
-              "type": "uint256",
-              "indexed": true,
-              "internal_type": "uint256"
-            },
-            {
-              "index": 1,
-              "name": "artist",
-              "type": "address",
-              "indexed": true,
-              "internal_type": "address"
-            },
-            {
-              "index": 2,
-              "name": "approvalHash",
-              "type": "bytes32",
-              "indexed": true,
-              "internal_type": "bytes32"
-            },
-            {
-              "index": 3,
-              "name": "signature",
-              "type": "string",
-              "indexed": false,
-              "internal_type": "string"
             }
           ]
         },
