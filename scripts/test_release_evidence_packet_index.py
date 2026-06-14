@@ -188,6 +188,10 @@ def seed_all_templates(root: Path) -> None:
         root / generator.FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE,
         "Fork deployment rehearsal retained artifact template.\n",
     )
+    write_text(
+        root / generator.TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE,
+        "Testnet deployment rehearsal retained artifact template.\n",
+    )
     seed_templates(
         root,
         non_local_checker.PRODUCTION_RELEASE_TEMPLATE_DIR,
@@ -292,7 +296,7 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             row = next(
                 row
                 for row in packet["rows"]
-                if row["requirement_id"] == "testnet_deployment_rehearsal"
+                if row["requirement_id"] == "fork_testnet_metadata_browser_evidence"
             )
 
             self.assertEqual(row["template_only_can_complete"], False)
@@ -380,6 +384,46 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             self.assertIn(
                 "python scripts/check_fork_deployment_rehearsal_evidence.py",
                 fork_row["validation_commands"],
+            )
+
+    def test_testnet_rehearsal_row_uses_canonical_retained_artifact(self) -> None:
+        """Testnet deployment tracker rows point at the testnet-specific template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            testnet_row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"] == generator.TESTNET_DEPLOYMENT_REQUIREMENT_ID
+            )
+
+            self.assertEqual(
+                testnet_row["retained_artifact_expectation"]["path"],
+                generator.TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+            )
+            self.assertEqual(
+                testnet_row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(
+                    root / generator.TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE
+                ),
+            )
+            self.assertIn(
+                "python scripts/test_testnet_deployment_rehearsal_evidence.py",
+                testnet_row["validation_commands"],
+            )
+            self.assertIn(
+                "python scripts/check_testnet_deployment_rehearsal_evidence.py",
+                testnet_row["validation_commands"],
             )
 
     def test_outputs_are_deterministic(self) -> None:

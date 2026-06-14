@@ -180,6 +180,28 @@ the generated non-local evidence envelope remains in sync, and
 `release-artifacts/latest/public-beta-evidence.json` is updated consistently
 with the accepted retained artifact.
 
+### Testnet Deployment Retained Artifact
+
+Tracker issue #217 requires reviewed retained testnet deployment rehearsal
+evidence before `testnet_deployment_rehearsal` can move to `complete`. Use
+[`release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`](../release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md)
+as the canonical retained transcript path. It records the Sepolia chain ID,
+testnet block or transaction references, sanitized deployment transcript,
+sanitized broadcast, generated manifest, address book, explorer verification
+status, gas or invariant summary, redaction confirmation, and reviewer
+decision.
+
+The committed file is template-only. It is not evidence that a testnet
+deployment rehearsal occurred, and issue #217 remains open until reviewed
+retained evidence is linked from the shared public-beta evidence manifest.
+
+The retained artifact is checked separately from the JSON metadata envelope:
+
+```sh
+python scripts/test_testnet_deployment_rehearsal_evidence.py
+python scripts/check_testnet_deployment_rehearsal_evidence.py
+```
+
 ## Public-Beta Requirement Mapping
 
 When evidence is retained, update the matching requirement row in
@@ -189,7 +211,7 @@ When evidence is retained, update the matching requirement row in
 | --- | --- |
 | `external_audit_report` | Final external audit report, scope, commit, issue-linked findings, and remediation state |
 | `fork_deployment_rehearsal` | Fork transcript, sanitized broadcast, manifest, address book, verification status, gas/invariant summary |
-| `testnet_deployment_rehearsal` | Testnet transcript, sanitized broadcast, manifest, address book, explorer verification status |
+| `testnet_deployment_rehearsal` | Testnet transcript, transaction references, sanitized broadcast, manifest, address book, explorer verification status |
 | `fork_testnet_metadata_browser_evidence` | Browser execution output for token metadata generated from deployed fork/testnet contracts |
 | `fork_testnet_ceremony_evidence` | Fork/testnet deployment/admin/signer/auction/emergency ceremony evidence |
 | `fork_testnet_randomizer_operations_evidence` | Fork/testnet provider, funding, epoch, callback, reserve, migration, stale/failed/retry, pause, and emergency evidence |
@@ -360,6 +382,23 @@ the public-beta row remains `missing` until a final reviewed audit report,
 audited commit/scope, finding remediation map, retest or accepted-risk status,
 and reviewer confirmation are retained and linked from the shared
 public-beta evidence manifest.
+
+The testnet deployment rehearsal row has a dedicated retained-artifact template
+at
+`release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`.
+Before generating the non-local metadata envelope for
+`testnet_deployment_rehearsal`, run:
+
+```sh
+python scripts/test_testnet_deployment_rehearsal_evidence.py
+python scripts/check_testnet_deployment_rehearsal_evidence.py
+```
+
+The committed template is not completion evidence. Issue #217 remains open and
+the public-beta row remains `missing` until reviewed testnet transcript,
+transaction references, sanitized broadcast, generated manifest/address book,
+explorer status, and reviewer confirmation are retained and linked from the
+shared public-beta evidence manifest.
 
 ### Release Signing Evidence
 

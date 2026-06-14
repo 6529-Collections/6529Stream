@@ -9,6 +9,11 @@ production-ready. Work should move through decisions, characterization tests,
 implementation, verification, deployment rehearsal, and release gates in that
 order.
 
+Use `ops/EXECUTION_BACKLOG.md` for the PR-sized implementation queue. This file
+defines strategy, gates, and readiness criteria; the execution backlog defines
+the concrete next work items, dependencies, acceptance criteria, and evidence
+requirements needed to move toward a 10/10 open-source protocol repo.
+
 ## 0. Current Status
 
 ### Maturity Statement
@@ -95,6 +100,15 @@ order.
   headroom, above the 384-byte minimum release floor but below the 512-byte
   warning threshold. Large non-trivial Core work should recover headroom or
   explicitly spend an approved size budget first.
+- A clean-main reviewer reassessment at commit
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` reported that
+  `forge build`, `forge test -vvv` with 316 tests, gas snapshot checks, and the
+  production size build passed. Treat that as a useful status correction, not a
+  production-readiness claim: the remaining "10/10 open-source NFT protocol"
+  work is now concentrated in production trust evidence, testnet/live release
+  proof, marketplace/indexer evidence, contract-level metadata, 1/1 provenance,
+  collector-verifiable permanence, explicit royalty philosophy, quiet
+  warning/lint baselines, and continued `StreamCore` size discipline.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -102,12 +116,12 @@ order.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-14 17:43 UTC` for merged baseline PR #354: external audit retained-artifact checker support passed focused tests, release evidence checks, changelog, whitespace, and full Windows `scripts\check.ps1` locally; PR #354 CI run `27506666878` passed on final head `859749113b2c141542317af4406fd7a19a039054` before squash merge `300d96c8e80701c3814873993650ad57decbe695`; issue #353 closed completed; issue #215 remains open for real reviewed external audit evidence and its live body was synced to the dedicated retained-artifact path/checker commands |
-| OS tested | GitHub Actions passed for merged baseline PR #354 CI run `27506666878` on head `859749113b2c141542317af4406fd7a19a039054`, including Windows PowerShell wrapper job `81299029608` and Foundry smoke job `81299029630`, with merged baseline commit `300d96c8e80701c3814873993650ad57decbe695` |
+| Last verified | `2026-06-14 18:08 UTC` for merged baseline PR #356: roadmap/run-state reconciliation for PR #354 passed heading, release-manifest, release-checksum, changelog, and whitespace checks locally; PR #356 CI run `27507051549` passed on final head `a19f728c01e20cba1afad7ac90ec6533d1014cbe` before squash merge `dd61e79d1fba5dbfec105b46ee0544fed105b95e`; issue #355 closed completed; issue #217 remains open for real reviewed testnet deployment rehearsal evidence |
+| OS tested | GitHub Actions passed for merged baseline PR #356 CI run `27507051549` on head `a19f728c01e20cba1afad7ac90ec6533d1014cbe`, including Windows PowerShell wrapper job `81300070339` and Foundry smoke job `81300070342`, with merged baseline commit `dd61e79d1fba5dbfec105b46ee0544fed105b95e` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #354 CI run `27506666878` passed on head `859749113b2c141542317af4406fd7a19a039054`; CodeRabbit status was success with no unresolved review threads after explicit review request comment `4702511746` and review-finished reply `4702511950`; merge-decision comment `4702529737`; PR #354 squash-merged as `300d96c8e80701c3814873993650ad57decbe695`; issue #353 closed completed |
+| CI run | Latest merged baseline PR #356 CI run `27507051549` passed on head `a19f728c01e20cba1afad7ac90ec6533d1014cbe`; CodeRabbit status was success with no unresolved review threads after explicit review request comment `4702549856` and review-finished reply `4702550060`; merge-decision comment `4702573973`; PR #356 squash-merged as `dd61e79d1fba5dbfec105b46ee0544fed105b95e`; issue #355 closed completed |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
@@ -647,6 +661,15 @@ later sections.
 - If ERC-4906 is implemented, test `supportsInterface(0x49064906)`.
 - Emit `MetadataUpdate` / `BatchMetadataUpdate` only when JSON metadata changes,
   not merely on mint or burn unless intentionally documented.
+- Decide whether to implement ERC-7572-style `contractURI()` and
+  `ContractURIUpdated`. ERC-7572 is draft status, but contract-level metadata is
+  already marketplace-relevant and should be explicit before public beta.
+- Treat 1/1 provenance as a first-class NFT surface: artist statement,
+  certificate/authenticity hash, curation notes, exhibition/history records,
+  collector-facing provenance events, and frozen provenance manifests.
+- Decide the royalty product philosophy before release: ERC-2981 information
+  only, richer per-collection/per-token policy, or optional creator-fee
+  enforcement with a documented transfer-composability tradeoff.
 - Define ABI and interface stability expectations.
 - Maintain a changelog for external API, interface, event, and deployment
   changes.
@@ -1918,6 +1941,25 @@ Acceptance criteria:
     future ADR accepts the bytecode/gas cost.
   - Decide realistic collection sizes and gas targets before promising large
     ranges publicly.
+- Add contract-level metadata as a tracked standards item rather than a hidden
+  marketplace assumption:
+  - Decide ERC-7572-style `contractURI()` support, event naming, JSON schema,
+    mutability/freeze policy, and interface exposure.
+  - Keep the implementation out of `StreamCore` unless a size-budget exception
+    is accepted; prefer satellite contracts, libraries, or metadata adapters
+    while `StreamCore` headroom is below the warning threshold.
+- Add royalty policy as an explicit governance/product ADR:
+  - Current ERC-2981 behavior exposes royalty information but does not enforce
+    secondary-sale payment.
+  - Decide default royalty governance, per-token or per-collection overrides,
+    recipient rotation, marketplace display expectations, and whether any
+    optional transfer-validator or creator-fee enforcement is in scope.
+- Treat release-grade compiler and linter quietness as product polish:
+  - Burn down unused randomizer parameters or document intentional interface
+    compatibility.
+  - Burn down pure/view mutability suggestions where safe.
+  - Remove invalid NatSpec tags or record explicit third-party/vendored
+    dispositions.
 - Establish gas budgets for mint, bid, settle, curator claim, `tokenURI`, and
   dependency/script reads.
 - Replace ambiguous revert strings with custom errors for security-relevant
@@ -2089,6 +2131,10 @@ No P0 contract PR may merge without:
   converting the 17-file residual baseline into reviewed exemptions while
   preserving strict formatting for all non-exempt Solidity files.
 - Burn down invalid NatSpec tags and warning baseline.
+- Burn down release-grade warning noise: unused parameters, pure/view
+  suggestions, invalid NatSpec tags, and any remaining lint diagnostics must be
+  fixed, renamed, or documented with reviewed dispositions before a top-tier
+  release claim.
 - Normalize Solidity pragmas across source, interfaces, tests, and vendored
   files.
 - Add Markdown lint.
@@ -2437,6 +2483,15 @@ No P0 contract PR may merge without:
 - Manifold or other common collector tooling.
 - ERC-2981 royalty note: `royaltyInfo()` exposes royalty information, but
   payment depends on marketplace or external payment logic.
+- Contract-level metadata evidence: marketplace reads `contractURI()` or the
+  documented fallback, displays collection metadata correctly, and observes
+  `ContractURIUpdated` if implemented.
+- Metadata refresh evidence: OpenSea, Reservoir, Blur, Manifold, or equivalent
+  collector tooling can refresh token metadata, display animation output, show
+  royalty information, and survive stale/failed/frozen/burned metadata states.
+- Transfer/sale smoke evidence: at least one testnet or fork marketplace/indexer
+  path proves transfer, listing or simulated sale, royalty display, event replay,
+  and metadata cache invalidation assumptions without leaking secrets.
 
 ## 13. P3 Content, Legal, Privacy, And Long-Term Scale
 
@@ -2453,6 +2508,20 @@ No P0 contract PR may merge without:
 - Add malware or hostile script review.
 - Add PII/secrets accidental inclusion playbook.
 - Add jurisdiction and sanctions escalation path for payout recipients.
+- Add a first-class 1/1 provenance layer:
+  - Artist statement and collector-facing work description.
+  - Certificate/authenticity hash and signed provenance statement.
+  - Curation notes, exhibition/history records, and provenance update policy.
+  - Collector-facing provenance events or retained evidence if events are kept
+    out of Core for size reasons.
+  - Frozen provenance manifest tied to collection/token freeze manifests.
+- Add a collector-verifiable permanence package:
+  - Deterministic renderer and dependency/source archive.
+  - Token output hashes and replay instructions.
+  - Browser proof for final token output.
+  - Clear guarantees for fully on-chain data versus decentralized-storage,
+    gateway, or external dependency assumptions.
+  - Release artifact bundle that collectors can verify independently.
 
 ### Pre-Mint Content Checklist
 
@@ -2593,6 +2662,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Local gas snapshot baseline | Mint, bid, settlement, curator claim, `tokenURI`, and dependency/script read gas are measured by deterministic local snapshots | `test/StreamGasSnapshot.t.sol`, `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`, `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap` | Passing locally: Foundry gas snapshot records fixed-price mint, auction bid, auction settlement with bid, curator reward claim, final on-chain `tokenURI`, and dependency generative-script read operations with setup gas paused; local/CI gates fail if the committed snapshot drifts. Fork/testnet/mainnet gas reports remain future release work. | [`Local gas snapshot baseline`](https://github.com/6529-Collections/6529Stream/issues/146) | Gate D/Gate G | TBD |
 | Forced ETH accounting | Forced/direct ETH does not corrupt owed/surplus accounting | `test/StreamAuctionPayments.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamRandomizerPayments.t.sol`, `test/StreamPaymentsInvariant.t.sol` | Passing for current first-party local accounting: direct and forced ETH regressions cover auction, fixed-price drops, curator pool, StreamMinter, and NextGenRandomizerRNG local accounting, including forced ETH during a pending randomizer request; bounded sequence fuzzing now injects deterministic forced-balance surplus between mixed operations and proves owed totals, reserves, balance coverage, and emergency-withdrawable surplus stay coherent. | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`#152`](https://github.com/6529-Collections/6529Stream/issues/152) | Gate C/Gate D | TBD |
 | External audit report retained artifact | Future external audit report evidence must retain a final report or public report reference, audited commit, audit scope, finding IDs and severities, remediation links, accepted-risk references, retest status, reviewer approval, and no-secret redaction fields | `scripts/test_external_audit_report_evidence.py`, `scripts/check_external_audit_report_evidence.py`, `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`, `release-artifacts/evidence/public-beta-templates/external-audit-report-template.json`, `release-artifacts/latest/release-evidence-packet-index.json`, `release-artifacts/latest/release-evidence-issue-backlog.json`, `release-artifacts/latest/release-evidence-issue-body-sync.json`, `docs/non-local-release-evidence.md` | Merged in PR #354 / issue #353: a dedicated template and checker validate the external audit retained-artifact shape, packet/backlog/body-sync generators point issue #215 at the dedicated path, live issue #215 was updated from the generated body-sync payload, and `external_audit_report` remains `missing` until real reviewed evidence is retained. | [`#215`](https://github.com/6529-Collections/6529Stream/issues/215), [`#353`](https://github.com/6529-Collections/6529Stream/issues/353), [`PR #354`](https://github.com/6529-Collections/6529Stream/pull/354), [`#355`](https://github.com/6529-Collections/6529Stream/issues/355) | Gate F/Gate G | TBD |
+| Testnet deployment rehearsal retained artifact | Future testnet deployment rehearsal evidence must retain Sepolia chain metadata, testnet block or transaction references, sanitized command transcript, sanitized Foundry broadcast, generated manifest, generated address book, explorer verification status, gas or invariant summary, reviewer approval, and no-secret redaction fields | `scripts/test_testnet_deployment_rehearsal_evidence.py`, `scripts/check_testnet_deployment_rehearsal_evidence.py`, `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`, `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json`, `release-artifacts/latest/release-evidence-packet-index.json`, `release-artifacts/latest/release-evidence-issue-backlog.json`, `release-artifacts/latest/release-evidence-issue-body-sync.json`, `docs/non-local-release-evidence.md` | In progress on branch `codex/testnet-deployment-rehearsal-evidence-checker`: a dedicated template and checker validate the testnet retained-artifact shape, packet/backlog/body-sync generators point issue #217 at the dedicated path, and `testnet_deployment_rehearsal` remains `missing` until real reviewed evidence is retained. | [`#217`](https://github.com/6529-Collections/6529Stream/issues/217), [`#357`](https://github.com/6529-Collections/6529Stream/issues/357) | Gate E/Gate G | TBD |
 | Fork deployment rehearsal retained artifact | Reviewed fork deployment rehearsal evidence must retain fork command output, fork block reference, sanitized broadcast, generated manifest, generated address book, verification status, gas or invariant summary, release digest references, and reviewer approval without secrets | `scripts/test_fork_deployment_rehearsal_evidence.py`, `scripts/check_fork_deployment_rehearsal_evidence.py`, `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`, `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json`, `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json`, `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`, `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`, `release-artifacts/latest/public-beta-evidence.json`, `docs/non-local-release-evidence.md`, `scripts/test_release_evidence_packet_index.py` | Merged in PR #350: reviewed mainnet-fork evidence captures fork block `25316366`, fork hash `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`, sanitized broadcast `sha256:554852de9ecdefb01dae1a7724c47d4379e876d2ba5ee06778d9fef78258a08f`, generated fork manifest `sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736`, generated fork address book `sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4`, reviewed non-local evidence metadata, CodeRabbit status success on PR #347/#349/#350, supporting CI runs `27503447725` and `27504228132`, and final PR #350 CI run `27505334136` passed Windows PowerShell wrapper job `81295431136` and Foundry smoke job `81295431140`. The `fork_deployment_rehearsal` public-beta row is `complete`, issue #216 left the active backlog/link/body-sync set and closed completed, and overall public-beta readiness remains `blocked` on the remaining missing evidence rows. | [`#325`](https://github.com/6529-Collections/6529Stream/issues/325), [`PR #326`](https://github.com/6529-Collections/6529Stream/pull/326), [`#327`](https://github.com/6529-Collections/6529Stream/issues/327), [`PR #328`](https://github.com/6529-Collections/6529Stream/pull/328), [`#329`](https://github.com/6529-Collections/6529Stream/issues/329), [`PR #330`](https://github.com/6529-Collections/6529Stream/pull/330), [`#333`](https://github.com/6529-Collections/6529Stream/issues/333), [`#216`](https://github.com/6529-Collections/6529Stream/issues/216), [`PR #347`](https://github.com/6529-Collections/6529Stream/pull/347), [`#348`](https://github.com/6529-Collections/6529Stream/issues/348), [`PR #349`](https://github.com/6529-Collections/6529Stream/pull/349), [`PR #350`](https://github.com/6529-Collections/6529Stream/pull/350), [`#351`](https://github.com/6529-Collections/6529Stream/issues/351) | Gate E/Gate G | TBD |
 | Fork deployment release artifact coverage | The fork deployment retained artifact, sanitized broadcast, generated fork manifest, generated fork address book, non-local evidence envelope, public-beta evidence row, release manifest, checksum bundle, tooling docs, release-readiness docs, generated evidence tracker issue payloads, and retained live issue-body audit bundle stay covered by local gates and CI without overstating readiness claims | `Makefile`, `scripts/check.sh`, `scripts/check.ps1`, `.github/workflows/ci.yml`, `scripts/generate_broadcast_manifest_input.py --template deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --broadcast deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json --output deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --manifest-output deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_address_books.py --check`, `scripts/generate_release_evidence_packet_index.py --check`, `scripts/generate_release_evidence_issue_backlog.py --check`, `scripts/generate_release_evidence_issue_body_sync.py --check`, `scripts/check_release_evidence_issue_bodies.py`, `scripts/check_release_evidence_issue_closure.py`, `scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check`, `scripts/generate_release_manifest.py --check`, `scripts/generate_release_checksums.py --check`, `docs/tooling.md`, `docs/release-readiness.md`, `CHANGELOG.md` | Merged in PR #350: fork retained evidence is reviewed, the public-beta blocker report moves the row to reviewed external evidence, the active evidence issue backlog and issue-link/body-sync artifacts drop #216 because its row is complete, release manifest/checksum coverage is refreshed, and CI run `27505334136` passed. Readiness is not overstated: public beta remains `blocked` because seven public-beta and nine production-release evidence rows are still missing. | [`#325`](https://github.com/6529-Collections/6529Stream/issues/325), [`PR #326`](https://github.com/6529-Collections/6529Stream/pull/326), [`#327`](https://github.com/6529-Collections/6529Stream/issues/327), [`PR #328`](https://github.com/6529-Collections/6529Stream/pull/328), [`#329`](https://github.com/6529-Collections/6529Stream/issues/329), [`PR #330`](https://github.com/6529-Collections/6529Stream/pull/330), [`#333`](https://github.com/6529-Collections/6529Stream/issues/333), [`#216`](https://github.com/6529-Collections/6529Stream/issues/216), [`PR #347`](https://github.com/6529-Collections/6529Stream/pull/347), [`#348`](https://github.com/6529-Collections/6529Stream/issues/348), [`PR #349`](https://github.com/6529-Collections/6529Stream/pull/349), [`PR #350`](https://github.com/6529-Collections/6529Stream/pull/350), [`#351`](https://github.com/6529-Collections/6529Stream/issues/351), [`P1-RELEASE-006`](https://github.com/6529-Collections/6529Stream/issues/105), [`P1-RELEASE-004`](https://github.com/6529-Collections/6529Stream/issues/101) | Gate E/Gate G | TBD |
 

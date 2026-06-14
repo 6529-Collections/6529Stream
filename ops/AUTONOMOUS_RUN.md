@@ -32,14 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-pr-354-merge-state` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/354` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/355` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/356` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/215` (`external_audit_report` remains open for real reviewed audit evidence) |
+| Active PR branch | `codex/testnet-deployment-rehearsal-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/356` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/357` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/359` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence) |
 | Roadmap file | `ops/ROADMAP.md` |
+| Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 17:46 UTC` |
+| Last updated | `2026-06-14 21:59 UTC` |
 
 ## Packaging Notes
 
@@ -50,6 +51,10 @@ tests, security hardening, deployment discipline, and release/audit readiness.
   active queue item.
 - Use clean branches from `origin/main` for each PR unless an active PR branch is
   already recorded here.
+- Use `ops/EXECUTION_BACKLOG.md` as the PR-sized implementation map. After the
+  active testnet evidence checker branch, pick substantive follow-up work from
+  its first 30 PR queue and fold future state updates into delivery PRs by
+  default.
 
 ## PR Queue
 
@@ -229,13 +234,96 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 170 | Reconcile PR #347 fork evidence merge state | Gate G support | Record PR #347 merge evidence, apply the generated issue-body sync to live issue #216 so it shows `pending`, retain a no-secret live audit report bundle, refresh release manifest/checksum coverage, and preserve issue #216 open until evidence acceptance | Merged in PR #349 |
 | 171 | Reconcile PR #350 reviewed fork evidence merge state | Gate G support | Record PR #350 merge evidence, close out issue #216/Queue Item 164 in durable state, refresh roadmap verification metadata, and select issue #215 as the next release-evidence target without changing readiness claims | Merged in PR #352 |
 | 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Merged in PR #354 |
-| 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Active for issue #355 |
+| 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Merged in PR #356 |
+| 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Active for issue #357 |
 
 ## Current PR Worklog
 
-### PR candidate: Reconcile PR #354 merge state (Queue Item 173)
+### PR candidate: Add testnet deployment rehearsal retained artifact checker (Queue Item 174)
 
-Status: PR #356 opened and awaiting CI plus CodeRabbit.
+Status: PR #359 opened; initial CI passed; CodeRabbit feedback addressed
+locally and ready for rerun.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/357`.
+Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/359`.
+Branch: `codex/testnet-deployment-rehearsal-evidence-checker`.
+Branch started from PR #356 squash merge commit
+`dd61e79d1fba5dbfec105b46ee0544fed105b95e`.
+
+Goal:
+
+- Add a dedicated retained-artifact Markdown template for
+  `testnet_deployment_rehearsal`.
+- Add a focused offline checker and tests for Sepolia chain metadata, testnet
+  block or transaction references, sanitized transcript/broadcast paths,
+  generated manifest/address-book references, explorer status, reviewer
+  decision, and no-secret redaction fields.
+- Wire the checker into local and CI evidence gates.
+- Point the generated packet index, issue backlog, and issue body-sync payloads
+  at the dedicated testnet retained artifact path.
+- Preserve issue #217 as open and `testnet_deployment_rehearsal` as `missing`
+  until real reviewed testnet evidence is retained.
+- Fold durable state updates into this substantive PR rather than opening a
+  standalone reconciliation PR.
+- Add `ops/EXECUTION_BACKLOG.md` as the PR-sized 10/10 implementation map that
+  combines internal audit, external structural assessment, and integration
+  readiness into concrete follow-up PRs.
+
+Current facts:
+
+- PR #356 merged as squash commit
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e`.
+- PR #356 final head
+  `a19f728c01e20cba1afad7ac90ec6533d1014cbe` passed CI run
+  `27507051549`: Windows PowerShell wrapper job `81300070339` and Foundry
+  smoke job `81300070342`.
+- CodeRabbit status was success. The explicit review request comment
+  `4702549856` received review-finished reply `4702550060`; no review threads
+  were open.
+- Merge-decision comment `4702573973` recorded the autonomous merge basis and
+  the process correction to avoid standalone bookkeeping PRs by default.
+- Issue #355 closed completed at `2026-06-14 17:58 UTC`.
+- Issue #357 tracks this no-secret support work for parent evidence issue #217.
+- User requested a more detailed implementation map for the combined 10/10
+  roadmap; this branch now carries `ops/EXECUTION_BACKLOG.md` and roadmap/run
+  state links so future PR selection survives compaction.
+- PR #359 opened at `2026-06-14 21:59 UTC`.
+
+Validation completed locally:
+
+- `python scripts/test_testnet_deployment_rehearsal_evidence.py`.
+- `python scripts/check_testnet_deployment_rehearsal_evidence.py`.
+- Generated release evidence packet/backlog/body-sync tests and check modes.
+- Non-local release evidence, public-beta evidence, release-readiness,
+  release-manifest, release-checksum, and changelog checks.
+- `rg -n "^(#|##|###) " ops/EXECUTION_BACKLOG.md ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`.
+- Full Windows local gate with Foundry on PATH:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`,
+  completed at `2026-06-14 21:57 UTC`.
+- Sidecar verifier findings addressed before PR publication: reviewed testnet
+  evidence now requires successful `yes` result fields, rejects CLI-style
+  private key/RPC/token material, scans referenced retained files, and ignores
+  Python bytecode caches through `.gitignore`.
+- CodeRabbit review at `2026-06-14 22:23 UTC` raised two valid doc/backlog
+  fixes: add explicit operator redaction requirements to the testnet deployment
+  rehearsal tooling guidance and change the `testnet_deployment_rehearsal`
+  evidence-row transition wording from `missing -> reviewed` to
+  `missing -> complete`. Both are fixed locally with regenerated release
+  manifest/checksum artifacts.
+- User supplied a clean-main reviewer reassessment after that fix pass. The
+  reviewer reported that commit
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` passes `forge build`,
+  `forge test -vvv` with 316 tests, gas snapshot checks, and production size
+  build, while `StreamCore` remains tight at 24,139 runtime bytes with 437
+  bytes of EIP-170 headroom. The roadmap/backlog now records the remaining
+  "world-class 1/1 NFT" gaps as `ONE-*` work: ERC-7572-style contract-level
+  metadata, collector provenance, royalty philosophy, permanence package,
+  marketplace/indexer evidence, satellite-extension size discipline, and
+  warning/lint/NatSpec burn-down.
+
+### Completed: Reconcile PR #354 merge state (Queue Item 173)
+
+Status: merged in PR #356; issue #355 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/355`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/215`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/356`.
@@ -274,6 +362,17 @@ Current facts:
   open for real reviewed external audit evidence.
 - PR #356 opened from head
   `67aa5e96eb366d0f01aed389e0e3eee1afa6bc81`.
+- PR #356 final head
+  `a19f728c01e20cba1afad7ac90ec6533d1014cbe` passed CI run
+  `27507051549`: Windows PowerShell wrapper job `81300070339` and Foundry
+  smoke job `81300070342`.
+- CodeRabbit status was success. The explicit review request comment
+  `4702549856` received review-finished reply `4702550060`; no review threads
+  were open.
+- Merge-decision comment `4702573973` recorded the autonomous merge basis.
+- PR #356 squash-merged as
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` and closed issue #355 as
+  completed.
 
 Validation planned locally:
 
@@ -13220,6 +13319,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 18:08 | Merge PR #356 and start Queue Item 174 | PR #356 squash-merged as `dd61e79d1fba5dbfec105b46ee0544fed105b95e` after CI run `27507051549` passed Windows PowerShell wrapper job `81300070339` and Foundry smoke job `81300070342`; CodeRabbit status was success with review-finished reply `4702550060`, no review threads were open, merge-decision comment `4702573973` documented the autonomous merge basis and the process correction to avoid standalone bookkeeping PRs by default, issue #355 closed completed, issue #357 opened for testnet deployment rehearsal retained-artifact checker support, and branch `codex/testnet-deployment-rehearsal-evidence-checker` started from the merged baseline. |
+| 2026-06-14 18:00 | Select substantive next item | After reviewing the recent PR stream and current blocker reports, selected `testnet_deployment_rehearsal` issue #217 as the next substantive public-beta evidence hardening target because it still used the generic retained-artifact placeholder and blocks public beta; durable state updates will ride with the substantive PR rather than becoming a standalone reconciliation PR. |
 | 2026-06-14 17:46 | Open PR #356 | PR #356 opened on head `67aa5e96eb366d0f01aed389e0e3eee1afa6bc81`, records PR #354 merge evidence, live issue #215 body-sync status, issue #353 completion, and roadmap verification metadata while preserving issue #215 as open/missing for real reviewed audit evidence. |
 | 2026-06-14 17:43 | Merge PR #354 and start Queue Item 173 | PR #354 squash-merged as `300d96c8e80701c3814873993650ad57decbe695` after CI run `27506666878` passed Windows PowerShell wrapper job `81299029608` and Foundry smoke job `81299029630`; CodeRabbit status was success with review-finished reply `4702511950`, no review threads were open, merge-decision comment `4702529737` documented the autonomous merge basis, issue #353 closed completed, live issue #215 was updated from the generated body-sync payload to reference the dedicated external-audit retained artifact path/checker commands, issue #355 opened for merge-state reconciliation, and branch `codex/reconcile-pr-354-merge-state` started from the merged baseline. |
 | 2026-06-14 17:31 | Open PR #354 | PR #354 opened on head `4e9ae7f8798507a81f60cfa5af2f3225a8d16611`, adds the dedicated external audit report retained-artifact template/checker/tests, wires the checker into CI/local gates/generated release trackers, preserves issue #215 open and `external_audit_report` missing until real reviewed audit evidence exists, and awaits CI plus CodeRabbit review before merge. |

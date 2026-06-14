@@ -1,0 +1,2158 @@
+# 6529Stream Execution Backlog
+
+Status: active implementation map.
+
+This backlog turns the strategic roadmap in `ops/ROADMAP.md` into PR-sized
+work. It combines three inputs:
+
+- The repo-level audit performed during the autonomous run.
+- The external structural assessment: 6529Stream is a serious pre-audit
+  protocol stack, not production-ready, with the largest remaining gaps in
+  external execution evidence, release proof, governance operations, and
+  adversarial validation.
+- The integration-readiness target for a 6529.io-style product stack across
+  React, mobile, Electron, indexers, wallets, and operator tooling.
+
+The target is a 10/10 open-source NFT protocol repo: auditors, frontend
+engineers, operators, contributors, and protocol maintainers can independently
+understand, verify, deploy, integrate, and monitor the system without private
+conversation context.
+
+## 0. Operating Model
+
+### Canonical Files
+
+| File | Purpose |
+| --- | --- |
+| `ops/ROADMAP.md` | Strategic gates, maturity status, launch criteria, and long-form issue context |
+| `ops/EXECUTION_BACKLOG.md` | PR-sized implementation map and dependency ordering |
+| `ops/AUTONOMOUS_RUN.md` | Current branch, active PR, merge/review state, and running worklog |
+| `ops/SLITHER_BASELINE.md` | Static-analysis finding inventory and accepted/fixed status |
+| `release-artifacts/latest/` | Generated release state that must stay deterministic |
+
+### Anti-Drift Rules
+
+- Prefer substantive PRs over standalone reconciliation PRs.
+- Fold roadmap/run-state updates into the delivery PR that made them true.
+- Mark scaffolds, templates, and checkers as scaffolds. Do not describe them as
+  completed evidence until reviewed real artifacts exist.
+- Every PR must advance at least one readiness lane:
+  - contract safety,
+  - adversarial testing,
+  - non-local execution evidence,
+  - release integrity,
+  - governance operations,
+  - integration readiness,
+  - audit readiness,
+  - open-source contributor quality.
+- If a PR only reorganizes state, it must explain why that reorganization is
+  blocking execution.
+
+### PR Item Shape
+
+Each implementable item should be refined into this shape before work starts:
+
+- Problem.
+- Outcome.
+- Gate and readiness blocker.
+- Files likely touched.
+- Implementation steps.
+- Required tests/checks.
+- Acceptance criteria.
+- Evidence artifacts.
+- Dependencies.
+- Issue and PR links.
+
+### Work Type Codes
+
+| Code | Meaning |
+| --- | --- |
+| `MAP` | Execution planning and backlog control |
+| `EXT` | External execution evidence: fork, testnet, live, explorer, retained transcripts |
+| `ADV` | Adversarial, invariant, fuzz, fork, or economic attack tests |
+| `CON` | Contract/API hardening and event/read-model improvements |
+| `REL` | Release engineering, signatures, artifact integrity, reproducibility |
+| `GOV` | Governance, Safe, signer, pause, incident, monitoring operations |
+| `INT` | Frontend, SDK, indexer, mobile, Electron, and product integration readiness |
+| `ONE` | World-class 1/1 NFT product surfaces: provenance, permanence, royalties, marketplaces |
+| `AUD` | Audit packet, risk register, finding intake, external-audit closure |
+| `OSS` | README, contributor, security, issue/PR templates, repo experience |
+
+## 1. Current Maturity Frame
+
+### Correct Classification
+
+6529Stream is currently a high-quality pre-audit smart-contract protocol stack.
+It is not a beta or production system.
+
+The important distinction is:
+
+- It is not a toy or early prototype.
+- It is not nearly production-ready.
+- It is structured to become audit-ready and release-ready once external
+  evidence, adversarial proof, governance proof, and release proof are complete.
+
+### What Is Already Strong
+
+- Multi-contract protocol decomposition is strong.
+- EIP-712 and ERC-1271 drop authorization are implemented.
+- Auction custody, settlement, pull credits, and no-bid paths have target-state
+  tests.
+- Fixed-price, auction, curator, emergency-withdrawal, pause, signer, metadata,
+  dependency, ERC-4906, and randomizer flows have significant local coverage.
+- Local deployment, auction ceremony, emergency redeployment, release artifact,
+  manifest, checksum, and evidence scaffolds exist.
+- At least one reviewed fork deployment rehearsal artifact exists.
+- A clean-main reviewer reassessment at
+  `dd61e79d1fba5dbfec105b46ee0544fed105b95e` reported passing `forge build`,
+  `forge test -vvv` with 316 tests, gas snapshot checks, and the production size
+  build. This confirms the near-term focus should shift from generic "basic
+  contract missing" work to evidence, product standards, and integration proof.
+
+### What Still Blocks 10/10
+
+- Testnet and live execution evidence are missing or incomplete.
+- Explorer verification proof and verified address evidence are incomplete.
+- Signed release provenance and signed tags are incomplete.
+- Production governance ceremony proof is incomplete.
+- Reviewed signer custody and production signing evidence are incomplete.
+- Cross-contract adversarial testing is good but not exhaustive enough for the
+  auction/drop/randomizer/admin interaction surface.
+- Integrator documentation is not yet sufficient for a 6529.io-style frontend,
+  mobile app, Electron app, indexer, or operator dashboard.
+- Contract-level metadata is not yet a first-class release item. ERC-7572-style
+  `contractURI()` is draft-standard work, but marketplaces already depend on
+  contract-level metadata surfaces.
+- 1/1 collector trust surfaces need a stronger product layer: artist statement,
+  certificate/authenticity hash, curation notes, exhibition/history records,
+  provenance events or retained evidence, and frozen provenance manifests.
+- Royalty philosophy is not explicit enough for a high-value 1/1 drop:
+  ERC-2981 disclosure, governance controls, per-token/per-collection strategy,
+  and optional creator-fee enforcement must be a deliberate decision.
+- Permanence needs an independently replayable collector package: renderer,
+  dependencies, source archive, token output hashes, browser proof, and storage
+  guarantees.
+- Marketplace/indexer compatibility needs retained evidence, not just local
+  metadata checks.
+- `StreamCore` bytecode headroom remains tight, so new feature surfaces should
+  prefer satellite contracts, libraries, adapters, or explicit size-budget
+  exceptions.
+- Compiler/lint/NatSpec warning noise should be burned down or dispositioned
+  before making "world-class" release claims.
+- The repo has accumulated too much run-state bookkeeping relative to
+  substantive maturity work.
+
+## 2. Readiness Gates
+
+| Gate | Name | Status Frame | Backlog Lanes |
+| --- | --- | --- | --- |
+| A | Reproducible baseline | Mostly complete, keep guarded | `OSS`, `REL`, `MAP` |
+| B | Protocol decisions | Mostly complete, keep traceable | `CON`, `AUD` |
+| C | P0 implementation | Mostly complete, re-audit for drift | `CON`, `ADV`, `AUD` |
+| D | Test/invariant baseline | Partially complete, needs deeper adversarial tests | `ADV`, `CON` |
+| E | Deployment rehearsal | Partially complete locally/fork, missing testnet/live proof | `EXT`, `GOV`, `REL` |
+| F | External audit package | Scaffolding exists, completed audit evidence missing | `AUD`, `EXT`, `REL` |
+| G | Open-source release | Partially complete, integration docs and signed provenance missing | `OSS`, `INT`, `REL` |
+
+## 3. First 30 PR Queue
+
+This queue starts with the active branch items, then lists the preferred
+follow-up order unless bot feedback or CI forces a safer detour.
+
+| Order | Item | Gate | Main Blocker | Intended PR |
+| --- | --- | --- | --- | --- |
+| 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
+| 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
+| 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
+| 4 | `EXT-003` | E | Public beta evidence | Retain reviewed Sepolia deployment rehearsal broadcast |
+| 5 | `EXT-004` | E/G | Public beta evidence | Generate Sepolia manifest, address book, checksums, and source verification inputs |
+| 6 | `EXT-005` | E/G | Public beta evidence | Retain explorer verification evidence for Sepolia contracts |
+| 7 | `EXT-006` | E | Public beta evidence | Retain Sepolia fixed-price mint smoke evidence |
+| 8 | `EXT-007` | E | Public beta evidence | Retain Sepolia auction bid, settle, withdraw smoke evidence |
+| 9 | `EXT-008` | E | Public beta evidence | Retain Sepolia randomizer lifecycle and metadata browser evidence |
+| 10 | `GOV-001` | E/F | Governance proof | Add Safe/admin ceremony evidence checker |
+| 11 | `GOV-002` | E/F | Governance proof | Retain testnet role-grant and ownership-transfer ceremony evidence |
+| 12 | `ADV-001` | D/F | Audit confidence | Add end-to-end protocol state-machine harness |
+| 13 | `ADV-002` | D/F | Audit confidence | Add auction/drop/randomizer adversarial sequence tests |
+| 14 | `ADV-003` | D/F | Audit confidence | Add signer compromise, cancellation, and epoch invalidation fuzz tests |
+| 15 | `ADV-004` | D/F | Audit confidence | Add pause/unpause and settlement matrix invariants |
+| 16 | `ADV-005` | D/F | Audit confidence | Expand payment/forced-ETH invariants across all owed categories |
+| 17 | `REL-001` | F/G | Release proof | Add signed release provenance checker and retained artifact template |
+| 18 | `REL-002` | F/G | Release proof | Add signed tag and checksum verification gate |
+| 19 | `AUD-001` | F | Audit readiness | Refresh audit packet around actual current contract state |
+| 20 | `AUD-002` | F | Audit readiness | Add risk register and audit-boundary checker |
+| 21 | `INT-001` | G | Integration readiness | Add integrations doc entrypoint and artifact source-of-truth guide |
+| 22 | `INT-002` | G | Integration readiness | Add contract flow spec for fixed-price mint and drop authorization |
+| 23 | `INT-003` | G | Integration readiness | Add auction frontend/indexer flow spec |
+| 24 | `INT-004` | G | Integration readiness | Add wallet, EIP-712, ERC-1271, and Safe signing guide |
+| 25 | `INT-005` | G | Integration readiness | Add event/indexer reconstruction spec |
+| 26 | `INT-006` | G | Integration readiness | Add metadata rendering/cache/animation sandbox integration guide |
+| 27 | `INT-007` | G | Integration readiness | Add React/Next reference architecture |
+| 28 | `INT-008` | G | Integration readiness | Add mobile and WalletConnect integration guide |
+| 29 | `INT-009` | G | Integration readiness | Add Electron security and wallet integration guide |
+| 30 | `OSS-001` | A/G | Contributor quality | Refresh README/docs navigation around true maturity state |
+
+## 4. Detailed PR Items
+
+### MAP-001: Add 10/10 Execution Backlog
+
+Status: In progress on the current branch.
+
+Gate: A/G.
+
+Problem: `ops/ROADMAP.md` is strategic and comprehensive, but too large to use
+as the day-to-day autonomous implementation queue. Without a PR-sized backlog,
+work drifts toward local state reconciliation and documentation churn.
+
+Outcome: Add a durable execution backlog that combines internal review,
+external structural review, and integration-readiness goals into sequenced,
+implementable PR items.
+
+Files likely touched:
+
+- `ops/EXECUTION_BACKLOG.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
+
+Implementation steps:
+
+1. Add this backlog file.
+2. Link it from the roadmap and autonomous run state.
+3. Include first 30 PR queue, detailed PR items, acceptance criteria, and
+   maturity gates.
+4. Mark scaffolding separately from completed evidence.
+
+Required tests/checks:
+
+- `rg -n "^(#|##|###) " ops/EXECUTION_BACKLOG.md ops/ROADMAP.md ops/AUTONOMOUS_RUN.md`
+- `git diff --check`
+
+Acceptance criteria:
+
+- A future autonomous run can pick the next substantive PR without conversation
+  memory.
+- The backlog clearly prioritizes real execution evidence and adversarial
+  tests before further paperwork.
+- Integration-readiness work is present but sequenced after core external proof
+  items.
+
+Evidence artifacts: None; roadmap-only change.
+
+Dependencies: None.
+
+### EXT-001: Finish Testnet Deployment Rehearsal Retained Artifact Checker
+
+Status: In progress on `codex/testnet-deployment-rehearsal-evidence-checker`.
+
+Gate: E/G.
+
+Problem: Public beta evidence tracks `testnet_deployment_rehearsal`, but the
+repo needs a dedicated retained artifact format and checker so future Sepolia
+evidence is no-secret, reviewable, and machine-checked.
+
+Outcome: A committed template and checker exist for testnet deployment
+rehearsal evidence. The requirement remains blocked until a reviewed real
+artifact is retained.
+
+Files likely touched:
+
+- `scripts/check_testnet_deployment_rehearsal_evidence.py`
+- `scripts/test_testnet_deployment_rehearsal_evidence.py`
+- `release-artifacts/evidence/testnet-deployment-rehearsal/`
+- `release-artifacts/evidence/public-beta-templates/`
+- `scripts/generate_release_evidence_packet_index.py`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `.github/workflows/ci.yml`
+- `docs/non-local-release-evidence.md`
+- `docs/release-readiness.md`
+- `docs/tooling.md`
+- generated release artifacts
+
+Implementation steps:
+
+1. Add a Markdown retained artifact template with fields for environment,
+   chain ID, commit, CI run, broadcast, manifest, address book, explorer status,
+   gas/invariant summary, redaction, operator, reviewer, and validation
+   commands.
+2. Add a checker that rejects missing headings, wrong requirement ID, wrong
+   chain, reviewed artifacts with placeholders, missing validation commands,
+   and secret-shaped values.
+3. Add tests for the committed template, reviewed happy path, missing fields,
+   placeholder misuse, and secret-shaped text.
+4. Wire checker and tests into local/CI gates.
+5. Update release evidence packet/backlog/body sync to point to the dedicated
+   retained artifact.
+6. Regenerate deterministic release outputs.
+
+Required tests/checks:
+
+- `python scripts/test_testnet_deployment_rehearsal_evidence.py`
+- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
+- `python scripts/test_release_evidence_packet_index.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/test_release_evidence_issue_backlog.py`
+- `python scripts/generate_release_evidence_issue_backlog.py --check`
+- `python scripts/test_release_evidence_issue_body_sync.py`
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_release_readiness.py`
+- `python scripts/check_changelog.py`
+- `git diff --check`
+
+Acceptance criteria:
+
+- `testnet_deployment_rehearsal` remains marked missing/blocked until reviewed
+  Sepolia evidence exists.
+- The template is no-secret and cannot be mistaken for completed evidence.
+- CI and local checks fail if future retained artifacts lose required review or
+  validation data.
+
+Evidence artifacts:
+
+- Template only, not real evidence.
+
+Dependencies: Issue `#217`; active issue `#357`.
+
+### EXT-002: Add Sepolia Deployment Config And Rehearsal Runbook
+
+Status: Planned.
+
+Gate: E.
+
+Problem: A future operator needs an exact no-secret path for running the
+testnet deployment rehearsal without inventing command flags, addresses, or
+retained artifact structure.
+
+Outcome: The repo contains a Sepolia rehearsal config template and a runbook
+that explains how to run deployment, redact artifacts, generate manifests, and
+validate retained evidence.
+
+Files likely touched:
+
+- `deployments/config/sepolia-6529stream-v0.1.0-001.template.json`
+- `docs/deployment.md`
+- `docs/non-local-release-evidence.md`
+- `release-artifacts/evidence/testnet-deployment-rehearsal/`
+- `scripts/test_deployment_manifest.py`
+
+Implementation steps:
+
+1. Add a Sepolia deployment config template with placeholder addresses and
+   explicit no-secret comments where possible.
+2. Document required environment variables without committing private RPC URLs
+   or keys.
+3. Document the command sequence for deployment, broadcast capture, manifest
+   generation, address-book generation, source verification input generation,
+   retained artifact review, and release evidence regeneration.
+4. Add tests/checks that templates do not contain secret-looking values or
+   live private URLs.
+
+Required tests/checks:
+
+- `python scripts/test_deployment_manifest.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
+- `git diff --check`
+
+Acceptance criteria:
+
+- A maintainer can identify the exact files to copy/edit for a Sepolia run.
+- The runbook states which outputs are retained, redacted, hashed, and checked.
+- No private key, RPC token, or unreleased drop payload can be committed in the
+  template.
+
+Evidence artifacts:
+
+- Template and runbook only.
+
+Dependencies: `EXT-001`.
+
+### EXT-003: Retain Reviewed Sepolia Deployment Rehearsal Broadcast
+
+Status: Planned.
+
+Gate: E.
+
+Problem: Local and fork evidence do not prove the deployment path works against
+a real public testnet with explorer-visible transactions and live chain
+semantics.
+
+Outcome: The repo retains reviewed no-secret Sepolia deployment rehearsal
+evidence for `testnet_deployment_rehearsal`.
+
+Files likely touched:
+
+- `deployments/broadcasts/`
+- `deployments/config/`
+- `deployments/examples/`
+- `deployments/address-books/`
+- `release-artifacts/evidence/testnet-deployment-rehearsal/`
+- `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json`
+- generated release artifacts
+
+Implementation steps:
+
+1. Run the Sepolia deployment rehearsal using the documented command sequence.
+2. Retain sanitized Foundry broadcast output.
+3. Generate deployment manifest and address book from the sanitized broadcast.
+4. Create the reviewed retained artifact from the template.
+5. Generate the non-local evidence metadata envelope.
+6. Regenerate public beta evidence, release packet index, issue backlog,
+   manifest, and checksums.
+7. Keep private RPC URLs, private keys, deployer secrets, and unreleased drop
+   payloads out of the repo.
+
+Required tests/checks:
+
+- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
+- `python scripts/generate_non_local_release_evidence.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+
+Acceptance criteria:
+
+- The retained artifact has review status `reviewed`.
+- The retained artifact links commit, CI run, chain ID, block/transaction
+  references, sanitized broadcast, manifest, address book, and validation
+  commands.
+- The public-beta evidence row for `testnet_deployment_rehearsal` can move from
+  missing to complete only if all checker requirements pass.
+
+Evidence artifacts:
+
+- Reviewed retained artifact.
+- Sanitized broadcast.
+- Deployment manifest.
+- Address book.
+- Non-local metadata envelope.
+
+Dependencies: `EXT-001`, `EXT-002`, live Sepolia RPC access.
+
+### EXT-004: Generate Sepolia Manifest, Address Book, And Source Verification Inputs
+
+Status: Planned.
+
+Gate: E/G.
+
+Problem: Deployed addresses alone are not sufficient. Integrators, auditors,
+and release tooling need deterministic manifests, address books, source
+verification inputs, ABI checksums, and bytecode checksums tied to the exact
+deployment.
+
+Outcome: Sepolia deployment artifacts are generated from retained inputs and
+included in the release manifest/checksum bundle.
+
+Files likely touched:
+
+- `deployments/examples/`
+- `deployments/address-books/`
+- `release-artifacts/latest/source-verification-inputs.json`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `docs/tooling.md`
+- `docs/deployment.md`
+
+Implementation steps:
+
+1. Extend existing generators if they assume only Anvil or fork-mainnet names.
+2. Generate Sepolia manifest and address book from the sanitized broadcast.
+3. Generate source verification inputs for Sepolia contracts.
+4. Ensure release manifest includes Sepolia artifacts without claiming
+   production readiness.
+5. Update docs with exact artifact paths and commands.
+
+Required tests/checks:
+
+- `python scripts/test_broadcast_manifest_input.py`
+- `python scripts/generate_broadcast_manifest_input.py --check`
+- `python scripts/test_deployment_manifest.py`
+- `python scripts/generate_deployment_manifest.py --check`
+- `python scripts/test_address_books.py`
+- `python scripts/generate_address_books.py --check`
+- `python scripts/test_source_verification_inputs.py`
+- `python scripts/generate_source_verification_inputs.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+
+Acceptance criteria:
+
+- Sepolia artifacts are generated from committed no-secret inputs.
+- Drift checks fail if generated artifacts are stale.
+- Integrators can find Sepolia addresses through the address book, not by
+  reading a transcript manually.
+
+Evidence artifacts:
+
+- Sepolia manifest.
+- Sepolia address book.
+- Source verification inputs.
+- Updated release manifest/checksums.
+
+Dependencies: `EXT-003`.
+
+### EXT-005: Retain Sepolia Explorer Verification Evidence
+
+Status: Planned.
+
+Gate: E/G.
+
+Problem: A deployment is not release-grade until each contract can be matched
+to verified source and constructor/config inputs on the explorer.
+
+Outcome: A checked retained evidence artifact records explorer verification
+status for each Sepolia deployment address.
+
+Files likely touched:
+
+- `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json`
+- `release-artifacts/evidence/testnet-explorer-verification/`
+- `scripts/check_explorer_verification_evidence.py`
+- `scripts/test_explorer_verification_evidence.py`
+- `docs/non-local-release-evidence.md`
+- generated release artifacts
+
+Implementation steps:
+
+1. Add or extend an explorer-verification evidence schema/checker.
+2. Record contract name, deployed address, chain ID, explorer URL, verification
+   status, source input hash, compiler version, optimizer settings, and
+   reviewer.
+3. Reject unreviewed artifacts, private API keys, placeholder addresses, and
+   mismatched chain IDs.
+4. Wire the checker into local/CI gates.
+5. Regenerate evidence packet and public-beta status.
+
+Required tests/checks:
+
+- New checker tests.
+- New checker.
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+
+Acceptance criteria:
+
+- Every Sepolia deployment address has an explicit verification status.
+- Failed or pending explorer verification is allowed only if it keeps readiness
+  blocked.
+- The artifact does not retain explorer API keys or private URLs.
+
+Evidence artifacts:
+
+- Explorer verification retained artifact.
+- Optional non-local evidence metadata envelope.
+
+Dependencies: `EXT-004`.
+
+### EXT-006: Retain Sepolia Fixed-Price Mint Smoke Evidence
+
+Status: Planned.
+
+Gate: E.
+
+Problem: Deployment evidence alone does not prove user-facing fixed-price mint
+execution works on a public chain with real wallet/signature/transaction
+semantics.
+
+Outcome: Reviewed evidence shows a Sepolia fixed-price drop authorization,
+mint, credit accounting, metadata state, and events.
+
+Files likely touched:
+
+- `release-artifacts/evidence/testnet-fixed-price-mint/`
+- `docs/non-local-release-evidence.md`
+- `docs/drop-authorization-signing.md`
+- release evidence templates/checkers if needed
+
+Implementation steps:
+
+1. Generate a no-secret unsigned drop authorization payload.
+2. Sign with an approved test signer or mock-safe flow.
+3. Submit mint transaction on Sepolia.
+4. Retain transaction hash, event log summary, recipient, collection/token IDs,
+   metadata state, and credit balances.
+5. Redact or omit private signer material and unreleased payloads.
+6. Add a checker if the format is new.
+
+Required tests/checks:
+
+- Existing drop authorization evidence checks.
+- Non-local evidence checks.
+- Public beta evidence checks.
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- Evidence demonstrates EOA or ERC-1271 signature path explicitly.
+- Evidence records the EIP-712 domain and consumed drop ID/nonce.
+- Evidence records expected events and no unexpected owed-balance drift.
+
+Evidence artifacts:
+
+- Reviewed fixed-price mint retained artifact.
+- Optional sanitized transaction/log transcript.
+
+Dependencies: `EXT-003`, `EXT-004`.
+
+### EXT-007: Retain Sepolia Auction Ceremony Smoke Evidence
+
+Status: Planned.
+
+Gate: E.
+
+Problem: Auction correctness depends on multi-transaction state transitions:
+mint, bid, outbid/refund credit, end, settle, proceeds credit, withdrawal, and
+metadata state.
+
+Outcome: Reviewed Sepolia evidence proves the auction ceremony can complete
+with no stuck custody or owed-balance mismatch.
+
+Files likely touched:
+
+- `release-artifacts/evidence/testnet-auction-ceremony/`
+- `docs/auction-custody.md`
+- `docs/non-local-release-evidence.md`
+- release evidence templates/checkers if needed
+
+Implementation steps:
+
+1. Create or reuse a Sepolia auction drop authorization.
+2. Mint auction token and retain auction registration/state evidence.
+3. Place initial bid and outbid.
+4. Confirm previous bidder credit.
+5. Advance or wait until settlement is valid.
+6. Settle auction and withdraw proceeds/credits where applicable.
+7. Retain events, balances, custody, state, and reviewed command transcript.
+
+Required tests/checks:
+
+- New or existing ceremony evidence checker.
+- Non-local evidence checks.
+- Public beta evidence checks.
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- Token custody is known at every step.
+- Previous bidder refund becomes withdrawable credit.
+- Settlement is idempotent or replay-safe.
+- Owed balances reconcile to expected zero/non-zero values after withdrawals.
+
+Evidence artifacts:
+
+- Reviewed auction ceremony artifact.
+- Sanitized transaction/log transcript.
+
+Dependencies: `EXT-003`, `EXT-004`.
+
+### EXT-008: Retain Sepolia Randomizer And Metadata Browser Evidence
+
+Status: Planned.
+
+Gate: E/D.
+
+Problem: Randomizer lifecycle and generated metadata rendering need public-chain
+proof, not only local tests.
+
+Outcome: Reviewed Sepolia evidence shows pending, fulfilled/final or documented
+fallback state, token metadata output, and browser sandbox execution against
+deployed contracts.
+
+Files likely touched:
+
+- `release-artifacts/evidence/testnet-randomizer-operations/`
+- `release-artifacts/evidence/testnet-metadata-browser/`
+- `docs/randomizer-operations.md`
+- `docs/metadata.md`
+- `docs/non-local-release-evidence.md`
+- metadata browser check scripts if needed
+
+Implementation steps:
+
+1. Trigger a mint path that requests randomness.
+2. Record request ID, provider, collection, token, epoch, pending state, and
+   fulfillment state.
+3. Fetch token metadata from the deployed contract.
+4. Run metadata browser sandbox checks against the fetched output.
+5. Retain no-secret logs, hashes, and reviewer decision.
+6. Keep readiness blocked if fulfillment cannot be completed.
+
+Required tests/checks:
+
+- `python scripts/check_randomizer_operations.py`
+- `python scripts/check_rehearsal_metadata_browser_sandbox.py`
+- Non-local evidence checks.
+- Public beta evidence checks.
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- Evidence ties request ID, token, collection, randomizer epoch, and provider.
+- Metadata output is parsed and browser-sandbox checked.
+- Pending/stale/failed/final status is explicit and not inferred.
+
+Evidence artifacts:
+
+- Reviewed randomizer operations artifact.
+- Reviewed metadata browser artifact.
+
+Dependencies: `EXT-003`, `EXT-004`.
+
+### GOV-001: Add Safe/Admin Ceremony Evidence Checker
+
+Status: Planned.
+
+Gate: E/F.
+
+Problem: Governance controls are implemented, but production-like ownership,
+role grants, signer setup, and pause authority need operational evidence.
+
+Outcome: A no-secret retained artifact schema/checker exists for Safe/admin
+ceremony evidence.
+
+Files likely touched:
+
+- `deployments/schema/admin-ceremony-evidence.schema.json`
+- `deployments/admin-ceremony/`
+- `scripts/check_admin_ceremony_evidence.py`
+- `scripts/test_admin_ceremony_evidence.py`
+- `docs/deployment.md`
+- `docs/signer-custody-readiness.md`
+- `docs/incident-response.md`
+
+Implementation steps:
+
+1. Define fields for deployer, Safe, owner transfer, role grants, signer setup,
+   pause authorities, emergency recipients, verification status, operator,
+   reviewer, and redaction.
+2. Reject placeholders in reviewed evidence.
+3. Reject private key/RPC/API-key shaped values.
+4. Wire checker into local/CI gates and release manifest.
+
+Required tests/checks:
+
+- New checker tests.
+- New checker.
+- Release manifest/checksum checks.
+- Release readiness check.
+
+Acceptance criteria:
+
+- A reviewer can reconstruct who controls each privileged surface.
+- The artifact distinguishes testnet, fork, and production ceremonies.
+- The artifact records whether ownership transfer and role grants are complete,
+  pending, or intentionally blocked.
+
+Evidence artifacts:
+
+- Template only in this PR.
+
+Dependencies: Existing deployment manifest and signer custody docs.
+
+### GOV-002: Retain Testnet Governance Ceremony Evidence
+
+Status: Planned.
+
+Gate: E/F.
+
+Problem: Governance ceremony checkers only matter once they are exercised
+against a real deployment.
+
+Outcome: Reviewed Sepolia evidence proves owner transfer, role grant, signer,
+pauser, emergency recipient, and verification ceremonies for the testnet
+deployment.
+
+Files likely touched:
+
+- `deployments/admin-ceremony/`
+- `release-artifacts/evidence/public-beta-templates/`
+- `docs/deployment.md`
+- generated release artifacts
+
+Implementation steps:
+
+1. Execute testnet ownership transfer or document why ownership remains with a
+   test deployer.
+2. Grant required roles.
+3. Configure signer manager and drop signer.
+4. Configure pause/emergency controls.
+5. Retain transaction hashes and post-state views.
+6. Review and validate the retained artifact.
+
+Required tests/checks:
+
+- `python scripts/check_admin_ceremony_evidence.py`
+- `python scripts/check_signer_custody_readiness.py`
+- Public beta evidence checks.
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- Every privileged role has a known testnet holder.
+- Unsafe temporary holders are marked temporary with a removal plan.
+- Artifact is reviewed and no-secret.
+
+Evidence artifacts:
+
+- Reviewed testnet admin ceremony retained artifact.
+
+Dependencies: `GOV-001`, `EXT-003`.
+
+### GOV-003: Retain Reviewed Signer Custody Readiness Evidence
+
+Status: Planned.
+
+Gate: F/G.
+
+Problem: Signer custody is currently documented by template, but production
+readiness needs reviewed evidence of signer class, epoch source, rotation,
+revocation, monitoring, and incident response.
+
+Outcome: Reviewed signer custody readiness artifact exists and is linked from
+release readiness without exposing secrets.
+
+Files likely touched:
+
+- `release-artifacts/signer-custody-readiness/`
+- `docs/signer-custody-readiness.md`
+- generated public beta/production blocker reports
+
+Implementation steps:
+
+1. Fill the signer custody template with reviewed no-secret operational facts.
+2. Record signer class, manager, epoch source, rotation drill, revocation drill,
+   ERC-1271 status, alerting, and incident links.
+3. Validate with existing checker.
+4. Regenerate release readiness and blocker reports.
+
+Required tests/checks:
+
+- `python scripts/test_signer_custody_readiness.py`
+- `python scripts/check_signer_custody_readiness.py`
+- `python scripts/check_release_readiness.py`
+- blocker report checks.
+
+Acceptance criteria:
+
+- Artifact states who can sign, who can rotate, and how compromise is handled.
+- Artifact does not reveal private keys, operational secrets, or private
+  endpoint details.
+- Release readiness reflects reviewed status accurately.
+
+Evidence artifacts:
+
+- Reviewed signer custody retained artifact.
+
+Dependencies: Signer owner/operator decision outside repo.
+
+### GOV-004: Add Pause And Incident Drill Evidence
+
+Status: Planned.
+
+Gate: F.
+
+Problem: Pause and incident runbooks exist, but the repo needs proof that
+operators can execute drills and retain safe evidence.
+
+Outcome: Evidence templates/checkers cover drills for mint pause, bid pause,
+settlement pause, withdrawal policy, failed randomness, stuck auction, bad
+metadata, bad Merkle root, and signer compromise.
+
+Files likely touched:
+
+- `docs/incident-response.md`
+- `release-artifacts/evidence/incident-drills/`
+- `scripts/check_incident_drill_evidence.py`
+- `scripts/test_incident_drill_evidence.py`
+
+Implementation steps:
+
+1. Define incident drill evidence schema.
+2. Add template rows for each required drill.
+3. Reject reviewed artifacts that do not include operator, reviewer, commands,
+   affected controls, observed events, and rollback/recovery status.
+4. Wire checker into release readiness.
+
+Required tests/checks:
+
+- New checker tests.
+- New checker.
+- `python scripts/check_incident_response.py`
+- `python scripts/check_release_readiness.py`
+
+Acceptance criteria:
+
+- Drills are tied to actual protocol controls and events.
+- A missing drill keeps the relevant release gate blocked.
+- Secret-shaped values are rejected.
+
+Evidence artifacts:
+
+- Templates only unless drills are actually executed.
+
+Dependencies: `GOV-001`.
+
+### ADV-001: Add End-To-End Protocol State-Machine Harness
+
+Status: Planned.
+
+Gate: D/F.
+
+Problem: Existing tests cover many surfaces, but audit confidence needs a
+single harness that models cross-contract state across mint, auction,
+randomizer, metadata, pause, signer, and payment flows.
+
+Outcome: A reusable Foundry harness models protocol actions and exposes
+assertions that future adversarial tests can reuse.
+
+Files likely touched:
+
+- `test/helpers/ProtocolStateMachine.sol`
+- `test/StreamProtocolStateMachine.t.sol`
+- existing fixture/helpers
+- `docs/threat-model.md`
+- `ops/ROADMAP.md`
+
+Implementation steps:
+
+1. Define model state for collections, tokens, drop IDs, auctions, owed
+   balances, randomizer requests, metadata states, paused domains, and signer
+   epochs.
+2. Add bounded actions for mint, bid, outbid, settle, withdraw, pause, unpause,
+   rotate signer, cancel drop, request/fulfill randomness, and freeze metadata.
+3. Add model assertions without changing production contracts.
+4. Keep the first PR small enough to compile and run reliably.
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamProtocolStateMachine.t.sol -vvv`
+- `forge test -vvv`
+- `python scripts/check_changelog.py` if external behavior docs change.
+
+Acceptance criteria:
+
+- Harness compiles and executes deterministic smoke sequences.
+- Harness exposes reusable helpers for future fuzz/invariant PRs.
+- No production behavior changes.
+
+Evidence artifacts: None.
+
+Dependencies: Current fixture helpers.
+
+### ADV-002: Add Auction/Drop/Randomizer Adversarial Sequence Tests
+
+Status: Planned.
+
+Gate: D/F.
+
+Problem: The highest-risk surface is the coupling of signed drop authorization,
+auction state transitions, payment credits, and randomizer lifecycle.
+
+Outcome: Generated sequences attempt adversarial ordering around mint, bid,
+outbid, settlement, cancellation, signer rotation, and randomness callbacks.
+
+Files likely touched:
+
+- `test/StreamProtocolStateMachine.t.sol`
+- `test/StreamAuctionInvariant.t.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `docs/threat-model.md`
+
+Implementation steps:
+
+1. Add sequence generators for auction drop mint, bid/outbid, settle/no-bid,
+   randomizer fulfillment, and metadata finalization.
+2. Add negative sequences for replayed signatures, cancelled drops, expired
+   signatures, stale epochs, paused domains, and wrong provider callbacks.
+3. Assert token custody, owed balances, consumed drop IDs, request state, and
+   event trace invariants.
+
+Required tests/checks:
+
+- Targeted Foundry test command.
+- Full `forge test -vvv` if runtime remains acceptable.
+
+Acceptance criteria:
+
+- No sequence can produce unknown custody.
+- No sequence can erase owed credit after failed withdrawal.
+- No sequence can fulfill randomness for the wrong request/token/collection.
+- No sequence can settle the same auction into duplicated proceeds.
+
+Evidence artifacts: None.
+
+Dependencies: `ADV-001`.
+
+### ADV-003: Add Signer Compromise And Revocation Fuzz Tests
+
+Status: Planned.
+
+Gate: D/F.
+
+Problem: Signer compromise is a production-critical scenario. The contract and
+frontend assumptions must prove drop IDs, signer epochs, cancellations, and
+pauses stop stale authorizations.
+
+Outcome: Tests cover signer rotation, per-drop cancellation, replay,
+stale-epoch invalidation, wrong domain, wrong chain, wrong contract, and global
+drop-execution pause.
+
+Files likely touched:
+
+- `test/StreamDropsEIP712.t.sol`
+- `test/StreamDropsERC1271.t.sol`
+- `test/StreamSignerAdmin.t.sol`
+- `test/StreamPauseControls.t.sol`
+- `docs/drop-authorization-signing.md`
+- `docs/threat-model.md`
+
+Implementation steps:
+
+1. Build a table of authorization invalidation mechanisms.
+2. Add fuzzed or table-driven tests for each invalidation path.
+3. Include EOA, EIP-2098, and ERC-1271 where relevant.
+4. Assert expected custom errors and events.
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamDropsEIP712.t.sol -vvv`
+- `forge test --match-path test/StreamDropsERC1271.t.sol -vvv`
+- `forge test --match-path test/StreamSignerAdmin.t.sol -vvv`
+- `forge test -vvv`
+
+Acceptance criteria:
+
+- Stale signatures cannot mint after signer rotation.
+- Cancelled drop IDs cannot mint.
+- Wrong chain/verifying contract/domain versions fail.
+- ERC-1271 behavior is covered or explicitly documented.
+
+Evidence artifacts: None.
+
+Dependencies: Current EIP-712/ERC-1271 implementation.
+
+### ADV-004: Add Pause And Settlement Matrix Invariants
+
+Status: Planned.
+
+Gate: D/F.
+
+Problem: Pause controls and settlement/withdrawal policies interact with user
+funds. Tests must prove emergency controls do not trap or erase owed balances
+unless intentionally documented.
+
+Outcome: Matrix tests cover mint pause, bid pause, settlement pause, withdrawal
+policy, emergency withdrawals, and owed-balance safety.
+
+Files likely touched:
+
+- `test/StreamPauseControls.t.sol`
+- `test/StreamAuctionPayments.t.sol`
+- `test/StreamPaymentsInvariant.t.sol`
+- `docs/incident-response.md`
+- `docs/auction-custody.md`
+
+Implementation steps:
+
+1. Enumerate pause domains and expected allowed/blocked functions.
+2. Add table-driven tests for each function/domain pair.
+3. Add assertions that owed credits persist under pause and failed withdrawal.
+4. Add emergency withdrawal boundary checks after paused states.
+
+Required tests/checks:
+
+- Targeted Foundry tests.
+- Full `forge test -vvv`.
+
+Acceptance criteria:
+
+- Pause policies are executable and documented.
+- Emergency controls cannot withdraw owed funds.
+- Failed withdrawals do not erase credit.
+
+Evidence artifacts: None.
+
+Dependencies: Existing pause controls and payment invariants.
+
+### ADV-005: Expand Payment And Forced-ETH Invariants
+
+Status: Planned.
+
+Gate: D/F.
+
+Problem: Pull-payment design is strong, but the invariant suite should
+explicitly cover all owed categories and forced-balance drift across more
+operation sequences.
+
+Outcome: Invariants prove total owed equals category owed balances, contract
+balance covers owed balances, and forced ETH becomes surplus without corrupting
+credits.
+
+Files likely touched:
+
+- `test/StreamPaymentsInvariant.t.sol`
+- `test/StreamAuctionPayments.t.sol`
+- `test/StreamFixedPricePayments.t.sol`
+- `test/StreamCuratorsPool.t.sol`
+- `docs/auction-custody.md`
+
+Implementation steps:
+
+1. Extend handlers for fixed-price poster/protocol credits, auction bidder
+   credits, auction proceeds, curator credits, randomizer reserves, and forced
+   ETH.
+2. Add category and aggregate owed views to assertions.
+3. Add failed withdrawal and reentrancy receiver actions.
+4. Bound operation count to keep CI stable.
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamPaymentsInvariant.t.sol -vvv`
+- `forge test -vvv`
+
+Acceptance criteria:
+
+- Aggregate owed totals match sum of categories after every sequence.
+- Contract balances cover owed balances.
+- Forced ETH is accounted as surplus or ignored as documented.
+- Emergency withdrawal cannot take owed funds.
+
+Evidence artifacts: None.
+
+Dependencies: Existing payment invariant baseline.
+
+### CON-001: Re-Audit Public Entry Point And Event Surface
+
+Status: Planned.
+
+Gate: C/D/G.
+
+Problem: The contract surface evolved through many PRs. Before audit and
+integration docs, the repo needs a fresh inventory of public/external
+functions, custom errors, events, state transitions, and view/read-model gaps.
+
+Outcome: A checked API surface report identifies integration-critical functions
+and any missing events/views/docs.
+
+Files likely touched:
+
+- `scripts/generate_protocol_surface_report.py`
+- `scripts/test_protocol_surface_report.py`
+- `release-artifacts/latest/protocol-surface-report.json`
+- `docs/architecture.md`
+- `docs/tooling.md`
+
+Implementation steps:
+
+1. Parse Foundry artifacts for public/external functions, events, and errors.
+2. Classify each entry by contract and workflow.
+3. Compare against documented flow coverage.
+4. Emit a deterministic report and fail on drift.
+
+Required tests/checks:
+
+- New script tests.
+- New report check.
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- Every external state-changing function is classified.
+- Event and custom-error surfaces are visible to auditors and integrators.
+- Report drift is detected in CI or local checks.
+
+Evidence artifacts:
+
+- Generated protocol surface report.
+
+Dependencies: Release artifact generator patterns.
+
+### CON-002: Close Event Schema Gaps For Indexers
+
+Status: Planned.
+
+Gate: D/G.
+
+Problem: Frontend and indexer teams need stable events with indexed fields for
+state reconstruction. Any missing state transition events should be found
+before integration docs become canonical.
+
+Outcome: Contract events, docs, and tests cover each external state transition
+needed by product/indexer flows.
+
+Files likely touched:
+
+- `smart-contracts/*.sol`
+- event tests under `test/`
+- `release-artifacts/latest/event-topic-catalog.json`
+- `docs/metadata.md`
+- `docs/integrations/events-and-indexing.md`
+- `CHANGELOG.md`
+
+Implementation steps:
+
+1. Use `CON-001` report and integration flows to identify event gaps.
+2. Add or document events for missing external state transitions.
+3. Add event assertion tests.
+4. Regenerate ABI/event/release artifacts.
+5. Document breaking-change impact if signatures change.
+
+Required tests/checks:
+
+- Targeted Foundry tests.
+- `python scripts/generate_release_artifacts.py --check`
+- ABI compatibility check.
+- Changelog check.
+
+Acceptance criteria:
+
+- Indexers can reconstruct drop, auction, credit, randomizer, metadata, and
+  admin state without private contract introspection beyond documented reads.
+- Event topic catalog is current.
+- Breaking event changes are explicitly approved.
+
+Evidence artifacts: Generated event topic catalog.
+
+Dependencies: `CON-001`, `INT-005`.
+
+### REL-001: Add Signed Release Provenance Evidence Checker
+
+Status: Planned.
+
+Gate: F/G.
+
+Problem: Release artifacts and checksums exist, but production-grade release
+integrity needs a retained evidence path for signatures, signer identity,
+artifact hash, tag, and review.
+
+Outcome: A checker validates signed release provenance artifacts without
+requiring real production signatures yet.
+
+Files likely touched:
+
+- `release-artifacts/schema/release-signature-evidence.schema.json`
+- `release-artifacts/signatures/`
+- `scripts/check_release_signatures.py`
+- `scripts/test_release_signatures.py`
+- `docs/release-signatures.md`
+- `docs/release-policy.md`
+
+Implementation steps:
+
+1. Review existing release signature template/checker and identify gaps.
+2. Require tag, commit SHA, checksum bundle hash, signer fingerprint or address,
+   signature status, reviewer, and verification command.
+3. Reject placeholder values in reviewed artifacts.
+4. Wire release signature status into release readiness.
+
+Required tests/checks:
+
+- `python scripts/test_release_signatures.py`
+- `python scripts/check_release_signatures.py`
+- `python scripts/check_release_readiness.py`
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- Unsigned local placeholder evidence remains blocked.
+- Reviewed signatures can only pass with exact commit/artifact linkage.
+- The docs explain which signatures are required for public beta vs production.
+
+Evidence artifacts:
+
+- Template/checker in this PR; reviewed signature evidence later.
+
+Dependencies: Existing release checksum bundle.
+
+### REL-002: Add Signed Tag And Checksum Verification Gate
+
+Status: Planned.
+
+Gate: F/G.
+
+Problem: A release needs a canonical Git tag and checksum bundle that can be
+verified independently.
+
+Outcome: Local/CI checks can verify signed tag metadata and checksum integrity
+for release candidate branches/tags.
+
+Files likely touched:
+
+- `scripts/check_signed_release_tag.py`
+- `scripts/test_signed_release_tag.py`
+- `docs/release-policy.md`
+- `.github/workflows/ci.yml`
+
+Implementation steps:
+
+1. Define local behavior for branches without tags: blocked or skipped with
+   explicit non-release status.
+2. Verify tag points to current release commit when running in release mode.
+3. Verify tag signature status and checksum bundle signature when available.
+4. Document exact maintainer command sequence.
+
+Required tests/checks:
+
+- New script tests.
+- New script.
+- Release readiness check.
+
+Acceptance criteria:
+
+- Non-release PRs do not falsely claim signed release status.
+- Release-mode checks fail if tag/signature/checksum linkage is missing.
+- Docs support independent verification by an external user.
+
+Evidence artifacts:
+
+- Signed tag verification report when used in release mode.
+
+Dependencies: `REL-001`.
+
+### REL-003: Add Exact Bytecode-To-Release Proof
+
+Status: Planned.
+
+Gate: F/G.
+
+Problem: Users and auditors need to verify that deployed bytecode matches the
+release artifact bundle exactly.
+
+Outcome: A deterministic proof ties source verification inputs, compiler
+settings, bytecode hash, deployed address, chain ID, and release manifest.
+
+Files likely touched:
+
+- `scripts/check_bytecode_release_proof.py`
+- `scripts/test_bytecode_release_proof.py`
+- `release-artifacts/latest/`
+- `docs/tooling.md`
+- `docs/release-policy.md`
+
+Implementation steps:
+
+1. Define proof schema for contract, address, chain ID, runtime bytecode hash,
+   creation bytecode hash, compiler settings, artifact path, and release
+   manifest hash.
+2. Generate proof for local/fork/testnet artifacts where data is available.
+3. Fail on hash mismatch or missing required fields in reviewed release mode.
+4. Keep testnet/local proof separate from production proof.
+
+Required tests/checks:
+
+- New script tests.
+- New checker.
+- Release manifest/checksum checks.
+
+Acceptance criteria:
+
+- A verifier can connect a deployed address to a specific release bundle.
+- Missing live production proof keeps production readiness blocked.
+- The proof is deterministic and no-secret.
+
+Evidence artifacts:
+
+- Bytecode release proof JSON.
+
+Dependencies: `EXT-004`, `EXT-005`.
+
+### AUD-001: Refresh Audit Package Around Current Protocol State
+
+Status: Planned.
+
+Gate: F.
+
+Problem: Audit docs exist, but after many PRs the package needs a current,
+reviewable snapshot that reflects actual code, tests, release artifacts, and
+known gaps.
+
+Outcome: Audit package is refreshed with current architecture, threat model,
+ADRs, invariants, deployment evidence, release artifacts, known risks, and
+integration assumptions.
+
+Files likely touched:
+
+- `docs/audit-package.md`
+- `docs/architecture.md`
+- `docs/threat-model.md`
+- `docs/known-blockers.md`
+- `ops/SLITHER_BASELINE.md`
+- `ops/ROADMAP.md`
+
+Implementation steps:
+
+1. Inventory current contract surface, tests, release artifacts, and evidence.
+2. Update audit package sections with exact paths and commands.
+3. Separate fixed risks, accepted risks, open risks, and evidence gaps.
+4. Add audit submission checklist.
+
+Required tests/checks:
+
+- `python scripts/check_audit_package.py`
+- `python scripts/check_architecture_threat_model.py`
+- `python scripts/check_release_readiness.py`
+- `git diff --check`
+
+Acceptance criteria:
+
+- Auditor can start from `docs/audit-package.md` without reading the whole
+  roadmap first.
+- Package states pre-production status honestly.
+- Open external evidence gaps are not hidden by scaffolding.
+
+Evidence artifacts: Audit package docs only.
+
+Dependencies: Prefer after `EXT-003` through `EXT-008`, but can be partially
+refreshed earlier if audit scheduling requires it.
+
+### AUD-002: Add Risk Register And Audit Boundary Checker
+
+Status: Planned.
+
+Gate: F.
+
+Problem: Risks are distributed across roadmap, Slither baseline, docs, and
+issues. Auditors need a single checked register that distinguishes residual
+risk from open blockers.
+
+Outcome: A machine-readable risk register and checker exist.
+
+Files likely touched:
+
+- `ops/RISK_REGISTER.md` or `release-artifacts/latest/risk-register.json`
+- `scripts/check_risk_register.py`
+- `scripts/test_risk_register.py`
+- `docs/audit-package.md`
+- `docs/threat-model.md`
+
+Implementation steps:
+
+1. Define fields: risk ID, area, severity, status, mitigation, tests,
+   evidence, owner, target gate, residual risk.
+2. Seed risks from roadmap, external assessment, Slither baseline, and release
+   blockers.
+3. Add checker for required fields, valid statuses, and linked evidence.
+4. Wire into audit package check.
+
+Required tests/checks:
+
+- New checker tests.
+- New checker.
+- Audit package check.
+- Release readiness check.
+
+Acceptance criteria:
+
+- Every P0/P1 residual risk has status and evidence.
+- Accepted trust assumptions are explicit, not implied.
+- Missing production evidence remains visible.
+
+Evidence artifacts:
+
+- Risk register.
+
+Dependencies: `AUD-001`.
+
+### INT-001: Add Integrations Entrypoint And Artifact Source Of Truth
+
+Status: Planned.
+
+Gate: G.
+
+Problem: A frontend or indexer engineer cannot yet start from a single
+integration entrypoint that explains which artifacts, manifests, ABIs, event
+catalogs, metadata docs, and chain configs to trust.
+
+Outcome: `docs/integrations/README.md` defines the integration surface and
+links all canonical artifacts.
+
+Files likely touched:
+
+- `docs/integrations/README.md`
+- `README.md`
+- `docs/tooling.md`
+- `release-artifacts/README.md`
+
+Implementation steps:
+
+1. Create integrations docs directory.
+2. Define supported consumer types: React web app, mobile app, Electron app,
+   indexer, operator UI, backend signing service.
+3. Point to canonical ABIs, address books, release manifests, event catalog,
+   metadata docs, deployment docs, signing docs, and readiness status.
+4. State pre-production/testnet caveats.
+5. Add docs navigation links.
+
+Required tests/checks:
+
+- Markdown heading/link sanity via `rg`.
+- `python scripts/check_release_readiness.py` if docs path is tracked.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- A frontend engineer knows where to get addresses and ABIs.
+- A product engineer knows which flows are documented and which are not.
+- The doc does not claim production readiness.
+
+Evidence artifacts: None.
+
+Dependencies: None; best after current external-evidence checker PR.
+
+### INT-002: Add Fixed-Price Mint And Drop Authorization Flow Spec
+
+Status: Planned.
+
+Gate: G/D.
+
+Problem: Frontend teams need exact transaction/read/event/failure-state
+guidance for fixed-price minting and EIP-712 drop authorization.
+
+Outcome: A flow spec documents fixed-price mint integration, EIP-712 payloads,
+wallet signing, ERC-1271 handling, transaction submission, event monitoring,
+and UI states.
+
+Files likely touched:
+
+- `docs/integrations/contract-flows.md`
+- `docs/integrations/wallets-and-signatures.md`
+- `docs/drop-authorization-signing.md`
+- optional TypeScript snippet fixtures under `docs/integrations/examples/`
+
+Implementation steps:
+
+1. Document required reads before mint.
+2. Document payload fields and source of domain values.
+3. Document EOA and ERC-1271 signing paths.
+4. Document submit transaction and expected events.
+5. Document negative states: wrong chain, expired, consumed, cancelled, wrong
+   signer, stale epoch, paused, insufficient payment.
+6. Include viem-style pseudocode without creating a maintained SDK package yet.
+
+Required tests/checks:
+
+- Existing drop authorization fixture checks if examples are machine-readable.
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- A React/viem frontend can implement fixed-price mint without guessing.
+- The doc explains replay protection as storage-backed, not provided by
+  EIP-712 alone.
+- The doc covers ERC-1271 or explicitly links support status.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001`.
+
+### INT-003: Add Auction Frontend And Indexer Flow Spec
+
+Status: Planned.
+
+Gate: G/D.
+
+Problem: Auction UX depends on reconstructing state from events and reads. The
+frontend needs canonical guidance for auction creation, bidding, outbid credit,
+settlement, cancellation, no-bid claims, proceeds, and withdrawals.
+
+Outcome: A flow spec documents user actions, views, events, state transitions,
+and failure states for auction integrations.
+
+Files likely touched:
+
+- `docs/integrations/contract-flows.md`
+- `docs/integrations/events-and-indexing.md`
+- `docs/auction-custody.md`
+
+Implementation steps:
+
+1. Document auction state machine in product terms.
+2. Map each user action to contract call, preconditions, events, and reads.
+3. Document outbid credit and proceeds credit UX.
+4. Document settlement idempotency/retry behavior.
+5. Document no-bid path and cancellation states.
+6. Identify any event/read gaps for follow-up `CON` items.
+
+Required tests/checks:
+
+- Markdown heading check.
+- Event topic catalog check if docs reference event names.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- A frontend can display correct action buttons from documented state.
+- An indexer can reconstruct the auction lifecycle from documented events and
+  reads.
+- Missing event/read gaps become explicit follow-up issues.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001`.
+
+### INT-004: Add Wallet, EIP-712, ERC-1271, And Safe Signing Guide
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: Signatures are a core integration and security surface. Product teams
+need wallet-specific guidance that avoids replay, wrong-domain, and smart-wallet
+mistakes.
+
+Outcome: A dedicated wallet/signature integration guide covers browser wallets,
+WalletConnect, Safe/ERC-1271, backend signers, signer epoch, cancellation, and
+error handling.
+
+Files likely touched:
+
+- `docs/integrations/wallets-and-signatures.md`
+- `docs/drop-authorization-signing.md`
+- `docs/signer-custody-readiness.md`
+
+Implementation steps:
+
+1. Document domain fields: name, version, chain ID, verifying contract.
+2. Document nonce/drop ID, deadline, signer epoch, consumed storage, and
+   cancellation.
+3. Document EOA flow and ERC-1271 flow.
+4. Document WalletConnect/mobile signing handoff caveats.
+5. Document Safe signing and validation expectations.
+6. Document common frontend error states and recovery.
+
+Required tests/checks:
+
+- Drop authorization fixture checks if examples are added.
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- The guide makes clear that EIP-712 is encoding/signing, not replay protection
+  by itself.
+- Smart wallet support is documented with contract-signature behavior.
+- Wrong-domain and stale-epoch failure modes are user-visible.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001`, current ERC-1271 tests.
+
+### INT-005: Add Event And Indexer Reconstruction Spec
+
+Status: Planned.
+
+Gate: G/D.
+
+Problem: A 6529.io-style UI will likely use an indexer. The indexer needs a
+canonical event-to-state reconstruction model, confirmation depth policy, and
+reorg behavior.
+
+Outcome: A spec maps events and reads to indexed models for collections,
+tokens, drops, auctions, credits, randomizer requests, metadata, governance,
+and release artifacts.
+
+Files likely touched:
+
+- `docs/integrations/events-and-indexing.md`
+- `release-artifacts/latest/event-topic-catalog.json`
+- `docs/release-policy.md`
+- `docs/metadata.md`
+
+Implementation steps:
+
+1. List each indexed entity and primary key.
+2. Map contract events to entity updates.
+3. Identify required read-after-event calls.
+4. Define confirmation depth and reorg rollback policy.
+5. Define stale/missing event recovery via full rescan.
+6. Identify event schema gaps for `CON-002`.
+
+Required tests/checks:
+
+- Event catalog generation check.
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- An indexer engineer can build the schema without reverse-engineering tests.
+- Reorg and confirmation assumptions are explicit.
+- Event gaps are tracked as follow-up work.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001`, `CON-001` preferred.
+
+### INT-006: Add Metadata Rendering And Cache Integration Guide
+
+Status: Planned.
+
+Gate: G/D.
+
+Problem: NFT product UIs, metadata caches, and marketplaces need exact guidance
+for pending, stale, failed, final, frozen, burned, and ERC-4906 states.
+
+Outcome: A guide documents metadata states, tokenURI behavior, animation
+sandboxing, cache invalidation, ERC-4906 handling, and marketplace caveats.
+
+Files likely touched:
+
+- `docs/integrations/metadata-rendering.md`
+- `docs/metadata.md`
+- `test/fixtures/metadata/`
+
+Implementation steps:
+
+1. Document each metadata state and expected UI display.
+2. Document ERC-4906 event handling and non-handling on mint/burn where
+   intentional.
+3. Document animation URL sandbox and CSP guidance for web/electron.
+4. Document cache invalidation after randomness, dependency updates, and freeze.
+5. Link golden fixtures and browser sandbox checks.
+
+Required tests/checks:
+
+- Metadata fixture checks if examples are added.
+- Metadata browser sandbox checks if examples are added.
+- Markdown heading check.
+
+Acceptance criteria:
+
+- Frontends know when to refresh metadata and when not to.
+- Electron/mobile security constraints are called out.
+- Marketplace compatibility assumptions are explicit.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001`.
+
+### INT-007: Add React/Next Reference Architecture
+
+Status: Planned.
+
+Gate: G.
+
+Problem: Frontend teams need recommended architecture for consuming ABIs,
+address books, event catalogs, metadata, wallet state, transactions, and
+indexer data without a monolithic reference app.
+
+Outcome: A reference architecture doc covers React/Next, viem/wagmi, TanStack
+Query, generated types, environment separation, chain config, and transaction
+state.
+
+Files likely touched:
+
+- `docs/integrations/frontend-reference-architecture.md`
+- `docs/integrations/examples/react-viem.md`
+- `README.md`
+
+Implementation steps:
+
+1. Define package choices and non-goals.
+2. Define artifact import/source-of-truth pattern.
+3. Define read/query/transaction/signature layers.
+4. Define indexer vs direct RPC responsibilities.
+5. Define error/retry and chain switching behavior.
+6. Include small pseudocode examples only.
+
+Required tests/checks:
+
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- A 6529.io-style React frontend can choose a sane architecture quickly.
+- The doc avoids committing the repo to a maintained app package prematurely.
+- Artifacts and addresses come from release outputs, not hardcoded snippets.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001` through `INT-006` preferred.
+
+### INT-008: Add Mobile And WalletConnect Integration Guide
+
+Status: Planned.
+
+Gate: G.
+
+Problem: Mobile signing, chain switching, deep links, and background refresh
+have different constraints from desktop web.
+
+Outcome: A mobile integration guide covers WalletConnect, native deep links,
+signature handoff, chain changes, background refresh limits, push assumptions,
+and user recovery flows.
+
+Files likely touched:
+
+- `docs/integrations/mobile-and-electron.md`
+- `docs/integrations/wallets-and-signatures.md`
+
+Implementation steps:
+
+1. Document supported wallet connection models.
+2. Document EIP-712 signing display and chain mismatch recovery.
+3. Document transaction pending/replaced/failed states.
+4. Document background refresh and push notification assumptions for auction
+   and randomness status.
+5. Document no private key custody in the app.
+
+Required tests/checks:
+
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- Mobile implementers understand which flows require foreground wallet action.
+- Push/indexer assumptions are explicit.
+- WalletConnect edge cases are not hidden.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-004`, `INT-005`.
+
+### INT-009: Add Electron Security And Wallet Integration Guide
+
+Status: Planned.
+
+Gate: G.
+
+Problem: Electron apps can accidentally create severe wallet and metadata
+security risks if renderer isolation, signing, and animation rendering are not
+specified.
+
+Outcome: An Electron guide documents context isolation, no private keys,
+wallet-provider boundaries, metadata sandboxing, signed updates, and IPC
+patterns.
+
+Files likely touched:
+
+- `docs/integrations/mobile-and-electron.md`
+- `docs/integrations/metadata-rendering.md`
+- `docs/security.md` if created, otherwise `SECURITY.md`
+
+Implementation steps:
+
+1. Document main/renderer/preload responsibilities.
+2. Require context isolation and limited IPC.
+3. Prohibit private key handling in renderer/main unless a future audited
+   wallet module exists.
+4. Document metadata animation sandbox and CSP.
+5. Document signed update expectations.
+
+Required tests/checks:
+
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- Electron implementers are warned about the highest-risk patterns.
+- Metadata rendering guidance carries over from web to desktop.
+- Signing remains wallet-mediated or hardware-backed.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-006`, `INT-008`.
+
+### INT-010: Add Operator Admin UI Specification
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: A 6529 operations UI needs safe flows for signer setup, pause, role
+grants, dependency updates, metadata freeze, randomizer operations, and
+emergency actions.
+
+Outcome: A product-facing operator UI spec maps admin actions to contracts,
+required confirmations, Safe transactions, events, monitoring, and runbooks.
+
+Files likely touched:
+
+- `docs/integrations/operator-admin-ui.md`
+- `docs/deployment.md`
+- `docs/incident-response.md`
+- `docs/signer-custody-readiness.md`
+- `docs/randomizer-operations.md`
+
+Implementation steps:
+
+1. List operator personas and permissions.
+2. Map each admin action to contract call, preconditions, event, and review.
+3. Define dangerous-action confirmations and Safe batching guidance.
+4. Link each action to runbook and monitoring event.
+5. Identify missing read/event gaps.
+
+Required tests/checks:
+
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- An admin UI can be designed without guessing which actions are dangerous.
+- Safe/multisig flow is first-class.
+- Monitoring and incident links are attached to each high-risk operation.
+
+Evidence artifacts: None.
+
+Dependencies: `GOV-001`, `INT-005`.
+
+### OSS-001: Refresh README And Docs Navigation Around True Maturity
+
+Status: Planned.
+
+Gate: A/G.
+
+Problem: As the repo matures, README and docs navigation must make the current
+classification clear: serious pre-audit protocol, not beta or production.
+
+Outcome: Entry docs direct users to roadmap, execution backlog, release
+readiness, integrations, deployment, audit package, and security policy.
+
+Files likely touched:
+
+- `README.md`
+- `docs/status.md`
+- `docs/known-blockers.md`
+- `docs/integrations/README.md`
+- `CONTRIBUTING.md`
+
+Implementation steps:
+
+1. Add a high-signal maturity status block.
+2. Link the execution backlog and launch gates.
+3. Add role-based docs entrypoints for auditor, integrator, operator,
+   contributor, and protocol maintainer.
+4. Avoid production-readiness claims.
+
+Required tests/checks:
+
+- Markdown heading check.
+- `python scripts/check_release_readiness.py` if docs are tracked.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- Fresh readers can find their path in under 30 minutes.
+- The repo does not overstate readiness.
+- Integration docs are discoverable.
+
+Evidence artifacts: None.
+
+Dependencies: `INT-001`.
+
+## 5. Later PR Inventory
+
+These items are implementable but intentionally sequenced after the first 30
+unless an external dependency changes.
+
+### External Execution Evidence
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `EXT-009` | Retain fork metadata browser evidence from deployed fork contracts | E | fork deployment artifact |
+| `EXT-010` | Retain fork ceremony evidence for admin/signer/randomizer/auction operations | E/F | ceremony checker |
+| `EXT-011` | Retain fork randomizer operations evidence | E/F | randomizer operations checker |
+| `EXT-012` | Add production broadcast retention checker | F/G | release-mode policy |
+| `EXT-013` | Add production verified-addresses evidence checker | F/G | explorer checker |
+| `EXT-014` | Add live metadata browser evidence checker | F/G | metadata browser evidence pattern |
+| `EXT-015` | Add live ceremony evidence checker | F/G | governance ceremony checker |
+| `EXT-016` | Add live randomizer operations evidence checker | F/G | randomizer operations pattern |
+
+### Adversarial Testing
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `ADV-006` | Add randomizer callback reentrancy/stale-provider adversarial suite | D/F | `ADV-001` |
+| `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | metadata fixtures |
+| `ADV-008` | Add event reconstructability tests from emitted logs | D/G | `CON-002` |
+| `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | fork tooling |
+| `ADV-010` | Add MEV/timing attack model and bounded simulations | F | threat-model refresh |
+| `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | gas snapshot baseline |
+| `ADV-012` | Add mutation-style negative tests for custom errors | D/F | custom error inventory |
+
+### Contract/API Hardening
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | `INT-002` to `INT-005` |
+| `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | `CON-001` |
+| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | size report |
+| `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | `CON-001` |
+| `CON-007` | Add interface/version views for frontend compatibility | G | `INT-001` |
+
+### 1/1 Product Excellence
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | size budget, `INT-001` |
+| `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | metadata freeze model |
+| `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | governance ADR update |
+| `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | dependency artifact manifest |
+| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |
+| `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is tight | G | `CON-005` |
+| `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | formatting/static-analysis gates |
+
+### Release Engineering
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | `REL-001` |
+| `REL-005` | Add release artifact verifier script for third-party users | G | `REL-003` |
+| `REL-006` | Add release notes generator from changelog and artifact diff | G | changelog policy |
+| `REL-007` | Add dependency provenance attestation bundle | F/G | dependency manifest |
+| `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | live evidence templates |
+
+### Governance And Operations
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `GOV-005` | Add signer compromise drill retained evidence | F | `GOV-004` |
+| `GOV-006` | Add stuck auction drill retained evidence | F | `GOV-004` |
+| `GOV-007` | Add failed randomness drill retained evidence | F | `GOV-004` |
+| `GOV-008` | Add bad metadata/dependency drill retained evidence | F | `GOV-004` |
+| `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | `INT-005` |
+| `GOV-010` | Add operator dashboard query model | G | `INT-010` |
+
+### Integration Readiness
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `INT-011` | Add curator rewards frontend flow spec | G | `INT-001` |
+| `INT-012` | Add withdrawal/credit UX flow spec | G | `INT-002`, `INT-003` |
+| `INT-013` | Add TypeScript snippets for artifact loading and chain config | G | `INT-001` |
+| `INT-014` | Add TypeScript snippets for EIP-712 payload construction | G | `INT-004` |
+| `INT-015` | Add TypeScript snippets for event decoding/indexer ingestion | G | `INT-005` |
+| `INT-016` | Add integration conformance fixtures for frontend teams | G | `INT-013` to `INT-015` |
+| `INT-017` | Add minimal read-only reference UI, if still useful after docs | G | stable testnet addresses |
+| `INT-018` | Add transaction-flow reference UI, if maintainers want app code in repo | G | `INT-017` |
+
+### Audit And Open Source
+
+| Item | Intended PR | Gate | Dependency |
+| --- | --- | --- | --- |
+| `AUD-003` | Add external audit finding intake template and remediation workflow | F | `AUD-001` |
+| `AUD-004` | Add post-audit remediation evidence checker | F/G | external audit completed |
+| `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
+| `OSS-002` | Add first-30-minutes contributor guide | A/G | README refresh |
+| `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | backlog labels |
+| `OSS-004` | Add PR template release-impact checklist | G | changelog policy |
+| `OSS-005` | Add docs link checker or markdown-lint gate | G | docs stabilization |
+
+## 6. Dependency Map
+
+```mermaid
+flowchart TD
+    MAP["MAP-001 execution backlog"]
+    EXT1["EXT-001 testnet retained artifact checker"]
+    EXT2["EXT-002 Sepolia runbook/config"]
+    EXT3["EXT-003 reviewed Sepolia deployment evidence"]
+    EXT4["EXT-004 Sepolia manifests/address books"]
+    EXT5["EXT-005 explorer verification evidence"]
+    EXT6["EXT-006 fixed-price smoke"]
+    EXT7["EXT-007 auction smoke"]
+    EXT8["EXT-008 randomizer/metadata proof"]
+    GOV1["GOV-001 admin ceremony checker"]
+    GOV2["GOV-002 testnet governance evidence"]
+    ADV1["ADV-001 state-machine harness"]
+    ADV2["ADV-002 adversarial sequences"]
+    REL1["REL-001 signed provenance checker"]
+    AUD1["AUD-001 audit package refresh"]
+    INT1["INT-001 integration entrypoint"]
+    INT5["INT-005 event/indexer spec"]
+
+    MAP --> EXT1
+    EXT1 --> EXT2
+    EXT2 --> EXT3
+    EXT3 --> EXT4
+    EXT4 --> EXT5
+    EXT4 --> EXT6
+    EXT4 --> EXT7
+    EXT4 --> EXT8
+    GOV1 --> GOV2
+    EXT3 --> GOV2
+    ADV1 --> ADV2
+    EXT5 --> REL1
+    EXT8 --> AUD1
+    ADV2 --> AUD1
+    INT1 --> INT5
+    EXT4 --> INT1
+```
+
+## 7. Readiness Definition Of Done
+
+### Public Beta Ready
+
+- CI green on build, tests, size, formatting, release artifacts, release
+  readiness, public-beta evidence, and evidence packet checks.
+- Testnet deployment rehearsal evidence is reviewed and retained.
+- Testnet explorer verification status is reviewed and retained.
+- Testnet fixed-price, auction, randomizer, and metadata smoke evidence exists
+  or is explicitly waived with owner/risk/expiry.
+- No P0/P1 public-beta blocker remains open without an accepted waiver.
+- README and docs clearly state pre-production or beta status.
+
+### Audit Submission Ready
+
+- Audit package is current.
+- Slither high/medium baseline is fixed, accepted, or waived with evidence.
+- Risk register is current.
+- Adversarial state-machine tests exist for the highest-risk protocol paths.
+- External execution evidence exists for fork and testnet.
+- Governance and signer custody assumptions are documented with evidence.
+
+### Production Ready
+
+- Public beta requirements are complete.
+- External audit report is retained or audit waiver is public and signed off.
+- Production signed tag and checksum bundle exist.
+- Production bytecode-to-release proof exists.
+- Live deployment manifest/address book/explorer verification evidence exists.
+- Live ceremony, signer custody, production signing, randomizer operations, and
+  incident-response readiness evidence exists.
+- Integrator docs are sufficient for frontend, mobile, Electron, indexer, and
+  operator surfaces.
+- Contract-level metadata, royalty policy, 1/1 provenance, collector
+  permanence, marketplace/indexer evidence, and release-grade warning
+  dispositions are complete or explicitly waived with owner/risk/expiry.
+
+### Integrator Ready
+
+- Integration entrypoint exists.
+- Contract flows are documented for fixed-price mint, auction, credits,
+  curator rewards, metadata, randomizer, and admin/operator actions.
+- Wallet/signature docs cover EOA, ERC-1271, Safe, WalletConnect, replay,
+  signer epoch, cancellation, and wrong-domain failures.
+- Event/indexer docs define entities, events, indexed fields, confirmation
+  depth, reorg policy, and rescan strategy.
+- Metadata docs define pending, stale, failed, final, frozen, burned, cache, and
+  ERC-4906 behavior.
+- Contract-level metadata, royalty display, provenance manifest, and permanence
+  package expectations are documented for product teams and collector tooling.
+- React/mobile/Electron guidance exists and consumes release artifacts instead
+  of hardcoded addresses.
+
+## 8. Backlog Maintenance
+
+- Update this file when a PR merges, a blocker is discovered, or a work item
+  splits.
+- Prefer appending new items to the relevant lane over editing history.
+- Move completed implementation details into `ops/AUTONOMOUS_RUN.md` worklog
+  and leave this backlog focused on future work.
+- If an item becomes obsolete, mark it superseded and link the replacement.
+- Keep the first 30 PR queue biased toward actual maturity changes, not
+  state-file churn.
