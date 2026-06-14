@@ -35,11 +35,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-live-audit-freshness-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/302` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/303` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/304` |
 | Next issue | TBD after issue #303 merges |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 04:27 UTC` |
+| Last updated | `2026-06-14 04:29 UTC` |
 
 ## Packaging Notes
 
@@ -209,12 +209,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile live audit freshness guard merge state (Queue Item 146)
 
-Status: local implementation in progress; PR not opened yet.
+Status: PR open; awaiting CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/303`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/304`.
 Branch: `codex/reconcile-live-audit-freshness-merge-state`.
 Branch started from PR #302 squash merge commit
 `96c1e7cd63a3129f04658d16eab56229063e4718`.
+Opening head: `14ad0033e83eb1dc7f3d9f798b53a4a89e095c7e`.
 
 Goal:
 
@@ -11698,6 +11699,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 04:29 | Open PR #304 | State-only live audit freshness merge-state reconciliation PR opened on head `14ad0033e83eb1dc7f3d9f798b53a4a89e095c7e`; it links issue #303, records PR #302 as merged, refreshes roadmap verification metadata to the latest green baseline, marks the freshness guard row passing, and selects Queue Item 147 as the next no-secret roadmap target. |
 | 2026-06-14 04:23 | Start Queue Item 146 | PR #302 merged as `96c1e7cd63a3129f04658d16eab56229063e4718`, issue #301 closed completed, issue #303 opened for state-only merge reconciliation, and branch `codex/reconcile-live-audit-freshness-merge-state` started from the merged baseline. |
 | 2026-06-14 04:20 | Merge PR #302 | Retained live audit report freshness guard merged as `96c1e7cd63a3129f04658d16eab56229063e4718`; final head `8f52a4ad71082209d596e60dc70525dfd1d32622` passed CI run `27487986670`, CodeRabbit status was success with no unresolved review threads after explicit review request comment `4700659492`, and issue #301 closed completed. |
 | 2026-06-14 04:09 | Open PR #302 | Retained live audit freshness guard PR opened on head `30195e922fdd7eada56301092196f31235e764ed`; it links issue #301, adds explicit freshness/currentness enforcement and committed historical/not-current retained reports, refreshes release evidence artifacts, and preserves blocked readiness claims. |
