@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-pr-338-merge-state` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/338` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/339` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/340` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/216` |
 | Roadmap file | `ops/ROADMAP.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -227,12 +227,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Reconcile PR #338 merge state (Queue Item 165)
 
-Status: branch in progress; PR not opened yet.
+Status: PR open; waiting for CI and CodeRabbit.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/339`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/340`.
 Branch: `codex/reconcile-pr-338-merge-state`.
 Branch started from PR #338 squash merge commit
 `8fdcad01d67e5280f0a43a92504646149bba34df`.
+Initial PR head: `b1baac33f216f9bbcea5076c4f35d1147de9599d`.
+CodeRabbit review requested via comment `4701852808`.
 
 Goal:
 
@@ -12649,6 +12651,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-14 13:12 | Open PR #340 | State-only PR #340 opened for issue #339 on head `b1baac33f216f9bbcea5076c4f35d1147de9599d`, records PR #338 merge evidence and issue #337 completion, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701852808`. |
 | 2026-06-14 13:06 | Start Queue Item 165 | PR #338 merged as `8fdcad01d67e5280f0a43a92504646149bba34df`, issue #337 closed completed, issue #339 opened for merge-state reconciliation, and branch `codex/reconcile-pr-338-merge-state` started from the merged baseline; issue #216 remains blocked pending actual reviewed retained fork evidence. |
 | 2026-06-14 13:05 | Merge PR #338 | State-only reconciliation PR #338 passed CI run `27499563930`, job `81279861840`, on final head `ef514a2e6cebd7cb2a64dc13c027f6a8c8915703`; CodeRabbit status was success after explicit review-finished reply `4701812536`; no review threads were open; merge-decision comment `4701834195` recorded the initial rate-limit warning as non-actionable; squash merge commit `8fdcad01d67e5280f0a43a92504646149bba34df` landed on `main`; and issue #337 closed completed. |
 | 2026-06-14 12:56 | Open PR #338 | State-only PR #338 opened for issue #337 on head `3c89f9410253c24a84aaabe74c099880ca04acc9`, records PR #336 merge evidence and issue #335 completion, preserves issue #216 as blocked for actual reviewed fork evidence, and requests CodeRabbit review via comment `4701812284`. |
