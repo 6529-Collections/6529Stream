@@ -83,6 +83,30 @@ With-bid settlement:
 - A failed NFT transfer leaves the auction in `EndedWithBid`, keeps active bid
   escrow intact, and creates no proceeds credits.
 
+## Pause And Emergency Boundaries
+
+Pause controls are domain-scoped:
+
+- `AuctionBid` pause blocks new bids, but it does not change the current highest
+  bid, current highest bidder, active bid escrow, outbid bidder credits, token
+  custody, or user withdrawal availability.
+- `AuctionSettlement` pause blocks ended-auction settlement and no-bid claims,
+  but it does not move escrowed NFTs, erase active bid escrow, create proceeds,
+  or change owed balances.
+- Contract-poster no-bid auctions remain in escrow while settlement is paused.
+  After unpause, settlement can record the poster as the pending claimant; a
+  later claim is also blocked by settlement pause until unpaused again.
+- User withdrawals are intentionally outside the operational pause domains.
+  Bidder credits and settled proceeds remain withdrawable unless a future ADR
+  explicitly accepts a bounded withdrawal pause.
+- Emergency withdrawal is surplus-only. It cannot withdraw bidder credits,
+  active highest-bid escrow, or settled poster/protocol/curator proceeds while
+  bid or settlement domains are paused. Forced surplus may be withdrawn during
+  a pause, but the post-withdrawal contract balance must still cover owed
+  balances.
+- Repeated settlement after a terminal state is rejected and cannot duplicate
+  proceeds after a pause/unpause sequence.
+
 ## Cancellation
 
 Cancellation is intentionally narrow:

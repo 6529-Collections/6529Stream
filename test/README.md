@@ -175,7 +175,14 @@ withdrawals use the explicit `StreamAdmins.emergencyRecipient()` while keeping
 the existing surplus/reserve boundaries intact. The pause suite also covers the
 current signer-compromise response path by pausing drop execution, incrementing
 the signer epoch, cancelling the exposed drop ID, unpausing, and proving the
-stale payload cannot mint.
+stale payload cannot mint. ADV-004 adds pause/settlement matrix regressions in
+the same suite: auction bid pauses reject new bids while preserving highest-bid
+escrow and outbid bidder credits, settlement pauses preserve custody, status,
+escrow, proceeds, and total owed balances, contract-poster no-bid settlement
+and claim paths remain paused until unpaused, duplicate settlement cannot
+recreate proceeds, failed fixed-price, bidder-credit, and proceeds withdrawals
+preserve credits, forced surplus can be withdrawn without draining owed funds,
+and user withdrawals remain available during operational pauses.
 
 Randomizer request lifecycle and callback validation now have P0-RAND-001
 target-state coverage in `StreamRandomizerLifecycle.t.sol`: VRF and arRNG

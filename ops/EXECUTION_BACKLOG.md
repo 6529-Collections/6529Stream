@@ -1061,7 +1061,8 @@ Issue: [`#372`](https://github.com/6529-Collections/6529Stream/issues/372).
 
 ### ADV-003: Add Signer Compromise And Revocation Fuzz Tests
 
-Status: In progress locally on branch `codex/signer-compromise-fuzz`.
+Status: Completed in PR
+[`#377`](https://github.com/6529-Collections/6529Stream/pull/377).
 
 Gate: D/F.
 
@@ -1133,7 +1134,7 @@ Issue: [`#374`](https://github.com/6529-Collections/6529Stream/issues/374).
 
 ### ADV-004: Add Pause And Settlement Matrix Invariants
 
-Status: Planned.
+Status: In progress locally on branch `codex/pause-settlement-matrix-invariants`.
 
 Gate: D/F.
 
@@ -1141,38 +1142,66 @@ Problem: Pause controls and settlement/withdrawal policies interact with user
 funds. Tests must prove emergency controls do not trap or erase owed balances
 unless intentionally documented.
 
-Outcome: Matrix tests cover mint pause, bid pause, settlement pause, withdrawal
-policy, emergency withdrawals, and owed-balance safety.
+Outcome: Matrix tests cover mint pause, bid pause, settlement pause,
+withdrawal policy, forced-surplus emergency withdrawals, duplicate-settlement
+rejection, no-bid contract-poster settlement/claim pause behavior, custody
+preservation, and owed-balance safety.
 
 Files likely touched:
 
 - `test/StreamPauseControls.t.sol`
 - `test/StreamAuctionPayments.t.sol`
 - `test/StreamPaymentsInvariant.t.sol`
+- `test/README.md`
 - `docs/incident-response.md`
 - `docs/auction-custody.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
 
 Implementation steps:
 
 1. Enumerate pause domains and expected allowed/blocked functions.
-2. Add table-driven tests for each function/domain pair.
-3. Add assertions that owed credits persist under pause and failed withdrawal.
-4. Add emergency withdrawal boundary checks after paused states.
+2. Add snapshot-backed matrix tests for auction bid pause and settlement pause.
+3. Assert paused bid and with-bid settlement attempts do not mutate custody,
+   status, highest bid, bidder credits, proceeds credits, active escrow, total
+   owed, contract balance, or emergency-withdrawable surplus.
+4. Assert no-bid settlement and pending contract-poster claims stay paused
+   without losing custody or pending-claimant state.
+5. Assert user withdrawals remain available under operational pauses.
+6. Add failed fixed-price, bidder-credit, proceeds-withdrawal, and
+   duplicate-settlement checks under pause/unpause sequences.
+7. Add forced-surplus emergency withdrawal boundary checks after paused states.
 
 Required tests/checks:
 
-- Targeted Foundry tests.
-- Full `forge test -vvv`.
+- `forge test --match-path test/StreamPauseControls.t.sol -vvv`
+- `forge test --match-path test/StreamAuctionPayments.t.sol -vvv`
+- `forge test --match-path test/StreamPaymentsInvariant.t.sol -vvv`
+- `forge test -vvv`
 
 Acceptance criteria:
 
 - Pause policies are executable and documented.
-- Emergency controls cannot withdraw owed funds.
-- Failed withdrawals do not erase credit.
+- Bid pause rejects new bids without changing highest bid, highest bidder,
+  bidder credits, active escrow, total owed, contract balance, custody, or
+  emergency-withdrawable surplus.
+- Settlement pause rejects ended-auction settlement without changing custody,
+  status, escrow, proceeds, total owed, contract balance, or surplus.
+- No-bid contract-poster settlement and pending claims remain blocked while
+  settlement pause is active and complete after unpause.
+- User bidder and proceeds withdrawals remain available during operational
+  pauses.
+- Duplicate settlement cannot recreate proceeds after a pause/unpause sequence.
+- Emergency controls can withdraw forced surplus during operational pauses but
+  cannot withdraw owed funds.
+- Failed fixed-price, bidder-credit, and proceeds withdrawals do not erase
+  credit.
 
 Evidence artifacts: None.
 
-Dependencies: Existing pause controls and payment invariants.
+Dependencies: Existing pause controls, auction payments, and payment
+invariants.
+Issue: [`#378`](https://github.com/6529-Collections/6529Stream/issues/378).
 
 ### ADV-005: Expand Payment And Forced-ETH Invariants
 

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/signer-compromise-fuzz` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/376` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/374` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/377` |
-| Next issue | TBD after ADV-003; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/pause-settlement-matrix-invariants` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/377` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/378` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/379` |
+| Next issue | TBD after ADV-004; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 03:12 UTC` |
+| Last updated | `2026-06-15 04:11 UTC` |
 
 ## Packaging Notes
 
@@ -241,18 +241,81 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 177 | Add end-to-end protocol state-machine harness | Gate D/Gate F support | Add a reusable Foundry helper plus deterministic smoke coverage across fixed-price mint, auction bid/settlement, payments, pause/signer/cancel controls, randomness finalization, metadata mutation, and collection freeze without production contract changes | Merged in PR #371 |
 | 178 | Add auction/drop/randomizer adversarial sequence tests | Gate D/Gate F support | Extend the protocol state-machine test with adversarial ordering coverage for cancelled/expired/stale/replayed drops, reverted fixed-price withdrawals, auction pre-settlement ordering, settlement idempotence, late bids, and failed auction withdrawals without production contract changes | Merged in PR #373 |
 | 179 | Fold clean-main reviewer rebaseline into roadmap | Gate G support | Record the reviewer-confirmed fixed surfaces, remaining 10/10 product/evidence gaps, benchmark inputs, and backlog mapping without changing readiness claims | Merged in PR #376 |
-| 180 | Add signer compromise and revocation fuzz tests | Gate D/Gate F support | Add deterministic and bounded fuzz coverage for signer compromise response paths: drop-execution pause, signer rotation, epoch invalidation, per-drop cancellation, replay rejection, recovered fixed-price and auction payloads, and invalid-attempt no-mutation assertions | In progress on issue #374 |
+| 180 | Add signer compromise and revocation fuzz tests | Gate D/Gate F support | Add deterministic and bounded fuzz coverage for signer compromise response paths: drop-execution pause, signer rotation, epoch invalidation, per-drop cancellation, replay rejection, recovered fixed-price and auction payloads, and invalid-attempt no-mutation assertions | Merged in PR #377 |
+| 181 | Add pause and settlement matrix invariants | Gate D/Gate F support | Add snapshot-backed matrix coverage for auction bid pauses, settlement pauses, failed proceeds withdrawals, user withdrawal liveness, emergency-withdrawal owed-fund boundaries, and duplicate-settlement rejection without production contract changes | In progress on issue #378 |
 
 ## Current PR Worklog
 
-### PR candidate: Add signer compromise and revocation fuzz tests (Queue Item 180)
+### PR candidate: Add pause and settlement matrix invariants (Queue Item 181)
 
-Status: PR #377 open; CI and CodeRabbit pending.
+Status: PR #379 open; final local precision pass completed after bot
+nice-to-have feedback, amended push and final CI follow-up pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/378`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/379`.
+Branch: `codex/pause-settlement-matrix-invariants`.
+Branch started from PR #377 squash merge commit
+`7d14e95df61f0ef0f1185c42a7a70e3bb50a1ec9`.
+
+Goal:
+
+- Add focused ADV-004 coverage for pause, settlement, withdrawal, emergency,
+  custody, and owed-balance interactions without production contract changes.
+- Prove auction bid pause rejects new bids while preserving current highest-bid
+  state, outbid bidder credits, active escrow, custody, owed totals, contract
+  balance, and emergency-withdrawable surplus.
+- Prove auction settlement pause rejects ended settlement while preserving
+  custody, status, active escrow, proceeds, owed totals, contract balance, and
+  emergency-withdrawable surplus.
+- Prove duplicate settlement, failed proceeds withdrawal, emergency withdrawal,
+  and user withdrawal liveness remain safe across pause/unpause sequences.
+- Prove no-bid contract-poster settlement and pending claims remain paused
+  without losing custody or pending-claimant state, and forced surplus can be
+  withdrawn during a pause without draining owed funds.
+
+Validation completed so far:
+
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test\StreamPauseControls.t.sol -vvv`
+  passed locally with 12 tests passing, including the new ADV-004 matrix
+  regressions for bid pause, with-bid settlement pause, no-bid contract-poster
+  settlement/claim pause, failed fixed-price/bidder/proceeds withdrawals,
+  forced-surplus emergency withdrawal, and user withdrawal liveness, with
+  existing compiler/NatSpec warning noise only.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test\StreamAuctionPayments.t.sol -vvv`
+  passed locally with 14 tests passing.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`
+  passed locally with 256 fuzz runs.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt --check test\StreamPauseControls.t.sol`
+  passed.
+- `python scripts\test_incident_response.py`, `python scripts\check_incident_response.py`,
+  `python scripts\test_signer_custody_readiness.py`, `python scripts\check_signer_custody_readiness.py`,
+  `python scripts\check_changelog.py`, release manifest/checksum check mode,
+  roadmap/backlog/run-state/docs heading scan, and `git diff --check` passed
+  locally after refreshing release artifacts and signer custody readiness hash
+  evidence.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed locally on 2026-06-15 03:37 UTC, then passed again after rebasing
+  onto `origin/main` commit `ba93f5baf368b11d738863086441370145e0aa81` on
+  2026-06-15 03:46 UTC, with existing compiler/NatSpec warning noise only.
+- After 6529bot's non-blocking nice-to-have about broad low-level negative
+  calls, the paused bid, paused settlement, duplicate settlement, paused
+  no-bid claim, and failed withdrawal assertions were tightened to exact
+  `vm.expectRevert(...)` checks while preserving the snapshot-backed
+  no-mutation assertions. The targeted pause suite passed again, and the full
+  local gate passed again at 2026-06-15 04:11 UTC with the same existing
+  compiler/NatSpec warning noise only.
+
+### Completed: Add signer compromise and revocation fuzz tests (Queue Item 180)
+
+Status: merged as PR #377; issue #374 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/374`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/377`.
 Branch: `codex/signer-compromise-fuzz`.
 Branch started from PR #376 squash merge commit
 `ba83f54ca2ea952a62403a8b74faa09e11e150c7`.
+Opening PR head: `b00517c4a1a29d847565303091b2b7eb99689513`.
+Final PR head: `676d3982024bd79c061540bc71aa6184cc84064a`.
+Squash merge commit:
+`7d14e95df61f0ef0f1185c42a7a70e3bb50a1ec9`.
 
 Goal:
 
@@ -282,6 +345,12 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed locally on 2026-06-15 03:08 UTC with existing compiler/NatSpec
   warning noise only.
+- PR #377 CI run `27521742421` passed: Foundry smoke job `81340908414` and
+  Windows PowerShell wrapper job `81340908382` succeeded. CodeRabbit status was
+  success; the explicit `@coderabbitai review` command returned `Review
+  finished`, no reviews or review threads were present, and merge-decision
+  comment `4704193974` documented the non-actionable rate-limit banner. PR
+  #377 squash-merged as `7d14e95df61f0ef0f1185c42a7a70e3bb50a1ec9`.
 
 ### Completed: Fold clean-main reviewer rebaseline into roadmap (Queue Item 179)
 

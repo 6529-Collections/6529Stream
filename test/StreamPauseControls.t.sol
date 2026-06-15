@@ -26,8 +26,33 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
     address private constant WITHDRAW_RECIPIENT = address(0x4004);
     address private constant PAUSE_GUARDIAN = address(0x6006);
     address private constant UNPAUSE_ADMIN = address(0x7007);
+    address private constant FIRST_BIDDER = address(0x8008);
+    address private constant SECOND_BIDDER = address(0x9009);
+    address private constant THIRD_BIDDER = address(0xA00A);
     uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant RESERVE_PRICE = 5 ether;
+    uint256 private constant SECOND_BID = 6 ether;
+    uint256 private constant THIRD_BID = 7 ether;
     bytes32 private constant REASON = keccak256("pause-regression");
+
+    struct AuctionPauseSnapshot {
+        uint256 highestBid;
+        address highestBidder;
+        uint256 watchedBidderCredit;
+        uint256 posterCredit;
+        uint256 protocolCredit;
+        uint256 curatorCredit;
+        uint256 totalBidderOwed;
+        uint256 totalAuctionBidEscrow;
+        uint256 totalPosterOwed;
+        uint256 totalProtocolOwed;
+        uint256 totalCuratorOwed;
+        uint256 totalOwed;
+        uint256 balance;
+        uint256 emergencyWithdrawable;
+        uint256 status;
+        address owner;
+    }
 
     function testPauseGuardianCanPauseButCannotUnpause() public {
         StreamAdmins admins = new StreamAdmins(address(this));
@@ -173,11 +198,8 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
 
         _setPaused(setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_BID(), true);
 
-        (bool pausedBid,) = address(setup.auctions).call{ value: 1 ether }(
-            abi.encodeWithSelector(setup.auctions.participateToAuction.selector, setup.tokenId)
-        );
-
-        pausedBid.assertFalse("bid succeeded while paused");
+        vm.expectRevert("Bid paused");
+        setup.auctions.participateToAuction{ value: 1 ether }(setup.tokenId);
         setup.auctions.auctionHighestBid(setup.tokenId).assertEq(0, "paused bid recorded");
 
         _setPaused(setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_BID(), false);
@@ -194,10 +216,8 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
             setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), true
         );
 
-        (bool pausedSettlement,) = address(setup.auctions)
-            .call(abi.encodeWithSelector(setup.auctions.claimAuction.selector, setup.tokenId));
-
-        pausedSettlement.assertFalse("settlement succeeded while paused");
+        vm.expectRevert("Settlement paused");
+        setup.auctions.claimAuction(setup.tokenId);
         uint256(StreamAuctions.AuctionStatus.EndedNoBid)
             .assertEq(
                 uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId)), "status changed"
@@ -258,6 +278,7 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
     function testUserWithdrawalsRemainAvailableDuringOperationalPauses() public {
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        RejectingPauseRecipient rejectingRecipient = new RejectingPauseRecipient();
         vm.deal(address(this), 10 ether);
         StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
             deployed.drops,
@@ -277,6 +298,15 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
         _pauseAllOperationalDomains(deployed.admins);
         uint256 recipientBalanceBefore = WITHDRAW_RECIPIENT.balance;
 
+        vm.expectRevert("ETH failed");
+        vm.prank(POSTER);
+        deployed.drops.withdrawFixedPriceCreditTo(payable(address(rejectingRecipient)));
+        deployed.drops.fixedPricePosterCredits(POSTER).assertEq(2 ether, "poster credit erased");
+        deployed.drops.totalFixedPricePosterOwed().assertEq(2 ether, "poster owed changed");
+        deployed.drops.totalOwed().assertEq(4 ether, "total owed changed");
+        address(deployed.drops).balance.assertEq(4 ether, "drops balance changed");
+        deployed.drops.emergencyWithdrawable().assertEq(0, "owed funds exposed as surplus");
+
         vm.prank(POSTER);
         deployed.drops.withdrawFixedPriceCreditTo(payable(WITHDRAW_RECIPIENT));
 
@@ -285,7 +315,190 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
         deployed.drops.fixedPricePosterCredits(POSTER).assertEq(0, "poster credit not cleared");
     }
 
+    function testAuctionBidPauseMatrixPreservesCreditsEscrowAndWithdrawals() public {
+        AuctionSetup memory setup = _createAuctionDrop(1 days, RESERVE_PRICE);
+        RejectingPauseRecipient rejectingRecipient = new RejectingPauseRecipient();
+        vm.deal(FIRST_BIDDER, 10 ether);
+        vm.deal(SECOND_BIDDER, 10 ether);
+        vm.deal(THIRD_BIDDER, 10 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+        vm.prank(SECOND_BIDDER);
+        setup.auctions.participateToAuction{ value: SECOND_BID }(setup.tokenId);
+
+        AuctionPauseSnapshot memory beforePausedBid =
+            _snapshotAuctionPauseState(setup, FIRST_BIDDER);
+        _setPaused(setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_BID(), true);
+
+        vm.expectRevert("Bid paused");
+        vm.prank(THIRD_BIDDER);
+        setup.auctions.participateToAuction{ value: THIRD_BID }(setup.tokenId);
+        _assertAuctionPauseState(setup, FIRST_BIDDER, beforePausedBid);
+
+        setup.deployed.admins.updateEmergencyRecipient(PAYOUT);
+        uint256 payoutBalanceBefore = PAYOUT.balance;
+        vm.deal(address(setup.auctions), beforePausedBid.balance + 1 ether);
+        setup.auctions.emergencyWithdrawable().assertEq(1 ether, "forced surplus");
+        setup.auctions.emergencyWithdraw();
+        PAYOUT.balance.assertEq(payoutBalanceBefore + 1 ether, "surplus payout");
+        _assertAuctionPauseState(setup, FIRST_BIDDER, beforePausedBid);
+
+        vm.expectRevert("ETH failed");
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.withdrawBidderCreditTo(payable(address(rejectingRecipient)));
+        _assertAuctionPauseState(setup, FIRST_BIDDER, beforePausedBid);
+
+        uint256 recipientBalanceBefore = WITHDRAW_RECIPIENT.balance;
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.withdrawBidderCreditTo(payable(WITHDRAW_RECIPIENT));
+
+        WITHDRAW_RECIPIENT.balance
+            .assertEq(recipientBalanceBefore + RESERVE_PRICE, "bidder withdrawal paused");
+        setup.auctions.auctionBidderCredits(FIRST_BIDDER).assertEq(0, "bidder credit");
+        setup.auctions.totalBidderOwed().assertEq(0, "total bidder owed");
+        setup.auctions.totalAuctionBidEscrow().assertEq(SECOND_BID, "active escrow");
+        setup.auctions.totalOwed().assertEq(SECOND_BID, "total owed");
+        address(setup.auctions).balance.assertEq(SECOND_BID, "auction balance");
+        setup.auctions.emergencyWithdrawable().assertEq(0, "owed surplus");
+    }
+
+    function testAuctionSettlementPauseMatrixPreservesCustodyAndProceeds() public {
+        AuctionSetup memory setup = _createAuctionDrop(1 days, RESERVE_PRICE);
+        RejectingPauseRecipient rejectingRecipient = new RejectingPauseRecipient();
+        vm.deal(FIRST_BIDDER, 10 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+
+        AuctionPauseSnapshot memory beforePausedSettlement =
+            _snapshotAuctionPauseState(setup, FIRST_BIDDER);
+        uint256(StreamAuctions.AuctionStatus.EndedWithBid)
+            .assertEq(beforePausedSettlement.status, "precondition status");
+        _setPaused(
+            setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), true
+        );
+
+        vm.expectRevert("Settlement paused");
+        setup.auctions.claimAuction(setup.tokenId);
+        _assertAuctionPauseState(setup, FIRST_BIDDER, beforePausedSettlement);
+
+        setup.deployed.admins.updateEmergencyRecipient(PAYOUT);
+        uint256 payoutBalanceBefore = PAYOUT.balance;
+        vm.deal(address(setup.auctions), beforePausedSettlement.balance + 1 ether);
+        setup.auctions.emergencyWithdrawable().assertEq(1 ether, "settlement surplus");
+        setup.auctions.emergencyWithdraw();
+        PAYOUT.balance.assertEq(payoutBalanceBefore + 1 ether, "settlement surplus payout");
+        _assertAuctionPauseState(setup, FIRST_BIDDER, beforePausedSettlement);
+
+        _setPaused(
+            setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), false
+        );
+        setup.auctions.claimAuction(setup.tokenId);
+
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(FIRST_BIDDER, "winner owner");
+        uint256(StreamAuctions.AuctionStatus.SettledWithBid)
+            .assertEq(uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId)), "settled");
+        setup.auctions.totalAuctionBidEscrow().assertEq(0, "escrow after settlement");
+        setup.auctions.totalProceedsOwed().assertEq(RESERVE_PRICE, "proceeds owed");
+        setup.auctions.totalOwed().assertEq(RESERVE_PRICE, "total owed after settlement");
+        setup.auctions.emergencyWithdrawable().assertEq(0, "settlement surplus");
+
+        AuctionPauseSnapshot memory afterSettlement =
+            _snapshotAuctionPauseState(setup, FIRST_BIDDER);
+        vm.expectRevert("Not ended");
+        setup.auctions.claimAuction(setup.tokenId);
+        _assertAuctionPauseState(setup, FIRST_BIDDER, afterSettlement);
+
+        _pauseAllOperationalDomains(setup.deployed.admins);
+        vm.expectRevert("ETH failed");
+        vm.prank(POSTER);
+        setup.auctions.withdrawAuctionProceedsCreditTo(payable(address(rejectingRecipient)));
+        _assertAuctionPauseState(setup, FIRST_BIDDER, afterSettlement);
+        setup.auctions.emergencyWithdraw();
+        _assertAuctionPauseState(setup, FIRST_BIDDER, afterSettlement);
+
+        uint256 recipientBalanceBefore = WITHDRAW_RECIPIENT.balance;
+        vm.prank(POSTER);
+        setup.auctions.withdrawAuctionProceedsCreditTo(payable(WITHDRAW_RECIPIENT));
+        vm.prank(PAYOUT);
+        setup.auctions.withdrawAuctionProceedsCreditTo(payable(WITHDRAW_RECIPIENT));
+        vm.prank(CURATORS_POOL);
+        setup.auctions.withdrawAuctionProceedsCreditTo(payable(WITHDRAW_RECIPIENT));
+
+        WITHDRAW_RECIPIENT.balance
+            .assertEq(recipientBalanceBefore + RESERVE_PRICE, "proceeds withdrawal paused");
+        setup.auctions.totalProceedsOwed().assertEq(0, "proceeds still owed");
+        setup.auctions.totalOwed().assertEq(0, "owed after proceeds withdrawals");
+        address(setup.auctions).balance.assertEq(0, "auction balance after withdrawals");
+    }
+
+    function testNoBidSettlementPauseMatrixPreservesContractPosterCustody() public {
+        NoBidContractPoster contractPoster = new NoBidContractPoster();
+        AuctionSetup memory setup =
+            _createAuctionDropForPoster(address(contractPoster), 1 days, RESERVE_PRICE);
+        vm.warp(setup.auctionEndTime + 1);
+
+        uint256(StreamAuctions.AuctionStatus.EndedNoBid)
+            .assertEq(uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId)), "ended");
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "custody");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(0), "pending claimant");
+        setup.auctions.totalOwed().assertEq(0, "owed before no-bid settlement");
+
+        _setPaused(
+            setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), true
+        );
+        vm.expectRevert("Settlement paused");
+        setup.auctions.claimAuction(setup.tokenId);
+        uint256(StreamAuctions.AuctionStatus.EndedNoBid)
+            .assertEq(uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId)), "status");
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "owner");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(0), "pending while paused");
+        setup.auctions.totalOwed().assertEq(0, "owed changed while paused");
+
+        _setPaused(
+            setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), false
+        );
+        setup.auctions.claimAuction(setup.tokenId);
+
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "held");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(contractPoster), "pending claimant");
+
+        _setPaused(
+            setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), true
+        );
+        vm.expectRevert("Settlement paused");
+        contractPoster.claimNoBid(setup.auctions, setup.tokenId, WITHDRAW_RECIPIENT);
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "claim owner");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(contractPoster), "claimant changed");
+
+        _setPaused(
+            setup.deployed.admins, setup.deployed.admins.PAUSE_DOMAIN_AUCTION_SETTLEMENT(), false
+        );
+        contractPoster.claimNoBid(setup.auctions, setup.tokenId, WITHDRAW_RECIPIENT);
+
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(WITHDRAW_RECIPIENT, "recipient");
+        uint256(StreamAuctions.AuctionStatus.SettledNoBid)
+            .assertEq(uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId)), "settled");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(0), "pending cleared");
+        setup.auctions.totalOwed().assertEq(0, "owed after no-bid claim");
+        setup.auctions.emergencyWithdrawable().assertEq(0, "no-bid surplus");
+    }
+
     function _createAuctionDrop(uint256 duration, uint256 reservePrice)
+        private
+        returns (AuctionSetup memory setup)
+    {
+        return _createAuctionDropForPoster(POSTER, duration, reservePrice);
+    }
+
+    function _createAuctionDropForPoster(address poster, uint256 duration, uint256 reservePrice)
         private
         returns (AuctionSetup memory setup)
     {
@@ -303,7 +516,7 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
 
         StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
             setup.deployed.drops,
-            POSTER,
+            poster,
             address(0),
             "auction-data",
             1,
@@ -320,6 +533,58 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
                 signAuthorization(setup.deployed.drops, authorization)
             );
         setup.tokenId = TOKEN_ID;
+    }
+
+    function _snapshotAuctionPauseState(AuctionSetup memory setup, address watchedBidder)
+        private
+        view
+        returns (AuctionPauseSnapshot memory snapshot)
+    {
+        snapshot = AuctionPauseSnapshot({
+            highestBid: setup.auctions.auctionHighestBid(setup.tokenId),
+            highestBidder: setup.auctions.auctionHighestBidder(setup.tokenId),
+            watchedBidderCredit: setup.auctions.auctionBidderCredits(watchedBidder),
+            posterCredit: setup.auctions.auctionPosterCredits(POSTER),
+            protocolCredit: setup.auctions.auctionProtocolCredits(PAYOUT),
+            curatorCredit: setup.auctions.auctionCuratorCredits(CURATORS_POOL),
+            totalBidderOwed: setup.auctions.totalBidderOwed(),
+            totalAuctionBidEscrow: setup.auctions.totalAuctionBidEscrow(),
+            totalPosterOwed: setup.auctions.totalPosterOwed(),
+            totalProtocolOwed: setup.auctions.totalProtocolOwed(),
+            totalCuratorOwed: setup.auctions.totalCuratorOwed(),
+            totalOwed: setup.auctions.totalOwed(),
+            balance: address(setup.auctions).balance,
+            emergencyWithdrawable: setup.auctions.emergencyWithdrawable(),
+            status: uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId)),
+            owner: setup.deployed.core.ownerOf(setup.tokenId)
+        });
+    }
+
+    function _assertAuctionPauseState(
+        AuctionSetup memory setup,
+        address watchedBidder,
+        AuctionPauseSnapshot memory expected
+    ) private view {
+        setup.auctions.auctionHighestBid(setup.tokenId).assertEq(expected.highestBid, "bid");
+        setup.auctions.auctionHighestBidder(setup.tokenId)
+            .assertEq(expected.highestBidder, "bidder");
+        setup.auctions.auctionBidderCredits(watchedBidder)
+            .assertEq(expected.watchedBidderCredit, "bidder credit");
+        setup.auctions.auctionPosterCredits(POSTER).assertEq(expected.posterCredit, "poster");
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(expected.protocolCredit, "protocol");
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL)
+            .assertEq(expected.curatorCredit, "curator");
+        setup.auctions.totalBidderOwed().assertEq(expected.totalBidderOwed, "bidder owed");
+        setup.auctions.totalAuctionBidEscrow().assertEq(expected.totalAuctionBidEscrow, "escrow");
+        setup.auctions.totalPosterOwed().assertEq(expected.totalPosterOwed, "poster owed");
+        setup.auctions.totalProtocolOwed().assertEq(expected.totalProtocolOwed, "protocol owed");
+        setup.auctions.totalCuratorOwed().assertEq(expected.totalCuratorOwed, "curator owed");
+        setup.auctions.totalOwed().assertEq(expected.totalOwed, "owed");
+        address(setup.auctions).balance.assertEq(expected.balance, "balance");
+        setup.auctions.emergencyWithdrawable().assertEq(expected.emergencyWithdrawable, "surplus");
+        uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId))
+            .assertEq(expected.status, "status");
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(expected.owner, "owner");
     }
 
     function _pauseAllOperationalDomains(StreamAdmins admins) private {
@@ -355,5 +620,17 @@ contract PauseMockArrngController {
         lastRefundAddress = refundAddress;
         requestId = nextRequestId;
         nextRequestId++;
+    }
+}
+
+contract RejectingPauseRecipient {
+    receive() external payable {
+        revert("reject eth");
+    }
+}
+
+contract NoBidContractPoster {
+    function claimNoBid(StreamAuctions auctions, uint256 tokenId, address recipient) external {
+        auctions.claimNoBidAuctionToken(tokenId, recipient);
     }
 }

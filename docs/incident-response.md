@@ -125,13 +125,24 @@ Immediate checks:
 - Confirm highest bidder, highest bid, poster credit, curator credit, protocol
   credit, bidder credit, and total owed views.
 - Confirm whether settlement is already terminal and idempotent.
+- If a pause is involved, snapshot custody, status, highest bid, credits,
+  active escrow, total owed, contract balance, and emergency-withdrawable
+  surplus before and after the attempted paused action.
 - Confirm withdrawal availability for unaffected credits.
 
 Containment:
 
 - Consider bid pause or settlement pause if new bids or settlements can worsen
   the incident.
+- Bid pause should block only new bids; it should not mutate current highest
+  bid state, bidder credits, active escrow, custody, or withdrawals.
+- Settlement pause should keep custody and owed balances unchanged until the
+  domain is unpaused or a reviewed recovery path is accepted.
+- For no-bid settlement with a contract poster, settlement pause should also
+  preserve escrow custody and any pending claimant state until unpaused.
 - Do not move an escrowed token or owed funds through emergency withdrawal.
+- Forced surplus can be withdrawn during an operational pause only if owed
+  balances remain fully covered after the withdrawal.
 - Do not erase bidder, poster, curator, or protocol credits during recovery.
 
 Recovery:
