@@ -194,12 +194,12 @@ reference inputs for roadmap quality, not automatic implementation mandates.
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-15 06:51 UTC` on branch `codex/audit-package-refresh`: full Windows `scripts/check.ps1` gate passed after refreshing AUD-001 audit-package state, checker coverage, release manifest, bytecode-release-proof, checksums, roadmap, backlog, and run-state; branch started from PR #385 squash merge commit `8217dfcc0aaf201d7ffa42fba0340c59d883699c`; issue #217 remains open for real reviewed testnet deployment rehearsal evidence |
-| OS tested | Local Windows PowerShell wrapper passed on branch `codex/audit-package-refresh`; latest merged baseline PR #385 passed Windows wrapper and Foundry smoke CI before squash merge `8217dfcc0aaf201d7ffa42fba0340c59d883699c` |
+| Last verified | `2026-06-15 08:22 UTC` on branch `codex/integrations-entrypoint`: full Windows `scripts/check.ps1` gate passed after adding the INT-001 integrations entrypoint, checker/tests, release-readiness links, release manifest coverage, regenerated risk register, bytecode-release-proof, checksums, roadmap, backlog, and run-state; branch started from PR #389 squash merge commit `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`; issue #217 remains open for real reviewed testnet deployment rehearsal evidence |
+| OS tested | Local Windows PowerShell wrapper passed on branch `codex/integrations-entrypoint`; latest merged baseline PR #389 passed Windows wrapper and Foundry smoke CI before squash merge `9aafee7a6055726c3a7fb693cd8e8a7202a4132f` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #385 passed Windows wrapper and Foundry smoke CI on head `6511e57a27b52cb7ab8b15aa7696ee923cf004fd`; CodeRabbit status was success with no unresolved review threads; PR #385 squash-merged as `8217dfcc0aaf201d7ffa42fba0340c59d883699c`; issue #384 closed completed. Current branch CI is pending until PR creation |
+| CI run | Latest merged baseline PR #389 passed Windows wrapper and Foundry smoke CI on final head `e9b3dbba51b45cab4b39a24986d108a0ebff0d1d`; CodeRabbit status was success with no unresolved review threads; PR #389 squash-merged as `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`; issue #388 closed completed. Current branch CI is pending until PR creation |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline

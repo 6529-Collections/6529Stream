@@ -1597,7 +1597,7 @@ REL-003 release proof changed what auditors should inspect first.
 
 ### AUD-002: Add Risk Register And Audit Boundary Checker
 
-Status: In progress on issue #388 / branch `codex/risk-register`.
+Status: Merged in PR #389; issue #388 closed completed.
 
 Gate: F.
 
@@ -1703,38 +1703,73 @@ Dependencies: `AUD-001`.
 
 ### INT-001: Add Integrations Entrypoint And Artifact Source Of Truth
 
-Status: Planned.
+Status: In progress on issue #390 / branch `codex/integrations-entrypoint`.
 
 Gate: G.
 
-Problem: A frontend or indexer engineer cannot yet start from a single
-integration entrypoint that explains which artifacts, manifests, ABIs, event
-catalogs, metadata docs, and chain configs to trust.
+Problem: A frontend, mobile, Electron, indexer, operator UI, or backend signing
+engineer cannot yet start from a single integration entrypoint that explains
+which artifacts, manifests, generated ABIs, event catalogs, metadata docs,
+signing docs, release evidence, and chain configs to trust. Raw Foundry ABIs
+are generated under ignored `out/` after `forge build`, so the repo needs a
+tracked source-of-truth map that points integrators to stable checked artifacts
+without pretending local scaffolding is production evidence.
 
-Outcome: `docs/integrations/README.md` defines the integration surface and
-links all canonical artifacts.
+Outcome: `docs/integrations/README.md` defines the integration surface, links
+all canonical tracked artifacts, states the pre-audit maturity boundary, and
+maps the follow-up INT-002 through INT-009 flow specs.
 
 Files likely touched:
 
 - `docs/integrations/README.md`
 - `README.md`
-- `docs/tooling.md`
+- `docs/release-readiness.md`
 - `release-artifacts/README.md`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- Makefile, Bash, PowerShell, and CI gate wiring
+- generated release manifest, bytecode proof, risk register, and checksum
+  artifacts if docs or manifest inputs change
 
 Implementation steps:
 
 1. Create integrations docs directory.
 2. Define supported consumer types: React web app, mobile app, Electron app,
    indexer, operator UI, backend signing service.
-3. Point to canonical ABIs, address books, release manifests, event catalog,
-   metadata docs, deployment docs, signing docs, and readiness status.
-4. State pre-production/testnet caveats.
-5. Add docs navigation links.
+3. Point to canonical ABI surface/checksum artifacts, address books, deployment
+   manifests, release manifests, event topic catalog, interface IDs, metadata
+   docs, deployment docs, signing docs, risk register, public-beta evidence
+   status, release policy, and checksum bundle.
+4. State pre-production/testnet caveats: pre-audit, not production-ready, local
+   baseline only, not a security claim, and not a replacement for fork,
+   testnet, live, audit, or marketplace/indexer evidence.
+5. Add a checker and tests that require headings, maturity phrases, source of
+   truth links, validation commands, and follow-up integration flow map.
+6. Wire the checker into local and CI gates.
+7. Add docs navigation links from README, release-readiness, and
+   release-artifacts docs.
+8. Regenerate downstream release artifacts after docs/checker changes.
 
 Required tests/checks:
 
-- Markdown heading/link sanity via `rg`.
-- `python scripts/check_release_readiness.py` if docs path is tracked.
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/test_risk_register.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts/check_integrations_readme.py scripts/test_integrations_readme.py`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -1742,10 +1777,18 @@ Acceptance criteria:
 - A frontend engineer knows where to get addresses and ABIs.
 - A product engineer knows which flows are documented and which are not.
 - The doc does not claim production readiness.
+- The doc explicitly says raw ABIs are generated under ignored `out/` and that
+  the tracked source of truth is release artifacts, ABI surface/checksum
+  outputs, event/interface catalogs, deployment manifests, address books, and
+  evidence status files.
+- React, mobile, Electron, indexer, operator UI, and backend-signing consumers
+  each have a source-of-truth path and a clear later flow-spec owner.
+- Local integration readiness is not represented as fork, testnet, live,
+  marketplace, public-beta, audit, or production evidence.
 
 Evidence artifacts: None.
 
-Dependencies: None; best after current external-evidence checker PR.
+Dependencies: `AUD-002`; best before `INT-002` through `INT-009`.
 
 ### INT-002: Add Fixed-Price Mint And Drop Authorization Flow Spec
 

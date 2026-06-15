@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-001 integrations entrypoint with `docs/integrations/README.md`, a
+  checker/test pair, local/CI gate wiring, release-readiness navigation, and
+  release-manifest coverage so frontend, mobile, Electron, indexer, operator
+  UI, and backend signing service teams can find canonical integration
+  artifacts without weakening the pre-production readiness boundary.
 - Added AUD-002 generated risk register support with
   `release-artifacts/latest/risk-register.json`, a retained schema, generator,
   checker, focused tests, local/CI gate wiring, audit-package and

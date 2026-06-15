@@ -3,6 +3,13 @@
 This directory contains the deterministic local release-artifact baseline for
 6529Stream.
 
+Integrator-facing consumers should start from
+[`docs/integrations/README.md`](../docs/integrations/README.md). That page maps
+this directory's generated ABI checksums, address books, deployment manifests,
+event topics, interface IDs, release manifest, source verification inputs, risk
+register, and readiness artifacts into a single source-of-truth view without
+claiming public beta or production readiness.
+
 Run after the production build profile:
 
 ```sh
@@ -35,6 +42,7 @@ python scripts/check_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/check_integrations_readme.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
@@ -106,6 +114,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_integrations_readme.py
+python scripts/check_integrations_readme.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py

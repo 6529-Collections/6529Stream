@@ -24,6 +24,11 @@ accompany reviewed non-local signing evidence.
 Use [`docs/deployment.md`](deployment.md#admin-ceremony-evidence) for the
 no-secret admin ceremony evidence model that must accompany reviewed ownership,
 role, signer, pause, emergency, and post-state proof for non-local deployments.
+Use [`docs/integrations/README.md`](integrations/README.md) as the integration entrypoint
+for frontend, mobile, Electron, indexer, operator UI, and backend
+signing service teams that need to find canonical ABIs, address books,
+deployment manifests, event catalogs, metadata docs, signing docs, and release
+artifacts without treating local evidence as public beta or production proof.
 Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and

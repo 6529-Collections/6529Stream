@@ -193,8 +193,8 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, public-beta evidence status, generated blocker reports, release manifest, and release checksum bundle |
-| `docs/` | Project, security, ADR, and operational docs |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, public-beta evidence status, generated blocker reports, risk register, release manifest, and release checksum bundle |
+| `docs/` | Project, security, ADR, integration, and operational docs |
 | `ops/` | Roadmap and execution state |
 
 ## Important Docs
@@ -208,6 +208,7 @@ Current pinned versions:
 - [`docs/threat-model.md`](docs/threat-model.md)
 - [`docs/audit-package.md`](docs/audit-package.md)
 - [`docs/release-readiness.md`](docs/release-readiness.md)
+- [`docs/integrations/README.md`](docs/integrations/README.md)
 - [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)
