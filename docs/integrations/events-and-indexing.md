@@ -17,7 +17,12 @@ Use this with the integration entrypoint in
 guide in [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md),
 metadata policy in [`docs/metadata.md`](../metadata.md), release policy in
 [`docs/release-policy.md`](../release-policy.md), and release readiness in
-[`docs/release-readiness.md`](../release-readiness.md).
+[`docs/release-readiness.md`](../release-readiness.md). Use
+[`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md)
+for the `ONE-005` retained marketplace/indexer evidence model covering
+OpenSea, Reservoir, Blur, Manifold, equivalent collector/indexer tooling,
+contract metadata, token metadata refresh, animation rendering, royalty
+display, transfer/listing/sale paths, event replay, and cache invalidation.
 
 ## Maturity And Scope
 
@@ -62,6 +67,7 @@ copies.
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Auction states, bids, no-bid settlement, credits, pause domains, and event/read gaps |
 | Wallet/signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Domain, signer epoch, consumed/cancelled drops, EOA, ERC-1271, Safe, and failure states |
 | Metadata policy | [`docs/metadata.md`](../metadata.md) | Token JSON state, contract-level metadata, ERC-4906 behavior, burn, freeze, cache, and browser sandbox semantics |
+| Marketplace/indexer evidence | [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | `ONE-005` retained marketplace/indexer evidence requirements for event replay, metadata refresh, cache invalidation, royalty display, and platform coverage |
 | 1/1 provenance policy | [`docs/provenance-manifests.md`](../provenance-manifests.md) | Artifact-only provenance entity, release binding, and frontend/indexer display boundaries |
 | Release policy | [`docs/release-policy.md`](../release-policy.md) | Event signature/indexed-field changes are breaking unless approved |
 | Drop signing guide | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | Typed-data schema and fixture expectations |
@@ -444,6 +450,7 @@ Known local-baseline gaps to track as follow-up work:
 | Forced ETH has no receipt event | Surplus can change without protocol logs | Reconcile from balance/owed/surplus reads |
 | Historical reads may be unavailable on some RPC providers | Entity reconstruction can be less precise | Require archive RPC or mark read-derived repair tasks |
 | Marketplace ingestion is not proven | Event correctness does not prove marketplace display | Keep marketplace evidence as future public-beta/production evidence |
+| Retained marketplace/indexer evidence is missing | Local replay docs do not prove OpenSea, Reservoir, Blur, Manifold, or equivalent collector/indexer tooling behavior | Keep `fork_testnet_marketplace_indexer_evidence` and `live_marketplace_indexer_evidence` missing until reviewed retained evidence is linked |
 | Live reorg behavior is not retained | Local tests do not prove chain-specific finality | Keep non-local event replay evidence as future Gate G work |
 
 Missing event fields belong in `CON-002`. Missing public/read-adapter views
@@ -464,6 +471,8 @@ python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py

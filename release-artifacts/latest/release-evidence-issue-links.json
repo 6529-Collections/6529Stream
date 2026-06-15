@@ -83,6 +83,28 @@
       ]
     },
     {
+      "entry_id": "public-beta-fork-testnet-marketplace-indexer-evidence",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_testnet_marketplace_indexer_evidence",
+      "status": "missing",
+      "title": "Retain public beta evidence: fork_testnet_marketplace_indexer_evidence",
+      "issue_number": 423,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/423",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap",
+        "evidence",
+        "public-beta"
+      ]
+    },
+    {
       "entry_id": "public-beta-fork-testnet-ceremony-evidence",
       "phase": "public_beta",
       "phase_label": "Public Beta",
@@ -311,6 +333,28 @@
       "title": "Retain production release evidence: live_randomizer_operations_evidence",
       "issue_number": 229,
       "issue_url": "https://github.com/6529-Collections/6529Stream/issues/229",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap",
+        "evidence",
+        "production-release"
+      ]
+    },
+    {
+      "entry_id": "production-release-live-marketplace-indexer-evidence",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_marketplace_indexer_evidence",
+      "status": "missing",
+      "title": "Retain production release evidence: live_marketplace_indexer_evidence",
+      "issue_number": 424,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/424",
       "suggested_labels": [
         "release",
         "evidence",

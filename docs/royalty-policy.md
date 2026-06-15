@@ -35,6 +35,7 @@ Use the following tracked sources before making any royalty claim:
 | Metadata boundary | [`docs/metadata.md`](metadata.md), [`docs/integrations/metadata-rendering.md`](integrations/metadata-rendering.md) | Metadata and marketplace display evidence are separate from royalty enforcement |
 | Integration entrypoint | [`docs/integrations/README.md`](integrations/README.md) | Routes frontend, mobile, Electron, indexer, operator UI, and backend signing-service teams |
 | Event and indexer context | [`docs/integrations/events-and-indexing.md`](integrations/events-and-indexing.md) | Event replay and indexer reconstruction do not prove marketplace royalty payment |
+| Marketplace/indexer evidence | [`docs/integrations/marketplace-indexer-evidence.md`](integrations/marketplace-indexer-evidence.md) | `ONE-005` retained marketplace/indexer evidence requirements for royalty display, platform coverage, event replay, and cache invalidation |
 | Wallet and signature context | [`docs/integrations/wallets-and-signatures.md`](integrations/wallets-and-signatures.md) | Signing evidence is separate from sale proceeds and secondary-market royalty behavior |
 | Provenance context | [`docs/provenance-manifests.md`](provenance-manifests.md) | Artist/story/authenticity provenance is not payment enforcement |
 | Release readiness | [`docs/release-readiness.md`](release-readiness.md), [`docs/public-beta-evidence.md`](public-beta-evidence.md), [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) | Public beta and production claims need reviewed retained evidence |
@@ -192,9 +193,11 @@ marketplace or collector-facing royalty-display claim. Production requires the
 same evidence plus normal release signatures, deployed address verification,
 explorer verification, and post-audit remediation status.
 
-`ONE-005` owns retained marketplace/indexer evidence for collector-facing
-display claims. Until that evidence exists, royalty display remains a local
-integration boundary and not release readiness proof.
+[`ONE-005`](integrations/marketplace-indexer-evidence.md) owns retained
+marketplace/indexer evidence for collector-facing display claims across
+OpenSea, Reservoir, Blur, Manifold, or equivalent collector/indexer tooling.
+Until that reviewed fork/testnet/live evidence exists, royalty display remains
+a local integration boundary and not release readiness proof.
 
 ## Testing Strategy
 
@@ -225,6 +228,8 @@ python scripts/test_royalty_policy.py
 python scripts/check_royalty_policy.py
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py

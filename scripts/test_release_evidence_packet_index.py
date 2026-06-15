@@ -192,6 +192,14 @@ def seed_all_templates(root: Path) -> None:
         root / generator.TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE,
         "Testnet deployment rehearsal retained artifact template.\n",
     )
+    write_text(
+        root / generator.PUBLIC_BETA_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
+        "Fork/testnet marketplace and indexer retained artifact template.\n",
+    )
+    write_text(
+        root / generator.LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
+        "Live marketplace and indexer retained artifact template.\n",
+    )
     seed_templates(
         root,
         non_local_checker.PRODUCTION_RELEASE_TEMPLATE_DIR,
@@ -424,6 +432,64 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             self.assertIn(
                 "python scripts/check_testnet_deployment_rehearsal_evidence.py",
                 testnet_row["validation_commands"],
+            )
+
+    def test_marketplace_indexer_rows_use_canonical_retained_artifacts(self) -> None:
+        """Marketplace/indexer tracker rows point at dedicated retained templates."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            public_row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"]
+                == generator.PUBLIC_BETA_MARKETPLACE_INDEXER_REQUIREMENT_ID
+            )
+            live_row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"]
+                == generator.LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID
+            )
+
+            self.assertEqual(
+                public_row["retained_artifact_expectation"]["path"],
+                generator.PUBLIC_BETA_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+            )
+            self.assertEqual(
+                public_row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(
+                    root
+                    / generator.PUBLIC_BETA_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE
+                ),
+            )
+            self.assertEqual(
+                live_row["retained_artifact_expectation"]["path"],
+                generator.LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+            )
+            self.assertEqual(
+                live_row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(
+                    root / generator.LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE
+                ),
+            )
+            self.assertIn(
+                "python scripts/test_marketplace_indexer_evidence.py",
+                public_row["validation_commands"],
+            )
+            self.assertIn(
+                "python scripts/check_marketplace_indexer_evidence.py",
+                live_row["validation_commands"],
             )
 
     def test_outputs_are_deterministic(self) -> None:

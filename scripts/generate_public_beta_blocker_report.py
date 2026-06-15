@@ -76,6 +76,14 @@ VALIDATION_COMMANDS = (
     ("Ceremony evidence", "python scripts/check_ceremony_evidence.py"),
     ("Randomizer operations", "python scripts/test_randomizer_operations.py"),
     ("Randomizer operations", "python scripts/check_randomizer_operations.py"),
+    (
+        "Marketplace/indexer evidence",
+        "python scripts/test_marketplace_indexer_evidence.py",
+    ),
+    (
+        "Marketplace/indexer evidence",
+        "python scripts/check_marketplace_indexer_evidence.py",
+    ),
     ("Release manifest", "python scripts/test_release_manifest.py"),
     ("Release manifest", "python scripts/generate_release_manifest.py --check"),
     ("Release checksums", "python scripts/test_release_checksums.py"),
