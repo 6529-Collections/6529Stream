@@ -80,12 +80,12 @@
     },
     "StreamContractMetadata": {
       "creation": {
-        "sha256": "sha256:af49e080e76b07cda43dcd6fea585fd33c003b45a93cc2fb10d00b65a38d2b58",
+        "sha256": "sha256:492fc0d9297a1407373ab700d73cb8f77f1f1e72b49287729d93088d3cd15f3b",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       },
       "runtime": {
-        "sha256": "sha256:036485ea55b5cb6acbddcb317b2a7bb6cbc202bd961820b49c0f748c3e2acb4a",
+        "sha256": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       }
@@ -219,10 +219,10 @@
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
       "abi_sha256": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-      "bytecode_sha256": "sha256:af49e080e76b07cda43dcd6fea585fd33c003b45a93cc2fb10d00b65a38d2b58",
+      "bytecode_sha256": "sha256:492fc0d9297a1407373ab700d73cb8f77f1f1e72b49287729d93088d3cd15f3b",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
-      "deployed_bytecode_sha256": "sha256:036485ea55b5cb6acbddcb317b2a7bb6cbc202bd961820b49c0f748c3e2acb4a",
+      "deployed_bytecode_sha256": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "abi_entries": 16,

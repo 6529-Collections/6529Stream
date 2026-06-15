@@ -169,13 +169,17 @@ metadata URI schemes are `https://`, `ipfs://`, and `ar://`; unsafe, empty,
 oversized, whitespace-bearing, control-character, and invalid UTF-8 values are
 rejected before storage. `updateContractURI` follows the existing
 target-scoped function-admin/global-admin model and is blocked while the
-`METADATA_MUTATION` pause domain is active.
+`METADATA_MUTATION` pause domain is active. `updateAdminContract` is also
+authorized by the current admin contract and blocked by the same pause before
+the adapter can bind to a replacement admin contract.
 
 Subscribe to `ContractURIUpdated()` from the adapter address and then re-read
 `contractURI()`, `contractURIHash()`, `streamCore()`, and `adminsContract()`.
 Cache keys for contract-level metadata should include chain ID, adapter
 address, core address, deployment manifest hash, release manifest hash, and
 `contractURIHash()`.
+`contractURIHash()` is `keccak256(bytes(contractURI()))` over the exact stored
+URI bytes; clients should not normalize the URI before comparing hashes.
 
 This is not yet proof that marketplaces will discover contract-level metadata
 from the ERC-721 address. Clients that rely on OpenSea, Reservoir, Blur,

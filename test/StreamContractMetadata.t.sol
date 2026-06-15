@@ -24,22 +24,23 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testInitialContractMetadataState() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
 
         metadata.streamCore().assertEq(address(deployed.core), "core not retained");
         metadata.adminsContract().assertEq(address(deployed.admins), "admins not retained");
         metadata.contractURI().assertEq(INITIAL_URI, "initial uri not retained");
-        metadata.contractURIHash().assertEq(
-            keccak256(bytes(INITIAL_URI)), "initial uri hash not retained"
-        );
+        metadata.contractURIHash()
+            .assertEq(keccak256(bytes(INITIAL_URI)), "initial uri hash not retained");
         metadata.isStreamContractMetadata().assertTrue("metadata marker false");
     }
 
     function testSupportsErc7572AndStreamMetadataInterfaces() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
 
         metadata.supportsInterface(type(IERC7572).interfaceId).assertTrue("missing ERC-7572");
         metadata.supportsInterface(type(IStreamContractMetadata).interfaceId)
@@ -49,11 +50,13 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testFunctionAdminCanUpdateContractURIAndEmitErc7572Event() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
-        deployed.admins.registerFunctionAdmin(
-            FUNCTION_ADMIN, address(metadata), metadata.updateContractURI.selector, true
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
         );
+        deployed.admins
+            .registerFunctionAdmin(
+                FUNCTION_ADMIN, address(metadata), metadata.updateContractURI.selector, true
+            );
 
         vm.expectEmit(false, false, false, false);
         emit ContractURIUpdated();
@@ -61,15 +64,29 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
         metadata.updateContractURI(UPDATED_URI);
 
         metadata.contractURI().assertEq(UPDATED_URI, "updated uri not retained");
-        metadata.contractURIHash().assertEq(
-            keccak256(bytes(UPDATED_URI)), "updated uri hash not retained"
+        metadata.contractURIHash()
+            .assertEq(keccak256(bytes(UPDATED_URI)), "updated uri hash not retained");
+    }
+
+    function testContractURIHashUsesExactStoredUriBytes() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
         );
+        string memory exactUri = "ipfs://Qm6529StreamMetadataCaseSensitivePath";
+
+        metadata.updateContractURI(exactUri);
+
+        metadata.contractURI().assertEq(exactUri, "exact uri bytes not stored");
+        metadata.contractURIHash()
+            .assertEq(keccak256(bytes(exactUri)), "uri hash not exact keccak256(bytes(uri))");
     }
 
     function testGlobalAdminCanUpdateContractURI() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
 
         metadata.updateContractURI(UPDATED_URI);
 
@@ -78,10 +95,13 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testMetadataMutationPauseBlocksContractURIUpdate() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
+        StreamAdmins replacementAdmins = new StreamAdmins(address(this));
 
-        deployed.admins.setPaused(deployed.admins.PAUSE_DOMAIN_METADATA_MUTATION(), true, bytes32(0));
+        deployed.admins
+            .setPaused(deployed.admins.PAUSE_DOMAIN_METADATA_MUTATION(), true, bytes32(0));
 
         vm.expectRevert(
             abi.encodeWithSelector(StreamContractMetadata.MetadataMutationPaused.selector)
@@ -89,11 +109,18 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
         metadata.updateContractURI(UPDATED_URI);
 
         metadata.contractURI().assertEq(INITIAL_URI, "paused update changed uri");
-        metadata.contractURIHash().assertEq(
-            keccak256(bytes(INITIAL_URI)), "paused update changed hash"
-        );
+        metadata.contractURIHash()
+            .assertEq(keccak256(bytes(INITIAL_URI)), "paused update changed hash");
 
-        deployed.admins.setPaused(deployed.admins.PAUSE_DOMAIN_METADATA_MUTATION(), false, bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamContractMetadata.MetadataMutationPaused.selector)
+        );
+        metadata.updateAdminContract(address(replacementAdmins));
+
+        metadata.adminsContract().assertEq(address(deployed.admins), "paused update changed admins");
+
+        deployed.admins
+            .setPaused(deployed.admins.PAUSE_DOMAIN_METADATA_MUTATION(), false, bytes32(0));
         metadata.updateContractURI(UPDATED_URI);
 
         metadata.contractURI().assertEq(UPDATED_URI, "unpaused update failed");
@@ -101,8 +128,9 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testUnauthorizedAccountCannotUpdateContractURI() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(StreamContractMetadata.FunctionAdminUnauthorized.selector)
@@ -113,17 +141,44 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testContractURIRejectsEmptyAndUnsafeUris() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
 
         vm.expectRevert(abi.encodeWithSelector(StreamContractMetadata.EmptyContractURI.selector));
         metadata.updateContractURI("");
+
+        vm.expectRevert(abi.encodeWithSelector(StreamMetadataRenderer.UnsafeMetadataURI.selector));
+        metadata.updateContractURI("data:application/json;base64,e30=");
 
         vm.expectRevert(abi.encodeWithSelector(StreamMetadataRenderer.UnsafeMetadataURI.selector));
         metadata.updateContractURI("javascript:alert(1)");
 
         vm.expectRevert(abi.encodeWithSelector(StreamMetadataRenderer.UnsafeMetadataURI.selector));
         metadata.updateContractURI("https://metadata.6529.io/bad path.json");
+
+        vm.expectRevert(abi.encodeWithSelector(StreamMetadataRenderer.UnsafeMetadataURI.selector));
+        metadata.updateContractURI(
+            string(abi.encodePacked("https://metadata.6529.io/", bytes1(0x01), "bad.json"))
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRenderer.MetadataFieldInvalidUTF8.selector, bytes32("contractURI")
+            )
+        );
+        metadata.updateContractURI(string(abi.encodePacked("ipfs://", bytes1(0xc0), bytes1(0xaf))));
+
+        uint256 maximum = metadata.MAX_CONTRACT_URI_BYTES();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRenderer.MetadataFieldTooLarge.selector,
+                bytes32("contractURI"),
+                maximum + 1,
+                maximum
+            )
+        );
+        metadata.updateContractURI(_ascii(maximum + 1));
     }
 
     function testConstructorRejectsInvalidCoreAndAdminContracts() public {
@@ -141,8 +196,9 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testUpdateAdminContractRequiresOldAdminAndValidNewAdmin() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata metadata =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
         StreamAdmins replacementAdmins = new StreamAdmins(address(this));
         EmptyMarker emptyMarker = new EmptyMarker();
 
@@ -158,26 +214,43 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     function testUpdateAdminContractUsesTargetScopedSelector() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamContractMetadata first =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
-        StreamContractMetadata second =
-            new StreamContractMetadata(address(deployed.core), address(deployed.admins), INITIAL_URI);
-        StreamAdmins replacementAdmins = new StreamAdmins(address(this));
-        deployed.admins.registerFunctionAdmin(
-            FUNCTION_ADMIN, address(first), first.updateAdminContract.selector, true
+        StreamContractMetadata first = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
         );
+        StreamContractMetadata second = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
+        StreamAdmins replacementAdmins = new StreamAdmins(address(this));
+        deployed.admins
+            .registerFunctionAdmin(
+                FUNCTION_ADMIN, address(first), first.updateAdminContract.selector, true
+            );
 
         vm.prank(FUNCTION_ADMIN);
-        (bool firstSuccess,) = address(first).call(
-            abi.encodeWithSelector(first.updateAdminContract.selector, address(replacementAdmins))
-        );
+        (bool firstSuccess,) = address(first)
+            .call(
+                abi.encodeWithSelector(
+                    first.updateAdminContract.selector, address(replacementAdmins)
+                )
+            );
         firstSuccess.assertTrue("target grant did not authorize target");
 
         vm.prank(FUNCTION_ADMIN);
-        (bool secondSuccess,) = address(second).call(
-            abi.encodeWithSelector(second.updateAdminContract.selector, address(replacementAdmins))
-        );
+        (bool secondSuccess,) = address(second)
+            .call(
+                abi.encodeWithSelector(
+                    second.updateAdminContract.selector, address(replacementAdmins)
+                )
+            );
         secondSuccess.assertFalse("target grant authorized another metadata contract");
+    }
+
+    function _ascii(uint256 size) private pure returns (string memory) {
+        bytes memory value = new bytes(size);
+        for (uint256 i = 0; i < size; i++) {
+            value[i] = 0x61;
+        }
+        return string(value);
     }
 }
 

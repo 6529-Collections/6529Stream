@@ -61,7 +61,7 @@
         "ipfs://6529stream-contract-metadata/rehearsal.json"
       ],
       "abi_hash": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-      "bytecode_hash": "sha256:036485ea55b5cb6acbddcb317b2a7bb6cbc202bd961820b49c0f748c3e2acb4a",
+      "bytecode_hash": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -177,7 +177,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:4d6da2aa2c9d2059dbcc312c98212dd9ed7b71bf6bff0278575ac167723023fa",
+    "manifest_sha256": "sha256:8e5d97140b70da78d6bd086511c47ee02388f0736f77ee3313215e5a1ac60ab6",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",

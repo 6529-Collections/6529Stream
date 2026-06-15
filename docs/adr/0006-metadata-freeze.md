@@ -152,16 +152,19 @@ Contract-level metadata is a protocol release surface but not a token
 rendering input. The current implementation uses `StreamContractMetadata` as a
 satellite/read-adapter that binds to the canonical `StreamCore` and
 `StreamAdmins` addresses. It returns a safe `https://`, `ipfs://`, or `ar://`
-content URI from `contractURI()`, exposes `contractURIHash()` for release
+content URI from `contractURI()`, exposes `contractURIHash()` as
+`keccak256(bytes(contractURI()))` over the exact stored URI bytes for release
 evidence, and emits `ContractURIUpdated()` on URI changes.
 
 Because `StreamCore` is byte-tight, the adapter keeps ERC-7572-style behavior
 out of Core until a separate size-budget decision accepts adding it there.
 Collection freeze does not freeze this adapter; instead, changes are governed,
 evented, paused by `METADATA_MUTATION`, and tracked through release artifacts.
-Marketplace or wallet claims still need retained non-local evidence because
-third parties that probe only the ERC-721 contract address may not discover an
-external adapter automatically.
+Admin-contract rebinding is authorized by the current admin contract and blocked
+by the same metadata-mutation pause; the replacement admin marker is an
+interface guard, not an operator-trust proof. Marketplace or wallet claims still
+need retained non-local evidence because third parties that probe only the
+ERC-721 contract address may not discover an external adapter automatically.
 
 ### Off-Chain Metadata
 

@@ -357,8 +357,10 @@ events:
 Re-read token JSON after metadata invalidation. ERC-4906 events expose update
 signals; they do not prove marketplace ingestion, cache purge, or JSON validity.
 Re-read `contractURI()`, `contractURIHash()`, `streamCore()`, and
-`adminsContract()` after `ContractURIUpdated`. That event is not ERC-4906 and
-does not imply token-level JSON changed.
+`adminsContract()` after `ContractURIUpdated`. `contractURIHash()` is
+`keccak256(bytes(contractURI()))` over the exact stored URI bytes, with no URI
+normalization. That event is not ERC-4906 and does not imply token-level JSON
+changed.
 
 ## Governance And Pause Reconstruction
 

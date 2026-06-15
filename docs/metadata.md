@@ -166,11 +166,17 @@ marketplace-evidence decision.
 `updateContractURI` is authorized through the existing target-scoped
 function-admin or global-admin model and is blocked when
 `StreamPauseDomains.METADATA_MUTATION` is paused. `updateAdminContract` is also
-target-scoped and must point at a contract that exposes the accepted
-`IStreamAdmins` marker. The local deployment rehearsal deploys the adapter,
-records it in deployment manifests/address books, and includes its ABI,
-bytecode hash, interface IDs, and `ContractURIUpdated` topic in the generated
-release artifacts.
+target-scoped, blocked by the same metadata-mutation pause, and must point at a
+contract that exposes the accepted `IStreamAdmins` marker. The marker is an
+interface guard rather than a trust guarantee, so operators must still treat
+admin rebinding as a ceremony-level governance action. The local deployment
+rehearsal deploys the adapter, records it in deployment manifests/address
+books, and includes its ABI, bytecode hash, interface IDs, and
+`ContractURIUpdated` topic in the generated release artifacts.
+
+`contractURIHash()` is `keccak256(bytes(contractURI()))` over the exact stored
+URI bytes. The adapter does not normalize, lowercase, trim, decode, or fetch
+the URI before hashing it.
 
 The adapter is not `StreamCore` itself. Third-party marketplaces or wallets
 that only probe the ERC-721 contract address for `contractURI()` will not

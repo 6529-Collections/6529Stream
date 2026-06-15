@@ -402,8 +402,8 @@
     },
     "smart-contracts/StreamContractMetadata.sol": {
       "path": "smart-contracts/StreamContractMetadata.sol",
-      "sha256": "sha256:6cc10c45078c666c30593f1b44f659fa0567ab0c456f21c1d91f88dada420011",
-      "solc_keccak256": "0x83eaf5b40b18db9e96f9b100374ea12e5d5b3cd61912b4bb6daf5b92399ce418",
+      "sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
+      "solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
       "license": "MIT",
       "used_by": [
         "StreamContractMetadata"
@@ -675,7 +675,7 @@
       "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
       "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:3ec1ec3f9e7d18659e427f95c4af591ca0a73286751d0b008e23adf68553a304",
+      "artifact_sha256": "sha256:fbb39daad23d1ea80c4b05d2b3ef9ecc9c83e7395424d0630d461faa85eaa741",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -903,10 +903,10 @@
     },
     "StreamContractMetadata": {
       "source": "smart-contracts/StreamContractMetadata.sol",
-      "source_sha256": "sha256:6cc10c45078c666c30593f1b44f659fa0567ab0c456f21c1d91f88dada420011",
-      "source_solc_keccak256": "0x83eaf5b40b18db9e96f9b100374ea12e5d5b3cd61912b4bb6daf5b92399ce418",
+      "source_sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
+      "source_solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
-      "artifact_sha256": "sha256:ca8fe9314c57eb1e22588846bff59dcbb07443e8a92a8af0c439195d3db3024b",
+      "artifact_sha256": "sha256:4cfc68546cd2e140536384fe72c2039b1d9c41abbd0d8c91c559e4f09b5a1706",
       "compilation_target": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -923,16 +923,16 @@
       "abi_sha256": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:af49e080e76b07cda43dcd6fea585fd33c003b45a93cc2fb10d00b65a38d2b58",
+          "sha256": "sha256:492fc0d9297a1407373ab700d73cb8f77f1f1e72b49287729d93088d3cd15f3b",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:af49e080e76b07cda43dcd6fea585fd33c003b45a93cc2fb10d00b65a38d2b58"
+          "release_artifact_sha256": "sha256:492fc0d9297a1407373ab700d73cb8f77f1f1e72b49287729d93088d3cd15f3b"
         },
         "runtime": {
-          "sha256": "sha256:036485ea55b5cb6acbddcb317b2a7bb6cbc202bd961820b49c0f748c3e2acb4a",
+          "sha256": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:036485ea55b5cb6acbddcb317b2a7bb6cbc202bd961820b49c0f748c3e2acb4a"
+          "release_artifact_sha256": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578"
         }
       },
       "constructor": {
@@ -976,11 +976,15 @@
                 "length": 20
               },
               {
-                "start": 1790,
+                "start": 1813,
                 "length": 20
               },
               {
-                "start": 2891,
+                "start": 2792,
+                "length": 20
+              },
+              {
+                "start": 3400,
                 "length": 20
               }
             ]
@@ -992,11 +996,15 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 660,
+                "start": 683,
                 "length": 20
               },
               {
-                "start": 1761,
+                "start": 1662,
+                "length": 20
+              },
+              {
+                "start": 2270,
                 "length": 20
               }
             ]

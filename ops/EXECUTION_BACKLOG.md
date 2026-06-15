@@ -2671,8 +2671,11 @@ Dependencies: `GOV-001`, `INT-005`.
 
 ### ONE-001: Decide And Implement Contract-Level Metadata Surface
 
-Status: PR #411 open and ready for review on
-`codex/contract-level-metadata-surface`; issue #410; CodeRabbit requested.
+Status: PR #411 open on `codex/contract-level-metadata-surface`; issue #410.
+Initial CodeRabbit review was requested, and 6529bot general review comment
+`4710176032` has a validated local response prepared for push: pause-gate admin
+rebinding, document/test exact `contractURIHash()` semantics, expand URI
+negative tests, and refresh generated release/deployment evidence.
 
 Gate: G/F.
 
@@ -2725,9 +2728,21 @@ Implementation steps:
 Required tests/checks:
 
 - `forge test --match-path <contract-metadata-test-file> -vvv` if implemented
+- `forge test --match-path test/StreamContractMetadata.t.sol -vvv`
+- `forge test --match-path test/StreamDeploymentManifest.t.sol -vvv`
+- `forge test -vvv`
+- `forge build --sizes --via-ir --skip test --skip script --force`
 - `python scripts/generate_release_artifacts.py --check`
+- `python scripts/generate_source_verification_inputs.py --check`
+- `python scripts/generate_deployment_manifest.py --check`
+- `python scripts/generate_address_books.py --check`
 - `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_bytecode_release_proof.py --check`
 - `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_ceremony_evidence.py`
+- `python scripts/check_randomizer_operations.py`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 - Markdown heading check
 - `git diff --check`
 
@@ -2737,6 +2752,15 @@ Acceptance criteria:
   or provided through a satellite/read-adapter surface.
 - If implemented, `contractURI()` returns deterministic metadata and the update
   path emits `ContractURIUpdated`.
+- `contractURIHash()` is documented and tested as
+  `keccak256(bytes(contractURI()))` over exact stored URI bytes, with no URI
+  normalization, trimming, case folding, decoding, or fetch before hashing.
+- Contract metadata admin rebinding is authorized through the current admin
+  contract and blocked while `StreamPauseDomains.METADATA_MUTATION` is paused;
+  the replacement admin marker is an interface guard, not a governance-trust
+  guarantee.
+- URI validation has negative tests for empty, unsafe scheme, whitespace,
+  control-character, invalid UTF-8, and oversized values.
 - The chosen design does not push `StreamCore` below the approved bytecode
   headroom floor without an explicit size-budget exception.
 - Integrator docs explain how wallets, marketplaces, and indexers should find

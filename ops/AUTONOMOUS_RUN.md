@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 16:42 UTC` |
+| Last updated | `2026-06-15 17:12 UTC` |
 
 ## Packaging Notes
 
@@ -15228,6 +15228,7 @@ Outcome:
 | 2026-06-15 16:39 | Validate ONE-001 local draft | Added an ERC-7572-style `StreamContractMetadata` satellite/read-adapter, `IERC7572` and `IStreamContractMetadata` interfaces, deployment rehearsal wiring, generated release/deployment artifacts, integration docs, and retained local evidence hash updates. Local validation passed: focused contract metadata tests, deployment manifest tests, full `forge test -vvv` (`336` tests), `forge build --sizes --via-ir --skip test --skip script --force` (`StreamCore` runtime `24,139` bytes, `437` byte margin; adapter runtime `2,431` bytes), full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. |
 | 2026-06-15 16:41 | Open PR #411 for ONE-001 | PR #411 opened as a draft on branch `codex/contract-level-metadata-surface`, closes issue #410, and CodeRabbit review was requested in comment `4710158602`. |
 | 2026-06-15 16:42 | Mark PR #411 ready | PR #411 was marked ready for review after CodeRabbit reported draft-skip status but also completed the explicit review command; CodeRabbit review was requested again in comment `4710169291`. |
+| 2026-06-15 17:12 | Address PR #411 6529bot review | Prepared a substantive response to 6529bot general review comment `4710176032`: `updateAdminContract` now shares the `METADATA_MUTATION` pause guard with `updateContractURI`, `contractURIHash()` is documented and tested as `keccak256(bytes(contractURI()))` over exact stored URI bytes, adapter negative tests now cover empty/data/javascript/whitespace/control/invalid-UTF-8/oversized URIs plus paused admin rebinding, and regenerated deployment/release/evidence hashes. Local validation passed: focused adapter tests (`11`), deployment-manifest tests (`4`), full `forge test -vvv` (`337` tests), `forge build --sizes --via-ir --skip test --skip script --force` (`StreamCore` runtime `24,139` bytes, `437` byte margin; adapter runtime `2,476` bytes), artifact drift checks, ceremony/randomizer evidence checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. Next GitHub action: push this review-response head, reply on PR #411, request follow-up bot review, then merge only after CI and review state are clean. |
 
 ## Resume Instructions
 

@@ -62,6 +62,7 @@ contract StreamContractMetadata is ERC165, IStreamContractMetadata {
         external
         FunctionAdminRequired(this.updateAdminContract.selector)
     {
+        _requireMetadataMutationNotPaused();
         _setAdminContract(newAdminsContract);
     }
 
@@ -69,11 +70,7 @@ contract StreamContractMetadata is ERC165, IStreamContractMetadata {
         external
         FunctionAdminRequired(this.updateContractURI.selector)
     {
-        StreamMetadataRenderer.requireNotPaused(
-            address(_adminsContract),
-            StreamPauseDomains.METADATA_MUTATION,
-            MetadataMutationPaused.selector
-        );
+        _requireMetadataMutationNotPaused();
         _setContractURI(newContractURI);
     }
 
@@ -98,5 +95,13 @@ contract StreamContractMetadata is ERC165, IStreamContractMetadata {
         _contractURI = newContractURI;
         _contractURIHash = keccak256(bytes(newContractURI));
         emit ContractURIUpdated();
+    }
+
+    function _requireMetadataMutationNotPaused() private view {
+        StreamMetadataRenderer.requireNotPaused(
+            address(_adminsContract),
+            StreamPauseDomains.METADATA_MUTATION,
+            MetadataMutationPaused.selector
+        );
     }
 }
