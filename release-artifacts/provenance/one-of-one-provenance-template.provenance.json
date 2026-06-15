@@ -67,7 +67,7 @@
         {
           "label": "release binding evidence placeholder",
           "uri": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-          "sha256": "not_available_local",
+          "sha256": "sha256:6702604c432ae96aada7299f5c6cc7da237c24b303970336e9d9bbe1a8ccf309",
           "notes": "The generated catalog is checksum-covered but is not release completion evidence."
         }
       ]
@@ -94,12 +94,12 @@
     },
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:0c75f7c77e7d1d1fbe26913f5f19443bc808a58ed0097ff9bc3aefe1ce11916f",
+      "sha256": "sha256:967ba08b0ebebecd512d7365388f8e924fba4ddbd310e40a6611d2cdef9209fc",
       "status": "template"
     },
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:6793584adaa2693895bd98ff9904cc0b22dfe00d737dd4bca5d2576373abd080",
+      "sha256": "sha256:ab56541244954ad100037979c306cd2f9deb650be394b428bdf55065a7375cce",
       "status": "template"
     },
     "contract_uri_hash_source": "StreamContractMetadata.contractURIHash(); zero value is template-only.",
