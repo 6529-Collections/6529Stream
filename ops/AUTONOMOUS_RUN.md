@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/mobile-walletconnect-integration-guide` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/403` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/404` |
-| Active PR | TBD after local INT-008 validation |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/405` |
 | Next issue | `INT-009` Electron security and wallet integration guide after INT-008 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 14:03 UTC` |
+| Last updated | `2026-06-15 14:04 UTC` |
 
 ## Packaging Notes
 
@@ -15211,6 +15211,7 @@ Outcome:
 | 2026-06-15 13:34 | Merge PR #403 and select INT-008 | React/Next reference architecture merged as `2789ee7d5c655a667a1b469405c9840807a3c2cb` after CI passed, CodeRabbit status was success, review threads were empty, and 6529bot reported no new findings on final head `4c6416a3fc980bb041aeda54142b4c880aab4e4e`; issue #402 closed completed. |
 | 2026-06-15 13:34 | Create issue #404 and start INT-008 | Next substantive integration-readiness slice is the mobile and WalletConnect integration guide on branch `codex/mobile-walletconnect-integration-guide`; issue #404 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, and no-mobile-SDK/no-production-readiness boundaries. |
 | 2026-06-15 14:03 | Validate INT-008 local draft | Focused mobile/WalletConnect, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
+| 2026-06-15 14:04 | Open PR #405 for INT-008 | PR #405 is open on branch `codex/mobile-walletconnect-integration-guide`, closes issue #404, and awaits bot review/CI on the final state-update head. |
 
 ## Resume Instructions
 
