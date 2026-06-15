@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/react-next-reference-architecture` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/401` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/402` |
-| Active PR | TBD until INT-007 branch is pushed |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/403` |
 | Next issue | TBD after INT-007. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 13:19 UTC` |
+| Last updated | `2026-06-15 13:21 UTC` |
 
 ## Packaging Notes
 
@@ -15206,6 +15206,7 @@ Outcome:
 | 2026-06-15 12:54 | Create issue #402 and select INT-007 | Next substantive integration-readiness slice is the React/Next frontend reference architecture on branch `codex/react-next-reference-architecture`; issue #402 now tracks the guide, pseudocode examples, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, and no-SDK/no-production-readiness boundaries. |
 | 2026-06-15 13:03 | Reconfirm Core bytecode posture | Core was materially refactored away from the hard EIP-170 blocker in PRs #90, #116, and #133; current tracked `StreamCore` runtime is still 24,139 bytes with 437 bytes of EIP-170 headroom, above the 384-byte minimum release floor but below the 512-byte warning threshold, so large non-trivial Core work still needs headroom recovery or an explicit size-budget exception. |
 | 2026-06-15 13:19 | Validate INT-007 local draft | Focused React/Next reference, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
+| 2026-06-15 13:21 | Open PR #403 for INT-007 | PR #403 is open on branch `codex/react-next-reference-architecture`, closes issue #402, and CodeRabbit review was requested in comment `4708353207`. |
 
 ## Resume Instructions
 
