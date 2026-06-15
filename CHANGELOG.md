@@ -7,6 +7,15 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-008 mobile and WalletConnect integration guide with
+  `docs/integrations/mobile-walletconnect.md`, a checker/test pair, local/CI
+  gate wiring, release-readiness navigation, release-manifest coverage, and
+  no-mobile-SDK/no-production-readiness boundaries so mobile browser, native
+  shell, and WalletConnect implementers can trace session lifecycle, foreground
+  wallet handoff, deep links, account/chain changes, typed-data and transaction
+  guards, offline/background recovery, metadata/indexer refresh, telemetry, and
+  no-secret support expectations without treating local evidence as public beta
+  or production proof.
 - Added INT-007 React/Next frontend reference architecture with
   `docs/integrations/frontend-reference-architecture.md`,
   `docs/integrations/examples/react-viem.md`, a checker/test pair, local/CI

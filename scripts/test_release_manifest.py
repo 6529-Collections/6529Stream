@@ -172,6 +172,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "integrations" / "events-and-indexing.md",
         root / "docs" / "integrations" / "metadata-rendering.md",
         root / "docs" / "integrations" / "frontend-reference-architecture.md",
+        root / "docs" / "integrations" / "mobile-walletconnect.md",
         root / "docs" / "integrations" / "examples" / "react-viem.md",
     ]
 

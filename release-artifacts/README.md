@@ -49,6 +49,7 @@ python scripts/check_wallet_signature_flows.py
 python scripts/check_events_and_indexing.py
 python scripts/check_metadata_rendering.py
 python scripts/check_react_next_reference.py
+python scripts/check_mobile_walletconnect.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
@@ -134,6 +135,8 @@ python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
 python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
+python scripts/test_mobile_walletconnect.py
+python scripts/check_mobile_walletconnect.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
@@ -174,6 +177,7 @@ public-beta evidence status, schema hashes, governance doc hashes including
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`,
 `docs/integrations/frontend-reference-architecture.md`,
+`docs/integrations/mobile-walletconnect.md`,
 `docs/integrations/examples/react-viem.md`, and
 `docs/release-readiness.md`, and the release-ceremony items that are not yet
 available for this pre-audit local baseline.
@@ -350,13 +354,15 @@ production admin ceremony completion.
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`, `docs/signer-custody-readiness.md`,
-`docs/integrations/frontend-reference-architecture.md`, and
+`docs/integrations/frontend-reference-architecture.md`,
+`docs/integrations/mobile-walletconnect.md`, and
 `docs/release-readiness.md` are the
 auditor-facing architecture, trust-boundary, package, incident-response,
 evidence-status, non-local evidence intake, signer custody readiness, frontend
-reference, and Gate G readiness indexes for the current local baseline. They
-are validated before release manifest generation, and the release manifest
-records their hashes as governance documents.
+reference, mobile/WalletConnect reference, and Gate G readiness indexes for
+the current local baseline. They are validated before release manifest
+generation, and the release manifest records their hashes as governance
+documents.
 
 `evidence/external-audit-report/external-audit-report-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
@@ -435,6 +441,7 @@ python scripts/generate_release_evidence_live_audit_archive.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_react_next_reference.py
+python scripts/check_mobile_walletconnect.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py

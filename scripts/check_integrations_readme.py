@@ -64,6 +64,10 @@ REQUIRED_PHRASES = [
     "maintained frontend package",
     "generated SDK",
     "INT-008",
+    "mobile and WalletConnect integration guide",
+    "maintained mobile SDK",
+    "React Native app",
+    "WalletConnect dependency recommendation",
     "INT-009",
 ]
 
@@ -80,6 +84,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_metadata_rendering.py",
     "python scripts/test_react_next_reference.py",
     "python scripts/check_react_next_reference.py",
+    "python scripts/test_mobile_walletconnect.py",
+    "python scripts/check_mobile_walletconnect.py",
     "python scripts/check_release_readiness.py",
     "python scripts/check_changelog.py",
 ]
@@ -103,6 +109,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/events-and-indexing.md",
     "docs/integrations/metadata-rendering.md",
     "docs/integrations/frontend-reference-architecture.md",
+    "docs/integrations/mobile-walletconnect.md",
     "docs/integrations/examples/react-viem.md",
     "release-artifacts/README.md",
     "release-artifacts/contracts.json",

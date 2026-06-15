@@ -178,6 +178,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_metadata_rendering.py"
 & $pythonPath @pythonArgs "scripts\test_react_next_reference.py"
 & $pythonPath @pythonArgs "scripts\check_react_next_reference.py"
+& $pythonPath @pythonArgs "scripts\test_mobile_walletconnect.py"
+& $pythonPath @pythonArgs "scripts\check_mobile_walletconnect.py"
 & $pythonPath @pythonArgs "scripts\test_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\check_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"
