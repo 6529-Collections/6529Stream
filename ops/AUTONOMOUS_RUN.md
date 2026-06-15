@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fixed-price-flow-spec` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/391` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/392` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/393` |
-| Next issue | TBD after INT-002; likely `INT-003` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/auction-flow-spec` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/393` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/394` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/395` |
+| Next issue | TBD after INT-003; likely `INT-004` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 10:17 UTC` |
+| Last updated | `2026-06-15 10:52 UTC` |
 
 ## Packaging Notes
 
@@ -249,39 +249,44 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | Merged in PR #387 |
 | 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | Merged in PR #389 |
 | 187 | Add integrations entrypoint and artifact source of truth | Gate G support | Add `docs/integrations/README.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links for frontend, mobile, Electron, indexer, operator, and backend-signing integrators | Merged in PR #391 |
-| 188 | Add fixed-price mint and drop authorization flow spec | Gate G/Gate D support | Add `docs/integrations/contract-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and backend-signing teams can trace fixed-price minting, EIP-712/ERC-1271 auth, events, credits, withdrawals, and failure states | In progress on issue #392 |
+| 188 | Add fixed-price mint and drop authorization flow spec | Gate G/Gate D support | Add `docs/integrations/contract-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and backend-signing teams can trace fixed-price minting, EIP-712/ERC-1271 auth, events, credits, withdrawals, and failure states | Merged in PR #393 |
+| 189 | Add auction frontend and indexer flow spec | Gate G/Gate D support | Add `docs/integrations/auction-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and indexer teams can trace auction submission, bidding, settlement, no-bid claims, cancellation, credits, withdrawals, pause states, events, and failure states | In progress on issue #394 |
 
 ## Current PR Worklog
 
-### PR candidate: Add fixed-price mint and drop authorization flow spec (Queue Item 188)
+### PR candidate: Add auction frontend and indexer flow spec (Queue Item 189)
 
-Status: PR #393 open; CodeRabbit status success, 6529bot non-blocking payment-split drift observation addressed locally; CI pending on latest push.
-Issue: `https://github.com/6529-Collections/6529Stream/issues/392`.
-PR: `https://github.com/6529-Collections/6529Stream/pull/393`.
-Branch: `codex/fixed-price-flow-spec`.
-Branch started from PR #391 squash merge commit
-`f4fdb5fb4e6923bfd787a734a59aca4457bd8755`.
-Initial PR head: `58cd06346c29bbc562a9d8da65ea2a0b3b43b5de`.
+Status: PR #395 ready for review; CodeRabbit review requested in comments
+`4707102005` and `4707115598` but currently rate-limited; 6529bot security
+reported no findings and general/follow-up review reported no blocking
+findings; CI run 837 pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/394`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/395`.
+Branch: `codex/auction-flow-spec`.
+Branch started from PR #393 squash merge commit
+`37583836372e55027ab447134629660812025788`.
 
 Goal:
 
-- Add `docs/integrations/contract-flows.md` as the INT-002 fixed-price mint and
-  drop authorization integration flow spec.
-- Document source-of-truth artifacts, preflight reads, EIP-712 payload fields,
-  EOA and ERC-1271 signing paths, `mintDrop` transaction submission, events,
-  post-transaction reads, payment credits, withdrawal UX, curator reserve
-  accounting, failure states, frontend state machine, and backend signing
-  service boundaries.
-- Add `scripts/check_contract_flows.py` and `scripts/test_contract_flows.py` so
+- Add `docs/integrations/auction-flows.md` as the INT-003 auction frontend and
+  indexer integration flow spec.
+- Document source-of-truth artifacts, preflight reads, EIP-712 auction payload
+  fields, `mintDrop` submission, canonical states, bidding, outbid credits,
+  with-bid settlement, no-bid claims, cancellation, proceeds credits, pause
+  domains, failure states, frontend state machine, and indexer reconstruction.
+- Add `scripts/check_auction_flows.py` and `scripts/test_auction_flows.py` so
   required headings, maturity language, source links, validation commands, and
-  flow-critical terms cannot drift.
-- Wire the contract-flow checker into Makefile, Bash, PowerShell, and CI gates,
+  flow-critical auction terms cannot drift.
+- Wire the auction-flow checker into Makefile, Bash, PowerShell, and CI gates,
   then include the doc in release-manifest and checksum coverage.
-- Link the new flow from README, integrations entrypoint, release-readiness, and
-  release-artifacts docs without making public-beta or production claims.
+- Link the auction flow from the integrations entrypoint, fixed-price flow,
+  release-readiness dashboard, release-artifacts README, changelog, backlog,
+  and autonomous-run state without making public-beta or production claims.
 
 Validation plan:
 
+- `python scripts/test_auction_flows.py`.
+- `python scripts/check_auction_flows.py`.
 - `python scripts/test_contract_flows.py`.
 - `python scripts/check_contract_flows.py`.
 - `python scripts/test_integrations_readme.py`.
@@ -298,44 +303,64 @@ Validation plan:
 - `python scripts/check_risk_register.py`.
 - `python scripts/generate_risk_register.py --check`.
 - `python scripts/check_changelog.py`.
-- `python -m py_compile scripts/check_contract_flows.py scripts/test_contract_flows.py`.
+- `python -m py_compile scripts/check_auction_flows.py scripts/test_auction_flows.py`.
 - `git diff --check`.
-- Full Windows gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- Focused auction Solidity coverage if local time permits:
+  `forge test --match-path test/StreamAuctionCustody.t.sol`,
+  `forge test --match-path test/StreamAuctionPayments.t.sol`,
+  `forge test --match-path test/StreamAuctionInvariant.t.sol`,
+  `forge test --match-path test/StreamPaymentsInvariant.t.sol`,
+  `forge test --match-path test/StreamPauseControls.t.sol`, and
+  `forge test --match-path test/StreamProtocolStateMachine.t.sol`.
 
 Notes:
 
-- Read-only subagent trace confirmed the flow: `mintDrop` validates pause,
-  hashes and validates the EIP-712/ERC-1271 signer, validates fields, writes
-  `consumedDropIds`, emits `DropAuthorizationConsumed`, then executes
-  fixed-price minting. If downstream minting reverts, credit and consume writes
-  roll back.
-- Frontend preflight should include an `eth_call` simulation using the exact
-  sender, value, authorization, token data, and signature because simple reads
-  do not prove minter phase/supply, core freeze, randomizer, token-data limits,
-  or ERC-721 receiver behavior.
-- Curator reserve is accounted in `fixedPriceCuratorReserveCredits` and owed
-  totals but is not directly withdrawable through the fixed-price poster/protocol
-  withdrawal function.
+- Read-only subagent trace confirmed canonical states: `None`, `Created`,
+  `Active`, `EndedNoBid`, `EndedWithBid`, `SettledNoBid`, `SettledWithBid`,
+  and `Cancelled`.
+- `StreamAuctions.retrieveAuctionEndTime(tokenId)` is authoritative after
+  `AuctionExtended`; `StreamMinter.getAuctionEndTime(tokenId)` can be stale.
+- The end condition is strict `block.timestamp > endTime`; a bid exactly at
+  `endTime` is still active.
+- Known event/read gaps are documented for follow-up under `CON-003` and
+  `INT-005`: no `minimumNextBid` view, compact `AuctionStatusChanged`, compact
+  `ClaimAuction`, and no dedicated direct no-bid recipient event.
+- Bot verification notes were addressed by confirming required link targets
+  exist on `main`, relying on the checker path-resolution guard, and adding an
+  explicit doc line that no current path emits `AuctionStatusChanged` with
+  `Created`.
 
 Open concerns:
 
 - This PR documents and checks integration behavior only. It must not claim a
-  production signing service, public beta readiness, marketplace proof, or live
+  production indexer, public beta readiness, marketplace proof, or live
   deployment evidence.
 
 Validation result:
 
-- Focused contract-flow, integration README, release-readiness,
-  release-manifest, bytecode-release-proof, release-checksum, risk-register,
-  changelog, Python compile, and whitespace checks passed locally.
-- Full Windows wrapper `powershell -NoProfile -ExecutionPolicy Bypass -File
-  scripts\check.ps1` passed at `2026-06-15 09:22 UTC` after rerunning outside
-  the workspace sandbox so the installed Foundry binary could execute.
-- Follow-up payment-split drift guard validation passed locally with
-  `python scripts/test_contract_flows.py`, `python scripts/check_contract_flows.py`,
-  `python scripts/generate_release_manifest.py --check`,
-  `python scripts/generate_bytecode_release_proof.py --check`, and
-  `python scripts/generate_release_checksums.py --check`.
+- Focused auction-flow, fixed-price-flow, integration README,
+  release-readiness, release-manifest, bytecode-release-proof,
+  release-checksum, risk-register, changelog, Python compile, and whitespace
+  checks passed locally.
+- Focused Forge validation passed locally with
+  `forge test --match-path "test/StreamAuction*.t.sol" -vvv`,
+  `forge test --match-path "test/StreamPauseControls.t.sol" -vvv`, and
+  `forge test --match-path "test/StreamProtocolStateMachine.t.sol" -vvv`.
+- Forge emitted pre-existing compiler/Natspec warnings in legacy source files;
+  no tests failed.
+
+### Completed: Add fixed-price mint and drop authorization flow spec (Queue Item 188)
+
+Status: Merged in PR #393; issue #392 closed completed.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/392`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/393`.
+Branch: `codex/fixed-price-flow-spec`.
+Squash merge: `37583836372e55027ab447134629660812025788`.
+Merge basis: CI run `27539242807` passed, CodeRabbit status was success with
+no actionable comments, no unresolved review threads were open, 6529bot
+reported no new findings after the payment-split clarification, and
+merge-decision comment `4706909091` documented the clean state before squash
+merge.
 
 ### Completed: Add integrations entrypoint and artifact source of truth (Queue Item 187)
 

@@ -1792,7 +1792,7 @@ Dependencies: `AUD-002`; best before `INT-002` through `INT-009`.
 
 ### INT-002: Add Fixed-Price Mint And Drop Authorization Flow Spec
 
-Status: In progress on issue #392 / branch `codex/fixed-price-flow-spec`.
+Status: Merged in PR #393; issue #392 closed.
 
 Gate: G/D.
 
@@ -1903,36 +1903,96 @@ Dependencies: `INT-001`.
 
 ### INT-003: Add Auction Frontend And Indexer Flow Spec
 
-Status: Planned.
+Status: PR #395 draft open on issue #394 / branch `codex/auction-flow-spec`.
 
 Gate: G/D.
 
-Problem: Auction UX depends on reconstructing state from events and reads. The
-frontend needs canonical guidance for auction creation, bidding, outbid credit,
-settlement, cancellation, no-bid claims, proceeds, and withdrawals.
+Problem: Auction UX and indexers depend on reconstructing state from a mix of
+events and reads. The frontend needs canonical guidance for auction creation,
+bidding, outbid credit, settlement, cancellation, no-bid claims, proceeds,
+withdrawals, pause domains, timestamp-derived states, and known event/read
+gaps without reverse-engineering Solidity internals.
 
-Outcome: A flow spec documents user actions, views, events, state transitions,
-and failure states for auction integrations.
+Outcome: `docs/integrations/auction-flows.md` documents the auction flow as a
+checked pre-audit local baseline. It covers source-of-truth artifacts,
+preflight reads, EIP-712 auction payload fields, `mintDrop` submission,
+canonical auction states, bidding, with-bid settlement, no-bid settlement,
+cancellation, bidder/proceeds credits, event/indexer reconstruction, pause
+boundaries, failure states, frontend state transitions, and follow-up event/read
+gaps without claiming production readiness.
 
 Files likely touched:
 
+- `docs/integrations/auction-flows.md`
 - `docs/integrations/contract-flows.md`
-- `docs/integrations/events-and-indexing.md`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
 - `docs/auction-custody.md`
+- `scripts/check_auction_flows.py`
+- `scripts/test_auction_flows.py`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- Makefile, Bash, PowerShell, and CI gate wiring
+- generated release manifest, bytecode proof, risk register, and checksum
+  artifacts if docs or manifest inputs change
 
 Implementation steps:
 
-1. Document auction state machine in product terms.
-2. Map each user action to contract call, preconditions, events, and reads.
-3. Document outbid credit and proceeds credit UX.
-4. Document settlement idempotency/retry behavior.
-5. Document no-bid path and cancellation states.
-6. Identify any event/read gaps for follow-up `CON` items.
+1. Document required source-of-truth artifacts before a frontend, mobile app,
+   Electron app, backend signing service, or indexer wires auction behavior.
+2. Document auction payload requirements, including `saleMode = 2`,
+   zero recipient, zero payer, zero fixed price, `msg.value == 0`, reserve
+   price, auction end time, signer epoch, deadline, and storage-backed replay
+   controls.
+3. Document preflight reads for `StreamDrops`, `StreamMinter`, and
+   `StreamAuctions`, including authoritative end-time and stale minter
+   end-time boundaries.
+4. Document the canonical state machine: `None`, `Created`, `Active`,
+   `EndedNoBid`, `EndedWithBid`, `SettledNoBid`, `SettledWithBid`, and
+   `Cancelled`.
+5. Map each user action to contract call, preconditions, events, and reads:
+   submit auction drop, bid, settle, no-bid claim, cancel, withdraw bidder
+   credit, and withdraw proceeds credit.
+6. Document outbid credit, proceeds credit, active bid escrow, total owed,
+   total reserved, surplus, and emergency-withdrawable views.
+7. Document with-bid credit math, including `highestBid / 2`,
+   `highestBid / 4`, and `highestBid - posterCredit - protocolCredit`.
+8. Document pause and emergency boundaries for `AUCTION_BID` / `AuctionBid`
+   and `AUCTION_SETTLEMENT` / `AuctionSettlement`.
+9. Document event/indexer reconstruction and explicit event/read gaps for
+   follow-up `CON-003` and `INT-005`.
+10. Add a checker and tests requiring headings, maturity phrases,
+    flow-critical terms, local source links, and validation commands.
+11. Wire the checker into local and CI gates.
+12. Link the flow spec from integration, release-readiness, release-artifact,
+    changelog, backlog, and autonomous-run docs.
+13. Regenerate downstream release artifacts after docs/checker changes.
 
 Required tests/checks:
 
-- Markdown heading check.
-- Event topic catalog check if docs reference event names.
+- `python scripts/test_auction_flows.py`
+- `python scripts/check_auction_flows.py`
+- `python scripts/test_contract_flows.py`
+- `python scripts/check_contract_flows.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/test_risk_register.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts/check_auction_flows.py scripts/test_auction_flows.py`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -1940,7 +2000,19 @@ Acceptance criteria:
 - A frontend can display correct action buttons from documented state.
 - An indexer can reconstruct the auction lifecycle from documented events and
   reads.
-- Missing event/read gaps become explicit follow-up issues.
+- The doc explains that `retrieveAuctionEndTime` is authoritative after
+  extension and `StreamMinter.getAuctionEndTime` can be stale.
+- The doc explains the strict end boundary `block.timestamp > endTime`.
+- The doc covers previous bidder credit, with-bid proceeds credit, no-bid
+  claimant state, cancellation state, pause domains, and failed-withdrawal
+  credit preservation.
+- The doc distinguishes fixed-price and auction split math.
+- The doc requires frontend/indexer handling for missing `minimumNextBid`,
+  compact `AuctionStatusChanged`, compact `ClaimAuction`, and direct no-bid
+  recipient inference.
+- Missing event/read gaps are explicit follow-up backlog items.
+- Local/CI gates fail if the flow spec drops required maturity language,
+  headings, source links, validation commands, or flow-critical terms.
 
 Evidence artifacts: None.
 

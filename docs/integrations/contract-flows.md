@@ -10,8 +10,8 @@ Use this with the integration source-of-truth entrypoint in
 [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md), and
 the release-readiness dashboard in
 [`docs/release-readiness.md`](../release-readiness.md). The flow below
-describes the current fixed-price path only; auction-specific UX remains
-future `INT-003` work.
+describes the current fixed-price path. Auction-specific UX and indexer
+guidance lives in [`docs/integrations/auction-flows.md`](auction-flows.md).
 
 ## Maturity And Scope
 
