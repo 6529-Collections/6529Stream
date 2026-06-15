@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/one-of-one-permanence-package.schema.json",
+  "title": "6529Stream 1/1 Permanence Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "record_type",
+    "review_status",
+    "environment",
+    "protocol_version",
+    "deployment_version",
+    "source",
+    "scope",
+    "renderer",
+    "dependencies",
+    "source_archive",
+    "replay",
+    "output_evidence",
+    "storage_guarantees",
+    "release_bindings",
+    "integration_guidance",
+    "review",
+    "retained_artifacts",
+    "redaction_policy",
+    "template_notice",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.one-of-one-permanence-package.v1"
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_type": {
+      "enum": ["template", "evidence"]
+    },
+    "review_status": {
+      "enum": ["template", "pending_review", "reviewed"]
+    },
+    "environment": {
+      "enum": ["local", "fork", "testnet", "mainnet", "production"]
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "scope": {
+      "$ref": "#/$defs/scope"
+    },
+    "renderer": {
+      "$ref": "#/$defs/renderer"
+    },
+    "dependencies": {
+      "$ref": "#/$defs/dependencies"
+    },
+    "source_archive": {
+      "$ref": "#/$defs/source_archive"
+    },
+    "replay": {
+      "$ref": "#/$defs/replay"
+    },
+    "output_evidence": {
+      "$ref": "#/$defs/output_evidence"
+    },
+    "storage_guarantees": {
+      "$ref": "#/$defs/storage_guarantees"
+    },
+    "release_bindings": {
+      "$ref": "#/$defs/release_bindings"
+    },
+    "integration_guidance": {
+      "$ref": "#/$defs/integration_guidance"
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/retained_artifact"
+      }
+    },
+    "redaction_policy": {
+      "$ref": "#/$defs/redaction_policy"
+    },
+    "template_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "git_commit": { "type": "string", "pattern": "^[0-9a-fA-F]{40}$" },
+        "source_dirty": { "type": "boolean" },
+        "ci_run": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_type",
+        "chain_id",
+        "core_contract",
+        "contract_metadata_adapter",
+        "collection_id",
+        "token_id",
+        "token_standard",
+        "metadata_schema_version",
+        "contract_uri_hash",
+        "collection_freeze_manifest_hash"
+      ],
+      "properties": {
+        "scope_type": { "const": "one_of_one_token" },
+        "chain_id": { "type": "integer", "minimum": 1 },
+        "core_contract": { "$ref": "#/$defs/address" },
+        "contract_metadata_adapter": { "$ref": "#/$defs/address" },
+        "collection_id": { "type": "integer", "minimum": 0 },
+        "token_id": { "type": "integer", "minimum": 0 },
+        "token_standard": { "const": "ERC721" },
+        "metadata_schema_version": { "type": "string", "minLength": 1 },
+        "contract_uri_hash": { "$ref": "#/$defs/bytes32" },
+        "collection_freeze_manifest_hash": { "$ref": "#/$defs/bytes32" }
+      }
+    },
+    "renderer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "renderer_name",
+        "renderer_version",
+        "renderer_contract",
+        "renderer_source",
+        "rendering_mode",
+        "runtime_assumptions"
+      ],
+      "properties": {
+        "renderer_name": { "type": "string", "minLength": 1 },
+        "renderer_version": { "type": "string", "minLength": 1 },
+        "renderer_contract": { "$ref": "#/$defs/address" },
+        "renderer_source": { "$ref": "#/$defs/retained_artifact" },
+        "rendering_mode": {
+          "enum": ["on_chain_metadata", "animation_html", "off_chain_media", "hybrid"]
+        },
+        "runtime_assumptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["browser", "node", "python", "foundry", "notes"],
+          "properties": {
+            "browser": { "type": "string", "minLength": 1 },
+            "node": { "type": "string", "minLength": 1 },
+            "python": { "type": "string", "minLength": 1 },
+            "foundry": { "type": "string", "minLength": 1 },
+            "notes": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency_artifact_manifest",
+        "dependency_registry",
+        "dependency_count",
+        "dependency_records"
+      ],
+      "properties": {
+        "dependency_artifact_manifest": { "$ref": "#/$defs/retained_artifact" },
+        "dependency_registry": { "$ref": "#/$defs/address" },
+        "dependency_count": { "type": "integer", "minimum": 0 },
+        "dependency_records": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/dependency_record" }
+        }
+      }
+    },
+    "dependency_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency_key",
+        "version",
+        "content_sha256",
+        "provenance_sha256",
+        "source_status"
+      ],
+      "properties": {
+        "dependency_key": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "content_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "provenance_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "source_status": { "enum": ["template", "pending_review", "reviewed"] }
+      }
+    },
+    "source_archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive_status",
+        "repository_archive_uri",
+        "archive_sha256",
+        "included_files"
+      ],
+      "properties": {
+        "archive_status": { "enum": ["template", "pending_review", "reviewed"] },
+        "repository_archive_uri": { "type": "string", "minLength": 1 },
+        "archive_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "included_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/retained_artifact" }
+        }
+      }
+    },
+    "replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deterministic_replay_status",
+        "replay_requires_network",
+        "replay_commands",
+        "expected_replay_outputs"
+      ],
+      "properties": {
+        "deterministic_replay_status": {
+          "enum": [
+            "template",
+            "pending_review",
+            "reviewed_replayable",
+            "blocked_missing_final_output"
+          ]
+        },
+        "replay_requires_network": { "type": "boolean" },
+        "replay_commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/replay_command" }
+        },
+        "expected_replay_outputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "replay_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "purpose", "working_directory"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "working_directory": { "type": "string", "minLength": 1 }
+      }
+    },
+    "output_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metadata_json_sha256",
+        "animation_html_sha256",
+        "image_sha256",
+        "rendered_output_sha256",
+        "browser_proof_sha256",
+        "browser_proof_status",
+        "output_hash_status"
+      ],
+      "properties": {
+        "metadata_json_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "animation_html_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "image_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "rendered_output_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "browser_proof_sha256": { "$ref": "#/$defs/sha256_or_placeholder" },
+        "browser_proof_status": {
+          "enum": ["template", "pending_review", "reviewed", "not_available_local"]
+        },
+        "output_hash_status": {
+          "enum": ["template", "pending_review", "reviewed", "not_available_local"]
+        }
+      }
+    },
+    "storage_guarantees": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fully_on_chain_components",
+        "decentralized_storage_components",
+        "external_service_dependencies",
+        "gateway_assumptions",
+        "permanence_summary",
+        "known_failure_modes"
+      ],
+      "properties": {
+        "fully_on_chain_components": { "$ref": "#/$defs/string_array" },
+        "decentralized_storage_components": { "$ref": "#/$defs/string_array" },
+        "external_service_dependencies": { "$ref": "#/$defs/string_array" },
+        "gateway_assumptions": { "$ref": "#/$defs/string_array" },
+        "permanence_summary": { "type": "string", "minLength": 1 },
+        "known_failure_modes": { "$ref": "#/$defs/string_array" }
+      }
+    },
+    "release_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "release_manifest",
+        "release_checksums",
+        "dependency_artifact_manifest",
+        "one_of_one_provenance_manifest"
+      ],
+      "properties": {
+        "release_manifest": { "$ref": "#/$defs/binding_ref" },
+        "release_checksums": { "$ref": "#/$defs/binding_ref" },
+        "dependency_artifact_manifest": { "$ref": "#/$defs/binding_ref" },
+        "one_of_one_provenance_manifest": { "$ref": "#/$defs/binding_ref" }
+      }
+    },
+    "integration_guidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collector_verification",
+        "frontend_replay",
+        "indexer_binding",
+        "marketplace_boundary"
+      ],
+      "properties": {
+        "collector_verification": { "type": "string", "minLength": 1 },
+        "frontend_replay": { "type": "string", "minLength": 1 },
+        "indexer_binding": { "type": "string", "minLength": 1 },
+        "marketplace_boundary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "reviewer",
+        "approval_status",
+        "approval_reference",
+        "reviewed_at"
+      ],
+      "properties": {
+        "owner": { "type": "string", "minLength": 1 },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "approval_status": { "enum": ["template", "pending", "approved", "rejected"] },
+        "approval_reference": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "minLength": 1 }
+      }
+    },
+    "retained_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "path", "sha256"],
+      "properties": {
+        "category": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "binding_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "status"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256_or_self_ref" },
+        "status": {
+          "enum": ["template", "pending_review", "reviewed", "self_referential"]
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": { "const": true },
+        "redacted_fields": { "$ref": "#/$defs/string_array" }
+      }
+    },
+    "string_array": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "bytes32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "sha256_or_placeholder": {
+      "type": "string",
+      "pattern": "^(sha256:[0-9a-f]{64}|not_available_local)$"
+    },
+    "sha256_or_self_ref": {
+      "type": "string",
+      "pattern": "^(sha256:[0-9a-f]{64}|not_available_local|not_available_self_referential)$"
+    }
+  }
+}

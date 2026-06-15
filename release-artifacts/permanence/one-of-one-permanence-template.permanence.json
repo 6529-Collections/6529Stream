@@ -1,0 +1,207 @@
+{
+  "schema_version": "6529stream.one-of-one-permanence-package.v1",
+  "package_id": "one-of-one-permanence-template",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "local",
+  "protocol_version": "0.1.0",
+  "deployment_version": "anvil-6529stream-v0.1.0-001",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "e9ca329f0ea6ee3cc5d0c5650ddc0d98dee3d0a0",
+    "source_dirty": false,
+    "ci_run": "TBD"
+  },
+  "scope": {
+    "scope_type": "one_of_one_token",
+    "chain_id": 31337,
+    "core_contract": "0x0000000000000000000000000000000000000003",
+    "contract_metadata_adapter": "0x000000000000000000000000000000000000000a",
+    "collection_id": 1,
+    "token_id": 1,
+    "token_standard": "ERC721",
+    "metadata_schema_version": "6529stream-v1",
+    "contract_uri_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "collection_freeze_manifest_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "renderer": {
+    "renderer_name": "StreamMetadataRenderer",
+    "renderer_version": "0.1.0",
+    "renderer_contract": "0x000000000000000000000000000000000000000b",
+    "renderer_source": {
+      "category": "renderer_source",
+      "path": "smart-contracts/StreamMetadataRenderer.sol",
+      "sha256": "sha256:0a103cbd50548ccbbe513c2fb0a17c42a315e6fca5508747c02cf3bb7bf84ecb"
+    },
+    "rendering_mode": "animation_html",
+    "runtime_assumptions": {
+      "browser": "Chromium pinned through requirements-tools.txt for local browser checks",
+      "node": "not required for the committed local template",
+      "python": "Python from the documented local toolchain",
+      "foundry": "v1.7.1",
+      "notes": "The local template records expected runtime categories without claiming final collector replay evidence."
+    }
+  },
+  "dependencies": {
+    "dependency_artifact_manifest": {
+      "category": "dependency_artifact_manifest",
+      "path": "release-artifacts/latest/dependency-artifact-manifest.json",
+      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce"
+    },
+    "dependency_registry": "0x0000000000000000000000000000000000000004",
+    "dependency_count": 1,
+    "dependency_records": [
+      {
+        "dependency_key": "template-dependency",
+        "version": 1,
+        "content_sha256": "not_available_local",
+        "provenance_sha256": "not_available_local",
+        "source_status": "template"
+      }
+    ]
+  },
+  "source_archive": {
+    "archive_status": "template",
+    "repository_archive_uri": "not_available_local",
+    "archive_sha256": "not_available_local",
+    "included_files": [
+      {
+        "category": "source_archive_file",
+        "path": "docs/metadata.md",
+        "sha256": "sha256:1ae029be1ef7e2bd46e6d23df346814addd3d53eea248dcca62088ee91adc872"
+      }
+    ]
+  },
+  "replay": {
+    "deterministic_replay_status": "template",
+    "replay_requires_network": false,
+    "replay_commands": [
+      {
+        "command": "python scripts/check_metadata_browser_sandbox.py",
+        "purpose": "Validate committed metadata browser sandbox fixtures before using final-drop package evidence.",
+        "working_directory": "."
+      },
+      {
+        "command": "python scripts/check_one_of_one_permanence_package.py",
+        "purpose": "Validate permanence package descriptor structure, hashes, no-secret policy, and reviewed-evidence boundaries.",
+        "working_directory": "."
+      }
+    ],
+    "expected_replay_outputs": [
+      "metadata JSON digest",
+      "animation HTML digest",
+      "rendered output digest",
+      "browser proof digest"
+    ]
+  },
+  "output_evidence": {
+    "metadata_json_sha256": "not_available_local",
+    "animation_html_sha256": "not_available_local",
+    "image_sha256": "not_available_local",
+    "rendered_output_sha256": "not_available_local",
+    "browser_proof_sha256": "not_available_local",
+    "browser_proof_status": "template",
+    "output_hash_status": "template"
+  },
+  "storage_guarantees": {
+    "fully_on_chain_components": [
+      "collection and token identifiers",
+      "metadata schema state exposed by StreamCore",
+      "dependency registry references",
+      "collection freeze manifest hash when frozen"
+    ],
+    "decentralized_storage_components": [
+      "future reviewed source archive",
+      "future reviewed rendered media or browser proof artifacts"
+    ],
+    "external_service_dependencies": [
+      "gateway availability for decentralized storage retrieval",
+      "browser/runtime availability for independent replay"
+    ],
+    "gateway_assumptions": [
+      "Collectors should verify content hashes and not trust a single gateway response."
+    ],
+    "permanence_summary": "Fully on-chain inputs are distinguished from decentralized storage artifacts, gateway assumptions, and browser/runtime replay assumptions.",
+    "known_failure_modes": [
+      "decentralized storage gateway outage",
+      "missing final browser proof",
+      "browser/runtime behavior drift before reviewed replay evidence is retained"
+    ]
+  },
+  "release_bindings": {
+    "release_manifest": {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "sha256": "not_available_self_referential",
+      "status": "self_referential"
+    },
+    "release_checksums": {
+      "path": "release-artifacts/latest/SHA256SUMS",
+      "sha256": "not_available_self_referential",
+      "status": "self_referential"
+    },
+    "dependency_artifact_manifest": {
+      "path": "release-artifacts/latest/dependency-artifact-manifest.json",
+      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
+      "status": "template"
+    },
+    "one_of_one_provenance_manifest": {
+      "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
+      "sha256": "sha256:01d4d6966a864f801675d7dc225f0bd9047dbaf5227b6bf83f5985ff66c9652d",
+      "status": "template"
+    }
+  },
+  "integration_guidance": {
+    "collector_verification": "Use this template to understand required hashes and replay steps; do not treat it as final collector proof.",
+    "frontend_replay": "Render final permanence package artifacts only inside the documented metadata/browser sandbox.",
+    "indexer_binding": "Index permanence packages from release artifact manifests and checksum changes, not protocol logs.",
+    "marketplace_boundary": "This template is not marketplace display, listing, sale, transfer, royalty, or refresh evidence."
+  },
+  "review": {
+    "owner": "TBD",
+    "reviewer": "TBD",
+    "approval_status": "template",
+    "approval_reference": "TBD",
+    "reviewed_at": "not_available_local"
+  },
+  "retained_artifacts": [
+    {
+      "category": "permanence_schema",
+      "path": "release-artifacts/schema/one-of-one-permanence-package.schema.json",
+      "sha256": "sha256:fdbaa1b56c1586b15cd15d15fb360af033950b9db596ddb07ee961b355a37ca8"
+    },
+    {
+      "category": "permanence_retained_artifact_template",
+      "path": "release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md",
+      "sha256": "sha256:518f4d4e9219b4d9eb2e4d8e99adc9f7eceadd7a4dc3321cb3ae1bfbe003dc54"
+    },
+    {
+      "category": "permanence_runbook",
+      "path": "docs/permanence-packages.md",
+      "sha256": "sha256:9d1b600d3162e151558a64009dee3a7f25977b0fbe9fc07266379ca4ee27b8f6"
+    },
+    {
+      "category": "dependency_artifact_manifest",
+      "path": "release-artifacts/latest/dependency-artifact-manifest.json",
+      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce"
+    },
+    {
+      "category": "provenance_manifest",
+      "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
+      "sha256": "sha256:01d4d6966a864f801675d7dc225f0bd9047dbaf5227b6bf83f5985ff66c9652d"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "raw_signature",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence.",
+  "operator_notes": "No-secret local template for collector-verifiable permanence package requirements."
+}

@@ -48,6 +48,7 @@ RELEASE_EVIDENCE_ISSUE_LINKS_JSON_FILENAME = "release-evidence-issue-links.json"
 RELEASE_EVIDENCE_ISSUE_BODY_SYNC_JSON_FILENAME = "release-evidence-issue-body-sync.json"
 RELEASE_EVIDENCE_ISSUE_BODY_SYNC_MARKDOWN_FILENAME = "release-evidence-issue-body-sync.md"
 ONE_OF_ONE_PROVENANCE_MANIFEST_FILENAME = "one-of-one-provenance-manifest.json"
+ONE_OF_ONE_PERMANENCE_MANIFEST_FILENAME = "one-of-one-permanence-manifest.json"
 DEFAULT_DEPLOYMENT_CONFIG_DIR = Path("deployments/config")
 DEFAULT_DEPLOYMENT_BROADCAST_DIR = Path("deployments/broadcasts")
 DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
@@ -80,6 +81,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/drop-authorization-signing.md"),
     Path("docs/signer-custody-readiness.md"),
     Path("docs/provenance-manifests.md"),
+    Path("docs/permanence-packages.md"),
     Path("docs/royalty-policy.md"),
     Path("docs/release-readiness.md"),
     Path("docs/integrations/README.md"),
@@ -1046,6 +1048,11 @@ def build_manifest(
             ),
             "one_of_one_provenance_manifest": file_record(
                 release_artifacts_dir / ONE_OF_ONE_PROVENANCE_MANIFEST_FILENAME,
+                repo_root,
+                schema_required=True,
+            ),
+            "one_of_one_permanence_manifest": file_record(
+                release_artifacts_dir / ONE_OF_ONE_PERMANENCE_MANIFEST_FILENAME,
                 repo_root,
                 schema_required=True,
             ),
