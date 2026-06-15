@@ -183,6 +183,8 @@ jobs:
             scripts/test_mobile_walletconnect.py \
             scripts/check_electron_security_wallets.py \
             scripts/test_electron_security_wallets.py \
+            scripts/check_operator_admin_ui.py \
+            scripts/test_operator_admin_ui.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -498,6 +500,8 @@ jobs:
           python3 scripts/check_mobile_walletconnect.py 2>&1 | tee ci-logs/mobile-walletconnect-check.log
           python3 scripts/test_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-tests.log
           python3 scripts/check_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-check.log
+          python3 scripts/test_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-tests.log
+          python3 scripts/check_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-check.log
 
       - name: Release readiness
         shell: bash

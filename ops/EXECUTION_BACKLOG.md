@@ -598,7 +598,8 @@ Dependencies: `EXT-004`.
 
 ### EXT-006: Retain Sepolia Fixed-Price Mint Smoke Evidence
 
-Status: Planned.
+Status: Planned; blocked by reviewed Sepolia deployment/explorer evidence and
+real RPC/signer/funding environment.
 
 Gate: E.
 
@@ -2606,7 +2607,7 @@ Dependencies: `INT-006`, `INT-008`.
 
 ### INT-010: Add Operator Admin UI Specification
 
-Status: Planned.
+Status: In progress on `codex/operator-admin-ui-spec`; issue #408.
 
 Gate: G/F.
 
@@ -2620,10 +2621,23 @@ required confirmations, Safe transactions, events, monitoring, and runbooks.
 Files likely touched:
 
 - `docs/integrations/operator-admin-ui.md`
-- `docs/deployment.md`
-- `docs/incident-response.md`
-- `docs/signer-custody-readiness.md`
-- `docs/randomizer-operations.md`
+- `scripts/check_operator_admin_ui.py`
+- `scripts/test_operator_admin_ui.py`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `.github/workflows/ci.yml`
+- `CHANGELOG.md`
+- generated `release-artifacts/latest/` manifests/checksums
 
 Implementation steps:
 
@@ -2636,6 +2650,10 @@ Implementation steps:
 Required tests/checks:
 
 - Markdown heading check.
+- Operator admin UI checker/test pair.
+- Integration README checker/test pair.
+- Release-readiness checker/test pair.
+- Release manifest, bytecode proof, and checksum drift checks.
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2643,6 +2661,9 @@ Acceptance criteria:
 - An admin UI can be designed without guessing which actions are dangerous.
 - Safe/multisig flow is first-class.
 - Monitoring and incident links are attached to each high-risk operation.
+- The spec documents the local/pre-audit boundary and does not claim retained
+  production governance evidence.
+- The guide is included in release-manifest governance docs and local/CI gates.
 
 Evidence artifacts: None.
 
