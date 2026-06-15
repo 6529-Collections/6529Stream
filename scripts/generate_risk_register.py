@@ -292,7 +292,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "id": "RISK-SIZE-001",
-        "title": "StreamCore bytecode headroom remains tight",
+        "title": "StreamCore bytecode headroom remains finite",
         "area": "core_size",
         "severity": "medium",
         "status": "accepted_local_baseline",
@@ -305,7 +305,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ),
         "residual_risk": (
             "Large future Core feature work could consume the remaining EIP-170 "
-            "headroom and block deployment."
+            "headroom and block deployment if size deltas are not measured."
         ),
         "evidence_paths": [
             "docs/known-blockers.md",

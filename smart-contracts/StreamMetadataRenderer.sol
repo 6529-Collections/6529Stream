@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "./Base64.sol";
 import "./IStreamAdmins.sol";
+import "./IRandomizerLifecycle.sol";
 import "./Strings.sol";
 
 library StreamMetadataRenderer {
@@ -205,6 +206,93 @@ library StreamMetadataRenderer {
                 tokenHash
             )
         );
+    }
+
+    function offchainTokenURI(
+        string memory baseURI,
+        uint256 tokenId,
+        string memory metadataState,
+        bool finalMetadata
+    ) public pure returns (string memory) {
+        return finalMetadata
+            ? string(abi.encodePacked(baseURI, tokenId.toString()))
+            : string(abi.encodePacked(baseURI, metadataState));
+    }
+
+    function tokenName(string memory collectionName, uint256 tokenId, uint256 firstTokenId)
+        public
+        pure
+        returns (string memory)
+    {
+        return string(abi.encodePacked(collectionName, " #", (tokenId - firstTokenId).toString()));
+    }
+
+    function pendingTokenMetadataState(address randomizer, uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        bytes4 supportSelector = IRandomizerLifecycle.supportsRandomizerLifecycle.selector;
+        bytes4 stateSelector = IRandomizerLifecycle.randomnessRequestStateForToken.selector;
+        bool supported;
+        uint256 state;
+        bool hasState;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, supportSelector)
+            supported := staticcall(gas(), randomizer, ptr, 0x04, ptr, 0x20)
+            supported := and(supported, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
+
+            mstore(ptr, stateSelector)
+            mstore(add(ptr, 0x04), tokenId)
+            hasState := staticcall(gas(), randomizer, ptr, 0x24, ptr, 0x20)
+            hasState := and(supported, and(hasState, eq(returndatasize(), 0x20)))
+            state := mload(ptr)
+        }
+
+        if (hasState) {
+            if (state == uint256(IRandomizerLifecycle.RandomnessRequestState.Stale)) {
+                return "stale";
+            }
+            if (state == uint256(IRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing))
+            {
+                return "failed";
+            }
+        }
+
+        return "pending";
+    }
+
+    function pendingRandomnessRequests(address randomizer, uint256 collectionId)
+        public
+        view
+        returns (uint256 pendingRequests)
+    {
+        bytes4 supportSelector = IRandomizerLifecycle.supportsRandomizerLifecycle.selector;
+        bytes4 pendingSelector = IRandomizerLifecycle.pendingRandomnessRequests.selector;
+        bool supported;
+        bool pendingSucceeded;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, supportSelector)
+            supported := staticcall(gas(), randomizer, ptr, 0x04, ptr, 0x20)
+            supported := and(supported, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
+            if supported {
+                mstore(ptr, pendingSelector)
+                mstore(add(ptr, 0x04), collectionId)
+                pendingSucceeded := staticcall(gas(), randomizer, ptr, 0x24, ptr, 0x20)
+                if and(pendingSucceeded, eq(returndatasize(), 0x20)) {
+                    pendingRequests := mload(ptr)
+                }
+                if iszero(and(pendingSucceeded, eq(returndatasize(), 0x20))) {
+                    returndatacopy(0, 0, returndatasize())
+                    if returndatasize() {
+                        revert(0, returndatasize())
+                    }
+                    revert(0, 0)
+                }
+            }
+        }
     }
 
     function escapeHtmlAttribute(string memory raw) public pure returns (string memory) {
