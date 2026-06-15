@@ -104,6 +104,10 @@ REQUIRED_PHRASES = [
     "Reservoir",
     "Blur",
     "Manifold",
+    "ONE-005",
+    "retained marketplace/indexer evidence",
+    "fork_testnet_marketplace_indexer_evidence",
+    "live_marketplace_indexer_evidence",
 ]
 
 REQUIRED_COMMANDS = [
@@ -120,6 +124,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_rehearsal_metadata_browser_sandbox.py",
     "python scripts/test_integrations_readme.py",
     "python scripts/check_integrations_readme.py",
+    "python scripts/test_marketplace_indexer_evidence.py",
+    "python scripts/check_marketplace_indexer_evidence.py",
     "python scripts/test_release_readiness.py",
     "python scripts/check_release_readiness.py",
     "python scripts/test_release_manifest.py",
@@ -134,6 +140,7 @@ REQUIRED_COMMANDS = [
 REQUIRED_LINK_TARGETS = [
     "docs/integrations/README.md",
     "docs/integrations/events-and-indexing.md",
+    "docs/integrations/marketplace-indexer-evidence.md",
     "docs/integrations/contract-flows.md",
     "docs/integrations/auction-flows.md",
     "docs/integrations/wallets-and-signatures.md",

@@ -101,8 +101,8 @@
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:297276d12c08ab5af18bb14f010274195749acf0fcd1d3832c11a44ffcc5f073",
-      "size_bytes": 6765,
+      "sha256": "sha256:0a1517b7a2601ec383f9a54354797a742ff7408551db8f614e8c71dc1b721642",
+      "size_bytes": 7625,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
       "status": {
@@ -110,14 +110,14 @@
         "production_release": "blocked"
       },
       "blocking_counts": {
-        "public_beta": 7,
-        "production_release": 9
+        "public_beta": 8,
+        "production_release": 10
       }
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:344f84f53be7dbc38ec643bb2dbbe4837201fd4140b4b669b15860956afc756e",
-      "size_bytes": 21290,
+      "sha256": "sha256:56c7e77fbbff54bf7a9f3c651e7d5018d20afbe040e1547521325672fa8d75b8",
+      "size_bytes": 22294,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
       "risk_count": 11,
@@ -140,25 +140,25 @@
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb",
-      "size_bytes": 9772
+      "sha256": "sha256:6548c9db1e0a7d4cba5fa99b6f9941ff15210605f387c7030d9b67adf51cf326",
+      "size_bytes": 11136
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
-      "sha256": "sha256:5613913dcca6ae722ef82462f2a99e6cdf921fc5f61916fc14e0b78b512988ba",
-      "size_bytes": 7947
+      "sha256": "sha256:5c0e4179c6d00bdbfc18557be5c180f74a646a20b46ffef8482bfcfe721e1d7f",
+      "size_bytes": 8881
     },
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:9f011c676ce314f730e6ea7bbeb57651d52fc970dd9aafb0481511fe3028cbe7",
-        "size_bytes": 53824,
+        "sha256": "sha256:ff48cbf0a76e8be49b35ea36fd9f404a8a658e424e01db51d2211e3fd1a1d122",
+        "size_bytes": 60680,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-packet-index.md",
-        "sha256": "sha256:dadca5b8b926a1f6321c5755619ace2b7f2346ab7e8aad878f34fdc9a44c8c76",
-        "size_bytes": 25047
+        "sha256": "sha256:efd2f15bd3366b61f8a844a4d6a080caea561ba6c1938661f0ea32a1b806bccb",
+        "size_bytes": 28217
       }
     },
     "release_evidence_live_audit_report_archive": {
@@ -177,33 +177,33 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:2fac871d20bb49cc3fa25bffb35e4ec7fa8920047587ca438573f5a620f3f5f6",
-        "size_bytes": 102605,
+        "sha256": "sha256:e5fa16c4cbd68efbef97dc9f2f0b5cb909b261b703fbfe959d132ab895a84925",
+        "size_bytes": 116477,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.md",
-        "sha256": "sha256:bccda35cbb0c1b953eb0f701ce9d134d9b237f9ea17ad3b7f7b6eb2af9e50714",
-        "size_bytes": 64528
+        "sha256": "sha256:d18dc5f9106fb8d75d666582b5f9b48edf90eb6b9cad4aa5947364450770b2a6",
+        "size_bytes": 73265
       }
     },
     "release_evidence_issue_links": {
       "path": "release-artifacts/latest/release-evidence-issue-links.json",
-      "sha256": "sha256:cbcefca2040b57f8dc6cc6c5107924467ee82e5015a621b29b72d9c23210c167",
-      "size_bytes": 11166,
+      "sha256": "sha256:a9790af58498df99f5978b7dfeb690197e7d2cf801e33dc065d377124bc0e590",
+      "size_bytes": 12538,
       "schema_version": "6529stream.release-evidence-issue-links.v1"
     },
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:6334f89523e777f03db0bb8b138776ea641ea26cf385784e8e100f71244f8f8a",
-        "size_bytes": 72149,
+        "sha256": "sha256:aa0da948395dced28f7828d2f0f03d4cdb0bd74abdafaf55664b995362a1a298",
+        "size_bytes": 81496,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:9a5331f58d10d80be734d8e290352276394f955ce9405a01582ab83faee6c3d0",
-        "size_bytes": 63685
+        "sha256": "sha256:bf8abfd745962ddeceed4966e4319bc5dc2cb840c41bd94ba974149576683aa4",
+        "size_bytes": 72048
       }
     },
     "release_signature_evidence": [
@@ -537,6 +537,53 @@
           },
           "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
           "operator_notes": "Replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json",
+        "sha256": "sha256:c46a529a7d23da36310ffb0ac24dddc80ed1f14f5af54757d0dfd47513e86624",
+        "size_bytes": 1923,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "production-release-template-live-marketplace-indexer-evidence",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "live",
+        "public_beta_requirement_id": "live_marketplace_indexer_evidence",
+        "retained_path": "release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "production-release-template-live-marketplace-indexer-evidence",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "live",
+          "chain_id": 1,
+          "block_or_reference": "template-only live block, token ID, collection ID, marketplace/indexer source, or transcript reference",
+          "command_or_source_system": "template-only live marketplace/indexer transcript, OpenSea/Reservoir/Blur/Manifold source, collector tool, event replay command, or operator transcript",
+          "retained_path": "release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md",
+          "sha256": "sha256:d414f7172ad166fe3682b0bc1db77dcac311bc0da13b90d6514c5459d3ec23f7",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, marketplace credentials, indexer credentials, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "live_marketplace_indexer_evidence",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with reviewed live marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation."
         }
       },
       {
@@ -1007,6 +1054,53 @@
           },
           "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
           "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
+        }
+      },
+      {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json",
+        "sha256": "sha256:5842544b9d14df3ab14d73e453dabb5ce35ce37f6c87e47aa2f31f9a02d08212",
+        "size_bytes": 1972,
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-testnet-marketplace-indexer-evidence",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "fork",
+        "public_beta_requirement_id": "fork_testnet_marketplace_indexer_evidence",
+        "retained_path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
+        "evidence": {
+          "schema_version": "6529stream.non-local-release-evidence.v1",
+          "evidence_id": "public-beta-template-fork-testnet-marketplace-indexer-evidence",
+          "record_type": "template",
+          "review_status": "template",
+          "environment": "fork",
+          "chain_id": 1,
+          "block_or_reference": "template-only fork or testnet block, token ID, collection ID, marketplace/indexer source, or transcript reference",
+          "command_or_source_system": "template-only marketplace/indexer transcript, OpenSea/Reservoir/Blur/Manifold source, collector tool, event replay command, or operator transcript",
+          "retained_path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
+          "sha256": "sha256:811c7131c7b999a6c1b8c23e369d6e0ab4048498789f54eba91c7b3aa9b4097e",
+          "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, marketplace credentials, indexer credentials, or unreleased drop payloads are present.",
+          "owner": "TBD",
+          "reviewer": "TBD",
+          "public_beta_requirement_id": "fork_testnet_marketplace_indexer_evidence",
+          "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "0000000000000000000000000000000000000000",
+            "source_dirty": false,
+            "ci_run": "template"
+          },
+          "redaction_policy": {
+            "no_secrets": true,
+            "redacted_fields": [
+              "private_key",
+              "mnemonic",
+              "seed_phrase",
+              "api_key",
+              "rpc_url",
+              "unreleased_drop_payload"
+            ]
+          },
+          "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+          "operator_notes": "Replace this template with reviewed fork/testnet marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale or simulated sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation."
         }
       },
       {
@@ -1822,8 +1916,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:30b6e6ef023b93156261978f58bf8647f5df0c234909cb7bc9c49f628c46b72d",
-      "size_bytes": 36930
+      "sha256": "sha256:8096b6a42c8c84618954b7bcaaca81764e9344fc563c538d6f758c7a22a4997e",
+      "size_bytes": 37407
     },
     "governance_docs": [
       {
@@ -1853,13 +1947,13 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:08c71af121d9d943951edfccc9bd6d6cf4cddd3e75dec128eb852a455c6e3f3e",
-        "size_bytes": 16361
+        "sha256": "sha256:ee9dc7fdc8c9b1d460732e296435df0c25326f6e5a727445f4c2109d6b172ea9",
+        "size_bytes": 17449
       },
       {
         "path": "docs/non-local-release-evidence.md",
-        "sha256": "sha256:6ddd35b6d59e98fd26674728fca284fd667443b34971214d918feb9af5f35e5f",
-        "size_bytes": 22746
+        "sha256": "sha256:f9d06dc5a7a5191edc38516820259f9e312e9fa5166a9b0f42bd204878783484",
+        "size_bytes": 25240
       },
       {
         "path": "docs/architecture.md",
@@ -1903,18 +1997,18 @@
       },
       {
         "path": "docs/royalty-policy.md",
-        "sha256": "sha256:67b03faf1eb835e30019d99e398e295894aec9dd099e9920595a7ca29118b447",
-        "size_bytes": 13850
+        "sha256": "sha256:541441c734273a619cfbbd50b3f3357256d8ab03f9411bf0d989a7217f0cdefa",
+        "size_bytes": 14388
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:0eb678b997069e04b089c784ed5c44022411063d3aebe9ab24f8aff3d2916aef",
-        "size_bytes": 44393
+        "sha256": "sha256:73394e0c198dca38b325f01ce3aaf43d4e4223c6f2e45d7a72983a09e7e753cf",
+        "size_bytes": 44989
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:ecf41e8209d13378904954f77bd6d93b3c86387643b93c2e60b6d38bc843a587",
-        "size_bytes": 25638
+        "sha256": "sha256:b026159f89d708c3d9fcb80cb8961fb63b1a6aedd6544cfac61efda12b96aa92",
+        "size_bytes": 27128
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -1933,13 +2027,18 @@
       },
       {
         "path": "docs/integrations/events-and-indexing.md",
-        "sha256": "sha256:19aec4fcfda25a6d1dfecbd72bc93857206fe841bb3553edb5a6f7862e5da165",
-        "size_bytes": 31363
+        "sha256": "sha256:0fb4270a19039544ff3c4d9e9cc2abe65cdddb6e810d3d0a4b26398f7c65176b",
+        "size_bytes": 32445
       },
       {
         "path": "docs/integrations/metadata-rendering.md",
-        "sha256": "sha256:78259160bdf0d28edcd35bba33f0476b34af40a93c1c860229ef67d0026ba5d1",
-        "size_bytes": 25510
+        "sha256": "sha256:d877ee2ae1d8419da0f716c7636170d7cd6ce48fb1164d7d8eb4d222eec203be",
+        "size_bytes": 26548
+      },
+      {
+        "path": "docs/integrations/marketplace-indexer-evidence.md",
+        "sha256": "sha256:3cfea3d0270faa6c5d3be57a61c6b259d61158dbdb7564f6978e8674948ed2df",
+        "size_bytes": 9183
       },
       {
         "path": "docs/integrations/frontend-reference-architecture.md",

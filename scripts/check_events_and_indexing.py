@@ -157,6 +157,10 @@ REQUIRED_PHRASES = [
     "forced ETH",
     "CON-002",
     "INT-005",
+    "ONE-005",
+    "retained marketplace/indexer evidence",
+    "fork_testnet_marketplace_indexer_evidence",
+    "live_marketplace_indexer_evidence",
 ]
 
 REQUIRED_COMMANDS = [
@@ -167,6 +171,8 @@ REQUIRED_COMMANDS = [
     "python scripts/generate_one_of_one_provenance_manifest.py --check",
     "python scripts/test_integrations_readme.py",
     "python scripts/check_integrations_readme.py",
+    "python scripts/test_marketplace_indexer_evidence.py",
+    "python scripts/check_marketplace_indexer_evidence.py",
     "python scripts/test_release_readiness.py",
     "python scripts/check_release_readiness.py",
     "python scripts/test_release_manifest.py",
@@ -183,6 +189,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/contract-flows.md",
     "docs/integrations/auction-flows.md",
     "docs/integrations/wallets-and-signatures.md",
+    "docs/integrations/marketplace-indexer-evidence.md",
     "docs/metadata.md",
     "docs/provenance-manifests.md",
     "docs/release-policy.md",

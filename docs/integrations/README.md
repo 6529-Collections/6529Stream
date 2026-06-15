@@ -34,10 +34,10 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, marketplace, and React/Next reference architecture guidance is documented for the local baseline |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, and React/Next reference architecture guidance is documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
-| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), and [`metadata-rendering.md`](metadata-rendering.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, and cache invalidation are documented for the local baseline |
+| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, cache invalidation, and retained marketplace/indexer evidence requirements are documented for the local baseline |
 | Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, release-readiness dashboard, and [`operator-admin-ui.md`](operator-admin-ui.md) | Current `INT-010` operator personas, Safe/multisig ceremony, role, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and evidence-boundary guidance is documented |
 | Backend signing service | Use EIP-712, ERC-1271, Safe, signer custody, drop authorization signing docs, and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Local templates and integration guidance only; production signing evidence remains blocked |
 
@@ -76,6 +76,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Wallet and signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Current `INT-004` EIP-712, ERC-1271, Safe, WalletConnect, backend signer, and failure-state guide |
 | Event and indexer guide | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Current `INT-005` event subscriptions, indexed entities, read-after-event calls, reorg policy, and known event/read gaps |
 | Metadata rendering guide | [`docs/integrations/metadata-rendering.md`](metadata-rendering.md) | Current `INT-006` metadata state, tokenURI, ERC-4906 cache invalidation, animation sandbox, cache key, and marketplace evidence-boundary guide |
+| Marketplace/indexer evidence guide | [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Current `ONE-005` retained marketplace/indexer evidence requirements for OpenSea, Reservoir, Blur, Manifold, equivalent collector/indexer tooling, contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale paths, event replay, and cache invalidation |
 | Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | Release-tracked ERC-7572-style `contractURI()` adapter with `ContractURIUpdated` and URI hash views |
 | React/Next reference architecture | [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md) | Current `INT-007` artifact import, client layering, query/cache, transaction, wallet, metadata, indexer, environment, and testing guide |
 | Mobile and WalletConnect guide | [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md) | Current `INT-008` mobile browser, native shell, WalletConnect session, foreground handoff, deep-link, reconnect, offline/background, telemetry, and no-secret guide |
@@ -108,6 +109,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md)
 - [`docs/integrations/events-and-indexing.md`](events-and-indexing.md)
 - [`docs/integrations/metadata-rendering.md`](metadata-rendering.md)
+- [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md)
 - [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md)
 - [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md)
 - [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md)
@@ -174,6 +176,13 @@ to understand what is still intentionally future work:
   [`docs/permanence-packages.md`](../permanence-packages.md), recording the
   artifact-only one-of-one permanence manifest, replay commands, browser proof,
   output hashes, and fully on-chain versus decentralized storage boundaries.
+- `ONE-005`: the retained marketplace/indexer evidence guide is now
+  [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md),
+  recording the fork/testnet/live evidence model for contract metadata,
+  token metadata refresh, animation rendering, royalty display,
+  transfer/listing/sale paths, event replay, cache invalidation, and platform
+  coverage across OpenSea, Reservoir, Blur, Manifold, or equivalent
+  collector/indexer tooling.
 
 Until the remaining specs exist, integrators should treat the linked artifacts
 as source material and the existing tests/docs as examples, not as a finished
@@ -193,6 +202,9 @@ particular:
   not reviewed production signing evidence.
 - Metadata/browser checks and the `INT-006` guide are local evidence, not
   marketplace or collector-tool proof.
+- `ONE-005` retained marketplace/indexer templates are template-only and are
+  not release readiness proof until reviewed fork/testnet/live evidence is
+  linked from the shared evidence status manifest.
 - The 1/1 provenance manifest is a checked release-artifact model for
   artist/story/authenticity context, not a tokenURI finality signal,
   marketplace discovery claim, royalty enforcement mechanism, or ownership
@@ -238,6 +250,8 @@ python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
 python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
 python scripts/test_one_of_one_provenance_manifest.py
 python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check

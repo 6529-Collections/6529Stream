@@ -54,6 +54,15 @@
       "notes": "Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained."
     },
     {
+      "id": "fork_testnet_marketplace_indexer_evidence",
+      "phase": "public_beta",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained."
+    },
+    {
       "id": "fork_testnet_ceremony_evidence",
       "phase": "public_beta",
       "status": "missing",
@@ -153,6 +162,15 @@
       "notes": "Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained."
     },
     {
+      "id": "live_marketplace_indexer_evidence",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained."
+    },
+    {
       "id": "live_explorer_verification",
       "phase": "production_release",
       "status": "missing",
@@ -175,7 +193,7 @@
     {
       "category": "public_beta_evidence_schema",
       "path": "release-artifacts/schema/public-beta-evidence.schema.json",
-      "sha256": "sha256:cec024757bfe8967a27106ee8c4739c6f51ff8b0ec6a2fb564939441fd9ac9bb"
+      "sha256": "sha256:d73863ab1be2718f7cd60f89fd37f3df6fdbfbf9dac693071f6e9a12d4b38d65"
     }
   ],
   "redaction_policy": {

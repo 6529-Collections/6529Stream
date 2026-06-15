@@ -49,6 +49,14 @@ VALIDATION_COMMANDS = (
         "Signer custody readiness evidence",
         "python scripts/check_signer_custody_readiness.py",
     ),
+    (
+        "Marketplace/indexer evidence",
+        "python scripts/test_marketplace_indexer_evidence.py",
+    ),
+    (
+        "Marketplace/indexer evidence",
+        "python scripts/check_marketplace_indexer_evidence.py",
+    ),
     ("Release manifest", "python scripts/test_release_manifest.py"),
     ("Release manifest", "python scripts/generate_release_manifest.py --check"),
     ("Release checksums", "python scripts/test_release_checksums.py"),

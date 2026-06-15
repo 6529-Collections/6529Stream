@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-headroom-recovery` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/419` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/420` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
-| Next issue | After the `CON-005` headroom recovery detour, continue to `ONE-005` marketplace/indexer integration evidence unless bot/CI feedback or roadmap priority requires another detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/marketplace-indexer-evidence-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/422` |
+| Active PR | None yet |
+| Next issue | Implement `ONE-005` marketplace/indexer retained evidence model. Supporting evidence tracker issues were opened as `https://github.com/6529-Collections/6529Stream/issues/423` (`fork_testnet_marketplace_indexer_evidence`) and `https://github.com/6529-Collections/6529Stream/issues/424` (`live_marketplace_indexer_evidence`) and must remain incomplete until real reviewed external evidence is retained. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 22:36 UTC` |
+| Last updated | `2026-06-15 23:38 UTC` |
 
 ## Packaging Notes
 
@@ -262,6 +262,91 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 198 | Add 1/1 provenance manifest model | Gate G/Gate F support | Add provenance model docs, schema, retained artifact template, generated manifest, local/CI checks, release-manifest/checksum coverage, and artifact-only boundaries while preserving `StreamCore` bytecode headroom | In progress on issue #412 |
 
 ## Current PR Worklog
+
+### PR candidate: Add marketplace and indexer retained evidence model (Queue Item ONE-005)
+
+Status: Ready to commit and open PR after local validation; no PR open yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/422`.
+PR: None yet.
+Branch: `codex/marketplace-indexer-evidence-model`.
+Branch started from PR #421 squash merge commit
+`443921b93e42ea38fca4696bdecffdbea559d4bc`.
+
+Goal:
+
+- Add a first-class marketplace/indexer retained evidence model without
+  claiming external readiness from local templates.
+- Cover fork/testnet and live retained artifacts for contract metadata,
+  `contractURI()` / `contractURIHash()`, `ContractURIUpdated`, token metadata
+  refresh, ERC-4906 refresh events, animation rendering, royalty display,
+  transfer/listing/sale or simulated-sale flows, event replay, and cache
+  invalidation.
+- Add public-beta requirement `fork_testnet_marketplace_indexer_evidence` and
+  production requirement `live_marketplace_indexer_evidence` as missing rows
+  linked to tracker issues #423 and #424.
+- Wire the checker/tests into local gates, CI, public-beta and production
+  blocker reports, release evidence packet index, evidence issue backlog/body
+  sync, release manifest, risk register, bytecode proof, and checksum bundles.
+- Cross-link integration, metadata, event/indexer, royalty, release-readiness,
+  public-beta evidence, and non-local evidence docs while preserving
+  marketplace, royalty-enforcement, and production-readiness boundaries.
+
+Validation plan:
+
+- `python scripts/test_marketplace_indexer_evidence.py`.
+- `python scripts/check_marketplace_indexer_evidence.py`.
+- `python scripts/test_public_beta_evidence.py`.
+- `python scripts/check_public_beta_evidence.py`.
+- `python scripts/test_non_local_release_evidence.py`.
+- `python scripts/check_non_local_release_evidence.py`.
+- `python scripts/test_public_beta_blocker_report.py`.
+- `python scripts/generate_public_beta_blocker_report.py --check`.
+- `python scripts/test_production_release_blocker_report.py`.
+- `python scripts/generate_production_release_blocker_report.py --check`.
+- `python scripts/test_release_evidence_packet_index.py`.
+- `python scripts/generate_release_evidence_packet_index.py --check`.
+- `python scripts/test_release_evidence_issue_backlog.py`.
+- `python scripts/generate_release_evidence_issue_backlog.py --check`.
+- `python scripts/test_release_evidence_issue_links.py`.
+- `python scripts/check_release_evidence_issue_links.py`.
+- `python scripts/test_release_evidence_issue_body_sync.py`.
+- `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- Focused integration/release-readiness/royalty checker pairs.
+- `python -m py_compile` for touched scripts.
+- `make check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Notes:
+
+- Tracker issues #423 and #424 must remain incomplete until real reviewed
+  external marketplace/indexer evidence is retained.
+- Local template files are scaffolding only; they must not satisfy readiness
+  rows while placeholders or template-only notices remain.
+- No Solidity bytecode change is planned for this branch, preserving the
+  `StreamCore` 23,661-byte production runtime from PR #421.
+
+Validation result:
+
+- Focused marketplace/indexer evidence checker/test, public-beta evidence,
+  non-local release evidence, blocker reports, release packet/backlog/link/body
+  sync, release manifest, bytecode proof, checksum bundle, risk register,
+  integration docs, release-readiness docs, royalty docs, changelog gate,
+  Python compile, and `git diff --check` passed locally.
+- Full `make check` passed.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- Existing warning noise remains: Foundry `selfdestruct` warnings in
+  forced-ETH tests, legacy randomizer unused parameters/pure-view suggestions,
+  and known Foundry trace/source warnings during rehearsal scripts.
 
 ### PR candidate: Add 1/1 provenance manifest model (Queue Item 198)
 
@@ -15338,6 +15423,8 @@ Outcome:
 | 2026-06-15 22:20 | Validate headroom recovery branch | Focused metadata/randomizer/royalty suites passed; `make release-checksums` refreshed bytecode, deployment, manifest, checksum, risk, provenance, permanence, and gas-snapshot artifacts; full `make check`, Windows `scripts\check.ps1`, touched-file formatting, release manifest/proof/checksum checks, and `git diff --check` all pass. The accepted gas snapshot trade is two small decreases and a +2,143 gas increase for final on-chain `tokenURI` in exchange for recovering 386 bytes of `StreamCore` runtime headroom. |
 | 2026-06-15 22:25 | Open PR #421 | PR #421 is open and marked ready for review after CodeRabbit skipped the initial draft state. CodeRabbit review has been requested again and CI/bot feedback is pending. |
 | 2026-06-15 22:36 | Address PR #421 review comments | CodeRabbit found two actionable follow-ups: a wording cleanup in `docs/known-blockers.md` and imported-source hash validation in `scripts/check_contract_size_budget.py`. The checker now validates every resolvable metadata source path against the checkout, `scripts/test_contract_size_budget.py` covers stale imported dependency hashes, and focused Python tests plus `python scripts\check_contract_size_budget.py` pass with `StreamCore` still at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
+| 2026-06-15 22:57 | Merge PR #421 and resume ONE-005 | PR #421 merged as `443921b93e42ea38fca4696bdecffdbea559d4bc`, issue #420 closed completed, CodeRabbit review threads were resolved, and GitHub CI passed. Created issue #422 for the marketplace/indexer retained evidence model plus evidence tracker issues #423 and #424 for future public-beta and production marketplace/indexer proof. Branch `codex/marketplace-indexer-evidence-model` is active from updated `main`. |
+| 2026-06-15 23:38 | Validate ONE-005 PR candidate | Marketplace/indexer evidence model, dedicated checker/tests, release-evidence rows, retained templates, release packet/backlog/body-sync, release manifest/checksums, risk register, integration docs, local `make check`, Windows `scripts\check.ps1`, and `git diff --check` passed locally. No Solidity bytecode changed; `StreamCore` remains at the PR #421 production runtime size. |
 
 ## Resume Instructions
 
