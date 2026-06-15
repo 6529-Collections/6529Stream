@@ -30,6 +30,7 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
 python scripts/generate_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_permanence_manifest.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_risk_register.py
 python scripts/generate_public_beta_blocker_report.py
@@ -194,6 +195,19 @@ it with `python scripts/test_one_of_one_provenance_manifest.py`,
 `python scripts/check_one_of_one_provenance_manifest.py`, and
 `python scripts/generate_one_of_one_provenance_manifest.py --check`.
 
+`latest/one-of-one-permanence-manifest.json` is generated from schemaed
+descriptors under `permanence/`. It catalogs collector-verifiable permanence
+package records, descriptor hashes, token scope, renderer/dependency/source
+bindings, replay command status, output hash status, browser proof status, and
+fully on-chain versus decentralized storage boundaries. The current checked
+template is an artifact-only model for replayability requirements; it is not
+final collector proof, not marketplace readiness proof, not ownership proof
+beyond chain state, and not production release approval until reviewed
+non-local or final-drop evidence exists. Validate it with
+`python scripts/test_one_of_one_permanence_package.py`,
+`python scripts/check_one_of_one_permanence_package.py`, and
+`python scripts/generate_one_of_one_permanence_manifest.py --check`.
+
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
 hashes, deployment manifest/address-book hashes, ceremony evidence hashes,
@@ -205,6 +219,7 @@ public-beta evidence status, schema hashes, governance doc hashes including
 `docs/integrations/mobile-walletconnect.md`,
 `docs/integrations/electron-security-wallets.md`,
 `docs/integrations/operator-admin-ui.md`,
+`docs/permanence-packages.md`,
 `docs/integrations/examples/react-viem.md`, and
 `docs/release-readiness.md`, and the release-ceremony items that are not yet
 available for this pre-audit local baseline.
@@ -377,6 +392,16 @@ at `provenance/one-of-one-provenance-retained-artifact-template.md` and
 validation without claiming public beta, production, marketplace, or collector
 readiness.
 
+`permanence/one-of-one-permanence-template.permanence.json` is the checked
+no-secret template for future reviewed collector-verifiable permanence package
+evidence. Its schema lives at
+`schema/one-of-one-permanence-package.schema.json`, and the template points at
+`permanence/one-of-one-permanence-retained-artifact-template.md`,
+`docs/permanence-packages.md`, the dependency artifact manifest, and the 1/1
+provenance manifest to prove retained artifact and runbook hash validation
+without claiming public beta, production, marketplace, or final collector
+readiness.
+
 Deployment admin ceremony evidence is retained under
 `../deployments/admin-ceremony/` and cataloged by
 `latest/release-manifest.json` as a deployment artifact. Its schema lives at
@@ -478,6 +503,7 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
 python scripts/generate_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_permanence_manifest.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py

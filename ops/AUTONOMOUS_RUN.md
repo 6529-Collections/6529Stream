@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/royalty-policy-boundary` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/415` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/416` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/417` |
-| Next issue | After `ONE-003`, continue to `ONE-004` collector-verifiable permanence package unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/collector-permanence-package` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/417` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/418` |
+| Active PR | `TBD` |
+| Next issue | After `ONE-004`, continue to `ONE-005` marketplace/indexer integration evidence unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 20:32 UTC` |
+| Last updated | `2026-06-15 21:05 UTC` |
 
 ## Packaging Notes
 
@@ -15328,6 +15328,8 @@ Outcome:
 | 2026-06-15 20:06 | Start ONE-003 royalty policy boundary | PR #415 merged as `a10b9abbf01e654c51959c2f83ae75fef4727819`, issue #416 was opened for the royalty philosophy/enforcement boundary, and branch `codex/royalty-policy-boundary` is implementing a docs-first royalty policy with checker/test wiring, integration/release-readiness links, release-manifest coverage, and risk-register source tracking. Solidity changes are intentionally out of scope unless a future size-budget and governance decision accepts them. |
 | 2026-06-15 20:26 | Validate ONE-003 local draft | Added `docs/royalty-policy.md`, `scripts/check_royalty_policy.py`, `scripts/test_royalty_policy.py`, integration/release-readiness/release-policy cross-links, Makefile/bash/PowerShell/CI wiring, release-manifest/risk-register source tracking, and regenerated provenance/release/checksum artifacts. Focused royalty, integrations, release-readiness, provenance, risk-register, release-manifest, bytecode-proof, checksum, changelog, Python compile, heading scan, and `git diff --check` passed. Full `make check` and Windows `scripts\check.ps1` passed with existing Foundry warning noise only. |
 | 2026-06-15 20:29 | Open PR #417 for ONE-003 | PR #417 is open on branch `codex/royalty-policy-boundary`, closes issue #416, and CodeRabbit review was requested in comment `4712168464`. Next action is to wait for CI and bot feedback, then resolve any actionable comments before merge. |
+| 2026-06-15 20:55 | Merge PR #417 and select ONE-004 | Royalty policy boundary merged as `e9ca329f0ea6ee3cc5d0c5650ddc0d98dee3d0a0`, issue #416 closed completed, issue #418 opened for the collector-verifiable permanence package, and branch `codex/collector-permanence-package` created from updated `main`. |
+| 2026-06-15 21:05 | Implement ONE-004 local draft | Branch `codex/collector-permanence-package` adds `docs/permanence-packages.md`, permanence schema/template/retained-artifact template, generated `release-artifacts/latest/one-of-one-permanence-manifest.json`, checker/generator/tests, local/CI gate wiring, release manifest/checksum/risk-register coverage, and integration/release-readiness/release-policy docs. Solidity changes are intentionally out of scope and `StreamCore` still measures 24,047 runtime bytes with 529 bytes of EIP-170 headroom in this checkout. |
 | 2026-06-15 20:32 | Address PR #417 source-constant review note | 6529bot reviewed the first PR head as good to merge with no security findings and suggested tying documented royalty constants to source/tests. Added checker assertions that `StreamCore.sol` and `StreamRoyalty.t.sol` still contain the documented receiver, `690` bps, `10_000` denominator, ERC-2981 interface ID, and retained royalty regression names, plus drift tests. Focused royalty, risk-register, release-manifest, bytecode-proof, checksum, changelog, `git diff --check`, and `make royalty-policy-check` passed. |
 
 ## Resume Instructions
