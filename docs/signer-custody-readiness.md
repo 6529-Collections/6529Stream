@@ -8,6 +8,7 @@ public-beta readiness, or live signer-service integration.
 
 Use this guide with
 [`docs/drop-authorization-signing.md`](drop-authorization-signing.md),
+[`docs/deployment.md#admin-ceremony-evidence`](deployment.md#admin-ceremony-evidence),
 [`docs/incident-response.md`](incident-response.md),
 [`docs/non-local-release-evidence.md`](non-local-release-evidence.md), and
 [`docs/release-readiness.md`](release-readiness.md).
@@ -58,6 +59,10 @@ Before public beta, signer custody readiness evidence must be reviewed and must
 identify the approved custody owner, signer manager, signer-service class,
 approval workflow, signer epoch source, monitoring runbook, incident-response
 path, rotation procedure, revocation procedure, and signer compromise response.
+The reviewed deployment admin ceremony evidence should independently prove the
+matching signer manager, signer setup status, ownership handoff, temporary
+deployer-admin revocation, and pause or emergency controls for the deployed
+contracts.
 
 The evidence must also show whether ERC-1271 contract signers are supported for
 the selected signer. If an ERC-1271 signer is used for production, support must

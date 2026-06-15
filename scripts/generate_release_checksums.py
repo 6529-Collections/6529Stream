@@ -31,6 +31,7 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/address-books"),
     Path("deployments/schema"),
     Path("deployments/ceremony-evidence"),
+    Path("deployments/admin-ceremony"),
     Path("deployments/randomizer-operations"),
     Path("test/fixtures/drop-authorization"),
 ]

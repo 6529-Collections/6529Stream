@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/sepolia-deployment-rehearsal-runbook` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/359` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/360` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/361` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence) |
+| Active PR branch | `codex/admin-ceremony-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/361` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/362` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/369` |
+| Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence; Sepolia execution is blocked locally by missing RPC/signer/funding environment) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-14 23:25 UTC` |
+| Last updated | `2026-06-15 00:13 UTC` |
 
 ## Packaging Notes
 
@@ -236,13 +236,91 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 172 | Add external audit report retained artifact checker | Gate F/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `external_audit_report` without closing issue #215 or changing readiness claims | Merged in PR #354 |
 | 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Merged in PR #356 |
 | 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Merged in PR #359 |
-| 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | PR #361 opened |
+| 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | Merged in PR #361 |
+| 176 | Add Safe/admin ceremony evidence checker | Gate E/Gate F/Gate G support | Add a no-secret admin ceremony evidence schema, template, retained-artifact checklist, checker, tests, docs, local/CI wiring, release-manifest coverage, and checksum coverage without claiming reviewed fork/testnet/live governance ceremony completion | PR #369 opened |
 
 ## Current PR Worklog
 
-### PR candidate: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
+### PR candidate: Add Safe/admin ceremony evidence checker (Queue Item 176)
 
-Status: PR #361 opened; local validation passed after sidecar fix; awaiting CI.
+Status: PR #369 is ready for review; full local gate passed after sidecar
+fixes; CI and CodeRabbit review pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/362`.
+Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`
+remains open for real reviewed Sepolia/testnet evidence.
+PR: `https://github.com/6529-Collections/6529Stream/pull/369`.
+Branch: `codex/admin-ceremony-evidence-checker`.
+Branch started from PR #361 squash merge commit
+`63b1c30444db9ed143c3914e8bfce4803a456a5e`.
+
+Goal:
+
+- Add a no-secret admin ceremony evidence schema and template for ownership
+  transfer, Safe/multisig control, temporary deployer-admin revocation, role
+  grants, signer setup, pause/emergency setup, source/explorer verification,
+  approval, retained artifacts, and redaction.
+- Add a retained-artifact checklist that tells operators what public evidence
+  to preserve without committing private keys, mnemonics, RPC URLs, API keys,
+  Safe signing secrets, raw signatures, or unreleased drop payloads.
+- Add an offline checker and tests that reject reviewed evidence with template
+  placeholders, stale retained hashes, zero privileged addresses, invalid
+  environment/chain pairs, path escapes, secret-shaped values, or incomplete
+  approval state.
+- Wire the checker into Makefile, Bash/PowerShell local gates, GitHub CI,
+  release manifest generation, release checksum coverage, deployment docs,
+  release-readiness docs, signer custody docs, incident response, changelog,
+  and roadmap state.
+- Preserve readiness claims: this PR ships template/checker infrastructure
+  only and does not complete reviewed fork/testnet/live admin ceremony
+  evidence.
+
+Current facts:
+
+- PR #361 merged as squash commit
+  `63b1c30444db9ed143c3914e8bfce4803a456a5e`.
+- PR #361 final head
+  `9f0017b18c97495565b6f4a91161023e769130d6` passed CI run
+  `27515414735`: Windows PowerShell wrapper job `81323076315` and Foundry
+  smoke job `81323076314`.
+- CodeRabbit was rate-limited on PR #361; sidecar review found a P2 signer
+  wording ambiguity that was fixed before merge, and merge-decision comment
+  `4703427194` recorded the autonomous basis.
+- Issue #360 closed completed; issue #217 remains open for real reviewed
+  Sepolia/testnet deployment rehearsal evidence.
+- Local non-secret environment audit found no `SEPOLIA_RPC_URL`, deployer,
+  admin, signer, Etherscan, keystore, or AWS signing environment configured, so
+  EXT-003 through EXT-008 remain blocked on real external execution inputs.
+- Issue #362 now tracks GOV-001 for the Safe/admin ceremony evidence checker.
+- Sidecar review found five pre-PR issues: reviewed evidence needed real
+  ceremony proof categories, template addresses/all-zero commits needed
+  reviewed-mode rejection, redaction policy terms needed to match the detector,
+  no-arg checker execution needed to scan every admin ceremony JSON, and
+  `ops/EXECUTION_BACKLOG.md` had stale #362 status mapping. All five were fixed
+  before the final local gate.
+
+Validation completed so far:
+
+- `python -m py_compile scripts/generate_release_manifest.py scripts/test_release_manifest.py scripts/check_admin_ceremony_evidence.py scripts/test_admin_ceremony_evidence.py scripts/generate_release_checksums.py scripts/test_release_checksums.py`.
+- `python scripts/test_admin_ceremony_evidence.py`.
+- `python scripts/check_admin_ceremony_evidence.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_signer_custody_readiness.py`.
+- `python scripts/check_signer_custody_readiness.py`.
+- `python scripts/test_incident_response.py`.
+- `python scripts/check_incident_response.py`.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 00:13 UTC with existing Foundry warning noise only after sidecar fixes.
+- `git diff --check` passed with only the existing CRLF warning for
+  `scripts/check.ps1`.
+- PR #369 opened as a draft, then was marked ready for review after GitHub
+  showed no workflow runs and CodeRabbit skipped automatic draft review.
+  CodeRabbit review was requested again after the ready-for-review transition.
+
+### Completed: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
+
+Status: merged in PR #361; issue #360 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/360`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/361`.
@@ -267,20 +345,19 @@ Goal:
 - Preserve issue #217 as open and `testnet_deployment_rehearsal` as `missing`
   until real reviewed Sepolia evidence is retained.
 
-Current facts:
+Final merge facts:
 
-- PR #359 merged as squash commit
-  `c79244ad6c5bcfa1d8a1cf74e450fda7c8f3608f`.
-- PR #359 final head
-  `7776646bc29e2d48aef7917c591c2a2805c9852e` passed CI run
-  `27514114821`: Windows PowerShell wrapper job `81319572869` and Foundry
-  smoke job `81319572874`.
-- CodeRabbit status was success and both prior actionable threads were marked
-  addressed before merge.
-- Merge-decision comment `4703304431` recorded the autonomous merge basis.
-- Issue #357 closed completed at `2026-06-14 22:39 UTC`.
-- Issue #360 now tracks EXT-002 for the Sepolia config template and no-secret
-  rehearsal runbook.
+- PR #361 merged as squash commit
+  `63b1c30444db9ed143c3914e8bfce4803a456a5e`.
+- PR #361 final head
+  `9f0017b18c97495565b6f4a91161023e769130d6` passed CI run
+  `27515414735`: Windows PowerShell wrapper job `81323076315` and Foundry
+  smoke job `81323076314`.
+- CodeRabbit was rate-limited on PR #361; sidecar review found a P2 signer
+  wording ambiguity that was fixed before merge, and merge-decision comment
+  `4703427194` recorded the autonomous basis.
+- Issue #360 closed completed. Issue #217 remains open for real reviewed
+  Sepolia/testnet deployment rehearsal evidence.
 
 Validation completed locally:
 

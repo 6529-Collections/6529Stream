@@ -280,6 +280,15 @@ and the template points at
 retained artifact and runbook hash validation without claiming public-beta or
 production readiness.
 
+Deployment admin ceremony evidence is retained under
+`../deployments/admin-ceremony/` and cataloged by
+`latest/release-manifest.json` as a deployment artifact. Its schema lives at
+`../deployments/schema/admin-ceremony-evidence.schema.json`, and the checked
+template points at
+`../deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md`
+to prove retained artifact hash validation without claiming fork, testnet, or
+production admin ceremony completion.
+
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`, `docs/signer-custody-readiness.md`, and

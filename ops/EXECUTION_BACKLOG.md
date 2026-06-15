@@ -320,7 +320,7 @@ Dependencies: Issue `#217`; active issue `#357`.
 
 ### EXT-002: Add Sepolia Deployment Config And Rehearsal Runbook
 
-Status: In progress on issue #360.
+Status: Merged in PR #361; issue #360 closed completed.
 
 Gate: E.
 
@@ -374,7 +374,8 @@ Dependencies: `EXT-001`.
 
 ### EXT-003: Retain Reviewed Sepolia Deployment Rehearsal Broadcast
 
-Status: Planned.
+Status: Planned; blocked locally until a reviewed Sepolia RPC/signer/funding
+environment exists.
 
 Gate: E.
 
@@ -710,7 +711,7 @@ Dependencies: `EXT-003`, `EXT-004`.
 
 ### GOV-001: Add Safe/Admin Ceremony Evidence Checker
 
-Status: Planned.
+Status: In progress on issue #362.
 
 Gate: E/F.
 
@@ -726,9 +727,12 @@ Files likely touched:
 - `deployments/admin-ceremony/`
 - `scripts/check_admin_ceremony_evidence.py`
 - `scripts/test_admin_ceremony_evidence.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/generate_release_checksums.py`
 - `docs/deployment.md`
 - `docs/signer-custody-readiness.md`
 - `docs/incident-response.md`
+- `docs/release-readiness.md`
 
 Implementation steps:
 
@@ -737,7 +741,8 @@ Implementation steps:
    reviewer, and redaction.
 2. Reject placeholders in reviewed evidence.
 3. Reject private key/RPC/API-key shaped values.
-4. Wire checker into local/CI gates and release manifest.
+4. Wire checker into local/CI gates, release manifest, checksum coverage, and
+   release-readiness docs.
 
 Required tests/checks:
 
@@ -745,6 +750,8 @@ Required tests/checks:
 - New checker.
 - Release manifest/checksum checks.
 - Release readiness check.
+- `python scripts/test_admin_ceremony_evidence.py`
+- `python scripts/check_admin_ceremony_evidence.py`
 
 Acceptance criteria:
 
@@ -752,6 +759,9 @@ Acceptance criteria:
 - The artifact distinguishes testnet, fork, and production ceremonies.
 - The artifact records whether ownership transfer and role grants are complete,
   pending, or intentionally blocked.
+- Reviewed evidence cannot pass with template placeholders, stale retained
+  hashes, zero privileged addresses, invalid environment/chain pairs, path
+  escapes, secret-shaped values, or incomplete approval state.
 
 Evidence artifacts:
 

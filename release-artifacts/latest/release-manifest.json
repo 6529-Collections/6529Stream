@@ -10,7 +10,8 @@
     "deployment_versions": [
       "anvil-6529stream-v0.1.0-001",
       "anvil-6529stream-v0.1.0-001-broadcast",
-      "fork-mainnet-6529stream-v0.1.0-001-broadcast"
+      "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "sepolia-6529stream-v0.1.0-001"
     ]
   },
   "source": {
@@ -22,6 +23,7 @@
     "address_book_dir": "deployments/address-books",
     "deployment_schema_dir": "deployments/schema",
     "ceremony_evidence_dir": "deployments/ceremony-evidence",
+    "admin_ceremony_dir": "deployments/admin-ceremony",
     "randomizer_operations_dir": "deployments/randomizer-operations",
     "release_signatures_dir": "release-artifacts/signatures",
     "non_local_evidence_dir": "release-artifacts/evidence",
@@ -1320,7 +1322,7 @@
     "signer_custody_readiness": [
       {
         "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-        "sha256": "sha256:efdcac24c0272d955cb2cb22886af6a688c30d0c90dfcb9463f9b3c0119f00cf",
+        "sha256": "sha256:5270a5a9566281b37b77bcfb3d240f65a3b794fe654b0c2df50583f76645dac0",
         "size_bytes": 3470,
         "schema_version": "6529stream.signer-custody-readiness.v1",
         "evidence_id": "signer-custody-readiness-template",
@@ -1409,12 +1411,12 @@
             "monitoring_status": "not_available_local",
             "runbook": {
               "path": "docs/signer-custody-readiness.md",
-              "sha256": "sha256:f3f89f027d8d828d4292bc65a71693d3dc8b2ae97f7533a614c52500fcf44415"
+              "sha256": "sha256:6d681967068e3c1dddbd3f59f46bd0ede5435f0ee9dffdb07f95283b5cc85146"
             },
             "alerting_reference": "TBD",
             "incident_response_runbook": {
               "path": "docs/incident-response.md",
-              "sha256": "sha256:bb19915fa68cf7f3839d87308a932461f97861e3e3ead6328e9e7a1e28b94cea"
+              "sha256": "sha256:89a753b39a54259d740cd788591fe5aa5a01df19171642e6640a959eb8386e03"
             },
             "signer_service_integration_status": "not_available_local"
           },
@@ -1677,6 +1679,12 @@
         "schema_version": "https://json-schema.org/draft/2020-12/schema"
       },
       {
+        "path": "deployments/schema/admin-ceremony-evidence.schema.json",
+        "sha256": "sha256:82d58d8d0bab0fa9d34b2b093a6feeefdf3242a630c4f8ef10f4a9ac2ba7ad0e",
+        "size_bytes": 11596,
+        "schema_version": "https://json-schema.org/draft/2020-12/schema"
+      },
+      {
         "path": "deployments/schema/ceremony-evidence.schema.json",
         "sha256": "sha256:e145d9174ec8ab724332caaaafee2b70286b0aa63e1ac74a495fa2aca7cc92ac",
         "size_bytes": 7556,
@@ -1713,6 +1721,25 @@
         "address_book": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
         "release_checksum_bundle": "release-artifacts/latest/SHA256SUMS",
         "contract_verification": "not_applicable"
+      }
+    ],
+    "admin_ceremony": [
+      {
+        "path": "deployments/admin-ceremony/admin-ceremony-evidence-template.json",
+        "sha256": "sha256:036777bb3ded9547c75f555bea40efa666f9171238bbd90c4bb86d00cc6ec011",
+        "size_bytes": 5699,
+        "schema_version": "6529stream.admin-ceremony-evidence.v1",
+        "evidence_id": "admin-ceremony-template",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": "testnet",
+        "chain_id": 11155111,
+        "protocol_version": "0.1.0",
+        "deployment_version": "sepolia-6529stream-v0.1.0-001",
+        "ownership_status": "template",
+        "signer_setup_status": "template",
+        "pause_and_emergency_status": "template",
+        "post_state_views": "template"
       }
     ],
     "randomizer_operations": [
@@ -1753,8 +1780,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:ebe0261a17ecde51db854a31f7a4aee5c64e56fe97a74819549fd81b14991564",
-      "size_bytes": 24103
+      "sha256": "sha256:887ec0203205d9fafd8feb634c629d3390d5b8871f562dadb2c08ceca24b5284",
+      "size_bytes": 24467
     },
     "governance_docs": [
       {
@@ -1764,8 +1791,8 @@
       },
       {
         "path": "docs/deployment.md",
-        "sha256": "sha256:1cfa3bc241851ca0a7045e0524295daf061a90c7b18e97a2a2a7cf82d4b5bbd5",
-        "size_bytes": 21810
+        "sha256": "sha256:5753f52b629ccce04d61fade28f12d20d90259451eb47de01591a00f0b24a97d",
+        "size_bytes": 23287
       },
       {
         "path": "docs/dependency-operations.md",
@@ -1809,8 +1836,8 @@
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:bb19915fa68cf7f3839d87308a932461f97861e3e3ead6328e9e7a1e28b94cea",
-        "size_bytes": 19644
+        "sha256": "sha256:89a753b39a54259d740cd788591fe5aa5a01df19171642e6640a959eb8386e03",
+        "size_bytes": 20266
       },
       {
         "path": "docs/drop-authorization-signing.md",
@@ -1819,18 +1846,18 @@
       },
       {
         "path": "docs/signer-custody-readiness.md",
-        "sha256": "sha256:f3f89f027d8d828d4292bc65a71693d3dc8b2ae97f7533a614c52500fcf44415",
-        "size_bytes": 4461
+        "sha256": "sha256:6d681967068e3c1dddbd3f59f46bd0ede5435f0ee9dffdb07f95283b5cc85146",
+        "size_bytes": 4789
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:7f766ff95bc00bafd1bc623ae9c825ec13e12cf191fddef1da758b8f0da0a315",
-        "size_bytes": 30094
+        "sha256": "sha256:a9745e7d270e9bc824488375363d6feb633c0cdbe4e35a5948cb7c2958a4c690",
+        "size_bytes": 31143
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:b984c3a35ba7c4130348a52058c6ecf1d8a48e7d3504460a10daa8549a1a13be",
-        "size_bytes": 41280
+        "sha256": "sha256:8e700018175e20f7ca775079025c46e3145c021a1fcde69e196e09f6633c46c1",
+        "size_bytes": 41991
       },
       {
         "path": "docs/status.md",

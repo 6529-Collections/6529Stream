@@ -42,6 +42,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     address_book_dir = root / "deployments" / "address-books"
     deployment_schema_dir = root / "deployments" / "schema"
     ceremony_evidence_dir = root / "deployments" / "ceremony-evidence"
+    admin_ceremony_dir = root / "deployments" / "admin-ceremony"
     randomizer_operations_dir = root / "deployments" / "randomizer-operations"
     release_signatures_dir = root / "release-artifacts" / "signatures"
     non_local_evidence_dir = root / "release-artifacts" / "evidence"
@@ -60,6 +61,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     signer_custody_readiness_schema = root / "release-artifacts" / "schema" / (
         "signer-custody-readiness.schema.json"
     )
+    admin_ceremony_schema = deployment_schema_dir / "admin-ceremony-evidence.schema.json"
     public_beta_schema = root / "release-artifacts" / "schema" / (
         "public-beta-evidence.schema.json"
     )
@@ -76,6 +78,9 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     signer_custody_retained_artifact = (
         signer_custody_readiness_dir
         / "signer-custody-readiness-retained-artifact.txt"
+    )
+    admin_ceremony_retained_artifact = (
+        admin_ceremony_dir / "admin-ceremony-retained-artifact-template.md"
     )
     drop_authorization_payload_output = root / (
         "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json"
@@ -207,6 +212,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
+        admin_ceremony_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
         release_signature_schema,
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
@@ -242,6 +251,185 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
                 },
             },
             "verification_status": {"contract_verification": "not_applicable"},
+        },
+    )
+    write_text(
+        admin_ceremony_retained_artifact,
+        "# Admin Ceremony Retained Artifact Template\n\nTemplate only.\n",
+    )
+    write_json(
+        admin_ceremony_dir / "admin-ceremony-template.json",
+        {
+            "schema_version": "6529stream.admin-ceremony-evidence.v1",
+            "evidence_id": "admin-ceremony-template",
+            "record_type": "template",
+            "review_status": "template",
+            "environment": "local",
+            "chain_id": 31337,
+            "source": {
+                "repository": "https://github.com/6529-Collections/6529Stream",
+                "git_commit": "0" * 40,
+                "source_dirty": False,
+                "ci_run": "template",
+            },
+            "deployment": {
+                "protocol_version": "0.1.0",
+                "deployment_version": "anvil-001",
+                "deployment_manifest": {
+                    "path": "TBD",
+                    "sha256": "sha256:" + "0" * 64,
+                },
+                "address_book": {
+                    "path": "TBD",
+                    "sha256": "sha256:" + "0" * 64,
+                },
+                "release_manifest": {
+                    "path": "TBD",
+                    "sha256": "sha256:" + "0" * 64,
+                },
+                "checksum_bundle": {
+                    "path": "TBD",
+                    "sha256": "sha256:" + "0" * 64,
+                },
+            },
+            "participants": {
+                "deployer": "0x" + "1" * 40,
+                "admin_safe": "0x" + "2" * 40,
+                "pause_guardian": "0x" + "3" * 40,
+                "emergency_recipient": "0x" + "4" * 40,
+                "drop_signer": "0x" + "5" * 40,
+                "signer_manager": "0x" + "2" * 40,
+            },
+            "ownership": {
+                "status": "template",
+                "owner_before": "0x" + "1" * 40,
+                "owner_after": "0x" + "2" * 40,
+                "transfer_tx": "TBD",
+                "temporary_deployer_admin_revoked": "template",
+                "rationale": "TBD",
+            },
+            "roles": {
+                "global_admins": [
+                    {
+                        "role": "global_admin",
+                        "target": "StreamAdmins",
+                        "account": "0x" + "2" * 40,
+                        "status": "template",
+                        "tx": "TBD",
+                        "rationale": "TBD",
+                    }
+                ],
+                "function_admins": [
+                    {
+                        "role": "unpause_admin",
+                        "target": "StreamCore",
+                        "account": "0x" + "2" * 40,
+                        "status": "template",
+                        "tx": "TBD",
+                        "rationale": "TBD",
+                    }
+                ],
+                "signer_managers": [
+                    {
+                        "role": "signer_manager",
+                        "target": "StreamDrops",
+                        "account": "0x" + "2" * 40,
+                        "status": "template",
+                        "tx": "TBD",
+                        "rationale": "TBD",
+                    }
+                ],
+                "pause_guardians": [
+                    {
+                        "role": "pause_guardian",
+                        "target": "StreamAdmins",
+                        "account": "0x" + "3" * 40,
+                        "status": "template",
+                        "tx": "TBD",
+                        "rationale": "TBD",
+                    }
+                ],
+                "unpause_admins": [
+                    {
+                        "role": "unpause_admin",
+                        "target": "StreamAdmins",
+                        "account": "0x" + "2" * 40,
+                        "status": "template",
+                        "tx": "TBD",
+                        "rationale": "TBD",
+                    }
+                ],
+            },
+            "signer_setup": {
+                "status": "template",
+                "drop_signer": "0x" + "5" * 40,
+                "signer_epoch": 0,
+                "signer_manager": "0x" + "2" * 40,
+                "rotation_or_cancellation_test": "template",
+                "tx": "TBD",
+                "rationale": "TBD",
+            },
+            "pause_and_emergency": {
+                "status": "template",
+                "mint_pause_admin": "0x" + "3" * 40,
+                "bid_pause_admin": "0x" + "3" * 40,
+                "settlement_pause_admin": "0x" + "3" * 40,
+                "withdrawal_pause_policy": "TBD",
+                "emergency_recipient": "0x" + "4" * 40,
+                "tx": "TBD",
+                "rationale": "TBD",
+            },
+            "verification": {
+                "contract_verification": "template",
+                "source_verification_inputs": "template",
+                "explorer_verification": "template",
+                "post_state_views": "template",
+                "rationale": "TBD",
+            },
+            "review": {
+                "owner": "TBD",
+                "reviewer": "TBD",
+                "approval_status": "template",
+                "approval_reference": "TBD",
+                "reviewed_at": "template",
+            },
+            "retained_artifacts": [
+                {
+                    "category": "admin_ceremony_schema",
+                    "path": "deployments/schema/admin-ceremony-evidence.schema.json",
+                    "sha256": generator.file_sha256(admin_ceremony_schema),
+                },
+                {
+                    "category": "admin_ceremony_retained_artifact_template",
+                    "path": (
+                        "deployments/admin-ceremony/"
+                        "admin-ceremony-retained-artifact-template.md"
+                    ),
+                    "sha256": generator.file_sha256(admin_ceremony_retained_artifact),
+                },
+            ],
+            "redaction_policy": {
+                "no_secrets": True,
+                "redacted_fields": [
+                    "private_key",
+                    "mnemonic",
+                    "seed_phrase",
+                    "safe_signing_secret",
+                    "signer_service_credentials",
+                    "signer_secret",
+                    "password",
+                    "client_secret",
+                    "api_key",
+                    "rpc_url",
+                    "private_rpc_url",
+                    "bearer_token",
+                    "session_cookie",
+                    "raw_signature",
+                    "unreleased_drop_payload",
+                ],
+            },
+            "template_notice": "Template only.",
+            "operator_notes": "local template only",
         },
     )
     write_json(
@@ -873,6 +1061,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "address_book_dir": address_book_dir,
         "deployment_schema_dir": deployment_schema_dir,
         "ceremony_evidence_dir": ceremony_evidence_dir,
+        "admin_ceremony_dir": admin_ceremony_dir,
         "randomizer_operations_dir": randomizer_operations_dir,
         "release_signatures_dir": release_signatures_dir,
         "non_local_evidence_dir": non_local_evidence_dir,
@@ -881,11 +1070,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "release_signature_schema": release_signature_schema,
         "drop_authorization_signing_schema": drop_authorization_signing_schema,
         "signer_custody_readiness_schema": signer_custody_readiness_schema,
+        "admin_ceremony_schema": admin_ceremony_schema,
         "public_beta_schema": public_beta_schema,
         "non_local_evidence_schema": non_local_evidence_schema,
         "non_local_retained_artifact": non_local_retained_artifact,
         "drop_authorization_retained_artifact": drop_authorization_retained_artifact,
         "signer_custody_retained_artifact": signer_custody_retained_artifact,
+        "admin_ceremony_retained_artifact": admin_ceremony_retained_artifact,
         "drop_authorization_payload_output": drop_authorization_payload_output,
         "output": output,
         "changelog": changelog,
@@ -912,6 +1103,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["admin_ceremony_dir"],
                 paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
@@ -930,6 +1122,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["admin_ceremony_dir"],
                 paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
@@ -981,6 +1174,20 @@ class ReleaseManifestTests(unittest.TestCase):
                     "environment"
                 ],
                 "local",
+            )
+            self.assertEqual(
+                manifest["source"]["admin_ceremony_dir"],
+                "deployments/admin-ceremony",
+            )
+            admin_ceremony = manifest["deployment_artifacts"]["admin_ceremony"][0]
+            self.assertEqual(admin_ceremony["evidence_id"], "admin-ceremony-template")
+            self.assertEqual(admin_ceremony["record_type"], "template")
+            self.assertEqual(admin_ceremony["review_status"], "template")
+            self.assertEqual(admin_ceremony["ownership_status"], "template")
+            self.assertEqual(admin_ceremony["signer_setup_status"], "template")
+            self.assertEqual(
+                admin_ceremony["pause_and_emergency_status"],
+                "template",
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["randomizer_operations"][0]["evidence_id"],
@@ -1306,6 +1513,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["admin_ceremony_dir"],
                 paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
@@ -1458,6 +1666,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["admin_ceremony_dir"],
                 paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
@@ -1477,6 +1686,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1533,6 +1743,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1566,6 +1777,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1600,6 +1812,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1634,6 +1847,39 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
+                    paths["randomizer_operations_dir"],
+                    paths["changelog"],
+                    paths["docs"],
+                )
+
+    def test_generator_rejects_invalid_admin_ceremony_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            evidence_path = paths["admin_ceremony_dir"] / "admin-ceremony-template.json"
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            evidence["chain_id"] = 1
+            write_json(evidence_path, evidence)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "invalid admin ceremony evidence",
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["latest"],
+                    paths["baseline"],
+                    paths["gas_snapshot"],
+                    paths["contract_config"],
+                    paths["deployment_config_dir"],
+                    paths["deployment_broadcast_dir"],
+                    paths["deployment_manifest_dir"],
+                    paths["address_book_dir"],
+                    paths["deployment_schema_dir"],
+                    paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1656,6 +1902,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["admin_ceremony_dir"],
                 paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
@@ -1677,6 +1924,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1705,6 +1953,7 @@ class ReleaseManifestTests(unittest.TestCase):
                 paths["address_book_dir"],
                 paths["deployment_schema_dir"],
                 paths["ceremony_evidence_dir"],
+                paths["admin_ceremony_dir"],
                 paths["randomizer_operations_dir"],
                 paths["changelog"],
                 paths["docs"],
@@ -1738,6 +1987,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1766,6 +2016,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1791,6 +2042,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],
@@ -1816,6 +2068,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     paths["address_book_dir"],
                     paths["deployment_schema_dir"],
                     paths["ceremony_evidence_dir"],
+                    paths["admin_ceremony_dir"],
                     paths["randomizer_operations_dir"],
                     paths["changelog"],
                     paths["docs"],

@@ -1,0 +1,505 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/admin-ceremony-evidence.schema.json",
+  "title": "6529Stream Admin Ceremony Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "record_type",
+    "review_status",
+    "environment",
+    "chain_id",
+    "source",
+    "deployment",
+    "participants",
+    "ownership",
+    "roles",
+    "signer_setup",
+    "pause_and_emergency",
+    "verification",
+    "review",
+    "retained_artifacts",
+    "redaction_policy",
+    "template_notice",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.admin-ceremony-evidence.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_type": {
+      "enum": ["template", "evidence"]
+    },
+    "review_status": {
+      "enum": ["template", "pending_review", "reviewed"]
+    },
+    "environment": {
+      "enum": ["local", "fork", "testnet", "mainnet", "production"]
+    },
+    "chain_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "deployment": {
+      "$ref": "#/$defs/deployment"
+    },
+    "participants": {
+      "$ref": "#/$defs/participants"
+    },
+    "ownership": {
+      "$ref": "#/$defs/ownership"
+    },
+    "roles": {
+      "$ref": "#/$defs/roles"
+    },
+    "signer_setup": {
+      "$ref": "#/$defs/signer_setup"
+    },
+    "pause_and_emergency": {
+      "$ref": "#/$defs/pause_and_emergency"
+    },
+    "verification": {
+      "$ref": "#/$defs/verification"
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/retained_artifact"
+      }
+    },
+    "redaction_policy": {
+      "$ref": "#/$defs/redaction_policy"
+    },
+    "template_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "pattern": "(^/|^[A-Za-z]:|\\.\\.)"
+      }
+    },
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_version",
+        "deployment_version",
+        "deployment_manifest",
+        "address_book",
+        "release_manifest",
+        "checksum_bundle"
+      ],
+      "properties": {
+        "protocol_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deployment_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deployment_manifest": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "address_book": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "release_manifest": {
+          "$ref": "#/$defs/file_ref"
+        },
+        "checksum_bundle": {
+          "$ref": "#/$defs/file_ref"
+        }
+      }
+    },
+    "participants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployer",
+        "admin_safe",
+        "pause_guardian",
+        "emergency_recipient",
+        "drop_signer",
+        "signer_manager"
+      ],
+      "properties": {
+        "deployer": {
+          "$ref": "#/$defs/address"
+        },
+        "admin_safe": {
+          "$ref": "#/$defs/address"
+        },
+        "pause_guardian": {
+          "$ref": "#/$defs/address"
+        },
+        "emergency_recipient": {
+          "$ref": "#/$defs/address"
+        },
+        "drop_signer": {
+          "$ref": "#/$defs/address"
+        },
+        "signer_manager": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "owner_before",
+        "owner_after",
+        "transfer_tx",
+        "temporary_deployer_admin_revoked",
+        "rationale"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "owner_before": {
+          "$ref": "#/$defs/address"
+        },
+        "owner_after": {
+          "$ref": "#/$defs/address"
+        },
+        "transfer_tx": {
+          "type": "string",
+          "minLength": 1
+        },
+        "temporary_deployer_admin_revoked": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "role_grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "target", "account", "status", "tx", "rationale"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account": {
+          "$ref": "#/$defs/address"
+        },
+        "status": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "tx": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_admins",
+        "function_admins",
+        "signer_managers",
+        "pause_guardians",
+        "unpause_admins"
+      ],
+      "properties": {
+        "global_admins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role_grant"
+          }
+        },
+        "function_admins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role_grant"
+          }
+        },
+        "signer_managers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role_grant"
+          }
+        },
+        "pause_guardians": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role_grant"
+          }
+        },
+        "unpause_admins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role_grant"
+          }
+        }
+      }
+    },
+    "signer_setup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "drop_signer",
+        "signer_epoch",
+        "signer_manager",
+        "rotation_or_cancellation_test",
+        "tx",
+        "rationale"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "drop_signer": {
+          "$ref": "#/$defs/address"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "signer_manager": {
+          "$ref": "#/$defs/address"
+        },
+        "rotation_or_cancellation_test": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "tx": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "pause_and_emergency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "mint_pause_admin",
+        "bid_pause_admin",
+        "settlement_pause_admin",
+        "withdrawal_pause_policy",
+        "emergency_recipient",
+        "tx",
+        "rationale"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "mint_pause_admin": {
+          "$ref": "#/$defs/address"
+        },
+        "bid_pause_admin": {
+          "$ref": "#/$defs/address"
+        },
+        "settlement_pause_admin": {
+          "$ref": "#/$defs/address"
+        },
+        "withdrawal_pause_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "emergency_recipient": {
+          "$ref": "#/$defs/address"
+        },
+        "tx": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_verification",
+        "source_verification_inputs",
+        "explorer_verification",
+        "post_state_views",
+        "rationale"
+      ],
+      "properties": {
+        "contract_verification": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "source_verification_inputs": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "explorer_verification": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "post_state_views": {
+          "$ref": "#/$defs/ceremony_status"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "reviewer",
+        "approval_status",
+        "approval_reference",
+        "reviewed_at"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_status": {
+          "enum": ["template", "pending", "approved", "rejected"]
+        },
+        "approval_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retained_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "path", "sha256"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "type": "boolean"
+        },
+        "redacted_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "ceremony_status": {
+      "enum": [
+        "template",
+        "not_started",
+        "pending",
+        "complete",
+        "intentionally_blocked",
+        "blocked"
+      ]
+    }
+  }
+}
