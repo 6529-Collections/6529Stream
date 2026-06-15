@@ -75,7 +75,9 @@ The wallet, EIP-712, ERC-1271, and Safe signing guide is listed.
 The event and indexer reconstruction spec is listed.
 The metadata rendering, cache, animation sandbox, and marketplace integration guide is listed.
 The React/Next frontend reference architecture is listed.
-The maintained frontend package and generated SDK boundaries are listed.
+The mobile and WalletConnect integration guide is listed.
+The maintained frontend package, generated SDK, maintained mobile SDK,
+React Native app, and WalletConnect dependency recommendation boundaries are listed.
 
 ## Readiness Boundaries
 

@@ -80,6 +80,10 @@ REQUIRED_READINESS_PHRASES = [
     "React/Next frontend reference architecture",
     "maintained frontend package",
     "generated SDK",
+    "mobile and WalletConnect integration guide",
+    "maintained mobile SDK",
+    "React Native app",
+    "WalletConnect dependency recommendation",
     "drop authorization signing fixtures",
     "unsigned payload-generator examples",
     "drop authorization signing evidence",
@@ -108,6 +112,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_metadata_rendering.py",
     "python scripts/test_react_next_reference.py",
     "python scripts/check_react_next_reference.py",
+    "python scripts/test_mobile_walletconnect.py",
+    "python scripts/check_mobile_walletconnect.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -221,6 +227,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/events-and-indexing.md",
     "docs/integrations/metadata-rendering.md",
     "docs/integrations/frontend-reference-architecture.md",
+    "docs/integrations/mobile-walletconnect.md",
     "docs/integrations/examples/react-viem.md",
     "docs/architecture.md",
     "docs/threat-model.md",

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/react-next-reference-architecture` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/401` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/402` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/403` |
-| Next issue | TBD after INT-007. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/mobile-walletconnect-integration-guide` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/403` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/404` |
+| Active PR | TBD after local INT-008 validation |
+| Next issue | `INT-009` Electron security and wallet integration guide after INT-008 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 13:23 UTC` |
+| Last updated | `2026-06-15 14:03 UTC` |
 
 ## Packaging Notes
 
@@ -15208,6 +15208,9 @@ Outcome:
 | 2026-06-15 13:19 | Validate INT-007 local draft | Focused React/Next reference, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 13:21 | Open PR #403 for INT-007 | PR #403 is open on branch `codex/react-next-reference-architecture`, closes issue #402, and CodeRabbit review was requested in comment `4708353207`. |
 | 2026-06-15 13:23 | Address PR #403 bot nice-to-have | 6529bot general review found a copy-paste risk in the public-env pseudocode guard; updated the example to strip `NEXT_PUBLIC_` before matching secret-shaped suffixes, regenerated release manifest/proof/checksums, and reran focused React/Next plus release artifact drift checks. |
+| 2026-06-15 13:34 | Merge PR #403 and select INT-008 | React/Next reference architecture merged as `2789ee7d5c655a667a1b469405c9840807a3c2cb` after CI passed, CodeRabbit status was success, review threads were empty, and 6529bot reported no new findings on final head `4c6416a3fc980bb041aeda54142b4c880aab4e4e`; issue #402 closed completed. |
+| 2026-06-15 13:34 | Create issue #404 and start INT-008 | Next substantive integration-readiness slice is the mobile and WalletConnect integration guide on branch `codex/mobile-walletconnect-integration-guide`; issue #404 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, and no-mobile-SDK/no-production-readiness boundaries. |
+| 2026-06-15 14:03 | Validate INT-008 local draft | Focused mobile/WalletConnect, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 
 ## Resume Instructions
 

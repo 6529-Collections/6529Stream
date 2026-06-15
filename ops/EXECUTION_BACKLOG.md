@@ -478,7 +478,8 @@ Dependencies: `EXT-001`, `EXT-002`, live Sepolia RPC access.
 
 ### EXT-004: Generate Sepolia Manifest, Address Book, And Source Verification Inputs
 
-Status: Planned.
+Status: In progress on `codex/mobile-walletconnect-integration-guide`; issue
+`#404`.
 
 Gate: E/G.
 
@@ -2465,13 +2466,16 @@ Problem: Mobile signing, chain switching, deep links, and background refresh
 have different constraints from desktop web.
 
 Outcome: A mobile integration guide covers WalletConnect, native deep links,
-signature handoff, chain changes, background refresh limits, push assumptions,
-and user recovery flows.
+foreground wallet handoff, chain changes, typed-data and transaction guards,
+background refresh limits, push assumptions, no-secret telemetry, and user
+recovery flows.
 
 Files likely touched:
 
-- `docs/integrations/mobile-and-electron.md`
-- `docs/integrations/wallets-and-signatures.md`
+- `docs/integrations/mobile-walletconnect.md`
+- `scripts/check_mobile_walletconnect.py`
+- `scripts/test_mobile_walletconnect.py`
+- integration, release-readiness, release-manifest, checksum, and CI wiring
 
 Implementation steps:
 
@@ -2484,12 +2488,24 @@ Implementation steps:
 
 Required tests/checks:
 
-- Markdown heading check.
+- `python scripts/test_mobile_walletconnect.py`.
+- `python scripts/check_mobile_walletconnect.py`.
+- `python scripts/test_integrations_readme.py`.
+- `python scripts/check_integrations_readme.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- Release manifest, bytecode proof, and checksum drift checks.
 - `git diff --check`.
 
 Acceptance criteria:
 
 - Mobile implementers understand which flows require foreground wallet action.
+- Chain/account/domain mismatches halt before wallet prompts.
+- Replay protection is attributed to consumed/cancelled/signer-epoch storage,
+  not WalletConnect or EIP-712 alone.
+- No private keys, seed phrases, raw signatures, WalletConnect pairing URIs,
+  session topics, signer-service credentials, or unreleased payloads are
+  allowed in client logs, telemetry, crash reports, or support bundles.
 - Push/indexer assumptions are explicit.
 - WalletConnect edge cases are not hidden.
 

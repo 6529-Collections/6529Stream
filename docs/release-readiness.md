@@ -54,6 +54,13 @@ integration work, including artifact import, client layering, query/cache,
 transaction, wallet, metadata, indexer, environment, and testing boundaries
 without adding a maintained frontend package or generated SDK.
 Use
+[`docs/integrations/mobile-walletconnect.md`](integrations/mobile-walletconnect.md)
+as the mobile and WalletConnect integration guide for current INT-008
+integration work, including mobile browser, native shell, WalletConnect session
+lifecycle, foreground wallet handoff, deep links, reconnect, offline/background,
+telemetry, and no-secret boundaries without adding a maintained mobile SDK,
+React Native app, or WalletConnect dependency recommendation.
+Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
 [`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md)
@@ -334,6 +341,7 @@ Audit and protocol evidence:
 - [docs/integrations/events-and-indexing.md](integrations/events-and-indexing.md)
 - [docs/integrations/metadata-rendering.md](integrations/metadata-rendering.md)
 - [docs/integrations/frontend-reference-architecture.md](integrations/frontend-reference-architecture.md)
+- [docs/integrations/mobile-walletconnect.md](integrations/mobile-walletconnect.md)
 - [docs/integrations/examples/react-viem.md](integrations/examples/react-viem.md)
 
 Release artifacts:
@@ -402,6 +410,8 @@ python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
 python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
+python scripts/test_mobile_walletconnect.py
+python scripts/check_mobile_walletconnect.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check

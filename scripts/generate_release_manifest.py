@@ -86,6 +86,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/integrations/events-and-indexing.md"),
     Path("docs/integrations/metadata-rendering.md"),
     Path("docs/integrations/frontend-reference-architecture.md"),
+    Path("docs/integrations/mobile-walletconnect.md"),
     Path("docs/integrations/examples/react-viem.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
