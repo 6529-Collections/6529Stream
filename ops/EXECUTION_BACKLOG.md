@@ -235,7 +235,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 
 ### MAP-001: Add 10/10 Execution Backlog
 
-Status: In progress on the current branch.
+Status: Merged in PR #359.
 
 Gate: A/G.
 
@@ -478,8 +478,8 @@ Dependencies: `EXT-001`, `EXT-002`, live Sepolia RPC access.
 
 ### EXT-004: Generate Sepolia Manifest, Address Book, And Source Verification Inputs
 
-Status: In progress on `codex/mobile-walletconnect-integration-guide`; issue
-`#404`.
+Status: Planned; blocked by reviewed testnet deployment evidence from
+`EXT-003`.
 
 Gate: E/G.
 
@@ -542,7 +542,8 @@ Dependencies: `EXT-003`.
 
 ### EXT-005: Retain Sepolia Explorer Verification Evidence
 
-Status: In progress on `codex/electron-security-wallet-guide`; issue `#406`.
+Status: Planned; blocked by generated Sepolia manifests and address books from
+`EXT-004`.
 
 Gate: E/G.
 

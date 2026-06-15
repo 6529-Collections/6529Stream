@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 14:40 UTC` |
+| Last updated | `2026-06-15 14:43 UTC` |
 
 ## Packaging Notes
 
@@ -15217,6 +15217,7 @@ Outcome:
 | 2026-06-15 14:15 | Create issue #406 and start INT-009 | Next substantive integration-readiness slice is the Electron security and wallet integration guide on branch `codex/electron-security-wallet-guide`; issue #406 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, signed-update/code-signing boundaries, and no-Electron-app/no-production-readiness boundaries. |
 | 2026-06-15 14:38 | Validate INT-009 local draft | Focused Electron security/wallet, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 14:40 | Open PR #407 for INT-009 | PR #407 is open on branch `codex/electron-security-wallet-guide`, closes issue #406, and CodeRabbit review was requested in comment `4709069970`. |
+| 2026-06-15 14:43 | Address PR #407 bot bookkeeping note | 6529bot's first pass on the pre-state head was merge-ready but noticed stale backlog/run-state status markers; `ops/AUTONOMOUS_RUN.md` already named PR #407 on the final head, and the remaining stale `MAP-001`, `EXT-004`, and `EXT-005` status rows are now reconciled before follow-up review. |
 
 ## Resume Instructions
 
