@@ -125,6 +125,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_contract_flows.py
 "$python_bin" scripts/test_auction_flows.py
 "$python_bin" scripts/check_auction_flows.py
+"$python_bin" scripts/test_wallet_signature_flows.py
+"$python_bin" scripts/check_wallet_signature_flows.py
 "$python_bin" scripts/test_release_readiness.py
 "$python_bin" scripts/check_release_readiness.py
 "$python_bin" scripts/test_release_manifest.py

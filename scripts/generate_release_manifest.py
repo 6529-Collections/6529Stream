@@ -82,6 +82,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/integrations/README.md"),
     Path("docs/integrations/contract-flows.md"),
     Path("docs/integrations/auction-flows.md"),
+    Path("docs/integrations/wallets-and-signatures.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]

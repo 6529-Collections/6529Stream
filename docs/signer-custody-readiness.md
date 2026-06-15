@@ -8,6 +8,7 @@ public-beta readiness, or live signer-service integration.
 
 Use this guide with
 [`docs/drop-authorization-signing.md`](drop-authorization-signing.md),
+[`docs/integrations/wallets-and-signatures.md`](integrations/wallets-and-signatures.md),
 [`docs/deployment.md#admin-ceremony-evidence`](deployment.md#admin-ceremony-evidence),
 [`docs/incident-response.md`](incident-response.md),
 [`docs/non-local-release-evidence.md`](non-local-release-evidence.md), and

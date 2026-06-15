@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/auction-flow-spec` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/393` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/394` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/395` |
-| Next issue | TBD after INT-003; likely `INT-004` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/wallet-signing-guide` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/395` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/396` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/397` |
+| Next issue | TBD after INT-004. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 10:52 UTC` |
+| Last updated | `2026-06-15 11:23 UTC` |
 
 ## Packaging Notes
 
@@ -15188,6 +15188,10 @@ Outcome:
 | 2026-06-13 13:38 | Merge PR #236 | Release evidence issue body sync merged as `1a825466d2333dc75e2fb8e2aeb11dc9b0dccc5a` after final CI run `27468161616`, CodeRabbit success, resolved review threads, and issue #235 closure |
 | 2026-06-13 13:41 | Start Queue Item 113 | Issue #237 opened to reconcile PR #236 merge evidence and roadmap metadata; tracker issues #215 through #231 had `release` and `roadmap` labels re-applied to match committed `applied_labels` |
 | 2026-06-13 13:44 | Open PR #238 | Release evidence body-sync state reconciliation PR opened on head `5d6002d78b75da03ae3ce45dbcfefecdcd4fa8b8`; CodeRabbit review will be requested after this PR-state follow-up commit |
+| 2026-06-15 11:01 | Merge PR #395 | Auction integration flow spec merged as `604f0db28dffb89c24c24bf0d28b5d028987cad0` after CI run #838 passed, 6529bot reported no new findings on final head `8c01b53f0595b360269c4d6c2b8e26987914c289`, review threads were empty, and CodeRabbit status was success despite an informational rate-limit comment. |
+| 2026-06-15 11:02 | Create issue #396 and select INT-004 | Next substantive integration-readiness slice is the wallet, EIP-712, ERC-1271, and Safe signing guide on branch `codex/wallet-signing-guide`; no existing open issue matched, so issue #396 now tracks the guide/checker/local-CI/release-manifest work. |
+| 2026-06-15 11:20 | Open PR #397 for INT-004 | PR #397 is open on branch `codex/wallet-signing-guide`, closes issue #396, and CodeRabbit review was requested. Local evidence includes the wallet guide checker/test, integration/release-readiness checks, release manifest/proof/checksum checks, focused EIP-712/ERC-1271 Forge tests, PowerShell parser check, and `git diff --check`. |
+| 2026-06-15 11:23 | Address PR #397 bot nice-to-have | Tightened `scripts/check_wallet_signature_flows.py` required phrases from generic schema words to code-token field names so the checker better protects the typed-data domain and replay fields. |
 
 ## Resume Instructions
 

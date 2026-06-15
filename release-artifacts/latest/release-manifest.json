@@ -104,7 +104,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:339b001ab98757b2fadb1f3e5d27d22adccf837310579b3424a64732333bc6fd",
+      "sha256": "sha256:91c82e4ab7777f43861356ee8490d19d18337bd0cf20c726a494a329c66a864f",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1346,7 +1346,7 @@
     "signer_custody_readiness": [
       {
         "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-        "sha256": "sha256:8dc2b53591207d713616c9acdb3d0841aa3bee47594b82a6894aec83264460ff",
+        "sha256": "sha256:b735c3468d421afe7e80ad71d52673f2e2c6ba9f863be8cc9ebcb120a2f15cb1",
         "size_bytes": 3470,
         "schema_version": "6529stream.signer-custody-readiness.v1",
         "evidence_id": "signer-custody-readiness-template",
@@ -1435,7 +1435,7 @@
             "monitoring_status": "not_available_local",
             "runbook": {
               "path": "docs/signer-custody-readiness.md",
-              "sha256": "sha256:6d681967068e3c1dddbd3f59f46bd0ede5435f0ee9dffdb07f95283b5cc85146"
+              "sha256": "sha256:b8f6b6e01ccf445f52e4a95e09188bf79ed8b84000c4e796c7583012ced685b3"
             },
             "alerting_reference": "TBD",
             "incident_response_runbook": {
@@ -1804,8 +1804,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:cea60315eb09e646d1296cc84bb538500bdedf545f1a375c1ed29cf81eaac3c4",
-      "size_bytes": 29487
+      "sha256": "sha256:3414fc4ab635fb915126a088137a88858e6ae41b4c5cf0c90dadf005980b8c55",
+      "size_bytes": 29998
     },
     "governance_docs": [
       {
@@ -1865,23 +1865,23 @@
       },
       {
         "path": "docs/drop-authorization-signing.md",
-        "sha256": "sha256:39ca3ad966aabd82a8029ce700ca0b239e6788a6516b9421c85ed0db3574c1e7",
-        "size_bytes": 15182
+        "sha256": "sha256:c6b1f8b2cb3cf0007fc2cbd1b91e4db3e9bcdd439b24b600b3d54c19b0998b85",
+        "size_bytes": 15454
       },
       {
         "path": "docs/signer-custody-readiness.md",
-        "sha256": "sha256:6d681967068e3c1dddbd3f59f46bd0ede5435f0ee9dffdb07f95283b5cc85146",
-        "size_bytes": 4789
+        "sha256": "sha256:b8f6b6e01ccf445f52e4a95e09188bf79ed8b84000c4e796c7583012ced685b3",
+        "size_bytes": 4878
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:f138b534dfe44f287f5ac497889f88c2087ec44528a7b3bc90d4798df5eb58d4",
-        "size_bytes": 34521
+        "sha256": "sha256:fb1e9539848649336c93fcd625f31015cf619e3c9e1758b0f60b31faf5176a72",
+        "size_bytes": 34889
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:a084321f6bbfea343ea1ce74067c11ba4a9cf0b5451f051a3d9539356ae54d2a",
-        "size_bytes": 14578
+        "sha256": "sha256:828e80c2430562f14beadfc20eeebe204f1598779870b5952d673b5206f6584e",
+        "size_bytes": 15360
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -1892,6 +1892,11 @@
         "path": "docs/integrations/auction-flows.md",
         "sha256": "sha256:ba531a197cc7c8f5732732911ec3ce0d3a819633276cfe81751319308d266780",
         "size_bytes": 30766
+      },
+      {
+        "path": "docs/integrations/wallets-and-signatures.md",
+        "sha256": "sha256:924fa149b1dd0ac87f5c52e7e73a13cc413aa09cb23c459ff37d5af1336455d1",
+        "size_bytes": 23179
       },
       {
         "path": "docs/tooling.md",

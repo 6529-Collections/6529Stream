@@ -16,6 +16,9 @@ the target-state Solidity coverage lives in
 [`test/StreamDropsEIP712.t.sol`](../test/StreamDropsEIP712.t.sol),
 [`test/StreamDropsERC1271.t.sol`](../test/StreamDropsERC1271.t.sol), and
 [`test/helpers/DropAuthTestHelper.sol`](../test/helpers/DropAuthTestHelper.sol).
+For app-facing wallet, Safe, WalletConnect, frontend preflight, and UX failure
+handling, use
+[`docs/integrations/wallets-and-signatures.md`](integrations/wallets-and-signatures.md).
 
 This guide covers:
 
@@ -317,4 +320,5 @@ Required cross-links:
 - [`docs/audit-package.md`](audit-package.md)
 - [`docs/incident-response.md`](incident-response.md)
 - [`docs/signer-custody-readiness.md`](signer-custody-readiness.md)
+- [`docs/integrations/wallets-and-signatures.md`](integrations/wallets-and-signatures.md)
 - [`ops/ROADMAP.md`](../ops/ROADMAP.md)

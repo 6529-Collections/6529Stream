@@ -34,12 +34,12 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), and [`auction-flows.md`](auction-flows.md) | Fixed-price and auction flows are documented; other detailed flow specs remain future `INT` work |
-| Mobile app | Use the same contract surface artifacts plus wallet/signing docs, [`contract-flows.md`](contract-flows.md), and [`auction-flows.md`](auction-flows.md) | Fixed-price and auction flows are documented; WalletConnect and deep-link guidance remains future `INT-008` work |
-| Electron app | Use web-app artifacts plus strict renderer/process security assumptions | Entry point only; Electron security guidance remains future `INT-009` work |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Fixed-price, auction, and wallet/signature flows are documented; other detailed flow specs remain future `INT` work |
+| Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), and [`auction-flows.md`](auction-flows.md) | Fixed-price, auction, WalletConnect, and mobile handoff signature guidance are documented; deeper mobile reference architecture remains future `INT-008` work |
+| Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md) and strict renderer/process security assumptions | Signature boundary guidance is documented; deeper Electron shell guidance remains future `INT-009` work |
 | Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, and [`auction-flows.md`](auction-flows.md) | Auction lifecycle reconstruction is documented; full event replay spec remains future `INT-005` work |
 | Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, and release-readiness dashboard | Entry point only; dashboard query model remains future `GOV`/`INT` work |
-| Backend signing service | Use EIP-712, ERC-1271, signer custody, and drop authorization signing docs | Local templates only; production signing evidence remains blocked |
+| Backend signing service | Use EIP-712, ERC-1271, Safe, signer custody, drop authorization signing docs, and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Local templates and integration guidance only; production signing evidence remains blocked |
 
 ## Source Of Truth
 
@@ -70,6 +70,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Drop signing | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | EIP-712 and ERC-1271 local fixture guidance |
 | Fixed-price mint flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Current `INT-002` transaction, event, credit, and failure-state guide |
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Current `INT-003` auction submit, bid, settlement, credit, pause, and indexer guide |
+| Wallet and signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Current `INT-004` EIP-712, ERC-1271, Safe, WalletConnect, backend signer, and failure-state guide |
 | Release signatures | [`docs/release-signatures.md`](../release-signatures.md) | No production signatures are committed |
 
 ## Canonical Artifacts
@@ -91,6 +92,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/known-blockers.md`](../known-blockers.md)
 - [`docs/integrations/contract-flows.md`](contract-flows.md)
 - [`docs/integrations/auction-flows.md`](auction-flows.md)
+- [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md)
 - [`release-artifacts/README.md`](../../release-artifacts/README.md)
 - [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json)
 - [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json)
@@ -123,7 +125,8 @@ to understand what is still intentionally future work:
   [`contract-flows.md`](contract-flows.md).
 - `INT-003`: auction frontend and indexer flow spec is now
   [`auction-flows.md`](auction-flows.md).
-- `INT-004`: wallet, EIP-712, ERC-1271, and Safe signing guide.
+- `INT-004`: wallet, EIP-712, ERC-1271, and Safe signing guide is now
+  [`wallets-and-signatures.md`](wallets-and-signatures.md).
 - `INT-005`: event and indexer reconstruction spec.
 - `INT-006`: metadata rendering, cache, animation sandbox, and marketplace
   integration guide.
@@ -161,6 +164,8 @@ python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
 python scripts/test_auction_flows.py
 python scripts/check_auction_flows.py
+python scripts/test_wallet_signature_flows.py
+python scripts/check_wallet_signature_flows.py
 python scripts/check_release_readiness.py
 python scripts/check_changelog.py
 ```

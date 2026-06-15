@@ -45,6 +45,7 @@ python scripts/check_audit_package.py
 python scripts/check_integrations_readme.py
 python scripts/check_contract_flows.py
 python scripts/check_auction_flows.py
+python scripts/check_wallet_signature_flows.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
@@ -122,6 +123,8 @@ python scripts/test_contract_flows.py
 python scripts/check_contract_flows.py
 python scripts/test_auction_flows.py
 python scripts/check_auction_flows.py
+python scripts/test_wallet_signature_flows.py
+python scripts/check_wallet_signature_flows.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
