@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 23:41 UTC` |
+| Last updated | `2026-06-15 23:51 UTC` |
 
 ## Packaging Notes
 
@@ -265,8 +265,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add marketplace and indexer retained evidence model (Queue Item ONE-005)
 
-Status: PR #425 open and ready for review; CodeRabbit review requested in
-comment `4713416626`; CI and bot comments pending.
+Status: PR #425 open and ready for review; CodeRabbit status is success;
+6529bot security found no findings; 6529bot general marked good to merge with
+nice-to-haves now addressed locally; CI pending on latest pushed head.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/422`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/425`.
 Branch: `codex/marketplace-indexer-evidence-model`.
@@ -15427,6 +15428,7 @@ Outcome:
 | 2026-06-15 22:57 | Merge PR #421 and resume ONE-005 | PR #421 merged as `443921b93e42ea38fca4696bdecffdbea559d4bc`, issue #420 closed completed, CodeRabbit review threads were resolved, and GitHub CI passed. Created issue #422 for the marketplace/indexer retained evidence model plus evidence tracker issues #423 and #424 for future public-beta and production marketplace/indexer proof. Branch `codex/marketplace-indexer-evidence-model` is active from updated `main`. |
 | 2026-06-15 23:38 | Validate ONE-005 PR candidate | Marketplace/indexer evidence model, dedicated checker/tests, release-evidence rows, retained templates, release packet/backlog/body-sync, release manifest/checksums, risk register, integration docs, local `make check`, Windows `scripts\check.ps1`, and `git diff --check` passed locally. No Solidity bytecode changed; `StreamCore` remains at the PR #421 production runtime size. |
 | 2026-06-15 23:41 | Open PR #425 for ONE-005 | PR #425 is open and ready for review, closes issue #422, and CodeRabbit review was requested in comment `4713416626`. Tracker issues #423 and #424 remain open for future reviewed public-beta and production marketplace/indexer evidence. |
+| 2026-06-15 23:51 | Address PR #425 bot nice-to-haves | 6529bot security found no findings and general review marked the PR good to merge. Confirmed `docs/public-beta-evidence.md` list numbering is sequential in the current head, then added direct envelope-template SHA validation to `scripts/check_marketplace_indexer_evidence.py` plus focused matching/drift tests. Focused marketplace-indexer, release manifest/proof/checksum, changelog, Python compile, and `git diff --check` checks passed locally. |
 
 ## Resume Instructions
 

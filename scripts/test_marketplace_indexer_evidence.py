@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -24,6 +25,45 @@ def write_text(path: Path, value: str) -> None:
     """Write UTF-8 text while creating parent directories."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def write_json(path: Path, value: object) -> None:
+    """Write deterministic JSON while creating parent directories."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, indent=2)
+        handle.write("\n")
+
+
+def envelope_template(
+    retained_path: Path,
+    *,
+    requirement_id: str = checker.PUBLIC_BETA_REQUIREMENT_ID,
+    environment: str = "fork",
+    sha256: str | None = None,
+) -> dict[str, object]:
+    """Return a valid non-local envelope template for a retained artifact."""
+    return {
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": f"template-{requirement_id}",
+        "record_type": "template",
+        "review_status": "template",
+        "environment": environment,
+        "chain_id": 1,
+        "block_or_reference": "template-only marketplace/indexer reference",
+        "command_or_source_system": "template-only marketplace/indexer transcript",
+        "retained_path": retained_path.as_posix(),
+        "sha256": sha256 or checker.file_sha256(retained_path),
+        "redaction_statement": "Template only; no secrets are present.",
+        "owner": "TBD",
+        "reviewer": "TBD",
+        "public_beta_requirement_id": requirement_id,
+        "template_notice": (
+            "Template only. This file is not completion evidence and does not mark "
+            "public beta or production ready."
+        ),
+        "operator_notes": "Replace this template with reviewed evidence.",
+    }
 
 
 def valid_template(
@@ -189,6 +229,42 @@ class MarketplaceIndexerEvidenceTests(unittest.TestCase):
             result = checker.main([])
 
         self.assertEqual(result, 0)
+
+    def test_envelope_template_passes_with_matching_retained_hash(self) -> None:
+        """Envelope templates pin the retained Markdown artifact digest."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            retained_path = Path(temp_dir) / "retained.md"
+            envelope_path = Path(temp_dir) / "envelope.json"
+            write_text(retained_path, valid_template())
+            write_json(envelope_path, envelope_template(retained_path))
+
+            checker.validate_envelope_template(
+                envelope_path,
+                retained_path,
+                checker.PUBLIC_BETA_REQUIREMENT_ID,
+                checker.PUBLIC_BETA_ENVIRONMENTS,
+            )
+
+    def test_envelope_template_hash_drift_fails(self) -> None:
+        """Envelope sha256 pins cannot drift from retained Markdown artifacts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            retained_path = Path(temp_dir) / "retained.md"
+            envelope_path = Path(temp_dir) / "envelope.json"
+            write_text(retained_path, valid_template())
+            write_json(
+                envelope_path,
+                envelope_template(retained_path, sha256=f"sha256:{'0' * 64}"),
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError, "sha256 mismatch"
+            ):
+                checker.validate_envelope_template(
+                    envelope_path,
+                    retained_path,
+                    checker.PUBLIC_BETA_REQUIREMENT_ID,
+                    checker.PUBLIC_BETA_ENVIRONMENTS,
+                )
 
     def test_reviewed_public_beta_artifact_passes(self) -> None:
         """A reviewed fork/testnet artifact can satisfy the checker."""

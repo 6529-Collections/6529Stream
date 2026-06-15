@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -11,6 +13,8 @@ from pathlib import Path
 
 PUBLIC_BETA_REQUIREMENT_ID = "fork_testnet_marketplace_indexer_evidence"
 PRODUCTION_REQUIREMENT_ID = "live_marketplace_indexer_evidence"
+PUBLIC_BETA_ENVIRONMENTS = {"fork", "testnet"}
+PRODUCTION_ENVIRONMENTS = {"live"}
 DEFAULT_EVIDENCE = [
     Path(
         "release-artifacts/evidence/marketplace-indexer/"
@@ -19,6 +23,26 @@ DEFAULT_EVIDENCE = [
     Path(
         "release-artifacts/evidence/marketplace-indexer/"
         "live-marketplace-indexer-retained-artifact-template.md"
+    ),
+]
+DEFAULT_ENVELOPE_TEMPLATES = [
+    (
+        Path(
+            "release-artifacts/evidence/public-beta-templates/"
+            "fork-testnet-marketplace-indexer-evidence-template.json"
+        ),
+        DEFAULT_EVIDENCE[0],
+        PUBLIC_BETA_REQUIREMENT_ID,
+        PUBLIC_BETA_ENVIRONMENTS,
+    ),
+    (
+        Path(
+            "release-artifacts/evidence/production-release-templates/"
+            "live-marketplace-indexer-evidence-template.json"
+        ),
+        DEFAULT_EVIDENCE[1],
+        PRODUCTION_REQUIREMENT_ID,
+        PRODUCTION_ENVIRONMENTS,
     ),
 ]
 
@@ -78,8 +102,6 @@ REQUIRED_FIELDS = {
 
 REVIEW_STATUSES = {"template", "pending_review", "reviewed"}
 REVIEW_DECISIONS = {"template", "pending_review", "reviewed", "changes_requested"}
-PUBLIC_BETA_ENVIRONMENTS = {"fork", "testnet"}
-PRODUCTION_ENVIRONMENTS = {"live"}
 FINAL_VALUE_FIELDS = [
     "Git commit",
     "Release manifest/checksum digests",
@@ -200,6 +222,27 @@ def read_text(path: Path) -> str:
         raise MarketplaceIndexerEvidenceError(f"missing required file: {path}") from exc
     except UnicodeDecodeError as exc:
         raise MarketplaceIndexerEvidenceError(f"{path} must be valid UTF-8") from exc
+
+
+def load_json(path: Path) -> object:
+    """Load JSON with checker-specific errors."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise MarketplaceIndexerEvidenceError(f"missing required file: {path}") from exc
+    except UnicodeDecodeError as exc:
+        raise MarketplaceIndexerEvidenceError(f"{path} must be valid UTF-8") from exc
+    except json.JSONDecodeError as exc:
+        raise MarketplaceIndexerEvidenceError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def file_sha256(path: Path) -> str:
+    """Return the sha256 digest string used by release evidence envelopes."""
+    try:
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    except FileNotFoundError as exc:
+        raise MarketplaceIndexerEvidenceError(f"missing required file: {path}") from exc
+    return f"sha256:{digest}"
 
 
 def validate_no_secret_values(path: Path, text: str) -> None:
@@ -394,6 +437,64 @@ def validate_artifact(path: Path) -> None:
     validate_commands(path, text)
 
 
+def require_json_string(data: dict[str, object], path: Path, key: str) -> str:
+    """Return a required JSON string field."""
+    value = data.get(key)
+    if not isinstance(value, str) or not value:
+        raise MarketplaceIndexerEvidenceError(
+            f"{path} field {key!r} must be a non-empty string"
+        )
+    return value
+
+
+def validate_envelope_template(
+    envelope_path: Path,
+    retained_path: Path,
+    requirement_id: str,
+    environments: set[str],
+) -> None:
+    """Validate an envelope template points at the retained template digest."""
+    data = load_json(envelope_path)
+    if not isinstance(data, dict):
+        raise MarketplaceIndexerEvidenceError(f"{envelope_path} must be a JSON object")
+
+    if require_json_string(data, envelope_path, "record_type") != "template":
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} field 'record_type' must be 'template'"
+        )
+    if require_json_string(data, envelope_path, "review_status") != "template":
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} field 'review_status' must be 'template'"
+        )
+    if (
+        require_json_string(data, envelope_path, "public_beta_requirement_id")
+        != requirement_id
+    ):
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} public_beta_requirement_id must be {requirement_id!r}"
+        )
+    environment = require_json_string(data, envelope_path, "environment")
+    if environment not in environments:
+        expected = ", ".join(sorted(environments))
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} environment must be one of {expected}, got {environment!r}"
+        )
+    if (
+        require_json_string(data, envelope_path, "retained_path")
+        != retained_path.as_posix()
+    ):
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} retained_path must be {retained_path.as_posix()!r}"
+        )
+
+    expected_sha256 = file_sha256(retained_path)
+    if require_json_string(data, envelope_path, "sha256") != expected_sha256:
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} sha256 mismatch for {retained_path}: "
+            f"expected {expected_sha256}"
+        )
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(
@@ -415,6 +516,19 @@ def main(argv: list[str] | None = None) -> int:
     try:
         for path in paths:
             validate_artifact(path)
+        if args.evidence is None:
+            for (
+                envelope_path,
+                retained_path,
+                requirement_id,
+                environments,
+            ) in DEFAULT_ENVELOPE_TEMPLATES:
+                validate_envelope_template(
+                    envelope_path,
+                    retained_path,
+                    requirement_id,
+                    environments,
+                )
     except MarketplaceIndexerEvidenceError as exc:
         print(f"marketplace/indexer evidence check failed: {exc}", file=sys.stderr)
         return 1
