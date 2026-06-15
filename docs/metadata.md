@@ -250,6 +250,10 @@ the contract preserves a live `totalSupply()` view but does not expose
 
 The current event policy is:
 
+Use [`docs/integrations/events-and-indexing.md`](integrations/events-and-indexing.md)
+for the broader indexer reconstruction model, confirmation-depth posture,
+read-after-event expectations, and known event/read gaps.
+
 - `MetadataUpdate(tokenId)` is emitted when a live token's randomness is
   fulfilled through `setTokenHash`.
 - `MetadataUpdate(tokenId)` is emitted when `changeTokenData` writes a live

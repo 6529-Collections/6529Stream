@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-005 event and indexer reconstruction spec with
+  `docs/integrations/events-and-indexing.md`, a checker/test pair, local/CI gate
+  wiring, release-readiness navigation, and release-manifest coverage so
+  frontend, mobile, Electron, operator UI, backend signing-service,
+  marketplace, analytics, and indexer teams can trace source artifacts, indexed
+  entities, event-to-state updates, read-after-event calls,
+  confirmation/reorg policy, full-rescan recovery, and known event/read gaps
+  without production-readiness or live-indexer overclaims.
 - Added INT-004 wallet, EIP-712, ERC-1271, and Safe signing guide with
   `docs/integrations/wallets-and-signatures.md`, a checker/test pair,
   local/CI gate wiring, release-readiness navigation, and release-manifest

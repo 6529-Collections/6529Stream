@@ -98,6 +98,9 @@ The ABI compatibility gate compares the current production ABI surface against
   manifest input, deployment manifest, address book, release manifest, and
   checksum outputs must be regenerated before merge when their covered inputs
   change.
+- Update [`docs/integrations/events-and-indexing.md`](integrations/events-and-indexing.md)
+  when event signatures, indexed fields, emitting contracts, replay posture, or
+  read-after-event requirements change.
 
 ## Changelog Gate
 

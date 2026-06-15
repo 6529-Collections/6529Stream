@@ -173,6 +173,8 @@ jobs:
             scripts/test_auction_flows.py \
             scripts/check_wallet_signature_flows.py \
             scripts/test_wallet_signature_flows.py \
+            scripts/check_events_and_indexing.py \
+            scripts/test_events_and_indexing.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -478,6 +480,8 @@ jobs:
           python3 scripts/check_auction_flows.py 2>&1 | tee ci-logs/auction-flows-check.log
           python3 scripts/test_wallet_signature_flows.py 2>&1 | tee ci-logs/wallet-signature-flows-tests.log
           python3 scripts/check_wallet_signature_flows.py 2>&1 | tee ci-logs/wallet-signature-flows-check.log
+          python3 scripts/test_events_and_indexing.py 2>&1 | tee ci-logs/events-and-indexing-tests.log
+          python3 scripts/check_events_and_indexing.py 2>&1 | tee ci-logs/events-and-indexing-check.log
 
       - name: Release readiness
         shell: bash

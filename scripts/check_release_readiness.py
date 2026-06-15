@@ -75,6 +75,7 @@ REQUIRED_READINESS_PHRASES = [
     "fixed-price mint and drop authorization flow spec",
     "auction frontend and indexer flow spec",
     "wallet, EIP-712, ERC-1271, and Safe signing guide",
+    "event and indexer reconstruction spec",
     "drop authorization signing fixtures",
     "unsigned payload-generator examples",
     "drop authorization signing evidence",
@@ -97,6 +98,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_auction_flows.py",
     "python scripts/test_wallet_signature_flows.py",
     "python scripts/check_wallet_signature_flows.py",
+    "python scripts/test_events_and_indexing.py",
+    "python scripts/check_events_and_indexing.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -207,6 +210,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/contract-flows.md",
     "docs/integrations/auction-flows.md",
     "docs/integrations/wallets-and-signatures.md",
+    "docs/integrations/events-and-indexing.md",
     "docs/architecture.md",
     "docs/threat-model.md",
     "docs/deployment.md",

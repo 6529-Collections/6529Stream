@@ -2020,7 +2020,7 @@ Dependencies: `INT-001`.
 
 ### INT-004: Add Wallet, EIP-712, ERC-1271, And Safe Signing Guide
 
-Status: PR #397 open on issue #396 / branch `codex/wallet-signing-guide`.
+Status: Merged in PR #397; issue #396 closed completed.
 
 Gate: G/F.
 
@@ -2129,7 +2129,8 @@ Dependencies: `INT-001`, current ERC-1271 tests.
 
 ### INT-005: Add Event And Indexer Reconstruction Spec
 
-Status: Planned.
+Status: In progress on issue #398 / branch
+`codex/event-indexer-reconstruction-spec`.
 
 Gate: G/D.
 
@@ -2144,7 +2145,22 @@ and release artifacts.
 Files likely touched:
 
 - `docs/integrations/events-and-indexing.md`
-- `release-artifacts/latest/event-topic-catalog.json`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `CHANGELOG.md`
+- `scripts/check_events_and_indexing.py`
+- `scripts/test_events_and_indexing.py`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- Makefile, Bash, PowerShell, and CI gate wiring
+- generated release manifest, bytecode proof, checksum artifacts, and risk
+  register outputs if docs or manifest inputs change
+- `release-artifacts/latest/event-topic-catalog.json` as the source artifact
+  consumed by the guide
 - `docs/release-policy.md`
 - `docs/metadata.md`
 
@@ -2155,19 +2171,57 @@ Implementation steps:
 3. Identify required read-after-event calls.
 4. Define confirmation depth and reorg rollback policy.
 5. Define stale/missing event recovery via full rescan.
-6. Identify event schema gaps for `CON-002`.
+6. Document source-of-truth artifacts, log identity, event ordering, duplicate
+   handling, idempotent processing, and namespace keys.
+7. Cover collection/token, drop/signature, auction, credit/payment, randomizer,
+   metadata/dependency, governance, pause, and emergency event families.
+8. Identify event schema and read gaps for `CON-002` / `CON-003`.
+9. Add a checker and tests requiring headings, maturity phrases,
+   source-of-truth links, validation commands, replay terms, and event/read gap
+   language.
+10. Wire the checker into local and CI gates.
+11. Link the guide from integration, release-readiness, release-artifact,
+    changelog, backlog, metadata, release-policy, and autonomous-run docs.
+12. Regenerate downstream release artifacts after docs/checker changes.
 
 Required tests/checks:
 
-- Event catalog generation check.
-- Markdown heading check.
+- `python scripts/test_events_and_indexing.py`
+- `python scripts/check_events_and_indexing.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
 - `git diff --check`.
 
 Acceptance criteria:
 
 - An indexer engineer can build the schema without reverse-engineering tests.
 - Reorg and confirmation assumptions are explicit.
-- Event gaps are tracked as follow-up work.
+- Event topic catalog, ABI checksums, release manifest, release checksums,
+  deployment manifests, address books, and interface IDs are named as canonical
+  source artifacts.
+- The guide covers indexed entities, primary keys, event-to-state processing,
+  required read-after-event calls, confirmation/reorg behavior, full-rescan
+  recovery, duplicate handling, idempotency, and known event/read gaps.
+- Auction reconstruction documents custody, bid, settlement, cancellation,
+  refund-credit, proceeds-credit, direct no-bid claim, and emergency-withdrawal
+  boundaries without claiming every state is recoverable from one event alone.
+- Credit/payment reconstruction documents poster, bidder, curator, protocol,
+  total owed, surplus, failed-withdrawal rollback, forced ETH, and emergency
+  withdrawal boundaries.
+- Randomizer reconstruction documents pending, fulfilled, stale, failed
+  post-processing, retried post-processing, burned-token randomness, and
+  request ID/token/collection/epoch validation expectations.
+- Event gaps are tracked as follow-up work under `CON-002` / `CON-003` and do
+  not become hidden integration assumptions.
 
 Evidence artifacts: None.
 
