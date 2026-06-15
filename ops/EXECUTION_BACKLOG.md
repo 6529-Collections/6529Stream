@@ -2671,8 +2671,8 @@ Dependencies: `GOV-001`, `INT-005`.
 
 ### ONE-001: Decide And Implement Contract-Level Metadata Surface
 
-Status: PR #411 open as draft on `codex/contract-level-metadata-surface`;
-issue #410; CodeRabbit requested.
+Status: PR #411 open and ready for review on
+`codex/contract-level-metadata-surface`; issue #410; CodeRabbit requested.
 
 Gate: G/F.
 
