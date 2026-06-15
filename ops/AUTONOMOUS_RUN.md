@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 06:25 UTC` |
+| Last updated | `2026-06-15 06:27 UTC` |
 
 ## Packaging Notes
 
@@ -251,13 +251,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add exact bytecode-to-release proof (Queue Item 184)
 
-Status: PR #385 open; awaiting CI and CodeRabbit review.
+Status: PR #385 open; bot nice-to-have drift regression pushed; awaiting CI
+and CodeRabbit review on latest head.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/384`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/385`.
 Branch: `codex/bytecode-release-proof`.
 Branch started from PR #383 squash merge commit
 `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9`.
 Initial PR head: `88a4a7083d3bd04646d3a69a057912c1df823e7e`.
+Latest pushed head: `338cb34bd1269f05af7d65c5d650fdad3ae09191`.
 
 Goal:
 
@@ -306,6 +308,10 @@ Latest local validation:
 - `2026-06-15 06:23 UTC`: full Windows
   `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed on branch `codex/bytecode-release-proof` with Foundry `v1.7.1`.
+- `2026-06-15 06:27 UTC`: after 6529bot nice-to-have review, added
+  `test_check_mode_rejects_drift`; `python scripts/test_bytecode_release_proof.py`,
+  `python -m py_compile scripts\test_bytecode_release_proof.py`, and
+  `git diff --check` passed.
 
 ### Completed: Add signed release tag verification gate (Queue Item 183)
 
@@ -13915,6 +13921,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 06:27 | Address PR #385 nice-to-have | 6529bot marked PR #385 good to merge but suggested spot-checking checksum coverage and `--check` drift. Checksum membership was already covered in `scripts/test_release_checksums.py`; added `test_check_mode_rejects_drift` to the bytecode proof tests and pushed head `338cb34bd1269f05af7d65c5d650fdad3ae09191`. |
 | 2026-06-15 06:25 | Open PR #385 | PR #385 opened on head `88a4a7083d3bd04646d3a69a057912c1df823e7e`, adds the bytecode-to-release proof generator/tests/artifact, wires it into local/CI gates and checksum coverage, folds the reviewer comments into roadmap/backlog state, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-15 06:09 | Add reviewer comments and continue REL-003 | A reviewer rechecked current main and confirmed the scary core contract gaps are mostly fixed while production trust evidence, 1/1 product surfaces, marketplace/indexer proof, `StreamCore` size discipline, and warning hygiene remain the next 10/10 work. Folded those comments into `ops/ROADMAP.md` and `ops/EXECUTION_BACKLOG.md` while continuing the bytecode-to-release proof branch for issue #384. |
 | 2026-06-15 05:52 | Merge PR #383 and start Queue Item 184 | PR #383 squash-merged as `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9` after Windows wrapper and Foundry smoke CI passed, CodeRabbit status was success with no unresolved review threads, and verifier hardening from bot feedback was implemented on head `f4dd225ec6ddb152df5d797ed6990fd99dd12b98`; issue #382 closed completed and branch `codex/bytecode-release-proof` started for issue #384 / REL-003 exact bytecode-to-release proof. |
