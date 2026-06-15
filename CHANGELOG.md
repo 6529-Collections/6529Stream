@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-004 wallet, EIP-712, ERC-1271, and Safe signing guide with
+  `docs/integrations/wallets-and-signatures.md`, a checker/test pair,
+  local/CI gate wiring, release-readiness navigation, and release-manifest
+  coverage so React, mobile, Electron, operator UI, indexer, and backend
+  signing-service teams can trace domain fields, replay controls, EOA and
+  contract-signer behavior, Safe/WalletConnect caveats, failure states, and
+  no-secret custody boundaries without production-readiness overclaims.
 - Added INT-003 auction frontend and indexer flow spec with
   `docs/integrations/auction-flows.md`, a checker/test pair, local/CI gate
   wiring, release-readiness navigation, and release-manifest coverage so

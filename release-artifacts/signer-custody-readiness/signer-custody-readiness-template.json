@@ -46,7 +46,7 @@
     "monitoring_status": "not_available_local",
     "runbook": {
       "path": "docs/signer-custody-readiness.md",
-      "sha256": "sha256:6d681967068e3c1dddbd3f59f46bd0ede5435f0ee9dffdb07f95283b5cc85146"
+      "sha256": "sha256:b8f6b6e01ccf445f52e4a95e09188bf79ed8b84000c4e796c7583012ced685b3"
     },
     "alerting_reference": "TBD",
     "incident_response_runbook": {

@@ -170,6 +170,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_contract_flows.py"
 & $pythonPath @pythonArgs "scripts\test_auction_flows.py"
 & $pythonPath @pythonArgs "scripts\check_auction_flows.py"
+& $pythonPath @pythonArgs "scripts\test_wallet_signature_flows.py"
+& $pythonPath @pythonArgs "scripts\check_wallet_signature_flows.py"
 & $pythonPath @pythonArgs "scripts\test_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\check_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"

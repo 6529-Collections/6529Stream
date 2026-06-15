@@ -1903,7 +1903,7 @@ Dependencies: `INT-001`.
 
 ### INT-003: Add Auction Frontend And Indexer Flow Spec
 
-Status: PR #395 draft open on issue #394 / branch `codex/auction-flow-spec`.
+Status: Merged in PR #395; issue #394 closed completed.
 
 Gate: G/D.
 
@@ -2020,46 +2020,108 @@ Dependencies: `INT-001`.
 
 ### INT-004: Add Wallet, EIP-712, ERC-1271, And Safe Signing Guide
 
-Status: Planned.
+Status: In progress on issue #396 / branch `codex/wallet-signing-guide`.
 
 Gate: G/F.
 
 Problem: Signatures are a core integration and security surface. Product teams
-need wallet-specific guidance that avoids replay, wrong-domain, and smart-wallet
+need wallet-specific guidance that avoids replay, wrong-domain, stale-epoch,
+cancelled-drop, Safe/ERC-1271, WalletConnect, and backend signer custody
 mistakes.
 
 Outcome: A dedicated wallet/signature integration guide covers browser wallets,
-WalletConnect, Safe/ERC-1271, backend signers, signer epoch, cancellation, and
-error handling.
+WalletConnect, mobile handoff, Electron boundaries, Safe/ERC-1271, backend
+signers, signer epoch, cancellation, replay controls, frontend preflight reads,
+and error handling. The guide is checked, release-tracked, and explicitly
+pre-audit / not production-ready.
 
 Files likely touched:
 
 - `docs/integrations/wallets-and-signatures.md`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
 - `docs/drop-authorization-signing.md`
 - `docs/signer-custody-readiness.md`
+- `scripts/check_wallet_signature_flows.py`
+- `scripts/test_wallet_signature_flows.py`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- Makefile, Bash, PowerShell, and CI gate wiring
+- generated release manifest, bytecode proof, and checksum artifacts if docs
+  or manifest inputs change
 
 Implementation steps:
 
 1. Document domain fields: name, version, chain ID, verifying contract.
 2. Document nonce/drop ID, deadline, signer epoch, consumed storage, and
-   cancellation.
-3. Document EOA flow and ERC-1271 flow.
-4. Document WalletConnect/mobile signing handoff caveats.
-5. Document Safe signing and validation expectations.
-6. Document common frontend error states and recovery.
+   cancellation, while making clear there is no separate on-chain monotonic
+   nonce map.
+3. Document EOA flow, including 65-byte and EIP-2098 compact signatures,
+   low-s, invalid-v, zero-signer, and malformed-length failure handling.
+4. Document ERC-1271 flow, including exact `isValidSignature(bytes32,bytes)`
+   digest/signature behavior, 32-byte return length, magic value `0x1626ba7e`,
+   invalid magic, revert, empty/short/extra return, wrong digest, and wrong
+   signature bytes.
+5. Document Safe signing and validation expectations as a contract-signer
+   integration, without claiming reviewed Safe custody exists.
+6. Document WalletConnect/mobile handoff caveats and Electron secret-boundary
+   expectations.
+7. Document backend signing-service responsibilities and frontend preflight
+   reads.
+8. Document common frontend error states and recovery.
+9. Add a checker and tests requiring headings, maturity phrases, flow-critical
+   terms, local source links, and validation commands.
+10. Wire the checker into local and CI gates.
+11. Link the guide from integration, release-readiness, release-artifact,
+    changelog, backlog, and autonomous-run docs.
+12. Regenerate downstream release artifacts after docs/checker changes.
 
 Required tests/checks:
 
-- Drop authorization fixture checks if examples are added.
-- Markdown heading check.
+- `python scripts/test_wallet_signature_flows.py`
+- `python scripts/check_wallet_signature_flows.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_drop_authorization_fixtures.py`
+- `python scripts/check_drop_authorization_fixtures.py`
+- `python scripts/test_drop_authorization_signing_evidence.py`
+- `python scripts/check_drop_authorization_signing_evidence.py`
+- `python scripts/test_signer_custody_readiness.py`
+- `python scripts/check_signer_custody_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `forge test --match-path test/StreamDropsEIP712.t.sol`
+- `forge test --match-path test/StreamDropsERC1271.t.sol`
 - `git diff --check`.
 
 Acceptance criteria:
 
 - The guide makes clear that EIP-712 is encoding/signing, not replay protection
   by itself.
-- Smart wallet support is documented with contract-signature behavior.
-- Wrong-domain and stale-epoch failure modes are user-visible.
+- The guide states replay depends on domain separation, consumed/cancelled
+  storage, signer-service nonce/salt allocation, deadline, signer epoch,
+  signer rotation, and consumed-state writes.
+- The guide documents that there is no on-chain monotonic nonce map.
+- Smart wallet support is documented with ERC-1271 contract-signature
+  behavior, and Safe support is scoped to that behavior unless future reviewed
+  custody evidence says otherwise.
+- Wrong signer, wrong domain, wrong chain, expired, replayed, cancelled, stale
+  epoch, malleable, invalid length, zero signer, wrong digest, wrong signature
+  bytes, zero recipient, non-zero auction recipient, token-data substitution,
+  and value/payer mismatches are user-visible.
+- Local/CI gates fail if the guide drops required maturity language, headings,
+  source links, validation commands, or signature-critical terms.
 
 Evidence artifacts: None.
 
