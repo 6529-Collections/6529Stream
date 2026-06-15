@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-005 marketplace/indexer retained evidence coverage with
+  `docs/integrations/marketplace-indexer-evidence.md`, fork/testnet and live
+  retained-artifact templates, public-beta and production evidence rows,
+  release-packet/backlog/body-sync/manifest/checksum coverage, local/CI checker
+  wiring, and explicit boundaries that template files are not completion
+  evidence and no public-beta or production-readiness claim depends on
+  marketplaces honoring royalties.
 - Added ONE-004 collector-verifiable permanence package support with
   `docs/permanence-packages.md`, a checked JSON schema, no-secret retained
   artifact template, generated

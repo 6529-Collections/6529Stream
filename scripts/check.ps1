@@ -132,6 +132,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_fork_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_testnet_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_testnet_deployment_rehearsal_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_marketplace_indexer_evidence.py"
+& $pythonPath @pythonArgs "scripts\check_marketplace_indexer_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_public_beta_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_public_beta_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_risk_register.py"
