@@ -137,6 +137,61 @@ Collection base URIs and external library URLs are optional fields, so empty
 values remain valid, but any nonempty collection base URI must be a safe content
 URI and any nonempty library URL must be a safe script URI.
 
+## Contract-Level Metadata
+
+`StreamContractMetadata` provides the current ERC-7572-style contract-level
+metadata surface without adding bytes to `StreamCore`. This is a
+satellite/read-adapter: it records the deployed `StreamCore` address, the
+`StreamAdmins` authority, a safe contract metadata URI, and
+`contractURIHash()` so release artifacts can bind the current pointer.
+
+The adapter exposes:
+
+- `contractURI()`, from `IERC7572`, for collection/contract-level metadata;
+- `ContractURIUpdated()`, from `IERC7572`, whenever the URI changes;
+- `supportsInterface(type(IERC7572).interfaceId)` and
+  `supportsInterface(type(IStreamContractMetadata).interfaceId)`;
+- `streamCore()` and `adminsContract()` for indexer/source binding; and
+- `isStreamContractMetadata()` as the release-tracked marker.
+
+The current contract-level metadata policy intentionally stores a content URI
+rather than on-chain JSON. Accepted URI schemes are the same current content
+schemes used for token image and collection base URI storage: `https://`,
+`ipfs://`, and `ar://`. Empty, unsafe, whitespace-bearing, control-character,
+and invalid UTF-8 values revert before storage. Data URIs are not accepted by
+this adapter in the current release track even though ERC-7572 allows on-chain
+JSON shapes; changing that would require a separate storage, size, and
+marketplace-evidence decision.
+
+`updateContractURI` is authorized through the existing target-scoped
+function-admin or global-admin model and is blocked when
+`StreamPauseDomains.METADATA_MUTATION` is paused. `updateAdminContract` is also
+target-scoped, blocked by the same metadata-mutation pause, and must point at a
+contract that exposes the accepted `IStreamAdmins` marker. The marker is an
+interface guard rather than a trust guarantee, so operators must still treat
+admin rebinding as a ceremony-level governance action. The local deployment
+rehearsal deploys the adapter, records it in deployment manifests/address
+books, and includes its ABI, bytecode hash, interface IDs, and
+`ContractURIUpdated` topic in the generated release artifacts.
+
+`contractURIHash()` is `keccak256(bytes(contractURI()))` over the exact stored
+URI bytes. The adapter does not normalize, lowercase, trim, decode, or fetch
+the URI before hashing it.
+
+The adapter is not `StreamCore` itself. Third-party marketplaces or wallets
+that only probe the ERC-721 contract address for `contractURI()` will not
+discover this surface until an integration explicitly follows the release
+manifest/address book or until a later size-budget decision moves an equivalent
+surface into a core or proxy address. Public-beta claims about OpenSea,
+Reservoir, Blur, Manifold, wallets, or indexers reading contract-level metadata
+still require retained fork/testnet/live evidence.
+
+Contract-level metadata is not part of the per-collection freeze manifest in
+the current implementation. Collection freeze remains the permanence boundary
+for token rendering inputs in `StreamCore`; the adapter-level URI remains
+governance-mutable before release and should be treated as release-artifact
+state that changes only through an evented admin ceremony.
+
 This slice also replaces several older `StreamCore` string reverts on
 metadata-adjacent mint, randomizer, pause, and contract-wiring paths with
 custom errors so the production URI checks fit under EIP-170 and integrations
@@ -146,6 +201,38 @@ can match selectors deterministically. New custom errors include
 `InvalidRandomizerContract()`, `MetadataMutationPaused()`,
 `NotMinterContract()`, `TokenOutsideCollectionRange()`, and
 `ZeroTokenHash()`.
+
+## 1/1 Provenance Manifests
+
+1/1 provenance is a collector-facing release artifact, not an additional
+`StreamCore` token-rendering input in the current release track. The canonical
+policy is [docs/provenance-manifests.md](provenance-manifests.md), the checked
+schema is
+[release-artifacts/schema/one-of-one-provenance-manifest.schema.json](../release-artifacts/schema/one-of-one-provenance-manifest.schema.json),
+and the generated catalog is
+[release-artifacts/latest/one-of-one-provenance-manifest.json](../release-artifacts/latest/one-of-one-provenance-manifest.json).
+The current no-secret template is
+[release-artifacts/provenance/one-of-one-provenance-template.provenance.json](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json).
+
+The manifest model can describe artist statements, authenticity status,
+certificate hashes, curation notes, exhibition or publication history, retained
+artifact hashes, and append-only story/provenance entries. These fields help
+frontends, indexers, collectors, and auditors display and verify 1/1 context
+without treating that context as ownership proof, marketplace readiness proof,
+royalty enforcement, or a replacement for chain state.
+
+This boundary is intentional while `StreamCore` remains close to the EIP-170
+bytecode limit. The provenance manifest is not `tokenURI()` JSON, not
+`contractURI()` JSON, not `collectionFreezeManifestHash(collectionId)`, and not
+new `StreamCore` storage. A future on-chain provenance event/view or satellite
+contract must be accepted in a separate size-budget and integration decision.
+Until then, provenance is validated through the release artifact toolchain:
+
+```text
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
+```
 
 ## Size Limits
 

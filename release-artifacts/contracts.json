@@ -22,6 +22,10 @@
       "source": "smart-contracts/AuctionContract.sol"
     },
     {
+      "name": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol"
+    },
+    {
       "name": "StreamCore",
       "source": "smart-contracts/StreamCore.sol"
     },
@@ -38,6 +42,19 @@
       "source": "smart-contracts/StreamMinter.sol"
     }
   ],
+  "runtime_size_budget": {
+    "schema_version": "6529stream.contract-runtime-size-budget.v1",
+    "eip_170_runtime_limit_bytes": 24576,
+    "contracts": {
+      "StreamCore": {
+        "source": "smart-contracts/StreamCore.sol",
+        "minimum_runtime_margin_bytes": 384,
+        "warning_runtime_margin_bytes": 512,
+        "tracking": "https://github.com/6529-Collections/6529Stream/issues/414",
+        "policy": "hard fail below the minimum release floor; warn below the future-work threshold"
+      }
+    }
+  },
   "interfaces": [
     {
       "name": "IDependencyRegistry",
@@ -57,6 +74,10 @@
       "name": "IERC4906",
       "source": "smart-contracts/IERC4906.sol",
       "interface_id": "0x49064906"
+    },
+    {
+      "name": "IERC7572",
+      "source": "smart-contracts/IERC7572.sol"
     },
     {
       "name": "IERC721",
@@ -88,6 +109,10 @@
     {
       "name": "IStreamAuctions",
       "source": "smart-contracts/IStreamAuctions.sol"
+    },
+    {
+      "name": "IStreamContractMetadata",
+      "source": "smart-contracts/IStreamContractMetadata.sol"
     },
     {
       "name": "IStreamCore",

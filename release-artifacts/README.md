@@ -14,6 +14,7 @@ Run after the production build profile:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/check_contract_size_budget.py
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_release_artifacts.py
 python scripts/generate_source_verification_inputs.py
@@ -28,6 +29,7 @@ python scripts/check_signed_release_tag.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
+python scripts/generate_one_of_one_provenance_manifest.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_risk_register.py
 python scripts/generate_public_beta_blocker_report.py
@@ -61,6 +63,8 @@ python scripts/generate_release_checksums.py
 Check the committed artifacts without rewriting them:
 
 ```sh
+python scripts/test_contract_size_budget.py
+python scripts/check_contract_size_budget.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
@@ -88,6 +92,9 @@ python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_risk_register.py
@@ -174,6 +181,18 @@ packaged dependency files under that policy so Windows and Linux checkouts
 produce the same manifest hashes.
 Production dependency version changes must follow
 `docs/dependency-operations.md` before public release.
+
+`latest/one-of-one-provenance-manifest.json` is generated from schemaed
+descriptors under `provenance/`. It catalogs 1/1 provenance records, descriptor
+hashes, token scope, artwork summary fields, authenticity status, append-only
+entry count, mutability boundaries, and reviewer status. The current checked
+template is an artifact-only model for artist/story/authenticity context; it is
+not `tokenURI` metadata, not `contractURI()` metadata, not included in
+`collectionFreezeManifestHash(collectionId)`, not marketplace readiness proof,
+not royalty enforcement, and not ownership proof beyond chain state. Validate
+it with `python scripts/test_one_of_one_provenance_manifest.py`,
+`python scripts/check_one_of_one_provenance_manifest.py`, and
+`python scripts/generate_one_of_one_provenance_manifest.py --check`.
 
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
@@ -350,6 +369,14 @@ and the template points at
 retained artifact and runbook hash validation without claiming public-beta or
 production readiness.
 
+`provenance/one-of-one-provenance-template.provenance.json` is the checked
+no-secret template for future reviewed 1/1 provenance evidence. Its schema lives
+at `schema/one-of-one-provenance-manifest.schema.json`, and the template points
+at `provenance/one-of-one-provenance-retained-artifact-template.md` and
+`docs/provenance-manifests.md` to prove retained artifact and runbook hash
+validation without claiming public beta, production, marketplace, or collector
+readiness.
+
 Deployment admin ceremony evidence is retained under
 `../deployments/admin-ceremony/` and cataloged by
 `latest/release-manifest.json` as a deployment artifact. Its schema lives at
@@ -417,6 +444,12 @@ constructor, fallback, and receive surface. The check fails on removed or
 changed entries and reports additive entries as compatible for this first
 release baseline.
 
+`contracts.json` also carries the production runtime size budget. The local and
+CI size-budget checker reads the production Foundry artifacts, computes linked
+runtime size even when Solidity library placeholders are still unlinked, checks
+every production contract against EIP-170, and enforces the configured
+`StreamCore` minimum margin before release artifacts can be considered current.
+
 `baselines/v0.1.0/gas-snapshot.snap` is the local Foundry gas snapshot for the
 Gate D operations. It is generated with `forge snapshot --match-path
 test/StreamGasSnapshot.t.sol --snap
@@ -433,6 +466,7 @@ inherited `supportsInterface` or event-only declarations.
 After any covered artifact changes, refresh the checksum bundle with:
 
 ```sh
+python scripts/check_contract_size_budget.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
 python scripts/generate_source_verification_inputs.py
@@ -443,6 +477,7 @@ python scripts/check_release_signatures.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
+python scripts/generate_one_of_one_provenance_manifest.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py

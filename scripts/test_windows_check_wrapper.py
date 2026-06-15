@@ -61,6 +61,8 @@ class WindowsCheckWrapperTests(unittest.TestCase):
         self.assertIn('$pythonPath = "Invoke-CheckedPython"', self.check_content)
         self.assertIn("$pythonArgs = @()", self.check_content)
         self.assertIn('& $pythonPath @pythonArgs "scripts\\check_metadata_browser_sandbox.py"', self.check_content)
+        self.assertIn('& $pythonPath @pythonArgs "scripts\\test_contract_size_budget.py"', self.check_content)
+        self.assertIn('& $pythonPath @pythonArgs "scripts\\check_contract_size_budget.py"', self.check_content)
 
     def test_runtime_harness_exercises_success_and_failure_paths(self) -> None:
         self.assertIn('. (Join-Path $PSScriptRoot "windows-check-helpers.ps1")', self.runtime_test_content)

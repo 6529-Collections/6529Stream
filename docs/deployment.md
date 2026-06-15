@@ -18,6 +18,7 @@ The script deploys and wires a local stack:
 - `StreamAdmins`
 - `DependencyRegistry`
 - `StreamCore`
+- `StreamContractMetadata`
 - `StreamCuratorsPool`
 - `StreamMinter`
 - `StreamDrops`
@@ -25,11 +26,12 @@ The script deploys and wires a local stack:
 - `NextGenRandomizerVRF`
 - `NextGenRandomizerRNG`
 
-It also creates a sample collection, pins a sample dependency version, assigns
-the VRF randomizer, sets mint phases, registers the Safe placeholder as global
-admin, configures pause/signer emergency roles, revokes the temporary deployment
-admin, and transfers Ownable control for `StreamAdmins` and `StreamCore` to the
-configured Safe placeholder.
+It also configures the ERC-7572-style contract-level metadata adapter with the
+deployment `contractMetadataURI`, creates a sample collection, pins a sample
+dependency version, assigns the VRF randomizer, sets mint phases, registers the
+Safe placeholder as global admin, configures pause/signer emergency roles,
+revokes the temporary deployment admin, and transfers Ownable control for
+`StreamAdmins` and `StreamCore` to the configured Safe placeholder.
 
 The rehearsal is not a production broadcast. It uses non-secret placeholder
 addresses and local-only external dependency addresses.
@@ -90,6 +92,7 @@ Required operator environment variables:
 | Variable | Retain In Repo | Purpose |
 | --- | --- | --- |
 | `SEPOLIA_RPC_URL` | No, redact value | Sepolia RPC endpoint used by the operator shell. |
+| `SEPOLIA_CONTRACT_METADATA_URI` | Yes | Reviewed `StreamContractMetadata` constructor URI for contract-level metadata. |
 | `SEPOLIA_DEPLOYER_ADDRESS` | Yes | Public Forge broadcaster address. Must match the approved signing backend used by the operator shell. |
 | `SEPOLIA_ADMIN_SAFE` | Yes | Safe or multisig that receives ownership/admin authority. |
 | `SEPOLIA_PAUSE_GUARDIAN` | Yes | Pause guardian address. |
@@ -273,6 +276,7 @@ are generated from the production `via-ir` Foundry artifacts:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/check_contract_size_budget.py
 python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/generate_source_verification_inputs.py
@@ -300,7 +304,9 @@ python scripts/generate_release_checksums.py --check
 The committed baseline is under `release-artifacts/latest/`. `StreamCore`
 currently links `StreamMetadataRenderer`, so its bytecode hash entries are
 explicitly marked as `unlinked_artifact_object` until a broadcast or linked
-verification artifact supplies the final deployed bytecode.
+verification artifact supplies the final deployed bytecode. Runtime size budget
+checks still count those placeholders as 20-byte library addresses, matching the
+deployed linked bytecode shape for EIP-170 budgeting.
 
 Deployment manifest generation reads the committed manifest input, fills ABI and
 runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`, and
