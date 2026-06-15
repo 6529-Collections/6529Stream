@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/marketplace-indexer-evidence-model` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/422` |
-| Active PR | None yet |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
 | Next issue | Implement `ONE-005` marketplace/indexer retained evidence model. Supporting evidence tracker issues were opened as `https://github.com/6529-Collections/6529Stream/issues/423` (`fork_testnet_marketplace_indexer_evidence`) and `https://github.com/6529-Collections/6529Stream/issues/424` (`live_marketplace_indexer_evidence`) and must remain incomplete until real reviewed external evidence is retained. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 23:38 UTC` |
+| Last updated | `2026-06-15 23:41 UTC` |
 
 ## Packaging Notes
 
@@ -265,9 +265,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add marketplace and indexer retained evidence model (Queue Item ONE-005)
 
-Status: Ready to commit and open PR after local validation; no PR open yet.
+Status: PR #425 open and ready for review; CodeRabbit review requested in
+comment `4713416626`; CI and bot comments pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/422`.
-PR: None yet.
+PR: `https://github.com/6529-Collections/6529Stream/pull/425`.
 Branch: `codex/marketplace-indexer-evidence-model`.
 Branch started from PR #421 squash merge commit
 `443921b93e42ea38fca4696bdecffdbea559d4bc`.
@@ -15425,6 +15426,7 @@ Outcome:
 | 2026-06-15 22:36 | Address PR #421 review comments | CodeRabbit found two actionable follow-ups: a wording cleanup in `docs/known-blockers.md` and imported-source hash validation in `scripts/check_contract_size_budget.py`. The checker now validates every resolvable metadata source path against the checkout, `scripts/test_contract_size_budget.py` covers stale imported dependency hashes, and focused Python tests plus `python scripts\check_contract_size_budget.py` pass with `StreamCore` still at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 | 2026-06-15 22:57 | Merge PR #421 and resume ONE-005 | PR #421 merged as `443921b93e42ea38fca4696bdecffdbea559d4bc`, issue #420 closed completed, CodeRabbit review threads were resolved, and GitHub CI passed. Created issue #422 for the marketplace/indexer retained evidence model plus evidence tracker issues #423 and #424 for future public-beta and production marketplace/indexer proof. Branch `codex/marketplace-indexer-evidence-model` is active from updated `main`. |
 | 2026-06-15 23:38 | Validate ONE-005 PR candidate | Marketplace/indexer evidence model, dedicated checker/tests, release-evidence rows, retained templates, release packet/backlog/body-sync, release manifest/checksums, risk register, integration docs, local `make check`, Windows `scripts\check.ps1`, and `git diff --check` passed locally. No Solidity bytecode changed; `StreamCore` remains at the PR #421 production runtime size. |
+| 2026-06-15 23:41 | Open PR #425 for ONE-005 | PR #425 is open and ready for review, closes issue #422, and CodeRabbit review was requested in comment `4713416626`. Tracker issues #423 and #424 remain open for future reviewed public-beta and production marketplace/indexer evidence. |
 
 ## Resume Instructions
 
