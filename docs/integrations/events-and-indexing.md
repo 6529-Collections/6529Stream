@@ -83,6 +83,7 @@ copies.
 | Drops contract | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Drop authorization, signer, auction contract, and fixed-price credit events |
 | Auction contract | [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol) | Auction lifecycle, bid, settlement, and proceeds events |
 | Admin contract | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Role, pause, emergency recipient, and signer-lifecycle target events |
+| Minter bridge | [`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol) | Bridge reads such as original auction end-time values |
 | Randomizer lifecycle | [`smart-contracts/StreamRandomizerLifecycle.sol`](../../smart-contracts/StreamRandomizerLifecycle.sol) | Request, fulfillment, stale, failure, retry, and burned-token randomness events |
 | Curator pool | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Merkle roots, curator credits, and curator withdrawals |
 | Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Dependency version creation/deprecation events |
@@ -275,6 +276,10 @@ Canonical auction states for indexing:
 `StreamAuctions.retrieveAuctionEndTime(tokenId)` is authoritative after
 `AuctionExtended`. `StreamMinter.getAuctionEndTime(tokenId)` is only the
 original minter bridge value and can be stale.
+For source-file lookup, the deployed auction implementation is
+[`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol)
+and the minter bridge is
+[`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol).
 
 Outbid refunds become bidder credits through `OutbidCreditCreated`. Settlement
 credits are emitted through `AuctionProceedsCreditCreated`. Withdrawals are

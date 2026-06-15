@@ -67,13 +67,13 @@ logs must be idempotent are named.
 
 ## Indexed Entities
 
-ReleaseArtifactSnapshot, ContractDeployment, Collection, Token, DropExecution,
-Auction, CreditAccount, RandomnessRequest, MetadataState, AdminRole,
-PauseDomain, DependencyVersion, and CuratorRoot are named.
+ReleaseArtifactSnapshot, ContractDeployment, | `Collection` |, | `Token` |,
+DropExecution, | `Auction` |, CreditAccount, RandomnessRequest, MetadataState,
+AdminRole, PauseDomain, DependencyVersion, and CuratorRoot are named.
 
 ## Event Processing Rules
 
-Transfer, Approval, ApprovalForAll, MetadataUpdate, BatchMetadataUpdate,
+Transfer, `Approval`, `ApprovalForAll`, MetadataUpdate, BatchMetadataUpdate,
 CollectionCreated, CollectionFrozen, CollectionRandomizerUpdated,
 DependencyVersionPinned, TokenBurned, DropAuthorizationConsumed,
 DropAuthorizationCancelled, SignerEpochChanged, DropSignerChanged,
@@ -280,6 +280,27 @@ class EventsAndIndexingTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.EventsAndIndexingError, "linked targets are missing"
+            ):
+                checker.validate_events_and_indexing(
+                    root, root / checker.DEFAULT_EVENTS_AND_INDEXING
+                )
+
+    def test_rejects_path_label_that_resolves_elsewhere(self) -> None:
+        """Path-like link labels must resolve to the same repo path they name."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_events_and_indexing_doc().replace(
+                "- [smart-contracts/StreamCore.sol](../../smart-contracts/StreamCore.sol)\n",
+                (
+                    "- [smart-contracts/StreamCore.sol]"
+                    "(../../smart-contracts/StreamDrops.sol)\n"
+                ),
+            )
+            write_text(root / checker.DEFAULT_EVENTS_AND_INDEXING, text)
+
+            with self.assertRaisesRegex(
+                checker.EventsAndIndexingError, "resolves to"
             ):
                 checker.validate_events_and_indexing(
                     root, root / checker.DEFAULT_EVENTS_AND_INDEXING

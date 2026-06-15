@@ -60,10 +60,10 @@ REQUIRED_PHRASES = [
     "logIndex",
     "ReleaseArtifactSnapshot",
     "ContractDeployment",
-    "Collection",
-    "Token",
+    "| `Collection` |",
+    "| `Token` |",
     "DropExecution",
-    "Auction",
+    "| `Auction` |",
     "CreditAccount",
     "RandomnessRequest",
     "MetadataState",
@@ -72,8 +72,8 @@ REQUIRED_PHRASES = [
     "DependencyVersion",
     "CuratorRoot",
     "Transfer",
-    "Approval",
-    "ApprovalForAll",
+    "`Approval`",
+    "`ApprovalForAll`",
     "MetadataUpdate",
     "BatchMetadataUpdate",
     "CollectionCreated",
@@ -192,6 +192,7 @@ REQUIRED_LINK_TARGETS = [
     "smart-contracts/StreamDrops.sol",
     "smart-contracts/AuctionContract.sol",
     "smart-contracts/StreamAdmins.sol",
+    "smart-contracts/StreamMinter.sol",
     "smart-contracts/StreamRandomizerLifecycle.sol",
     "smart-contracts/StreamCuratorsPool.sol",
     "smart-contracts/DependencyRegistry.sol",
@@ -207,7 +208,7 @@ REQUIRED_LINK_TARGETS = [
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
-LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 
 
 class EventsAndIndexingError(ValueError):
@@ -246,12 +247,30 @@ def normalized_link_target(raw_target: str) -> str | None:
     return path_part
 
 
+def label_looks_like_repo_path(label: str) -> bool:
+    """Return true when a link label should match its resolved repo path."""
+    normalized = label.strip().strip("`")
+    suffixes = (
+        ".md",
+        ".json",
+        ".sol",
+        ".py",
+        ".sh",
+        ".ps1",
+        ".yml",
+        ".yaml",
+        ".toml",
+    )
+    return "/" in normalized or "\\" in normalized or normalized.endswith(suffixes)
+
+
 def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[str]:
     """Collect existing repository-relative file links from Markdown text."""
     links = set()
     missing = []
     for match in LINK_RE.finditer(text):
-        target = normalized_link_target(match.group(1))
+        label = match.group(1).strip().strip("`")
+        target = normalized_link_target(match.group(2))
         if target is None:
             continue
 
@@ -264,6 +283,10 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
         if not resolved.exists():
             missing.append(relative)
             continue
+        if label_looks_like_repo_path(label) and label.replace("\\", "/") != relative:
+            raise EventsAndIndexingError(
+                f"link label {label!r} resolves to {relative!r}"
+            )
         links.add(relative)
 
     if missing:

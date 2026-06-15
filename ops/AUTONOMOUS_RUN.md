@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 11:52 UTC` |
+| Last updated | `2026-06-15 11:54 UTC` |
 
 ## Packaging Notes
 
@@ -15195,6 +15195,7 @@ Outcome:
 | 2026-06-15 11:28 | Merge PR #397 | Wallet signature integration guide merged as `2dba644e6b29e3e32474a59ebc3b13db493232fe` after CI passed, CodeRabbit status was success, review threads were empty, and issue #396 closed completed. |
 | 2026-06-15 11:29 | Create issue #398 and select INT-005 | Next substantive integration-readiness slice is the event and indexer reconstruction spec on branch `codex/event-indexer-reconstruction-spec`; issue #398 now tracks the guide/checker/local-CI/release-manifest work. |
 | 2026-06-15 11:52 | Open PR #399 for INT-005 | PR #399 is open on branch `codex/event-indexer-reconstruction-spec`, closes issue #398, and CodeRabbit review was requested. Local evidence includes the event/indexer guide checker/test, integration/release-readiness checks, risk-register/release-manifest/proof/checksum drift checks, shell and PowerShell syntax checks, `git diff --check`, and full `make check`. |
+| 2026-06-15 11:54 | Address PR #399 bot nice-to-haves | Tightened generic event/entity checker phrases, added a source-file mapping for `StreamAuctions` / `StreamMinter`, and added path-like link-label validation for the event/indexer guide checker. |
 
 ## Resume Instructions
 

@@ -1900,8 +1900,8 @@
       },
       {
         "path": "docs/integrations/events-and-indexing.md",
-        "sha256": "sha256:28f943b2d14eb9c923d1e27f6ce4e5ca2a7714f8b1f694ed8ff71c0a31d87c75",
-        "size_bytes": 27960
+        "sha256": "sha256:947b337384e9bf61962fef0823d145e17f90788df44a77ee63753deb70ae9a62",
+        "size_bytes": 28362
       },
       {
         "path": "docs/tooling.md",
