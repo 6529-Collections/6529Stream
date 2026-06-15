@@ -17,6 +17,7 @@ Use this runbook for evidence that cannot be produced by the local Anvil gate:
 - testnet deployments and explorer verification;
 - live deployments, sanitized broadcasts, address books, and explorer links;
 - fork/testnet/live metadata browser execution;
+- fork/testnet/live marketplace/indexer display, replay, and cache evidence;
 - fork/testnet/live deployment and admin ceremonies;
 - fork/testnet/live randomizer provider operations;
 - fork/testnet/live gas and invariant evidence;
@@ -42,6 +43,7 @@ Use the most specific existing evidence directory when one exists:
 | Release manifests and checksums | `release-artifacts/latest/` |
 | Audit or remediation summaries | `docs/audits/` or `docs/audit-package.md` |
 | Browser, gas, invariant, or explorer transcripts | A release-specific subdirectory under `release-artifacts/evidence/` |
+| Marketplace/indexer evidence | `release-artifacts/evidence/marketplace-indexer/` |
 
 If a new evidence family needs a schema, add the schema and checker before
 marking the related public-beta row complete.
@@ -220,6 +222,7 @@ When evidence is retained, update the matching requirement row in
 | `fork_deployment_rehearsal` | Fork transcript, sanitized broadcast, manifest, address book, verification status, gas/invariant summary |
 | `testnet_deployment_rehearsal` | Testnet transcript, transaction references, sanitized broadcast, manifest, address book, explorer verification status |
 | `fork_testnet_metadata_browser_evidence` | Browser execution output for token metadata generated from deployed fork/testnet contracts |
+| `fork_testnet_marketplace_indexer_evidence` | Fork/testnet marketplace and indexer proof for contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale or simulated sale path, event replay, cache invalidation, platform coverage, redaction, and reviewer approval |
 | `fork_testnet_ceremony_evidence` | Fork/testnet deployment/admin/signer/auction/emergency ceremony evidence |
 | `fork_testnet_randomizer_operations_evidence` | Fork/testnet provider, funding, epoch, callback, reserve, migration, stale/failed/retry, pause, and emergency evidence |
 | `verified_deployed_addresses` | Reviewed non-local address book plus independent address verification source |
@@ -231,6 +234,7 @@ When evidence is retained, update the matching requirement row in
 | `live_deployment_manifest` | Live deployment manifests generated from production inputs and broadcasts |
 | `live_ceremony_evidence` | Live admin, signer, metadata, auction, emergency, ownership, role, and verification ceremony evidence |
 | `live_randomizer_operations_evidence` | Live provider configuration, funding, billing, epoch, callback health, reserve, migration, stale/failed/retry, pause, and emergency evidence |
+| `live_marketplace_indexer_evidence` | Live marketplace and indexer proof for contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, platform coverage, redaction, and reviewer approval |
 | `live_explorer_verification` | Live explorer verification outputs and verified contract-address links |
 | `post_audit_remediation` | Finding-by-finding remediation evidence, accepted-risk records, retest status, and release notes |
 
@@ -313,6 +317,47 @@ Retain:
 Map fork/testnet evidence to `fork_testnet_metadata_browser_evidence` and live
 evidence to `live_ceremony_evidence` unless a later schema creates a dedicated
 live metadata requirement.
+
+### Marketplace And Indexer Evidence
+
+Retain:
+
+- network, chain ID, block, deployment manifest, address book, and contract
+  addresses;
+- token IDs and collection IDs exercised;
+- OpenSea, Reservoir, Blur, Manifold, or equivalent collector/indexer tooling
+  source references;
+- contract metadata discovery through `contractURI()`, `contractURIHash()`,
+  and `ContractURIUpdated`;
+- token metadata refresh through ERC-4906 `MetadataUpdate` and
+  `BatchMetadataUpdate`;
+- animation rendering result;
+- royalty display result with the explicit
+  `royalty disclosure, not payment enforcement` boundary;
+- transfer/listing/sale path or public-beta-safe simulated sale path;
+- event replay, cache invalidation, and stale/failed/frozen/burned state
+  handling;
+- screenshot, public reference, query result, or redacted transcript; and
+- reviewer confirmation without secrets or unreleased payloads.
+
+Map fork/testnet evidence to `fork_testnet_marketplace_indexer_evidence` and
+live evidence to `live_marketplace_indexer_evidence`.
+
+The marketplace/indexer rows have dedicated retained-artifact templates at
+`release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`
+and
+`release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`.
+Before generating the non-local metadata envelope, run:
+
+```sh
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
+```
+
+The committed templates are not completion evidence. Issues #423 and #424
+remain open and the shared release evidence rows remain `missing` until
+reviewed retained marketplace/indexer evidence is linked from the shared
+public-beta evidence manifest.
 
 ### Ceremony Evidence
 

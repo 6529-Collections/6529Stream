@@ -19,7 +19,12 @@ policy in [`docs/metadata.md`](../metadata.md), 1/1 provenance policy in
 [`docs/release-readiness.md`](../release-readiness.md), dependency operations in
 [`docs/dependency-operations.md`](../dependency-operations.md), and non-local
 evidence intake in
-[`docs/non-local-release-evidence.md`](../non-local-release-evidence.md).
+[`docs/non-local-release-evidence.md`](../non-local-release-evidence.md). Use
+[`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md)
+for the `ONE-005` retained marketplace/indexer evidence model covering
+OpenSea, Reservoir, Blur, Manifold, equivalent collector/indexer tooling,
+contract metadata, token metadata refresh, animation rendering, royalty
+display, transfer/listing/sale paths, event replay, and cache invalidation.
 
 ## Maturity And Scope
 
@@ -77,6 +82,7 @@ rather than hand-maintained metadata snippets.
 | Dependency operations | [`docs/dependency-operations.md`](../dependency-operations.md) | Dependency source packaging, migration, and source retention |
 | Randomizer operations | [`docs/randomizer-operations.md`](../randomizer-operations.md) | Provider, funding, lifecycle, stale/failure/retry evidence |
 | Non-local evidence | [`docs/non-local-release-evidence.md`](../non-local-release-evidence.md) | Fork/testnet/live retained evidence requirements |
+| Marketplace/indexer evidence | [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | `ONE-005` retained marketplace/indexer evidence requirements for contract metadata, token refresh, animation rendering, royalty display, event replay, and cache invalidation |
 | Public beta evidence | [`docs/public-beta-evidence.md`](../public-beta-evidence.md) | Evidence status and blocker posture |
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated metadata/marketplace blocker source |
 | Release manifest | [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json) | Generated source-of-truth manifest |
@@ -376,13 +382,17 @@ clients, Electron shells, CDN caches, or analytics tools ingest metadata
 correctly.
 
 Before public beta or production, retained non-local evidence still needs to
-show metadata refresh, animation rendering, marketplace display, royalties or
-contract metadata where applicable, transfer/listing or sale paths, event
+follow [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md)
+and show metadata refresh, animation rendering, marketplace display, royalties
+or contract metadata where applicable, transfer/listing or sale paths, event
 replay, cache invalidation, and reviewer confirmation without secrets or
 unreleased payloads.
 
-The current public-beta blocker row for metadata browser evidence remains
-missing until reviewed fork/testnet or live evidence is retained.
+The current public-beta blocker rows for metadata browser evidence and
+`fork_testnet_marketplace_indexer_evidence` remain missing until reviewed
+fork/testnet evidence is retained. The production row
+`live_marketplace_indexer_evidence` remains missing until reviewed live
+evidence is retained.
 
 ## Validation Commands
 
@@ -402,6 +412,8 @@ python scripts/test_rehearsal_metadata_browser_sandbox.py
 python scripts/check_rehearsal_metadata_browser_sandbox.py
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py

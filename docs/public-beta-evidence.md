@@ -13,6 +13,8 @@ Validate the evidence status with:
 ```sh
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
 python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/test_production_release_blocker_report.py
@@ -139,6 +141,14 @@ evidence for non-local signing. The committed
 [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json)
 is a checked local template only, not completion evidence.
 
+Marketplace/indexer evidence should follow the dedicated retained artifact
+templates at
+[`release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`](../release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md)
+and
+[`release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`](../release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md),
+and pass `python scripts/check_marketplace_indexer_evidence.py` before any
+public-beta or production status row relies on marketplace/indexer evidence.
+
 ## Status Values
 
 Each requirement uses one of these statuses:
@@ -165,6 +175,7 @@ Public beta evidence must account for:
 - fork deployment rehearsal evidence;
 - testnet deployment rehearsal evidence;
 - fork/testnet metadata browser evidence;
+- fork/testnet marketplace/indexer evidence;
 - fork/testnet ceremony evidence;
 - fork/testnet randomizer operations evidence;
 - verified deployed addresses;
@@ -182,6 +193,7 @@ Production release evidence must account for:
 - live deployment manifests;
 - live ceremony evidence;
 - live randomizer operations evidence;
+- live marketplace/indexer evidence;
 - live explorer verification;
 - post-audit remediation evidence.
 
@@ -217,25 +229,28 @@ To move a requirement to `complete`:
    non-local evidence metadata JSON that supports the row.
 8. Run `python scripts/check_fork_deployment_rehearsal_evidence.py` when the
    retained artifact supports `fork_deployment_rehearsal` / issue #216.
-9. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
+9. Run `python scripts/check_marketplace_indexer_evidence.py` when the
+   retained artifact supports `fork_testnet_marketplace_indexer_evidence` /
+   issue #423 or `live_marketplace_indexer_evidence` / issue #424.
+10. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
    retained drop authorization signing evidence that supports the row.
-10. Run `python scripts/check_signer_custody_readiness.py` for any signer
+11. Run `python scripts/check_signer_custody_readiness.py` for any signer
    custody readiness evidence that supports the row.
-11. Regenerate and check the blocker reports with
+12. Regenerate and check the blocker reports with
    `python scripts/generate_public_beta_blocker_report.py` and
    `python scripts/generate_production_release_blocker_report.py`.
-12. Regenerate and check the release evidence packet index with
+13. Regenerate and check the release evidence packet index with
    `python scripts/generate_release_evidence_packet_index.py`,
    `python scripts/test_release_evidence_packet_index.py`, and
    `python scripts/generate_release_evidence_packet_index.py --check`.
-13. Regenerate and check the release evidence issue backlog with
+14. Regenerate and check the release evidence issue backlog with
    `python scripts/generate_release_evidence_issue_backlog.py`,
    `python scripts/test_release_evidence_issue_backlog.py`, and
    `python scripts/generate_release_evidence_issue_backlog.py --check`.
-14. Check the issue-link map with
+15. Check the issue-link map with
     `python scripts/test_release_evidence_issue_links.py` and
     `python scripts/check_release_evidence_issue_links.py`.
-15. Check committed release evidence tracker labels with
+16. Check committed release evidence tracker labels with
     `python scripts/test_release_evidence_issue_labels.py` and
     `python scripts/check_release_evidence_issue_labels.py`. To audit live
     GitHub label, body, and closure drift together, run the operator-only
@@ -260,11 +275,11 @@ To move a requirement to `complete`:
     python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
     ```
 
-16. Regenerate and check the release evidence issue body sync artifact with
+17. Regenerate and check the release evidence issue body sync artifact with
     `python scripts/generate_release_evidence_issue_body_sync.py`,
     `python scripts/test_release_evidence_issue_body_sync.py`, and
     `python scripts/generate_release_evidence_issue_body_sync.py --check`.
-17. Check committed release evidence tracker bodies with
+18. Check committed release evidence tracker bodies with
     `python scripts/test_release_evidence_issue_bodies.py` and
     `python scripts/check_release_evidence_issue_bodies.py`. To audit live
     GitHub body drift, export a local snapshot and pass it with `--live-json`:
@@ -278,7 +293,7 @@ To move a requirement to `complete`:
     `python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/release-evidence-issue-bodies`
     and apply the issue-specific `gh issue edit ... --body-file ...` command
     printed by the checker.
-18. Check release evidence tracker closure readiness with
+19. Check release evidence tracker closure readiness with
     `python scripts/test_release_evidence_issue_closure.py` and
     `python scripts/check_release_evidence_issue_closure.py`. To audit live
     GitHub closure state, export all tracker issues and pass the snapshot with
@@ -292,7 +307,7 @@ To move a requirement to `complete`:
     If premature closure is reported, reopen the issue with the remediation
     command printed by the checker and keep it open until retained evidence is
     complete or explicitly risk-accepted in the committed manifest.
-18. Regenerate and check the release manifest and checksum bundle.
+20. Regenerate and check the release manifest and checksum bundle.
 
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`

@@ -22,3 +22,9 @@ Before using a template for real evidence:
 4. Run `python scripts/check_non_local_release_evidence.py` on the evidence
    JSON and `python scripts/check_public_beta_evidence.py` after linking it
    from the shared release evidence status manifest.
+
+For live marketplace/indexer evidence, fill
+`release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`
+and run `python scripts/check_marketplace_indexer_evidence.py` before
+generating the non-local evidence envelope for
+`live_marketplace_indexer_evidence`.
