@@ -76,8 +76,11 @@ The event and indexer reconstruction spec is listed.
 The metadata rendering, cache, animation sandbox, and marketplace integration guide is listed.
 The React/Next frontend reference architecture is listed.
 The mobile and WalletConnect integration guide is listed.
+The Electron security and wallet integration guide is listed.
 The maintained frontend package, generated SDK, maintained mobile SDK,
-React Native app, and WalletConnect dependency recommendation boundaries are listed.
+React Native app, WalletConnect dependency recommendation, maintained Electron app,
+native desktop app, desktop SDK, code-signing implementation, and
+signed-update implementation boundaries are listed.
 
 ## Readiness Boundaries
 

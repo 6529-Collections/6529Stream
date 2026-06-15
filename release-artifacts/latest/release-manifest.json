@@ -104,7 +104,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:e7928f2ed77c52a9ab00ff5664fc94966b33c3c3b3e6cc7c3373cbd4815e794b",
+      "sha256": "sha256:abe1e0c4ddc31b2c86ceca1166487c4150e2caa6d7124ac4ad0bd4723e27d28d",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1804,8 +1804,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:1fa5df5992cc0fb77257c533fb5c306855cbb2d29edda03003717082873593c1",
-      "size_bytes": 32375
+      "sha256": "sha256:40866c5027810ee4d1b4eb79e170417b9f5ff7843aa2c7bc226ca109afb67e97",
+      "size_bytes": 33045
     },
     "governance_docs": [
       {
@@ -1875,13 +1875,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:d14a6606359858f808b6c86bc7c8ad1dbb4e687c5da3a847c060ec717bd58a00",
-        "size_bytes": 36902
+        "sha256": "sha256:3d25725af91194ef866061cfd4e36eea511fe245c4e172c240ec7a1b37e394ed",
+        "size_bytes": 37709
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:f72946571980f7bf56345181d00baa22909d8fba9736cda47b1e773ca5df99d2",
-        "size_bytes": 18549
+        "sha256": "sha256:0f750f20e954d6bb4dbfde67662bbfdc622cfe35b3e91663f32640dd599edd0d",
+        "size_bytes": 19461
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -1917,6 +1917,11 @@
         "path": "docs/integrations/mobile-walletconnect.md",
         "sha256": "sha256:90679ed3ff627fd5a27b8460fd693719f0fbd3d2606ec7d50f82febed8d01b45",
         "size_bytes": 22381
+      },
+      {
+        "path": "docs/integrations/electron-security-wallets.md",
+        "sha256": "sha256:afe8af422eca20817b53b35b2c06a113f1a8890aab68a4e1a1e9b490a9c8b043",
+        "size_bytes": 23991
       },
       {
         "path": "docs/integrations/examples/react-viem.md",

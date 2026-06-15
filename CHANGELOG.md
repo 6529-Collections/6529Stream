@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-009 Electron security and wallet integration guide with
+  `docs/integrations/electron-security-wallets.md`, a checker/test pair,
+  local/CI gate wiring, release-readiness navigation, release-manifest
+  coverage, and no-Electron-app/no-production-readiness boundaries so desktop
+  implementers can trace main/renderer/preload responsibilities,
+  BrowserWindow hardening, context isolation, IPC allowlists, wallet-provider
+  boundaries, metadata animation sandboxing, local cache/secrets policy,
+  signed-update and code-signing expectations, telemetry, and no-secret support
+  constraints without treating local evidence as public beta or production
+  proof.
 - Added INT-008 mobile and WalletConnect integration guide with
   `docs/integrations/mobile-walletconnect.md`, a checker/test pair, local/CI
   gate wiring, release-readiness navigation, release-manifest coverage, and

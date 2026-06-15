@@ -178,6 +178,7 @@ public-beta evidence status, schema hashes, governance doc hashes including
 `docs/non-local-release-evidence.md`,
 `docs/integrations/frontend-reference-architecture.md`,
 `docs/integrations/mobile-walletconnect.md`,
+`docs/integrations/electron-security-wallets.md`,
 `docs/integrations/examples/react-viem.md`, and
 `docs/release-readiness.md`, and the release-ceremony items that are not yet
 available for this pre-audit local baseline.
@@ -355,12 +356,13 @@ production admin ceremony completion.
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`, `docs/signer-custody-readiness.md`,
 `docs/integrations/frontend-reference-architecture.md`,
-`docs/integrations/mobile-walletconnect.md`, and
+`docs/integrations/mobile-walletconnect.md`,
+`docs/integrations/electron-security-wallets.md`, and
 `docs/release-readiness.md` are the
 auditor-facing architecture, trust-boundary, package, incident-response,
 evidence-status, non-local evidence intake, signer custody readiness, frontend
-reference, mobile/WalletConnect reference, and Gate G readiness indexes for
-the current local baseline. They are validated before release manifest
+reference, mobile/WalletConnect reference, Electron security/wallet reference,
+and Gate G readiness indexes for the current local baseline. They are validated before release manifest
 generation, and the release manifest records their hashes as governance
 documents.
 

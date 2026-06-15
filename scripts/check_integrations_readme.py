@@ -69,6 +69,12 @@ REQUIRED_PHRASES = [
     "React Native app",
     "WalletConnect dependency recommendation",
     "INT-009",
+    "Electron security and wallet integration guide",
+    "maintained Electron app",
+    "native desktop app",
+    "desktop SDK",
+    "code-signing implementation",
+    "signed-update implementation",
 ]
 
 REQUIRED_COMMANDS = [
@@ -86,6 +92,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_react_next_reference.py",
     "python scripts/test_mobile_walletconnect.py",
     "python scripts/check_mobile_walletconnect.py",
+    "python scripts/test_electron_security_wallets.py",
+    "python scripts/check_electron_security_wallets.py",
     "python scripts/check_release_readiness.py",
     "python scripts/check_changelog.py",
 ]
@@ -110,6 +118,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/metadata-rendering.md",
     "docs/integrations/frontend-reference-architecture.md",
     "docs/integrations/mobile-walletconnect.md",
+    "docs/integrations/electron-security-wallets.md",
     "docs/integrations/examples/react-viem.md",
     "release-artifacts/README.md",
     "release-artifacts/contracts.json",
