@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/contract-level-metadata-surface` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/409` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/410` |
-| Active PR | `TBD - local validation complete; PR pending` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/411` |
 | Next issue | `ONE-002` 1/1 provenance manifest model after ONE-001 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 16:39 UTC` |
+| Last updated | `2026-06-15 16:41 UTC` |
 
 ## Packaging Notes
 
@@ -15226,6 +15226,7 @@ Outcome:
 | 2026-06-15 15:47 | Merge PR #409 and select ONE-001 | Operator admin UI specification merged as `947ce6d5d02187d677c3153fab01aff9940960c9` after CI run `27557822994` passed, review threads were empty, and CodeRabbit finished with only an informational rate-limit note. |
 | 2026-06-15 15:51 | Create issue #410 and start ONE-001 | Next substantive 1/1 product-readiness slice is the contract-level metadata surface on branch `codex/contract-level-metadata-surface`; the implementation path is a bytecode-preserving satellite/read-adapter unless local proof shows a safer Core change. |
 | 2026-06-15 16:39 | Validate ONE-001 local draft | Added an ERC-7572-style `StreamContractMetadata` satellite/read-adapter, `IERC7572` and `IStreamContractMetadata` interfaces, deployment rehearsal wiring, generated release/deployment artifacts, integration docs, and retained local evidence hash updates. Local validation passed: focused contract metadata tests, deployment manifest tests, full `forge test -vvv` (`336` tests), `forge build --sizes --via-ir --skip test --skip script --force` (`StreamCore` runtime `24,139` bytes, `437` byte margin; adapter runtime `2,431` bytes), full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. |
+| 2026-06-15 16:41 | Open PR #411 for ONE-001 | PR #411 is open as a draft on branch `codex/contract-level-metadata-surface`, closes issue #410, and CodeRabbit review was requested in comment `4710158602`. |
 
 ## Resume Instructions
 
