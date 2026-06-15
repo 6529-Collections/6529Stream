@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 05:31 UTC` |
+| Last updated | `2026-06-15 05:44 UTC` |
 
 ## Packaging Notes
 
@@ -250,7 +250,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add signed release tag verification gate (Queue Item 183)
 
-Status: PR #383 open; CodeRabbit/CI pending.
+Status: PR #383 open; bot-review hardening iteration in progress after 6529bot
+general review requested verifier changes.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/382`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/383`.
 Branch: `codex/signed-release-tag-gate`.
@@ -271,9 +272,22 @@ Goal:
 - Wire the checker into `Makefile`, Bash/PowerShell wrappers, and CI, and
   update release docs/readiness checks.
 
+Review iteration:
+
+- CodeRabbit was rate-limited but returned success after explicit review request
+  comment `4704863962`.
+- 6529bot security review on opening head `0d0231d9fcee68d7efab19b21bb92f6d1a5e74aa`
+  reported no security findings.
+- 6529bot general review requested stricter release verifier behavior: require
+  an explicit good-signature marker, require retained signer fingerprints in
+  release mode, match fingerprints as bounded tokens, tighten tag-name
+  validation, and add bypass-path tests.
+- Local follow-up hardening now implements those requests and expands the
+  signed-release-tag focused test suite.
+
 Validation completed so far:
 
-- `python scripts\test_signed_release_tag.py` passed locally with 10 tests.
+- `python scripts\test_signed_release_tag.py` passed locally with 14 tests.
 - `python scripts\check_signed_release_tag.py` passed locally in default
   non-release mode, printing that no signed release status is claimed.
 - `python scripts\test_release_readiness.py` and
@@ -282,6 +296,11 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed locally at `2026-06-15 05:29 UTC` with existing compiler/NatSpec and
   Foundry trace warning noise only.
+- After the bot-review hardening iteration, `python scripts\test_signed_release_tag.py`,
+  `python scripts\check_signed_release_tag.py`, `python scripts\check_release_readiness.py`,
+  `python scripts\check_changelog.py`, release manifest/checksum tests and
+  drift checks, `git diff --check`, and the full PowerShell `scripts\check.ps1`
+  gate all passed locally again at `2026-06-15 05:44 UTC`.
 
 ### Completed: Expand payment and forced-ETH invariants (Queue Item 182)
 

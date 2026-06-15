@@ -67,7 +67,15 @@ def fake_runner(
     tag_commit: str = COMMIT,
     tag_verify_code: int = 0,
     signer_fingerprint: str = "b" * 40,
+    tag_verify_stderr: str | None = None,
 ) -> FakeRunner:
+    if tag_verify_stderr is None:
+        tag_verify_stderr = (
+            f"gpg: using RSA key {signer_fingerprint}\n"
+            "gpg: Good signature from release@example.test\n"
+            if tag_verify_code == 0
+            else "gpg: BAD signature\n"
+        )
     return FakeRunner(
         {
             ("git", "rev-parse", "HEAD"): checker.CommandResult(0, head + "\n", ""),
@@ -77,10 +85,7 @@ def fake_runner(
             ("git", "tag", "-v", TAG): checker.CommandResult(
                 tag_verify_code,
                 "object " + COMMIT + "\n",
-                f"gpg: using RSA key {signer_fingerprint}\n"
-                "gpg: Good signature from release@example.test\n"
-                if tag_verify_code == 0
-                else "gpg: BAD signature\n",
+                tag_verify_stderr,
             ),
         }
     )
@@ -207,6 +212,12 @@ class SignedReleaseTagTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "requires --tag"):
                 checker.check_signed_release_tag(root, mode="release", runner=fake_runner())
 
+    def test_release_mode_rejects_unsafe_tag_names(self) -> None:
+        for tag in ["../v0.1.0", "release@{bad}", "release^bad", "/v0.1.0", "v0.1.0.lock"]:
+            with self.subTest(tag=tag):
+                with self.assertRaisesRegex(checker.SignedReleaseTagError, "safe Git tag name"):
+                    checker.check_signed_release_tag(Path("."), mode="release", tag=tag)
+
     def test_release_mode_rejects_missing_tag_ref(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -255,6 +266,25 @@ class SignedReleaseTagTests(unittest.TestCase):
                         Path("release-artifacts/signatures"),
                     ],
                     runner=fake_runner(tag_verify_code=1),
+                )
+
+    def test_release_mode_rejects_tag_verification_without_good_signature_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_release_tree(root)
+
+            with self.assertRaisesRegex(checker.SignedReleaseTagError, "good-signature marker"):
+                checker.check_signed_release_tag(
+                    root,
+                    mode="release",
+                    tag=TAG,
+                    covered_paths=[
+                        Path("release-artifacts/schema"),
+                        Path("release-artifacts/signatures"),
+                    ],
+                    runner=fake_runner(
+                        tag_verify_stderr=f"gpg: using RSA key {'b' * 40}\n"
+                    ),
                 )
 
     def test_release_mode_rejects_stale_checksum_bundle(self) -> None:
@@ -308,6 +338,30 @@ class SignedReleaseTagTests(unittest.TestCase):
                         Path("release-artifacts/signatures"),
                     ],
                     runner=fake_runner(signer_fingerprint="c" * 40),
+                )
+
+    def test_release_mode_rejects_missing_signer_fingerprint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence_path = write_release_tree(root)
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            del evidence["signing_identity"]["public_key_fingerprint"]
+            write_json(evidence_path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.SignedReleaseTagError,
+                "public_key_fingerprint",
+            ):
+                checker.check_signed_release_tag(
+                    root,
+                    mode="release",
+                    tag=TAG,
+                    evidence=[evidence_path],
+                    covered_paths=[
+                        Path("release-artifacts/schema"),
+                        Path("release-artifacts/signatures"),
+                    ],
+                    runner=fake_runner(),
                 )
 
     def test_release_mode_rejects_checksum_covered_signature_evidence(self) -> None:

@@ -23,6 +23,11 @@ evidence:
 python scripts/check_signed_release_tag.py --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json
 ```
 
+Strict release mode depends on the runner's trusted keyring for the actual Git
+tag signature trust decision. The retained release evidence must also include a
+non-empty public-key fingerprint, and `git tag -v` output must contain the same
+fingerprint as a discrete token together with an explicit good-signature marker.
+
 Production releases must retain:
 
 - the exact `release-artifacts/latest/SHA256SUMS` file that was signed;

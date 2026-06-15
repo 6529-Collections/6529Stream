@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
-from string import hexdigits
 from pathlib import Path
 from typing import Sequence
 
@@ -22,6 +22,14 @@ import generate_release_checksums as checksum_generator  # noqa: E402
 DEFAULT_SIGNATURE_DIR = Path("release-artifacts/signatures")
 DEFAULT_OUTPUT_DIR = checksum_generator.DEFAULT_OUTPUT_DIR
 DEFAULT_COVERED_PATHS = checksum_generator.DEFAULT_COVERED_PATHS
+TAG_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
+GOOD_SIGNATURE_RE = re.compile(
+    r"(?im)(^|\b)(gpg:\s+)?good\s+(?:\"git\"\s+)?signature\b|"
+    r"^\[GNUPG:\]\s+(GOODSIG|VALIDSIG)\b"
+)
+FINGERPRINT_TOKEN_RE = re.compile(
+    r"(?<![0-9A-Fa-f])(?:[0-9A-Fa-f][ :]?){40,64}(?![0-9A-Fa-f])"
+)
 
 
 class SignedReleaseTagError(RuntimeError):
@@ -57,9 +65,27 @@ def normalize_path(path: Path, repo_root: Path) -> str:
 def validate_tag_name(tag: str) -> None:
     if not tag:
         raise SignedReleaseTagError("release mode requires --tag")
-    if tag.strip() != tag or tag.startswith("-") or any(character.isspace() for character in tag):
-        raise SignedReleaseTagError("release tag must not contain whitespace or start with '-'")
-    if "\\" in tag or ".." in Path(tag).parts or tag.endswith("/") or tag.endswith(".lock"):
+    if not TAG_NAME_RE.fullmatch(tag):
+        raise SignedReleaseTagError("release tag must be a safe Git tag name")
+    if (
+        tag.startswith("/")
+        or tag.startswith("-")
+        or tag.endswith("/")
+        or tag.endswith(".")
+        or "//" in tag
+        or "@{" in tag
+        or tag == "@"
+    ):
+        raise SignedReleaseTagError("release tag must be a safe Git tag name")
+    for component in tag.split("/"):
+        if (
+            component in {"", ".", ".."}
+            or component.startswith(".")
+            or component.endswith(".lock")
+            or component.endswith(".")
+        ):
+            raise SignedReleaseTagError("release tag must be a safe Git tag name")
+    if ".." in tag:
         raise SignedReleaseTagError("release tag must be a safe Git tag name")
 
 
@@ -104,7 +130,25 @@ def verify_tag_signature(repo_root: Path, runner: GitRunner, tag: str) -> str:
         raise SignedReleaseTagError(f"release tag {tag} signature verification failed")
     if not output:
         raise SignedReleaseTagError(f"release tag {tag} signature verification produced no output")
+    if not GOOD_SIGNATURE_RE.search(output):
+        raise SignedReleaseTagError(
+            f"release tag {tag} signature verification did not include a good-signature marker"
+        )
     return output
+
+
+def verification_output_contains_fingerprint(output: str, fingerprint: str) -> bool:
+    expected = fingerprint.lower()
+    for line in output.splitlines():
+        for match in FINGERPRINT_TOKEN_RE.finditer(line):
+            candidate = "".join(
+                character.lower()
+                for character in match.group(0)
+                if character in "0123456789abcdefABCDEF"
+            )
+            if candidate == expected:
+                return True
+    return False
 
 
 def verify_checksum_bundle(
@@ -180,11 +224,6 @@ def matching_release_evidence(
     checksum_covered_paths: set[str],
     tag_verification_output: str,
 ) -> Path:
-    tag_verification_hex = "".join(
-        character.lower()
-        for character in tag_verification_output
-        if character in hexdigits
-    )
     checked = []
     for path in evidence_paths(repo_root, configured_evidence):
         evidence = load_valid_evidence(path, repo_root)
@@ -204,10 +243,17 @@ def matching_release_evidence(
             reasons.append("source.source_dirty is not false")
         if evidence.get("network", {}).get("environment") == "local":
             reasons.append("network.environment is local")
-        fingerprint = str(
-            evidence.get("signing_identity", {}).get("public_key_fingerprint", "")
-        ).lower()
-        if fingerprint and fingerprint not in tag_verification_hex:
+        try:
+            fingerprint = release_signatures.require_fingerprint(
+                evidence.get("signing_identity", {}).get("public_key_fingerprint"),
+                "signing_identity.public_key_fingerprint",
+            )
+        except release_signatures.ReleaseSignatureEvidenceError as exc:
+            reasons.append(str(exc))
+            fingerprint = ""
+        if fingerprint and not verification_output_contains_fingerprint(
+            tag_verification_output, fingerprint
+        ):
             reasons.append("signed tag verification output does not include signer fingerprint")
 
         signatures = evidence.get("signatures", {})
