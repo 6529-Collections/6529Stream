@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/provenance-manifest-model` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/411` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/412` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/413` |
 | Next issue | `ONE-003` royalty philosophy after ONE-002 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 18:06 UTC` |
+| Last updated | `2026-06-15 18:10 UTC` |
 
 ## Packaging Notes
 
@@ -265,9 +265,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add 1/1 provenance manifest model (Queue Item 198)
 
-Status: Local validation complete; PR not opened yet.
+Status: PR #413 open and ready for review; CodeRabbit review requested in
+comment `4710926034`; CI and bot comments pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/412`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/413`.
 Branch: `codex/provenance-manifest-model`.
 Branch started from PR #411 squash merge commit
 `af6c9c8c645a5135ab431ceafa5a9be2e3c2976d`.
@@ -15319,6 +15320,7 @@ Outcome:
 | 2026-06-15 17:24 | Merge PR #411 and select ONE-002 | Contract-level metadata adapter merged as `af6c9c8c645a5135ab431ceafa5a9be2e3c2976d`, issue #410 closed completed, and issue #412 opened for the 1/1 provenance manifest model. The merge kept `StreamCore` at `24,139` runtime bytes with `437` bytes of EIP-170 headroom, so the next 1/1 product surface should stay artifact/satellite-first unless a later size-budget decision accepts Core spend. |
 | 2026-06-15 17:50 | Implement ONE-002 local draft | Started branch `codex/provenance-manifest-model` from PR #411 merge commit `af6c9c8c645a5135ab431ceafa5a9be2e3c2976d`; added provenance docs, schema, retained artifact template, generator/checker/tests, generated manifest, integration/release-readiness/release-artifact docs, local/CI gate wiring, release-manifest/checksum coverage, changelog, backlog, and durable-state updates while preserving the artifact-only boundary. |
 | 2026-06-15 18:06 | Validate ONE-002 local draft | Focused provenance tests/checker/generator, integration/release-readiness doc checkers, risk register, release manifest, bytecode proof, checksums, release artifacts, changelog, Python compile, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all passed. Existing Foundry compiler and trace warnings are known backlog warning-noise items. |
+| 2026-06-15 18:10 | Open PR #413 for ONE-002 | PR #413 opened on branch `codex/provenance-manifest-model`, closes issue #412, and CodeRabbit review was requested in comment `4710926034`. |
 
 ## Resume Instructions
 
