@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fixed-price-flow-spec` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/391` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/392` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/393` |
 | Next issue | TBD after INT-002; likely `INT-003` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 09:22 UTC` |
+| Last updated | `2026-06-15 10:05 UTC` |
 
 ## Packaging Notes
 
@@ -255,12 +255,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add fixed-price mint and drop authorization flow spec (Queue Item 188)
 
-Status: Local validation complete; PR not opened yet.
+Status: PR #393 open; CI and bot feedback pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/392`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/393`.
 Branch: `codex/fixed-price-flow-spec`.
 Branch started from PR #391 squash merge commit
 `f4fdb5fb4e6923bfd787a734a59aca4457bd8755`.
+Initial PR head: `58cd06346c29bbc562a9d8da65ea2a0b3b43b5de`.
 
 Goal:
 
@@ -14288,6 +14289,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 10:05 | Open PR #393 | Fixed-price drop flow spec PR opened on head `58cd06346c29bbc562a9d8da65ea2a0b3b43b5de`, links issue #392, records local validation evidence, and awaits CI plus CodeRabbit/6529bot feedback. |
 | 2026-06-15 09:22 | Finish Queue Item 188 local validation | Focused docs/artifact checks and full Windows `scripts\check.ps1` passed after regenerating risk-register, release-manifest, bytecode-release-proof, and checksum outputs; the first sandboxed full-wrapper attempt hit `Access is denied` launching the installed Foundry binary, and the escalated rerun passed. |
 | 2026-06-15 08:44 | Start Queue Item 188 | PR #391 squash-merged as `f4fdb5fb4e6923bfd787a734a59aca4457bd8755`; issue #392 and branch `codex/fixed-price-flow-spec` now track INT-002 so frontend and backend-signing teams get a checked fixed-price mint/drop authorization flow spec before deeper app architecture work. |
 | 2026-06-15 08:34 | Merge PR #391 | Integrations entrypoint PR merged after CI run `27533663351` passed latest head `9bb27e3761746f3c524c7e0cf1c06956325a84fb`, CodeRabbit status was success, no review threads were present, 6529bot reported no security findings and "Good to merge," and merge-decision comment `4706039924` documented the non-blocking nice-to-have notes. |
