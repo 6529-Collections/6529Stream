@@ -14,6 +14,7 @@ Run after the production build profile:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/check_contract_size_budget.py
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_release_artifacts.py
 python scripts/generate_source_verification_inputs.py
@@ -62,6 +63,8 @@ python scripts/generate_release_checksums.py
 Check the committed artifacts without rewriting them:
 
 ```sh
+python scripts/test_contract_size_budget.py
+python scripts/check_contract_size_budget.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
@@ -441,6 +444,12 @@ constructor, fallback, and receive surface. The check fails on removed or
 changed entries and reports additive entries as compatible for this first
 release baseline.
 
+`contracts.json` also carries the production runtime size budget. The local and
+CI size-budget checker reads the production Foundry artifacts, computes linked
+runtime size even when Solidity library placeholders are still unlinked, checks
+every production contract against EIP-170, and enforces the configured
+`StreamCore` minimum margin before release artifacts can be considered current.
+
 `baselines/v0.1.0/gas-snapshot.snap` is the local Foundry gas snapshot for the
 Gate D operations. It is generated with `forge snapshot --match-path
 test/StreamGasSnapshot.t.sol --snap
@@ -457,6 +466,7 @@ inherited `supportsInterface` or event-only declarations.
 After any covered artifact changes, refresh the checksum bundle with:
 
 ```sh
+python scripts/check_contract_size_budget.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
 python scripts/generate_source_verification_inputs.py

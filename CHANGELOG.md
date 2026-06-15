@@ -463,6 +463,10 @@ the release policy in `docs/release-policy.md`.
   probe with equivalent low-level staticcalls that preserve pending-probe
   revert data. The production IR-optimized runtime is now 24,139 bytes with 437
   bytes of EIP-170 headroom.
+- Recovered additional `StreamCore` runtime bytecode headroom by replacing the
+  unused inherited ERC-2981 default-royalty machinery with equivalent fixed
+  `royaltyInfo` logic and explicit ERC-2981 interface support. The production
+  IR-optimized runtime is now 24,047 bytes with 529 bytes of EIP-170 headroom.
 
 ### Release Impact
 
@@ -504,6 +508,13 @@ the release policy in `docs/release-policy.md`.
   `release-artifacts/dependencies/`.
 - Gate D/G release artifacts now include the bytecode delta from production
   raw-attribute schema enforcement in `StreamMetadataRenderer`.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  replacing inherited ERC-2981 default-royalty machinery with equivalent fixed
+  royalty logic, plus generated creation/runtime bytecode size fields and
+  bytecode-release-proof size assertions.
+- Gate D/G now enforces the `StreamCore` runtime size budget from
+  `release-artifacts/contracts.json` in local checks, CI, and the Windows
+  wrapper.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   `StreamCore` size-recovery custom errors:
   `ArtistSignatureUnauthorized()`, `FunctionAdminUnauthorized()`,

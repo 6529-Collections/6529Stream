@@ -276,6 +276,7 @@ are generated from the production `via-ir` Foundry artifacts:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/check_contract_size_budget.py
 python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/generate_source_verification_inputs.py
@@ -303,7 +304,9 @@ python scripts/generate_release_checksums.py --check
 The committed baseline is under `release-artifacts/latest/`. `StreamCore`
 currently links `StreamMetadataRenderer`, so its bytecode hash entries are
 explicitly marked as `unlinked_artifact_object` until a broadcast or linked
-verification artifact supplies the final deployed bytecode.
+verification artifact supplies the final deployed bytecode. Runtime size budget
+checks still count those placeholders as 20-byte library addresses, matching the
+deployed linked bytecode shape for EIP-170 budgeting.
 
 Deployment manifest generation reads the committed manifest input, fills ABI and
 runtime bytecode hashes from `release-artifacts/latest/abi-checksums.json`, and
