@@ -58,6 +58,12 @@ Use
 as the metadata rendering, cache, animation sandbox, and marketplace
 integration guide for current INT-006 integration work.
 Use
+[`docs/integrations/marketplace-indexer-evidence.md`](integrations/marketplace-indexer-evidence.md)
+as the `ONE-005` retained marketplace/indexer evidence guide for OpenSea,
+Reservoir, Blur, Manifold, equivalent collector/indexer tooling, contract
+metadata, token metadata refresh, animation rendering, royalty display,
+transfer/listing/sale paths, event replay, and cache invalidation.
+Use
 [`docs/integrations/frontend-reference-architecture.md`](integrations/frontend-reference-architecture.md)
 as the React/Next frontend reference architecture for current INT-007
 integration work, including artifact import, client layering, query/cache,
@@ -405,6 +411,7 @@ Audit and protocol evidence:
 - [docs/integrations/wallets-and-signatures.md](integrations/wallets-and-signatures.md)
 - [docs/integrations/events-and-indexing.md](integrations/events-and-indexing.md)
 - [docs/integrations/metadata-rendering.md](integrations/metadata-rendering.md)
+- [docs/integrations/marketplace-indexer-evidence.md](integrations/marketplace-indexer-evidence.md)
 - [docs/integrations/frontend-reference-architecture.md](integrations/frontend-reference-architecture.md)
 - [docs/integrations/mobile-walletconnect.md](integrations/mobile-walletconnect.md)
 - [docs/integrations/electron-security-wallets.md](integrations/electron-security-wallets.md)
@@ -483,6 +490,8 @@ python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
 python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
+python scripts/test_marketplace_indexer_evidence.py
+python scripts/check_marketplace_indexer_evidence.py
 python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
 python scripts/test_mobile_walletconnect.py

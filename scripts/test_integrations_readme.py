@@ -65,7 +65,8 @@ one-of-one permanence manifest, browser proof, fully on-chain versus
 decentralized storage, royalty policy, ERC-2981, royalty disclosure, not
 payment enforcement, No production-readiness claim depends on marketplaces
 honoring royalties, EIP-712, ERC-1271, risk register, and public-beta
-evidence status are named.
+evidence status are named. ONE-005 retained marketplace/indexer evidence
+for OpenSea, Reservoir, Blur, and Manifold is named.
 
 ## Canonical Artifacts
 

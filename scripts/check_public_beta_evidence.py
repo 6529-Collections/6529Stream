@@ -24,6 +24,7 @@ PUBLIC_BETA_REQUIREMENTS = (
     "fork_deployment_rehearsal",
     "testnet_deployment_rehearsal",
     "fork_testnet_metadata_browser_evidence",
+    "fork_testnet_marketplace_indexer_evidence",
     "fork_testnet_ceremony_evidence",
     "fork_testnet_randomizer_operations_evidence",
     "verified_deployed_addresses",
@@ -37,6 +38,7 @@ PRODUCTION_REQUIREMENTS = (
     "live_deployment_manifest",
     "live_ceremony_evidence",
     "live_randomizer_operations_evidence",
+    "live_marketplace_indexer_evidence",
     "live_explorer_verification",
     "post_audit_remediation",
 )
@@ -50,6 +52,7 @@ RUNBOOK_REVIEW_REQUIREMENTS = frozenset(
         "fork_deployment_rehearsal",
         "testnet_deployment_rehearsal",
         "fork_testnet_metadata_browser_evidence",
+        "fork_testnet_marketplace_indexer_evidence",
         "fork_testnet_ceremony_evidence",
         "fork_testnet_randomizer_operations_evidence",
         "verified_deployed_addresses",
@@ -61,6 +64,7 @@ RUNBOOK_REVIEW_REQUIREMENTS = frozenset(
         "live_deployment_manifest",
         "live_ceremony_evidence",
         "live_randomizer_operations_evidence",
+        "live_marketplace_indexer_evidence",
         "live_explorer_verification",
         "post_audit_remediation",
     }
