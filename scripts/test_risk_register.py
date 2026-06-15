@@ -53,6 +53,7 @@ def seed_file(root: Path, relative_path: str, text: str = "seed\n") -> Path:
 def minimal_register(root: Path) -> dict[str, object]:
     source = seed_file(root, "docs/source.md")
     evidence = seed_file(root, "docs/evidence.md")
+    seed_file(root, "scripts/check_risk_register.py", "#!/usr/bin/env python3\n")
     risks = []
     for index, area in enumerate(sorted(checker.REQUIRED_AREAS), start=1):
         risk_id = f"RISK-T{index:02d}-{index:03d}"
@@ -217,6 +218,16 @@ class RiskRegisterTests(unittest.TestCase):
             write_json(root / checker.DEFAULT_REGISTER, register)
 
             with self.assertRaisesRegex(checker.RiskRegisterError, "checks must not be empty"):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_rejects_missing_python_check_script(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            register["risks"][0]["checks"] = ["python scripts/renamed_check.py --check"]
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(checker.RiskRegisterError, "references missing file"):
                 checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
 
     def test_rejects_secret_like_key_or_value(self) -> None:

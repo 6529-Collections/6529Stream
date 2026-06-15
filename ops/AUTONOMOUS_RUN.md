@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 07:41 UTC` |
+| Last updated | `2026-06-15 07:51 UTC` |
 
 ## Packaging Notes
 
@@ -253,8 +253,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add risk register and audit-boundary checker (Queue Item 186)
 
-Status: PR #389 open; CodeRabbit review requested in comment `4705647847`;
-awaiting CI and bot feedback.
+Status: PR #389 open; CI passed on initial head, 6529bot non-blocking
+hardening note addressed locally and pending push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/388`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/389`.
 Branch: `codex/risk-register`.
@@ -333,6 +333,23 @@ Notes:
   does not change Solidity bytecode.
 - `git diff --check` passed and printed Git's normal LF-to-CRLF warning for
   `scripts/check.ps1`.
+
+Bot feedback addressed locally at `2026-06-15 07:51 UTC`:
+
+- 6529bot comment `4705658115` reported "No new findings" and suggested a
+  non-blocking hardening item: validate that `python scripts/*.py` check
+  commands in risk rows point at existing files.
+- Added `validate_check_command()` to `scripts/check_risk_register.py`, seeded
+  the release-manifest fixture script path, and added
+  `test_rejects_missing_python_check_script`.
+- Focused validation passed:
+  `python scripts/test_risk_register.py`,
+  `python scripts/check_risk_register.py`,
+  `python scripts/generate_risk_register.py --check`,
+  `python scripts/test_release_manifest.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python -m py_compile scripts\check_risk_register.py scripts\test_risk_register.py scripts\test_release_manifest.py`,
+  and `git diff --check`.
 
 Open concerns:
 
@@ -14087,6 +14104,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 07:51 | Address PR #389 hardening note | 6529bot found no blocking issues but suggested validating risk-register `python scripts/*.py` check references. Implemented the stricter checker and fixture/test coverage before merge. |
 | 2026-06-15 07:41 | Open PR #389 | Risk-register PR opened on head `3bff44156310a8ea171fbd02ca6e984110db28a6`, links issue #388, records full local validation, and CodeRabbit review was requested in comment `4705647847`. |
 | 2026-06-15 07:38 | Complete Queue Item 186 local validation | Risk-register generator/checker/tests, audit package/readiness checks, release artifact/manifest/proof/checksum checks, changelog gate, Python compile, diff hygiene, and full Windows check wrapper all passed locally before opening the PR. |
 | 2026-06-15 07:27 | Start Queue Item 186 | PR #387 squash-merged as `193a208f42246841a8469386ce2097b5b50097b9`; issue #388 and branch `codex/risk-register` now track AUD-002 so reviewer-supplied production trust, 1/1 product, marketplace/indexer, size, warning, and evidence gaps become a generated checked risk register rather than prose-only roadmap notes. |

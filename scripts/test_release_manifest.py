@@ -33,6 +33,7 @@ def write_text(path: Path, value: str) -> None:
 
 def minimal_risk_register(root: Path, source_path: Path, evidence_path: Path) -> dict[str, object]:
     """Build a minimal valid risk register fixture."""
+    write_text(root / "scripts/check_risk_register.py", "#!/usr/bin/env python3\n")
     risks = []
     evidence = {
         "path": evidence_path.resolve().relative_to(root.resolve()).as_posix(),

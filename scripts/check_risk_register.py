@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import shlex
 import sys
 from datetime import date
 from pathlib import Path
@@ -246,6 +247,22 @@ def validate_tracking_ref(value: Any, repo_root: Path, path: str) -> None:
     resolve_repo_file(repo_root, local_path, path)
 
 
+def validate_check_command(value: Any, repo_root: Path, path: str) -> None:
+    """Validate check command strings and script references when present."""
+    command = require_string(value, path)
+    try:
+        tokens = shlex.split(command, posix=True)
+    except ValueError as exc:
+        raise RiskRegisterError(f"{path} must be a parseable command string") from exc
+
+    if len(tokens) < 2 or tokens[0] != "python":
+        return
+
+    script_path = tokens[1].replace("\\", "/")
+    if script_path.startswith("scripts/") and script_path.endswith(".py"):
+        resolve_repo_file(repo_root, script_path, path)
+
+
 def validate_no_secret_shape(value: Any, path: str = "$") -> None:
     """Reject secret-shaped keys and assignment-looking values."""
     if path.startswith("$.redaction_policy"):
@@ -320,7 +337,7 @@ def validate_risk(value: Any, repo_root: Path, index: int) -> dict[str, str]:
     if not checks:
         raise RiskRegisterError(f"{path}.checks must not be empty")
     for check_index, check in enumerate(checks):
-        require_string(check, f"{path}.checks[{check_index}]")
+        validate_check_command(check, repo_root, f"{path}.checks[{check_index}]")
 
     tracking = require_list(risk.get("tracking"), f"{path}.tracking")
     if not tracking:
