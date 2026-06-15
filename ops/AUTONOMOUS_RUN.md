@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 04:45 UTC` |
+| Last updated | `2026-06-15 04:56 UTC` |
 
 ## Packaging Notes
 
@@ -249,7 +249,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Expand payment and forced-ETH invariants (Queue Item 182)
 
-Status: PR #381 open; CI and CodeRabbit review pending.
+Status: PR #381 open; CI passed on initial head, bot nice-to-have follow-up prepared locally.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/380`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/381`.
 Branch: `codex/payment-forced-eth-invariants`.
@@ -287,6 +287,25 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed locally at `2026-06-15 04:45 UTC` with existing compiler and Foundry
   trace warning noise only.
+- PR #381 was marked ready for review and CodeRabbit review was requested in
+  comment `4704661319`; CodeRabbit replied `Review finished` in comment
+  `4704661702`, while its initial rate-limit warning comment `4704657752`
+  produced a success status and no actionable review threads.
+- GitHub Actions run `27524707053` passed on initial head
+  `d2a18efd299ea5a150ceb86377846b261b4e2a15`, including Windows PowerShell
+  wrapper job `81349567851` and Foundry smoke job `81349567865`.
+- 6529bot general review comment `4704665314` marked the PR good to merge with
+  non-blocking nice-to-haves; 6529bot security review comment `4704665519`
+  reported no security findings.
+- Local follow-up for the nice-to-haves added comments documenting the
+  intentional exact `ETH failed` assertion and current full-balance randomizer
+  reserve model. Focused validation passed:
+  `forge fmt --check test\StreamPaymentsInvariant.t.sol`,
+  `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`,
+  `python scripts\check_randomizer_operations.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\generate_release_checksums.py --check`,
+  `python scripts\check_changelog.py`, and `git diff --check`.
 
 ### Completed: Add pause and settlement matrix invariants (Queue Item 181)
 
@@ -13767,6 +13786,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 04:56 | Address PR #381 nice-to-haves | CI passed on initial head `d2a18efd299ea5a150ceb86377846b261b4e2a15`, CodeRabbit status was success despite a rate-limit banner, and 6529bot marked the PR good to merge with non-blocking suggestions. Accepted the low-risk clarity suggestions by documenting the exact `ETH failed` assertion and the current full-balance randomizer reserve model, then refreshed randomizer evidence and release artifacts before focused validation. |
 | 2026-06-15 04:48 | Open PR #381 | PR #381 opened for issue #380 on head `067c31cfc33ff0025c0a73d18faade4c1dddc249`, expands ADV-005 payment and forced-ETH invariant coverage without production contract changes, refreshes retained randomizer operations evidence and deterministic release artifacts, records the clean-main reviewer roadmap additions already folded into the current roadmap/backlog, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-15 02:58 | Merge PR #376 and start Queue Item 180 | PR #376 squash-merged as `ba83f54ca2ea952a62403a8b74faa09e11e150c7` after CI run `27520925937` passed Foundry smoke job `81338566333` and Windows PowerShell wrapper job `81338566247`; CodeRabbit status was success with no submitted reviews and no review threads, merge-decision comment `4704081007` documented the non-actionable rate-limit banner, issue #375 closed completed, and branch `codex/signer-compromise-fuzz` started from the merged baseline for issue #374 / ADV-003 signer compromise and revocation fuzz coverage. |
 | 2026-06-15 02:33 | Start Queue Item 179 | User supplied clean-main reviewer comments for the roadmap after PR #373 merged; issue #375 and branch `codex/reviewer-roadmap-rebaseline` track a bounded documentation/state reconciliation that records the fixed-versus-missing rebaseline, source benchmarks, backlog mapping, and latest verification metadata before returning to substantive ADV-003 signer-compromise fuzz work. |

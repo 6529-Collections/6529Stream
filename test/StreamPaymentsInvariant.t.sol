@@ -533,6 +533,7 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         _assertCuratorTotals();
         surplusMinter.totalOwed().assertEq(0, "minter owed");
         surplusMinter.totalReserved().assertEq(0, "minter reserved");
+        // Current RNG adapter policy treats the full adapter balance as reserved provider funds.
         address(randomizer).balance
             .assertEq(randomizer.totalRandomnessReserved(), "randomizer balance reserved");
         randomizer.totalOwed().assertEq(randomizer.totalRandomnessReserved(), "randomizer owed");
@@ -705,6 +706,7 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         pure
     {
         require(!success, message);
+        // Keep failed-withdrawal handlers pinned to the current withdrawal error surface.
         require(
             keccak256(revertData)
                 == keccak256(abi.encodeWithSignature("Error(string)", "ETH failed")),
