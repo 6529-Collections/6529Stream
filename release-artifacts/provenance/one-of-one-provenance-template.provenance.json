@@ -132,7 +132,7 @@
     {
       "category": "provenance_runbook",
       "path": "docs/provenance-manifests.md",
-      "sha256": "sha256:af43a565f5269274845f9499e1fd5f8ff8955dd764f780648a4199f8382dd293"
+      "sha256": "sha256:ec54197989419f54827409f81a4fb0ae82bab62749d839afd474019dd572865a"
     }
   ],
   "redaction_policy": {

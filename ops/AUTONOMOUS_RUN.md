@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-size-budget-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/413` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/414` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/415` |
-| Next issue | After CON-005, resume `ONE-003` royalty philosophy unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/royalty-policy-boundary` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/415` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/416` |
+| Active PR | TBD |
+| Next issue | After `ONE-003`, continue to `ONE-004` collector-verifiable permanence package unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 19:10 UTC` |
+| Last updated | `2026-06-15 20:26 UTC` |
 
 ## Packaging Notes
 
@@ -15325,6 +15325,8 @@ Outcome:
 | 2026-06-15 18:35 | Implement CON-005 local draft | Branch `codex/streamcore-size-budget-headroom` replaces unused inherited ERC-2981 default-royalty machinery with fixed `royaltyInfo` logic and explicit ERC-2981 interface support, adds `StreamRoyalty` regressions, adds an artifact-backed runtime size-budget checker wired into Makefile, bash, PowerShell, and CI, records budget thresholds in `release-artifacts/contracts.json`, and regenerates release/deployment artifacts. Focused checks currently pass and `StreamCore` measures 24,047 runtime bytes with 529 bytes of EIP-170 headroom. |
 | 2026-06-15 19:10 | Open PR #415 for CON-005 | Full `make check`, Windows `scripts\check.ps1`, focused size-budget/royalty/artifact checks, `forge build --sizes --via-ir --skip test --skip script --force`, and `git diff --check` passed. PR #415 is open on branch `codex/streamcore-size-budget-headroom`, closes issue #414, and CodeRabbit review was requested in comment `4711435580`. |
 | 2026-06-15 19:47 | Address PR #415 review coverage | 6529bot requested explicit royalty/interface and size-budget checker proof. Added `StreamRoyalty` regressions for retained ERC-165/ERC-721/ERC-721 metadata/ERC-2981/ERC-4906 support, large-sale royalty equivalence, and checked-overflow semantics; expanded the size-budget checker to fail any production contract that exceeds EIP-170, even without a configured release-floor entry; added multi-placeholder and unbudgeted-contract unit coverage; refreshed release proof/manifest/checksum/risk artifacts. Local validation passed: focused royalty/event/size-budget/artifact checks, `python scripts\check_contract_size_budget.py`, full `make check`, Windows `scripts\check.ps1`, and `git diff --check`; `StreamCore` remains 24,047 runtime bytes with 529 bytes of EIP-170 headroom. |
+| 2026-06-15 20:06 | Start ONE-003 royalty policy boundary | PR #415 merged as `a10b9abbf01e654c51959c2f83ae75fef4727819`, issue #416 was opened for the royalty philosophy/enforcement boundary, and branch `codex/royalty-policy-boundary` is implementing a docs-first royalty policy with checker/test wiring, integration/release-readiness links, release-manifest coverage, and risk-register source tracking. Solidity changes are intentionally out of scope unless a future size-budget and governance decision accepts them. |
+| 2026-06-15 20:26 | Validate ONE-003 local draft | Added `docs/royalty-policy.md`, `scripts/check_royalty_policy.py`, `scripts/test_royalty_policy.py`, integration/release-readiness/release-policy cross-links, Makefile/bash/PowerShell/CI wiring, release-manifest/risk-register source tracking, and regenerated provenance/release/checksum artifacts. Focused royalty, integrations, release-readiness, provenance, risk-register, release-manifest, bytecode-proof, checksum, changelog, Python compile, heading scan, and `git diff --check` passed. Full `make check` and Windows `scripts\check.ps1` passed with existing Foundry warning noise only. |
 
 ## Resume Instructions
 
