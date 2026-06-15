@@ -17,6 +17,7 @@ REQUIRED_HEADINGS = {
         (1, "Architecture"),
         (2, "Maturity And Scope"),
         (2, "System Components"),
+        (2, "Product Extension And Size-Budget Policy"),
         (2, "Actor And Role Boundaries"),
         (2, "Protocol Flows"),
         (2, "Value And Custody Boundaries"),
@@ -63,6 +64,22 @@ REQUIRED_ARCHITECTURE_PHRASES = [
     "metadata",
     "deployment",
     "release",
+]
+
+REQUIRED_SIZE_POLICY_PHRASES = [
+    "satellite-first",
+    "satellite contracts",
+    "read adapters",
+    "linked libraries",
+    "release artifacts",
+    "explicit size-budget exception",
+    "measured before/after `StreamCore` runtime bytecode delta",
+    "23,661 bytes",
+    "915 bytes",
+    "384-byte minimum",
+    "512-byte warning",
+    "forge build --sizes --via-ir --skip test --skip script --force",
+    "python scripts/check_contract_size_budget.py",
 ]
 
 REQUIRED_THREAT_PHRASES = [
@@ -118,11 +135,13 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/release-manifest.json",
     "release-artifacts/latest/SHA256SUMS",
     "release-artifacts/latest/release-checksums.json",
+    "release-artifacts/contracts.json",
     "test/StreamPaymentsInvariant.t.sol",
     "test/StreamSupplyReplayFreezeInvariant.t.sol",
     "test/StreamAuctionInvariant.t.sol",
     "test/StreamRandomizerPayments.t.sol",
     "test/StreamDeploymentManifest.t.sol",
+    "scripts/check_contract_size_budget.py",
     "scripts/check_audit_package.py",
 ]
 
@@ -193,8 +212,12 @@ def linked_repo_paths(repo_root: Path, documents: dict[Path, str]) -> set[str]:
 
 
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
-    normalized_text = text.lower()
-    return [phrase for phrase in phrases if phrase.lower() not in normalized_text]
+    normalized_text = " ".join(text.lower().split())
+    return [
+        phrase
+        for phrase in phrases
+        if " ".join(phrase.lower().split()) not in normalized_text
+    ]
 
 
 def validate_document_headings(
@@ -258,6 +281,15 @@ def validate_architecture_threat_model(
         raise ArchitectureThreatModelError(
             "architecture is missing required content: "
             + ", ".join(missing_architecture)
+        )
+
+    missing_size_policy = missing_phrases(
+        documents[architecture_path], REQUIRED_SIZE_POLICY_PHRASES
+    )
+    if missing_size_policy:
+        raise ArchitectureThreatModelError(
+            "architecture is missing required size-budget policy content: "
+            + ", ".join(missing_size_policy)
         )
 
     missing_threats = missing_phrases(

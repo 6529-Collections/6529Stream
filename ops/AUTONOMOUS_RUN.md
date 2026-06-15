@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/marketplace-indexer-evidence-model` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/422` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
-| Next issue | Implement `ONE-005` marketplace/indexer retained evidence model. Supporting evidence tracker issues were opened as `https://github.com/6529-Collections/6529Stream/issues/423` (`fork_testnet_marketplace_indexer_evidence`) and `https://github.com/6529-Collections/6529Stream/issues/424` (`live_marketplace_indexer_evidence`) and must remain incomplete until real reviewed external evidence is retained. |
+| Active PR branch | `codex/satellite-extension-policy` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/426` |
+| Active PR | None yet |
+| Next issue | Implement `ONE-006` satellite-extension architecture policy so future 1/1 product surfaces default to satellites/read adapters/libraries/release artifacts unless an explicit measured `StreamCore` size-budget exception is accepted. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 23:51 UTC` |
+| Last updated | `2026-06-15 23:57 UTC` |
 
 ## Packaging Notes
 
@@ -262,6 +262,67 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 198 | Add 1/1 provenance manifest model | Gate G/Gate F support | Add provenance model docs, schema, retained artifact template, generated manifest, local/CI checks, release-manifest/checksum coverage, and artifact-only boundaries while preserving `StreamCore` bytecode headroom | In progress on issue #412 |
 
 ## Current PR Worklog
+
+### PR candidate: Add satellite-extension architecture policy (Queue Item ONE-006)
+
+Status: Ready to commit and open PR after local validation; no PR open yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/426`.
+PR: None yet.
+Branch: `codex/satellite-extension-policy`.
+Branch started from PR #425 squash merge commit
+`48eae446f47f6d4d65d844b1413059e275d8f0e9`.
+
+Goal:
+
+- Make future 1/1 product work satellite-first by default while `StreamCore`
+  bytecode headroom remains finite.
+- Define when a feature belongs in Core, a satellite contract, a read adapter,
+  a linked library, release artifacts, or docs-only evidence.
+- Require measured before/after `StreamCore` runtime deltas and explicit
+  size-budget exception notes for non-critical Core bytecode spend.
+- Tie the policy to the current production runtime of 23,661 bytes, 915 bytes
+  of EIP-170 headroom, the 384-byte minimum release floor, and the 512-byte
+  warning threshold.
+- Add checker/test coverage so future edits cannot quietly remove the
+  satellite-first policy or size-budget command references.
+
+Validation plan:
+
+- `python scripts/test_architecture_threat_model.py`.
+- `python scripts/check_architecture_threat_model.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_architecture_threat_model.py scripts/test_architecture_threat_model.py`.
+- `make architecture-threat-model-check release-manifest-check release-checksums-check changelog-check`.
+- `git diff --check`.
+
+Notes:
+
+- This branch is policy/checker/docs only. No Solidity bytecode change is
+  planned.
+- PR #425 merged as `48eae446f47f6d4d65d844b1413059e275d8f0e9`; issue #422
+  is closed completed. Tracker issues #423 and #424 intentionally remain open
+  for future reviewed public-beta and production marketplace/indexer evidence.
+
+Validation result:
+
+- Architecture/threat-model checker tests and doc check passed.
+- Release manifest, bytecode release proof, release checksum, and risk-register
+  generator tests/checks passed after regenerating the derived artifacts.
+- `python scripts/check_changelog.py`, Python compile for touched checker
+  scripts, and `git diff --check` passed.
+- `make architecture-threat-model-check release-manifest-check
+  release-checksums-check changelog-check` passed, including the production
+  size build that still measures `StreamCore` at 23,661 runtime bytes with
+  915 bytes of EIP-170 headroom.
 
 ### PR candidate: Add marketplace and indexer retained evidence model (Queue Item ONE-005)
 
@@ -15429,6 +15490,7 @@ Outcome:
 | 2026-06-15 23:38 | Validate ONE-005 PR candidate | Marketplace/indexer evidence model, dedicated checker/tests, release-evidence rows, retained templates, release packet/backlog/body-sync, release manifest/checksums, risk register, integration docs, local `make check`, Windows `scripts\check.ps1`, and `git diff --check` passed locally. No Solidity bytecode changed; `StreamCore` remains at the PR #421 production runtime size. |
 | 2026-06-15 23:41 | Open PR #425 for ONE-005 | PR #425 is open and ready for review, closes issue #422, and CodeRabbit review was requested in comment `4713416626`. Tracker issues #423 and #424 remain open for future reviewed public-beta and production marketplace/indexer evidence. |
 | 2026-06-15 23:51 | Address PR #425 bot nice-to-haves | 6529bot security found no findings and general review marked the PR good to merge. Confirmed `docs/public-beta-evidence.md` list numbering is sequential in the current head, then added direct envelope-template SHA validation to `scripts/check_marketplace_indexer_evidence.py` plus focused matching/drift tests. Focused marketplace-indexer, release manifest/proof/checksum, changelog, Python compile, and `git diff --check` checks passed locally. |
+| 2026-06-15 23:52 | Merge PR #425 and start ONE-006 | PR #425 merged as `48eae446f47f6d4d65d844b1413059e275d8f0e9`, issue #422 closed completed, CodeRabbit status was success, 6529bot follow-up review on the latest head reported no new findings, and GitHub CI run `27583841942` passed. Created issue #426 and branch `codex/satellite-extension-policy` for the satellite-extension architecture policy. |
 
 ## Resume Instructions
 

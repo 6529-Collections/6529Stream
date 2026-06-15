@@ -52,6 +52,59 @@ In this document, `arRNG` means the external randomness controller consumed
 through `ArrngConsumer` by `NextGenRandomizerRNG`. Its concrete provider
 configuration is release evidence, not hard-coded protocol trust.
 
+## Product Extension And Size-Budget Policy
+
+Future 1/1 product work is satellite-first by default. New collector-facing
+features should use satellite contracts, read adapters, linked libraries,
+release artifacts, or documentation-only evidence unless the feature is a
+Core invariant, token-ownership rule, or security boundary that must live in
+`StreamCore`.
+
+The current production size source of truth is
+[`release-artifacts/contracts.json`](../release-artifacts/contracts.json) plus
+the artifact-backed checker
+[`scripts/check_contract_size_budget.py`](../scripts/check_contract_size_budget.py).
+Run `python scripts/check_contract_size_budget.py` after the production size
+build before relying on any size-budget claim.
+The current production profile is:
+
+- command: `forge build --sizes --via-ir --skip test --skip script --force`;
+- current `StreamCore` runtime: 23,661 bytes;
+- current EIP-170 margin: 915 bytes;
+- minimum release floor: 384-byte minimum runtime margin;
+- warning threshold: 512-byte warning runtime margin.
+
+Any PR that spends non-trivial `StreamCore` bytecode must include:
+
+- a linked GitHub issue or ADR explaining why a satellite contract, read
+  adapter, library, release artifact, or docs-only path is insufficient;
+- a measured before/after `StreamCore` runtime bytecode delta from the
+  production profile;
+- the resulting EIP-170 margin and whether it remains above the 384-byte
+  minimum release floor and 512-byte warning threshold;
+- an explicit size-budget exception note in `CHANGELOG.md`,
+  `docs/release-policy.md`, or the affected ADR when the change is
+  non-critical product functionality;
+- updated release artifacts when ABI, bytecode, deployment, manifest, checksum,
+  or bytecode-to-release proof outputs change; and
+- tests or retained evidence proving behavior did not move across trust
+  boundaries accidentally.
+
+The default classification for future feature work is:
+
+| Feature type | Default path | Core spend posture |
+| --- | --- | --- |
+| Ownership, transfer, mint authority, burn, and token-existence invariants | `StreamCore` only when required by ERC-721 semantics | Allowed with measured delta and release-risk review |
+| Metadata rendering helpers, contract-level metadata, provenance, permanence, marketplace/indexer proof, and collector evidence | Satellite contracts, read adapters, release artifacts, or docs | Avoid Core unless an ADR accepts the exception |
+| Royalty display, policy, enforcement experiments, and marketplace compatibility | Current fixed ERC-2981 Core surface plus satellite policy/enforcement contracts if needed | Avoid Core for mutable policy or enforcement experiments |
+| Frontend, mobile, Electron, SDK, analytics, and indexer behavior | Integration docs, generated artifacts, release manifests, and off-chain code | No Core spend |
+| Deployment, ceremony, audit, release, signature, and evidence workflows | Release artifacts, deployment manifests, address books, runbooks, and retained evidence | No Core spend |
+
+This policy is intentionally conservative even with 915 bytes of current
+headroom. The goal is to keep `StreamCore` deployable, auditable, and stable
+while allowing world-class 1/1 drop surfaces to evolve through explicit,
+versioned extension points.
+
 ## Actor And Role Boundaries
 
 The current role model separates operational duties:

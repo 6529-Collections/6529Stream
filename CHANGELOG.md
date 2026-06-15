@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-006 satellite-extension architecture policy coverage with checked
+  architecture-doc size-budget requirements, release-policy/status hooks, and
+  explicit rules for measured `StreamCore` bytecode deltas, size-budget
+  exceptions, and satellite/read-adapter/library/release-artifact defaults for
+  future 1/1 product surfaces.
 - Added ONE-005 marketplace/indexer retained evidence coverage with
   `docs/integrations/marketplace-indexer-evidence.md`, fork/testnet and live
   retained-artifact templates, public-beta and production evidence rows,

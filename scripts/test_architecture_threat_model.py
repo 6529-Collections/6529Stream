@@ -47,6 +47,13 @@ DependencyRegistry, StreamCuratorsPool, NextGenRandomizerVRF, and
 NextGenRandomizerRNG. It describes fixed-price minting, auction flows, pull
 credits, randomizer behavior, metadata behavior, deployment evidence, and
 release evidence.
+Future product work is satellite-first, uses satellite contracts, read
+adapters, linked libraries, release artifacts, or docs, and any explicit
+size-budget exception needs a measured before/after `StreamCore` runtime
+bytecode delta. Current StreamCore runtime is 23,661 bytes with 915 bytes of
+margin, above the 384-byte minimum and 512-byte warning thresholds. Run
+forge build --sizes --via-ir --skip test --skip script --force and
+python scripts/check_contract_size_budget.py.
 
 Read the [threat model](threat-model.md).
 
@@ -57,6 +64,10 @@ This document covers the local baseline.
 ## System Components
 
 Components are listed above.
+
+## Product Extension And Size-Budget Policy
+
+The satellite-first size-budget policy is listed above.
 
 ## Actor And Role Boundaries
 
@@ -266,6 +277,24 @@ class ArchitectureThreatModelTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.ArchitectureThreatModelError, "must link to"
+            ):
+                checker.validate_architecture_threat_model(
+                    root,
+                    root / checker.DEFAULT_ARCHITECTURE,
+                    root / checker.DEFAULT_THREAT_MODEL,
+                )
+
+    def test_rejects_missing_size_policy_phrase(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_architecture_doc().replace("satellite-first", "extension")
+            write_text(root / checker.DEFAULT_ARCHITECTURE, text)
+            write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
+
+            with self.assertRaisesRegex(
+                checker.ArchitectureThreatModelError,
+                "missing required size-budget policy content",
             ):
                 checker.validate_architecture_threat_model(
                     root,

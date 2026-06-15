@@ -15,6 +15,12 @@ The current Gate A smoke baseline proves:
   deployability gate, the current 384-byte minimum release floor, and the
   512-byte warning threshold; large non-trivial `StreamCore` feature work should
   still measure bytecode deltas and explicitly accept any size-budget exception.
+  The architecture policy in
+  [`docs/architecture.md#product-extension-and-size-budget-policy`](architecture.md#product-extension-and-size-budget-policy)
+  makes future collector/product surfaces satellite-first by default through
+  satellite contracts, read adapters, linked libraries, release artifacts, or
+  documentation-only evidence unless Core ownership/security invariants require
+  otherwise.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass

@@ -3141,8 +3141,8 @@ Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.
 
 ### ONE-006: Add Satellite-Extension Architecture Policy
 
-Status: Partially started by CON-005 size-budget enforcement and issue #420
-headroom recovery; broader architecture policy remains planned.
+Status: In progress locally on issue #426 and branch
+`codex/satellite-extension-policy`.
 
 Gate: G.
 
