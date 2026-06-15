@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added AUD-002 generated risk register support with
+  `release-artifacts/latest/risk-register.json`, a retained schema, generator,
+  checker, focused tests, local/CI gate wiring, audit-package and
+  release-readiness links, release-manifest coverage, and checksum coverage so
+  launch blockers, planned mitigations, and accepted local-baseline risks stay
+  machine-checkable.
 - Refreshed the AUD-001 external audit package with a current protocol
   snapshot, explicit local-versus-external evidence gaps, bytecode-to-release
   proof and signed release tag references, release-artifact traceability, and

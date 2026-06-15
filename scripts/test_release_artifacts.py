@@ -156,6 +156,10 @@ class ReleaseArtifactTests(unittest.TestCase):
                 {"schema_version": "6529stream.release-manifest.v1"},
             )
             write_json(
+                output_dir / "risk-register.json",
+                {"schema_version": "6529stream.risk-register.v1"},
+            )
+            write_json(
                 output_dir / "bytecode-release-proof.json",
                 {"schema_version": "6529stream.bytecode-release-proof.v1"},
             )

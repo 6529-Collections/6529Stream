@@ -1,0 +1,468 @@
+{
+  "schema_version": "6529stream.risk-register.v1",
+  "generated_by": "scripts/generate_risk_register.py:1",
+  "maturity": "pre_audit_local_baseline",
+  "readiness_boundary": "Open blockers and planned mitigations are not launch approvals. Public beta and production claims require reviewed retained evidence or explicit accepted-risk records in the public-beta evidence manifest.",
+  "source_documents": [
+    {
+      "path": "release-artifacts/schema/risk-register.schema.json",
+      "sha256": "sha256:c1484a62332afd3e6d3b0a7b3eb14fd90473da207516115d4504ab04ade60af3"
+    },
+    {
+      "path": "ops/ROADMAP.md",
+      "sha256": "sha256:a0229cf406999b0e516e666baaf41d9638b798188b290e12e81036f17c209212"
+    },
+    {
+      "path": "ops/EXECUTION_BACKLOG.md",
+      "sha256": "sha256:43e08abbf83484e998385b6f76a7d13a3c448a60ba5bf1f1c63715852a67396c"
+    },
+    {
+      "path": "docs/audit-package.md",
+      "sha256": "sha256:5cf1fa033b87bc4b234ea5b721cf0aee86394b0134c0da60c4daf99ba9f589fb"
+    },
+    {
+      "path": "docs/release-readiness.md",
+      "sha256": "sha256:3f93e87ee448e2597e15db49fb839919f14c320a52c94772b1d423f6ea03d1de"
+    },
+    {
+      "path": "docs/known-blockers.md",
+      "sha256": "sha256:7dcb0a524b2760d941c369e9806a65fc6aae3219c97788bab4814982dcfdee9d"
+    },
+    {
+      "path": "ops/SLITHER_BASELINE.md",
+      "sha256": "sha256:65f3a190564edb3d5d0fda5cc5b4599f901c1d5e1696abed18ca507b2e1e76f6"
+    },
+    {
+      "path": "release-artifacts/latest/public-beta-evidence.json",
+      "sha256": "sha256:297276d12c08ab5af18bb14f010274195749acf0fcd1d3832c11a44ffcc5f073"
+    },
+    {
+      "path": "release-artifacts/latest/public-beta-blockers.md",
+      "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb"
+    },
+    {
+      "path": "release-artifacts/latest/production-release-blockers.md",
+      "sha256": "sha256:5613913dcca6ae722ef82462f2a99e6cdf921fc5f61916fc14e0b78b512988ba"
+    }
+  ],
+  "status_taxonomy": {
+    "accepted_local_baseline": "Accepted for local pre-audit baseline only; still reviewable before release.",
+    "accepted_risk": "Explicit risk acceptance with owner, date, expiry, and reference.",
+    "mitigated_local": "Mitigated by committed local checks or docs; external proof may still be required.",
+    "open_blocker": "Blocks public beta, audit-ready, or production claims.",
+    "planned_mitigation": "Tracked but not yet implemented or evidenced."
+  },
+  "risk_acceptance_policy": "Accepted-risk rows require owner approval, an expiry, a reference, and matching public-beta evidence status where they affect launch claims.",
+  "risks": [
+    {
+      "id": "RISK-AUD-001",
+      "title": "Completed external audit and post-audit remediation are missing",
+      "area": "audit",
+      "severity": "critical",
+      "status": "open_blocker",
+      "owner": "TBD",
+      "target_gate": "Gate F",
+      "source": "clean-main reviewer rebaseline and release evidence blockers",
+      "mitigation": "Retain a reviewed external audit report, map findings to issues, add remediation evidence, and keep post-audit remediation blocked until accepted by maintainers.",
+      "residual_risk": "The local test and Slither baseline is not an independent security assessment and cannot support public beta or production claims.",
+      "checks": [
+        "python scripts/test_external_audit_report_evidence.py",
+        "python scripts/check_external_audit_report_evidence.py",
+        "python scripts/test_audit_package.py",
+        "python scripts/check_audit_package.py",
+        "python scripts/check_public_beta_evidence.py"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/215",
+        "https://github.com/6529-Collections/6529Stream/issues/231"
+      ],
+      "evidence": [
+        {
+          "path": "docs/audit-package.md",
+          "sha256": "sha256:5cf1fa033b87bc4b234ea5b721cf0aee86394b0134c0da60c4daf99ba9f589fb"
+        },
+        {
+          "path": "release-artifacts/latest/public-beta-blockers.md",
+          "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb"
+        },
+        {
+          "path": "release-artifacts/latest/production-release-blockers.md",
+          "sha256": "sha256:5613913dcca6ae722ef82462f2a99e6cdf921fc5f61916fc14e0b78b512988ba"
+        },
+        {
+          "path": "release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md",
+          "sha256": "sha256:d575a626ce65eb1543dbefc67201025352dc981792fe4792fc73b3039d991ce7"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-AUD-002",
+      "title": "Risk register and audit-boundary drift",
+      "area": "audit_boundary",
+      "severity": "medium",
+      "status": "mitigated_local",
+      "owner": "audit",
+      "target_gate": "Gate F",
+      "source": "AUD-002",
+      "mitigation": "Generate this risk register from the committed roadmap, backlog, blocker reports, Slither baseline, and audit package, then fail local and CI checks on missing categories, stale hashes, or unsafe accepted-risk metadata.",
+      "residual_risk": "The register can only summarize committed public evidence; it does not replace real external audit, production ceremony, or marketplace evidence.",
+      "checks": [
+        "python scripts/test_risk_register.py",
+        "python scripts/check_risk_register.py",
+        "python scripts/generate_risk_register.py --check"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/388"
+      ],
+      "evidence": [
+        {
+          "path": "release-artifacts/schema/risk-register.schema.json",
+          "sha256": "sha256:c1484a62332afd3e6d3b0a7b3eb14fd90473da207516115d4504ab04ade60af3"
+        },
+        {
+          "path": "docs/audit-package.md",
+          "sha256": "sha256:5cf1fa033b87bc4b234ea5b721cf0aee86394b0134c0da60c4daf99ba9f589fb"
+        },
+        {
+          "path": "ops/EXECUTION_BACKLOG.md",
+          "sha256": "sha256:43e08abbf83484e998385b6f76a7d13a3c448a60ba5bf1f1c63715852a67396c"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-EXT-001",
+      "title": "Public beta external execution evidence remains incomplete",
+      "area": "external_evidence",
+      "severity": "high",
+      "status": "open_blocker",
+      "owner": "TBD",
+      "target_gate": "Gate E",
+      "source": "public-beta evidence status and clean-main reviewer rebaseline",
+      "mitigation": "Retain reviewed fork, testnet, metadata browser, ceremony, randomizer, verified address, and explorer evidence through the no-secret evidence intake.",
+      "residual_risk": "Local and fork artifacts do not prove public testnet or live-chain deployment behavior, explorer verification, or indexer-visible state.",
+      "checks": [
+        "python scripts/test_public_beta_evidence.py",
+        "python scripts/check_public_beta_evidence.py",
+        "python scripts/test_non_local_release_evidence.py",
+        "python scripts/check_non_local_release_evidence.py"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/217",
+        "https://github.com/6529-Collections/6529Stream/issues/218"
+      ],
+      "evidence": [
+        {
+          "path": "docs/release-readiness.md",
+          "sha256": "sha256:3f93e87ee448e2597e15db49fb839919f14c320a52c94772b1d423f6ea03d1de"
+        },
+        {
+          "path": "release-artifacts/latest/public-beta-evidence.json",
+          "sha256": "sha256:297276d12c08ab5af18bb14f010274195749acf0fcd1d3832c11a44ffcc5f073"
+        },
+        {
+          "path": "release-artifacts/latest/public-beta-blockers.md",
+          "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-GOV-001",
+      "title": "Production governance ceremony and signer custody proof are missing",
+      "area": "governance",
+      "severity": "high",
+      "status": "open_blocker",
+      "owner": "TBD",
+      "target_gate": "Gate F",
+      "source": "signer custody readiness and admin ceremony evidence model",
+      "mitigation": "Retain reviewed Safe ownership, role grants, signer manager, pause guardian, emergency recipient, signer custody, rotation, and monitoring evidence.",
+      "residual_risk": "Production authority could be misunderstood or unverifiable without reviewed ceremony artifacts and custody evidence.",
+      "checks": [
+        "python scripts/test_signer_custody_readiness.py",
+        "python scripts/check_signer_custody_readiness.py",
+        "python scripts/test_admin_ceremony_evidence.py",
+        "python scripts/check_admin_ceremony_evidence.py"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/362"
+      ],
+      "evidence": [
+        {
+          "path": "docs/signer-custody-readiness.md",
+          "sha256": "sha256:6d681967068e3c1dddbd3f59f46bd0ede5435f0ee9dffdb07f95283b5cc85146"
+        },
+        {
+          "path": "deployments/admin-ceremony/admin-ceremony-evidence-template.json",
+          "sha256": "sha256:036777bb3ded9547c75f555bea40efa666f9171238bbd90c4bb86d00cc6ec011"
+        },
+        {
+          "path": "deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md",
+          "sha256": "sha256:a02cad78a6cbc4f6e1780de249d379baf36505eb75a104178125b08b379bc84d"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-META-001",
+      "title": "Marketplace, indexer, and metadata browser evidence is incomplete",
+      "area": "metadata_marketplace",
+      "severity": "high",
+      "status": "open_blocker",
+      "owner": "TBD",
+      "target_gate": "Gate E",
+      "source": "clean-main reviewer rebaseline and release readiness dashboard",
+      "mitigation": "Retain fork, testnet, and live evidence for token metadata refresh, animation execution, marketplace display, royalty display, event replay, and cache invalidation.",
+      "residual_risk": "Local browser and fixture checks do not prove collector-facing marketplace behavior.",
+      "checks": [
+        "python scripts/test_metadata_fixtures.py",
+        "python scripts/check_metadata_fixtures.py",
+        "python scripts/test_metadata_browser_sandbox.py",
+        "python scripts/check_metadata_browser_sandbox.py"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/135"
+      ],
+      "evidence": [
+        {
+          "path": "docs/metadata.md",
+          "sha256": "sha256:de21e0177a4eda1cbd922ab05664113d98ba421b2e87c43c503b65cf3abda8f9"
+        },
+        {
+          "path": "docs/release-readiness.md",
+          "sha256": "sha256:3f93e87ee448e2597e15db49fb839919f14c320a52c94772b1d423f6ea03d1de"
+        },
+        {
+          "path": "release-artifacts/latest/public-beta-blockers.md",
+          "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-ONE-001",
+      "title": "Best-in-class 1/1 product surfaces remain design and evidence work",
+      "area": "one_of_one_product",
+      "severity": "medium",
+      "status": "planned_mitigation",
+      "owner": "product",
+      "target_gate": "Gate G",
+      "source": "clean-main reviewer rebaseline and integration-readiness roadmap",
+      "mitigation": "Decide and implement or explicitly defer contract-level metadata, 1/1 provenance manifests, artist/authenticity records, royalty policy, collector permanence packages, and marketplace/indexer evidence.",
+      "residual_risk": "The protocol can be locally safe without yet meeting a world-class collector-facing 1/1 release bar.",
+      "checks": [
+        "python scripts/test_risk_register.py",
+        "python scripts/check_risk_register.py",
+        "python scripts/check_audit_package.py"
+      ],
+      "tracking": [
+        "ops/EXECUTION_BACKLOG.md"
+      ],
+      "evidence": [
+        {
+          "path": "ops/ROADMAP.md",
+          "sha256": "sha256:a0229cf406999b0e516e666baaf41d9638b798188b290e12e81036f17c209212"
+        },
+        {
+          "path": "ops/EXECUTION_BACKLOG.md",
+          "sha256": "sha256:43e08abbf83484e998385b6f76a7d13a3c448a60ba5bf1f1c63715852a67396c"
+        },
+        {
+          "path": "docs/metadata.md",
+          "sha256": "sha256:de21e0177a4eda1cbd922ab05664113d98ba421b2e87c43c503b65cf3abda8f9"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-RAND-001",
+      "title": "Non-local randomizer provider operations evidence is missing",
+      "area": "randomizer_operations",
+      "severity": "high",
+      "status": "open_blocker",
+      "owner": "TBD",
+      "target_gate": "Gate E",
+      "source": "public-beta evidence blockers and randomizer operations runbook",
+      "mitigation": "Retain reviewed fork/testnet/live provider configuration, funding, request health, epoch, stale/failure/retry, and metadata-finalization evidence.",
+      "residual_risk": "Local mock provider evidence does not prove live provider funding, callback, or operational monitoring behavior.",
+      "checks": [
+        "python scripts/test_randomizer_operations.py",
+        "python scripts/check_randomizer_operations.py",
+        "python scripts/check_public_beta_evidence.py"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/221"
+      ],
+      "evidence": [
+        {
+          "path": "docs/randomizer-operations.md",
+          "sha256": "sha256:c683ffb29f93a541e7e1650a29d078adc4fb6ff3db4df2e297e36e019f248018"
+        },
+        {
+          "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
+          "sha256": "sha256:6fcea34fa9ae78e72aefd52234ca83697a05eece5bae23dce42c5ac023ae8140"
+        },
+        {
+          "path": "release-artifacts/latest/public-beta-blockers.md",
+          "sha256": "sha256:323f19cf22868a6c4a93d97b095ab0da3694c620ff4fddc9766b3a6c34ef5eeb"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-REL-001",
+      "title": "Production release signatures, signed tags, and live bytecode proof are missing",
+      "area": "release_integrity",
+      "severity": "high",
+      "status": "open_blocker",
+      "owner": "TBD",
+      "target_gate": "Gate G",
+      "source": "production release blocker report and release-signature policy",
+      "mitigation": "Retain production checksum signatures, signed Git tag evidence, production deployment manifests, source verification inputs, and live bytecode/explorer proof.",
+      "residual_risk": "The local bytecode-to-release proof does not prove deployed live bytecode or production signer approval.",
+      "checks": [
+        "python scripts/test_signed_release_tag.py",
+        "python scripts/check_signed_release_tag.py",
+        "python scripts/test_bytecode_release_proof.py",
+        "python scripts/generate_bytecode_release_proof.py --check"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/384"
+      ],
+      "evidence": [
+        {
+          "path": "docs/release-signatures.md",
+          "sha256": "sha256:35fcb468c940ff8ebb8f949535055962687571d980baa72f7a7c9aa9f0be05a5"
+        },
+        {
+          "path": "release-artifacts/latest/source-verification-inputs.json",
+          "sha256": "sha256:1fbea177413542f60749db26e5e150a7f7126bea5679eacf994c7982513fe983"
+        },
+        {
+          "path": "release-artifacts/latest/production-release-blockers.md",
+          "sha256": "sha256:5613913dcca6ae722ef82462f2a99e6cdf921fc5f61916fc14e0b78b512988ba"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-SIZE-001",
+      "title": "StreamCore bytecode headroom remains tight",
+      "area": "core_size",
+      "severity": "medium",
+      "status": "accepted_local_baseline",
+      "owner": "protocol",
+      "target_gate": "Gate G",
+      "source": "clean-main reviewer rebaseline and status docs",
+      "mitigation": "Keep non-critical product surfaces in satellite contracts, adapters, libraries, release artifacts, or docs unless a measured size-budget exception is accepted.",
+      "residual_risk": "Large future Core feature work could consume the remaining EIP-170 headroom and block deployment.",
+      "checks": [
+        "forge build --sizes --via-ir --skip test --skip script --force",
+        "python scripts/generate_release_manifest.py --check"
+      ],
+      "tracking": [
+        "https://github.com/6529-Collections/6529Stream/issues/115"
+      ],
+      "evidence": [
+        {
+          "path": "docs/known-blockers.md",
+          "sha256": "sha256:7dcb0a524b2760d941c369e9806a65fc6aae3219c97788bab4814982dcfdee9d"
+        },
+        {
+          "path": "ops/ROADMAP.md",
+          "sha256": "sha256:a0229cf406999b0e516e666baaf41d9638b798188b290e12e81036f17c209212"
+        },
+        {
+          "path": "docs/status.md",
+          "sha256": "sha256:047a4826fac24e105aceba0679e994994f9f4a32b898e7b6e773dad99b471e22"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-SLITHER-001",
+      "title": "Static-analysis baseline contains accepted local findings",
+      "area": "static_analysis",
+      "severity": "medium",
+      "status": "accepted_local_baseline",
+      "owner": "security",
+      "target_gate": "Gate F",
+      "source": "Slither baseline and vendored-library provenance docs",
+      "mitigation": "Keep high/medium production findings fixed or explicitly accepted, retain test-only and vendored-library dispositions, and require future deltas to update the baseline.",
+      "residual_risk": "Accepted local findings are audit inputs and should be independently reviewed before launch.",
+      "checks": [
+        "slither . --config-file slither.config.json --foundry-compile-all",
+        "python scripts/check_audit_package.py"
+      ],
+      "tracking": [
+        "ops/SLITHER_BASELINE.md"
+      ],
+      "evidence": [
+        {
+          "path": "ops/SLITHER_BASELINE.md",
+          "sha256": "sha256:65f3a190564edb3d5d0fda5cc5b4599f901c1d5e1696abed18ca507b2e1e76f6"
+        },
+        {
+          "path": "docs/slither.md",
+          "sha256": "sha256:85f0724352de3789935202f0404136bb0d37e701b67378e98b25cf4150305d02"
+        },
+        {
+          "path": "docs/vendored-libraries.md",
+          "sha256": "sha256:532b029087cef2b1173e6e824e8abd21d5d2439f89e95fe0ff7013cdb3d9daff"
+        }
+      ],
+      "risk_acceptance": null
+    },
+    {
+      "id": "RISK-WARN-001",
+      "title": "Compiler, NatSpec, lint, and warning noise still need release disposition",
+      "area": "warning_hygiene",
+      "severity": "medium",
+      "status": "planned_mitigation",
+      "owner": "oss",
+      "target_gate": "Gate G",
+      "source": "clean-main reviewer rebaseline",
+      "mitigation": "Capture warning categories, fix low-risk first-party warning noise, document accepted warning dispositions, and decide whether new warning categories fail CI.",
+      "residual_risk": "Warning noise can hide meaningful future regressions and weakens open-source reviewer confidence.",
+      "checks": [
+        "forge build",
+        "python scripts/check_audit_package.py",
+        "python scripts/check_release_readiness.py"
+      ],
+      "tracking": [
+        "ops/EXECUTION_BACKLOG.md"
+      ],
+      "evidence": [
+        {
+          "path": "ops/ROADMAP.md",
+          "sha256": "sha256:a0229cf406999b0e516e666baaf41d9638b798188b290e12e81036f17c209212"
+        },
+        {
+          "path": "ops/EXECUTION_BACKLOG.md",
+          "sha256": "sha256:43e08abbf83484e998385b6f76a7d13a3c448a60ba5bf1f1c63715852a67396c"
+        },
+        {
+          "path": "docs/tooling.md",
+          "sha256": "sha256:92c00d2d5bb78b4c3ca769da162f6bc414d9d8566407969e2342c5a336dc0867"
+        }
+      ],
+      "risk_acceptance": null
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "bearer_token",
+      "client_secret",
+      "session_cookie",
+      "unreleased_drop_payload"
+    ]
+  },
+  "operator_notes": "Generated no-secret risk register. It summarizes launch blockers and accepted local-baseline risks; it does not complete external evidence."
+}

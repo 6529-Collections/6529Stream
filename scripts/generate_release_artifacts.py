@@ -38,6 +38,7 @@ DOWNSTREAM_RELEASE_FILES = {
     "SHA256SUMS",
     "release-checksums.json",
     "release-manifest.json",
+    "risk-register.json",
     "source-verification-inputs.json",
 }
 

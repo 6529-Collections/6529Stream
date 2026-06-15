@@ -1526,7 +1526,7 @@ verification inputs, and release manifest; production completion depends on
 
 ### AUD-001: Refresh Audit Package Around Current Protocol State
 
-Status: In progress on issue #386 / branch `codex/audit-package-refresh`.
+Status: Merged in PR #387; issue #386 closed completed.
 
 Gate: F.
 
@@ -1597,49 +1597,107 @@ REL-003 release proof changed what auditors should inspect first.
 
 ### AUD-002: Add Risk Register And Audit Boundary Checker
 
-Status: Planned.
+Status: In progress on issue #388 / branch `codex/risk-register`.
 
 Gate: F.
 
-Problem: Risks are distributed across roadmap, Slither baseline, docs, and
-issues. Auditors need a single checked register that distinguishes residual
-risk from open blockers.
+Problem: Risks are distributed across roadmap, Slither baseline, docs, release
+blocker reports, and issues. Auditors need a single checked register that
+distinguishes residual risk, accepted local-baseline findings, planned
+mitigations, and open launch blockers without turning scaffolding into
+readiness evidence.
 
-Outcome: A machine-readable risk register and checker exist.
+Outcome: A generated, machine-readable risk register and checker exist. The
+register is release-manifest and checksum covered, links to source documents
+and evidence by SHA-256, rejects unsafe accepted-risk metadata, and keeps the
+clean-main reviewer gaps visible as release blockers or planned mitigations.
 
 Files likely touched:
 
-- `ops/RISK_REGISTER.md` or `release-artifacts/latest/risk-register.json`
+- `release-artifacts/latest/risk-register.json`
+- `release-artifacts/schema/risk-register.schema.json`
 - `scripts/check_risk_register.py`
+- `scripts/generate_risk_register.py`
 - `scripts/test_risk_register.py`
 - `docs/audit-package.md`
-- `docs/threat-model.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `scripts/generate_release_artifacts.py`
+- `scripts/test_release_artifacts.py`
+- `scripts/test_release_checksums.py`
+- local/CI gate wiring
+- generated release manifest, bytecode proof, and checksum artifacts
 
 Implementation steps:
 
-1. Define fields: risk ID, area, severity, status, mitigation, tests,
-   evidence, owner, target gate, residual risk.
-2. Seed risks from roadmap, external assessment, Slither baseline, and release
-   blockers.
-3. Add checker for required fields, valid statuses, and linked evidence.
-4. Wire into audit package check.
+1. Define the JSON fields: risk ID, title, area, severity, status, owner,
+   target gate, source, mitigation, residual risk, evidence file refs, checks,
+   tracking refs, and optional accepted-risk metadata.
+2. Add a schema file and a deterministic generator that computes evidence
+   hashes from committed source documents, blocker reports, Slither baseline,
+   audit package, and reviewer-rebaseline entries.
+3. Seed risks for external evidence, external audit, release integrity,
+   governance/signer custody, randomizer operations, marketplace/metadata
+   evidence, 1/1 product excellence, `StreamCore` size headroom, static
+   analysis, warning hygiene, and the audit-boundary register itself.
+4. Add a checker that rejects missing fields, unexpected fields, duplicate or
+   unsorted IDs, invalid statuses/severities/gates, missing required areas,
+   missing `RISK-AUD-002`, stale evidence hashes, path escapes, missing
+   tracking refs, unsafe accepted-risk metadata, and secret-shaped keys or
+   assignment-looking values.
+5. Wire checker, generator drift check, and tests into Makefile, Bash,
+   PowerShell, and CI gates.
+6. Include the risk register in the top-level release manifest and checksum
+   coverage without adding it to the contract-derived release artifact
+   manifest.
+7. Link the register from the audit package, release-readiness dashboard, and
+   release-artifacts guide.
+8. Regenerate the register first, then release manifest, bytecode proof, and
+   checksum artifacts.
 
 Required tests/checks:
 
-- New checker tests.
-- New checker.
-- Audit package check.
-- Release readiness check.
+- `python scripts/test_risk_register.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/test_audit_package.py`
+- `python scripts/check_audit_package.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_artifacts.py`
+- `python scripts/generate_release_artifacts.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts/check_risk_register.py scripts/generate_risk_register.py scripts/test_risk_register.py`
+- `git diff --check`
 
 Acceptance criteria:
 
-- Every P0/P1 residual risk has status and evidence.
-- Accepted trust assumptions are explicit, not implied.
-- Missing production evidence remains visible.
+- Every P0/P1 residual risk or release-blocking assumption in the current
+  committed sources has a status, owner, target gate, mitigation, checks, and
+  evidence link.
+- Accepted local-baseline risks are distinct from public-beta or production
+  evidence completion.
+- Missing production evidence remains visible as `open_blocker` or
+  `planned_mitigation`, not hidden by templates.
+- Evidence refs use forward-slash repo paths, stay inside the repo, exist, and
+  match current SHA-256 hashes.
+- The release manifest exposes risk counts and the checksum bundle covers the
+  register.
+- The register avoids dependency cycles by not hashing downstream outputs such
+  as `release-manifest.json` or `bytecode-release-proof.json`.
 
 Evidence artifacts:
 
-- Risk register.
+- `release-artifacts/latest/risk-register.json`.
+- `release-artifacts/schema/risk-register.schema.json`.
 
 Dependencies: `AUD-001`.
 
@@ -2718,6 +2776,7 @@ flowchart TD
     ADV2["ADV-002 adversarial sequences"]
     REL1["REL-001 signed provenance checker"]
     AUD1["AUD-001 audit package refresh"]
+    AUD2["AUD-002 risk register"]
     INT1["INT-001 integration entrypoint"]
     INT5["INT-005 event/indexer spec"]
 
@@ -2735,6 +2794,8 @@ flowchart TD
     EXT5 --> REL1
     EXT8 --> AUD1
     ADV2 --> AUD1
+    AUD1 --> AUD2
+    AUD2 --> INT1
     INT1 --> INT5
     EXT4 --> INT1
 ```

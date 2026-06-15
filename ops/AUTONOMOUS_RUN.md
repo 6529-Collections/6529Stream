@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/audit-package-refresh` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/385` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/386` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/387` |
-| Next issue | TBD after AUD-001; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/risk-register` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/387` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/388` |
+| Active PR | TBD |
+| Next issue | TBD after AUD-002; likely `INT-001` unless bot feedback or release-evidence priority changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 06:53 UTC` |
+| Last updated | `2026-06-15 07:38 UTC` |
 
 ## Packaging Notes
 
@@ -246,20 +246,116 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 182 | Expand payment and forced-ETH invariants | Gate D/Gate F support | Extend the bounded payment invariant with failed-withdrawal rollback actions, auction curator proceeds withdrawals, randomizer forced-reserve injection, and explicit category/reserve equality checks without production contract changes | Merged in PR #381 |
 | 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | Merged in PR #383 |
 | 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | Merged in PR #385 |
-| 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | In progress on issue #386 |
+| 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | Merged in PR #387 |
+| 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | Validated locally on issue #388; PR pending |
 
 ## Current PR Worklog
 
-### PR candidate: Refresh audit package around current protocol state (Queue Item 185)
+### PR candidate: Add risk register and audit-boundary checker (Queue Item 186)
 
-Status: PR #387 open; CodeRabbit review requested in comment `4705306474`;
-awaiting CI and bot feedback.
+Status: Validated locally; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/388`.
+PR: TBD.
+Branch: `codex/risk-register`.
+Branch started from PR #387 squash merge commit
+`193a208f42246841a8469386ce2097b5b50097b9`.
+
+Goal:
+
+- Add `release-artifacts/latest/risk-register.json` as the generated canonical
+  no-secret risk register for launch blockers, accepted local-baseline risks,
+  planned mitigations, source-document hashes, evidence hashes, checks, and
+  tracking refs.
+- Add `release-artifacts/schema/risk-register.schema.json`,
+  `scripts/generate_risk_register.py`, `scripts/check_risk_register.py`, and
+  `scripts/test_risk_register.py`.
+- Wire risk-register drift checks into Makefile, Bash, PowerShell, and CI
+  gates.
+- Include the risk register in the top-level release manifest and checksum
+  bundle without adding it to the contract-derived release artifact manifest.
+- Link it from the audit package, release-readiness dashboard, and
+  release-artifacts guide.
+- Preserve the readiness boundary: missing public-beta and production evidence
+  remains blocked unless reviewed evidence or explicit accepted-risk records
+  exist.
+
+Validation plan:
+
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/test_audit_package.py`.
+- `python scripts/check_audit_package.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_risk_register.py scripts/generate_risk_register.py scripts/test_risk_register.py`.
+- `git diff --check`.
+- Full Windows gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Validation completed locally at `2026-06-15 07:38 UTC`:
+
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/test_audit_package.py`.
+- `python scripts/check_audit_package.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts\check_risk_register.py scripts\generate_risk_register.py scripts\test_risk_register.py`.
+- `git diff --check`.
+- Full Windows gate: `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Notes:
+
+- The full Windows gate passed with the existing Solidity compiler warnings for
+  test-only `selfdestruct`, unused randomizer helper parameters, and pure/view
+  suggestions. Those warnings remain tracked as warning-hygiene work; this PR
+  does not change Solidity bytecode.
+- `git diff --check` passed and printed Git's normal LF-to-CRLF warning for
+  `scripts/check.ps1`.
+
+Open concerns:
+
+- Avoid release-artifact dependency cycles: the risk register must not hash
+  downstream outputs such as `release-manifest.json`,
+  `bytecode-release-proof.json`, `SHA256SUMS`, or `release-checksums.json`.
+- This PR adds checked risk visibility only. It must not claim that external
+  audit, testnet/live evidence, production signatures, or marketplace evidence
+  are complete.
+
+### Completed: Refresh audit package around current protocol state (Queue Item 185)
+
+Status: Merged in PR #387; issue #386 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/386`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/387`.
 Branch: `codex/audit-package-refresh`.
 Branch started from PR #385 squash merge commit
 `8217dfcc0aaf201d7ffa42fba0340c59d883699c`.
 Initial PR head: `4a48ea983fe0ac4b655b90ef90fbfdba439a7a8b`.
+Final pushed head: `9b54e2c55a6d891537719f70da485b88241a119d`.
+Squash merge: `193a208f42246841a8469386ce2097b5b50097b9`.
+Merge basis: CI run `27529308375` passed Windows PowerShell wrapper and
+Foundry smoke jobs, CodeRabbit status was success, 6529bot reported no new
+findings, and merge-decision comment `4705363421` documented the clean review
+state before squash merge.
 
 Goal:
 
@@ -13989,6 +14085,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 07:38 | Complete Queue Item 186 local validation | Risk-register generator/checker/tests, audit package/readiness checks, release artifact/manifest/proof/checksum checks, changelog gate, Python compile, diff hygiene, and full Windows check wrapper all passed locally before opening the PR. |
+| 2026-06-15 07:27 | Start Queue Item 186 | PR #387 squash-merged as `193a208f42246841a8469386ce2097b5b50097b9`; issue #388 and branch `codex/risk-register` now track AUD-002 so reviewer-supplied production trust, 1/1 product, marketplace/indexer, size, warning, and evidence gaps become a generated checked risk register rather than prose-only roadmap notes. |
+| 2026-06-15 07:09 | Merge PR #387 | Audit package refresh merged as `193a208f42246841a8469386ce2097b5b50097b9`; final head `9b54e2c55a6d891537719f70da485b88241a119d` passed CI run `27529308375`, CodeRabbit status was success, 6529bot reported no new findings, merge-decision comment `4705363421` documented the clean state, and issue #386 closed completed. |
 | 2026-06-15 06:53 | Open PR #387 | Audit package refresh PR opened on head `4a48ea983fe0ac4b655b90ef90fbfdba439a7a8b`, links issue #386, records full Windows wrapper validation, and CodeRabbit review was requested in comment `4705306474`. |
 | 2026-06-15 06:41 | Start Queue Item 185 | PR #385 squash-merged as `8217dfcc0aaf201d7ffa42fba0340c59d883699c`; issue #386 and branch `codex/audit-package-refresh` now track AUD-001 so the audit package reflects the current protocol, release proof, signed-tag gate, and external evidence gaps before the next audit-readiness slice. |
 | 2026-06-15 06:33 | Merge PR #385 | CI passed on final head `6511e57a27b52cb7ab8b15aa7696ee923cf004fd`, CodeRabbit status was success, no unresolved review threads were visible, 6529bot's nice-to-have drift test was implemented, and issue #384 closed completed. |

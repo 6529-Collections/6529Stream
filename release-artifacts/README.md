@@ -22,6 +22,7 @@ python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
 python scripts/check_public_beta_evidence.py
+python scripts/generate_risk_register.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
 python scripts/generate_release_evidence_packet_index.py
@@ -72,6 +73,9 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_risk_register.py
+python scripts/check_risk_register.py
+python scripts/generate_risk_register.py --check
 python scripts/test_public_beta_blocker_report.py
 python scripts/generate_public_beta_blocker_report.py --check
 python scripts/test_production_release_blocker_report.py
@@ -158,6 +162,15 @@ public-beta and production-release evidence. It stays blocked in the committed
 local baseline until fork/testnet/live evidence, audit evidence, production
 signatures, signed tags, explorer verification, and address evidence are
 retained or explicitly risk-accepted.
+
+`latest/risk-register.json` is generated from committed roadmap, blocker,
+audit-package, Slither, release, and evidence inputs. It records launch
+blockers, accepted local-baseline risks, planned mitigations, source-document
+hashes, evidence hashes, required checks, and tracking references. The register
+is validated by `scripts/check_risk_register.py`, refreshed by
+`scripts/generate_risk_register.py`, and backed by
+`schema/risk-register.schema.json`. It is checksum-covered and included in the
+top-level release manifest, but it is not itself launch approval.
 
 `latest/public-beta-blockers.md` is generated from
 `latest/public-beta-evidence.json`. It lists incomplete public-beta and

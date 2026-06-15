@@ -31,6 +31,64 @@ def write_text(path: Path, value: str) -> None:
     path.write_text(value, encoding="utf-8", newline="\n")
 
 
+def minimal_risk_register(root: Path, source_path: Path, evidence_path: Path) -> dict[str, object]:
+    """Build a minimal valid risk register fixture."""
+    risks = []
+    evidence = {
+        "path": evidence_path.resolve().relative_to(root.resolve()).as_posix(),
+        "sha256": generator.file_sha256(evidence_path),
+    }
+    for index, area in enumerate(
+        sorted(generator.risk_register_checker.REQUIRED_AREAS), start=1
+    ):
+        risk_id = f"RISK-T{index:02d}-{index:03d}"
+        if area == "audit_boundary":
+            risk_id = "RISK-AUD-002"
+        risks.append(
+            {
+                "id": risk_id,
+                "title": f"{area} fixture risk",
+                "area": area,
+                "severity": "medium",
+                "status": "open_blocker",
+                "owner": "TBD",
+                "target_gate": "Gate F",
+                "source": "release manifest unit fixture",
+                "mitigation": "Retain evidence and track remediation.",
+                "residual_risk": "The fixture risk remains until evidence is reviewed.",
+                "evidence": [evidence],
+                "checks": ["python scripts/check_risk_register.py"],
+                "tracking": [
+                    "https://github.com/6529-Collections/6529Stream/issues/388"
+                ],
+                "risk_acceptance": None,
+            }
+        )
+    return {
+        "schema_version": generator.risk_register_checker.RISK_REGISTER_SCHEMA,
+        "generated_by": "unit-test",
+        "maturity": "pre_audit_local_baseline",
+        "readiness_boundary": "No open blocker is release approval.",
+        "source_documents": [
+            {
+                "path": source_path.resolve().relative_to(root.resolve()).as_posix(),
+                "sha256": generator.file_sha256(source_path),
+            }
+        ],
+        "status_taxonomy": {
+            status: f"{status} description"
+            for status in generator.risk_register_checker.VALID_STATUSES
+        },
+        "risk_acceptance_policy": "Accepted risks need owner approval.",
+        "risks": sorted(risks, key=lambda item: item["id"]),
+        "redaction_policy": {
+            "no_secrets": True,
+            "redacted_fields": ["private_key", "mnemonic", "api_key", "rpc_url"],
+        },
+        "operator_notes": "unit test",
+    }
+
+
 def seed_release_tree(root: Path) -> dict[str, Path]:
     latest = root / "release-artifacts" / "latest"
     baseline = root / "release-artifacts" / "baselines" / "v0.1.0" / "abi-surface.json"
@@ -67,6 +125,9 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     non_local_evidence_schema = root / "release-artifacts" / "schema" / (
         "non-local-release-evidence.schema.json"
+    )
+    risk_register_schema = root / "release-artifacts" / "schema" / (
+        "risk-register.schema.json"
     )
     non_local_retained_artifact = (
         non_local_evidence_dir / "non-local-template-retained-artifact.txt"
@@ -233,6 +294,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     write_json(
         non_local_evidence_schema,
+        {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
+    )
+    write_json(
+        risk_register_schema,
         {"schema_version": "https://json-schema.org/draft/2020-12/schema"},
     )
     write_json(
@@ -947,6 +1012,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
         write_text(doc, f"# {doc.stem}\n")
+    write_json(
+        latest / "risk-register.json",
+        minimal_risk_register(root, risk_register_schema, docs[0]),
+    )
     signer_custody_runbook_ref = {
         "path": "docs/signer-custody-readiness.md",
         "sha256": generator.file_sha256(root / "docs" / "signer-custody-readiness.md"),
@@ -1073,6 +1142,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "admin_ceremony_schema": admin_ceremony_schema,
         "public_beta_schema": public_beta_schema,
         "non_local_evidence_schema": non_local_evidence_schema,
+        "risk_register_schema": risk_register_schema,
         "non_local_retained_artifact": non_local_retained_artifact,
         "drop_authorization_retained_artifact": drop_authorization_retained_artifact,
         "signer_custody_retained_artifact": signer_custody_retained_artifact,
@@ -1228,6 +1298,23 @@ class ReleaseManifestTests(unittest.TestCase):
                     "production_release"
                 ],
                 len(generator.public_beta_checker.PRODUCTION_REQUIREMENTS),
+            )
+            risk_register = manifest["release_artifacts"]["risk_register"]
+            self.assertEqual(
+                risk_register["path"],
+                "release-artifacts/latest/risk-register.json",
+            )
+            self.assertEqual(
+                risk_register["schema_version"],
+                generator.risk_register_checker.RISK_REGISTER_SCHEMA,
+            )
+            self.assertEqual(
+                risk_register["risk_count"],
+                len(generator.risk_register_checker.REQUIRED_AREAS),
+            )
+            self.assertEqual(
+                risk_register["open_blocker_count"],
+                len(generator.risk_register_checker.REQUIRED_AREAS),
             )
             public_beta_blockers = manifest["release_artifacts"][
                 "public_beta_blocker_report"
@@ -1532,6 +1619,15 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 public_beta["sha256"],
                 generator.file_sha256(custom_latest / "public-beta-evidence.json"),
+            )
+            risk_register = manifest["release_artifacts"]["risk_register"]
+            self.assertEqual(
+                risk_register["path"],
+                "custom-release-artifacts/latest/risk-register.json",
+            )
+            self.assertEqual(
+                risk_register["sha256"],
+                generator.file_sha256(custom_latest / "risk-register.json"),
             )
             blockers = manifest["release_artifacts"]["public_beta_blocker_report"]
             self.assertEqual(
