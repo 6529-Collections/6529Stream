@@ -12,10 +12,8 @@ library StreamArtistApprovals {
         "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
     );
     bytes32 private constant _ARTIST_APPROVAL_TYPEHASH = keccak256(
-        "6529StreamArtistApproval(uint256 collectionId,bytes32 schemaVersionHash,address artist,bytes32 collectionStateHash,bytes32 supplyStateHash,bytes32 liveTokenMetadataHash,bytes32 integrationStateHash,address core,uint256 chainId)"
+        "6529StreamArtistApproval(address artist,bytes32 freezeManifestHash,uint256 maxCollectionPurchases,uint256 collectionTotalSupply,uint256 finalSupplyDelay)"
     );
-    bytes32 private constant _ARTIST_APPROVAL_SCHEMA_VERSION_HASH =
-        keccak256("6529stream-artist-approval-v1");
     bytes32 private constant _EIP2098_S_MASK =
         0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     uint256 private constant _SECP256K1_N_DIV_2 =
@@ -64,62 +62,79 @@ library StreamArtistApprovals {
         return digest;
     }
 
-    function hashApproval(uint256, address, bytes32, bytes32, bytes32, bytes32, address, uint256)
+    function hashApproval(address, bytes32, uint256, uint256, uint256)
         external
         pure
         returns (bytes32 approvalHash)
     {
         bytes32 typehash = _ARTIST_APPROVAL_TYPEHASH;
-        bytes32 schemaVersionHash = _ARTIST_APPROVAL_SCHEMA_VERSION_HASH;
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, typehash)
             mstore(add(ptr, 0x20), calldataload(0x04))
-            mstore(add(ptr, 0x40), schemaVersionHash)
-            mstore(add(ptr, 0x60), calldataload(0x24))
-            mstore(add(ptr, 0x80), calldataload(0x44))
-            mstore(add(ptr, 0xa0), calldataload(0x64))
-            mstore(add(ptr, 0xc0), calldataload(0x84))
-            mstore(add(ptr, 0xe0), calldataload(0xa4))
-            mstore(add(ptr, 0x100), calldataload(0xc4))
-            mstore(add(ptr, 0x120), calldataload(0xe4))
-            approvalHash := keccak256(ptr, 0x140)
+            mstore(add(ptr, 0x40), calldataload(0x24))
+            mstore(add(ptr, 0x60), calldataload(0x44))
+            mstore(add(ptr, 0x80), calldataload(0x64))
+            mstore(add(ptr, 0xa0), calldataload(0x84))
+            approvalHash := keccak256(ptr, 0xc0)
         }
     }
 
-    function hashApprovalDigest(
-        uint256,
-        address,
-        bytes32,
-        bytes32,
-        bytes32,
-        bytes32,
-        address,
-        uint256
-    ) external pure returns (bytes32 digest) {
+    function hashApprovalDigest(address, bytes32, uint256, uint256, uint256, address, uint256)
+        external
+        pure
+        returns (bytes32 digest)
+    {
         bytes32 domainTypehash = _EIP712_DOMAIN_TYPEHASH;
         bytes32 nameHash = _ARTIST_APPROVAL_EIP712_NAME_HASH;
         bytes32 versionHash = _ARTIST_APPROVAL_EIP712_VERSION_HASH;
         bytes32 typehash = _ARTIST_APPROVAL_TYPEHASH;
-        bytes32 schemaVersionHash = _ARTIST_APPROVAL_SCHEMA_VERSION_HASH;
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, typehash)
             mstore(add(ptr, 0x20), calldataload(0x04))
-            mstore(add(ptr, 0x40), schemaVersionHash)
-            mstore(add(ptr, 0x60), calldataload(0x24))
-            mstore(add(ptr, 0x80), calldataload(0x44))
-            mstore(add(ptr, 0xa0), calldataload(0x64))
-            mstore(add(ptr, 0xc0), calldataload(0x84))
-            mstore(add(ptr, 0xe0), calldataload(0xa4))
-            mstore(add(ptr, 0x100), calldataload(0xc4))
-            mstore(add(ptr, 0x120), calldataload(0xe4))
-            let structHash := keccak256(ptr, 0x140)
+            mstore(add(ptr, 0x40), calldataload(0x24))
+            mstore(add(ptr, 0x60), calldataload(0x44))
+            mstore(add(ptr, 0x80), calldataload(0x64))
+            mstore(add(ptr, 0xa0), calldataload(0x84))
+            let structHash := keccak256(ptr, 0xc0)
             mstore(ptr, domainTypehash)
             mstore(add(ptr, 0x20), nameHash)
             mstore(add(ptr, 0x40), versionHash)
-            mstore(add(ptr, 0x60), calldataload(0xe4))
-            mstore(add(ptr, 0x80), calldataload(0xc4))
+            mstore(add(ptr, 0x60), calldataload(0xc4))
+            mstore(add(ptr, 0x80), calldataload(0xa4))
+            let separator := keccak256(ptr, 0xa0)
+            mstore(ptr, shl(240, 0x1901))
+            mstore(add(ptr, 0x02), separator)
+            mstore(add(ptr, 0x22), structHash)
+            digest := keccak256(ptr, 0x42)
+        }
+    }
+
+    function hashApprovalDigestForCurrentContract(address, bytes32, uint256, uint256, uint256)
+        external
+        view
+        returns (bytes32 digest)
+    {
+        bytes32 domainTypehash = _EIP712_DOMAIN_TYPEHASH;
+        bytes32 nameHash = _ARTIST_APPROVAL_EIP712_NAME_HASH;
+        bytes32 versionHash = _ARTIST_APPROVAL_EIP712_VERSION_HASH;
+        bytes32 typehash = _ARTIST_APPROVAL_TYPEHASH;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, typehash)
+            mstore(add(ptr, 0x20), calldataload(0x04))
+            mstore(add(ptr, 0x40), calldataload(0x24))
+            mstore(add(ptr, 0x60), calldataload(0x44))
+            mstore(add(ptr, 0x80), calldataload(0x64))
+            mstore(add(ptr, 0xa0), calldataload(0x84))
+            let structHash := keccak256(ptr, 0xc0)
+
+            mstore(ptr, domainTypehash)
+            mstore(add(ptr, 0x20), nameHash)
+            mstore(add(ptr, 0x40), versionHash)
+            mstore(add(ptr, 0x60), chainid())
+            mstore(add(ptr, 0x80), address())
             let separator := keccak256(ptr, 0xa0)
             mstore(ptr, shl(240, 0x1901))
             mstore(add(ptr, 0x02), separator)

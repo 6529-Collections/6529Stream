@@ -66,6 +66,9 @@ compatible migration path:
   permission change.
 - Metadata schema, token URI state, animation HTML, dependency pinning, or
   freeze semantics change.
+- Royalty behavior, ERC-2981 disclosure, receiver, fee numerator, denominator,
+  governance, marketplace display, or enforcement boundary change. Current
+  policy is recorded in `docs/royalty-policy.md`.
 - Payment, withdrawal, custody, settlement, emergency withdrawal, or accounting
   behavior change.
 - Randomness provider, request lifecycle, retry, or stale callback behavior
@@ -172,6 +175,8 @@ Before a public release tag:
   `python scripts/check_audit_package.py`.
 - The release-readiness dashboard follows `docs/release-readiness.md` and
   passes `python scripts/check_release_readiness.py`.
+- Royalty policy follows `docs/royalty-policy.md` and passes
+  `python scripts/check_royalty_policy.py`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.
