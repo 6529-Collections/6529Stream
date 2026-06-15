@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/metadata-rendering-cache-guide` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/399` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/400` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/401` |
 | Next issue | TBD after INT-006. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 12:30 UTC` |
+| Last updated | `2026-06-15 12:32 UTC` |
 
 ## Packaging Notes
 
@@ -15200,6 +15200,7 @@ Outcome:
 | 2026-06-15 12:04 | Create issue #400 and select INT-006 | Next substantive integration-readiness slice is the metadata rendering, cache, animation sandbox, and marketplace integration guide on branch `codex/metadata-rendering-cache-guide`; issue #400 now tracks the guide/checker/local-CI/release-manifest work. |
 | 2026-06-15 12:14 | Implement INT-006 local draft | Added `docs/integrations/metadata-rendering.md`, a checker/test pair, CI/local wrapper wiring, integration/release-readiness navigation, release-manifest coverage, changelog/backlog traceability, and state updates before release-artifact regeneration. |
 | 2026-06-15 12:30 | Validate INT-006 local draft | Focused metadata rendering, fixture, browser, rehearsal, integrations README, release-readiness, manifest, bytecode proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
+| 2026-06-15 12:32 | Open PR #401 for INT-006 | PR #401 is open on branch `codex/metadata-rendering-cache-guide`, closes issue #400, and CodeRabbit review was requested. |
 
 ## Resume Instructions
 
