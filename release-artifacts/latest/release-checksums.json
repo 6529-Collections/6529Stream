@@ -30,7 +30,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:3fc916d8ce6978dbf170e8c65a6e82ffdc2859deda2e3ac612bf73efbc132e42"
+    "sha256": "sha256:01a98c44e14cc4ec7728b51575c1f178b9dab6928b463b0722c65563473ded3c"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -119,7 +119,7 @@
     },
     {
       "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-      "sha256": "sha256:122b7b049946b200338d20c270fc68776f7ebf9f7d0647599adc13e5b059ab90",
+      "sha256": "sha256:079c79e29d1ae78eaaf4509d237f8ee878ad6813152d3af74e372a67665507bb",
       "size_bytes": 9421
     },
     {
@@ -419,7 +419,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:6115d76a2f60772a896c8182bb184aae7bcece20b6e0654a8d456fad04353bfd",
+      "sha256": "sha256:a4929e4b9d6006893d9ba521a2180bdb5d62926db9cef1ea36d6974f413b2b70",
       "size_bytes": 79958
     },
     {
@@ -514,12 +514,12 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:8e04050f6968e25c39cc56d2cfb397a2794d8866687dd7986f17ab70cbe83870",
+      "sha256": "sha256:e6236c1994fa93dfab03f03f1f86ea93fad0969e4d20f2603c515a792603e94c",
       "size_bytes": 97871
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f47ef6f5a23170362cd2ed8b9534a6ff049ec0823f9cf77a4bfe3c69a2c449d1",
+      "sha256": "sha256:e40f73dd6b215446423d89f9c903c6b14c3a99a884cdf40ce816ec5b0d767991",
       "size_bytes": 21257
     },
     {
