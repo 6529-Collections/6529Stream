@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 01:37 UTC` |
+| Last updated | `2026-06-15 01:44 UTC` |
 
 ## Packaging Notes
 
@@ -245,7 +245,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add auction/drop/randomizer adversarial sequence tests (Queue Item 178)
 
-Status: draft PR #373 opened; CI and CodeRabbit pending on pushed head.
+Status: PR #373 merge-ready; CI and CodeRabbit passed, and no review threads
+are open.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/372`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/373`.
 Branch: `codex/adversarial-sequence-tests`.
@@ -282,6 +283,13 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 01:35 UTC with existing compiler/NatSpec warning noise only.
 - Draft PR #373 opened and CodeRabbit review requested in issue comment
   `4703818536`; Claude intentionally skipped per current user instruction.
+- PR #373 was marked ready-for-review after CodeRabbit skipped draft review,
+  then CodeRabbit was requested again in issue comment `4703821210`.
+- CI run `27518977493` passed on head
+  `bb441146263828588f9b4653d9689749634e3239`: Foundry smoke job
+  `81333015717` passed, Windows PowerShell wrapper job `81333015705` passed,
+  CodeRabbit status was success, CodeRabbit reply `4703821481` reported review
+  finished, and no submitted reviews or review threads were open.
 
 ### PR candidate: Add end-to-end protocol state-machine harness (Queue Item 177)
 
