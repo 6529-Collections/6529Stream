@@ -12,6 +12,16 @@ the release policy in `docs/release-policy.md`.
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,
   randomness-finalized metadata, metadata mutation, collection freeze, and
   owed-balance/surplus assertions without production contract changes.
+- Added ADV-002 deterministic protocol state-machine adversarial tests for
+  cancelled, expired, stale-signer, and replayed drop authorizations,
+  fixed-price withdrawal rollback to rejecting receivers, auction
+  pre-settlement ordering, settlement idempotence, late bids, and failed
+  auction withdrawal rollback without production contract changes.
+- Expanded the reviewer-supplied 1/1 product-excellence roadmap into
+  issue-ready backlog entries and strategic release requirements for
+  contract-level metadata, provenance manifests, royalty policy, collector
+  permanence packages, marketplace/indexer evidence, satellite-extension
+  architecture, and release-grade warning disposition.
 - Added a no-secret deployment admin ceremony evidence schema, template,
   retained-artifact checklist, checker, tests, local/CI gate wiring, release
   manifest coverage, checksum coverage, and deployment/readiness/runbook docs

@@ -914,8 +914,7 @@ Dependencies: `GOV-001`.
 
 ### ADV-001: Add End-To-End Protocol State-Machine Harness
 
-Status: In progress on issue #370 and branch
-`codex/protocol-state-machine-harness`.
+Status: Merged in PR #371; issue #370 closed completed.
 
 Gate: D/F.
 
@@ -926,7 +925,7 @@ randomizer, metadata, pause, signer, and payment flows.
 Outcome: A reusable Foundry harness models protocol actions and exposes
 assertions that future adversarial tests can reuse.
 
-Current implementation slice: add a deterministic smoke harness without
+Completed implementation slice: added a deterministic smoke harness without
 production contract changes. The first reusable helper covers local deployment,
 fixed-price mint, auction outbid and settlement, fixed-price and auction credit
 withdrawals, pause/unpause checks, signer rotation, drop cancellation,
@@ -965,6 +964,7 @@ Acceptance criteria:
 - No production behavior changes.
 
 Issue: [`#370`](https://github.com/6529-Collections/6529Stream/issues/370).
+PR: [`#371`](https://github.com/6529-Collections/6529Stream/pull/371).
 
 Evidence artifacts: None.
 
@@ -972,47 +972,66 @@ Dependencies: Current fixture helpers.
 
 ### ADV-002: Add Auction/Drop/Randomizer Adversarial Sequence Tests
 
-Status: Planned.
+Status: In progress on issue #372 and branch
+`codex/adversarial-sequence-tests`.
 
 Gate: D/F.
 
 Problem: The highest-risk surface is the coupling of signed drop authorization,
-auction state transitions, payment credits, and randomizer lifecycle.
+auction state transitions, payment credits, and randomizer lifecycle. The first
+adversarial slice should strengthen the reusable state-machine harness without
+changing production contracts, while provider-specific wrong-request
+randomizer permutations stay in lifecycle-specific tests.
 
-Outcome: Generated sequences attempt adversarial ordering around mint, bid,
-outbid, settlement, cancellation, signer rotation, and randomness callbacks.
+Outcome: Deterministic adversarial sequences attempt unsafe ordering around
+drop mint, bid, outbid, settlement, cancellation, signer rotation, replay, and
+failed withdrawals, with exact revert assertions and custody/owed-balance
+checks. Later ADV work should add fuzzed/randomizer-provider permutations.
 
 Files likely touched:
 
 - `test/StreamProtocolStateMachine.t.sol`
-- `test/StreamAuctionInvariant.t.sol`
-- `test/StreamRandomizerLifecycle.t.sol`
+- `test/README.md`
 - `docs/threat-model.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
 
 Implementation steps:
 
-1. Add sequence generators for auction drop mint, bid/outbid, settle/no-bid,
-   randomizer fulfillment, and metadata finalization.
+1. Add deterministic adversarial ordering tests for cancelled, expired,
+   stale-signer, and replayed drop authorizations.
 2. Add negative sequences for replayed signatures, cancelled drops, expired
-   signatures, stale epochs, paused domains, and wrong provider callbacks.
-3. Assert token custody, owed balances, consumed drop IDs, request state, and
-   event trace invariants.
+   signatures, stale epochs, paused domains, early settlement, underbids,
+   cancellation after bid, repeat settlement, late bids, and failed
+   withdrawals.
+3. Assert token custody, owed balances, consumed drop IDs, bidder credits,
+   proceeds credits, and withdrawal rollback invariants.
+4. Document that wrong provider/request/token/collection randomness callback
+   permutations remain lifecycle-specific follow-up work outside the
+   immediate-randomizer state-machine helper.
 
 Required tests/checks:
 
-- Targeted Foundry test command.
-- Full `forge test -vvv` if runtime remains acceptable.
+- `forge test --match-path test/StreamProtocolStateMachine.t.sol -vvv`
+- `forge fmt --check test/StreamProtocolStateMachine.t.sol`
+- Full local gate before PR.
 
 Acceptance criteria:
 
 - No sequence can produce unknown custody.
 - No sequence can erase owed credit after failed withdrawal.
-- No sequence can fulfill randomness for the wrong request/token/collection.
 - No sequence can settle the same auction into duplicated proceeds.
+- Cancelled, expired, stale-signer, and replayed drops fail without consuming
+  new invalid drop IDs or mutating supply.
+- Failed fixed-price and auction withdrawal attempts preserve the account
+  credit and aggregate owed totals.
+- Randomness callback request/token/collection permutations are either covered
+  in lifecycle tests or explicitly deferred to `ADV-006`.
 
 Evidence artifacts: None.
 
 Dependencies: `ADV-001`.
+Issue: [`#372`](https://github.com/6529-Collections/6529Stream/issues/372).
 
 ### ADV-003: Add Signer Compromise And Revocation Fuzz Tests
 
@@ -1931,6 +1950,463 @@ Acceptance criteria:
 Evidence artifacts: None.
 
 Dependencies: `GOV-001`, `INT-005`.
+
+### ONE-001: Decide And Implement Contract-Level Metadata Surface
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: First-party contracts do not expose a contract-level metadata surface.
+ERC-7572 is still draft-standard, but marketplace, wallet, and collector tools
+already expect a `contractURI()`-style entrypoint for collection name,
+description, image, external links, royalty context, and provenance pointers.
+
+Outcome: The repo has an accepted contract-level metadata policy and either a
+minimal deployable implementation or a documented explicit deferral. If
+implemented, the surface follows an ERC-7572-style shape, emits
+`ContractURIUpdated` when the contract metadata changes, and has retained
+marketplace/indexer evidence before release claims.
+
+Files likely touched:
+
+- `docs/adr/0006-metadata-freeze.md`
+- `docs/metadata.md`
+- `docs/integrations/metadata-rendering.md`
+- `smart-contracts/` only if implementation is accepted
+- `test/` contract metadata tests if implementation is accepted
+- `release-artifacts/latest/interface-ids.json`
+- `release-artifacts/latest/event-topic-catalog.json`
+
+Implementation steps:
+
+1. Open a design note or ADR update choosing implementation, satellite
+   extension, or explicit deferral.
+2. If implemented, decide whether `contractURI()` belongs in `StreamCore`, a
+   satellite metadata contract, or a read adapter to protect `StreamCore`
+   EIP-170 headroom.
+3. Define the JSON schema, storage boundary, update authorization, freeze
+   behavior, and cache-invalidation event semantics.
+4. Add tests for URI reads, updates, freeze interaction, unauthorized mutation,
+   event emission, and interface/event catalog drift.
+5. Document marketplace fallback behavior if ERC-7572-style support is
+   deferred.
+6. Retain testnet/fork marketplace or indexer evidence before marking the item
+   release-ready.
+
+Required tests/checks:
+
+- `forge test --match-path <contract-metadata-test-file> -vvv` if implemented
+- `python scripts/generate_release_artifacts.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- Markdown heading check
+- `git diff --check`
+
+Acceptance criteria:
+
+- The roadmap records whether contract-level metadata is implemented, deferred,
+  or provided through a satellite/read-adapter surface.
+- If implemented, `contractURI()` returns deterministic metadata and the update
+  path emits `ContractURIUpdated`.
+- The chosen design does not push `StreamCore` below the approved bytecode
+  headroom floor without an explicit size-budget exception.
+- Integrator docs explain how wallets, marketplaces, and indexers should find
+  contract metadata.
+- Release readiness stays blocked until non-local marketplace/indexer evidence
+  exists.
+
+Evidence artifacts:
+
+- ADR/design update.
+- Tests if implemented.
+- Interface/event catalog updates if implemented.
+- Future retained marketplace/indexer evidence.
+
+Dependencies: `INT-001`, `INT-006`, `CON-005`.
+
+### ONE-002: Add 1/1 Provenance Manifest Model
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: A best-in-class 1/1 drop needs collector-verifiable provenance beyond
+generic token metadata: artist statement, certificate/authenticity hash,
+curation notes, exhibition/history records, and a clear policy for immutable
+versus append-only provenance updates.
+
+Outcome: The repo defines a provenance manifest model and decides which parts
+belong on-chain, in frozen metadata manifests, in retained release artifacts,
+or in future satellite contracts. The model is explicit enough for a frontend,
+indexer, collector tool, and auditor to verify provenance without private
+context.
+
+Files likely touched:
+
+- `docs/metadata.md`
+- `docs/integrations/metadata-rendering.md`
+- `docs/release-readiness.md`
+- `release-artifacts/schema/` if a machine-readable manifest is added
+- `release-artifacts/evidence/` if retained provenance evidence templates are
+  added
+- `smart-contracts/` and `test/` only if on-chain events/views are accepted
+
+Implementation steps:
+
+1. Define required and optional provenance fields for collection-level and
+   token-level 1/1 works.
+2. Decide whether collector-facing provenance updates are emitted as events,
+   retained as release artifacts, represented in metadata JSON, or delegated to
+   a satellite contract.
+3. Bind provenance manifests to collection IDs, token IDs, metadata schema
+   versions, freeze manifests, and release artifact hashes.
+4. Add schema/checker coverage if the provenance manifest is represented as a
+   release artifact.
+5. Add contract tests if any provenance event or view is implemented.
+6. Document how frontends show provenance, curation notes, and authenticity
+   hashes without confusing mutable notes with frozen artwork metadata.
+
+Required tests/checks:
+
+- Manifest schema/checker tests if a release artifact is added
+- `forge test --match-path <provenance-test-file> -vvv` if on-chain support is
+  added
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- Markdown heading check
+- `git diff --check`
+
+Acceptance criteria:
+
+- Provenance fields, update authority, mutability, and freeze interaction are
+  documented.
+- The model can represent artist statement, certificate/authenticity hash,
+  curation notes, exhibition/history records, and collector-facing provenance
+  links.
+- Any on-chain surface includes stable IDs and event/query fields suitable for
+  indexers.
+- Any off-chain retained artifact has no-secret validation and checksum
+  coverage.
+- Product docs clearly separate provenance evidence from marketplace-enforced
+  ownership or royalty claims.
+
+Evidence artifacts:
+
+- Provenance model docs.
+- Optional schema/checker and retained artifact template.
+- Optional tests/events/views.
+
+Dependencies: `ONE-001`, metadata freeze model, release manifest/checksum
+coverage.
+
+### ONE-003: Decide Royalty Philosophy And Enforcement Boundary
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: `royaltyInfo()` exposes ERC-2981 royalty information, but ERC-2981
+does not enforce secondary-sale payment. For high-value 1/1s, the repo must
+make an explicit product/governance choice about default royalties,
+per-collection or per-token overrides, marketplace disclosure, and optional
+transfer-validator or creator-fee enforcement.
+
+Outcome: The royalty policy is documented, testable, and reflected in
+integrator guidance. If new admin or enforcement surfaces are accepted, they
+are implemented with clear governance, marketplace compatibility, and
+composability trade-offs.
+
+Files likely touched:
+
+- `docs/adr/0004-admin-governance.md`
+- `docs/metadata.md`
+- `docs/integrations/marketplaces.md`
+- `docs/release-policy.md`
+- `smart-contracts/` and `test/` only if royalty admin or enforcement changes
+  are accepted
+
+Implementation steps:
+
+1. Document the current ERC-2981 behavior and its non-enforcement boundary.
+2. Decide whether royalties remain fixed/default-only, become per collection,
+   become per token, or move to a satellite royalty policy contract.
+3. Decide whether creator-fee enforcement is out of scope, optional, or a
+   future guarded module.
+4. If contract changes are accepted, add admin/event/test coverage for setter,
+   bounds, zero-address behavior, freeze/release policy, and marketplace reads.
+5. Add marketplace/integrator guidance explaining what the contract can and
+   cannot guarantee.
+
+Required tests/checks:
+
+- `forge test --match-path <royalty-test-file> -vvv` if behavior changes
+- Marketplace docs heading check
+- `python scripts/generate_release_artifacts.py --check` if ABI/events change
+- `python scripts/check_changelog.py`
+- `git diff --check`
+
+Acceptance criteria:
+
+- The docs explicitly state that ERC-2981 is royalty disclosure, not payment
+  enforcement.
+- The policy records who may change royalty data, when changes are allowed, and
+  how changes are signaled.
+- Any enforcement proposal states transfer-composability and marketplace risks.
+- Integrators know how to display royalty data and where to find authoritative
+  release artifacts.
+- No production-readiness claim depends on marketplaces honoring royalties.
+
+Evidence artifacts:
+
+- Royalty policy/design record.
+- Tests if behavior changes.
+- Future marketplace evidence from `ONE-005`.
+
+Dependencies: governance ADR, `INT-005`, `ONE-005`.
+
+### ONE-004: Add Collector-Verifiable Permanence Package
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: Metadata hardening and dependency pinning exist, but collectors still
+need a replayable package that proves what was rendered, which source and
+dependencies were used, what output hashes were expected, and which browser or
+renderer assumptions were required.
+
+Outcome: Release artifacts include a collector-verifiable permanence package
+for representative or final 1/1 outputs: renderer/dependency source archive
+references, deterministic replay instructions, token output hashes, browser
+proof, and explicit fully-on-chain versus decentralized-storage guarantees.
+
+Files likely touched:
+
+- `docs/metadata.md`
+- `docs/dependency-operations.md`
+- `docs/release-readiness.md`
+- `release-artifacts/dependencies/`
+- `release-artifacts/schema/`
+- `scripts/` package/checker/generator tests
+- `test/fixtures/metadata/`
+
+Implementation steps:
+
+1. Define the permanence package schema and no-secret retained artifact shape.
+2. Include source/dependency hashes, renderer version, browser/runtime version,
+   token IDs, expected output hashes, and replay commands.
+3. Add a checker that rejects stale hashes, missing replay instructions,
+   missing storage-guarantee text, path escapes, and secret-shaped values.
+4. Generate or retain sample package evidence from committed fixtures.
+5. Add docs for collector verification and frontend rendering teams.
+6. Keep live/final package evidence blocked until real final drop artifacts are
+   retained and reviewed.
+
+Required tests/checks:
+
+- Package checker unit tests
+- Package generator/checker `--check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- Metadata fixture tests if fixtures change
+- `git diff --check`
+
+Acceptance criteria:
+
+- A collector can verify source/dependency hashes and replay instructions from
+  committed artifacts.
+- The package states which data is fully on-chain and which depends on
+  decentralized storage, gateways, browsers, or external services.
+- Browser proof and token output hashes are retained or clearly marked missing.
+- Release readiness remains blocked for live/final claims until reviewed
+  non-local or final-drop evidence exists.
+
+Evidence artifacts:
+
+- Permanence package schema/template.
+- Sample package from committed fixtures.
+- Future reviewed final-drop retained artifact.
+
+Dependencies: dependency artifact manifest, metadata browser sandbox,
+`REL-007`.
+
+### ONE-005: Retain Marketplace And Indexer Integration Evidence
+
+Status: Planned.
+
+Gate: G/E.
+
+Problem: Local metadata and event tests do not prove that external tooling can
+read contract metadata, refresh token metadata, display animation output,
+surface royalties, replay events, and survive stale/failed/frozen/burned states.
+
+Outcome: The release evidence system has no-secret templates and checkers for
+marketplace/indexer evidence, and future reviewed testnet or fork evidence can
+complete the row without private context.
+
+Files likely touched:
+
+- `docs/integrations/marketplaces.md`
+- `docs/integrations/indexing.md`
+- `docs/public-beta-evidence.md`
+- `release-artifacts/evidence/public-beta-templates/`
+- `release-artifacts/evidence/production-release-templates/`
+- `release-artifacts/schema/`
+- `scripts/check_*marketplace*_evidence.py`
+- generated release artifacts
+
+Implementation steps:
+
+1. Define evidence fields for OpenSea, Reservoir, Blur, Manifold, or equivalent
+   collector/indexer tooling.
+2. Require network, contract addresses, token IDs, metadata refresh result,
+   animation/rendering result, royalty display result, transfer/listing or
+   simulated sale path, event replay status, cache invalidation notes, reviewer,
+   commands, screenshots or public references, and redaction status.
+3. Add a checker that rejects placeholders in reviewed evidence, secret-shaped
+   values, missing contract/version references, and unsupported environments.
+4. Link the evidence row to public-beta/production blocker reports without
+   marking it complete until real reviewed evidence exists.
+5. Document frontend/indexer expectations and known marketplace caveats.
+
+Required tests/checks:
+
+- Evidence checker unit tests
+- Evidence checker committed-template validation
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- `git diff --check`
+
+Acceptance criteria:
+
+- The repo can retain reviewed marketplace/indexer evidence without committing
+  secrets, private collector data, or unreleased payloads.
+- Evidence distinguishes metadata refresh, contract metadata, royalty display,
+  event replay, transfer/listing/sale, and animation rendering.
+- Local templates are clearly not completed evidence.
+- Public beta or production readiness stays blocked until reviewed external
+  evidence exists.
+
+Evidence artifacts:
+
+- Evidence schema/template/checker.
+- Future reviewed marketplace/indexer retained artifacts.
+
+Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.
+
+### ONE-006: Add Satellite-Extension Architecture Policy
+
+Status: Planned.
+
+Gate: G.
+
+Problem: `StreamCore` currently has limited EIP-170 bytecode headroom. Adding
+world-class 1/1 product surfaces directly to Core risks breaking deployment or
+forcing rushed size recovery after feature work is already written.
+
+Outcome: The repo has a documented architecture policy for future product
+features: prefer satellite contracts, read adapters, libraries, release
+artifacts, or explicit size-budget exceptions before adding non-critical logic
+to `StreamCore`.
+
+Files likely touched:
+
+- `docs/architecture.md`
+- `docs/release-policy.md`
+- `docs/status.md`
+- `ops/ROADMAP.md`
+- `ops/EXECUTION_BACKLOG.md`
+
+Implementation steps:
+
+1. Define size-budget thresholds for warning, release floor, and exception.
+2. Classify common feature types as Core, satellite, adapter, library, or
+   release-artifact work.
+3. Add review requirements for any PR that spends Core bytecode.
+4. Link the policy to contract-level metadata, provenance, royalties, and
+   permanence work.
+5. Consider a checker or docs lint if size-budget exceptions need
+   machine-readable tracking.
+
+Required tests/checks:
+
+- Production size command documentation check.
+- Markdown heading check.
+- `git diff --check`.
+
+Acceptance criteria:
+
+- Future product roadmap items have a default non-Core implementation path.
+- Any Core bytecode spend requires an explicit budget, measured delta, and
+  release-risk note.
+- The policy aligns with current `StreamCore` headroom measurements.
+
+Evidence artifacts: None unless a size-budget tracker is added.
+
+Dependencies: `CON-005`, production size gate.
+
+### ONE-007: Burn Down Or Disposition Release-Grade Warning Noise
+
+Status: Planned.
+
+Gate: G/F.
+
+Problem: A top-tier open-source contract repo should have a quiet compiler,
+NatSpec, linter, and static-analysis story. Current warnings may be harmless,
+but unreconciled noise makes reviews harder and trains contributors to ignore
+real issues.
+
+Outcome: Compiler warnings, invalid NatSpec tags, unused parameters, pure/view
+mutability suggestions, and lint findings are either fixed or listed in a
+reviewed disposition document with owner, reason, and follow-up policy.
+
+Files likely touched:
+
+- `ops/SLITHER_BASELINE.md`
+- `docs/tooling.md`
+- `docs/audit-package.md`
+- `smart-contracts/` if warning burn-down changes code
+- `test/` if behavior-preserving warning fixes need regression coverage
+- CI/local gate scripts if a stricter warning policy is adopted
+
+Implementation steps:
+
+1. Capture current `forge build` warning output and any NatSpec diagnostics.
+2. Split findings into fix-now, accepted-vendored, accepted-test-only,
+   accepted-size-tradeoff, and future-work buckets.
+3. Fix low-risk first-party warnings where they do not increase size or change
+   behavior.
+4. Add tests for any behavior-preserving code movement in security-relevant
+   paths.
+5. Document accepted dispositions and decide whether CI should fail on new
+   first-party warning categories.
+
+Required tests/checks:
+
+- `forge build`
+- `forge test -vvv`
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- Slither baseline check if touched
+- `python scripts/check_changelog.py`
+- `git diff --check`
+
+Acceptance criteria:
+
+- Reviewers can distinguish fixed, accepted, vendored, test-only, and
+  size-tradeoff warning noise.
+- Any remaining first-party warning has an explicit disposition and owner.
+- New warnings do not silently enter release claims.
+- Contract-size impact is measured for warning fixes touching `StreamCore`.
+
+Evidence artifacts:
+
+- Warning baseline/disposition.
+- Tests for behavior-preserving changes where needed.
+
+Dependencies: formatting/static-analysis gates, `CON-005`.
 
 ### OSS-001: Refresh README And Docs Navigation Around True Maturity
 
