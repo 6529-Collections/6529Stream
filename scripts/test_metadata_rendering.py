@@ -48,6 +48,9 @@ It does not replace fork/testnet/live evidence for public beta or production.
 Marketplace metadata rendering, cache, animation sandbox, INT-006, OpenSea,
 Reservoir, Blur, Manifold, risk register, release manifest, release checksums,
 public-beta evidence, and metadata browser evidence are named.
+ONE-005 retained marketplace/indexer evidence,
+fork_testnet_marketplace_indexer_evidence, and
+live_marketplace_indexer_evidence are named.
 The 1/1 provenance manifest, one-of-one-provenance-manifest.json,
 one-of-one provenance, artist statement, authenticity status, certificate,
 curation history, additional `tokenURI` JSON, and new `StreamCore` storage are

@@ -1,0 +1,35 @@
+{
+  "schema_version": "6529stream.non-local-release-evidence.v1",
+  "evidence_id": "production-release-template-live-marketplace-indexer-evidence",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "live",
+  "chain_id": 1,
+  "block_or_reference": "template-only live block, token ID, collection ID, marketplace/indexer source, or transcript reference",
+  "command_or_source_system": "template-only live marketplace/indexer transcript, OpenSea/Reservoir/Blur/Manifold source, collector tool, event replay command, or operator transcript",
+  "retained_path": "release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md",
+  "sha256": "sha256:d414f7172ad166fe3682b0bc1db77dcac311bc0da13b90d6514c5459d3ec23f7",
+  "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, marketplace credentials, indexer credentials, or unreleased drop payloads are present.",
+  "owner": "TBD",
+  "reviewer": "TBD",
+  "public_beta_requirement_id": "live_marketplace_indexer_evidence",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+  "operator_notes": "Replace this template with reviewed live marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation."
+}

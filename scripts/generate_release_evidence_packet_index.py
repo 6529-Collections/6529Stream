@@ -76,6 +76,18 @@ TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/testnet-deployment-rehearsal/"
     "testnet-deployment-rehearsal-retained-artifact-template.md"
 )
+PUBLIC_BETA_MARKETPLACE_INDEXER_REQUIREMENT_ID = (
+    "fork_testnet_marketplace_indexer_evidence"
+)
+PUBLIC_BETA_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/marketplace-indexer/"
+    "fork-testnet-marketplace-indexer-retained-artifact-template.md"
+)
+LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID = "live_marketplace_indexer_evidence"
+LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/marketplace-indexer/"
+    "live-marketplace-indexer-retained-artifact-template.md"
+)
 EXTERNAL_AUDIT_REQUIREMENT_ID = "external_audit_report"
 EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/external-audit-report/"
@@ -93,7 +105,15 @@ ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PUBLIC_BETA_PHASE, TESTNET_DEPLOYMENT_REQUIREMENT_ID): (
         "python scripts/test_testnet_deployment_rehearsal_evidence.py",
         "python scripts/check_testnet_deployment_rehearsal_evidence.py",
-    )
+    ),
+    (PUBLIC_BETA_PHASE, PUBLIC_BETA_MARKETPLACE_INDEXER_REQUIREMENT_ID): (
+        "python scripts/test_marketplace_indexer_evidence.py",
+        "python scripts/check_marketplace_indexer_evidence.py",
+    ),
+    (PRODUCTION_PHASE, LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID): (
+        "python scripts/test_marketplace_indexer_evidence.py",
+        "python scripts/check_marketplace_indexer_evidence.py",
+    ),
 }
 
 
@@ -274,6 +294,32 @@ def retained_artifact_expectation(
     ):
         record = file_record(
             resolve_repo_path(repo_root, TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif (
+        phase == PUBLIC_BETA_PHASE
+        and requirement_id == PUBLIC_BETA_MARKETPLACE_INDEXER_REQUIREMENT_ID
+    ):
+        record = file_record(
+            resolve_repo_path(
+                repo_root,
+                PUBLIC_BETA_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
+            ),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif (
+        phase == PRODUCTION_PHASE
+        and requirement_id == LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID
+    ):
+        record = file_record(
+            resolve_repo_path(
+                repo_root,
+                LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
+            ),
             repo_root,
         )
         retained_path = record["path"]

@@ -129,8 +129,9 @@ Integration guidance is named.
 ## Evidence And Readiness Boundaries
 
 Public beta requires reviewed retained fork/testnet/live evidence. Production
-requires the same evidence. retained fork/testnet/live evidence, ONE-005, event
-topic catalog, and not release readiness proof are named.
+requires the same evidence. retained fork/testnet/live evidence, ONE-005,
+retained marketplace/indexer evidence, event topic catalog, and not release
+readiness proof are named.
 
 ## Testing Strategy
 

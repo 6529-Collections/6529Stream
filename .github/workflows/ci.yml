@@ -445,6 +445,8 @@ jobs:
           python3 scripts/check_fork_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/fork-deployment-rehearsal-evidence-check.log
           python3 scripts/test_testnet_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/testnet-deployment-rehearsal-evidence-tests.log
           python3 scripts/check_testnet_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/testnet-deployment-rehearsal-evidence-check.log
+          python3 scripts/test_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-tests.log
+          python3 scripts/check_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-check.log
 
       - name: Public beta evidence
         shell: bash
