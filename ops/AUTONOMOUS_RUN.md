@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/integrations-entrypoint` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/389` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/390` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/391` |
 | Next issue | TBD after INT-001; likely `INT-002` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 08:22 UTC` |
+| Last updated | `2026-06-15 08:25 UTC` |
 
 ## Packaging Notes
 
@@ -254,12 +254,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add integrations entrypoint and artifact source of truth (Queue Item 187)
 
-Status: In progress locally; PR not opened yet.
+Status: PR #391 open; CodeRabbit requested in comment `4705979170`; CI and bot
+feedback pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/390`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/391`.
 Branch: `codex/integrations-entrypoint`.
 Branch started from PR #389 squash merge commit
 `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`.
+Initial PR head: `de5f291e4dde27085d6d2456d8c74051459e5f81`.
 
 Goal:
 
@@ -14199,6 +14201,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 08:25 | Open PR #391 | Integrations entrypoint PR opened on head `de5f291e4dde27085d6d2456d8c74051459e5f81`, links issue #390, records full local Windows validation, and CodeRabbit review was requested in comment `4705979170`. |
 | 2026-06-15 08:13 | Start Queue Item 187 | PR #389 squash-merged as `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`; issue #390 and branch `codex/integrations-entrypoint` now track INT-001 so frontend, mobile, Electron, indexer, operator, and backend-signing integrators get a checked source-of-truth entrypoint without readiness overclaims. |
 | 2026-06-15 08:01 | Merge PR #389 | Risk-register PR merged after CI run `27531918837` passed final head `e9b3dbba51b45cab4b39a24986d108a0ebff0d1d`, CodeRabbit status was success, the non-actionable rate-limit banner had no unresolved threads, 6529bot reported no new findings in comments `4705658115` and `4705728912`, merge-decision comment `4705790858` documented the clean state, and issue #388 closed completed. |
 | 2026-06-15 07:51 | Address PR #389 hardening note | 6529bot found no blocking issues but suggested validating risk-register `python scripts/*.py` check references. Implemented the stricter checker and fixture/test coverage before merge. |
