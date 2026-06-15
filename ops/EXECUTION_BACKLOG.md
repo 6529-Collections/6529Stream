@@ -1469,7 +1469,7 @@ Dependencies: `REL-001`.
 
 ### REL-003: Add Exact Bytecode-To-Release Proof
 
-Status: In progress on issue #384 and branch `codex/bytecode-release-proof`.
+Status: PR #385 open for issue #384 on branch `codex/bytecode-release-proof`.
 
 Gate: F/G.
 

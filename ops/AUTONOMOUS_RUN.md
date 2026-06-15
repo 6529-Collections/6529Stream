@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/bytecode-release-proof` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/383` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/384` |
-| Active PR | TBD until branch push and PR creation |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/385` |
 | Next issue | TBD after REL-003; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 06:23 UTC` |
+| Last updated | `2026-06-15 06:25 UTC` |
 
 ## Packaging Notes
 
@@ -251,12 +251,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add exact bytecode-to-release proof (Queue Item 184)
 
-Status: local implementation complete; full Windows gate passed; PR not yet opened.
+Status: PR #385 open; awaiting CI and CodeRabbit review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/384`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/385`.
 Branch: `codex/bytecode-release-proof`.
 Branch started from PR #383 squash merge commit
 `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9`.
+Initial PR head: `88a4a7083d3bd04646d3a69a057912c1df823e7e`.
 
 Goal:
 
@@ -13914,6 +13915,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 06:25 | Open PR #385 | PR #385 opened on head `88a4a7083d3bd04646d3a69a057912c1df823e7e`, adds the bytecode-to-release proof generator/tests/artifact, wires it into local/CI gates and checksum coverage, folds the reviewer comments into roadmap/backlog state, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-15 06:09 | Add reviewer comments and continue REL-003 | A reviewer rechecked current main and confirmed the scary core contract gaps are mostly fixed while production trust evidence, 1/1 product surfaces, marketplace/indexer proof, `StreamCore` size discipline, and warning hygiene remain the next 10/10 work. Folded those comments into `ops/ROADMAP.md` and `ops/EXECUTION_BACKLOG.md` while continuing the bytecode-to-release proof branch for issue #384. |
 | 2026-06-15 05:52 | Merge PR #383 and start Queue Item 184 | PR #383 squash-merged as `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9` after Windows wrapper and Foundry smoke CI passed, CodeRabbit status was success with no unresolved review threads, and verifier hardening from bot feedback was implemented on head `f4dd225ec6ddb152df5d797ed6990fd99dd12b98`; issue #382 closed completed and branch `codex/bytecode-release-proof` started for issue #384 / REL-003 exact bytecode-to-release proof. |
 | 2026-06-15 04:56 | Address PR #381 nice-to-haves | CI passed on initial head `d2a18efd299ea5a150ceb86377846b261b4e2a15`, CodeRabbit status was success despite a rate-limit banner, and 6529bot marked the PR good to merge with non-blocking suggestions. Accepted the low-risk clarity suggestions by documenting the exact `ETH failed` assertion and the current full-balance randomizer reserve model, then refreshed randomizer evidence and release artifacts before focused validation. |
