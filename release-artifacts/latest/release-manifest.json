@@ -1780,8 +1780,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f5b1ff5e8095df0fd022b9ace144ce88110675424cf8650bc8478ed54f3c6822",
-      "size_bytes": 27562
+      "sha256": "sha256:2dc827581155b2ae0ac92240db020f33c91856571e9017772658b3c488918a72",
+      "size_bytes": 27860
     },
     "governance_docs": [
       {
@@ -1831,8 +1831,8 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:3aa331af4a3fb5c3b856d56801603b636a7576c6d18059991e763b793ddb89bb",
-        "size_bytes": 16061
+        "sha256": "sha256:ca30e1a072e2f7a49affe18c5a614bb343b76365b153c984c499b70fcf4c1fe4",
+        "size_bytes": 23469
       },
       {
         "path": "docs/incident-response.md",

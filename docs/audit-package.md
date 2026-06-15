@@ -35,6 +35,25 @@ Explicitly out of scope for this package:
 - Any private key, mnemonic, RPC URL, API key, or unreleased drop payload.
 - A claim that the current local gates prove production safety.
 
+## Current Protocol Snapshot
+
+Use this snapshot to separate implemented local evidence from external evidence
+gaps before reading the detailed roadmap.
+
+| Area | Current local evidence | Still open before public beta or production |
+| --- | --- | --- |
+| Drop authorization | EIP-712 fixed-price and auction authorization, storage-backed replay controls, signer epochs, per-drop cancellation, EOA signatures, compact signatures, and ERC-1271 contract-signer paths are covered by Foundry tests and no-secret signing fixtures | Reviewed production signer custody, production signing service evidence, retained non-local signing evidence, and signed production payload ceremonies |
+| Auction and payments | Auction escrow custody, active-bid accounting, outbid bidder credits, no-bid and with-bid settlement, failed withdrawal rollback, fixed-price pull credits, curator credits, emergency-withdrawable surplus, and forced-ETH invariants are covered locally | Fork/testnet/live auction, withdrawal, and value-flow evidence; any future shared-ledger ADR or production payment operations evidence |
+| Randomness and metadata | VRF/arRNG request lifecycle, stale/failed/retry states, raw-output hashes, provider/epoch validation, metadata golden files, UTF-8/URI/attribute guards, ERC-4906 signaling, freeze manifests, burn semantics, and browser-sandbox fixture execution are covered locally | Fork/testnet/live randomizer provider funding, request-health, metadata browser, and final drop-output evidence |
+| Deployment and release | Local Anvil deployment, auction ceremony, emergency redeployment, ceremony evidence, randomizer operations evidence, release manifest, source verification inputs, address books, checksum bundle, signed release tag gate, and bytecode-to-release proof exist | Testnet/live deployment rehearsal, live explorer verification, production address books, production checksum signatures, live bytecode proof, reviewed admin ceremony evidence, and post-audit remediation |
+| 1/1 product excellence | Roadmap/backlog now track contract-level metadata, 1/1 provenance, royalty philosophy, collector-verifiable permanence, marketplace/indexer evidence, Core size discipline, and warning hygiene as explicit release work | Accepted design decisions, implementation where chosen, marketplace/indexer retained evidence, and final collector-facing release artifacts |
+
+Reviewer note: the clean-main rebaseline confirmed the core "serious contract"
+surfaces are largely implemented locally. The audit package should therefore
+focus on validating correctness, adversarial completeness, external evidence
+gaps, retained artifact integrity, and whether any accepted product/operations
+deferrals are appropriate for launch.
+
 ## Reviewer Entry Points
 
 | Purpose | Entry point |
@@ -97,8 +116,12 @@ should be treated as audit evidence to inspect, not as exhaustive proof.
 | Payment accounting and reserves | [`test/StreamPaymentsInvariant.t.sol`](../test/StreamPaymentsInvariant.t.sol) |
 | Supply, replay, burn, and freeze state | [`test/StreamSupplyReplayFreezeInvariant.t.sol`](../test/StreamSupplyReplayFreezeInvariant.t.sol) |
 | Auction custody and proceeds consistency | [`test/StreamAuctionInvariant.t.sol`](../test/StreamAuctionInvariant.t.sol) |
+| End-to-end protocol state machine | [`test/StreamProtocolStateMachine.t.sol`](../test/StreamProtocolStateMachine.t.sol) |
+| Signer compromise and revocation sequences | [`test/StreamSignerCompromiseFuzz.t.sol`](../test/StreamSignerCompromiseFuzz.t.sol) |
+| Pause and settlement matrix | [`test/StreamPauseControls.t.sol`](../test/StreamPauseControls.t.sol) |
 | Randomizer reserve lifecycle | [`test/StreamRandomizerPayments.t.sol`](../test/StreamRandomizerPayments.t.sol) |
 | Deployment, manifest, and ceremony smoke tests | [`test/StreamDeploymentManifest.t.sol`](../test/StreamDeploymentManifest.t.sol) |
+| Bytecode proof and checksum coverage | [`scripts/generate_bytecode_release_proof.py`](../scripts/generate_bytecode_release_proof.py), [`scripts/check_signed_release_tag.py`](../scripts/check_signed_release_tag.py) |
 | Full status summary | [`docs/status.md`](status.md) |
 | Test matrix and remaining test work | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 
@@ -132,16 +155,37 @@ Local deployment and release evidence:
   records no-secret local randomizer operations evidence.
 - [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json)
   is the generated top-level release evidence index.
+- [`release-artifacts/latest/source-verification-inputs.json`](../release-artifacts/latest/source-verification-inputs.json)
+  records source, artifact, compiler, constructor, and verification-command
+  inputs for the current local/fork release artifacts.
+- [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
+  is the bytecode-to-release proof. It ties committed local/fork address books,
+  deployment manifests, ABI checksums, source verification inputs, compiler
+  settings, runtime bytecode hashes, and creation bytecode hashes to the current
+  release manifest. It does not query live chain bytecode or claim production
+  verification.
 - [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS)
   is the signable checksum bundle for covered release and deployment artifacts.
 - [`release-artifacts/latest/release-checksums.json`](../release-artifacts/latest/release-checksums.json)
-  is the machine-readable checksum bundle.
+  is the machine-readable checksum bundle and includes the bytecode-to-release
+  proof even though the proof is intentionally not embedded into the release
+  manifest to avoid a manifest/proof hash cycle.
 - [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json)
   records local placeholder signature evidence and the self-referential
   manifest/checksum boundary.
+- [`scripts/check_signed_release_tag.py`](../scripts/check_signed_release_tag.py)
+  is the signed release tag verifier. Ordinary local/CI runs stay in
+  non-release mode, while production release mode requires a safe signed tag,
+  tag-to-HEAD match, current checksum bundle, and matching reviewed signature
+  evidence.
 - [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
   records the no-secret public-beta evidence status and keeps public beta and
   production release blocked until non-local evidence is retained.
+- [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
+  and
+  [`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md)
+  render the current public-beta and production blocker reports from
+  machine-readable evidence status.
 - [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) and
   [`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/)
   record no-secret local EIP-712 and ERC-1271 drop authorization signing
@@ -168,11 +212,14 @@ The release manifest includes this audit package as a governance document. The
 release manifest also includes the architecture map, threat model, incident
 response runbook, drop authorization signing guide, and signer custody
 readiness guide as governance documents, and it summarizes the public-beta
-evidence status. The
-checksum bundle covers the release manifest, so changes to the audit package,
-architecture map, threat model, incident-response runbook, drop authorization
-signing guide, signer custody readiness guide, or public-beta evidence status
-must refresh release evidence before a release-oriented PR can pass.
+evidence status. The bytecode-to-release proof records the release-manifest
+hash and is covered by the checksum bundle; it is deliberately not embedded
+back into the release manifest. The checksum bundle covers the release
+manifest, proof, address books, retained evidence, and release artifacts, so
+changes to the audit package, architecture map, threat model,
+incident-response runbook, drop authorization signing guide, signer custody
+readiness guide, public-beta evidence status, or release-proof artifacts must
+refresh release evidence before a release-oriented PR can pass.
 
 ## Known Blockers And Accepted Risks
 
@@ -182,8 +229,9 @@ Known unresolved blockers are tracked in
 include fork/testnet/live deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
 signatures, reviewed signer custody readiness evidence, non-local randomizer
-operations evidence, non-local metadata browser evidence, and external audit
-completion. The machine-readable status for these categories lives in
+operations evidence, non-local metadata browser evidence, live bytecode proof,
+post-audit remediation, and external audit completion. The machine-readable
+status for these categories lives in
 [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 
 Accepted local-baseline dispositions are separate from unresolved production
@@ -194,6 +242,8 @@ blockers:
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md).
 - Local Anvil ceremony, randomizer operations, and release signature evidence
   use no-secret placeholders and do not claim production status.
+- The bytecode-to-release proof is local/fork release-artifact proof; it does
+  not replace live RPC or explorer bytecode verification.
 - Runtime size remains under the current release floor but close enough to the
   EIP-170 limit that large future `StreamCore` changes need explicit size
   review.
@@ -236,13 +286,22 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_release_manifest.py
+python scripts/generate_release_manifest.py --check
+python scripts/test_bytecode_release_proof.py
+python scripts/generate_bytecode_release_proof.py --check
+python scripts/test_release_checksums.py
+python scripts/generate_release_checksums.py --check
+python scripts/test_signed_release_tag.py
+python scripts/check_signed_release_tag.py
 ```
 
-Run the release evidence checks that include this package:
+Run the release evidence generators if tracked artifacts need refreshing:
 
 ```sh
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python scripts/generate_release_manifest.py
+python scripts/generate_bytecode_release_proof.py
+python scripts/generate_release_checksums.py
 ```
 
 Run the full local gate when changing audit scope, release artifacts, or
@@ -257,6 +316,31 @@ Windows contributors can use the platform wrapper:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\check.ps1
 ```
+
+## Audit Submission Checklist
+
+Before sending this package to an external auditor or publishing an audit-ready
+branch, confirm each item below in the PR description or retained audit handoff
+notes:
+
+- The audited commit SHA and branch are named.
+- The package still says pre-audit, not production-ready, and local baseline.
+- `docs/architecture.md`, `docs/threat-model.md`, ADRs, and this package point
+  at the same protocol boundaries.
+- `ops/SLITHER_BASELINE.md` has no unexplained high/medium production finding.
+- `docs/known-blockers.md`, `docs/release-readiness.md`, public-beta blocker
+  report, and production-release blocker report agree on external evidence gaps.
+- Release manifest, bytecode-to-release proof, source verification inputs,
+  checksum bundle, and signed release tag gate are current.
+- Test evidence covers the state-machine, adversarial ordering, signer
+  compromise, pause matrix, payment/forced-ETH invariants, metadata browser
+  safety, randomizer lifecycle, deployment rehearsal, and release-proof checks.
+- Any accepted local-baseline risk has an owner, rationale, and follow-up
+  location.
+- No private keys, mnemonics, RPC URLs, API keys, unreleased drop payloads, or
+  private ceremony notes are present in retained artifacts.
+- Any live/fork/testnet/mainnet evidence claim links to reviewed no-secret
+  retained artifacts rather than local placeholders.
 
 ## Package Maintenance
 
@@ -292,8 +376,15 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py
+python scripts/test_bytecode_release_proof.py
+python scripts/generate_bytecode_release_proof.py
+python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py
 python scripts/generate_release_manifest.py --check
+python scripts/generate_bytecode_release_proof.py --check
 python scripts/generate_release_checksums.py --check
+python scripts/test_signed_release_tag.py
+python scripts/check_signed_release_tag.py
 ```

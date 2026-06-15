@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/bytecode-release-proof` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/383` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/384` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/385` |
-| Next issue | TBD after REL-003; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/audit-package-refresh` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/385` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/386` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/387` |
+| Next issue | TBD after AUD-001; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 06:27 UTC` |
+| Last updated | `2026-06-15 06:53 UTC` |
 
 ## Packaging Notes
 
@@ -245,21 +245,89 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 181 | Add pause and settlement matrix invariants | Gate D/Gate F support | Add snapshot-backed matrix coverage for auction bid pauses, settlement pauses, failed proceeds withdrawals, user withdrawal liveness, emergency-withdrawal owed-fund boundaries, and duplicate-settlement rejection without production contract changes | Merged in PR #379 |
 | 182 | Expand payment and forced-ETH invariants | Gate D/Gate F support | Extend the bounded payment invariant with failed-withdrawal rollback actions, auction curator proceeds withdrawals, randomizer forced-reserve injection, and explicit category/reserve equality checks without production contract changes | Merged in PR #381 |
 | 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | Merged in PR #383 |
-| 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | In progress on issue #384 |
+| 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | Merged in PR #385 |
+| 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | In progress on issue #386 |
 
 ## Current PR Worklog
 
-### PR candidate: Add exact bytecode-to-release proof (Queue Item 184)
+### PR candidate: Refresh audit package around current protocol state (Queue Item 185)
 
-Status: PR #385 open; bot nice-to-have drift regression pushed; awaiting CI
-and CodeRabbit review on latest head.
+Status: PR #387 open; CodeRabbit review requested in comment `4705306474`;
+awaiting CI and bot feedback.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/386`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/387`.
+Branch: `codex/audit-package-refresh`.
+Branch started from PR #385 squash merge commit
+`8217dfcc0aaf201d7ffa42fba0340c59d883699c`.
+Initial PR head: `4a48ea983fe0ac4b655b90ef90fbfdba439a7a8b`.
+
+Goal:
+
+- Refresh `docs/audit-package.md` so an auditor can see implemented local
+  protocol surfaces, release artifacts, test evidence, and external evidence
+  gaps without reverse-engineering the roadmap.
+- Add a current protocol snapshot, explicit bytecode-to-release proof and signed
+  release tag references, and an audit submission checklist.
+- Strengthen the audit package checker/tests so future edits cannot drop these
+  required sections, commands, and links.
+- Refresh deterministic release manifest, bytecode proof, and checksum evidence
+  because the audit package is a hashed governance document.
+
+Validation plan:
+
+- `python scripts/test_audit_package.py`.
+- `python scripts/check_audit_package.py`.
+- `python scripts/test_architecture_threat_model.py`.
+- `python scripts/check_architecture_threat_model.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_audit_package.py scripts/test_audit_package.py`.
+- `git diff --check`.
+- Full Windows gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Open concerns:
+
+- This PR should not imply that local evidence completes external audit, public
+  beta, or production readiness. It is an audit-package refresh only.
+- If CodeRabbit asks for more exact traceability, prefer checker-backed links
+  and commands over prose-only promises.
+
+Latest local validation:
+
+- `2026-06-15 06:41 UTC`: `python scripts/test_audit_package.py`,
+  `python scripts/check_audit_package.py`,
+  `python scripts/test_architecture_threat_model.py`,
+  `python scripts/check_architecture_threat_model.py`,
+  `python scripts/test_release_readiness.py`, and
+  `python scripts/check_release_readiness.py` passed.
+- `2026-06-15 06:41 UTC`: regenerated `release-manifest.json`,
+  `bytecode-release-proof.json`, `SHA256SUMS`, and `release-checksums.json`;
+  the corresponding `--check` commands passed.
+- `2026-06-15 06:51 UTC`: full Windows
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed with existing compiler/Foundry warning noise only.
+
+### Completed: Add exact bytecode-to-release proof (Queue Item 184)
+
+Status: Merged in PR #385; issue #384 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/384`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/385`.
 Branch: `codex/bytecode-release-proof`.
 Branch started from PR #383 squash merge commit
 `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9`.
 Initial PR head: `88a4a7083d3bd04646d3a69a057912c1df823e7e`.
-Latest pushed head: `338cb34bd1269f05af7d65c5d650fdad3ae09191`.
+Latest pushed head: `6511e57a27b52cb7ab8b15aa7696ee923cf004fd`.
+Squash merge: `8217dfcc0aaf201d7ffa42fba0340c59d883699c`.
+Merge basis: CI passed on the final head, CodeRabbit status was success, no
+unresolved review threads were visible, and 6529bot's nice-to-have drift
+regression was implemented before merge.
 
 Goal:
 
@@ -13921,6 +13989,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 06:53 | Open PR #387 | Audit package refresh PR opened on head `4a48ea983fe0ac4b655b90ef90fbfdba439a7a8b`, links issue #386, records full Windows wrapper validation, and CodeRabbit review was requested in comment `4705306474`. |
+| 2026-06-15 06:41 | Start Queue Item 185 | PR #385 squash-merged as `8217dfcc0aaf201d7ffa42fba0340c59d883699c`; issue #386 and branch `codex/audit-package-refresh` now track AUD-001 so the audit package reflects the current protocol, release proof, signed-tag gate, and external evidence gaps before the next audit-readiness slice. |
+| 2026-06-15 06:33 | Merge PR #385 | CI passed on final head `6511e57a27b52cb7ab8b15aa7696ee923cf004fd`, CodeRabbit status was success, no unresolved review threads were visible, 6529bot's nice-to-have drift test was implemented, and issue #384 closed completed. |
 | 2026-06-15 06:27 | Address PR #385 nice-to-have | 6529bot marked PR #385 good to merge but suggested spot-checking checksum coverage and `--check` drift. Checksum membership was already covered in `scripts/test_release_checksums.py`; added `test_check_mode_rejects_drift` to the bytecode proof tests and pushed head `338cb34bd1269f05af7d65c5d650fdad3ae09191`. |
 | 2026-06-15 06:25 | Open PR #385 | PR #385 opened on head `88a4a7083d3bd04646d3a69a057912c1df823e7e`, adds the bytecode-to-release proof generator/tests/artifact, wires it into local/CI gates and checksum coverage, folds the reviewer comments into roadmap/backlog state, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-15 06:09 | Add reviewer comments and continue REL-003 | A reviewer rechecked current main and confirmed the scary core contract gaps are mostly fixed while production trust evidence, 1/1 product surfaces, marketplace/indexer proof, `StreamCore` size discipline, and warning hygiene remain the next 10/10 work. Folded those comments into `ops/ROADMAP.md` and `ops/EXECUTION_BACKLOG.md` while continuing the bytecode-to-release proof branch for issue #384. |
