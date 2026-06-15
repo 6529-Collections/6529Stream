@@ -13,10 +13,12 @@
     "IERC721": "0x80ac58cd",
     "IERC721Enumerable": "0x780e9d63",
     "IERC721Metadata": "0x5b5e139f",
+    "IERC7572": "0xe8a3d485",
     "IRandomizer": "0xf3eb4f44",
     "IRandomizerLifecycle": "0xaabe1a0d",
     "IStreamAdmins": "0x00ddd221",
     "IStreamAuctions": "0xb109bb30",
+    "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0xbee7d263",
     "IStreamDrops": "0x0f531c31",
     "IStreamMinter": "0x0f48ec25"
@@ -307,6 +309,20 @@
         }
       ]
     },
+    "IERC7572": {
+      "source": "smart-contracts/IERC7572.sol",
+      "artifact_path": "out/IERC7572.sol/IERC7572.json",
+      "abi_sha256": "sha256:fdc27ee0b903d51effbc5868dfe10f7cf9bf0233900772ced428ce4ac5d27ab6",
+      "interface_id": "0xe8a3d485",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xe8a3d485",
+      "function_selectors": [
+        {
+          "signature": "contractURI()",
+          "selector": "0xe8a3d485"
+        }
+      ]
+    },
     "IRandomizer": {
       "source": "smart-contracts/IRandomizer.sol",
       "artifact_path": "out/IRandomizer.sol/IRandomizer.json",
@@ -428,6 +444,44 @@
         {
           "signature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
           "selector": "0x89dd4dc6"
+        }
+      ]
+    },
+    "IStreamContractMetadata": {
+      "source": "smart-contracts/IStreamContractMetadata.sol",
+      "artifact_path": "out/IStreamContractMetadata.sol/IStreamContractMetadata.json",
+      "abi_sha256": "sha256:ce8a86739d4d47eb40058bd5df61667adf2a97fe77179e6424a552d8264bc797",
+      "interface_id": "0x88369d44",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x88369d44",
+      "function_selectors": [
+        {
+          "signature": "adminsContract()",
+          "selector": "0x7e3c9be7"
+        },
+        {
+          "signature": "contractURI()",
+          "selector": "0xe8a3d485"
+        },
+        {
+          "signature": "contractURIHash()",
+          "selector": "0xc4217932"
+        },
+        {
+          "signature": "isStreamContractMetadata()",
+          "selector": "0xc3072dc6"
+        },
+        {
+          "signature": "streamCore()",
+          "selector": "0x5f59b4d2"
+        },
+        {
+          "signature": "updateAdminContract(address)",
+          "selector": "0x388d2c24"
+        },
+        {
+          "signature": "updateContractURI(string)",
+          "selector": "0x7e5b1e24"
         }
       ]
     },

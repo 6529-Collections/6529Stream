@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/operator-admin-ui-spec` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/407` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/408` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/409` |
-| Next issue | `ONE-001` contract-level metadata surface after INT-010 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/contract-level-metadata-surface` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/409` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/410` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/411` |
+| Next issue | `ONE-002` 1/1 provenance manifest model after ONE-001 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 15:37 UTC` |
+| Last updated | `2026-06-15 17:12 UTC` |
 
 ## Packaging Notes
 
@@ -15223,6 +15223,12 @@ Outcome:
 | 2026-06-15 14:57 | Create issue #408 and start INT-010 | Next substantive integration-readiness slice is the operator admin UI specification on branch `codex/operator-admin-ui-spec`; issue #408 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, Safe/multisig, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and no-production-readiness boundaries. |
 | 2026-06-15 15:34 | Validate INT-010 local draft | Focused operator admin UI, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed with existing Foundry warning noise only. |
 | 2026-06-15 15:37 | Open PR #409 for INT-010 | PR #409 is open on branch `codex/operator-admin-ui-spec`, closes issue #408, and CodeRabbit review was requested in comment `4709612799`. |
+| 2026-06-15 15:47 | Merge PR #409 and select ONE-001 | Operator admin UI specification merged as `947ce6d5d02187d677c3153fab01aff9940960c9` after CI run `27557822994` passed, review threads were empty, and CodeRabbit finished with only an informational rate-limit note. |
+| 2026-06-15 15:51 | Create issue #410 and start ONE-001 | Next substantive 1/1 product-readiness slice is the contract-level metadata surface on branch `codex/contract-level-metadata-surface`; the implementation path is a bytecode-preserving satellite/read-adapter unless local proof shows a safer Core change. |
+| 2026-06-15 16:39 | Validate ONE-001 local draft | Added an ERC-7572-style `StreamContractMetadata` satellite/read-adapter, `IERC7572` and `IStreamContractMetadata` interfaces, deployment rehearsal wiring, generated release/deployment artifacts, integration docs, and retained local evidence hash updates. Local validation passed: focused contract metadata tests, deployment manifest tests, full `forge test -vvv` (`336` tests), `forge build --sizes --via-ir --skip test --skip script --force` (`StreamCore` runtime `24,139` bytes, `437` byte margin; adapter runtime `2,431` bytes), full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. |
+| 2026-06-15 16:41 | Open PR #411 for ONE-001 | PR #411 opened as a draft on branch `codex/contract-level-metadata-surface`, closes issue #410, and CodeRabbit review was requested in comment `4710158602`. |
+| 2026-06-15 16:42 | Mark PR #411 ready | PR #411 was marked ready for review after CodeRabbit reported draft-skip status but also completed the explicit review command; CodeRabbit review was requested again in comment `4710169291`. |
+| 2026-06-15 17:12 | Address PR #411 6529bot review | Prepared a substantive response to 6529bot general review comment `4710176032`: `updateAdminContract` now shares the `METADATA_MUTATION` pause guard with `updateContractURI`, `contractURIHash()` is documented and tested as `keccak256(bytes(contractURI()))` over exact stored URI bytes, adapter negative tests now cover empty/data/javascript/whitespace/control/invalid-UTF-8/oversized URIs plus paused admin rebinding, and regenerated deployment/release/evidence hashes. Local validation passed: focused adapter tests (`11`), deployment-manifest tests (`4`), full `forge test -vvv` (`337` tests), `forge build --sizes --via-ir --skip test --skip script --force` (`StreamCore` runtime `24,139` bytes, `437` byte margin; adapter runtime `2,476` bytes), artifact drift checks, ceremony/randomizer evidence checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. Next GitHub action: push this review-response head, reply on PR #411, request follow-up bot review, then merge only after CI and review state are clean. |
 
 ## Resume Instructions
 

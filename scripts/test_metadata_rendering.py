@@ -65,7 +65,10 @@ Electron, mobile, and private keys are named.
 ## TokenURI Behavior
 
 tokenURI, metadata_schema_version, metadata_state,
-data:application/json;base64, and animation_url are named.
+data:application/json;base64, and animation_url are named. StreamContractMetadata,
+IERC7572, IStreamContractMetadata, ERC-7572-style, contractURI(),
+contractURIHash(), ContractURIUpdated, satellite/read-adapter, and
+METADATA_MUTATION are named.
 
 ## JSON And Fixture Expectations
 

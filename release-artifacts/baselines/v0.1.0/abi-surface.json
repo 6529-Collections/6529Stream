@@ -5817,6 +5817,239 @@
         "receives": []
       }
     },
+    "StreamContractMetadata": {
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+      "abi_sha256": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
+      "abi_entries": 16,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 9,
+        "events": 1,
+        "errors": 5,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address,address,string)",
+            "kind": "constructor",
+            "signature": "constructor(address,address,string)",
+            "inputs": [
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "admins",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "initialContractURI",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "MAX_CONTRACT_URI_BYTES()",
+            "kind": "function",
+            "name": "MAX_CONTRACT_URI_BYTES",
+            "signature": "MAX_CONTRACT_URI_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contractURI()",
+            "kind": "function",
+            "name": "contractURI",
+            "signature": "contractURI()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contractURIHash()",
+            "kind": "function",
+            "name": "contractURIHash",
+            "signature": "contractURIHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamContractMetadata()",
+            "kind": "function",
+            "name": "isStreamContractMetadata",
+            "signature": "isStreamContractMetadata()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamCore()",
+            "kind": "function",
+            "name": "streamCore",
+            "signature": "streamCore()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "updateAdminContract(address)",
+            "kind": "function",
+            "name": "updateAdminContract",
+            "signature": "updateAdminContract(address)",
+            "inputs": [
+              {
+                "name": "newAdminsContract",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateContractURI(string)",
+            "kind": "function",
+            "name": "updateContractURI",
+            "signature": "updateContractURI(string)",
+            "inputs": [
+              {
+                "name": "newContractURI",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "ContractURIUpdated()",
+            "kind": "event",
+            "name": "ContractURIUpdated",
+            "signature": "ContractURIUpdated()",
+            "anonymous": false,
+            "inputs": []
+          }
+        ],
+        "errors": [
+          {
+            "key": "EmptyContractURI()",
+            "kind": "error",
+            "name": "EmptyContractURI",
+            "signature": "EmptyContractURI()",
+            "inputs": []
+          },
+          {
+            "key": "FunctionAdminUnauthorized()",
+            "kind": "error",
+            "name": "FunctionAdminUnauthorized",
+            "signature": "FunctionAdminUnauthorized()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidAdminContract()",
+            "kind": "error",
+            "name": "InvalidAdminContract",
+            "signature": "InvalidAdminContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCoreContract()",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract()",
+            "inputs": []
+          },
+          {
+            "key": "MetadataMutationPaused()",
+            "kind": "error",
+            "name": "MetadataMutationPaused",
+            "signature": "MetadataMutationPaused()",
+            "inputs": []
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",

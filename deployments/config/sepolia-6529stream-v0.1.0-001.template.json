@@ -11,6 +11,11 @@
         "purpose": "Sepolia RPC endpoint used by the operator shell only."
       },
       {
+        "name": "SEPOLIA_CONTRACT_METADATA_URI",
+        "retained_value": "public_uri",
+        "purpose": "Reviewed contract-level metadata URI for the ERC-7572-style adapter constructor."
+      },
+      {
         "name": "SEPOLIA_DEPLOYER_ADDRESS",
         "retained_value": "public_address",
         "purpose": "Public Forge broadcaster address matching the approved hardware, keystore, cloud, or CI signing backend."
@@ -105,13 +110,17 @@
       {
         "name": "StreamAdmins",
         "address": "0x0000000000000000000000000000000000000001",
-        "constructor_args": ["$SEPOLIA_DROP_SIGNER"],
+        "constructor_args": [
+          "$SEPOLIA_DROP_SIGNER"
+        ],
         "verification_status": "not_started"
       },
       {
         "name": "DependencyRegistry",
         "address": "0x0000000000000000000000000000000000000002",
-        "constructor_args": ["$DEPLOYED_STREAM_ADMINS"],
+        "constructor_args": [
+          "$DEPLOYED_STREAM_ADMINS"
+        ],
         "verification_status": "not_started"
       },
       {
@@ -122,6 +131,16 @@
           "STREAM",
           "$DEPLOYED_STREAM_ADMINS",
           "$DEPLOYED_DEPENDENCY_REGISTRY"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamContractMetadata",
+        "address": "0x000000000000000000000000000000000000000a",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS",
+          "$SEPOLIA_CONTRACT_METADATA_URI"
         ],
         "verification_status": "not_started"
       },
@@ -195,10 +214,18 @@
       "deployer": "$SEPOLIA_DEPLOYER_ADDRESS",
       "admin_safe": "$SEPOLIA_ADMIN_SAFE",
       "emergency_recipient": "$SEPOLIA_EMERGENCY_RECIPIENT",
-      "pause_guardians": ["$SEPOLIA_PAUSE_GUARDIAN"],
-      "unpause_admins": ["$SEPOLIA_ADMIN_SAFE"],
-      "signer_managers": ["$SEPOLIA_ADMIN_SAFE"],
-      "drop_signers": ["$SEPOLIA_DROP_SIGNER"],
+      "pause_guardians": [
+        "$SEPOLIA_PAUSE_GUARDIAN"
+      ],
+      "unpause_admins": [
+        "$SEPOLIA_ADMIN_SAFE"
+      ],
+      "signer_managers": [
+        "$SEPOLIA_ADMIN_SAFE"
+      ],
+      "drop_signers": [
+        "$SEPOLIA_DROP_SIGNER"
+      ],
       "temporary_admins_revoked": true,
       "ownership_transfers": [
         {
