@@ -446,9 +446,9 @@ release baseline.
 
 `contracts.json` also carries the production runtime size budget. The local and
 CI size-budget checker reads the production Foundry artifacts, computes linked
-runtime size even when Solidity library placeholders are still unlinked, and
-enforces the configured `StreamCore` minimum margin before release artifacts can
-be considered current.
+runtime size even when Solidity library placeholders are still unlinked, checks
+every production contract against EIP-170, and enforces the configured
+`StreamCore` minimum margin before release artifacts can be considered current.
 
 `baselines/v0.1.0/gas-snapshot.snap` is the local Foundry gas snapshot for the
 Gate D operations. It is generated with `forge snapshot --match-path

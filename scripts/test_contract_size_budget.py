@@ -64,6 +64,17 @@ def write_tree(
     )
 
 
+def add_production_contract(root: Path, name: str, source: str, runtime_size: int) -> None:
+    config_path = root / "release-artifacts/contracts.json"
+    config = checker.load_json(config_path)
+    config["production_contracts"].append({"name": name, "source": source})
+    write_json(config_path, config)
+    write_json(
+        root / "out" / Path(source).name / f"{name}.json",
+        {"deployedBytecode": {"object": runtime_hex(runtime_size)}},
+    )
+
+
 class ContractSizeBudgetTests(unittest.TestCase):
     def test_passes_above_warning_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -124,6 +135,50 @@ class ContractSizeBudgetTests(unittest.TestCase):
         self.assertEqual(report[0]["runtime_size_bytes"], 22)
         self.assertEqual(report[0]["runtime_margin_bytes"], 78)
         self.assertEqual(report[0]["status"], "pass")
+
+    def test_counts_multiple_solidity_link_placeholders(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000, limit=100, minimum_margin=1, warning_margin=1)
+            write_json(
+                root / "out/Example.sol/Example.json",
+                {
+                    "deployedBytecode": {
+                        "object": (
+                            "0x60__$a64266b5966c542c29758651cb19f2deb4$__"
+                            "61__$bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb$__62"
+                        )
+                    }
+                },
+            )
+
+            report = checker.build_report(
+                root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT
+            )
+
+        self.assertEqual(report[0]["runtime_size_bytes"], 43)
+        self.assertEqual(report[0]["runtime_margin_bytes"], 57)
+        self.assertEqual(report[0]["status"], "pass")
+
+    def test_unbudgeted_production_contract_fails_when_above_eip170_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000)
+            add_production_contract(
+                root,
+                "Other",
+                "smart-contracts/Other.sol",
+                runtime_size=24_577,
+            )
+
+            report = checker.build_report(
+                root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT
+            )
+
+        by_name = {row["contract"]: row for row in report}
+        self.assertEqual(by_name["Other"]["runtime_margin_bytes"], -1)
+        self.assertEqual(by_name["Other"]["status"], "fail")
+        self.assertEqual(checker.check_report(report), 1)
 
     def test_rejects_malformed_unlinked_runtime_bytecode(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

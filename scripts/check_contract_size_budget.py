@@ -127,8 +127,10 @@ def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[
     for name in sorted(budgets):
         if name not in production:
             raise SizeBudgetError(f"runtime_size_budget contract is not production-listed: {name}")
+
+    for name in sorted(production):
         production_entry = production[name]
-        budget = budgets[name]
+        budget = budgets.get(name, {})
         source = require_string(production_entry.get("source"), f"production_contracts.{name}.source")
         configured_source = budget.get("source")
         if configured_source is not None and configured_source != source:
@@ -141,14 +143,20 @@ def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[
             budget.get("runtime_limit_bytes", default_limit),
             f"runtime_size_budget.contracts.{name}.runtime_limit_bytes",
         )
-        minimum_margin = require_int(
-            budget.get("minimum_runtime_margin_bytes"),
-            f"runtime_size_budget.contracts.{name}.minimum_runtime_margin_bytes",
-        )
-        warning_margin = require_int(
-            budget.get("warning_runtime_margin_bytes", minimum_margin),
-            f"runtime_size_budget.contracts.{name}.warning_runtime_margin_bytes",
-        )
+        if runtime_limit <= 0:
+            raise SizeBudgetError(f"{name} runtime limit must be positive")
+        if name in budgets:
+            minimum_margin = require_int(
+                budget.get("minimum_runtime_margin_bytes"),
+                f"runtime_size_budget.contracts.{name}.minimum_runtime_margin_bytes",
+            )
+            warning_margin = require_int(
+                budget.get("warning_runtime_margin_bytes", minimum_margin),
+                f"runtime_size_budget.contracts.{name}.warning_runtime_margin_bytes",
+            )
+        else:
+            minimum_margin = 0
+            warning_margin = 0
         if minimum_margin < 0 or warning_margin < minimum_margin:
             raise SizeBudgetError(f"{name} has invalid runtime margin thresholds")
 
