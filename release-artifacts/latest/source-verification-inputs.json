@@ -115,15 +115,6 @@
         "StreamCore"
       ]
     },
-    "smart-contracts/ERC2981.sol": {
-      "path": "smart-contracts/ERC2981.sol",
-      "sha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a",
-      "solc_keccak256": "0x7b5b7a1aee191e477887f0477c100636d872bc47f5359223b0821c4d3fa85165",
-      "license": "MIT",
-      "used_by": [
-        "StreamCore"
-      ]
-    },
     "smart-contracts/ERC721.sol": {
       "path": "smart-contracts/ERC721.sol",
       "sha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702",
@@ -411,8 +402,8 @@
     },
     "smart-contracts/StreamCore.sol": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:b5e233d4af060a23e23a3d23068f6313996b26cf2b4839f8a16d5e9b08306577",
-      "solc_keccak256": "0x7ec1fdf972c051be27c0bce25c8121241448f0788a6bf7640ad48e4da002862b",
+      "sha256": "sha256:74523a2ccf7513e370bddb4d5f5e2e0709b598e8812ce9da7c27688d6cdb3810",
+      "solc_keccak256": "0x75b2848dcb92ab18e2cdcd40758b9264060e9267a30034e6ee2db5112d0e642f",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -675,7 +666,7 @@
       "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
       "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:bbdea1c9f1bf2bafb090469a281ae0b1a5d4c86dab5851e1e779f420feb5f58d",
+      "artifact_sha256": "sha256:baec5dd3999a94090800963bfde282fcd0fe2b24b645a2d776c87b04c074ae84",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1018,10 +1009,10 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "source_sha256": "sha256:b5e233d4af060a23e23a3d23068f6313996b26cf2b4839f8a16d5e9b08306577",
-      "source_solc_keccak256": "0x7ec1fdf972c051be27c0bce25c8121241448f0788a6bf7640ad48e4da002862b",
+      "source_sha256": "sha256:74523a2ccf7513e370bddb4d5f5e2e0709b598e8812ce9da7c27688d6cdb3810",
+      "source_solc_keccak256": "0x75b2848dcb92ab18e2cdcd40758b9264060e9267a30034e6ee2db5112d0e642f",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:b3ed642094d86d66aae8b3acc8434ac98364f1876cd3315788e5822eb0469cf4",
+      "artifact_sha256": "sha256:101cad866b5032241696eabf03d2a1a507a7008e6d1f90e8e738a7e98ecc50b6",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1038,16 +1029,16 @@
       "abi_sha256": "sha256:be6dcfbe4bc78781206a9b5bb2ea029628ff8f665ccb923ae0530f943272cb49",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:ca0eea9c8718f9f7387909c2e046cb732ebed8baf82019c4e19399d051e6e38f",
+          "sha256": "sha256:713f21ebdae8725b21d09611b935a3d6912d77476cd2ad7b7ca0e89c72355d38",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:ca0eea9c8718f9f7387909c2e046cb732ebed8baf82019c4e19399d051e6e38f"
+          "release_artifact_sha256": "sha256:713f21ebdae8725b21d09611b935a3d6912d77476cd2ad7b7ca0e89c72355d38"
         },
         "runtime": {
-          "sha256": "sha256:6c2d76916c3dc47a32d7adadbfed8f65a14cbcf319093e99f07a33e6be74d770",
+          "sha256": "sha256:f793b61f75d096534d91c32669c792937c4dac554658411402c80eed936fe34d",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:6c2d76916c3dc47a32d7adadbfed8f65a14cbcf319093e99f07a33e6be74d770"
+          "release_artifact_sha256": "sha256:f793b61f75d096534d91c32669c792937c4dac554658411402c80eed936fe34d"
         }
       },
       "constructor": {
@@ -1093,67 +1084,67 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 7968,
+                "start": 7895,
                 "length": 20
               },
               {
-                "start": 8073,
+                "start": 8000,
                 "length": 20
               },
               {
-                "start": 8131,
+                "start": 8058,
                 "length": 20
               },
               {
-                "start": 8242,
+                "start": 8169,
                 "length": 20
               },
               {
-                "start": 10263,
+                "start": 10200,
                 "length": 20
               },
               {
-                "start": 10415,
+                "start": 10356,
                 "length": 20
               },
               {
-                "start": 12269,
+                "start": 12204,
                 "length": 20
               },
               {
-                "start": 12459,
+                "start": 12394,
                 "length": 20
               },
               {
-                "start": 15306,
+                "start": 15173,
                 "length": 20
               },
               {
-                "start": 20143,
+                "start": 20030,
                 "length": 20
               },
               {
-                "start": 20903,
+                "start": 20790,
                 "length": 20
               },
               {
-                "start": 21481,
+                "start": 21368,
                 "length": 20
               },
               {
-                "start": 22531,
+                "start": 22418,
                 "length": 20
               },
               {
-                "start": 23314,
+                "start": 23201,
                 "length": 20
               },
               {
-                "start": 24530,
+                "start": 24417,
                 "length": 20
               },
               {
-                "start": 25168,
+                "start": 25055,
                 "length": 20
               }
             ]
@@ -1165,19 +1156,19 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 6744,
+                "start": 6734,
                 "length": 20
               },
               {
-                "start": 6849,
+                "start": 6839,
                 "length": 20
               },
               {
-                "start": 6907,
+                "start": 6897,
                 "length": 20
               },
               {
-                "start": 7018,
+                "start": 7008,
                 "length": 20
               },
               {
@@ -1185,47 +1176,47 @@
                 "length": 20
               },
               {
-                "start": 9191,
+                "start": 9195,
                 "length": 20
               },
               {
-                "start": 11045,
+                "start": 11043,
                 "length": 20
               },
               {
-                "start": 11235,
+                "start": 11233,
                 "length": 20
               },
               {
-                "start": 14082,
+                "start": 14012,
                 "length": 20
               },
               {
-                "start": 18919,
+                "start": 18869,
                 "length": 20
               },
               {
-                "start": 19679,
+                "start": 19629,
                 "length": 20
               },
               {
-                "start": 20257,
+                "start": 20207,
                 "length": 20
               },
               {
-                "start": 21307,
+                "start": 21257,
                 "length": 20
               },
               {
-                "start": 22090,
+                "start": 22040,
                 "length": 20
               },
               {
-                "start": 23306,
+                "start": 23256,
                 "length": 20
               },
               {
-                "start": 23944,
+                "start": 23894,
                 "length": 20
               }
             ]

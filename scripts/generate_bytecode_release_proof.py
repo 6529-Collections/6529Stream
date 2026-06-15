@@ -272,6 +272,40 @@ def build_contract_proof(
     )
     if creation_hash != source_creation_hash:
         raise BytecodeReleaseProofError(f"{contract_name} creation bytecode hash mismatch")
+    creation_size = require_int(
+        abi_contract.get("bytecode_size_bytes"),
+        f"abi-checksums.contracts.{contract_name}.bytecode_size_bytes",
+    )
+    runtime_size = require_int(
+        abi_contract.get("deployed_bytecode_size_bytes"),
+        f"abi-checksums.contracts.{contract_name}.deployed_bytecode_size_bytes",
+    )
+    eip170_limit = require_int(
+        abi_contract.get("eip170_runtime_limit_bytes"),
+        f"abi-checksums.contracts.{contract_name}.eip170_runtime_limit_bytes",
+    )
+    runtime_margin = require_int(
+        abi_contract.get("deployed_runtime_margin_bytes"),
+        f"abi-checksums.contracts.{contract_name}.deployed_runtime_margin_bytes",
+    )
+    if runtime_margin != eip170_limit - runtime_size:
+        raise BytecodeReleaseProofError(f"{contract_name} runtime size margin mismatch")
+    abi_runtime_size = require_int(
+        require_dict(
+            abi_bytecode.get("runtime"), f"abi-checksums.bytecode_hashes.{contract_name}.runtime"
+        ).get("size_bytes"),
+        f"abi-checksums.bytecode_hashes.{contract_name}.runtime.size_bytes",
+    )
+    abi_creation_size = require_int(
+        require_dict(
+            abi_bytecode.get("creation"), f"abi-checksums.bytecode_hashes.{contract_name}.creation"
+        ).get("size_bytes"),
+        f"abi-checksums.bytecode_hashes.{contract_name}.creation.size_bytes",
+    )
+    if runtime_size != abi_runtime_size:
+        raise BytecodeReleaseProofError(f"{contract_name} runtime bytecode size mismatch")
+    if creation_size != abi_creation_size:
+        raise BytecodeReleaseProofError(f"{contract_name} creation bytecode size mismatch")
 
     source_path = require_string(
         address_book_contract.get("source"),
@@ -327,6 +361,12 @@ def build_contract_proof(
             "abi": abi_hash,
             "runtime_bytecode": runtime_hash,
             "creation_bytecode": creation_hash,
+        },
+        "sizes": {
+            "runtime_bytecode_bytes": runtime_size,
+            "creation_bytecode_bytes": creation_size,
+            "eip170_runtime_limit_bytes": eip170_limit,
+            "runtime_margin_bytes": runtime_margin,
         },
         "compiler": {
             "version": require_string(

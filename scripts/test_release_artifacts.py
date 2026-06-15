@@ -32,6 +32,16 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseArtifactTests(unittest.TestCase):
+    def test_bytecode_hash_counts_solidity_link_placeholders_for_size(self) -> None:
+        unlinked = "0x60__$a64266b5966c542c29758651cb19f2deb4$__61"
+
+        result = generator.bytecode_hash(unlinked)
+
+        self.assertEqual(result["linked"], False)
+        self.assertEqual(result["hash_mode"], "unlinked_artifact_object")
+        self.assertEqual(result["size_bytes"], 22)
+        self.assertEqual(result["sha256"], generator.sha256_bytes(unlinked.encode("utf-8")))
+
     def test_generator_outputs_event_topic_interface_id_and_hashes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -115,6 +125,16 @@ class ReleaseArtifactTests(unittest.TestCase):
             )
             self.assertEqual(abi_checksums["contracts"]["Example"]["bytecode_linked"], True)
             self.assertEqual(abi_checksums["contracts"]["Example"]["bytecode_hash_mode"], "bytes")
+            self.assertEqual(abi_checksums["contracts"]["Example"]["bytecode_size_bytes"], 2)
+            self.assertEqual(
+                abi_checksums["contracts"]["Example"]["deployed_bytecode_size_bytes"], 2
+            )
+            self.assertEqual(
+                abi_checksums["contracts"]["Example"]["eip170_runtime_limit_bytes"], 24576
+            )
+            self.assertEqual(
+                abi_checksums["contracts"]["Example"]["deployed_runtime_margin_bytes"], 24574
+            )
 
             events = generator.load_json(output_dir / "event-topic-catalog.json")
             self.assertEqual(
