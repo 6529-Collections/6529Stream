@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-003 royalty policy coverage with `docs/royalty-policy.md`, a
+  checker/test pair, local/CI gate wiring, integration/release-readiness
+  navigation, release-manifest/checksum coverage, and explicit ERC-2981
+  disclosure boundaries that state royalty information is not payment
+  enforcement and no production-readiness claim depends on marketplaces
+  honoring royalties.
 - Added ONE-002 1/1 provenance manifest support with
   `docs/provenance-manifests.md`, a checked JSON schema, no-secret retained
   artifact template, generated

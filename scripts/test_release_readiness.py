@@ -93,7 +93,9 @@ The drop authorization signing fixtures are summarized.
 The drop authorization signing evidence and signer custody readiness evidence
 are summarized.
 The 1/1 provenance manifest and artist/story/authenticity local artifact model
-are summarized without token finality, marketplace readiness, royalty
+are summarized with royalty policy, ERC-2981 disclosure, royalty disclosure,
+not payment enforcement, No production-readiness claim depends on marketplaces
+honoring royalties, and without token finality, marketplace readiness, royalty
 enforcement, or ownership proof beyond chain state.
 The test matrix and ADR index evidence are summarized.
 

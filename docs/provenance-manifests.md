@@ -49,7 +49,9 @@ The current boundary is:
   burn count, live token aggregate, randomizer/core/chain context, and
   dependency pins, not the append-only provenance story.
 - Provenance is not royalty enforcement, not ownership proof beyond chain
-  state, and not marketplace or indexer readiness proof.
+  state, and not marketplace or indexer readiness proof. Use
+  [`docs/royalty-policy.md`](royalty-policy.md) for the current ERC-2981
+  royalty disclosure and non-enforcement boundary.
 
 ## Required Fields
 

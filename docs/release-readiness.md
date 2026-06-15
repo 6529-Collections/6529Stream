@@ -24,6 +24,9 @@ accompany reviewed non-local signing evidence.
 Use [`docs/provenance-manifests.md`](provenance-manifests.md) for the checked
 1/1 provenance manifest model, generated provenance artifact catalog, and
 frontend/indexer display boundaries for artist/story/authenticity context.
+Use [`docs/royalty-policy.md`](royalty-policy.md) for the checked `ONE-003`
+royalty policy, current ERC-2981 disclosure, governance boundary, marketplace
+display guidance, and royalty disclosure, not payment enforcement caveat.
 Use [`docs/deployment.md`](deployment.md#admin-ceremony-evidence) for the
 no-secret admin ceremony evidence model that must accompany reviewed ownership,
 role, signer, pause, emergency, and post-state proof for non-local deployments.
@@ -176,6 +179,13 @@ The current local baseline includes:
   which establish the artifact-only artist/story/authenticity model without
   claiming token finality, marketplace readiness, royalty enforcement, or
   ownership proof beyond chain state;
+- royalty policy guidance in
+  [`docs/royalty-policy.md`](royalty-policy.md), covered by
+  `python scripts/test_royalty_policy.py` and
+  `python scripts/check_royalty_policy.py`, which documents current ERC-2981
+  disclosure, governance and enforcement boundaries, marketplace display
+  guidance, and the rule that No production-readiness claim depends on
+  marketplaces honoring royalties;
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -356,6 +366,7 @@ Audit and protocol evidence:
 - [docs/drop-authorization-signing.md](drop-authorization-signing.md)
 - [docs/signer-custody-readiness.md](signer-custody-readiness.md)
 - [docs/provenance-manifests.md](provenance-manifests.md)
+- [docs/royalty-policy.md](royalty-policy.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
 - [docs/deployment.md](deployment.md)
@@ -469,6 +480,8 @@ python scripts/check_signer_custody_readiness.py
 python scripts/test_one_of_one_provenance_manifest.py
 python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check
+python scripts/test_royalty_policy.py
+python scripts/check_royalty_policy.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_risk_register.py
