@@ -1780,8 +1780,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:887ec0203205d9fafd8feb634c629d3390d5b8871f562dadb2c08ceca24b5284",
-      "size_bytes": 24467
+      "sha256": "sha256:dd04b1ff3e9c73dad5281762f65489dc7a85e77973e30616659ab2c0e149fff1",
+      "size_bytes": 24832
     },
     "governance_docs": [
       {
@@ -1826,8 +1826,8 @@
       },
       {
         "path": "docs/threat-model.md",
-        "sha256": "sha256:c3f8163bae8b99ba984c8584d4615174bee4c9231f48b1f2959f093adf77e2a1",
-        "size_bytes": 11017
+        "sha256": "sha256:dfd9319fa65fe8cba5098be04fac5b7c863d3db2af5737ae0b4e66fd86fce1de",
+        "size_bytes": 11272
       },
       {
         "path": "docs/audit-package.md",

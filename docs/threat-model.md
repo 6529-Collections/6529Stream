@@ -144,6 +144,8 @@ Current evidence links include:
 - [`docs/auction-custody.md`](auction-custody.md)
 - [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json)
 - [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS)
+- [`test/helpers/ProtocolStateMachine.sol`](../test/helpers/ProtocolStateMachine.sol)
+- [`test/StreamProtocolStateMachine.t.sol`](../test/StreamProtocolStateMachine.t.sol)
 
 ## Residual Risks And Open Blockers
 
@@ -183,6 +185,7 @@ Use these starting points during review:
 - [payment invariant tests](../test/StreamPaymentsInvariant.t.sol)
 - [supply, replay, and freeze invariant tests](../test/StreamSupplyReplayFreezeInvariant.t.sol)
 - [auction invariant tests](../test/StreamAuctionInvariant.t.sol)
+- [protocol state-machine smoke harness](../test/StreamProtocolStateMachine.t.sol)
 - [randomizer payment tests](../test/StreamRandomizerPayments.t.sol)
 - [deployment manifest tests](../test/StreamDeploymentManifest.t.sol)
 - [audit package checker](../scripts/check_audit_package.py)

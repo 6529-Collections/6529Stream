@@ -115,6 +115,15 @@ burn counters, burn audit state, consumed/cancelled drop IDs, freeze manifest
 stability, final-supply tightening, and post-freeze mint/burn/token-data
 rejection.
 
+`StreamProtocolStateMachine.t.sol` adds the first reusable cross-contract
+protocol state-machine smoke harness in `helpers/ProtocolStateMachine.sol`.
+The deterministic sequence composes fixed-price minting, auction outbid and
+settlement, known credit withdrawals, pause/unpause checks, signer rotation,
+drop cancellation, immediate-randomizer metadata finalization, metadata
+mutation, collection freeze, and owed-balance/surplus assertions. Future
+adversarial and invariant PRs should extend this helper rather than duplicating
+the full stack setup.
+
 `StreamGasSnapshot.t.sol` provides the local Gate D gas snapshot surface. The
 committed baseline at `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`
 is generated and checked with `forge snapshot --match-path
