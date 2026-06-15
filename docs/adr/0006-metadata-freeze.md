@@ -13,7 +13,7 @@ Accepted.
 | Blocks | [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9), [P1-META-001](https://github.com/6529-Collections/6529Stream/issues/46), [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47), [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48), [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49), [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50), [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51) |
 | Related issues | [P0-RAND-004](https://github.com/6529-Collections/6529Stream/issues/40), [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34), [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35), [P0-INIT-001](https://github.com/6529-Collections/6529Stream/issues/15) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0004](0004-admin-governance.md), [ADR 0005](0005-randomness.md), [ADR 0007](0007-upgrade-redeployment.md) |
-| Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/DependencyRegistry.sol`, `smart-contracts/StreamMinter.sol`, randomizer adapters that finalize token metadata |
+| Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/StreamContractMetadata.sol`, `smart-contracts/DependencyRegistry.sol`, `smart-contracts/StreamMinter.sol`, randomizer adapters that finalize token metadata |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -30,6 +30,8 @@ Before public beta, the protocol needs to decide:
 - whether dependency registry updates can change already frozen collections
 - how dependency chunks are encoded, hashed, versioned, and proven
 - whether `ERC-4906` metadata update events are supported
+- whether contract-level metadata lives on `StreamCore` or a release-tracked
+  adapter while Core remains near the EIP-170 size limit
 - how burned tokens behave for metadata, supply, and late randomness callbacks
 - how JSON, HTML, JavaScript, and URI inputs are escaped and bounded
 - which events and views let indexers, artists, collectors, and auditors verify
@@ -133,8 +135,63 @@ The public-beta target design is:
     acceptable as the final public API.
 15. Every external metadata, dependency, freeze, burn, and metadata-significant
     randomness transition emits a stable event.
+16. Contract-level metadata is accepted as a release-tracked
+    `StreamContractMetadata` adapter for the current release track. It exposes
+    an ERC-7572-style `contractURI()` and `ContractURIUpdated()` without adding
+    bytes to `StreamCore`, stores only a safe content URI plus URI hash, follows
+    the existing target-scoped admin and metadata-pause model, and remains
+    outside per-collection freeze manifests until a later ADR accepts a global
+    contract-metadata freeze or moves an equivalent surface into the core/proxy
+    address.
+17. 1/1 provenance manifests are accepted as checked release artifacts for the
+    current release track. They may describe artist statements, authenticity
+    status, certificate hashes, curation notes, exhibition history, retained
+    artifact hashes, and append-only story/provenance entries, but they do not
+    change `tokenURI()` output, `contractURI()` output,
+    `collectionFreezeManifestHash(collectionId)`, ERC-721 ownership state, or
+    royalty enforcement. Future on-chain provenance events/views or a
+    satellite provenance contract require a separate size-budget and
+    integration decision.
 
 ## Metadata Modes
+
+### Contract-Level Metadata
+
+Contract-level metadata is a protocol release surface but not a token
+rendering input. The current implementation uses `StreamContractMetadata` as a
+satellite/read-adapter that binds to the canonical `StreamCore` and
+`StreamAdmins` addresses. It returns a safe `https://`, `ipfs://`, or `ar://`
+content URI from `contractURI()`, exposes `contractURIHash()` as
+`keccak256(bytes(contractURI()))` over the exact stored URI bytes for release
+evidence, and emits `ContractURIUpdated()` on URI changes.
+
+Because `StreamCore` is byte-tight, the adapter keeps ERC-7572-style behavior
+out of Core until a separate size-budget decision accepts adding it there.
+Collection freeze does not freeze this adapter; instead, changes are governed,
+evented, paused by `METADATA_MUTATION`, and tracked through release artifacts.
+Admin-contract rebinding is authorized by the current admin contract and blocked
+by the same metadata-mutation pause; the replacement admin marker is an
+interface guard, not an operator-trust proof. Marketplace or wallet claims still
+need retained non-local evidence because third parties that probe only the
+ERC-721 contract address may not discover an external adapter automatically.
+
+### 1/1 Provenance Manifests
+
+1/1 provenance manifests are release artifacts that sit beside, not inside, the
+current metadata freeze surface. The canonical runbook is
+[`docs/provenance-manifests.md`](../provenance-manifests.md); checked
+descriptors live under `release-artifacts/provenance/`; and
+`release-artifacts/latest/one-of-one-provenance-manifest.json` is the generated
+catalog included in release manifest and checksum coverage.
+
+The current provenance model is artifact-only. It helps collectors and
+integrators verify artist/story/authenticity context, but it is not additional
+`tokenURI()` JSON, not additional `contractURI()` JSON, not included in
+`collectionFreezeManifestHash(collectionId)`, not marketplace readiness proof,
+not royalty enforcement, and not ownership proof beyond canonical chain state.
+Append-only provenance updates must be represented as explicit descriptor
+entries with retained hashes and reviewer status rather than silent mutation of
+frozen artwork metadata.
 
 ### Off-Chain Metadata
 
@@ -597,6 +654,9 @@ signal that metadata changed before freeze.
   owns that decision.
 - Defining final randomness provider behavior beyond the metadata interactions
   inherited from ADR 0005.
+- Implementing on-chain provenance events/views or a provenance satellite
+  contract. The current accepted provenance surface is a checked release
+  artifact because `StreamCore` remains byte-tight.
 
 ## Accepted Risks
 

@@ -23,6 +23,7 @@ GENERATOR_VERSION = "1"
 DOWNSTREAM_RELEASE_FILES = {
     "bytecode-release-proof.json",
     "dependency-artifact-manifest.json",
+    "one-of-one-provenance-manifest.json",
     "production-release-blockers.md",
     "public-beta-blockers.md",
     "public-beta-evidence.json",

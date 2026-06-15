@@ -162,10 +162,9 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         vm.prank(RECIPIENT);
         deployed.core.burn(COLLECTION_ID, TOKEN_ID);
 
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         vm.prank(address(0xA11CE));
         deployed.core.artistSignature(COLLECTION_ID, "artist-signature");
-        deployed.core.artistSigned(COLLECTION_ID)
-            .assertTrue("frozen collection artist signature not recorded");
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         deployed.core.setCollectionData(COLLECTION_ID, address(0xA11CE), 5, 10, 1 days);

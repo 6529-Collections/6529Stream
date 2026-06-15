@@ -34,10 +34,10 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, cache, animation sandbox, marketplace, and React/Next reference architecture guidance is documented for the local baseline |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, cache, animation sandbox, marketplace, and React/Next reference architecture guidance is documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
-| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), and [`metadata-rendering.md`](metadata-rendering.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, and cache invalidation are documented for the local baseline |
+| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), and [`metadata-rendering.md`](metadata-rendering.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, and cache invalidation are documented for the local baseline |
 | Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, release-readiness dashboard, and [`operator-admin-ui.md`](operator-admin-ui.md) | Current `INT-010` operator personas, Safe/multisig ceremony, role, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and evidence-boundary guidance is documented |
 | Backend signing service | Use EIP-712, ERC-1271, Safe, signer custody, drop authorization signing docs, and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Local templates and integration guidance only; production signing evidence remains blocked |
 
@@ -66,13 +66,15 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Signable checksums | [`release-artifacts/latest/SHA256SUMS`](../../release-artifacts/latest/SHA256SUMS), [`release-artifacts/latest/release-checksums.json`](../../release-artifacts/latest/release-checksums.json) | Checksum bundle is signable but not currently a production signature |
 | Public readiness | [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json), [`docs/public-beta-evidence.md`](../public-beta-evidence.md), [`docs/non-local-release-evidence.md`](../non-local-release-evidence.md) | public-beta evidence status is the readiness source |
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated launch blockers, planned mitigations, and accepted local-baseline risks |
-| Metadata | [`docs/metadata.md`](../metadata.md) | Metadata schema, cache, browser, and freeze semantics |
+| Metadata | [`docs/metadata.md`](../metadata.md) | Metadata schema, contract-level metadata adapter, cache, browser, and freeze semantics |
+| 1/1 provenance | [`docs/provenance-manifests.md`](../provenance-manifests.md), [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json), [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json), [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json) | Artifact-only provenance model for artist/story/authenticity context; not token finality, ownership, royalty enforcement, marketplace readiness, or indexer readiness proof |
 | Drop signing | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | EIP-712 and ERC-1271 local fixture guidance |
 | Fixed-price mint flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Current `INT-002` transaction, event, credit, and failure-state guide |
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Current `INT-003` auction submit, bid, settlement, credit, pause, and indexer guide |
 | Wallet and signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Current `INT-004` EIP-712, ERC-1271, Safe, WalletConnect, backend signer, and failure-state guide |
 | Event and indexer guide | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Current `INT-005` event subscriptions, indexed entities, read-after-event calls, reorg policy, and known event/read gaps |
 | Metadata rendering guide | [`docs/integrations/metadata-rendering.md`](metadata-rendering.md) | Current `INT-006` metadata state, tokenURI, ERC-4906 cache invalidation, animation sandbox, cache key, and marketplace evidence-boundary guide |
+| Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | Release-tracked ERC-7572-style `contractURI()` adapter with `ContractURIUpdated` and URI hash views |
 | React/Next reference architecture | [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md) | Current `INT-007` artifact import, client layering, query/cache, transaction, wallet, metadata, indexer, environment, and testing guide |
 | Mobile and WalletConnect guide | [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md) | Current `INT-008` mobile browser, native shell, WalletConnect session, foreground handoff, deep-link, reconnect, offline/background, telemetry, and no-secret guide |
 | Electron security and wallet guide | [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md) | Current `INT-009` Electron main/renderer/preload, context isolation, IPC allowlist, wallet-provider, metadata sandbox, signed-update, and no-secret guide |
@@ -89,6 +91,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/deployment.md`](../deployment.md)
 - [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md)
 - [`docs/metadata.md`](../metadata.md)
+- [`docs/provenance-manifests.md`](../provenance-manifests.md)
 - [`docs/release-policy.md`](../release-policy.md)
 - [`docs/release-signatures.md`](../release-signatures.md)
 - [`docs/public-beta-evidence.md`](../public-beta-evidence.md)
@@ -120,6 +123,9 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json)
 - [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json)
 - [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json)
+- [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json)
+- [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json)
+- [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json)
 - [`deployments/README.md`](../../deployments/README.md)
 - [`deployments/schema/deployment-manifest.schema.json`](../../deployments/schema/deployment-manifest.schema.json)
 - [`deployments/schema/address-book.schema.json`](../../deployments/schema/address-book.schema.json)
@@ -173,6 +179,10 @@ particular:
   not reviewed production signing evidence.
 - Metadata/browser checks and the `INT-006` guide are local evidence, not
   marketplace or collector-tool proof.
+- The 1/1 provenance manifest is a checked release-artifact model for
+  artist/story/authenticity context, not a tokenURI finality signal,
+  marketplace discovery claim, royalty enforcement mechanism, or ownership
+  proof beyond chain state.
 - The `INT-007` React/Next guide is a local architecture reference, not a
   maintained frontend package, generated SDK, public beta implementation, or
   production integration proof.
@@ -206,6 +216,9 @@ python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
 python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
 python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
 python scripts/test_mobile_walletconnect.py

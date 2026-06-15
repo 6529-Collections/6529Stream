@@ -7,6 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-002 1/1 provenance manifest support with
+  `docs/provenance-manifests.md`, a checked JSON schema, no-secret retained
+  artifact template, generated
+  `release-artifacts/latest/one-of-one-provenance-manifest.json`, local/CI
+  checker and generator wiring, integration/release-readiness documentation,
+  release-manifest/checksum coverage, and explicit boundaries that provenance
+  evidence is not token metadata finality, marketplace proof, royalty
+  enforcement, or ownership proof beyond chain state.
+- Added ONE-001 contract-level metadata support with a release-tracked
+  `StreamContractMetadata` adapter, `IERC7572`/`IStreamContractMetadata`
+  interfaces, `contractURI()`/`contractURIHash()` views,
+  `ContractURIUpdated` event catalog coverage, metadata-pause enforcement,
+  deployment rehearsal wiring, generated manifest/address-book/source
+  verification artifacts, and integration docs that preserve the current
+  marketplace-evidence boundary.
 - Added INT-010 operator admin UI specification with
   `docs/integrations/operator-admin-ui.md`, a checker/test pair, local/CI gate
   wiring, integration/release-readiness navigation, release-manifest coverage,

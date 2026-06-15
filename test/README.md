@@ -331,6 +331,15 @@ state, rejects remint attempts for previously burned token IDs, and records
 valid VRF/arRNG post-burn randomness as audit-only state without ERC-4906
 metadata updates or freeze-manifest changes.
 
+Contract-level metadata now has ONE-001 target-state coverage in
+`StreamContractMetadata.t.sol`: the release-tracked adapter exposes
+ERC-7572-style `contractURI()` and `ContractURIUpdated`, records the core/admin
+binding and URI hash, validates URI/UTF-8 policy, supports target-scoped
+function admin and global admin updates, rejects unauthorized and invalid admin
+updates, and blocks `updateContractURI` while the `METADATA_MUTATION` pause
+domain is active. `StreamDeploymentManifest.t.sol` also asserts the deployment
+rehearsal wires the adapter into the local stack and manifest result.
+
 Collection freeze boundaries now have P1-META-002 target-state coverage in
 `StreamMetadataFreeze.t.sol`: freeze requires the mint window and final-supply
 delay to have elapsed, rejects live tokens whose metadata is still pending,
