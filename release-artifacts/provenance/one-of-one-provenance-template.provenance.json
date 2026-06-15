@@ -94,12 +94,12 @@
     },
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:d90632ac48168c8422ba77aa89be1035ee51edbe2cdd6013c72aa8a04c7bbbed",
+      "sha256": "sha256:9e50d9f889684118ca571b4e6d9e15dcde9b82b681c7952c1bd0aa5d7264582c",
       "status": "template"
     },
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:8f25e3220d4f6a1dec4f251db0f5b3491a4c3737b4d21f2b11095b916e44ef30",
+      "sha256": "sha256:a96023d1bb68081850157e8dd2df973b5a09b8248d258bef8178c1c41c16ed83",
       "status": "template"
     },
     "contract_uri_hash_source": "StreamContractMetadata.contractURIHash(); zero value is template-only.",
@@ -132,7 +132,7 @@
     {
       "category": "provenance_runbook",
       "path": "docs/provenance-manifests.md",
-      "sha256": "sha256:af43a565f5269274845f9499e1fd5f8ff8955dd764f780648a4199f8382dd293"
+      "sha256": "sha256:ec54197989419f54827409f81a4fb0ae82bab62749d839afd474019dd572865a"
     }
   ],
   "redaction_policy": {

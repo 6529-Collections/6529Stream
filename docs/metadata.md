@@ -220,6 +220,9 @@ artifact hashes, and append-only story/provenance entries. These fields help
 frontends, indexers, collectors, and auditors display and verify 1/1 context
 without treating that context as ownership proof, marketplace readiness proof,
 royalty enforcement, or a replacement for chain state.
+Use [docs/royalty-policy.md](royalty-policy.md) for the current ERC-2981
+royalty disclosure, governance, marketplace display, and non-enforcement
+boundary.
 
 This boundary is intentional while `StreamCore` remains close to the EIP-170
 bytecode limit. The provenance manifest is not `tokenURI()` JSON, not
