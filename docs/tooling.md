@@ -10,6 +10,7 @@
 | Solidity compiler | `0.8.19` |
 | Slither | `0.11.5` |
 | solc-select | `1.2.0` |
+| eth-hash | `0.8.0` |
 
 ## Local Checks
 
@@ -123,7 +124,11 @@ needs the IR optimizer to fit under the runtime limit. The artifact-backed
 budget checker reads `release-artifacts/contracts.json`, treats unlinked
 Solidity library placeholders as their 20-byte deployed addresses for size
 counting, fails below the 384-byte `StreamCore` minimum margin, and reports a
-warning below the 512-byte future-work threshold.
+warning below the 512-byte future-work threshold. The checker also validates
+artifact compiler metadata, optimizer settings, EVM version, compilation target,
+and current-source Keccak hashes before trusting any reported runtime size, so
+stale artifacts from earlier local commands fail before they can become release
+evidence.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the

@@ -10,11 +10,11 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:6bab8d95c8b7b7f6225d170016deff01a3bcde05b8078b0cdad4ac99ba07e2ed"
+      "sha256": "sha256:7a53c5268cd755726f159be9479b76bd2c35d3c87ec0a84b954396aab6185b41"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:e23a983046c584b22776152c372a007eec741f5f9a47205b5da28cb8fbf63f3a"
+      "sha256": "sha256:314dab0c301d355d3c23702e6a4682fa805d165e3c0fd9bbe789bde99a24d603"
     },
     {
       "path": "docs/audit-package.md",
@@ -34,7 +34,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:7dcb0a524b2760d941c369e9806a65fc6aae3219c97788bab4814982dcfdee9d"
+      "sha256": "sha256:1d482e70753985c8f4575450063b0249713193dded68c8c929c6c57b1c07e4a2"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -134,7 +134,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:e23a983046c584b22776152c372a007eec741f5f9a47205b5da28cb8fbf63f3a"
+          "sha256": "sha256:314dab0c301d355d3c23702e6a4682fa805d165e3c0fd9bbe789bde99a24d603"
         }
       ],
       "risk_acceptance": null
@@ -274,11 +274,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:6bab8d95c8b7b7f6225d170016deff01a3bcde05b8078b0cdad4ac99ba07e2ed"
+          "sha256": "sha256:7a53c5268cd755726f159be9479b76bd2c35d3c87ec0a84b954396aab6185b41"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:e23a983046c584b22776152c372a007eec741f5f9a47205b5da28cb8fbf63f3a"
+          "sha256": "sha256:314dab0c301d355d3c23702e6a4682fa805d165e3c0fd9bbe789bde99a24d603"
         },
         {
           "path": "docs/metadata.md",
@@ -321,7 +321,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:6cdb5785786593d349993490395091642a605159ff00b59ba7f43ccc37a510c3"
+          "sha256": "sha256:77801be9deb0a22ab9407cf585036687a8930de6d5630e68fcf9bd3becac633d"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -357,7 +357,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:c85fb93cfbad90d073fbcf6bceb1197022f81060f471caed93f185cea221acbb"
+          "sha256": "sha256:38af32ddada33baf52ef90d97c28f61406977567095666d6b00434c47b4a6281"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -368,7 +368,7 @@
     },
     {
       "id": "RISK-SIZE-001",
-      "title": "StreamCore bytecode headroom remains tight",
+      "title": "StreamCore bytecode headroom remains finite",
       "area": "core_size",
       "severity": "medium",
       "status": "accepted_local_baseline",
@@ -376,7 +376,7 @@
       "target_gate": "Gate G",
       "source": "clean-main reviewer rebaseline and status docs",
       "mitigation": "Keep non-critical product surfaces in satellite contracts, adapters, libraries, release artifacts, or docs unless a measured size-budget exception is accepted.",
-      "residual_risk": "Large future Core feature work could consume the remaining EIP-170 headroom and block deployment.",
+      "residual_risk": "Large future Core feature work could consume the remaining EIP-170 headroom and block deployment if size deltas are not measured.",
       "checks": [
         "forge build --sizes --via-ir --skip test --skip script --force",
         "python scripts/generate_release_manifest.py --check"
@@ -387,15 +387,15 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:7dcb0a524b2760d941c369e9806a65fc6aae3219c97788bab4814982dcfdee9d"
+          "sha256": "sha256:1d482e70753985c8f4575450063b0249713193dded68c8c929c6c57b1c07e4a2"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:6bab8d95c8b7b7f6225d170016deff01a3bcde05b8078b0cdad4ac99ba07e2ed"
+          "sha256": "sha256:7a53c5268cd755726f159be9479b76bd2c35d3c87ec0a84b954396aab6185b41"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:69b258d6d45f6250ec9e7955890f8b1459e6b2b45f0497db7e6293cc41bb3da9"
+          "sha256": "sha256:b08b5318ddc5415dbf720e846e85e419fafa340b15f832f69f52b836eca187b8"
         }
       ],
       "risk_acceptance": null
@@ -456,15 +456,15 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:6bab8d95c8b7b7f6225d170016deff01a3bcde05b8078b0cdad4ac99ba07e2ed"
+          "sha256": "sha256:7a53c5268cd755726f159be9479b76bd2c35d3c87ec0a84b954396aab6185b41"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:e23a983046c584b22776152c372a007eec741f5f9a47205b5da28cb8fbf63f3a"
+          "sha256": "sha256:314dab0c301d355d3c23702e6a4682fa805d165e3c0fd9bbe789bde99a24d603"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:0c2c3102d562f474fe4fc226b83c511a9bfe1c88f8367e92cb390ecee8cfd427"
+          "sha256": "sha256:46ae341b3c62751f2b973087aabd81e5147d8c184918ebbac7744450569df24b"
         }
       ],
       "risk_acceptance": null
