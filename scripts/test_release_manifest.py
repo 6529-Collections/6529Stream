@@ -165,6 +165,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "drop-authorization-signing.md",
         root / "docs" / "signer-custody-readiness.md",
         root / "docs" / "provenance-manifests.md",
+        root / "docs" / "permanence-packages.md",
         root / "docs" / "royalty-policy.md",
         root / "docs" / "release-readiness.md",
         root / "docs" / "integrations" / "README.md",
@@ -233,6 +234,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {
             "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1",
             "manifests": [],
+        },
+    )
+    write_json(
+        latest / "one-of-one-permanence-manifest.json",
+        {
+            "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1",
+            "packages": [],
         },
     )
     write_text(output, "{}\n")
@@ -1241,6 +1249,12 @@ class ReleaseManifestTests(unittest.TestCase):
                     "schema_version"
                 ],
                 "6529stream.one-of-one-provenance-release-manifest.v1",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["one_of_one_permanence_manifest"][
+                    "schema_version"
+                ],
+                "6529stream.one-of-one-permanence-release-manifest.v1",
             )
             self.assertEqual(
                 manifest["release_artifacts"]["gas_snapshot_baseline"]["path"],
