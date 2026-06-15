@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/admin-ceremony-evidence-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/361` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/362` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/369` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence; Sepolia execution is blocked locally by missing RPC/signer/funding environment) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
@@ -237,18 +237,18 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 173 | Reconcile PR #354 merge state | Gate F/Gate G support | Record PR #354 merge evidence, close out issue #353/Queue Item 172 in durable state, refresh roadmap verification metadata, and record the live issue #215 body-sync update without changing readiness claims | Merged in PR #356 |
 | 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Merged in PR #359 |
 | 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | Merged in PR #361 |
-| 176 | Add Safe/admin ceremony evidence checker | Gate E/Gate F/Gate G support | Add a no-secret admin ceremony evidence schema, template, retained-artifact checklist, checker, tests, docs, local/CI wiring, release-manifest coverage, and checksum coverage without claiming reviewed fork/testnet/live governance ceremony completion | Active for issue #362 |
+| 176 | Add Safe/admin ceremony evidence checker | Gate E/Gate F/Gate G support | Add a no-secret admin ceremony evidence schema, template, retained-artifact checklist, checker, tests, docs, local/CI wiring, release-manifest coverage, and checksum coverage without claiming reviewed fork/testnet/live governance ceremony completion | PR #369 opened |
 
 ## Current PR Worklog
 
 ### PR candidate: Add Safe/admin ceremony evidence checker (Queue Item 176)
 
-Status: local implementation complete; full local gate passed; sidecar review
-and PR creation pending.
+Status: PR #369 opened as draft; full local gate passed after sidecar fixes;
+CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/362`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`
 remains open for real reviewed Sepolia/testnet evidence.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/369`.
 Branch: `codex/admin-ceremony-evidence-checker`.
 Branch started from PR #361 squash merge commit
 `63b1c30444db9ed143c3914e8bfce4803a456a5e`.
@@ -314,6 +314,9 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 00:13 UTC with existing Foundry warning noise only after sidecar fixes.
 - `git diff --check` passed with only the existing CRLF warning for
   `scripts/check.ps1`.
+- PR #369 opened as a draft on head
+  `331f308a6ac2cec0203eb976da5d11ff9b49f6d0`; CodeRabbit review requested in
+  comment `4703544180`.
 
 ### Completed: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
 
