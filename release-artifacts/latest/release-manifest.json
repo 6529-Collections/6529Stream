@@ -116,7 +116,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:2deb8b69b11e1181fa80653469e9c5171d4b3321df998d891a6971dbfb55c301",
+      "sha256": "sha256:8d80f38eaca0dc5a1e82954e018777dbd7a5f0f1ce4adef7e03620111e1643cf",
       "size_bytes": 21257,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1787,7 +1787,7 @@
     "randomizer_operations": [
       {
         "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:5a3824d47c6bc641ce46bc1eaaf6834b40be6f612cc2d92cc6eeeb89dd5ac992",
+        "sha256": "sha256:6cdb5785786593d349993490395091642a605159ff00b59ba7f43ccc37a510c3",
         "size_bytes": 9421,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
