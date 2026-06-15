@@ -22,6 +22,10 @@ the release policy in `docs/release-policy.md`.
   contract-level metadata, provenance manifests, royalty policy, collector
   permanence packages, marketplace/indexer evidence, satellite-extension
   architecture, and release-grade warning disposition.
+- Recorded the clean-main reviewer rebaseline in the roadmap and execution
+  backlog, including reviewer-confirmed fixed protocol surfaces, remaining
+  production-trust and 1/1 product gaps, benchmark inputs, and PR #373
+  verification metadata.
 - Added a no-secret deployment admin ceremony evidence schema, template,
   retained-artifact checklist, checker, tests, local/CI gate wiring, release
   manifest coverage, checksum coverage, and deployment/readiness/runbook docs

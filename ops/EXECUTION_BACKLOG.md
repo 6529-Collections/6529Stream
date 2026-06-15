@@ -142,6 +142,32 @@ The important distinction is:
 - The repo has accumulated too much run-state bookkeeping relative to
   substantive maturity work.
 
+### Reviewer Rebaseline Mapping
+
+The clean-main reviewer reassessment should steer implementation priority. Do
+not reopen reviewer-confirmed fixed protocol surfaces unless a new test or
+audit finding identifies a concrete regression. Convert each remaining reviewer
+gap into a bounded issue or evidence artifact.
+
+| Reviewer finding | Roadmap owner | Implementation posture |
+| --- | --- | --- |
+| EIP-712 drop authorization, ERC-1271 signer support, replay controls, auction custody, pull credits, ERC-4906, freeze manifests, and randomizer lifecycle are already present on mainline | Gate C/D/F evidence | Preserve through adversarial tests, audit packet traceability, and no-secret release evidence; do not create generic rebuild issues |
+| Production trust evidence is still missing | `EXT`, `GOV`, `REL`, `AUD` | Prioritize reviewed testnet/live artifacts, explorer verification, signed release provenance, production signing/custody evidence, and completed external audit artifacts |
+| Contract-level metadata is missing | `ONE-001`, `INT-006`, `ONE-005` | Decide ERC-7572-style `contractURI()`, `ContractURIUpdated`, JSON schema, interface/event catalog updates, marketplace fallback, and non-local evidence |
+| 1/1 provenance is under-modeled | `ONE-002` | Define collection/token provenance manifests, artist statement, authenticity hash, curation/exhibition history, mutable versus frozen fields, and event/artifact boundaries |
+| Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement tradeoffs, and marketplace display evidence |
+| Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language |
+| Marketplace/indexer compatibility lacks retained proof | `ONE-005`, `INT-005`, `INT-006` | Retain no-secret evidence for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation |
+| `StreamCore` has only 437 bytes of EIP-170 headroom | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings, disposition accepted noise, and decide whether new warning categories should fail CI |
+
+Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
+VRF best practices, Art Blocks on-chain storage practice, Manifold creator
+contracts, Transient Labs creator/provenance patterns, and Limit Break creator
+token standards. These inputs should inform acceptance criteria and integrator
+docs, but any adopted behavior still needs an explicit ADR/design decision,
+tests, release artifacts, and size-budget review where applicable.
+
 ## 2. Readiness Gates
 
 | Gate | Name | Status Frame | Backlog Lanes |
