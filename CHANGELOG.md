@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret deployment admin ceremony evidence schema, template,
+  retained-artifact checklist, checker, tests, local/CI gate wiring, release
+  manifest coverage, checksum coverage, and deployment/readiness/runbook docs
+  for issue #362 while keeping reviewed fork/testnet/live admin ceremony
+  evidence missing until real ceremony artifacts are retained.
 - Added a no-secret Sepolia deployment rehearsal config template, a
   `runSepolia()` Foundry script entrypoint, deployment/runbook documentation,
   and template regression coverage for issue #360 while keeping

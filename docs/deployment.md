@@ -287,6 +287,8 @@ python scripts/generate_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
+python scripts/test_admin_ceremony_evidence.py
+python scripts/check_admin_ceremony_evidence.py
 python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/generate_release_manifest.py
@@ -374,6 +376,36 @@ Its sanitized broadcast records the linked `StreamMetadataRenderer` deployment
 under `broadcast_evidence.ignored_deployments` because the library is a helper
 deployment used to link `StreamCore`, while the release contract set remains the
 core/drops/auction/curator/randomizer/delegation surface.
+
+## Admin Ceremony Evidence
+
+Admin ceremony evidence lives under `deployments/admin-ceremony/` and follows
+`deployments/schema/admin-ceremony-evidence.schema.json`. It is a no-secret
+public evidence shape for proving post-deployment control of the deployed
+system, including deployer ownership transfer, Safe or multisig ownership,
+temporary admin revocation, role grants, signer setup, pause/emergency setup,
+post-state reads, source/explorer verification status, approval, and retained
+artifact hashes.
+
+The committed
+`deployments/admin-ceremony/admin-ceremony-evidence-template.json` is template
+evidence only. Reviewed fork, testnet, mainnet, or production evidence must
+replace template placeholders with retained transaction references, reviewed
+addresses, completed or intentionally blocked statuses, and non-placeholder
+rationale where work remains incomplete. It must not include private keys,
+mnemonics, API keys, private RPC URLs, Safe signing secrets, raw signatures, or
+unreleased drop payloads.
+
+Validate admin ceremony evidence with:
+
+```sh
+python scripts/test_admin_ceremony_evidence.py
+python scripts/check_admin_ceremony_evidence.py
+```
+
+The release manifest catalogs checked admin ceremony evidence as a deployment
+artifact, and the release checksum bundle covers the retained template and any
+future no-secret evidence files under `deployments/admin-ceremony/`.
 
 ## Randomizer Operations Evidence
 

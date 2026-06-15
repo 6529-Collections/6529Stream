@@ -37,6 +37,8 @@ python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_admin_ceremony_evidence.py
+python scripts/check_admin_ceremony_evidence.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/test_source_verification_inputs.py
@@ -139,6 +141,12 @@ The signer custody readiness checker validates the no-secret template under
 artifact references to current hashes, and rejects non-local placeholder
 signer custody, signer-service, lifecycle, monitoring, reviewer, path, and
 secret-shaped states.
+The admin ceremony evidence checker validates the no-secret template under
+`deployments/admin-ceremony/`, ties the retained artifact checklist and schema
+to current hashes, and rejects reviewed evidence that still contains template
+placeholders, invalid environment/chain pairs, zero privileged addresses,
+secret-shaped values, path escapes, stale retained hashes, or incomplete
+approval state.
 
 The release artifact step is the first Gate G machine-readable artifact gate.
 It verifies that `release-artifacts/latest/` matches the production `via-ir`
@@ -613,6 +621,8 @@ python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_admin_ceremony_evidence.py
+python scripts/check_admin_ceremony_evidence.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -677,6 +687,8 @@ python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_admin_ceremony_evidence.py
+python scripts/check_admin_ceremony_evidence.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
@@ -721,10 +733,11 @@ The release-checksum generator covers `release-artifacts/contracts.json`,
 `release-artifacts/latest/`, `release-artifacts/baselines/`,
 `deployments/broadcasts/`, `deployments/config/`, `deployments/examples/`,
 `deployments/address-books/`, `deployments/ceremony-evidence/`,
-`deployments/randomizer-operations/`, `deployments/schema/`, and
-`test/fixtures/drop-authorization/`, excluding its own generated checksum files
-to avoid self-referential hashes. Refresh the release manifest before
-refreshing the checksum bundle after changing any covered artifact.
+`deployments/admin-ceremony/`, `deployments/randomizer-operations/`,
+`deployments/schema/`, and `test/fixtures/drop-authorization/`, excluding its
+own generated checksum files to avoid self-referential hashes. Refresh the
+release manifest before refreshing the checksum bundle after changing any
+covered artifact.
 
 ## Non-Gating Diagnostics
 

@@ -1,0 +1,169 @@
+{
+  "schema_version": "6529stream.admin-ceremony-evidence.v1",
+  "evidence_id": "admin-ceremony-template",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "testnet",
+  "chain_id": 11155111,
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "deployment": {
+    "protocol_version": "0.1.0",
+    "deployment_version": "sepolia-6529stream-v0.1.0-001",
+    "deployment_manifest": {
+      "path": "TBD",
+      "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "address_book": {
+      "path": "TBD",
+      "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "release_manifest": {
+      "path": "TBD",
+      "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "checksum_bundle": {
+      "path": "TBD",
+      "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "participants": {
+    "deployer": "0x0000000000000000000000000000000000000001",
+    "admin_safe": "0x0000000000000000000000000000000000000002",
+    "pause_guardian": "0x0000000000000000000000000000000000000003",
+    "emergency_recipient": "0x0000000000000000000000000000000000000004",
+    "drop_signer": "0x0000000000000000000000000000000000000005",
+    "signer_manager": "0x0000000000000000000000000000000000000002"
+  },
+  "ownership": {
+    "status": "template",
+    "owner_before": "0x0000000000000000000000000000000000000001",
+    "owner_after": "0x0000000000000000000000000000000000000002",
+    "transfer_tx": "TBD",
+    "temporary_deployer_admin_revoked": "template",
+    "rationale": "TBD"
+  },
+  "roles": {
+    "global_admins": [
+      {
+        "role": "global_admin",
+        "target": "StreamAdmins",
+        "account": "0x0000000000000000000000000000000000000002",
+        "status": "template",
+        "tx": "TBD",
+        "rationale": "TBD"
+      }
+    ],
+    "function_admins": [
+      {
+        "role": "unpause_admin",
+        "target": "StreamCore pause surfaces",
+        "account": "0x0000000000000000000000000000000000000002",
+        "status": "template",
+        "tx": "TBD",
+        "rationale": "TBD"
+      }
+    ],
+    "signer_managers": [
+      {
+        "role": "signer_manager",
+        "target": "StreamDrops signer lifecycle",
+        "account": "0x0000000000000000000000000000000000000002",
+        "status": "template",
+        "tx": "TBD",
+        "rationale": "TBD"
+      }
+    ],
+    "pause_guardians": [
+      {
+        "role": "pause_guardian",
+        "target": "StreamAdmins pause surfaces",
+        "account": "0x0000000000000000000000000000000000000003",
+        "status": "template",
+        "tx": "TBD",
+        "rationale": "TBD"
+      }
+    ],
+    "unpause_admins": [
+      {
+        "role": "unpause_admin",
+        "target": "StreamAdmins pause surfaces",
+        "account": "0x0000000000000000000000000000000000000002",
+        "status": "template",
+        "tx": "TBD",
+        "rationale": "TBD"
+      }
+    ]
+  },
+  "signer_setup": {
+    "status": "template",
+    "drop_signer": "0x0000000000000000000000000000000000000005",
+    "signer_epoch": 0,
+    "signer_manager": "0x0000000000000000000000000000000000000002",
+    "rotation_or_cancellation_test": "template",
+    "tx": "TBD",
+    "rationale": "TBD"
+  },
+  "pause_and_emergency": {
+    "status": "template",
+    "mint_pause_admin": "0x0000000000000000000000000000000000000003",
+    "bid_pause_admin": "0x0000000000000000000000000000000000000003",
+    "settlement_pause_admin": "0x0000000000000000000000000000000000000003",
+    "withdrawal_pause_policy": "TBD",
+    "emergency_recipient": "0x0000000000000000000000000000000000000004",
+    "tx": "TBD",
+    "rationale": "TBD"
+  },
+  "verification": {
+    "contract_verification": "template",
+    "source_verification_inputs": "template",
+    "explorer_verification": "template",
+    "post_state_views": "template",
+    "rationale": "TBD"
+  },
+  "review": {
+    "owner": "TBD",
+    "reviewer": "TBD",
+    "approval_status": "template",
+    "approval_reference": "TBD",
+    "reviewed_at": "template"
+  },
+  "retained_artifacts": [
+    {
+      "category": "admin_ceremony_schema",
+      "path": "deployments/schema/admin-ceremony-evidence.schema.json",
+      "sha256": "sha256:82d58d8d0bab0fa9d34b2b093a6feeefdf3242a630c4f8ef10f4a9ac2ba7ad0e"
+    },
+    {
+      "category": "admin_ceremony_retained_artifact_template",
+      "path": "deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md",
+      "sha256": "sha256:a02cad78a6cbc4f6e1780de249d379baf36505eb75a104178125b08b379bc84d"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "safe_signing_secret",
+      "signer_service_credentials",
+      "signer_secret",
+      "password",
+      "client_secret",
+      "api_key",
+      "rpc_url",
+      "private_rpc_url",
+      "bearer_token",
+      "session_cookie",
+      "raw_signature",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence and does not mark public beta, audit, or production ready.",
+  "operator_notes": "Copy this file for fork, testnet, mainnet, or production admin ceremony evidence. Replace every template status, placeholder transaction, placeholder hash, and TBD field before requesting review. Do not commit private keys, Safe signing secrets, signer-service credentials, RPC credentials, raw signatures, or unreleased drop payloads."
+}

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import check_drop_authorization_signing_evidence as drop_signing_evidence_checker
+import check_admin_ceremony_evidence as admin_ceremony_checker
 import check_non_local_release_evidence as non_local_evidence_checker
 import check_public_beta_evidence as public_beta_checker
 import check_release_signatures as release_signature_checker
@@ -50,6 +51,7 @@ DEFAULT_DEPLOYMENT_MANIFEST_DIR = Path("deployments/examples")
 DEFAULT_ADDRESS_BOOK_DIR = Path("deployments/address-books")
 DEFAULT_DEPLOYMENT_SCHEMA_DIR = Path("deployments/schema")
 DEFAULT_CEREMONY_EVIDENCE_DIR = Path("deployments/ceremony-evidence")
+DEFAULT_ADMIN_CEREMONY_DIR = Path("deployments/admin-ceremony")
 DEFAULT_RANDOMIZER_OPERATIONS_DIR = Path("deployments/randomizer-operations")
 DEFAULT_RELEASE_SIGNATURES_DIR = Path("release-artifacts/signatures")
 DEFAULT_NON_LOCAL_EVIDENCE_DIR = Path("release-artifacts/evidence")
@@ -312,6 +314,48 @@ def ceremony_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
             "contract_verification": require_string(
                 verification_status.get("contract_verification"),
                 "verification_status.contract_verification",
+            ),
+        }
+    )
+    return record
+
+
+def admin_ceremony_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    data = require_dict(load_json(path), str(path))
+    try:
+        admin_ceremony_checker.validate_evidence_document(data, repo_root, str(path))
+    except admin_ceremony_checker.AdminCeremonyEvidenceError as exc:
+        raise ReleaseManifestError(f"invalid admin ceremony evidence {path}: {exc}") from exc
+    deployment = require_dict(data.get("deployment"), f"{path}.deployment")
+    ownership = require_dict(data.get("ownership"), f"{path}.ownership")
+    signer_setup = require_dict(data.get("signer_setup"), f"{path}.signer_setup")
+    pause_and_emergency = require_dict(
+        data.get("pause_and_emergency"), f"{path}.pause_and_emergency"
+    )
+    verification = require_dict(data.get("verification"), f"{path}.verification")
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "evidence_id": require_string(data.get("evidence_id"), "evidence_id"),
+            "record_type": require_string(data.get("record_type"), "record_type"),
+            "review_status": require_string(data.get("review_status"), "review_status"),
+            "environment": require_string(data.get("environment"), "environment"),
+            "chain_id": data.get("chain_id"),
+            "protocol_version": require_string(
+                deployment.get("protocol_version"), "deployment.protocol_version"
+            ),
+            "deployment_version": require_string(
+                deployment.get("deployment_version"), "deployment.deployment_version"
+            ),
+            "ownership_status": require_string(ownership.get("status"), "ownership.status"),
+            "signer_setup_status": require_string(
+                signer_setup.get("status"), "signer_setup.status"
+            ),
+            "pause_and_emergency_status": require_string(
+                pause_and_emergency.get("status"), "pause_and_emergency.status"
+            ),
+            "post_state_views": require_string(
+                verification.get("post_state_views"), "verification.post_state_views"
             ),
         }
     )
@@ -802,6 +846,7 @@ def build_manifest(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    admin_ceremony_dir: Path,
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
@@ -844,6 +889,9 @@ def build_manifest(
     ceremony_evidence = [
         ceremony_evidence_record(path, repo_root) for path in json_files(ceremony_evidence_dir)
     ]
+    admin_ceremony = [
+        admin_ceremony_record(path, repo_root) for path in json_files(admin_ceremony_dir)
+    ]
     randomizer_operations = [
         randomizer_operations_record(path, repo_root)
         for path in json_files(randomizer_operations_dir)
@@ -868,6 +916,7 @@ def build_manifest(
             [record["protocol_version"] for record in deployment_manifests]
             + [record["protocol_version"] for record in address_books]
             + [record["protocol_version"] for record in ceremony_evidence]
+            + [record["protocol_version"] for record in admin_ceremony]
             + [record["protocol_version"] for record in randomizer_operations]
             + [record["protocol_version"] for record in release_signatures]
         )
@@ -877,6 +926,7 @@ def build_manifest(
             [record["deployment_version"] for record in deployment_manifests]
             + [record["deployment_version"] for record in address_books]
             + [record["deployment_version"] for record in ceremony_evidence]
+            + [record["deployment_version"] for record in admin_ceremony]
             + [record["deployment_version"] for record in randomizer_operations]
         )
     )
@@ -902,6 +952,7 @@ def build_manifest(
             "address_book_dir": normalize_path(address_book_dir, repo_root),
             "deployment_schema_dir": normalize_path(deployment_schema_dir, repo_root),
             "ceremony_evidence_dir": normalize_path(ceremony_evidence_dir, repo_root),
+            "admin_ceremony_dir": normalize_path(admin_ceremony_dir, repo_root),
             "randomizer_operations_dir": normalize_path(
                 randomizer_operations_dir, repo_root
             ),
@@ -1037,6 +1088,7 @@ def build_manifest(
                 for path in json_files(deployment_schema_dir)
             ],
             "ceremony_evidence": ceremony_evidence,
+            "admin_ceremony": admin_ceremony,
             "randomizer_operations": randomizer_operations,
         },
         "release_notes_and_policy": {
@@ -1066,6 +1118,7 @@ def build_output_text(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    admin_ceremony_dir: Path,
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
@@ -1086,6 +1139,7 @@ def build_output_text(
         address_book_dir,
         deployment_schema_dir,
         ceremony_evidence_dir,
+        admin_ceremony_dir,
         randomizer_operations_dir,
         changelog_path,
         governance_docs,
@@ -1109,6 +1163,7 @@ def write_output(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    admin_ceremony_dir: Path,
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
@@ -1129,6 +1184,7 @@ def write_output(
         address_book_dir,
         deployment_schema_dir,
         ceremony_evidence_dir,
+        admin_ceremony_dir,
         randomizer_operations_dir,
         changelog_path,
         governance_docs,
@@ -1154,6 +1210,7 @@ def check_output(
     address_book_dir: Path,
     deployment_schema_dir: Path,
     ceremony_evidence_dir: Path,
+    admin_ceremony_dir: Path,
     randomizer_operations_dir: Path,
     changelog_path: Path,
     governance_docs: list[Path],
@@ -1182,6 +1239,7 @@ def check_output(
         address_book_dir,
         deployment_schema_dir,
         ceremony_evidence_dir,
+        admin_ceremony_dir,
         randomizer_operations_dir,
         changelog_path,
         governance_docs,
@@ -1234,6 +1292,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=DEFAULT_CEREMONY_EVIDENCE_DIR,
     )
     parser.add_argument(
+        "--admin-ceremony-dir",
+        type=Path,
+        default=DEFAULT_ADMIN_CEREMONY_DIR,
+    )
+    parser.add_argument(
         "--randomizer-operations-dir",
         type=Path,
         default=DEFAULT_RANDOMIZER_OPERATIONS_DIR,
@@ -1279,6 +1342,7 @@ def main(argv: list[str]) -> int:
                 args.address_book_dir,
                 args.deployment_schema_dir,
                 args.ceremony_evidence_dir,
+                args.admin_ceremony_dir,
                 args.randomizer_operations_dir,
                 args.changelog,
                 governance_docs,
@@ -1299,6 +1363,7 @@ def main(argv: list[str]) -> int:
             args.address_book_dir,
             args.deployment_schema_dir,
             args.ceremony_evidence_dir,
+            args.admin_ceremony_dir,
             args.randomizer_operations_dir,
             args.changelog,
             governance_docs,

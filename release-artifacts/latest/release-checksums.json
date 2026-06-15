@@ -19,6 +19,7 @@
       "deployments/address-books",
       "deployments/schema",
       "deployments/ceremony-evidence",
+      "deployments/admin-ceremony",
       "deployments/randomizer-operations",
       "test/fixtures/drop-authorization"
     ],
@@ -27,7 +28,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:e0d4871a1794377f331354dc47e5bc2a5cc46d2e9ea35841732e526a235a3ff7"
+    "sha256": "sha256:9a638b8e17c7fa65e8a813f8c4b47d857bca79a291f109f507a4c0c36b57d0b8"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -48,6 +49,16 @@
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
       "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4",
       "size_bytes": 5099
+    },
+    {
+      "path": "deployments/admin-ceremony/admin-ceremony-evidence-template.json",
+      "sha256": "sha256:036777bb3ded9547c75f555bea40efa666f9171238bbd90c4bb86d00cc6ec011",
+      "size_bytes": 5699
+    },
+    {
+      "path": "deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md",
+      "sha256": "sha256:a02cad78a6cbc4f6e1780de249d379baf36505eb75a104178125b08b379bc84d",
+      "size_bytes": 1574
     },
     {
       "path": "deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json",
@@ -113,6 +124,11 @@
       "path": "deployments/schema/address-book.schema.json",
       "sha256": "sha256:e36a4a98e66c0bdcd6f5cd6c8125e547c53bd4537a7ee2c25a69f041ec2c3d13",
       "size_bytes": 3268
+    },
+    {
+      "path": "deployments/schema/admin-ceremony-evidence.schema.json",
+      "sha256": "sha256:82d58d8d0bab0fa9d34b2b093a6feeefdf3242a630c4f8ef10f4a9ac2ba7ad0e",
+      "size_bytes": 11596
     },
     {
       "path": "deployments/schema/ceremony-evidence.schema.json",
@@ -481,8 +497,8 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9b1a7cf18838e2fa53f8a9cde726ba159bb115628c97d6a5dada54c90b061c0f",
-      "size_bytes": 92373
+      "sha256": "sha256:7ee7bc29aa853a1177b341da28329d02e73c57e03ac36a5eeaa78e95b48e9195",
+      "size_bytes": 93531
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -531,7 +547,7 @@
     },
     {
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-      "sha256": "sha256:efdcac24c0272d955cb2cb22886af6a688c30d0c90dfcb9463f9b3c0119f00cf",
+      "sha256": "sha256:5270a5a9566281b37b77bcfb3d240f65a3b794fe654b0c2df50583f76645dac0",
       "size_bytes": 3470
     },
     {

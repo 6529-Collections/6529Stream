@@ -46,6 +46,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_drop_authorization_signing_evidence.py
 "$python_bin" scripts/test_signer_custody_readiness.py
 "$python_bin" scripts/check_signer_custody_readiness.py
+"$python_bin" scripts/test_admin_ceremony_evidence.py
+"$python_bin" scripts/check_admin_ceremony_evidence.py
 "$python_bin" scripts/test_release_artifacts.py
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_source_verification_inputs.py
