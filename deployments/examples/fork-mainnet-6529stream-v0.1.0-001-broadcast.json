@@ -53,6 +53,17 @@
       "bytecode_hash": "sha256:fc4d63d8b705101fb657badbc3f593c3664a0d1b1357e8f380db03f7bf54ee64",
       "verification_status": "not_applicable"
     },
+    "StreamContractMetadata": {
+      "address": "0x200000000000000000000000000000000000000a",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000000003",
+        "0x0000000000000000000000000000000000000001",
+        "ipfs://6529stream-contract-metadata/rehearsal.json"
+      ],
+      "abi_hash": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
+      "bytecode_hash": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578",
+      "verification_status": "not_applicable"
+    },
     "StreamCuratorsPool": {
       "address": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d",
       "constructor_args": [
@@ -166,11 +177,12 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115",
+    "manifest_sha256": "sha256:8e5d97140b70da78d6bd086511c47ee02388f0736f77ee3313215e5a1ac60ab6",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
       "StreamCore": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+      "StreamContractMetadata": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
       "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
       "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",

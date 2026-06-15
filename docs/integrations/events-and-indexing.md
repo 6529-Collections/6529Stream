@@ -61,7 +61,7 @@ copies.
 | Fixed-price flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | `saleMode = 1`, `DropAuthorizationConsumed`, fixed-price credits, and withdrawal UX |
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Auction states, bids, no-bid settlement, credits, pause domains, and event/read gaps |
 | Wallet/signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Domain, signer epoch, consumed/cancelled drops, EOA, ERC-1271, Safe, and failure states |
-| Metadata policy | [`docs/metadata.md`](../metadata.md) | Token JSON state, ERC-4906 behavior, burn, freeze, cache, and browser sandbox semantics |
+| Metadata policy | [`docs/metadata.md`](../metadata.md) | Token JSON state, contract-level metadata, ERC-4906 behavior, burn, freeze, cache, and browser sandbox semantics |
 | Release policy | [`docs/release-policy.md`](../release-policy.md) | Event signature/indexed-field changes are breaking unless approved |
 | Drop signing guide | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | Typed-data schema and fixture expectations |
 | Auction custody guide | [`docs/auction-custody.md`](../auction-custody.md) | Custody and no-bid claimant behavior |
@@ -80,6 +80,7 @@ copies.
 | Local deployment manifest | [`deployments/examples/anvil-6529stream-v0.1.0-001.json`](../../deployments/examples/anvil-6529stream-v0.1.0-001.json) | Local deployment instance |
 | Fork deployment manifest | [`deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork deployment instance |
 | Core NFT contract | [`smart-contracts/StreamCore.sol`](../../smart-contracts/StreamCore.sol) | ERC-721, collection, metadata, dependency, burn, freeze, and randomizer events |
+| Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | ERC-7572-style `contractURI()`, `ContractURIUpdated`, URI hash, core binding, and admin binding |
 | Drops contract | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Drop authorization, signer, auction contract, and fixed-price credit events |
 | Auction contract | [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol) | Auction lifecycle, bid, settlement, and proceeds events |
 | Admin contract | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Role, pause, emergency recipient, and signer-lifecycle target events |
@@ -88,7 +89,9 @@ copies.
 | Curator pool | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Merkle roots, curator credits, and curator withdrawals |
 | Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Dependency version creation/deprecation events |
 | ERC-4906 interface | [`smart-contracts/IERC4906.sol`](../../smart-contracts/IERC4906.sol) | Metadata update event interface |
+| ERC-7572-style interface | [`smart-contracts/IERC7572.sol`](../../smart-contracts/IERC7572.sol) | Contract-level metadata interface used by the release-tracked adapter |
 | Metadata event tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol) | Current metadata event behavior |
+| Contract metadata tests | [`test/StreamContractMetadata.t.sol`](../../test/StreamContractMetadata.t.sol) | Contract URI, URI hash, pause, event, and admin behavior |
 | EIP-712 tests | [`test/StreamDropsEIP712.t.sol`](../../test/StreamDropsEIP712.t.sol) | Drop consumed/cancelled/signer event behavior |
 | ERC-1271 tests | [`test/StreamDropsERC1271.t.sol`](../../test/StreamDropsERC1271.t.sol) | Contract signer behavior |
 | Auction custody tests | [`test/StreamAuctionCustody.t.sol`](../../test/StreamAuctionCustody.t.sol) | Auction custody and no-bid state |
@@ -163,6 +166,7 @@ Minimum local entities:
 | `CreditAccount` | `chainId:contractAddress:creditType:account` | fixed-price, auction, curator, and protocol credit events plus reads |
 | `RandomnessRequest` | `chainId:randomizerAddress:requestId` | randomizer lifecycle events and reads |
 | `MetadataState` | `chainId:coreAddress:tokenId` or `collectionId` | `MetadataUpdate`, `BatchMetadataUpdate`, freeze/dependency events, metadata reads |
+| `ContractMetadataState` | `chainId:contractMetadataAddress` | `ContractURIUpdated`, adapter reads, release manifest/address book |
 | `AdminRole` | `chainId:adminsAddress:roleKey:account:target:selector` | role update events and admin reads |
 | `PauseDomain` | `chainId:adminsAddress:domain` | `PauseUpdated` and pause reads |
 | `DependencyVersion` | `chainId:registryAddress:dependencyNameAndVersion:version` | dependency registry events and registry reads |
@@ -179,7 +183,7 @@ emitter contracts. The current catalog includes these high-value event groups:
 | Group | Events | Primary update |
 | --- | --- | --- |
 | ERC-721 | `Transfer`, `Approval`, `ApprovalForAll` | Token owner, mint, burn, approval, and operator state |
-| Metadata | `MetadataUpdate`, `BatchMetadataUpdate`, `CollectionFrozen`, `DependencyVersionPinned`, `TokenBurned` | Token URI refresh, collection freeze, dependency pin, live-token state |
+| Metadata | `MetadataUpdate`, `BatchMetadataUpdate`, `CollectionFrozen`, `DependencyVersionPinned`, `TokenBurned`, `ContractURIUpdated` | Token URI refresh, collection freeze, dependency pin, live-token state, contract-level metadata refresh |
 | Drop authorization | `DropAuthorizationConsumed`, `DropAuthorizationCancelled`, `SignerEpochChanged`, `DropSignerChanged`, `AuctionContractChanged` | Drop execution, replay/cancellation state, signer lifecycle, auction bridge address |
 | Fixed-price credits | `FixedPriceCreditCreated`, `FixedPriceCreditWithdrawn` | Poster, protocol, curator reserve, and withdrawal views |
 | Auction lifecycle | `AuctionRegistered`, `AuctionCustodyConfirmed`, `AuctionStatusChanged`, `AuctionExtended`, `AuctionCancelled`, `ClaimAuction`, `NoBidSettlementPending`, `NoBidTokenClaimed` | Auction state, custody, end time, settlement, no-bid claimant |
@@ -200,6 +204,7 @@ Required read-after-event calls by surface:
 | Surface | Trigger | Reads |
 | --- | --- | --- |
 | Collection | `CollectionCreated`, `CollectionFrozen`, `CollectionRandomizerUpdated`, `DependencyVersionPinned` | collection info views, randomizer address/epoch, freeze manifest hash, dependency version state |
+| Contract metadata | `ContractURIUpdated` | `contractURI()`, `contractURIHash()`, `streamCore()`, `adminsContract()` from the adapter address in the selected address book |
 | Token | ERC-721 `Transfer`, `TokenBurned`, `MetadataUpdate` | `ownerOf` when minted and not burned, `tokenURI`, token metadata state, collection membership |
 | Drop | `DropAuthorizationConsumed`, `DropAuthorizationCancelled`, `SignerEpochChanged`, `DropSignerChanged` | `isDropConsumed(dropId)`, `isDropCancelled(dropId)`, `tdhSigner()`, `signerEpoch()` |
 | Fixed-price credit | `FixedPriceCreditCreated`, `FixedPriceCreditWithdrawn` | poster/protocol/curator reserve credit views, `totalFixedPriceOwed()`, `totalReserved()`, `surplus()` |
@@ -346,10 +351,16 @@ events:
 - `DependencyVersionCreated` and `DependencyVersionDeprecated` update the
   dependency registry model;
 - `CollectionFrozen` records frozen collection state and manifest hash;
+- `ContractURIUpdated` invalidates the contract-level metadata adapter record;
 - `TokenBurned` plus ERC-721 transfer-to-zero marks a token as burned.
 
 Re-read token JSON after metadata invalidation. ERC-4906 events expose update
 signals; they do not prove marketplace ingestion, cache purge, or JSON validity.
+Re-read `contractURI()`, `contractURIHash()`, `streamCore()`, and
+`adminsContract()` after `ContractURIUpdated`. `contractURIHash()` is
+`keccak256(bytes(contractURI()))` over the exact stored URI bytes, with no URI
+normalization. That event is not ERC-4906 and does not imply token-level JSON
+changed.
 
 ## Governance And Pause Reconstruction
 

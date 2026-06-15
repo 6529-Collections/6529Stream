@@ -2607,7 +2607,7 @@ Dependencies: `INT-006`, `INT-008`.
 
 ### INT-010: Add Operator Admin UI Specification
 
-Status: In progress on `codex/operator-admin-ui-spec`; issue #408.
+Status: Merged in PR #409; issue #408 closed completed.
 
 Gate: G/F.
 
@@ -2671,7 +2671,11 @@ Dependencies: `GOV-001`, `INT-005`.
 
 ### ONE-001: Decide And Implement Contract-Level Metadata Surface
 
-Status: Planned.
+Status: PR #411 open on `codex/contract-level-metadata-surface`; issue #410.
+Initial CodeRabbit review was requested, and 6529bot general review comment
+`4710176032` has a validated local response prepared for push: pause-gate admin
+rebinding, document/test exact `contractURIHash()` semantics, expand URI
+negative tests, and refresh generated release/deployment evidence.
 
 Gate: G/F.
 
@@ -2686,13 +2690,22 @@ implemented, the surface follows an ERC-7572-style shape, emits
 `ContractURIUpdated` when the contract metadata changes, and has retained
 marketplace/indexer evidence before release claims.
 
-Files likely touched:
+Files touched:
 
 - `docs/adr/0006-metadata-freeze.md`
 - `docs/metadata.md`
 - `docs/integrations/metadata-rendering.md`
-- `smart-contracts/` only if implementation is accepted
-- `test/` contract metadata tests if implementation is accepted
+- `docs/integrations/events-and-indexing.md`
+- `docs/integrations/README.md`
+- `smart-contracts/StreamContractMetadata.sol`
+- `smart-contracts/IERC7572.sol`
+- `smart-contracts/IStreamContractMetadata.sol`
+- `test/StreamContractMetadata.t.sol`
+- `script/RehearseDeployment.s.sol`
+- `deployments/` config, manifest, address-book, broadcast, and local evidence
+  artifacts
+- `release-artifacts/contracts.json`
+- `release-artifacts/baselines/v0.1.0/abi-surface.json`
 - `release-artifacts/latest/interface-ids.json`
 - `release-artifacts/latest/event-topic-catalog.json`
 
@@ -2715,9 +2728,21 @@ Implementation steps:
 Required tests/checks:
 
 - `forge test --match-path <contract-metadata-test-file> -vvv` if implemented
+- `forge test --match-path test/StreamContractMetadata.t.sol -vvv`
+- `forge test --match-path test/StreamDeploymentManifest.t.sol -vvv`
+- `forge test -vvv`
+- `forge build --sizes --via-ir --skip test --skip script --force`
 - `python scripts/generate_release_artifacts.py --check`
+- `python scripts/generate_source_verification_inputs.py --check`
+- `python scripts/generate_deployment_manifest.py --check`
+- `python scripts/generate_address_books.py --check`
 - `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_bytecode_release_proof.py --check`
 - `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_ceremony_evidence.py`
+- `python scripts/check_randomizer_operations.py`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 - Markdown heading check
 - `git diff --check`
 
@@ -2727,6 +2752,15 @@ Acceptance criteria:
   or provided through a satellite/read-adapter surface.
 - If implemented, `contractURI()` returns deterministic metadata and the update
   path emits `ContractURIUpdated`.
+- `contractURIHash()` is documented and tested as
+  `keccak256(bytes(contractURI()))` over exact stored URI bytes, with no URI
+  normalization, trimming, case folding, decoding, or fetch before hashing.
+- Contract metadata admin rebinding is authorized through the current admin
+  contract and blocked while `StreamPauseDomains.METADATA_MUTATION` is paused;
+  the replacement admin marker is an interface guard, not a governance-trust
+  guarantee.
+- URI validation has negative tests for empty, unsafe scheme, whitespace,
+  control-character, invalid UTF-8, and oversized values.
 - The chosen design does not push `StreamCore` below the approved bytecode
   headroom floor without an explicit size-budget exception.
 - Integrator docs explain how wallets, marketplaces, and indexers should find
@@ -2737,8 +2771,11 @@ Acceptance criteria:
 Evidence artifacts:
 
 - ADR/design update.
-- Tests if implemented.
-- Interface/event catalog updates if implemented.
+- `test/StreamContractMetadata.t.sol`
+- Interface/event catalog updates.
+- Deployment rehearsal, manifest, address-book, source verification,
+  bytecode-proof, checksum, ceremony, and randomizer-operation local evidence
+  updates.
 - Future retained marketplace/indexer evidence.
 
 Dependencies: `INT-001`, `INT-006`, `CON-005`.

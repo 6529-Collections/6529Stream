@@ -1152,6 +1152,16 @@
       ]
     },
     {
+      "topic0": "0xa5d4097edda6d87cb9329af83fb3712ef77eeb13738ffe43cc35a4ce305ad962",
+      "signature": "ContractURIUpdated()",
+      "name": "ContractURIUpdated",
+      "anonymous": false,
+      "inputs": [],
+      "emitted_by": [
+        "StreamContractMetadata"
+      ]
+    },
+    {
       "topic0": "0xa62de0ee279b35939225cc4e1aafec044ace6a06b5ae5d6e326dc85cf1c3dc99",
       "signature": "NoBidSettlementPending(uint256,address)",
       "name": "NoBidSettlementPending",
@@ -3736,6 +3746,19 @@
               "internal_type": "uint256"
             }
           ]
+        }
+      ]
+    },
+    "StreamContractMetadata": {
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+      "events": [
+        {
+          "name": "ContractURIUpdated",
+          "signature": "ContractURIUpdated()",
+          "topic0": "0xa5d4097edda6d87cb9329af83fb3712ef77eeb13738ffe43cc35a4ce305ad962",
+          "anonymous": false,
+          "inputs": []
         }
       ]
     },

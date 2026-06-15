@@ -18,6 +18,7 @@ The script deploys and wires a local stack:
 - `StreamAdmins`
 - `DependencyRegistry`
 - `StreamCore`
+- `StreamContractMetadata`
 - `StreamCuratorsPool`
 - `StreamMinter`
 - `StreamDrops`
@@ -25,11 +26,12 @@ The script deploys and wires a local stack:
 - `NextGenRandomizerVRF`
 - `NextGenRandomizerRNG`
 
-It also creates a sample collection, pins a sample dependency version, assigns
-the VRF randomizer, sets mint phases, registers the Safe placeholder as global
-admin, configures pause/signer emergency roles, revokes the temporary deployment
-admin, and transfers Ownable control for `StreamAdmins` and `StreamCore` to the
-configured Safe placeholder.
+It also configures the ERC-7572-style contract-level metadata adapter with the
+deployment `contractMetadataURI`, creates a sample collection, pins a sample
+dependency version, assigns the VRF randomizer, sets mint phases, registers the
+Safe placeholder as global admin, configures pause/signer emergency roles,
+revokes the temporary deployment admin, and transfers Ownable control for
+`StreamAdmins` and `StreamCore` to the configured Safe placeholder.
 
 The rehearsal is not a production broadcast. It uses non-secret placeholder
 addresses and local-only external dependency addresses.
@@ -90,6 +92,7 @@ Required operator environment variables:
 | Variable | Retain In Repo | Purpose |
 | --- | --- | --- |
 | `SEPOLIA_RPC_URL` | No, redact value | Sepolia RPC endpoint used by the operator shell. |
+| `SEPOLIA_CONTRACT_METADATA_URI` | Yes | Reviewed `StreamContractMetadata` constructor URI for contract-level metadata. |
 | `SEPOLIA_DEPLOYER_ADDRESS` | Yes | Public Forge broadcaster address. Must match the approved signing backend used by the operator shell. |
 | `SEPOLIA_ADMIN_SAFE` | Yes | Safe or multisig that receives ownership/admin authority. |
 | `SEPOLIA_PAUSE_GUARDIAN` | Yes | Pause guardian address. |
