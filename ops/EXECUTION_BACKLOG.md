@@ -2228,8 +2228,7 @@ Dependencies: `INT-001`, `CON-001` preferred.
 
 ### INT-006: Add Metadata Rendering And Cache Integration Guide
 
-Status: In progress on issue #400 / branch
-`codex/metadata-rendering-cache-guide`.
+Status: Merged in PR #401; issue #400 closed completed.
 
 Gate: G/D.
 
@@ -2354,7 +2353,9 @@ Dependencies: `INT-001`.
 
 ### INT-007: Add React/Next Reference Architecture
 
-Status: Planned.
+Status: In progress on issue
+[`#402`](https://github.com/6529-Collections/6529Stream/issues/402) and branch
+`codex/react-next-reference-architecture`.
 
 Gate: G.
 
@@ -2363,14 +2364,34 @@ address books, event catalogs, metadata, wallet state, transactions, and
 indexer data without a monolithic reference app.
 
 Outcome: A reference architecture doc covers React/Next, viem/wagmi, TanStack
-Query, generated types, environment separation, chain config, and transaction
-state.
+Query, generated types, artifact import, environment separation, chain config,
+query/cache boundaries, transaction state, wallet/signature boundaries,
+metadata rendering, indexer reconciliation, security boundaries, and testing
+without adding a maintained app package or generated SDK.
 
 Files likely touched:
 
 - `docs/integrations/frontend-reference-architecture.md`
 - `docs/integrations/examples/react-viem.md`
-- `README.md`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `scripts/check_react_next_reference.py`
+- `scripts/test_react_next_reference.py`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- `scripts/test_release_manifest.py`
+- `CHANGELOG.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
+- generated release artifacts under `release-artifacts/latest/`
 
 Implementation steps:
 
@@ -2379,11 +2400,33 @@ Implementation steps:
 3. Define read/query/transaction/signature layers.
 4. Define indexer vs direct RPC responsibilities.
 5. Define error/retry and chain switching behavior.
-6. Include small pseudocode examples only.
+6. Define public vs server-only environment variables and browser no-secret
+   boundaries.
+7. Include small pseudocode examples only.
+8. Wire the guide into integration, release-readiness, release-manifest,
+   checksum, local wrapper, and CI checks.
 
 Required tests/checks:
 
-- Markdown heading check.
+- `python -m py_compile scripts/check_react_next_reference.py scripts/test_react_next_reference.py`
+- `python scripts/test_react_next_reference.py`
+- `python scripts/check_react_next_reference.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `make react-next-reference-check`
+- `bash -n scripts/check.sh`
+- PowerShell parser check for `scripts/check.ps1`.
+- Full `make check`.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2391,6 +2434,22 @@ Acceptance criteria:
 - A 6529.io-style React frontend can choose a sane architecture quickly.
 - The doc avoids committing the repo to a maintained app package prematurely.
 - Artifacts and addresses come from release outputs, not hardcoded snippets.
+- Raw ABIs are generated from ignored `out/` after `forge build`, while review
+  and release traceability uses ABI surface/checksum artifacts.
+- Chain/domain/address-book mismatch stops before signing or transaction
+  submission.
+- Signed `DropAuthorization` fields and `tokenData` are treated as immutable
+  after issuance.
+- Query/cache boundaries include chain ID, deployment version, release manifest
+  hash, contract address, function/args, metadata state/schema inputs, event
+  source, and transaction hash as relevant.
+- Direct RPC reads remain required for critical preflight and post-event
+  reconciliation; indexer data is treated as eventually consistent.
+- Metadata animation is treated as untrusted content and follows the sandbox
+  boundary from `INT-006`.
+- Secrets, private keys, production signer material, admin credentials, private
+  RPC credentials, raw signatures, and unreleased payloads are explicitly
+  excluded from browser and `NEXT_PUBLIC_*` configuration.
 
 Evidence artifacts: None.
 

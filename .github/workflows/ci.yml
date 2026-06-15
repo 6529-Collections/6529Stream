@@ -177,6 +177,8 @@ jobs:
             scripts/test_events_and_indexing.py \
             scripts/check_metadata_rendering.py \
             scripts/test_metadata_rendering.py \
+            scripts/check_react_next_reference.py \
+            scripts/test_react_next_reference.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -486,6 +488,8 @@ jobs:
           python3 scripts/check_events_and_indexing.py 2>&1 | tee ci-logs/events-and-indexing-check.log
           python3 scripts/test_metadata_rendering.py 2>&1 | tee ci-logs/metadata-rendering-tests.log
           python3 scripts/check_metadata_rendering.py 2>&1 | tee ci-logs/metadata-rendering-check.log
+          python3 scripts/test_react_next_reference.py 2>&1 | tee ci-logs/react-next-reference-tests.log
+          python3 scripts/check_react_next_reference.py 2>&1 | tee ci-logs/react-next-reference-check.log
 
       - name: Release readiness
         shell: bash

@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-007 React/Next frontend reference architecture with
+  `docs/integrations/frontend-reference-architecture.md`,
+  `docs/integrations/examples/react-viem.md`, a checker/test pair, local/CI
+  gate wiring, release-readiness navigation, release-manifest coverage, and
+  no-SDK/no-production-readiness boundaries so 6529.io-style frontend teams can
+  trace artifact import, chain config, contract-client layering, query/cache,
+  transaction, wallet/signature, metadata, indexer, environment, telemetry, and
+  testing expectations without hardcoded addresses or browser secrets.
 - Added INT-006 metadata rendering, cache, animation sandbox, and marketplace
   integration guide with `docs/integrations/metadata-rendering.md`, a
   checker/test pair, local/CI gate wiring, release-readiness navigation, and
