@@ -155,6 +155,16 @@ invalidates stale payloads, fresh payloads from the new signer work,
 unauthorized lifecycle calls fail, and per-drop cancellation remains
 unavailable after consumption.
 
+`StreamSignerCompromiseFuzz.t.sol` extends signer lifecycle coverage for
+ADV-003. It runs a deterministic compromise drill that pauses drop execution,
+rotates the signer, invalidates a current signer epoch, cancels a pending drop,
+recovers with fresh fixed-price and auction authorizations, rejects replay, and
+rejects cancellation after consumption. A bounded fuzz scenario covers
+fixed-price and auction payloads across cancellation, pause, signer rotation,
+epoch increment, and expiry choices, asserting failed compromise attempts do
+not consume invalid drop IDs, mint supply, create auctions, or alter owed
+balances.
+
 Pause and emergency-control tests now include P0-ADMIN-002 target-state
 coverage in `StreamPauseControls.t.sol` and `StreamEmergencyWithdraw.t.sol`:
 pause guardians can pause but cannot unpause, unpause admins can unpause but

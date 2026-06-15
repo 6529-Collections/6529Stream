@@ -1061,7 +1061,7 @@ Issue: [`#372`](https://github.com/6529-Collections/6529Stream/issues/372).
 
 ### ADV-003: Add Signer Compromise And Revocation Fuzz Tests
 
-Status: Planned.
+Status: In progress locally on branch `codex/signer-compromise-fuzz`.
 
 Gate: D/F.
 
@@ -1070,27 +1070,39 @@ frontend assumptions must prove drop IDs, signer epochs, cancellations, and
 pauses stop stale authorizations.
 
 Outcome: Tests cover signer rotation, per-drop cancellation, replay,
-stale-epoch invalidation, wrong domain, wrong chain, wrong contract, and global
-drop-execution pause.
+stale-epoch invalidation, current-signer epoch revocation, fixed-price and
+auction recovery paths, and global drop-execution pause. Existing EIP-712 and
+ERC-1271 suites continue to own wrong-domain, wrong-chain, wrong-contract,
+compact-signature, malleability, and contract-signer permutations.
 
 Files likely touched:
 
+- `test/StreamSignerCompromiseFuzz.t.sol`
 - `test/StreamDropsEIP712.t.sol`
 - `test/StreamDropsERC1271.t.sol`
 - `test/StreamSignerAdmin.t.sol`
 - `test/StreamPauseControls.t.sol`
+- `test/README.md`
+- `ops/ROADMAP.md`
+- `ops/AUTONOMOUS_RUN.md`
 - `docs/drop-authorization-signing.md`
 - `docs/threat-model.md`
 
 Implementation steps:
 
 1. Build a table of authorization invalidation mechanisms.
-2. Add fuzzed or table-driven tests for each invalidation path.
-3. Include EOA, EIP-2098, and ERC-1271 where relevant.
-4. Assert expected custom errors and events.
+2. Add a deterministic signer-compromise drill for pause, rotation, epoch
+   invalidation, cancellation, recovery, replay, and cancel-after-consumption.
+3. Add bounded fuzz over fixed-price and auction signed payloads with
+   cancellation, pause, signer rotation, epoch increment, and expiry choices.
+4. Reuse existing EIP-712 and ERC-1271 suites for wrong domain, wrong chain,
+   wrong contract, EIP-2098, malleability, and contract signer coverage.
+5. Assert exact revert messages and signer/cancellation/consumption events
+   where relevant.
 
 Required tests/checks:
 
+- `forge test --match-path test/StreamSignerCompromiseFuzz.t.sol -vvv`
 - `forge test --match-path test/StreamDropsEIP712.t.sol -vvv`
 - `forge test --match-path test/StreamDropsERC1271.t.sol -vvv`
 - `forge test --match-path test/StreamSignerAdmin.t.sol -vvv`
@@ -1100,12 +1112,24 @@ Acceptance criteria:
 
 - Stale signatures cannot mint after signer rotation.
 - Cancelled drop IDs cannot mint.
+- Current-signer stale epochs cannot mint after epoch invalidation.
+- Drop-execution pause blocks compromised payload execution.
+- Fresh fixed-price and auction payloads from the recovered signer mint after
+  revocation controls are applied.
+- Replayed recovered payloads cannot mint twice.
+- Cancellation after consumption fails without setting the cancelled flag.
+- Failed compromise attempts do not consume invalid drop IDs, mint supply,
+  create auctions, or alter fixed-price/auction owed balances.
+- Bounded fuzz covers fixed-price and auction payloads across cancellation,
+  pause, signer rotation, epoch increment, and expiry choices.
 - Wrong chain/verifying contract/domain versions fail.
 - ERC-1271 behavior is covered or explicitly documented.
 
 Evidence artifacts: None.
 
-Dependencies: Current EIP-712/ERC-1271 implementation.
+Dependencies: Current EIP-712/ERC-1271 implementation, `ADV-001`, and
+`ADV-002`.
+Issue: [`#374`](https://github.com/6529-Collections/6529Stream/issues/374).
 
 ### ADV-004: Add Pause And Settlement Matrix Invariants
 
