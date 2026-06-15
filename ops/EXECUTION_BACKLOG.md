@@ -914,7 +914,8 @@ Dependencies: `GOV-001`.
 
 ### ADV-001: Add End-To-End Protocol State-Machine Harness
 
-Status: Planned.
+Status: In progress on issue #370 and branch
+`codex/protocol-state-machine-harness`.
 
 Gate: D/F.
 
@@ -924,6 +925,14 @@ randomizer, metadata, pause, signer, and payment flows.
 
 Outcome: A reusable Foundry harness models protocol actions and exposes
 assertions that future adversarial tests can reuse.
+
+Current implementation slice: add a deterministic smoke harness without
+production contract changes. The first reusable helper covers local deployment,
+fixed-price mint, auction outbid and settlement, fixed-price and auction credit
+withdrawals, pause/unpause checks, signer rotation, drop cancellation,
+immediate-randomizer metadata finalization, metadata mutation, and collection
+freeze. Future ADV items should extend it with fuzzed adversarial sequences and
+provider-specific randomness permutations.
 
 Files likely touched:
 
@@ -954,6 +963,8 @@ Acceptance criteria:
 - Harness compiles and executes deterministic smoke sequences.
 - Harness exposes reusable helpers for future fuzz/invariant PRs.
 - No production behavior changes.
+
+Issue: [`#370`](https://github.com/6529-Collections/6529Stream/issues/370).
 
 Evidence artifacts: None.
 

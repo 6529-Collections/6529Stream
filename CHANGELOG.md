@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a reusable ADV-001 protocol state-machine smoke harness with
+  deterministic cross-contract coverage for fixed-price minting, auction
+  outbid/settlement, known credit withdrawals, pause/signer/cancel controls,
+  randomness-finalized metadata, metadata mutation, collection freeze, and
+  owed-balance/surplus assertions without production contract changes.
 - Added a no-secret deployment admin ceremony evidence schema, template,
   retained-artifact checklist, checker, tests, local/CI gate wiring, release
   manifest coverage, checksum coverage, and deployment/readiness/runbook docs
