@@ -104,7 +104,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:446b9b8345657b7ebec381fdfc5170056e3d79f7b2dceed9ec6fbbfd82c25719",
+      "sha256": "sha256:91c82e4ab7777f43861356ee8490d19d18337bd0cf20c726a494a329c66a864f",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",

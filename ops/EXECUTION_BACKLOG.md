@@ -2020,7 +2020,7 @@ Dependencies: `INT-001`.
 
 ### INT-004: Add Wallet, EIP-712, ERC-1271, And Safe Signing Guide
 
-Status: In progress on issue #396 / branch `codex/wallet-signing-guide`.
+Status: PR #397 open on issue #396 / branch `codex/wallet-signing-guide`.
 
 Gate: G/F.
 
