@@ -60,6 +60,9 @@ REQUIRED_PHRASES = [
     "INT-006",
     "metadata rendering, cache, animation sandbox, and marketplace integration guide",
     "INT-007",
+    "React/Next frontend reference architecture",
+    "maintained frontend package",
+    "generated SDK",
     "INT-008",
     "INT-009",
 ]
@@ -75,6 +78,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_events_and_indexing.py",
     "python scripts/test_metadata_rendering.py",
     "python scripts/check_metadata_rendering.py",
+    "python scripts/test_react_next_reference.py",
+    "python scripts/check_react_next_reference.py",
     "python scripts/check_release_readiness.py",
     "python scripts/check_changelog.py",
 ]
@@ -97,6 +102,8 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/wallets-and-signatures.md",
     "docs/integrations/events-and-indexing.md",
     "docs/integrations/metadata-rendering.md",
+    "docs/integrations/frontend-reference-architecture.md",
+    "docs/integrations/examples/react-viem.md",
     "release-artifacts/README.md",
     "release-artifacts/contracts.json",
     "release-artifacts/baselines/v0.1.0/abi-surface.json",

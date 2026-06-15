@@ -77,6 +77,9 @@ REQUIRED_READINESS_PHRASES = [
     "wallet, EIP-712, ERC-1271, and Safe signing guide",
     "event and indexer reconstruction spec",
     "metadata rendering, cache, animation sandbox, and marketplace integration guide",
+    "React/Next frontend reference architecture",
+    "maintained frontend package",
+    "generated SDK",
     "drop authorization signing fixtures",
     "unsigned payload-generator examples",
     "drop authorization signing evidence",
@@ -103,6 +106,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_events_and_indexing.py",
     "python scripts/test_metadata_rendering.py",
     "python scripts/check_metadata_rendering.py",
+    "python scripts/test_react_next_reference.py",
+    "python scripts/check_react_next_reference.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -215,6 +220,8 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/wallets-and-signatures.md",
     "docs/integrations/events-and-indexing.md",
     "docs/integrations/metadata-rendering.md",
+    "docs/integrations/frontend-reference-architecture.md",
+    "docs/integrations/examples/react-viem.md",
     "docs/architecture.md",
     "docs/threat-model.md",
     "docs/deployment.md",

@@ -34,7 +34,7 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), and [`metadata-rendering.md`](metadata-rendering.md) | Fixed-price, auction, wallet/signature, metadata rendering, cache, animation sandbox, and marketplace integration guidance is documented; React reference architecture remains future `INT-007` work |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, cache, animation sandbox, marketplace, and React/Next reference architecture guidance is documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), and [`metadata-rendering.md`](metadata-rendering.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, and mobile metadata/cache caveats are documented; deeper mobile reference architecture remains future `INT-008` work |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and strict renderer/process security assumptions | Signature and metadata animation sandbox boundary guidance is documented; deeper Electron shell guidance remains future `INT-009` work |
 | Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), and [`metadata-rendering.md`](metadata-rendering.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, and cache invalidation are documented for the local baseline |
@@ -73,6 +73,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Wallet and signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Current `INT-004` EIP-712, ERC-1271, Safe, WalletConnect, backend signer, and failure-state guide |
 | Event and indexer guide | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Current `INT-005` event subscriptions, indexed entities, read-after-event calls, reorg policy, and known event/read gaps |
 | Metadata rendering guide | [`docs/integrations/metadata-rendering.md`](metadata-rendering.md) | Current `INT-006` metadata state, tokenURI, ERC-4906 cache invalidation, animation sandbox, cache key, and marketplace evidence-boundary guide |
+| React/Next reference architecture | [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md) | Current `INT-007` artifact import, client layering, query/cache, transaction, wallet, metadata, indexer, environment, and testing guide |
 | Release signatures | [`docs/release-signatures.md`](../release-signatures.md) | No production signatures are committed |
 
 ## Canonical Artifacts
@@ -97,6 +98,8 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md)
 - [`docs/integrations/events-and-indexing.md`](events-and-indexing.md)
 - [`docs/integrations/metadata-rendering.md`](metadata-rendering.md)
+- [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md)
+- [`docs/integrations/examples/react-viem.md`](examples/react-viem.md)
 - [`release-artifacts/README.md`](../../release-artifacts/README.md)
 - [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json)
 - [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json)
@@ -135,7 +138,10 @@ to understand what is still intentionally future work:
   [`events-and-indexing.md`](events-and-indexing.md).
 - `INT-006`: the metadata rendering, cache, animation sandbox, and marketplace
   integration guide is now [`metadata-rendering.md`](metadata-rendering.md).
-- `INT-007`: React/Next reference architecture.
+- `INT-007`: the React/Next frontend reference architecture is now
+  [`frontend-reference-architecture.md`](frontend-reference-architecture.md),
+  with pseudocode examples in
+  [`examples/react-viem.md`](examples/react-viem.md).
 - `INT-008`: mobile and WalletConnect integration guide.
 - `INT-009`: Electron security and wallet integration guide.
 
@@ -157,6 +163,9 @@ particular:
   not reviewed production signing evidence.
 - Metadata/browser checks and the `INT-006` guide are local evidence, not
   marketplace or collector-tool proof.
+- The `INT-007` React/Next guide is a local architecture reference, not a
+  maintained frontend package, generated SDK, public beta implementation, or
+  production integration proof.
 - Indexer teams still need retained non-local event replay and metadata refresh
   evidence before relying on production reconstruction.
 
@@ -175,6 +184,8 @@ python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
 python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
+python scripts/test_react_next_reference.py
+python scripts/check_react_next_reference.py
 python scripts/check_release_readiness.py
 python scripts/check_changelog.py
 ```

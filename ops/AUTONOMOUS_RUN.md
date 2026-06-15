@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-rendering-cache-guide` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/399` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/400` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/401` |
-| Next issue | TBD after INT-006. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/react-next-reference-architecture` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/401` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/402` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/403` |
+| Next issue | TBD after INT-007. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 12:43 UTC` |
+| Last updated | `2026-06-15 13:23 UTC` |
 
 ## Packaging Notes
 
@@ -15202,6 +15202,12 @@ Outcome:
 | 2026-06-15 12:30 | Validate INT-006 local draft | Focused metadata rendering, fixture, browser, rehearsal, integrations README, release-readiness, manifest, bytecode proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 12:32 | Open PR #401 for INT-006 | PR #401 is open on branch `codex/metadata-rendering-cache-guide`, closes issue #400, and CodeRabbit review was requested. |
 | 2026-06-15 12:43 | Address PR #401 bot nice-to-have | Wrapped the INT-006 integration README bullet by making the older integrations/release-readiness phrase checks whitespace-tolerant, added regression coverage for wrapped required phrases, regenerated release artifacts, and reran focused checks plus full `make check`. |
+| 2026-06-15 12:52 | Merge PR #401 | Metadata rendering integration guide merged as `642c552cbe096d4c7b1dc35d51744ab0a34498bd` after CI run `27547050023` passed, CodeRabbit status was success with only an informational rate-limit comment, 6529bot had no security findings, and issue #400 closed completed. |
+| 2026-06-15 12:54 | Create issue #402 and select INT-007 | Next substantive integration-readiness slice is the React/Next frontend reference architecture on branch `codex/react-next-reference-architecture`; issue #402 now tracks the guide, pseudocode examples, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, and no-SDK/no-production-readiness boundaries. |
+| 2026-06-15 13:03 | Reconfirm Core bytecode posture | Core was materially refactored away from the hard EIP-170 blocker in PRs #90, #116, and #133; current tracked `StreamCore` runtime is still 24,139 bytes with 437 bytes of EIP-170 headroom, above the 384-byte minimum release floor but below the 512-byte warning threshold, so large non-trivial Core work still needs headroom recovery or an explicit size-budget exception. |
+| 2026-06-15 13:19 | Validate INT-007 local draft | Focused React/Next reference, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
+| 2026-06-15 13:21 | Open PR #403 for INT-007 | PR #403 is open on branch `codex/react-next-reference-architecture`, closes issue #402, and CodeRabbit review was requested in comment `4708353207`. |
+| 2026-06-15 13:23 | Address PR #403 bot nice-to-have | 6529bot general review found a copy-paste risk in the public-env pseudocode guard; updated the example to strip `NEXT_PUBLIC_` before matching secret-shaped suffixes, regenerated release manifest/proof/checksums, and reran focused React/Next plus release artifact drift checks. |
 
 ## Resume Instructions
 
