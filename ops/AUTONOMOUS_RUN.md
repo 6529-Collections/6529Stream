@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/event-indexer-reconstruction-spec` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/397` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/398` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/399` |
-| Next issue | TBD after INT-005. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/metadata-rendering-cache-guide` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/399` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/400` |
+| Active PR | TBD |
+| Next issue | TBD after INT-006. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 11:54 UTC` |
+| Last updated | `2026-06-15 12:30 UTC` |
 
 ## Packaging Notes
 
@@ -15196,6 +15196,10 @@ Outcome:
 | 2026-06-15 11:29 | Create issue #398 and select INT-005 | Next substantive integration-readiness slice is the event and indexer reconstruction spec on branch `codex/event-indexer-reconstruction-spec`; issue #398 now tracks the guide/checker/local-CI/release-manifest work. |
 | 2026-06-15 11:52 | Open PR #399 for INT-005 | PR #399 is open on branch `codex/event-indexer-reconstruction-spec`, closes issue #398, and CodeRabbit review was requested. Local evidence includes the event/indexer guide checker/test, integration/release-readiness checks, risk-register/release-manifest/proof/checksum drift checks, shell and PowerShell syntax checks, `git diff --check`, and full `make check`. |
 | 2026-06-15 11:54 | Address PR #399 bot nice-to-haves | Tightened generic event/entity checker phrases, added a source-file mapping for `StreamAuctions` / `StreamMinter`, and added path-like link-label validation for the event/indexer guide checker. |
+| 2026-06-15 12:03 | Merge PR #399 | Event/indexer reconstruction spec merged as `767390ec17cfed17fac457af25d1fd694f700db6` after CI run `27544488930` passed, 6529bot reported no new security findings, CodeRabbit status was success, review threads were empty, and issue #398 closed completed. |
+| 2026-06-15 12:04 | Create issue #400 and select INT-006 | Next substantive integration-readiness slice is the metadata rendering, cache, animation sandbox, and marketplace integration guide on branch `codex/metadata-rendering-cache-guide`; issue #400 now tracks the guide/checker/local-CI/release-manifest work. |
+| 2026-06-15 12:14 | Implement INT-006 local draft | Added `docs/integrations/metadata-rendering.md`, a checker/test pair, CI/local wrapper wiring, integration/release-readiness navigation, release-manifest coverage, changelog/backlog traceability, and state updates before release-artifact regeneration. |
+| 2026-06-15 12:30 | Validate INT-006 local draft | Focused metadata rendering, fixture, browser, rehearsal, integrations README, release-readiness, manifest, bytecode proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 
 ## Resume Instructions
 
