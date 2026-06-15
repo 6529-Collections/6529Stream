@@ -167,6 +167,8 @@ jobs:
             scripts/test_incident_response.py \
             scripts/check_integrations_readme.py \
             scripts/test_integrations_readme.py \
+            scripts/check_contract_flows.py \
+            scripts/test_contract_flows.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -460,6 +462,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_integrations_readme.py 2>&1 | tee ci-logs/integrations-readme-tests.log
           python3 scripts/check_integrations_readme.py 2>&1 | tee ci-logs/integrations-readme-check.log
+
+      - name: Contract flow docs
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_contract_flows.py 2>&1 | tee ci-logs/contract-flows-tests.log
+          python3 scripts/check_contract_flows.py 2>&1 | tee ci-logs/contract-flows-check.log
 
       - name: Release readiness
         shell: bash

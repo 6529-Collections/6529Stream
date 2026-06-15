@@ -209,6 +209,7 @@ Current pinned versions:
 - [`docs/audit-package.md`](docs/audit-package.md)
 - [`docs/release-readiness.md`](docs/release-readiness.md)
 - [`docs/integrations/README.md`](docs/integrations/README.md)
+- [`docs/integrations/contract-flows.md`](docs/integrations/contract-flows.md)
 - [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md)
 - [`docs/status.md`](docs/status.md)
 - [`docs/known-blockers.md`](docs/known-blockers.md)

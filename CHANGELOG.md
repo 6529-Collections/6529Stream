@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-002 fixed-price mint and drop authorization flow spec with
+  `docs/integrations/contract-flows.md`, a checker/test pair, local/CI gate
+  wiring, release-readiness navigation, and release-manifest coverage so
+  frontend and backend signing service teams can trace preflight reads,
+  EIP-712/ERC-1271 payload handling, transaction submission, events, credits,
+  withdrawals, and failure states without production-readiness overclaims.
 - Added INT-001 integrations entrypoint with `docs/integrations/README.md`, a
   checker/test pair, local/CI gate wiring, release-readiness navigation, and
   release-manifest coverage so frontend, mobile, Electron, indexer, operator

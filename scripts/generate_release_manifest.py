@@ -80,6 +80,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/signer-custody-readiness.md"),
     Path("docs/release-readiness.md"),
     Path("docs/integrations/README.md"),
+    Path("docs/integrations/contract-flows.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]
