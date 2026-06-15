@@ -317,11 +317,11 @@ Production bytecode size is checked through the local/CI gate
 because the deployable contracts use the IR-optimized release profile while
 test-only invariant handlers can exceed initcode limits. The current Core UTF-8
 slice plus lifecycle-aware stale/failed metadata state display now keeps
-`StreamCore` deployable at 24,047 runtime bytes with 529 bytes of EIP-170
+`StreamCore` deployable at 23,661 runtime bytes with 915 bytes of EIP-170
 headroom, above the documented 384-byte release floor and 512-byte warning
-threshold for larger Core feature work. The size recovery also
-adds randomizer migration regressions for unsupported lifecycle providers and
-for lifecycle-aware providers whose pending-request probe fails.
+threshold for larger Core feature work. The latest size recovery also keeps
+randomizer migration regressions for unsupported lifecycle providers and for
+lifecycle-aware providers whose pending-request probe fails.
 
 Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event

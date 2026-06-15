@@ -10,11 +10,11 @@ The current Gate A smoke baseline proves:
   size gate. `python scripts/check_contract_size_budget.py` checks every
   production contract against EIP-170 and enforces the configured `StreamCore`
   release floor from `release-artifacts/contracts.json`. Current `StreamCore`
-  production runtime size is 24,047 bytes, leaving 529 bytes of EIP-170
+  production runtime size is 23,661 bytes, leaving 915 bytes of EIP-170
   headroom under the IR-optimized deployment profile. This passes the EIP-170
   deployability gate, the current 384-byte minimum release floor, and the
   512-byte warning threshold; large non-trivial `StreamCore` feature work should
-  still recover headroom or explicitly accept a size-budget exception.
+  still measure bytecode deltas and explicitly accept any size-budget exception.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass
