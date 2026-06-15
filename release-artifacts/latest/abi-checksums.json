@@ -11,7 +11,7 @@
     "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
     "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
     "StreamAuctions": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
-    "StreamCore": "sha256:0eb5ad7ff44ed58463bbacd6d7d592ee9b4e2509bed839b1c8ddaf899c9711e9",
+    "StreamCore": "sha256:b53d51f0532016726326d0a178b8aab449bd424864f4771077ef76a2cbfd725a",
     "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
     "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
     "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e"
@@ -79,12 +79,12 @@
     },
     "StreamCore": {
       "creation": {
-        "sha256": "sha256:c3b80c3721c3e652f25ae8ad3a950f93b9a39ccc96c75489e23033c17332ff03",
+        "sha256": "sha256:93455e9ac9724e5e209ea0a0d2f7f8c27043ce3cfa73cb00a522f233937aea00",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       },
       "runtime": {
-        "sha256": "sha256:596a4eed1de1126e196836f14500dcd33f7c7313ff110f199b02b386974c314d",
+        "sha256": "sha256:060bf1de23ba76dbc4a6f60df47a6926894b2373930bd4c57776150145158b4c",
         "linked": false,
         "hash_mode": "unlinked_artifact_object"
       }
@@ -205,11 +205,11 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:0eb5ad7ff44ed58463bbacd6d7d592ee9b4e2509bed839b1c8ddaf899c9711e9",
-      "bytecode_sha256": "sha256:c3b80c3721c3e652f25ae8ad3a950f93b9a39ccc96c75489e23033c17332ff03",
+      "abi_sha256": "sha256:b53d51f0532016726326d0a178b8aab449bd424864f4771077ef76a2cbfd725a",
+      "bytecode_sha256": "sha256:93455e9ac9724e5e209ea0a0d2f7f8c27043ce3cfa73cb00a522f233937aea00",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
-      "deployed_bytecode_sha256": "sha256:596a4eed1de1126e196836f14500dcd33f7c7313ff110f199b02b386974c314d",
+      "deployed_bytecode_sha256": "sha256:060bf1de23ba76dbc4a6f60df47a6926894b2373930bd4c57776150145158b4c",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "abi_entries": 123,

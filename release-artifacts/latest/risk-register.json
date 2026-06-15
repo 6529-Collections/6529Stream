@@ -301,7 +301,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:0260f3ad2e10ec400155770dee4d71e5e0806cec282539262476b445bf7cb795"
+          "sha256": "sha256:2dca883fcbc9fa62c3775b7c934d1d5b9e8834e7ec7c4eb95c13fe58a70b8540"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -337,7 +337,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:3030ac42bcc4abc58b9f6eb7169ed893ed3a2af573a9953ebc14a4ee2216ea61"
+          "sha256": "sha256:a51e356e36730e4f2f7e51faad8af6bf2326986a95a5b898d19d92c6a83016d9"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",

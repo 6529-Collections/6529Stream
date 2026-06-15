@@ -348,7 +348,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
                 (_collectionID * _COLLECTION_TOKEN_RANGE) + _collectionTotalSupply - 1;
             wereDataAdded[_collectionID] = true;
         } else {
-            if (!artistSigned(_collectionID)) {
+            if (!_artistSigned(_collectionID)) {
                 collectionData.collectionArtistAddress = _collectionArtistAddress;
             }
             collectionData.maxCollectionPurchases = _maxCollectionPurchases;
@@ -968,7 +968,15 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         return _hashArtistApproval(_collectionID);
     }
 
-    function artistSigned(uint256 _collectionID) public view returns (bool) {
+    function artistSigned(uint256) external view returns (bool) {
+        uint256 collectionID;
+        assembly ("memory-safe") {
+            collectionID := calldataload(4)
+        }
+        return _artistSigned(collectionID);
+    }
+
+    function _artistSigned(uint256 _collectionID) private view returns (bool) {
         bytes32 approvalHash = artistApprovalHashes[_collectionID];
         return approvalHash != bytes32(0) && approvalHash == _hashArtistApproval(_collectionID);
     }
