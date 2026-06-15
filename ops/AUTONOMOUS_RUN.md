@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reviewer-roadmap-rebaseline` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/373` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/375` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/376` |
-| Next issue | `https://github.com/6529-Collections/6529Stream/issues/374` (`ADV-003` signer compromise and revocation fuzz tests); `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/signer-compromise-fuzz` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/376` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/374` |
+| Active PR | `TBD` |
+| Next issue | TBD after ADV-003; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 02:44 UTC` |
+| Last updated | `2026-06-15 03:09 UTC` |
 
 ## Packaging Notes
 
@@ -240,19 +240,61 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 176 | Add Safe/admin ceremony evidence checker | Gate E/Gate F/Gate G support | Add a no-secret admin ceremony evidence schema, template, retained-artifact checklist, checker, tests, docs, local/CI wiring, release-manifest coverage, and checksum coverage without claiming reviewed fork/testnet/live governance ceremony completion | Merged in PR #369 |
 | 177 | Add end-to-end protocol state-machine harness | Gate D/Gate F support | Add a reusable Foundry helper plus deterministic smoke coverage across fixed-price mint, auction bid/settlement, payments, pause/signer/cancel controls, randomness finalization, metadata mutation, and collection freeze without production contract changes | Merged in PR #371 |
 | 178 | Add auction/drop/randomizer adversarial sequence tests | Gate D/Gate F support | Extend the protocol state-machine test with adversarial ordering coverage for cancelled/expired/stale/replayed drops, reverted fixed-price withdrawals, auction pre-settlement ordering, settlement idempotence, late bids, and failed auction withdrawals without production contract changes | Merged in PR #373 |
-| 179 | Fold clean-main reviewer rebaseline into roadmap | Gate G support | Record the reviewer-confirmed fixed surfaces, remaining 10/10 product/evidence gaps, benchmark inputs, and backlog mapping without changing readiness claims | In progress on issue #375 |
+| 179 | Fold clean-main reviewer rebaseline into roadmap | Gate G support | Record the reviewer-confirmed fixed surfaces, remaining 10/10 product/evidence gaps, benchmark inputs, and backlog mapping without changing readiness claims | Merged in PR #376 |
+| 180 | Add signer compromise and revocation fuzz tests | Gate D/Gate F support | Add deterministic and bounded fuzz coverage for signer compromise response paths: drop-execution pause, signer rotation, epoch invalidation, per-drop cancellation, replay rejection, recovered fixed-price and auction payloads, and invalid-attempt no-mutation assertions | In progress on issue #374 |
 
 ## Current PR Worklog
 
-### PR candidate: Fold clean-main reviewer rebaseline into roadmap (Queue Item 179)
+### PR candidate: Add signer compromise and revocation fuzz tests (Queue Item 180)
 
-Status: PR #376 open; CI and CodeRabbit pending.
+Status: local draft; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/374`.
+PR: `TBD`.
+Branch: `codex/signer-compromise-fuzz`.
+Branch started from PR #376 squash merge commit
+`ba83f54ca2ea952a62403a8b74faa09e11e150c7`.
+
+Goal:
+
+- Add focused ADV-003 coverage for signer compromise and revocation without
+  production contract changes.
+- Prove drop-execution pause, signer rotation, signer-epoch increment, and
+  per-drop cancellation stop stale or compromised authorizations without
+  consuming invalid drop IDs or mutating supply/accounting.
+- Prove recovered fixed-price and auction authorizations from the current
+  signer can mint, then reject replay and cancel-after-consumption attempts.
+- Keep wrong-domain, wrong-chain, wrong-contract, EIP-2098, malleability, and
+  ERC-1271 permutations in the existing EIP-712/ERC-1271 suites.
+
+Validation completed so far:
+
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test\StreamSignerCompromiseFuzz.t.sol -vvv`
+  passed locally with 2 tests passing, including 256 fuzz runs, with existing
+  compiler/NatSpec warning noise only.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt --check test\StreamSignerCompromiseFuzz.t.sol`
+  passed.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-contract "Stream(SignerAdmin|DropsEIP712|DropsERC1271|PauseControls|SignerCompromiseFuzz)Test" -vvv`
+  passed locally with 50 tests passing, including the ADV-003 fuzz run.
+- `python scripts\check_changelog.py`, `python scripts\generate_release_manifest.py --check`,
+  `python scripts\generate_release_checksums.py --check`, roadmap/backlog
+  heading scan, and `git diff --check` passed after regenerating release
+  manifest/checksum artifacts.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed locally on 2026-06-15 03:08 UTC with existing compiler/NatSpec
+  warning noise only.
+
+### Completed: Fold clean-main reviewer rebaseline into roadmap (Queue Item 179)
+
+Status: merged as PR #376; issue #375 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/375`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/376`.
 Branch: `codex/reviewer-roadmap-rebaseline`.
 Branch started from PR #373 squash merge commit
 `7684b800606b31d2487f078b87f2f6a19fd27777`.
 Opening PR head: `1169e98dec528ec1f2b54d42ed4a36b4fba5e12f`.
+Final PR head: `a4b695ddb24e3f0b102c7d85391c757a949f3d94`.
+Squash merge commit:
+`ba83f54ca2ea952a62403a8b74faa09e11e150c7`.
 
 Goal:
 
@@ -279,6 +321,12 @@ Validation completed so far:
 - PR #376 opened as ready-for-review and CodeRabbit was requested explicitly in
   issue comment `4704053622`; Claude intentionally skipped per current user
   instruction.
+- PR #376 CI run `27520925937` passed: Foundry smoke job `81338566333` and
+  Windows PowerShell wrapper job `81338566247` succeeded. CodeRabbit status was
+  success with no submitted reviews and no review threads; the rate-limit
+  banner was documented as non-actionable in merge-decision comment
+  `4704081007`. PR #376 squash-merged as
+  `ba83f54ca2ea952a62403a8b74faa09e11e150c7`.
 
 ### Completed: Add auction/drop/randomizer adversarial sequence tests (Queue Item 178)
 
@@ -13599,6 +13647,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 02:58 | Merge PR #376 and start Queue Item 180 | PR #376 squash-merged as `ba83f54ca2ea952a62403a8b74faa09e11e150c7` after CI run `27520925937` passed Foundry smoke job `81338566333` and Windows PowerShell wrapper job `81338566247`; CodeRabbit status was success with no submitted reviews and no review threads, merge-decision comment `4704081007` documented the non-actionable rate-limit banner, issue #375 closed completed, and branch `codex/signer-compromise-fuzz` started from the merged baseline for issue #374 / ADV-003 signer compromise and revocation fuzz coverage. |
 | 2026-06-15 02:33 | Start Queue Item 179 | User supplied clean-main reviewer comments for the roadmap after PR #373 merged; issue #375 and branch `codex/reviewer-roadmap-rebaseline` track a bounded documentation/state reconciliation that records the fixed-versus-missing rebaseline, source benchmarks, backlog mapping, and latest verification metadata before returning to substantive ADV-003 signer-compromise fuzz work. |
 | 2026-06-14 18:08 | Merge PR #356 and start Queue Item 174 | PR #356 squash-merged as `dd61e79d1fba5dbfec105b46ee0544fed105b95e` after CI run `27507051549` passed Windows PowerShell wrapper job `81300070339` and Foundry smoke job `81300070342`; CodeRabbit status was success with review-finished reply `4702550060`, no review threads were open, merge-decision comment `4702573973` documented the autonomous merge basis and the process correction to avoid standalone bookkeeping PRs by default, issue #355 closed completed, issue #357 opened for testnet deployment rehearsal retained-artifact checker support, and branch `codex/testnet-deployment-rehearsal-evidence-checker` started from the merged baseline. |
 | 2026-06-14 18:00 | Select substantive next item | After reviewing the recent PR stream and current blocker reports, selected `testnet_deployment_rehearsal` issue #217 as the next substantive public-beta evidence hardening target because it still used the generic retained-artifact placeholder and blocks public beta; durable state updates will ride with the substantive PR rather than becoming a standalone reconciliation PR. |

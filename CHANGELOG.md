@@ -17,6 +17,9 @@ the release policy in `docs/release-policy.md`.
   fixed-price withdrawal rollback to rejecting receivers, auction
   pre-settlement ordering, settlement idempotence, late bids, and failed
   auction withdrawal rollback without production contract changes.
+- Added ADV-003 signer compromise and revocation coverage with a deterministic
+  pause/rotation/epoch/cancellation recovery drill plus bounded fuzz over
+  fixed-price and auction signed payload invalidation paths.
 - Expanded the reviewer-supplied 1/1 product-excellence roadmap into
   issue-ready backlog entries and strategic release requirements for
   contract-level metadata, provenance manifests, royalty policy, collector
