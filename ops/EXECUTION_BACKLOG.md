@@ -2892,7 +2892,7 @@ coverage.
 
 ### ONE-003: Decide Royalty Philosophy And Enforcement Boundary
 
-Status: Planned.
+Status: In progress on branch `codex/royalty-policy-boundary`.
 
 Gate: G/F.
 
@@ -2909,10 +2909,14 @@ composability trade-offs.
 
 Files likely touched:
 
-- `docs/adr/0004-admin-governance.md`
+- `docs/royalty-policy.md`
 - `docs/metadata.md`
-- `docs/integrations/marketplaces.md`
+- `docs/provenance-manifests.md`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
 - `docs/release-policy.md`
+- local and CI check wiring for the royalty policy checker
+- release manifest, bytecode proof, checksum, and risk-register artifacts
 - `smart-contracts/` and `test/` only if royalty admin or enforcement changes
   are accepted
 
@@ -2931,8 +2935,19 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path <royalty-test-file> -vvv` if behavior changes
-- Marketplace docs heading check
+- `python scripts/test_royalty_policy.py`
+- `python scripts/check_royalty_policy.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `forge test --match-path test/StreamRoyalty.t.sol -vvv` if behavior changes
 - `python scripts/generate_release_artifacts.py --check` if ABI/events change
 - `python scripts/check_changelog.py`
 - `git diff --check`
@@ -2951,11 +2966,15 @@ Acceptance criteria:
 
 Evidence artifacts:
 
-- Royalty policy/design record.
-- Tests if behavior changes.
+- `docs/royalty-policy.md` policy/design record.
+- `scripts/check_royalty_policy.py` and `scripts/test_royalty_policy.py`.
+- Release/readiness integration links and generated artifact hashes.
+- Solidity tests if behavior changes.
 - Future marketplace evidence from `ONE-005`.
 
-Dependencies: governance ADR, `INT-005`, `ONE-005`.
+Tracking: <https://github.com/6529-Collections/6529Stream/issues/416>.
+
+Dependencies: release policy, `INT-005`, `ONE-005`.
 
 ### ONE-004: Add Collector-Verifiable Permanence Package
 

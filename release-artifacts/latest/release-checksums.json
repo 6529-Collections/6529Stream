@@ -29,7 +29,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:23a7f0fcc2fb9ace717f8919ea86952a3f828cb3616b1fe2348b70bcda79731d"
+    "sha256": "sha256:861bc66e5d7bbc9527bdf358b6f73a02a623a938490cebaa192f6a5dfba4daba"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -418,7 +418,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:28b0f92ef35a031fbb9a5641c3ff69a5f90b83b3d433d805c23478d40e627d2b",
+      "sha256": "sha256:818c9b2bb7a50b2988716192716d0b28a25a4af3aaa8e4108cca5301d13510a3",
       "size_bytes": 79958
     },
     {
@@ -438,7 +438,7 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:3eaf2fe0632c5f8424eeed69399eed45699a583bae9c082c58c15a0547c7c21f",
+      "sha256": "sha256:01d4d6966a864f801675d7dc225f0bd9047dbaf5227b6bf83f5985ff66c9652d",
       "size_bytes": 2177
     },
     {
@@ -508,13 +508,13 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:299ed42425a9a139c21b6906d95e6ed875f8e93cba3c9aa8577d322f75e02afb",
-      "size_bytes": 97186
+      "sha256": "sha256:d57ff897de0760800ae5e823f45e37a8c9dd4bbf9f90c7d054ac92edf5671110",
+      "size_bytes": 97366
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:a5a5457b76829062e7b0452fd62c0995ef7fb4be530930253a552ca75e25f9ce",
-      "size_bytes": 20415
+      "sha256": "sha256:23cf13c8d0d3bc57590612c1a001609e08490d1abe56ae397e1b768b98a875b8",
+      "size_bytes": 20816
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -528,7 +528,7 @@
     },
     {
       "path": "release-artifacts/provenance/one-of-one-provenance-template.provenance.json",
-      "sha256": "sha256:920872cb7c3bf35b6693f185fed83f93a4eb6c73e8a5a62203e0ad67409b397b",
+      "sha256": "sha256:9de89a511c28110bc8e0473e5c3524a4b2da64bed2864b572941b85c537ffc58",
       "size_bytes": 6161
     },
     {

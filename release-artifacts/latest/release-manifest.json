@@ -89,7 +89,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:3eaf2fe0632c5f8424eeed69399eed45699a583bae9c082c58c15a0547c7c21f",
+      "sha256": "sha256:01d4d6966a864f801675d7dc225f0bd9047dbaf5227b6bf83f5985ff66c9652d",
       "size_bytes": 2177,
       "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1"
     },
@@ -110,8 +110,8 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:a5a5457b76829062e7b0452fd62c0995ef7fb4be530930253a552ca75e25f9ce",
-      "size_bytes": 20415,
+      "sha256": "sha256:23cf13c8d0d3bc57590612c1a001609e08490d1abe56ae397e1b768b98a875b8",
+      "size_bytes": 20816,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
       "risk_count": 11,
@@ -1816,14 +1816,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:6ceb01d079377642b3a5dab52c9c6a2a1883d960aacaf2f4c58df68d7ededa1f",
-      "size_bytes": 35272
+      "sha256": "sha256:c9e3f6c0f2260a8e33eb04bb2e4e43681f3ddb51992663918e4a76b6aa1a83a7",
+      "size_bytes": 35654
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:bbd5013d252ed910596d70e490915ce0b29e41db9b4052087c48f7d167a33fc1",
-        "size_bytes": 8763
+        "sha256": "sha256:26223b7148d21a515f565c9b6b414e283ebde4e59de54ba95135c5f84faa6a33",
+        "size_bytes": 9072
       },
       {
         "path": "docs/deployment.md",
@@ -1887,18 +1887,23 @@
       },
       {
         "path": "docs/provenance-manifests.md",
-        "sha256": "sha256:af43a565f5269274845f9499e1fd5f8ff8955dd764f780648a4199f8382dd293",
-        "size_bytes": 6296
+        "sha256": "sha256:ec54197989419f54827409f81a4fb0ae82bab62749d839afd474019dd572865a",
+        "size_bytes": 6424
+      },
+      {
+        "path": "docs/royalty-policy.md",
+        "sha256": "sha256:67b03faf1eb835e30019d99e398e295894aec9dd099e9920595a7ca29118b447",
+        "size_bytes": 13850
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:03d85cb2d98ff7a904ee24d1b216831d6089b98ebd406f3851aaf16f2cb8fedb",
-        "size_bytes": 40949
+        "sha256": "sha256:5519f10ce9340230c46c2abb074ac4b67e10fb2b0ef181b4489d2af1144de326",
+        "size_bytes": 41691
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:d62393a6a8afb3902e78866f86c55f4ab55ee4b77c60e7037c73689da7760e77",
-        "size_bytes": 22401
+        "sha256": "sha256:15f175ebb570f3d6194f2e65fb2b96172b84d7bff0f9cc6384d7b24858383259",
+        "size_bytes": 23450
       },
       {
         "path": "docs/integrations/contract-flows.md",
