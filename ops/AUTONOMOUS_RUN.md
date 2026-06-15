@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/signed-release-tag-gate` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/381` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/382` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/383` |
 | Next issue | TBD after REL-002; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 05:29 UTC` |
+| Last updated | `2026-06-15 05:31 UTC` |
 
 ## Packaging Notes
 
@@ -250,9 +250,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add signed release tag verification gate (Queue Item 183)
 
-Status: local implementation in progress.
+Status: PR #383 open; CodeRabbit/CI pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/382`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/383`.
 Branch: `codex/signed-release-tag-gate`.
 Branch started from PR #381 squash merge commit
 `7e47cdf3732111616d4cd24e2c051c894471108d`.
