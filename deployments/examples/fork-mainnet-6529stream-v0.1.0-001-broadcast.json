@@ -50,7 +50,7 @@
         "0x0000000000000000000000000000000000000002"
       ],
       "abi_hash": "sha256:b53d51f0532016726326d0a178b8aab449bd424864f4771077ef76a2cbfd725a",
-      "bytecode_hash": "sha256:060bf1de23ba76dbc4a6f60df47a6926894b2373930bd4c57776150145158b4c",
+      "bytecode_hash": "sha256:c89cdff74b814dc65a999bbee2c21eea887ca36f38bd8d94c50db0f995e979fe",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -166,7 +166,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:6c4940cfdb8edfb268922d7e2331137348fa5bf15c63d86a444767ffb5fd3f99",
+    "manifest_sha256": "sha256:44d39a7cec429eab2b20b99920ae67a8eb9e7e1cf24743a4eaab48fd4514c7a5",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",

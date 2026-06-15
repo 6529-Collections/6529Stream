@@ -24,16 +24,16 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:ed159028327f86e5a0bd6252544a32fb6ddfb0ba2833405bb13323489f70ab4a"
+      "sha256": "sha256:a152a02830fb359973bbaed7e77f136b7f410d14b561e9abceb955de71a23408"
     },
     "deployment_manifest_canonical_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e",
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:20544656af99870c62be51ed4f7a64a1d55fbe568585fe5a353e5e55ca1bc09d"
+      "sha256": "sha256:4cc6da3c6a2147690b643c884f26d34f486eb933245b93fe504cb3a7b7a0183d"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:a570ef9b27c7032664d9c240fd3d11977355f3b6ffd74d9346658e84a88f95c5"
+      "sha256": "sha256:3144366184d50ae3c66eb5e5360d374a41e965d6c0c174a81b5ab8dee1b25761"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
@@ -58,7 +58,7 @@
       "evidence": [
         {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:ed159028327f86e5a0bd6252544a32fb6ddfb0ba2833405bb13323489f70ab4a"
+          "sha256": "sha256:a152a02830fb359973bbaed7e77f136b7f410d14b561e9abceb955de71a23408"
         }
       ],
       "notes": "The local manifest records the drop signer placeholder and signer-manager Safe placeholder."
@@ -106,17 +106,17 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:ed159028327f86e5a0bd6252544a32fb6ddfb0ba2833405bb13323489f70ab4a"
+      "sha256": "sha256:a152a02830fb359973bbaed7e77f136b7f410d14b561e9abceb955de71a23408"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:20544656af99870c62be51ed4f7a64a1d55fbe568585fe5a353e5e55ca1bc09d"
+      "sha256": "sha256:4cc6da3c6a2147690b643c884f26d34f486eb933245b93fe504cb3a7b7a0183d"
     },
     {
       "category": "abi_checksums",
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:a570ef9b27c7032664d9c240fd3d11977355f3b6ffd74d9346658e84a88f95c5"
+      "sha256": "sha256:3144366184d50ae3c66eb5e5360d374a41e965d6c0c174a81b5ab8dee1b25761"
     }
   ],
   "redaction_policy": {

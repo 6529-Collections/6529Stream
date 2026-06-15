@@ -18,6 +18,7 @@ library StreamArtistApprovals {
         0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     uint256 private constant _SECP256K1_N_DIV_2 =
         0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0;
+    bytes4 private constant _ERC1271_MAGIC_VALUE = 0x1626ba7e;
 
     function domainSeparator(address core, uint256 chainId) external pure returns (bytes32) {
         bytes32 domainTypehash = _EIP712_DOMAIN_TYPEHASH;
@@ -80,11 +81,23 @@ library StreamArtistApprovals {
         );
     }
 
-    function validateEOASignature(address artist, bytes32 digest, bytes calldata signature)
+    function validateSignature(address artist, bytes32 digest, bytes calldata signature)
         external
-        pure
+        view
     {
-        if (_recoverEOASigner(digest, signature) != artist) {
+        if (artist.code.length == 0) {
+            if (_recoverEOASigner(digest, signature) != artist) {
+                revert ArtistSignatureInvalid();
+            }
+            return;
+        }
+
+        (bool success, bytes memory returnData) =
+            artist.staticcall(abi.encodeWithSelector(_ERC1271_MAGIC_VALUE, digest, signature));
+        if (
+            !success || returnData.length != 32
+                || abi.decode(returnData, (bytes4)) != _ERC1271_MAGIC_VALUE
+        ) {
             revert ArtistSignatureInvalid();
         }
     }

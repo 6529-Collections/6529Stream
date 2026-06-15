@@ -551,7 +551,7 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         bytes calldata _artistSignature
     ) public {
         address artist = collectionAdditionalData[_collectionID].collectionArtistAddress;
-        StreamArtistApprovals.validateEOASignature(
+        StreamArtistApprovals.validateSignature(
             artist, _hashArtistApproval(_collectionID), _artistSignature
         );
         _recordArtistApproval(_collectionID, artist, _signature);

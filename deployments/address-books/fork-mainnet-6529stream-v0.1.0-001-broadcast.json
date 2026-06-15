@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:6c4940cfdb8edfb268922d7e2331137348fa5bf15c63d86a444767ffb5fd3f99",
+    "deployment_manifest_sha256": "sha256:44d39a7cec429eab2b20b99920ae67a8eb9e7e1cf24743a4eaab48fd4514c7a5",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -66,7 +66,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:b53d51f0532016726326d0a178b8aab449bd424864f4771077ef76a2cbfd725a",
-      "runtime_bytecode_hash": "sha256:060bf1de23ba76dbc4a6f60df47a6926894b2373930bd4c57776150145158b4c",
+      "runtime_bytecode_hash": "sha256:c89cdff74b814dc65a999bbee2c21eea887ca36f38bd8d94c50db0f995e979fe",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {

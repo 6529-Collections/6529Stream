@@ -117,6 +117,34 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         deployed.core.artistSignature(COLLECTION_ID, "typed-artist-approval", staleProof);
     }
 
+    function testERC1271ArtistSignatureStoresContractWalletApproval() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+        bytes memory artistProof = hex"12716529";
+        bytes32 expectedApprovalHash = deployed.core.hashArtistApproval(COLLECTION_ID);
+        artistWallet.setValidSignature(deployed.core.hashArtistApproval(COLLECTION_ID), artistProof);
+
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", artistProof);
+
+        deployed.core.artistSigned(COLLECTION_ID).assertTrue("contract approval flag not stored");
+        deployed.core.artistApprovalHashes(COLLECTION_ID)
+            .assertEq(expectedApprovalHash, "contract approval hash not stored");
+    }
+
+    function testERC1271ArtistSignatureRejectsBadContractWalletApproval() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+
+        artistWallet.setInvalidMagicValue();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"12716529");
+    }
+
     function testApprovedCollectionMutationInvalidatesArtistSignature() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
@@ -178,5 +206,36 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
 
     function _warpPastFinalSupplyWindow() private {
         vm.warp(block.timestamp + 31 days + 2);
+    }
+}
+
+contract ArtistERC1271Mock {
+    bytes4 private constant MAGIC_VALUE = 0x1626ba7e;
+    bytes32 private validDigest;
+    bytes private validSignature;
+    bytes4 private magicValue = MAGIC_VALUE;
+
+    function setValidSignature(bytes32 digest, bytes memory signature) external {
+        validDigest = digest;
+        validSignature = signature;
+        magicValue = MAGIC_VALUE;
+    }
+
+    function setInvalidMagicValue() external {
+        magicValue = 0xffffffff;
+    }
+
+    function isValidSignature(bytes32 digest, bytes memory signature)
+        external
+        view
+        returns (bytes4)
+    {
+        if (
+            digest == validDigest && keccak256(signature) == keccak256(validSignature)
+                && magicValue == MAGIC_VALUE
+        ) {
+            return MAGIC_VALUE;
+        }
+        return magicValue;
     }
 }
