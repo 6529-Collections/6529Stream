@@ -48,6 +48,10 @@ It does not replace fork/testnet/live evidence for public beta or production.
 Marketplace metadata rendering, cache, animation sandbox, INT-006, OpenSea,
 Reservoir, Blur, Manifold, risk register, release manifest, release checksums,
 public-beta evidence, and metadata browser evidence are named.
+The 1/1 provenance manifest, one-of-one-provenance-manifest.json,
+one-of-one provenance, artist statement, authenticity status, certificate,
+curation history, additional `tokenURI` JSON, and new `StreamCore` storage are
+named.
 
 ## Maturity And Scope
 
@@ -69,6 +73,10 @@ data:application/json;base64, and animation_url are named. StreamContractMetadat
 IERC7572, IStreamContractMetadata, ERC-7572-style, contractURI(),
 contractURIHash(), ContractURIUpdated, satellite/read-adapter, and
 METADATA_MUTATION are named.
+
+## 1/1 Provenance Manifests
+
+The provenance display boundary is named.
 
 ## JSON And Fixture Expectations
 

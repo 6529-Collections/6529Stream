@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/contract-level-metadata-surface` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/409` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/410` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/411` |
-| Next issue | `ONE-002` 1/1 provenance manifest model after ONE-001 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/provenance-manifest-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/411` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/412` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/413` |
+| Next issue | `ONE-003` royalty philosophy after ONE-002 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 17:12 UTC` |
+| Last updated | `2026-06-15 18:10 UTC` |
 
 ## Packaging Notes
 
@@ -250,9 +250,97 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | Merged in PR #389 |
 | 187 | Add integrations entrypoint and artifact source of truth | Gate G support | Add `docs/integrations/README.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links for frontend, mobile, Electron, indexer, operator, and backend-signing integrators | Merged in PR #391 |
 | 188 | Add fixed-price mint and drop authorization flow spec | Gate G/Gate D support | Add `docs/integrations/contract-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and backend-signing teams can trace fixed-price minting, EIP-712/ERC-1271 auth, events, credits, withdrawals, and failure states | Merged in PR #393 |
-| 189 | Add auction frontend and indexer flow spec | Gate G/Gate D support | Add `docs/integrations/auction-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and indexer teams can trace auction submission, bidding, settlement, no-bid claims, cancellation, credits, withdrawals, pause states, events, and failure states | In progress on issue #394 |
+| 189 | Add auction frontend and indexer flow spec | Gate G/Gate D support | Add `docs/integrations/auction-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and indexer teams can trace auction submission, bidding, settlement, no-bid claims, cancellation, credits, withdrawals, pause states, events, and failure states | Merged in PR #395 |
+| 190 | Add wallet, EIP-712, ERC-1271, and Safe signing guide | Gate G support | Add wallet/signature integration docs, checker/tests, local/CI wiring, release-manifest coverage, and no-secret custody boundaries | Merged in PR #397 |
+| 191 | Add event and indexer reconstruction spec | Gate G support | Add event/indexer guide, checker/tests, local/CI wiring, release-manifest coverage, and known gap tracking | Merged in PR #399 |
+| 192 | Add metadata rendering/cache integration guide | Gate G support | Add metadata rendering/cache/animation sandbox guide, checker/tests, release-readiness navigation, and release-manifest coverage | Merged in PR #401 |
+| 193 | Add React/Next reference architecture | Gate G support | Add frontend architecture guide, examples, checker/tests, release-readiness navigation, and release-manifest coverage | Merged in PR #403 |
+| 194 | Add mobile and WalletConnect integration guide | Gate G support | Add mobile/WalletConnect guide, checker/tests, release-readiness navigation, and release-manifest coverage | Merged in PR #405 |
+| 195 | Add Electron security and wallet integration guide | Gate G support | Add Electron guide, checker/tests, release-readiness navigation, and release-manifest coverage | Merged in PR #407 |
+| 196 | Add operator admin UI specification | Gate G/Gate F support | Add operator-admin guide, checker/tests, Safe/governance/monitoring links, release-readiness navigation, and release-manifest coverage | Merged in PR #409 |
+| 197 | Add contract-level metadata adapter | Gate G/Gate F support | Add ERC-7572-style `StreamContractMetadata` satellite/read-adapter, tests, deployment wiring, release artifacts, and integration docs while preserving `StreamCore` bytecode headroom | Merged in PR #411 |
+| 198 | Add 1/1 provenance manifest model | Gate G/Gate F support | Add provenance model docs, schema, retained artifact template, generated manifest, local/CI checks, release-manifest/checksum coverage, and artifact-only boundaries while preserving `StreamCore` bytecode headroom | In progress on issue #412 |
 
 ## Current PR Worklog
+
+### PR candidate: Add 1/1 provenance manifest model (Queue Item 198)
+
+Status: PR #413 open and ready for review; CodeRabbit review requested in
+comment `4710926034`; CI and bot comments pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/412`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/413`.
+Branch: `codex/provenance-manifest-model`.
+Branch started from PR #411 squash merge commit
+`af6c9c8c645a5135ab431ceafa5a9be2e3c2976d`.
+
+Goal:
+
+- Add a first-class 1/1 provenance manifest model for collector-facing
+  6529 drops without spending additional `StreamCore` bytecode.
+- Define required/optional provenance fields for artist statements,
+  authenticity status, certificate hashes, curation notes, exhibition history,
+  retained artifact hashes, append-only story/provenance entries, and reviewer
+  status.
+- Add a checked schema, no-secret retained artifact template, generator,
+  checker, tests, and generated
+  `release-artifacts/latest/one-of-one-provenance-manifest.json`.
+- Include the generated provenance catalog in release manifest/checksum
+  coverage and local/CI gates.
+- Cross-link metadata, integration, event/indexer, release-readiness, and
+  release-artifact docs while keeping public beta, marketplace, royalty,
+  ownership, and token-finality boundaries explicit.
+
+Validation plan:
+
+- `python scripts/test_one_of_one_provenance_manifest.py`.
+- `python scripts/check_one_of_one_provenance_manifest.py`.
+- `python scripts/generate_one_of_one_provenance_manifest.py --check`.
+- `python scripts/test_integrations_readme.py`.
+- `python scripts/check_integrations_readme.py`.
+- `python scripts/test_metadata_rendering.py`.
+- `python scripts/check_metadata_rendering.py`.
+- `python scripts/test_events_and_indexing.py`.
+- `python scripts/check_events_and_indexing.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_release_artifacts.py`.
+- `python scripts/generate_release_artifacts.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_one_of_one_provenance_manifest.py scripts/generate_one_of_one_provenance_manifest.py scripts/test_one_of_one_provenance_manifest.py`.
+- `make check`.
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Notes:
+
+- The current provenance model is intentionally artifact-only: it is not
+  `tokenURI()` JSON, not `contractURI()` JSON, not
+  `collectionFreezeManifestHash(collectionId)`, not marketplace readiness
+  proof, not royalty enforcement, and not ownership proof beyond chain state.
+- A future on-chain provenance event/view or satellite provenance contract
+  should be a separate issue with explicit size-budget and integration
+  acceptance.
+
+Validation result:
+
+- Focused provenance tests/checker/generator passed.
+- Integration README, metadata-rendering, event/indexer, and release-readiness
+  checker/test pairs passed.
+- Risk register, release manifest, bytecode release proof, release checksum,
+  release artifact, changelog, Python compile, heading scan, and whitespace
+  checks passed.
+- Full `make check` passed.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
+- Existing warning noise remains: Foundry compiler warnings for legacy
+  randomizer parameters/pure-view suggestions and forced-ETH test
+  `selfdestruct`, plus known Foundry trace/source warnings during rehearsal
+  scripts.
 
 ### PR candidate: Add auction frontend and indexer flow spec (Queue Item 189)
 
@@ -15229,6 +15317,10 @@ Outcome:
 | 2026-06-15 16:41 | Open PR #411 for ONE-001 | PR #411 opened as a draft on branch `codex/contract-level-metadata-surface`, closes issue #410, and CodeRabbit review was requested in comment `4710158602`. |
 | 2026-06-15 16:42 | Mark PR #411 ready | PR #411 was marked ready for review after CodeRabbit reported draft-skip status but also completed the explicit review command; CodeRabbit review was requested again in comment `4710169291`. |
 | 2026-06-15 17:12 | Address PR #411 6529bot review | Prepared a substantive response to 6529bot general review comment `4710176032`: `updateAdminContract` now shares the `METADATA_MUTATION` pause guard with `updateContractURI`, `contractURIHash()` is documented and tested as `keccak256(bytes(contractURI()))` over exact stored URI bytes, adapter negative tests now cover empty/data/javascript/whitespace/control/invalid-UTF-8/oversized URIs plus paused admin rebinding, and regenerated deployment/release/evidence hashes. Local validation passed: focused adapter tests (`11`), deployment-manifest tests (`4`), full `forge test -vvv` (`337` tests), `forge build --sizes --via-ir --skip test --skip script --force` (`StreamCore` runtime `24,139` bytes, `437` byte margin; adapter runtime `2,476` bytes), artifact drift checks, ceremony/randomizer evidence checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. Next GitHub action: push this review-response head, reply on PR #411, request follow-up bot review, then merge only after CI and review state are clean. |
+| 2026-06-15 17:24 | Merge PR #411 and select ONE-002 | Contract-level metadata adapter merged as `af6c9c8c645a5135ab431ceafa5a9be2e3c2976d`, issue #410 closed completed, and issue #412 opened for the 1/1 provenance manifest model. The merge kept `StreamCore` at `24,139` runtime bytes with `437` bytes of EIP-170 headroom, so the next 1/1 product surface should stay artifact/satellite-first unless a later size-budget decision accepts Core spend. |
+| 2026-06-15 17:50 | Implement ONE-002 local draft | Started branch `codex/provenance-manifest-model` from PR #411 merge commit `af6c9c8c645a5135ab431ceafa5a9be2e3c2976d`; added provenance docs, schema, retained artifact template, generator/checker/tests, generated manifest, integration/release-readiness/release-artifact docs, local/CI gate wiring, release-manifest/checksum coverage, changelog, backlog, and durable-state updates while preserving the artifact-only boundary. |
+| 2026-06-15 18:06 | Validate ONE-002 local draft | Focused provenance tests/checker/generator, integration/release-readiness doc checkers, risk register, release manifest, bytecode proof, checksums, release artifacts, changelog, Python compile, heading scan, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all passed. Existing Foundry compiler and trace warnings are known backlog warning-noise items. |
+| 2026-06-15 18:10 | Open PR #413 for ONE-002 | PR #413 opened on branch `codex/provenance-manifest-model`, closes issue #412, and CodeRabbit review was requested in comment `4710926034`. |
 
 ## Resume Instructions
 

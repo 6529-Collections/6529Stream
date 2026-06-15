@@ -13,7 +13,8 @@ fork/testnet/live evidence required for public beta or production release.
 Use this with the integration entrypoint in
 [`docs/integrations/README.md`](README.md), the event/indexer model in
 [`docs/integrations/events-and-indexing.md`](events-and-indexing.md), metadata
-policy in [`docs/metadata.md`](../metadata.md), release policy in
+policy in [`docs/metadata.md`](../metadata.md), 1/1 provenance policy in
+[`docs/provenance-manifests.md`](../provenance-manifests.md), release policy in
 [`docs/release-policy.md`](../release-policy.md), release readiness in
 [`docs/release-readiness.md`](../release-readiness.md), dependency operations in
 [`docs/dependency-operations.md`](../dependency-operations.md), and non-local
@@ -66,6 +67,7 @@ rather than hand-maintained metadata snippets.
 | --- | --- | --- |
 | Integration entrypoint | [`docs/integrations/README.md`](README.md) | Starts artifact, address, ABI, event, metadata, and flow discovery |
 | Metadata policy | [`docs/metadata.md`](../metadata.md) | Current schema, URI policy, size limits, UTF-8 policy, ERC-4906, burn, freeze, dependency, and browser sandbox behavior |
+| 1/1 provenance model | [`docs/provenance-manifests.md`](../provenance-manifests.md) | Artifact-only artist/story/authenticity context model and display boundary |
 | Event/indexer model | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Event subscriptions, read-after-event calls, confirmation/reorg policy, and event/read gaps |
 | Fixed-price flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Mint-time metadata and randomizer expectations |
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Auction display states before final ownership |
@@ -79,6 +81,7 @@ rather than hand-maintained metadata snippets.
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated metadata/marketplace blocker source |
 | Release manifest | [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json) | Generated source-of-truth manifest |
 | Release checksums | [`release-artifacts/latest/release-checksums.json`](../../release-artifacts/latest/release-checksums.json), [`release-artifacts/latest/SHA256SUMS`](../../release-artifacts/latest/SHA256SUMS) | Signable checksum bundle |
+| 1/1 provenance manifest | [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json), [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json), [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json) | Checked release artifact for one-of-one provenance records; not marketplace readiness proof |
 | Event topic catalog | [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json) | Metadata event signature source |
 | ABI checksums | [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI/bytecode checksum source |
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | ERC-4906 support lookup |
@@ -187,6 +190,30 @@ Manifold, wallet, or aggregator behavior must retain fork/testnet/live
 evidence showing the exact integration path they use. Until that evidence
 exists, treat the adapter as a first-party release/integration source of truth,
 not a universal marketplace-discovery guarantee.
+
+## 1/1 Provenance Manifests
+
+One-of-one provenance is currently modeled as a checked release artifact, not as
+additional `tokenURI` JSON and not as new `StreamCore` storage. Product clients
+that want to show artist statement, authenticity status, certificate/media
+hashes, curation history, exhibition/publication notes, collector notes, or
+corrections should read the generated
+`release-artifacts/latest/one-of-one-provenance-manifest.json` catalog and the
+schemaed provenance descriptor it points to.
+
+Display provenance as contextual story and authenticity information. Do not use
+it as proof that token metadata is final, proof that the collection is frozen,
+proof that a marketplace has discovered or refreshed metadata, royalty
+enforcement, ownership proof beyond chain state, or a substitute for retained
+fork/testnet/live indexer or marketplace evidence.
+
+The current provenance manifest deliberately records that its token metadata
+boundary is separate from `tokenURI`, its contract metadata boundary is
+separate from `contractURI()`, and its freeze boundary is not inside
+`collectionFreezeManifestHash(collectionId)`. If a future release embeds
+provenance in token metadata, contract-level metadata, or the freeze manifest,
+that change must update the schema, generated artifact, integration docs, and
+release-readiness evidence.
 
 ## JSON And Fixture Expectations
 
@@ -364,6 +391,9 @@ Run these when editing this guide:
 ```sh
 python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
 python scripts/test_metadata_fixtures.py
 python scripts/check_metadata_fixtures.py
 python scripts/test_metadata_browser_sandbox.py
@@ -391,6 +421,7 @@ release manifest, bytecode proof, and checksum bundle.
 Update this guide when any of these change:
 
 - metadata schema version or JSON fields;
+- 1/1 provenance schema, generated artifact, or display boundary;
 - `tokenURI` behavior;
 - metadata state values;
 - ERC-4906 event emission policy;
