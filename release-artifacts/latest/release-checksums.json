@@ -30,7 +30,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:e79be1a2d36e4c18402b8dcf9c35110818d479e1ee190d9853689312a2df5da3"
+    "sha256": "sha256:69ac774f04fb5d703f0d38b117de238619c041973a26022aaace4dab5666d65f"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -419,7 +419,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:92d06c6974fb4a32eb303265356c676b337d03569b23ed3cf95807a11c58c89e",
+      "sha256": "sha256:cd8389353ada9a8bce256cb6f62ebc0d300f186f2617f5c3d8de8fda0fa77093",
       "size_bytes": 79958
     },
     {
@@ -439,7 +439,7 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:5a2a2eddc58d466ecf5c4a3c1f7fc2d38bb474520a5a69b17fba9877a0fac707",
+      "sha256": "sha256:71ee405de271b4e5ba03d650d06e07211f6a75c9cf43f8ee3d5761b69fa603de",
       "size_bytes": 2913
     },
     {
@@ -514,12 +514,12 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:b34335c9b66289ca772fe2da2ba2cd8e257ed80ae9d0fa43e4577d595d5a63a4",
+      "sha256": "sha256:a3191747b7f23f2547db26ca1b25757c6d43f68ba5c8fd6098d7d11b76f8686d",
       "size_bytes": 97871
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:95bf2c33fe14262416e1adfc81305050aa1817445d4bcdc231f3593643a2c427",
+      "sha256": "sha256:1b4d955f4b484298fd1253526ef83fc9ec93398dd3bec5dbc658624b2ad6e2f2",
       "size_bytes": 21290
     },
     {
@@ -534,8 +534,8 @@
     },
     {
       "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-      "sha256": "sha256:f32ac93511203d3c6cdd8509533c88c2bcc9a6aa9fa8a6698a03e4e8b7e2f644",
-      "size_bytes": 8479
+      "sha256": "sha256:bf3178eb3cd2795a8cf755a1507e2114ba9e8054f2745cd728f690df41fd645f",
+      "size_bytes": 8272
     },
     {
       "path": "release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md",
