@@ -298,6 +298,24 @@ class MobileWalletConnectTests(unittest.TestCase):
                     root, root / checker.DEFAULT_MOBILE_WALLETCONNECT
                 )
 
+    def test_rejects_required_command_as_substring_only(self) -> None:
+        """Required commands must appear as exact command lines."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_mobile_walletconnect().replace(
+                "make check\n",
+                "echo make check\n",
+            )
+            write_text(root / checker.DEFAULT_MOBILE_WALLETCONNECT, text)
+
+            with self.assertRaisesRegex(
+                checker.MobileWalletConnectError, "missing required commands"
+            ):
+                checker.validate_mobile_walletconnect(
+                    root, root / checker.DEFAULT_MOBILE_WALLETCONNECT
+                )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

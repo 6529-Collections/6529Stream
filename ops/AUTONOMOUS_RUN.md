@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 14:04 UTC` |
+| Last updated | `2026-06-15 14:08 UTC` |
 
 ## Packaging Notes
 
@@ -15212,6 +15212,7 @@ Outcome:
 | 2026-06-15 13:34 | Create issue #404 and start INT-008 | Next substantive integration-readiness slice is the mobile and WalletConnect integration guide on branch `codex/mobile-walletconnect-integration-guide`; issue #404 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, and no-mobile-SDK/no-production-readiness boundaries. |
 | 2026-06-15 14:03 | Validate INT-008 local draft | Focused mobile/WalletConnect, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 14:04 | Open PR #405 for INT-008 | PR #405 is open on branch `codex/mobile-walletconnect-integration-guide`, closes issue #404, and awaits bot review/CI on the final state-update head. |
+| 2026-06-15 14:08 | Address PR #405 bot nice-to-haves | 6529bot general review was merge-ready and noted checker-maintenance nits; tightened mobile checker command matching to exact command lines, narrowed path-label validation to labels that look like repo paths, and added an exact-command regression. |
 
 ## Resume Instructions
 

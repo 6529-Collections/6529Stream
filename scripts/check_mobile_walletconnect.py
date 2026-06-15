@@ -210,19 +210,7 @@ def normalized_link_target(raw_target: str) -> str | None:
 def label_looks_like_repo_path(label: str) -> bool:
     """Return true when a link label should match its resolved repo path."""
     normalized = label.strip().strip("`")
-    suffixes = (
-        ".md",
-        ".json",
-        ".sol",
-        ".py",
-        ".sh",
-        ".ps1",
-        ".yml",
-        ".yaml",
-        ".toml",
-        ".txt",
-    )
-    return "/" in normalized or "\\" in normalized or normalized.endswith(suffixes)
+    return "/" in normalized or "\\" in normalized
 
 
 def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[str]:
@@ -297,7 +285,10 @@ def validate_mobile_walletconnect(repo_root: Path, document_path: Path) -> None:
             + ", ".join(missing_required_phrases)
         )
 
-    missing_commands = [command for command in REQUIRED_COMMANDS if command not in text]
+    command_lines = {line.strip() for line in text.splitlines()}
+    missing_commands = [
+        command for command in REQUIRED_COMMANDS if command not in command_lines
+    ]
     if missing_commands:
         raise MobileWalletConnectError(
             "mobile and WalletConnect guide is missing required commands: "
