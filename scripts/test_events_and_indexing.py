@@ -67,14 +67,17 @@ logs must be idempotent are named.
 
 ## Indexed Entities
 
-ReleaseArtifactSnapshot, ContractDeployment, | `Collection` |, | `Token` |,
-DropExecution, | `Auction` |, CreditAccount, RandomnessRequest, MetadataState,
-AdminRole, PauseDomain, DependencyVersion, and CuratorRoot are named.
+ReleaseArtifactSnapshot, ContractDeployment, ContractMetadataState,
+| `Collection` |, | `Token` |, DropExecution, | `Auction` |, CreditAccount,
+RandomnessRequest, MetadataState, AdminRole, PauseDomain, DependencyVersion,
+CuratorRoot, ProvenanceManifest, one-of-one-provenance-manifest.json,
+artifact-only, separate from `tokenURI`, separate from `contractURI()`, and
+not included in `collectionFreezeManifestHash(collectionId)` are named.
 
 ## Event Processing Rules
 
 Transfer, `Approval`, `ApprovalForAll`, MetadataUpdate, BatchMetadataUpdate,
-CollectionCreated, CollectionFrozen, CollectionRandomizerUpdated,
+ContractURIUpdated, CollectionCreated, CollectionFrozen, CollectionRandomizerUpdated,
 DependencyVersionPinned, TokenBurned, DropAuthorizationConsumed,
 DropAuthorizationCancelled, SignerEpochChanged, DropSignerChanged,
 AuctionContractChanged, FixedPriceCreditCreated, FixedPriceCreditWithdrawn,
@@ -98,7 +101,8 @@ isDropConsumed(dropId), isDropCancelled(dropId), tdhSigner(), signerEpoch(),
 auctionRecords(tokenId), retrieveAuctionStatus(tokenId),
 retrieveAuctionEndTime(tokenId), auctionHighestBid(tokenId),
 auctionHighestBidder(tokenId), totalOwed(), totalReserved(), surplus(), and
-emergencyWithdrawable() are named.
+emergencyWithdrawable() are named. contractURI(), contractURIHash(),
+streamCore(), and adminsContract() are named.
 
 ## Collection And Token Reconstruction
 

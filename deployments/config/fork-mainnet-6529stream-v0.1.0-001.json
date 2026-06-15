@@ -53,6 +53,16 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamContractMetadata",
+        "address": "0x000000000000000000000000000000000000000a",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "ipfs://6529stream-contract-metadata/rehearsal.json"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamCuratorsPool",
         "address": "0x0000000000000000000000000000000000000004",
         "constructor_args": [

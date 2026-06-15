@@ -21,6 +21,12 @@ EIP-712 / ERC-1271 evidence they cover.
 Use [`docs/signer-custody-readiness.md`](signer-custody-readiness.md) for the
 no-secret production signer custody readiness evidence model that must
 accompany reviewed non-local signing evidence.
+Use [`docs/provenance-manifests.md`](provenance-manifests.md) for the checked
+1/1 provenance manifest model, generated provenance artifact catalog, and
+frontend/indexer display boundaries for artist/story/authenticity context.
+Use [`docs/royalty-policy.md`](royalty-policy.md) for the checked `ONE-003`
+royalty policy, current ERC-2981 disclosure, governance boundary, marketplace
+display guidance, and royalty disclosure, not payment enforcement caveat.
 Use [`docs/deployment.md`](deployment.md#admin-ceremony-evidence) for the
 no-secret admin ceremony evidence model that must accompany reviewed ownership,
 role, signer, pause, emergency, and post-state proof for non-local deployments.
@@ -132,7 +138,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet ceremony/randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, risk register, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, and reviewed live bytecode proof missing |
+| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, risk register, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -160,6 +166,26 @@ The current local baseline includes:
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json),
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt),
   and [`scripts/check_signer_custody_readiness.py`](../scripts/check_signer_custody_readiness.py);
+- 1/1 provenance manifest guidance, schema, checked template, retained-artifact
+  checklist, generated release catalog, and checker in
+  [`docs/provenance-manifests.md`](provenance-manifests.md),
+  [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../release-artifacts/schema/one-of-one-provenance-manifest.schema.json),
+  [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json),
+  [`release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md`](../release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md),
+  [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../release-artifacts/latest/one-of-one-provenance-manifest.json),
+  [`scripts/check_one_of_one_provenance_manifest.py`](../scripts/check_one_of_one_provenance_manifest.py),
+  and
+  [`scripts/generate_one_of_one_provenance_manifest.py`](../scripts/generate_one_of_one_provenance_manifest.py),
+  which establish the artifact-only artist/story/authenticity model without
+  claiming token finality, marketplace readiness, royalty enforcement, or
+  ownership proof beyond chain state;
+- royalty policy guidance in
+  [`docs/royalty-policy.md`](royalty-policy.md), covered by
+  `python scripts/test_royalty_policy.py` and
+  `python scripts/check_royalty_policy.py`, which documents current ERC-2981
+  disclosure, governance and enforcement boundaries, marketplace display
+  guidance, and the rule that No production-readiness claim depends on
+  marketplaces honoring royalties;
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -339,6 +365,8 @@ Audit and protocol evidence:
 - [docs/incident-response.md](incident-response.md)
 - [docs/drop-authorization-signing.md](drop-authorization-signing.md)
 - [docs/signer-custody-readiness.md](signer-custody-readiness.md)
+- [docs/provenance-manifests.md](provenance-manifests.md)
+- [docs/royalty-policy.md](royalty-policy.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
 - [docs/deployment.md](deployment.md)
@@ -396,6 +424,10 @@ Release artifacts:
 - [release-artifacts/schema/signer-custody-readiness.schema.json](../release-artifacts/schema/signer-custody-readiness.schema.json)
 - [release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json)
 - [release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt](../release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt)
+- [release-artifacts/schema/one-of-one-provenance-manifest.schema.json](../release-artifacts/schema/one-of-one-provenance-manifest.schema.json)
+- [release-artifacts/provenance/one-of-one-provenance-template.provenance.json](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json)
+- [release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md](../release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md)
+- [release-artifacts/latest/one-of-one-provenance-manifest.json](../release-artifacts/latest/one-of-one-provenance-manifest.json)
 - [release-artifacts/schema/non-local-release-evidence.schema.json](../release-artifacts/schema/non-local-release-evidence.schema.json)
 - [release-artifacts/evidence/non-local-release-evidence-template.json](../release-artifacts/evidence/non-local-release-evidence-template.json)
 - [release-artifacts/evidence/non-local-template-retained-artifact.txt](../release-artifacts/evidence/non-local-template-retained-artifact.txt)
@@ -445,6 +477,11 @@ python scripts/test_drop_authorization_signing_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
+python scripts/test_royalty_policy.py
+python scripts/check_royalty_policy.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_risk_register.py

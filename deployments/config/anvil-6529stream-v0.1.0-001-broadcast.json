@@ -53,6 +53,16 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamContractMetadata",
+        "address": "0x100000000000000000000000000000000000000a",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "ipfs://6529stream-contract-metadata/rehearsal.json"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamCuratorsPool",
         "address": "0x1000000000000000000000000000000000000004",
         "constructor_args": [
@@ -172,7 +182,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:5697fb0387369b1127666f8c38b2a952dc2b085f7ab1188c1d18ac32da6141d3",
+    "broadcast_sha256": "sha256:20a2a90f1b0648b8321e4f26d181f5ba47269d725295e013273cc3ed1cda15b6",
     "template_config": "deployments/config/anvil-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 31337,
@@ -191,6 +201,11 @@
         "contract": "StreamCore",
         "address": "0x1000000000000000000000000000000000000003",
         "transaction_hash": "0x0303030303030303030303030303030303030303030303030303030303030303"
+      },
+      {
+        "contract": "StreamContractMetadata",
+        "address": "0x100000000000000000000000000000000000000a",
+        "transaction_hash": "0x0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a"
       },
       {
         "contract": "StreamCuratorsPool",

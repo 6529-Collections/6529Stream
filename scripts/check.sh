@@ -28,6 +28,8 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+"$python_bin" scripts/test_contract_size_budget.py
+"$python_bin" scripts/check_contract_size_budget.py
 "$python_bin" scripts/test_solidity_formatting.py
 "$python_bin" scripts/check_solidity_formatting.py
 "$python_bin" scripts/test_windows_check_wrapper.py
@@ -139,6 +141,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_electron_security_wallets.py
 "$python_bin" scripts/test_operator_admin_ui.py
 "$python_bin" scripts/check_operator_admin_ui.py
+"$python_bin" scripts/test_royalty_policy.py
+"$python_bin" scripts/check_royalty_policy.py
 "$python_bin" scripts/test_release_readiness.py
 "$python_bin" scripts/check_release_readiness.py
 "$python_bin" scripts/test_release_manifest.py

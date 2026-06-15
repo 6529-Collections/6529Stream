@@ -7,6 +7,27 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-003 royalty policy coverage with `docs/royalty-policy.md`, a
+  checker/test pair, local/CI gate wiring, integration/release-readiness
+  navigation, release-manifest/checksum coverage, and explicit ERC-2981
+  disclosure boundaries that state royalty information is not payment
+  enforcement and no production-readiness claim depends on marketplaces
+  honoring royalties.
+- Added ONE-002 1/1 provenance manifest support with
+  `docs/provenance-manifests.md`, a checked JSON schema, no-secret retained
+  artifact template, generated
+  `release-artifacts/latest/one-of-one-provenance-manifest.json`, local/CI
+  checker and generator wiring, integration/release-readiness documentation,
+  release-manifest/checksum coverage, and explicit boundaries that provenance
+  evidence is not token metadata finality, marketplace proof, royalty
+  enforcement, or ownership proof beyond chain state.
+- Added ONE-001 contract-level metadata support with a release-tracked
+  `StreamContractMetadata` adapter, `IERC7572`/`IStreamContractMetadata`
+  interfaces, `contractURI()`/`contractURIHash()` views,
+  `ContractURIUpdated` event catalog coverage, metadata-pause enforcement,
+  deployment rehearsal wiring, generated manifest/address-book/source
+  verification artifacts, and integration docs that preserve the current
+  marketplace-evidence boundary.
 - Added INT-010 operator admin UI specification with
   `docs/integrations/operator-admin-ui.md`, a checker/test pair, local/CI gate
   wiring, integration/release-readiness navigation, release-manifest coverage,
@@ -461,6 +482,10 @@ the release policy in `docs/release-policy.md`.
   probe with equivalent low-level staticcalls that preserve pending-probe
   revert data. The production IR-optimized runtime is now 24,139 bytes with 437
   bytes of EIP-170 headroom.
+- Recovered additional `StreamCore` runtime bytecode headroom by replacing the
+  unused inherited ERC-2981 default-royalty machinery with equivalent fixed
+  `royaltyInfo` logic and explicit ERC-2981 interface support. The production
+  IR-optimized runtime is now 24,047 bytes with 529 bytes of EIP-170 headroom.
 
 ### Release Impact
 
@@ -502,6 +527,13 @@ the release policy in `docs/release-policy.md`.
   `release-artifacts/dependencies/`.
 - Gate D/G release artifacts now include the bytecode delta from production
   raw-attribute schema enforcement in `StreamMetadataRenderer`.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  replacing inherited ERC-2981 default-royalty machinery with equivalent fixed
+  royalty logic, plus generated creation/runtime bytecode size fields and
+  bytecode-release-proof size assertions.
+- Gate D/G now enforces the `StreamCore` runtime size budget from
+  `release-artifacts/contracts.json` in local checks, CI, and the Windows
+  wrapper.
 - Gate D/G release artifacts now include the ABI and bytecode deltas from
   `StreamCore` size-recovery custom errors:
   `ArtistSignatureUnauthorized()`, `FunctionAdminUnauthorized()`,

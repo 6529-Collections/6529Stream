@@ -19,7 +19,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
 
     function testArtistSignatureStoresStateBoundApprovalHash() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        bytes32 expectedApprovalHash = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes32 expectedApprovalHash = _artistApprovalDigest(deployed.core, COLLECTION_ID);
 
         vm.prank(ARTIST);
         deployed.core.artistSignature(COLLECTION_ID, "artist-approved-genesis");
@@ -29,16 +29,16 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
             .assertEq("artist-approved-genesis", "artist signature text not stored");
         deployed.core.artistApprovalHashes(COLLECTION_ID)
             .assertEq(expectedApprovalHash, "artist approval hash not stored");
-        deployed.core.hashArtistApproval(COLLECTION_ID)
+        _artistApprovalDigest(deployed.core, COLLECTION_ID)
             .assertEq(expectedApprovalHash, "current approval hash changed unexpectedly");
     }
 
     function testArtistApprovalHashTracksCollectionStateChanges() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        bytes32 beforeUpdate = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes32 beforeUpdate = _artistApprovalDigest(deployed.core, COLLECTION_ID);
 
         deployed.core.setCollectionData(COLLECTION_ID, ARTIST, 9, 10, 2 days);
-        bytes32 afterSupplyPolicyUpdate = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes32 afterSupplyPolicyUpdate = _artistApprovalDigest(deployed.core, COLLECTION_ID);
         (afterSupplyPolicyUpdate != beforeUpdate).assertTrue("approval hash ignored supply policy");
 
         string[] memory scripts = new string[](1);
@@ -58,7 +58,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
                 scripts
             );
 
-        bytes32 afterMetadataUpdate = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes32 afterMetadataUpdate = _artistApprovalDigest(deployed.core, COLLECTION_ID);
         (afterMetadataUpdate != afterSupplyPolicyUpdate)
         .assertTrue("approval hash ignored collection metadata");
     }
@@ -81,7 +81,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         address signingArtist = vm.addr(ARTIST_PRIVATE_KEY);
         deployed.core.setCollectionData(COLLECTION_ID, signingArtist, 5, 10, 1 days);
-        bytes32 expectedApprovalHash = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes32 expectedApprovalHash = _artistApprovalDigest(deployed.core, COLLECTION_ID);
         bytes memory artistProof = _signArtistApproval(deployed.core, ARTIST_PRIVATE_KEY);
 
         deployed.core.artistSignature(COLLECTION_ID, "typed-artist-approval", artistProof);
@@ -95,7 +95,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         address signingArtist = vm.addr(ARTIST_PRIVATE_KEY);
         deployed.core.setCollectionData(COLLECTION_ID, signingArtist, 5, 10, 1 days);
-        bytes32 expectedApprovalHash = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes32 expectedApprovalHash = _artistApprovalDigest(deployed.core, COLLECTION_ID);
         bytes memory compactProof = _signCompactArtistApproval(deployed.core, ARTIST_PRIVATE_KEY);
 
         deployed.core.artistSignature(COLLECTION_ID, "compact-typed-approval", compactProof);
@@ -135,8 +135,10 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
         deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
         bytes memory artistProof = hex"12716529";
-        bytes32 expectedApprovalHash = deployed.core.hashArtistApproval(COLLECTION_ID);
-        artistWallet.setValidSignature(deployed.core.hashArtistApproval(COLLECTION_ID), artistProof);
+        bytes32 expectedApprovalHash = _artistApprovalDigest(deployed.core, COLLECTION_ID);
+        artistWallet.setValidSignature(
+            _artistApprovalDigest(deployed.core, COLLECTION_ID), artistProof
+        );
 
         deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", artistProof);
 
@@ -215,7 +217,9 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
         deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
         bytes memory artistProof = hex"12716529";
-        artistWallet.setValidSignature(deployed.core.hashArtistApproval(COLLECTION_ID), artistProof);
+        artistWallet.setValidSignature(
+            _artistApprovalDigest(deployed.core, COLLECTION_ID), artistProof
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
@@ -228,7 +232,9 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
         deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
         bytes memory artistProof = hex"12716529";
-        artistWallet.setValidSignature(deployed.core.hashArtistApproval(COLLECTION_ID), artistProof);
+        artistWallet.setValidSignature(
+            _artistApprovalDigest(deployed.core, COLLECTION_ID), artistProof
+        );
 
         deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 8, 10, 1 days);
 
@@ -252,7 +258,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
             .assertEq("artist-approved-genesis", "artist signature text not retained");
         deployed.core.artistApprovalHashes(COLLECTION_ID)
             .assertEq(previousApprovalHash, "stale approval hash not retained");
-        (deployed.core.hashArtistApproval(COLLECTION_ID) != previousApprovalHash)
+        (_artistApprovalDigest(deployed.core, COLLECTION_ID) != previousApprovalHash)
         .assertTrue("approval hash did not change");
 
         vm.prank(ARTIST);
@@ -260,17 +266,18 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         deployed.core.artistSigned(COLLECTION_ID).assertTrue("artist could not reapprove");
         deployed.core.artistApprovalHashes(COLLECTION_ID)
             .assertEq(
-                deployed.core.hashArtistApproval(COLLECTION_ID),
+                _artistApprovalDigest(deployed.core, COLLECTION_ID),
                 "reapproval did not store current hash"
             );
     }
 
-    function testArtistCanSignFinalFrozenCollectionState() public {
+    function testFrozenCollectionRejectsFinalArtistReapproval() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         _mintToken(deployed);
 
         vm.prank(ARTIST);
         deployed.core.artistSignature(COLLECTION_ID, "pre-freeze-approval");
+        bytes32 preFreezeApprovalHash = deployed.core.artistApprovalHashes(COLLECTION_ID);
         deployed.core.artistSigned(COLLECTION_ID).assertTrue("artist approval not stored");
 
         _warpPastFinalSupplyWindow();
@@ -278,16 +285,13 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         deployed.core.artistSigned(COLLECTION_ID)
             .assertFalse("supply finalization did not invalidate approval");
 
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         vm.prank(ARTIST);
         deployed.core.artistSignature(COLLECTION_ID, "final-frozen-approval");
 
         deployed.core.collectionFreezeStatus(COLLECTION_ID).assertTrue("collection not frozen");
-        deployed.core.artistSigned(COLLECTION_ID).assertTrue("final frozen approval not stored");
         deployed.core.artistApprovalHashes(COLLECTION_ID)
-            .assertEq(
-                deployed.core.hashArtistApproval(COLLECTION_ID),
-                "final approval hash does not match frozen state"
-            );
+            .assertEq(preFreezeApprovalHash, "frozen stale approval hash changed");
     }
 
     function _signArtistApproval(StreamCore core, uint256 privateKey)
@@ -295,7 +299,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         returns (bytes memory)
     {
         (uint8 v, bytes32 r, bytes32 s) =
-            vm.sign(privateKey, core.hashArtistApproval(COLLECTION_ID));
+            vm.sign(privateKey, _artistApprovalDigest(core, COLLECTION_ID));
         return abi.encodePacked(r, s, v);
     }
 
@@ -304,7 +308,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         returns (bytes memory)
     {
         (uint8 v, bytes32 r, bytes32 s) =
-            vm.sign(privateKey, core.hashArtistApproval(COLLECTION_ID));
+            vm.sign(privateKey, _artistApprovalDigest(core, COLLECTION_ID));
         uint256 yParity = uint256(v) - 27;
         bytes32 vs = bytes32(uint256(s) | (yParity << 255));
         return abi.encodePacked(r, vs);
@@ -318,6 +322,29 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
     function _warpPastFinalSupplyWindow() private {
         vm.warp(block.timestamp + 31 days + 2);
     }
+
+    function _artistApprovalDigest(StreamCore core, uint256 collectionId)
+        private
+        view
+        returns (bytes32)
+    {
+        (
+            address artist,
+            uint256 maxCollectionPurchases,,
+            uint256 collectionTotalSupply,
+            uint256 finalSupplyDelay,
+        ) = core.retrieveCollectionAdditionalData(collectionId);
+        return StreamArtistApprovals.hashApprovalDigest(
+            artist,
+            core.previewCollectionFreezeManifestHash(collectionId),
+            maxCollectionPurchases,
+            collectionTotalSupply,
+            finalSupplyDelay,
+            address(core),
+            block.chainid
+        );
+    }
+
 }
 
 contract ArtistERC1271Mock {

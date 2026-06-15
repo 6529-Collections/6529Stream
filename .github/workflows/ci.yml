@@ -86,6 +86,8 @@ jobs:
             scripts/argparse_helpers.py \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
+            scripts/check_contract_size_budget.py \
+            scripts/test_contract_size_budget.py \
             scripts/check_metadata_fixtures.py \
             scripts/test_metadata_fixtures.py \
             scripts/check_metadata_browser_sandbox.py \
@@ -100,6 +102,9 @@ jobs:
             scripts/test_drop_authorization_signing_evidence.py \
             scripts/check_signer_custody_readiness.py \
             scripts/test_signer_custody_readiness.py \
+            scripts/check_one_of_one_provenance_manifest.py \
+            scripts/generate_one_of_one_provenance_manifest.py \
+            scripts/test_one_of_one_provenance_manifest.py \
             scripts/check_admin_ceremony_evidence.py \
             scripts/test_admin_ceremony_evidence.py \
             scripts/generate_source_verification_inputs.py \
@@ -185,6 +190,8 @@ jobs:
             scripts/test_electron_security_wallets.py \
             scripts/check_operator_admin_ui.py \
             scripts/test_operator_admin_ui.py \
+            scripts/check_royalty_policy.py \
+            scripts/test_royalty_policy.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -262,6 +269,14 @@ jobs:
           mkdir -p ci-logs
           forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
 
+      - name: Contract size budget
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-tests.log
+          python3 scripts/check_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-check.log
+
       - name: Solidity formatting
         shell: bash
         run: |
@@ -308,6 +323,15 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_signer_custody_readiness.py 2>&1 | tee ci-logs/signer-custody-readiness-tests.log
           python3 scripts/check_signer_custody_readiness.py 2>&1 | tee ci-logs/signer-custody-readiness-check.log
+
+      - name: 1/1 provenance manifest
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_one_of_one_provenance_manifest.py 2>&1 | tee ci-logs/one-of-one-provenance-manifest-tests.log
+          python3 scripts/check_one_of_one_provenance_manifest.py 2>&1 | tee ci-logs/one-of-one-provenance-manifest-check.log
+          python3 scripts/generate_one_of_one_provenance_manifest.py --check 2>&1 | tee ci-logs/one-of-one-provenance-manifest-drift-check.log
 
       - name: Admin ceremony evidence
         shell: bash
@@ -502,6 +526,8 @@ jobs:
           python3 scripts/check_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-check.log
           python3 scripts/test_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-tests.log
           python3 scripts/check_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-check.log
+          python3 scripts/test_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-tests.log
+          python3 scripts/check_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-check.log
 
       - name: Release readiness
         shell: bash

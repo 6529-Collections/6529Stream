@@ -28,13 +28,17 @@
       {
         "name": "StreamAdmins",
         "address": "0x0000000000000000000000000000000000000001",
-        "constructor_args": ["0x0000000000000000000000000000000000006532"],
+        "constructor_args": [
+          "0x0000000000000000000000000000000000006532"
+        ],
         "verification_status": "not_applicable"
       },
       {
         "name": "DependencyRegistry",
         "address": "0x0000000000000000000000000000000000000002",
-        "constructor_args": ["0x0000000000000000000000000000000000000001"],
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000001"
+        ],
         "verification_status": "not_applicable"
       },
       {
@@ -45,6 +49,16 @@
           "STREAM",
           "0x0000000000000000000000000000000000000001",
           "0x0000000000000000000000000000000000000002"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamContractMetadata",
+        "address": "0x000000000000000000000000000000000000000a",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "ipfs://6529stream-contract-metadata/rehearsal.json"
         ],
         "verification_status": "not_applicable"
       },
@@ -118,10 +132,18 @@
       "deployer": "0x0000000000000000000000000000000000006537",
       "admin_safe": "0x0000000000000000000000000000000000006529",
       "emergency_recipient": "0x0000000000000000000000000000000000006531",
-      "pause_guardians": ["0x0000000000000000000000000000000000006530"],
-      "unpause_admins": ["0x0000000000000000000000000000000000006529"],
-      "signer_managers": ["0x0000000000000000000000000000000000006529"],
-      "drop_signers": ["0x0000000000000000000000000000000000006532"],
+      "pause_guardians": [
+        "0x0000000000000000000000000000000000006530"
+      ],
+      "unpause_admins": [
+        "0x0000000000000000000000000000000000006529"
+      ],
+      "signer_managers": [
+        "0x0000000000000000000000000000000000006529"
+      ],
+      "drop_signers": [
+        "0x0000000000000000000000000000000000006532"
+      ],
       "temporary_admins_revoked": true,
       "ownership_transfers": [
         {
