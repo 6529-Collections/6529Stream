@@ -139,7 +139,8 @@ function assertNoSecretsInPublicEnv(env: Record<string, string | undefined>) {
   for (const [key, value] of Object.entries(env)) {
     if (!key.startsWith("NEXT_PUBLIC_")) continue;
     if (!value) continue;
-    if (forbidden.some((marker) => key.includes(marker))) {
+    const publicName = key.slice("NEXT_PUBLIC_".length);
+    if (forbidden.some((marker) => publicName.includes(marker))) {
       throw new Error(`secret-shaped public env var: ${key}`);
     }
   }

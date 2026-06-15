@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 13:21 UTC` |
+| Last updated | `2026-06-15 13:23 UTC` |
 
 ## Packaging Notes
 
@@ -15207,6 +15207,7 @@ Outcome:
 | 2026-06-15 13:03 | Reconfirm Core bytecode posture | Core was materially refactored away from the hard EIP-170 blocker in PRs #90, #116, and #133; current tracked `StreamCore` runtime is still 24,139 bytes with 437 bytes of EIP-170 headroom, above the 384-byte minimum release floor but below the 512-byte warning threshold, so large non-trivial Core work still needs headroom recovery or an explicit size-budget exception. |
 | 2026-06-15 13:19 | Validate INT-007 local draft | Focused React/Next reference, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 13:21 | Open PR #403 for INT-007 | PR #403 is open on branch `codex/react-next-reference-architecture`, closes issue #402, and CodeRabbit review was requested in comment `4708353207`. |
+| 2026-06-15 13:23 | Address PR #403 bot nice-to-have | 6529bot general review found a copy-paste risk in the public-env pseudocode guard; updated the example to strip `NEXT_PUBLIC_` before matching secret-shaped suffixes, regenerated release manifest/proof/checksums, and reran focused React/Next plus release artifact drift checks. |
 
 ## Resume Instructions
 

@@ -1915,8 +1915,8 @@
       },
       {
         "path": "docs/integrations/examples/react-viem.md",
-        "sha256": "sha256:64d968c8c820fda82c61a779a8cdd408df71db99da9488a7d155b5f520cbfe71",
-        "size_bytes": 5124
+        "sha256": "sha256:1c68a324a60631c05e8f38eff8d2fcf4dcf6aa89745edd5978c6a7b144fe7e23",
+        "size_bytes": 5188
       },
       {
         "path": "docs/tooling.md",
