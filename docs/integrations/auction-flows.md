@@ -263,6 +263,9 @@ State transitions:
 | `EndedWithBid -> SettledWithBid` | `claimAuction` | `AuctionProceedsCreditCreated`, `AuctionStatusChanged`, `ClaimAuction`, and ERC-721 `Transfer` |
 | `Active -> Cancelled` | `cancelAuction` before bids | `AuctionCancelled`, `AuctionStatusChanged(Cancelled)`, and ERC-721 `Transfer` |
 
+The current implementation has no path that emits `AuctionStatusChanged` with
+`Created`; `Created` is reserved for a future non-atomic custody flow.
+
 `EndedNoBid` and `EndedWithBid` are derived by
 `retrieveAuctionStatus(tokenId)` using a strict timestamp check:
 `block.timestamp > endTime`. A bid exactly at `endTime` is still active and can

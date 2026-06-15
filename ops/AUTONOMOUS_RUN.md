@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 10:49 UTC` |
+| Last updated | `2026-06-15 10:52 UTC` |
 
 ## Packaging Notes
 
@@ -257,7 +257,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 ### PR candidate: Add auction frontend and indexer flow spec (Queue Item 189)
 
 Status: PR #395 ready for review; CodeRabbit review requested in comments
-`4707102005` and `4707115598`; CI and bot feedback pending.
+`4707102005` and `4707115598` but currently rate-limited; 6529bot security
+reported no findings and general/follow-up review reported no blocking
+findings; CI run 837 pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/394`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/395`.
 Branch: `codex/auction-flow-spec`.
@@ -323,6 +325,10 @@ Notes:
 - Known event/read gaps are documented for follow-up under `CON-003` and
   `INT-005`: no `minimumNextBid` view, compact `AuctionStatusChanged`, compact
   `ClaimAuction`, and no dedicated direct no-bid recipient event.
+- Bot verification notes were addressed by confirming required link targets
+  exist on `main`, relying on the checker path-resolution guard, and adding an
+  explicit doc line that no current path emits `AuctionStatusChanged` with
+  `Created`.
 
 Open concerns:
 
