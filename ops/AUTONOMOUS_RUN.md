@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/operator-admin-ui-spec` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/407` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/408` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/409` |
 | Next issue | `ONE-001` contract-level metadata surface after INT-010 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 15:34 UTC` |
+| Last updated | `2026-06-15 15:37 UTC` |
 
 ## Packaging Notes
 
@@ -15222,6 +15222,7 @@ Outcome:
 | 2026-06-15 14:56 | Merge PR #407 and select INT-010 | Electron security and wallet integration guide merged as `d42c97ae49133339e744bc4492a5130d1cae54b5` after CI run `27554528257` passed, review threads were empty, 6529bot reported no new findings on final head `e172e800bcb6986bf8317ff9d00093488616d87d`, and issue #406 closed completed. |
 | 2026-06-15 14:57 | Create issue #408 and start INT-010 | Next substantive integration-readiness slice is the operator admin UI specification on branch `codex/operator-admin-ui-spec`; issue #408 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, Safe/multisig, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and no-production-readiness boundaries. |
 | 2026-06-15 15:34 | Validate INT-010 local draft | Focused operator admin UI, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed with existing Foundry warning noise only. |
+| 2026-06-15 15:37 | Open PR #409 for INT-010 | PR #409 is open on branch `codex/operator-admin-ui-spec`, closes issue #408, and CodeRabbit review was requested in comment `4709612799`. |
 
 ## Resume Instructions
 
