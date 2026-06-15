@@ -122,7 +122,14 @@ settlement, known credit withdrawals, pause/unpause checks, signer rotation,
 drop cancellation, immediate-randomizer metadata finalization, metadata
 mutation, collection freeze, and owed-balance/surplus assertions. Future
 adversarial and invariant PRs should extend this helper rather than duplicating
-the full stack setup.
+the full stack setup. The same test file now also carries deterministic
+adversarial ordering coverage for cancelled, expired, stale-signer, and
+replayed drop authorizations; fixed-price withdrawal failures to rejecting
+receivers; auction early settlement, paused bids, underbids, cancellation after
+bid, repeat settlement, and late bids; and failed auction bidder/proceeds
+withdrawals. Provider-specific wrong request/token/collection randomizer
+permutations stay in lifecycle-specific randomizer suites because this harness
+uses the immediate randomizer for compact cross-contract flows.
 
 `StreamGasSnapshot.t.sol` provides the local Gate D gas snapshot surface. The
 committed baseline at `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`

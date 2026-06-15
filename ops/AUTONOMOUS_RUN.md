@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/protocol-state-machine-harness` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/369` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/370` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/371` |
+| Active PR branch | `codex/adversarial-sequence-tests` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/371` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/372` |
+| Active PR | TBD |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence; Sepolia execution is blocked locally by missing RPC/signer/funding environment) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 01:04 UTC` |
+| Last updated | `2026-06-15 01:35 UTC` |
 
 ## Packaging Notes
 
@@ -238,18 +238,58 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Merged in PR #359 |
 | 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | Merged in PR #361 |
 | 176 | Add Safe/admin ceremony evidence checker | Gate E/Gate F/Gate G support | Add a no-secret admin ceremony evidence schema, template, retained-artifact checklist, checker, tests, docs, local/CI wiring, release-manifest coverage, and checksum coverage without claiming reviewed fork/testnet/live governance ceremony completion | Merged in PR #369 |
-| 177 | Add end-to-end protocol state-machine harness | Gate D/Gate F support | Add a reusable Foundry helper plus deterministic smoke coverage across fixed-price mint, auction bid/settlement, payments, pause/signer/cancel controls, randomness finalization, metadata mutation, and collection freeze without production contract changes | PR #371 ready for review |
+| 177 | Add end-to-end protocol state-machine harness | Gate D/Gate F support | Add a reusable Foundry helper plus deterministic smoke coverage across fixed-price mint, auction bid/settlement, payments, pause/signer/cancel controls, randomness finalization, metadata mutation, and collection freeze without production contract changes | Merged in PR #371 |
+| 178 | Add auction/drop/randomizer adversarial sequence tests | Gate D/Gate F support | Extend the protocol state-machine test with adversarial ordering coverage for cancelled/expired/stale/replayed drops, reverted fixed-price withdrawals, auction pre-settlement ordering, settlement idempotence, late bids, and failed auction withdrawals without production contract changes | In progress on issue #372 |
 
 ## Current PR Worklog
 
+### PR candidate: Add auction/drop/randomizer adversarial sequence tests (Queue Item 178)
+
+Status: local draft on `codex/adversarial-sequence-tests`; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/372`.
+PR: TBD.
+Branch: `codex/adversarial-sequence-tests`.
+Branch started from PR #371 squash merge commit
+`d86c54f0ce9e2ad03728623f0c6d1eac9465bb24`.
+
+Goal:
+
+- Extend `test/StreamProtocolStateMachine.t.sol` with deterministic
+  adversarial ordering tests that reuse `helpers/ProtocolStateMachine.sol`.
+- Cover cancelled, expired, stale-signer, and replayed drop authorizations
+  without consuming failed drop IDs or mutating supply.
+- Cover failed fixed-price poster/protocol withdrawals to a rejecting receiver
+  without erasing credits or corrupting owed totals.
+- Cover auction early settlement, pause-blocked bids, underbids, outbid
+  credits, cancellation after bid, settlement idempotence, late bid rejection,
+  and failed bidder/proceeds withdrawals without losing custody or credits.
+- Keep provider-specific wrong request/token/collection randomizer permutations
+  for later `StreamRandomizerLifecycle.t.sol` or `StreamRandomizerRetry.t.sol`
+  work, because the reusable state-machine helper intentionally uses the
+  immediate randomizer.
+
+Validation completed so far:
+
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test\StreamProtocolStateMachine.t.sol -vvv` passed locally on 2026-06-15 01:24 UTC with 5 tests passing and existing compiler/NatSpec warning noise only.
+- Roadmap reviewer comments were folded into `ops/ROADMAP.md` and
+  `ops/EXECUTION_BACKLOG.md` as issue-ready 1/1 product-excellence work for
+  contract-level metadata, provenance, royalties, permanence,
+  marketplace/indexer evidence, satellite-extension architecture, and warning
+  disposition.
+- `python scripts\check_changelog.py`, roadmap/backlog heading scan, and
+  `git diff --check` passed after the roadmap-only update.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 01:35 UTC with existing compiler/NatSpec warning noise only.
+
 ### PR candidate: Add end-to-end protocol state-machine harness (Queue Item 177)
 
-Status: PR #371 ready for review; CodeRabbit and CI pending on final pushed head.
+Status: merged as PR #371; issue #370 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/370`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/371`.
 Branch: `codex/protocol-state-machine-harness`.
 Branch started from PR #369 squash merge commit
 `689968b7d89fe44d2c208357519713981eba6a46`.
+Squash merge commit:
+`d86c54f0ce9e2ad03728623f0c6d1eac9465bb24`.
 
 Goal:
 

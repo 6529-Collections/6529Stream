@@ -1780,8 +1780,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:dd04b1ff3e9c73dad5281762f65489dc7a85e77973e30616659ab2c0e149fff1",
-      "size_bytes": 24832
+      "sha256": "sha256:6df5d9bbecf4dac3ac4ea798b3a162dfeaec8a06621891633fa5da5cfca37d72",
+      "size_bytes": 25524
     },
     "governance_docs": [
       {
