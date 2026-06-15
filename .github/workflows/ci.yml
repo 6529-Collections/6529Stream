@@ -86,6 +86,8 @@ jobs:
             scripts/argparse_helpers.py \
             scripts/generate_release_artifacts.py \
             scripts/test_release_artifacts.py \
+            scripts/check_contract_size_budget.py \
+            scripts/test_contract_size_budget.py \
             scripts/check_metadata_fixtures.py \
             scripts/test_metadata_fixtures.py \
             scripts/check_metadata_browser_sandbox.py \
@@ -264,6 +266,14 @@ jobs:
           set -o pipefail
           mkdir -p ci-logs
           forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
+
+      - name: Contract size budget
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-tests.log
+          python3 scripts/check_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-check.log
 
       - name: Solidity formatting
         shell: bash

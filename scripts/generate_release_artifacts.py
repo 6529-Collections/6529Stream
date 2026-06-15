@@ -7,6 +7,7 @@ import argparse
 import filecmp
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -20,6 +21,7 @@ EVENT_CATALOG_SCHEMA = "6529stream.event-topic-catalog.v1"
 INTERFACE_ID_SCHEMA = "6529stream.interface-ids.v1"
 MANIFEST_SCHEMA = "6529stream.release-artifact-manifest.v1"
 GENERATOR_VERSION = "1"
+DEFAULT_EIP_170_RUNTIME_LIMIT_BYTES = 24_576
 DOWNSTREAM_RELEASE_FILES = {
     "bytecode-release-proof.json",
     "dependency-artifact-manifest.json",
@@ -46,6 +48,8 @@ DOWNSTREAM_RELEASE_FILES = {
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out")
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
+HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
+SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
 
 
 class ArtifactError(RuntimeError):
@@ -88,19 +92,31 @@ def bytecode_hash(value: str) -> dict[str, Any]:
         hex_value = value[2:]
     else:
         hex_value = value
+    linked_equivalent = SOLIDITY_LINK_PLACEHOLDER_RE.sub("0" * 40, hex_value)
     if hex_value == "":
-        return {"sha256": sha256_bytes(b""), "linked": True, "hash_mode": "bytes"}
-    try:
         return {
-            "sha256": sha256_bytes(bytes.fromhex(hex_value)),
+            "sha256": sha256_bytes(b""),
             "linked": True,
             "hash_mode": "bytes",
+            "size_bytes": 0,
+        }
+    try:
+        bytecode = bytes.fromhex(linked_equivalent)
+        if not HEX_RE.fullmatch(linked_equivalent):
+            raise ValueError("invalid linked-equivalent bytecode")
+        linked = linked_equivalent == hex_value
+        return {
+            "sha256": sha256_bytes(bytecode) if linked else sha256_bytes(value.encode("utf-8")),
+            "linked": linked,
+            "hash_mode": "bytes" if linked else "unlinked_artifact_object",
+            "size_bytes": len(bytecode),
         }
     except ValueError:
         return {
             "sha256": sha256_bytes(value.encode("utf-8")),
             "linked": False,
             "hash_mode": "unlinked_artifact_object",
+            "size_bytes": None,
         }
 
 
@@ -269,6 +285,7 @@ def build_abi_checksums(
     repo_root: Path,
     config_path: Path,
     foundry_out: Path,
+    eip_170_runtime_limit_bytes: int = DEFAULT_EIP_170_RUNTIME_LIMIT_BYTES,
 ) -> dict[str, Any]:
     contracts: dict[str, Any] = {}
     abi_hashes: dict[str, str] = {}
@@ -285,6 +302,10 @@ def build_abi_checksums(
             "creation": summary["bytecode_hash"],
             "runtime": summary["deployed_bytecode_hash"],
         }
+        runtime_size = summary["deployed_bytecode_hash"]["size_bytes"]
+        runtime_margin = (
+            None if runtime_size is None else eip_170_runtime_limit_bytes - runtime_size
+        )
         contracts[name] = {
             "source": summary["source"],
             "artifact_path": summary["artifact_path"],
@@ -292,9 +313,13 @@ def build_abi_checksums(
             "bytecode_sha256": summary["bytecode_hash"]["sha256"],
             "bytecode_linked": summary["bytecode_hash"]["linked"],
             "bytecode_hash_mode": summary["bytecode_hash"]["hash_mode"],
+            "bytecode_size_bytes": summary["bytecode_hash"]["size_bytes"],
             "deployed_bytecode_sha256": summary["deployed_bytecode_hash"]["sha256"],
             "deployed_bytecode_linked": summary["deployed_bytecode_hash"]["linked"],
             "deployed_bytecode_hash_mode": summary["deployed_bytecode_hash"]["hash_mode"],
+            "deployed_bytecode_size_bytes": runtime_size,
+            "eip170_runtime_limit_bytes": eip_170_runtime_limit_bytes,
+            "deployed_runtime_margin_bytes": runtime_margin,
             "abi_entries": len(abi),
             "function_count": len(functions),
             "event_count": len(events),
@@ -438,6 +463,16 @@ def generate_artifacts(
     config = load_json(config_path)
     contracts = config.get("production_contracts", [])
     interfaces = config.get("interfaces", [])
+    runtime_size_budget = config.get("runtime_size_budget", {})
+    eip_170_runtime_limit_bytes = runtime_size_budget.get(
+        "eip_170_runtime_limit_bytes", DEFAULT_EIP_170_RUNTIME_LIMIT_BYTES
+    )
+    if (
+        not isinstance(eip_170_runtime_limit_bytes, int)
+        or isinstance(eip_170_runtime_limit_bytes, bool)
+        or eip_170_runtime_limit_bytes <= 0
+    ):
+        raise ArtifactError("runtime_size_budget.eip_170_runtime_limit_bytes must be positive")
     if not contracts:
         raise ArtifactError("config production_contracts list is empty")
 
@@ -450,7 +485,11 @@ def generate_artifacts(
 
     files = {
         "abi-checksums.json": build_abi_checksums(
-            contract_summaries, repo_root, config_path, foundry_out
+            contract_summaries,
+            repo_root,
+            config_path,
+            foundry_out,
+            eip_170_runtime_limit_bytes,
         ),
         "event-topic-catalog.json": build_event_catalog(
             contract_summaries, repo_root, config_path, foundry_out, cast_bin

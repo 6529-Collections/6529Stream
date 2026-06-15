@@ -257,9 +257,9 @@ blockers:
   use no-secret placeholders and do not claim production status.
 - The bytecode-to-release proof is local/fork release-artifact proof; it does
   not replace live RPC or explorer bytecode verification.
-- Runtime size remains under the current release floor but close enough to the
-  EIP-170 limit that large future `StreamCore` changes need explicit size
-  review.
+- Runtime size remains under the EIP-170 limit and above the current release
+  floor, but close enough to the limit that large future `StreamCore` changes
+  need explicit size-budget review.
 
 No production risk is accepted for public launch by this audit package.
 

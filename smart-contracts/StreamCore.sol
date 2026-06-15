@@ -16,7 +16,7 @@ import "./IRandomizer.sol";
 import "./IRandomizerLifecycle.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamMinter.sol";
-import "./ERC2981.sol";
+import "./IERC2981.sol";
 import "./Ownable.sol";
 import "./IDependencyRegistry.sol";
 import "./IERC4906.sol";
@@ -24,10 +24,13 @@ import "./StreamArtistApprovals.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
 
-contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
+contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     using Strings for uint256;
 
     bytes4 private constant _INTERFACE_ID_ERC4906 = 0x49064906;
+    address private constant _DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
+    uint256 private constant _DEFAULT_ROYALTY_BPS = 690;
+    uint256 private constant _ROYALTY_DENOMINATOR = 10_000;
     string public constant METADATA_SCHEMA_VERSION = "6529stream-v1";
     bytes32 public constant METADATA_FREEZE_MANIFEST_TYPEHASH = keccak256(
         "6529StreamMetadataFreezeManifest(uint256 collectionId,bytes32 schemaVersionHash,bytes32 collectionStateHash,bytes32 supplyStateHash,bytes32 liveTokenMetadataHash,bytes32 integrationStateHash,address core,uint256 chainId)"
@@ -110,6 +113,10 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     error UnsafeRawAttributes(uint256 tokenId);
     error UnknownDependency(bytes32 dependencyNameAndVersion);
     error ZeroTokenHash();
+    error ERC2981InvalidDefaultRoyalty(uint256 numerator, uint256 denominator);
+    error ERC2981InvalidDefaultRoyaltyReceiver(address receiver);
+    error ERC2981InvalidTokenRoyalty(uint256 tokenId, uint256 numerator, uint256 denominator);
+    error ERC2981InvalidTokenRoyaltyReceiver(uint256 tokenId, address receiver);
 
     error PendingRandomnessRequests(
         uint256 collectionId, address randomizer, uint256 pendingRequests
@@ -268,7 +275,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         adminsContract = IStreamAdmins(_adminsContract);
         dependencyRegistry = IDependencyRegistry(_dependencyRegistry);
         newCollectionIndex = newCollectionIndex + 1;
-        _setDefaultRoyalty(0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377, 690);
     }
 
     // certain functions can only be called by a global or function admin
@@ -780,10 +786,22 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         public
         view
         virtual
-        override(ERC721, ERC2981)
+        override(ERC721, IERC165)
         returns (bool)
     {
-        return interfaceId == _INTERFACE_ID_ERC4906 || super.supportsInterface(interfaceId);
+        return interfaceId == _INTERFACE_ID_ERC4906 || interfaceId == type(IERC2981).interfaceId
+            || super.supportsInterface(interfaceId);
+    }
+
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        public
+        view
+        returns (address, uint256)
+    {
+        tokenId;
+        // Preserve the inherited ERC-2981 `view` ABI while keeping fixed royalty behavior.
+        newCollectionIndex;
+        return (_DEFAULT_ROYALTY_RECEIVER, salePrice * _DEFAULT_ROYALTY_BPS / _ROYALTY_DENOMINATOR);
     }
 
     function totalSupply() public view returns (uint256) {
