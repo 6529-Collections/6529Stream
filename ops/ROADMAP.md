@@ -116,16 +116,70 @@ requirements needed to move toward a 10/10 open-source protocol repo.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
+### Clean-Main Reviewer Rebaseline
+
+A reviewer reassessed a clean detached mainline worktree at commit
+`dd61e79d1fba5dbfec105b46ee0544fed105b95e` and reported that `forge build`,
+`forge test -vvv` with 316 tests, the gas snapshot check, and the production
+size build passed. The reviewer also confirmed `StreamCore` was 24,139 runtime
+bytes, leaving 437 bytes of EIP-170 headroom under the production profile.
+
+This is a status correction, not a production-readiness claim. The roadmap
+should not keep reopening generic "serious contract missing" blockers that are
+already implemented on current mainline, but it must continue to require
+public proof, external review, non-local deployment evidence, and retained
+marketplace/indexer evidence before any beta, audit-ready, production-ready,
+or best-in-class 1/1 claims.
+
+Reviewer-confirmed fixed surfaces on current mainline:
+
+- EIP-712 drop authorization with storage-backed replay controls and ERC-1271
+  contract signer support.
+- Pull-payment style accounting for fixed-price, auction, and curator flows.
+- Auction custody, settlement state, and custody validation.
+- ERC-4906 metadata update events and interface support.
+- Collection freeze manifests and metadata stability controls.
+- Randomizer lifecycle tracking, stale/failure/retry states, raw-output hashes,
+  and provider/epoch validation.
+
+Reviewer-confirmed remaining 10/10 work:
+
+- Production trust evidence: external audit, testnet/live evidence, verified
+  addresses, explorer verification, production signatures, and live ceremony
+  artifacts.
+- ERC-7572-style contract-level metadata policy or explicit deferral.
+- First-class 1/1 provenance: artist statement, certificate/authenticity hash,
+  curation notes, exhibition/history records, provenance events or retained
+  evidence, and frozen provenance manifests.
+- Explicit royalty philosophy: ERC-2981 disclosure, governance controls,
+  per-token or per-collection policy, marketplace display expectations, and
+  creator-fee enforcement tradeoffs.
+- Collector-verifiable permanence: deterministic renderer, dependency/source
+  archive, token output hashes, browser proof, and storage guarantees.
+- Marketplace/indexer integration evidence for contract metadata, token
+  metadata refresh, animation rendering, royalty display, transfer or sale
+  flows, event replay, and cache invalidation.
+- Continued `StreamCore` size discipline through satellite contracts, read
+  adapters, libraries, release artifacts, or explicit size-budget exceptions.
+- Release-grade compiler, NatSpec, lint, and static-analysis warning
+  dispositions.
+
+Benchmark and standards inputs for these remaining items include EIP-712,
+ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink VRF best practices, Art
+Blocks on-chain storage practice, Manifold creator contracts, Transient Labs
+creator/provenance patterns, and Limit Break creator token standards. These are
+reference inputs for roadmap quality, not automatic implementation mandates.
+
 ### Verification Metadata
 
 | Field | Value |
 | --- | --- |
-| Last verified | `2026-06-15 01:02 UTC` on branch `codex/protocol-state-machine-harness`: full `scripts/check.ps1` local gate passed after adding and sidecar-hardening the ADV-001 reusable protocol state-machine smoke harness; PR #369 merged as `689968b7d89fe44d2c208357519713981eba6a46`; issue #217 remains open for real reviewed testnet deployment rehearsal evidence |
-| OS tested | Local Windows PowerShell wrapper passed on branch `codex/protocol-state-machine-harness`; latest merged baseline PR #369 CI run `27516750801` passed on head `7b3c7370a2a05b1f9006441fe844ad7c7284b6a5`, including Windows PowerShell wrapper job `81326700866` and Foundry smoke job `81326700885` |
+| Last verified | `2026-06-15 01:35 UTC` on branch `codex/adversarial-sequence-tests`: full `scripts/check.ps1` local gate passed after adding ADV-002 deterministic protocol state-machine adversarial sequence coverage; PR #373 merged as `7684b800606b31d2487f078b87f2f6a19fd27777`; issue #217 remains open for real reviewed testnet deployment rehearsal evidence |
+| OS tested | Local Windows PowerShell wrapper passed on branch `codex/adversarial-sequence-tests`; latest merged baseline PR #373 CI run `27519191762` passed on head `79b2577eaa45bebf170ef8e9c56d2161c9b21d69`, including Windows PowerShell wrapper job `81333605245` and Foundry smoke job `81333605266` |
 | Foundry version | `v1.7.1` |
 | Solidity compiler version | `0.8.19` |
 | Slither version | `0.11.5` |
-| CI run | Latest merged baseline PR #369 CI run `27516750801` passed on head `7b3c7370a2a05b1f9006441fe844ad7c7284b6a5`; CodeRabbit passed; PR #369 squash-merged as `689968b7d89fe44d2c208357519713981eba6a46`; issue #362 closed completed |
+| CI run | Latest merged baseline PR #373 CI run `27519191762` passed on head `79b2577eaa45bebf170ef8e9c56d2161c9b21d69`; CodeRabbit passed with no actionable comments; PR #373 squash-merged as `7684b800606b31d2487f078b87f2f6a19fd27777`; issue #372 closed completed |
 | Command transcript location | `ops/SLITHER_BASELINE.md` for Slither baseline; PR-local commands and merge-state reconciliation details recorded in `ops/AUTONOMOUS_RUN.md` |
 
 ### Machine-Verifiable Baseline
