@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/streamcore-headroom-recovery` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/419` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/420` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
 | Next issue | After the `CON-005` headroom recovery detour, continue to `ONE-005` marketplace/indexer integration evidence unless bot/CI feedback or roadmap priority requires another detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 22:20 UTC` |
+| Last updated | `2026-06-15 22:25 UTC` |
 
 ## Packaging Notes
 
@@ -15336,6 +15336,7 @@ Outcome:
 | 2026-06-15 21:52 | Recover additional Core headroom locally | Branch `codex/streamcore-headroom-recovery` moves off-chain token URI formatting, token-name formatting, randomizer pending-state lookup, and old-randomizer pending-request probe helpers into the linked `StreamMetadataRenderer` library while preserving metadata and migration behavior. Production via-IR size build now measures `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom, recovering 386 bytes from the current 24,047-byte baseline. |
 | 2026-06-15 22:06 | Harden size artifact validation | The runtime size-budget checker now validates compiler metadata, optimizer runs, EVM version, compilation target, and current source Keccak hashes before trusting Foundry artifacts. Focused checker tests cover missing metadata, wrong compiler/profile, stale source hashes, placeholder counting, and EIP-170 failures; the production via-IR build plus checker passes with `StreamCore` at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 | 2026-06-15 22:20 | Validate headroom recovery branch | Focused metadata/randomizer/royalty suites passed; `make release-checksums` refreshed bytecode, deployment, manifest, checksum, risk, provenance, permanence, and gas-snapshot artifacts; full `make check`, Windows `scripts\check.ps1`, touched-file formatting, release manifest/proof/checksum checks, and `git diff --check` all pass. The accepted gas snapshot trade is two small decreases and a +2,143 gas increase for final on-chain `tokenURI` in exchange for recovering 386 bytes of `StreamCore` runtime headroom. |
+| 2026-06-15 22:25 | Open PR #421 | PR #421 is open and marked ready for review after CodeRabbit skipped the initial draft state. CodeRabbit review has been requested again and CI/bot feedback is pending. |
 
 ## Resume Instructions
 
