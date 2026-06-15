@@ -8,6 +8,7 @@ import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
@@ -27,6 +28,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
 
         StreamAdmins admins = StreamAdmins(result.admins);
         StreamCore core = StreamCore(result.core);
+        StreamContractMetadata metadata = StreamContractMetadata(result.contractMetadata);
         StreamDrops drops = StreamDrops(result.drops);
         StreamMinter minter = StreamMinter(result.minter);
 
@@ -51,6 +53,15 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         );
 
         Assertions.assertEq(core.minterContract(), result.minter, "core minter");
+        Assertions.assertEq(metadata.streamCore(), result.core, "metadata core");
+        Assertions.assertEq(metadata.adminsContract(), result.admins, "metadata admins");
+        Assertions.assertEq(metadata.contractURI(), config.contractMetadataURI, "metadata uri");
+        Assertions.assertEq(
+            metadata.contractURIHash(),
+            keccak256(bytes(config.contractMetadataURI)),
+            "metadata uri hash"
+        );
+        Assertions.assertTrue(metadata.isStreamContractMetadata(), "metadata marker");
         Assertions.assertEq(minter.streamDrops(), result.drops, "minter drops");
         Assertions.assertEq(drops.auctionContract(), result.auctions, "drops auction");
         Assertions.assertEq(drops.payOutAddress(), config.payout, "drops payout");

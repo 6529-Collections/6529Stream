@@ -1,0 +1,56 @@
+{
+  "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1",
+  "generated_by": "scripts/generate_one_of_one_provenance_manifest.py:1",
+  "source": {
+    "output": "release-artifacts/latest/one-of-one-provenance-manifest.json",
+    "descriptor_dir": "release-artifacts/provenance",
+    "descriptor_count": 1
+  },
+  "manifests": [
+    {
+      "descriptor": {
+        "path": "release-artifacts/provenance/one-of-one-provenance-template.provenance.json",
+        "sha256": "sha256:a2cd851f762ddee157a91f6514246ec1db193404538b56d0ea530fd2a04cc915",
+        "size_bytes": 6161,
+        "schema_version": "6529stream.one-of-one-provenance-manifest.v1"
+      },
+      "provenance_id": "one-of-one-provenance-template",
+      "record_type": "template",
+      "review_status": "template",
+      "environment": "local",
+      "protocol_version": "0.1.0",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "scope": {
+        "chain_id": 31337,
+        "core_contract": "0x0000000000000000000000000000000000000003",
+        "contract_metadata_adapter": "0x000000000000000000000000000000000000000a",
+        "collection_id": 1,
+        "token_id": 1,
+        "metadata_schema_version": "6529stream-v1",
+        "contract_uri_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "collection_freeze_manifest_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "artwork": {
+        "title": "Template 1/1 Artwork",
+        "artist": "6529Stream Template Artist",
+        "medium": "generative art"
+      },
+      "authenticity": {
+        "authenticity_status": "template",
+        "authority": "TBD"
+      },
+      "provenance_entry_count": 2,
+      "mutability_policy": {
+        "token_metadata_boundary": "separate_from_token_uri",
+        "contract_metadata_boundary": "separate_from_contract_uri",
+        "freeze_boundary": "not_in_collection_freeze_manifest",
+        "provenance_update_policy": "append_only",
+        "correction_policy": "append_only_with_supersedes"
+      },
+      "review": {
+        "approval_status": "template",
+        "reviewer": "TBD"
+      }
+    }
+  ]
+}

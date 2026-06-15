@@ -110,9 +110,10 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   production size build passed. Treat that as a useful status correction, not a
   production-readiness claim: the remaining "10/10 open-source NFT protocol"
   work is now concentrated in production trust evidence, testnet/live release
-  proof, marketplace/indexer evidence, contract-level metadata, 1/1 provenance,
-  collector-verifiable permanence, explicit royalty philosophy, quiet
-  warning/lint baselines, and continued `StreamCore` size discipline.
+  proof, marketplace/indexer evidence, non-local contract-level metadata
+  discovery proof, 1/1 provenance, collector-verifiable permanence, explicit
+  royalty philosophy, quiet warning/lint baselines, and continued `StreamCore`
+  size discipline.
   Public beta is still blocked by missing external audit, testnet/live
   deployment evidence, verified addresses, explorer verification, metadata
   browser evidence, and randomizer operations evidence. Production is still
@@ -154,13 +155,18 @@ Reviewer-confirmed fixed surfaces on current mainline:
 - Collection freeze manifests and metadata stability controls.
 - Randomizer lifecycle tracking, stale/failure/retry states, raw-output hashes,
   and provider/epoch validation.
+- ERC-7572-style contract-level metadata exists as a release-tracked
+  `StreamContractMetadata` satellite/read-adapter, preserving `StreamCore`
+  bytecode headroom while exposing `contractURI()`, `contractURIHash()`, and
+  `ContractURIUpdated`.
 
 Reviewer-confirmed remaining 10/10 work:
 
 - Production trust evidence: external audit, testnet/live evidence, verified
   addresses, explorer verification, production signatures, and live ceremony
   artifacts.
-- ERC-7572-style contract-level metadata policy or explicit deferral.
+- Non-local discovery evidence for contract-level metadata in marketplaces,
+  wallets, and indexer tooling.
 - First-class 1/1 provenance: artist statement, certificate/authenticity hash,
   curation notes, exhibition/history records, provenance events or retained
   evidence, and frozen provenance manifests. Treat Transient Labs-style story
@@ -754,12 +760,14 @@ later sections.
 - If ERC-4906 is implemented, test `supportsInterface(0x49064906)`.
 - Emit `MetadataUpdate` / `BatchMetadataUpdate` only when JSON metadata changes,
   not merely on mint or burn unless intentionally documented.
-- Decide whether to implement ERC-7572-style `contractURI()` and
-  `ContractURIUpdated`. ERC-7572 is draft status, but contract-level metadata is
-  already marketplace-relevant and should be explicit before public beta.
+- Keep the ERC-7572-style `StreamContractMetadata` adapter release-tracked and
+  require non-local marketplace/indexer evidence before public metadata
+  discovery claims.
 - Treat 1/1 provenance as a first-class NFT surface: artist statement,
   certificate/authenticity hash, curation notes, exhibition/history records,
-  collector-facing provenance events, and frozen provenance manifests.
+  append-only provenance records, retained artifact hashes, and future
+  collector-facing provenance events or satellite views if a later size-budget
+  decision accepts them.
 - Decide the royalty product philosophy before release: ERC-2981 information
   only, richer per-collection/per-token policy, or optional creator-fee
   enforcement with a documented transfer-composability tradeoff.
@@ -2669,9 +2677,13 @@ Before any "best-in-class 1/1" release claim:
   - Artist statement and collector-facing work description.
   - Certificate/authenticity hash and signed provenance statement.
   - Curation notes, exhibition/history records, and provenance update policy.
-  - Collector-facing provenance events or retained evidence if events are kept
-    out of Core for size reasons.
-  - Frozen provenance manifest tied to collection/token freeze manifests.
+  - Checked release artifact descriptors and generated provenance manifest
+    catalog under `release-artifacts/latest/`.
+  - Clear boundary that provenance evidence is not `tokenURI()` JSON,
+    `contractURI()` JSON, marketplace proof, royalty enforcement, or ownership
+    proof beyond chain state.
+  - Collector-facing provenance events or retained evidence if a future
+    size-budget decision accepts an on-chain or satellite surface.
 - Add a collector-verifiable permanence package:
   - Deterministic renderer and dependency/source archive.
   - Token output hashes and replay instructions.
