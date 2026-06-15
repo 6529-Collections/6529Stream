@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/signer-compromise-fuzz` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/376` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/374` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/377` |
 | Next issue | TBD after ADV-003; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 03:09 UTC` |
+| Last updated | `2026-06-15 03:12 UTC` |
 
 ## Packaging Notes
 
@@ -247,9 +247,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add signer compromise and revocation fuzz tests (Queue Item 180)
 
-Status: local draft; PR not opened yet.
+Status: PR #377 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/374`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/377`.
 Branch: `codex/signer-compromise-fuzz`.
 Branch started from PR #376 squash merge commit
 `ba83f54ca2ea952a62403a8b74faa09e11e150c7`.
