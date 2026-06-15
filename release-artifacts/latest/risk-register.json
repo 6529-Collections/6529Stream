@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:4e7b8f7b8e9325263ad6479faa39bd624c80a94e54bdd8922af26545c46fc5cd"
+      "sha256": "sha256:6ffbf026cc52e0b66b6b25909151df8581e702e4a511e8adad85781c53c396f5"
     },
     {
       "path": "docs/known-blockers.md",
@@ -155,7 +155,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:4e7b8f7b8e9325263ad6479faa39bd624c80a94e54bdd8922af26545c46fc5cd"
+          "sha256": "sha256:6ffbf026cc52e0b66b6b25909151df8581e702e4a511e8adad85781c53c396f5"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -231,7 +231,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:4e7b8f7b8e9325263ad6479faa39bd624c80a94e54bdd8922af26545c46fc5cd"
+          "sha256": "sha256:6ffbf026cc52e0b66b6b25909151df8581e702e4a511e8adad85781c53c396f5"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",

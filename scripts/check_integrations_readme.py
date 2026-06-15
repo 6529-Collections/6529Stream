@@ -190,7 +190,7 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
 
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     """Return required phrases that are absent from text, case-insensitively."""
-    normalized_text = text.lower()
+    normalized_text = " ".join(text.lower().split())
     return [phrase for phrase in phrases if phrase.lower() not in normalized_text]
 
 

@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 12:32 UTC` |
+| Last updated | `2026-06-15 12:43 UTC` |
 
 ## Packaging Notes
 
@@ -15201,6 +15201,7 @@ Outcome:
 | 2026-06-15 12:14 | Implement INT-006 local draft | Added `docs/integrations/metadata-rendering.md`, a checker/test pair, CI/local wrapper wiring, integration/release-readiness navigation, release-manifest coverage, changelog/backlog traceability, and state updates before release-artifact regeneration. |
 | 2026-06-15 12:30 | Validate INT-006 local draft | Focused metadata rendering, fixture, browser, rehearsal, integrations README, release-readiness, manifest, bytecode proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 12:32 | Open PR #401 for INT-006 | PR #401 is open on branch `codex/metadata-rendering-cache-guide`, closes issue #400, and CodeRabbit review was requested. |
+| 2026-06-15 12:43 | Address PR #401 bot nice-to-have | Wrapped the INT-006 integration README bullet by making the older integrations/release-readiness phrase checks whitespace-tolerant, added regression coverage for wrapped required phrases, regenerated release artifacts, and reran focused checks plus full `make check`. |
 
 ## Resume Instructions
 

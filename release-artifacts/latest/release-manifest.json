@@ -104,7 +104,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:97c00fa908c8570a76d21f78f9c739c71541954ae67aa3138db0b6ad5cb16e3a",
+      "sha256": "sha256:170d1ac9616f327088bac64f718f4ca7e81c79b23ae27738a79c9fd095096f0b",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1875,13 +1875,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:4e7b8f7b8e9325263ad6479faa39bd624c80a94e54bdd8922af26545c46fc5cd",
+        "sha256": "sha256:6ffbf026cc52e0b66b6b25909151df8581e702e4a511e8adad85781c53c396f5",
         "size_bytes": 35601
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:c232831950648c2000c4e066ffa56f6a0fd50f05e74bab16f9a065a05d2ea75e",
-        "size_bytes": 16721
+        "sha256": "sha256:df220b6ecb39cfab3028ed5718e8e24296f4c56c4f92488583c0f256c122d35f",
+        "size_bytes": 16723
       },
       {
         "path": "docs/integrations/contract-flows.md",

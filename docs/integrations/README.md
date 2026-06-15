@@ -133,7 +133,8 @@ to understand what is still intentionally future work:
   [`wallets-and-signatures.md`](wallets-and-signatures.md).
 - `INT-005`: event and indexer reconstruction spec is now
   [`events-and-indexing.md`](events-and-indexing.md).
-- `INT-006`: the metadata rendering, cache, animation sandbox, and marketplace integration guide is now [`metadata-rendering.md`](metadata-rendering.md).
+- `INT-006`: the metadata rendering, cache, animation sandbox, and marketplace
+  integration guide is now [`metadata-rendering.md`](metadata-rendering.md).
 - `INT-007`: React/Next reference architecture.
 - `INT-008`: mobile and WalletConnect integration guide.
 - `INT-009`: Electron security and wallet integration guide.

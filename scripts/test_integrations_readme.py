@@ -161,6 +161,21 @@ class IntegrationsReadmeTests(unittest.TestCase):
                     root, root / checker.DEFAULT_INTEGRATIONS_README
                 )
 
+    def test_required_phrases_tolerate_markdown_wrapping(self) -> None:
+        """Required phrases may span Markdown-wrapped lines."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_integrations_readme().replace(
+                "metadata rendering, cache, animation sandbox, and marketplace integration guide",
+                "metadata rendering, cache, animation sandbox, and marketplace\nintegration guide",
+            )
+            write_text(root / checker.DEFAULT_INTEGRATIONS_README, text)
+
+            checker.validate_integrations_readme(
+                root, root / checker.DEFAULT_INTEGRATIONS_README
+            )
+
     def test_rejects_missing_required_link(self) -> None:
         """Required artifact links cannot be silently dropped."""
         with tempfile.TemporaryDirectory() as temp_dir:

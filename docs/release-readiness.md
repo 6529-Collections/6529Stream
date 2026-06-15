@@ -45,7 +45,8 @@ as the event and indexer reconstruction spec for current INT-005 integration
 work.
 Use
 [`docs/integrations/metadata-rendering.md`](integrations/metadata-rendering.md)
-as the metadata rendering, cache, animation sandbox, and marketplace integration guide for current INT-006 integration work.
+as the metadata rendering, cache, animation sandbox, and marketplace
+integration guide for current INT-006 integration work.
 Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
