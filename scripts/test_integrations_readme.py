@@ -60,10 +60,12 @@ consumers are named here.
 
 ABIs, address books, deployment manifests, release manifest, source verification inputs,
 ABI compatibility baseline, event topic catalog, interface IDs, metadata,
-1/1 provenance manifest, royalty policy, ERC-2981, royalty disclosure, not
+1/1 provenance manifest, collector-verifiable permanence package,
+one-of-one permanence manifest, browser proof, fully on-chain versus
+decentralized storage, royalty policy, ERC-2981, royalty disclosure, not
 payment enforcement, No production-readiness claim depends on marketplaces
-honoring royalties, EIP-712, ERC-1271, risk register, and public-beta evidence
-status are named.
+honoring royalties, EIP-712, ERC-1271, risk register, and public-beta
+evidence status are named.
 
 ## Canonical Artifacts
 

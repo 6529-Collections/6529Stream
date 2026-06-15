@@ -66,6 +66,10 @@ compatible migration path:
   permission change.
 - Metadata schema, token URI state, animation HTML, dependency pinning, or
   freeze semantics change.
+- Collector-verifiable permanence package schema, replay command, browser
+  proof, output hash, storage guarantee, or one-of-one permanence manifest
+  semantics change. Current policy is recorded in
+  `docs/permanence-packages.md`.
 - Royalty behavior, ERC-2981 disclosure, receiver, fee numerator, denominator,
   governance, marketplace display, or enforcement boundary change. Current
   policy is recorded in `docs/royalty-policy.md`.
