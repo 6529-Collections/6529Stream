@@ -1322,7 +1322,7 @@
     "signer_custody_readiness": [
       {
         "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-        "sha256": "sha256:5270a5a9566281b37b77bcfb3d240f65a3b794fe654b0c2df50583f76645dac0",
+        "sha256": "sha256:8dc2b53591207d713616c9acdb3d0841aa3bee47594b82a6894aec83264460ff",
         "size_bytes": 3470,
         "schema_version": "6529stream.signer-custody-readiness.v1",
         "evidence_id": "signer-custody-readiness-template",
@@ -1416,7 +1416,7 @@
             "alerting_reference": "TBD",
             "incident_response_runbook": {
               "path": "docs/incident-response.md",
-              "sha256": "sha256:89a753b39a54259d740cd788591fe5aa5a01df19171642e6640a959eb8386e03"
+              "sha256": "sha256:8952af3f15858ff55a7eb8ba5379301def62196187778f9f81ee66bf5c30a161"
             },
             "signer_service_integration_status": "not_available_local"
           },
@@ -1780,8 +1780,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:5c9bd91fd533efe20a0915c511219650b87ee1753debba8ca46391104a56fc3d",
-      "size_bytes": 25984
+      "sha256": "sha256:1c82f3454abe3125396deb9432d04f634a4ccee3f0ab5cac74a1cca532249e9d",
+      "size_bytes": 26315
     },
     "governance_docs": [
       {
@@ -1836,8 +1836,8 @@
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:89a753b39a54259d740cd788591fe5aa5a01df19171642e6640a959eb8386e03",
-        "size_bytes": 20266
+        "sha256": "sha256:8952af3f15858ff55a7eb8ba5379301def62196187778f9f81ee66bf5c30a161",
+        "size_bytes": 21034
       },
       {
         "path": "docs/drop-authorization-signing.md",

@@ -20,6 +20,11 @@ the release policy in `docs/release-policy.md`.
 - Added ADV-003 signer compromise and revocation coverage with a deterministic
   pause/rotation/epoch/cancellation recovery drill plus bounded fuzz over
   fixed-price and auction signed payload invalidation paths.
+- Added ADV-004 pause and settlement matrix coverage for auction bid pauses,
+  with-bid and no-bid settlement pauses, failed fixed-price, bidder-credit, and
+  proceeds withdrawals, user withdrawal liveness, forced-surplus
+  emergency-withdrawal boundaries, and duplicate-settlement rejection without
+  production contract changes.
 - Expanded the reviewer-supplied 1/1 product-excellence roadmap into
   issue-ready backlog entries and strategic release requirements for
   contract-level metadata, provenance manifests, royalty policy, collector
