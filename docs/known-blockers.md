@@ -126,12 +126,12 @@ contributors who start from the README.
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
-  `StreamCore` at 24,139 runtime bytes with 437 bytes of EIP-170 headroom,
-  which passes deployability and the documented 384-byte minimum release floor.
-  Because this remains below the 512-byte warning threshold, large non-trivial
-  Core feature work still needs headroom recovery or an explicit size-budget
-  exception, and deployment scripts, manifests, and rehearsals still need to use
-  this production profile.
+  `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom,
+  which passes deployability, the documented 384-byte minimum release floor,
+  and the 512-byte warning threshold. Large non-trivial Core feature work still
+  needs measured bytecode deltas or an explicit size-budget exception, and
+  deployment scripts, manifests, and rehearsals still need to use this
+  production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

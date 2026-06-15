@@ -14,6 +14,10 @@ from typing import Any, Sequence
 BUDGET_SCHEMA = "6529stream.contract-runtime-size-budget.v1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out")
+EXPECTED_SOLC_VERSION = "0.8.19+commit.7dd6d404"
+EXPECTED_EVM_VERSION = "paris"
+EXPECTED_OPTIMIZER_RUNS = 200
+PRODUCTION_BUILD_COMMAND = "forge build --sizes --via-ir --skip test --skip script --force"
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
 
@@ -48,6 +52,27 @@ def require_string(value: Any, path: str) -> str:
     if not isinstance(value, str) or value == "":
         raise SizeBudgetError(f"{path} must be a non-empty string")
     return value
+
+
+def keccak256_hex(data: bytes) -> str:
+    try:
+        from eth_hash.auto import keccak
+
+        return "0x" + keccak(data).hex()
+    except ImportError:
+        pass
+
+    try:
+        from Crypto.Hash import keccak as crypto_keccak
+
+        digest = crypto_keccak.new(digest_bits=256)
+        digest.update(data)
+        return "0x" + digest.hexdigest()
+    except ImportError as exc:
+        raise SizeBudgetError(
+            "Ethereum Keccak support is required to validate artifact source hashes; "
+            "install requirements-tools.txt before running the size budget checker"
+        ) from exc
 
 
 def normalize_path(path: Path, repo_root: Path) -> str:
@@ -99,6 +124,105 @@ def deployed_runtime_size_bytes(artifact: dict[str, Any], artifact_path: Path) -
     return len(linked_equivalent) // 2
 
 
+def artifact_profile_error(artifact_path: Path, reason: str) -> SizeBudgetError:
+    return SizeBudgetError(
+        f"{artifact_path} is not a current production-size artifact: {reason}. "
+        f"Run `{PRODUCTION_BUILD_COMMAND}` before checking runtime budgets."
+    )
+
+
+def artifact_metadata(artifact: dict[str, Any], artifact_path: Path) -> dict[str, Any]:
+    value = artifact.get("metadata")
+    if value is None:
+        value = artifact.get("rawMetadata")
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str) and value:
+        try:
+            return require_dict(json.loads(value), f"{artifact_path}.metadata")
+        except json.JSONDecodeError as exc:
+            raise artifact_profile_error(artifact_path, f"metadata is invalid JSON: {exc}") from exc
+    raise artifact_profile_error(artifact_path, "metadata is missing")
+
+
+def validate_current_production_artifact(
+    repo_root: Path,
+    artifact: dict[str, Any],
+    artifact_path: Path,
+    contract_name: str,
+    source: str,
+) -> None:
+    metadata = artifact_metadata(artifact, artifact_path)
+    compiler = require_dict(metadata.get("compiler"), f"{artifact_path}.metadata.compiler")
+    compiler_version = require_string(
+        compiler.get("version"),
+        f"{artifact_path}.metadata.compiler.version",
+    )
+    if compiler_version != EXPECTED_SOLC_VERSION:
+        raise artifact_profile_error(
+            artifact_path,
+            f"compiler version is {compiler_version}, expected {EXPECTED_SOLC_VERSION}",
+        )
+
+    settings = require_dict(metadata.get("settings"), f"{artifact_path}.metadata.settings")
+    evm_version = require_string(
+        settings.get("evmVersion"),
+        f"{artifact_path}.metadata.settings.evmVersion",
+    )
+    if evm_version != EXPECTED_EVM_VERSION:
+        raise artifact_profile_error(
+            artifact_path,
+            f"EVM version is {evm_version}, expected {EXPECTED_EVM_VERSION}",
+        )
+
+    optimizer = require_dict(
+        settings.get("optimizer"),
+        f"{artifact_path}.metadata.settings.optimizer",
+    )
+    if optimizer.get("enabled") is not True:
+        raise artifact_profile_error(artifact_path, "optimizer is not enabled")
+    optimizer_runs = require_int(
+        optimizer.get("runs"),
+        f"{artifact_path}.metadata.settings.optimizer.runs",
+    )
+    if optimizer_runs != EXPECTED_OPTIMIZER_RUNS:
+        raise artifact_profile_error(
+            artifact_path,
+            f"optimizer runs are {optimizer_runs}, expected {EXPECTED_OPTIMIZER_RUNS}",
+        )
+
+    normalized_source = Path(source).as_posix()
+    compilation_target = require_dict(
+        settings.get("compilationTarget"),
+        f"{artifact_path}.metadata.settings.compilationTarget",
+    )
+    if compilation_target.get(normalized_source) != contract_name:
+        raise artifact_profile_error(
+            artifact_path,
+            f"compilation target does not identify {normalized_source}:{contract_name}",
+        )
+
+    sources = require_dict(metadata.get("sources"), f"{artifact_path}.metadata.sources")
+    source_metadata = require_dict(
+        sources.get(normalized_source),
+        f"{artifact_path}.metadata.sources.{normalized_source}",
+    )
+    recorded_hash = require_string(
+        source_metadata.get("keccak256"),
+        f"{artifact_path}.metadata.sources.{normalized_source}.keccak256",
+    )
+    source_path = repo_root / normalized_source
+    try:
+        actual_hash = keccak256_hex(source_path.read_bytes())
+    except FileNotFoundError as exc:
+        raise artifact_profile_error(artifact_path, f"source file is missing: {source_path}") from exc
+    if recorded_hash.lower() != actual_hash.lower():
+        raise artifact_profile_error(
+            artifact_path,
+            f"source hash for {normalized_source} does not match the current checkout",
+        )
+
+
 def budget_contracts(config: dict[str, Any]) -> tuple[int, dict[str, dict[str, Any]]]:
     budget = require_dict(config.get("runtime_size_budget"), "runtime_size_budget")
     schema = require_string(budget.get("schema_version"), "runtime_size_budget.schema_version")
@@ -138,6 +262,7 @@ def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[
 
         artifact_path = find_artifact(foundry_out_abs, name, source)
         artifact = require_dict(load_json(artifact_path), str(artifact_path))
+        validate_current_production_artifact(repo_root, artifact, artifact_path, name, source)
         runtime_size = deployed_runtime_size_bytes(artifact, artifact_path)
         runtime_limit = require_int(
             budget.get("runtime_limit_bytes", default_limit),
@@ -198,7 +323,10 @@ def check_report(report: list[dict[str, Any]]) -> int:
         for row in failing:
             print(
                 "error: {contract} runtime margin {runtime_margin_bytes} is below "
-                "minimum {minimum_runtime_margin_bytes}; see {tracking}".format(**row),
+                "minimum {minimum_runtime_margin_bytes}; see {tracking}. If this "
+                f"uses stale or non-production artifacts, rerun `{PRODUCTION_BUILD_COMMAND}`".format(
+                    **row
+                ),
                 file=sys.stderr,
             )
         return 1

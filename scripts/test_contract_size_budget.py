@@ -29,6 +29,59 @@ def runtime_hex(size_bytes: int) -> str:
     return "0x" + ("60" * size_bytes)
 
 
+def write_source(root: Path, source: str, content: str | None = None) -> None:
+    if content is None:
+        content = "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\ncontract Example {}\n"
+    source_path = root / source
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_text(content, encoding="utf-8", newline="\n")
+
+
+def artifact_metadata(
+    root: Path,
+    *,
+    name: str,
+    source: str,
+    solc_version: str = checker.EXPECTED_SOLC_VERSION,
+    evm_version: str = checker.EXPECTED_EVM_VERSION,
+    optimizer_enabled: bool = True,
+    optimizer_runs: int = checker.EXPECTED_OPTIMIZER_RUNS,
+    source_hash: str | None = None,
+) -> dict[str, Any]:
+    normalized_source = Path(source).as_posix()
+    if source_hash is None:
+        source_hash = checker.keccak256_hex((root / normalized_source).read_bytes())
+    return {
+        "compiler": {"version": solc_version},
+        "language": "Solidity",
+        "settings": {
+            "compilationTarget": {normalized_source: name},
+            "evmVersion": evm_version,
+            "optimizer": {"enabled": optimizer_enabled, "runs": optimizer_runs},
+        },
+        "sources": {normalized_source: {"keccak256": source_hash}},
+        "version": 1,
+    }
+
+
+def artifact_json(
+    root: Path,
+    *,
+    name: str,
+    source: str,
+    runtime_object: str,
+    metadata: dict[str, Any] | str | None = None,
+    include_metadata: bool = True,
+) -> dict[str, Any]:
+    artifact = {"deployedBytecode": {"object": runtime_object}}
+    if not include_metadata:
+        return artifact
+    if metadata is None:
+        metadata = artifact_metadata(root, name=name, source=source)
+    artifact["metadata"] = metadata
+    return artifact
+
+
 def write_tree(
     root: Path,
     *,
@@ -37,13 +90,13 @@ def write_tree(
     warning_margin: int = 512,
     limit: int = 24_576,
 ) -> None:
+    source = "smart-contracts/Example.sol"
+    write_source(root, source)
     write_json(
         root / "release-artifacts/contracts.json",
         {
             "schema_version": "6529stream.release-artifact-contracts.v1",
-            "production_contracts": [
-                {"name": "Example", "source": "smart-contracts/Example.sol"}
-            ],
+            "production_contracts": [{"name": "Example", "source": source}],
             "runtime_size_budget": {
                 "schema_version": checker.BUDGET_SCHEMA,
                 "eip_170_runtime_limit_bytes": limit,
@@ -60,7 +113,12 @@ def write_tree(
     )
     write_json(
         root / "out/Example.sol/Example.json",
-        {"deployedBytecode": {"object": runtime_hex(runtime_size)}},
+        artifact_json(
+            root,
+            name="Example",
+            source=source,
+            runtime_object=runtime_hex(runtime_size),
+        ),
     )
 
 
@@ -69,9 +127,15 @@ def add_production_contract(root: Path, name: str, source: str, runtime_size: in
     config = checker.load_json(config_path)
     config["production_contracts"].append({"name": name, "source": source})
     write_json(config_path, config)
+    write_source(root, source, f"// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\ncontract {name} {{}}\n")
     write_json(
         root / "out" / Path(source).name / f"{name}.json",
-        {"deployedBytecode": {"object": runtime_hex(runtime_size)}},
+        artifact_json(
+            root,
+            name=name,
+            source=source,
+            runtime_object=runtime_hex(runtime_size),
+        ),
     )
 
 
@@ -121,11 +185,12 @@ class ContractSizeBudgetTests(unittest.TestCase):
             write_tree(root, runtime_size=24_000, limit=100, minimum_margin=1, warning_margin=1)
             write_json(
                 root / "out/Example.sol/Example.json",
-                {
-                    "deployedBytecode": {
-                        "object": "0x60__$a64266b5966c542c29758651cb19f2deb4$__61"
-                    }
-                },
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object="0x60__$a64266b5966c542c29758651cb19f2deb4$__61",
+                ),
             )
 
             report = checker.build_report(
@@ -142,14 +207,15 @@ class ContractSizeBudgetTests(unittest.TestCase):
             write_tree(root, runtime_size=24_000, limit=100, minimum_margin=1, warning_margin=1)
             write_json(
                 root / "out/Example.sol/Example.json",
-                {
-                    "deployedBytecode": {
-                        "object": (
-                            "0x60__$a64266b5966c542c29758651cb19f2deb4$__"
-                            "61__$bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb$__62"
-                        )
-                    }
-                },
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object=(
+                        "0x60__$a64266b5966c542c29758651cb19f2deb4$__"
+                        "61__$bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb$__62"
+                    ),
+                ),
             )
 
             report = checker.build_report(
@@ -186,7 +252,12 @@ class ContractSizeBudgetTests(unittest.TestCase):
             write_tree(root, runtime_size=24_000)
             write_json(
                 root / "out/Example.sol/Example.json",
-                {"deployedBytecode": {"object": "0x60__$unlinked$__"}},
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object="0x60__$unlinked$__",
+                ),
             )
 
             with self.assertRaisesRegex(checker.SizeBudgetError, "must be hex"):
@@ -204,6 +275,83 @@ class ContractSizeBudgetTests(unittest.TestCase):
             write_json(config_path, config)
 
             with self.assertRaisesRegex(checker.SizeBudgetError, "not production-listed"):
+                checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_rejects_missing_artifact_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000)
+            write_json(
+                root / "out/Example.sol/Example.json",
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object=runtime_hex(24_000),
+                    include_metadata=False,
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.SizeBudgetError, "metadata is missing"):
+                checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_rejects_wrong_compiler_version(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000)
+            write_json(
+                root / "out/Example.sol/Example.json",
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object=runtime_hex(24_000),
+                    metadata=artifact_metadata(
+                        root,
+                        name="Example",
+                        source="smart-contracts/Example.sol",
+                        solc_version="0.8.20+commit.a1b79de6",
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.SizeBudgetError, "compiler version"):
+                checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_rejects_wrong_optimizer_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000)
+            write_json(
+                root / "out/Example.sol/Example.json",
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object=runtime_hex(24_000),
+                    metadata=artifact_metadata(
+                        root,
+                        name="Example",
+                        source="smart-contracts/Example.sol",
+                        optimizer_runs=10_000,
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.SizeBudgetError, "optimizer runs"):
+                checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_rejects_stale_source_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000)
+            write_source(
+                root,
+                "smart-contracts/Example.sol",
+                "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\ncontract Example { uint256 value; }\n",
+            )
+
+            with self.assertRaisesRegex(checker.SizeBudgetError, "source hash"):
                 checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
 
 

@@ -31,7 +31,7 @@
     "renderer_source": {
       "category": "renderer_source",
       "path": "smart-contracts/StreamMetadataRenderer.sol",
-      "sha256": "sha256:0a103cbd50548ccbbe513c2fb0a17c42a315e6fca5508747c02cf3bb7bf84ecb"
+      "sha256": "sha256:6e0ce56504ebca64ae0f8b0102041185505e9616b1b8a6efb510ce95b725b562"
     },
     "rendering_mode": "animation_html",
     "runtime_assumptions": {
@@ -146,7 +146,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:01d4d6966a864f801675d7dc225f0bd9047dbaf5227b6bf83f5985ff66c9652d",
+      "sha256": "sha256:c083f852604892999843416d46ffc85f9eb66f42f28f80b9ca2bbbbb158c8c19",
       "status": "template"
     }
   },
@@ -187,7 +187,7 @@
     {
       "category": "provenance_manifest",
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:01d4d6966a864f801675d7dc225f0bd9047dbaf5227b6bf83f5985ff66c9652d"
+      "sha256": "sha256:c083f852604892999843416d46ffc85f9eb66f42f28f80b9ca2bbbbb158c8c19"
     }
   ],
   "redaction_policy": {

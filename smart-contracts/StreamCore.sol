@@ -11,9 +11,7 @@
 pragma solidity ^0.8.19;
 
 import "./ERC721.sol";
-import "./Strings.sol";
 import "./IRandomizer.sol";
-import "./IRandomizerLifecycle.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamMinter.sol";
 import "./IERC2981.sol";
@@ -24,8 +22,6 @@ import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
 
 contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
-    using Strings for uint256;
-
     bytes4 private constant _INTERFACE_ID_ERC4906 = 0x49064906;
     address private constant _DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
     uint256 private constant _DEFAULT_ROYALTY_BPS = 690;
@@ -48,9 +44,6 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     );
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
-    string private constant _METADATA_STATE_PENDING = "pending";
-    string private constant _METADATA_STATE_STALE = "stale";
-    string private constant _METADATA_STATE_FAILED = "failed";
     string private constant _METADATA_STATE_FINAL = "final";
     uint256 private constant _COLLECTION_TOKEN_RANGE = 10 ** 10;
     uint256 private constant _FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
@@ -370,28 +363,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         _requireCollectionNotFrozen(_collectionID);
         address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
         if (oldRandomizer != address(0)) {
-            uint256 pendingRequests;
-            assembly ("memory-safe") {
-                let ptr := mload(0x40)
-                // IRandomizerLifecycle.supportsRandomizerLifecycle()
-                mstore(ptr, 0x81d673e000000000000000000000000000000000000000000000000000000000)
-                let ok := staticcall(gas(), oldRandomizer, ptr, 0x04, ptr, 0x20)
-                let supported := and(ok, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
-                if supported {
-                    // IRandomizerLifecycle.pendingRandomnessRequests(uint256)
-                    mstore(ptr, 0xdd26bdd100000000000000000000000000000000000000000000000000000000)
-                    mstore(add(ptr, 0x04), _collectionID)
-                    ok := staticcall(gas(), oldRandomizer, ptr, 0x24, ptr, 0x20)
-                    if iszero(ok) {
-                        returndatacopy(0, 0, returndatasize())
-                        revert(0, returndatasize())
-                    }
-                    if iszero(eq(returndatasize(), 0x20)) {
-                        revert(0, 0)
-                    }
-                    pendingRequests := mload(ptr)
-                }
-            }
+            uint256 pendingRequests =
+                StreamMetadataRenderer.pendingRandomnessRequests(oldRandomizer, _collectionID);
             if (pendingRequests != 0) {
                 revert PendingRandomnessRequests(_collectionID, oldRandomizer, pendingRequests);
             }
@@ -798,11 +771,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             if (bytes(baseURI).length == 0) {
                 return "";
             }
-            return finalMetadata
-                ? string(abi.encodePacked(baseURI, tokenId.toString()))
-                : string(
-                    abi.encodePacked(baseURI, _pendingTokenMetadataState(tokenId, collectionId))
-                );
+            return StreamMetadataRenderer.offchainTokenURI(
+                baseURI, tokenId, _pendingTokenMetadataState(tokenId, collectionId), finalMetadata
+            );
         }
 
         string memory metadataState = finalMetadata
@@ -829,36 +800,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         view
         returns (string memory)
     {
-        address randomizer = collectionAdditionalData[collectionId].randomizerContract;
-        bytes4 supportSelector = IRandomizerLifecycle.supportsRandomizerLifecycle.selector;
-        bytes4 stateSelector = IRandomizerLifecycle.randomnessRequestStateForToken.selector;
-        bool supported;
-        uint256 state;
-        bool hasState;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, supportSelector)
-            supported := staticcall(gas(), randomizer, ptr, 0x04, ptr, 0x20)
-            supported := and(supported, and(eq(returndatasize(), 0x20), eq(mload(ptr), 1)))
-
-            mstore(ptr, stateSelector)
-            mstore(add(ptr, 0x04), tokenId)
-            hasState := staticcall(gas(), randomizer, ptr, 0x24, ptr, 0x20)
-            hasState := and(supported, and(hasState, eq(returndatasize(), 0x20)))
-            state := mload(ptr)
-        }
-
-        if (hasState) {
-            if (state == uint256(IRandomizerLifecycle.RandomnessRequestState.Stale)) {
-                return _METADATA_STATE_STALE;
-            }
-            if (state == uint256(IRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing))
-            {
-                return _METADATA_STATE_FAILED;
-            }
-        }
-
-        return _METADATA_STATE_PENDING;
+        return StreamMetadataRenderer.pendingTokenMetadataState(
+            collectionAdditionalData[collectionId].randomizerContract, tokenId
+        );
     }
 
     function _onchainTokenURI(
@@ -932,9 +876,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         view
         returns (string memory)
     {
-        uint256 tok = tokenId - collectionAdditionalData[collectionId].reservedMinTokensIndex;
-        return string(
-            abi.encodePacked(collectionInfo[collectionId].collectionName, " #", tok.toString())
+        return StreamMetadataRenderer.tokenName(
+            collectionInfo[collectionId].collectionName,
+            tokenId,
+            collectionAdditionalData[collectionId].reservedMinTokensIndex
         );
     }
 
