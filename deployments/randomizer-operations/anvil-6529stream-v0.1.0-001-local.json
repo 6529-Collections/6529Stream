@@ -156,7 +156,7 @@
         },
         {
           "path": "test/StreamPaymentsInvariant.t.sol",
-          "sha256": "sha256:60a85d7b92909ca48f23429aca46a1104b033e4ba3c891e1ba0ab9c51564feba"
+          "sha256": "sha256:a45d7ca46b919f613da83d63c42187685ec9183ae6f8546f78cb06f54f0c6fc5"
         }
       ]
     },

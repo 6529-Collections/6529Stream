@@ -131,10 +131,11 @@ This implementation includes auction-local accounting needed for ADR 0002:
 - `totalOwed()`
 - `emergencyWithdrawable()`
 
-Full protocol-wide payment accounting remains owned by ADR 0003 and the
-`P0-PAY-*` roadmap items. Fixed-price pull payments, curator reward accounting,
-fuller randomizer reserve lifecycle accounting, and cross-contract invariants
-are not complete in this auction-custody change.
+Full protocol-wide payment accounting is owned by ADR 0003 and the `P0-PAY-*`
+roadmap items. The current local baseline includes fixed-price pull payments,
+curator reward accounting, randomizer reserve accounting, and cross-contract
+payment invariants in the payment-focused test suite. Fork/testnet/live
+evidence remains separate release-gate work.
 
 ## Key Events
 

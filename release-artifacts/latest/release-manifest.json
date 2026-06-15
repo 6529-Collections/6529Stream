@@ -1745,7 +1745,7 @@
     "randomizer_operations": [
       {
         "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:3e8c0c0ca32a1b5c63a27f33419894560c9b574a942b50f56f112c9eeacd8e37",
+        "sha256": "sha256:6fcea34fa9ae78e72aefd52234ca83697a05eece5bae23dce42c5ac023ae8140",
         "size_bytes": 9421,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
@@ -1780,8 +1780,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:1c82f3454abe3125396deb9432d04f634a4ccee3f0ab5cac74a1cca532249e9d",
-      "size_bytes": 26315
+      "sha256": "sha256:b309cffea1f3aad2e976d91ff71a5515dc4f9cedba1725cc58aeb24d5035c04f",
+      "size_bytes": 26640
     },
     "governance_docs": [
       {

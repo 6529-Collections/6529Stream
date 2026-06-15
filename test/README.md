@@ -105,6 +105,10 @@ category totals, `totalOwed()` views, balance coverage, reserves, and
 `emergencyWithdrawable()` views remain coherent for the current first-party
 payment surfaces. The invariant suite also checks ADR-style local-ledger view
 aliases such as `totalReserved()` and `surplus()` where those surfaces apply.
+ADV-005 expands that sequence with failed fixed-price, auction
+bidder/proceeds, and curator withdrawals to rejecting recipients, auction
+curator proceeds withdrawal selection, deterministic forced randomizer reserve
+injection, and explicit randomizer balance/reserve equality assertions.
 
 Supply, replay, and freeze behavior now has a bounded sequence invariant
 baseline in `StreamSupplyReplayFreezeInvariant.t.sol`: mixed fixed-price mints,

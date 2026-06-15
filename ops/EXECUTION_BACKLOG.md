@@ -1134,7 +1134,7 @@ Issue: [`#374`](https://github.com/6529-Collections/6529Stream/issues/374).
 
 ### ADV-004: Add Pause And Settlement Matrix Invariants
 
-Status: In progress locally on branch `codex/pause-settlement-matrix-invariants`.
+Status: Merged in PR #379; issue #378 closed completed.
 
 Gate: D/F.
 
@@ -1202,10 +1202,11 @@ Evidence artifacts: None.
 Dependencies: Existing pause controls, auction payments, and payment
 invariants.
 Issue: [`#378`](https://github.com/6529-Collections/6529Stream/issues/378).
+PR: [`#379`](https://github.com/6529-Collections/6529Stream/pull/379).
 
 ### ADV-005: Expand Payment And Forced-ETH Invariants
 
-Status: Planned.
+Status: Local validation complete on issue #380 and branch `codex/payment-forced-eth-invariants`; PR not opened yet.
 
 Gate: D/F.
 
@@ -1231,13 +1232,17 @@ Implementation steps:
    credits, auction proceeds, curator credits, randomizer reserves, and forced
    ETH.
 2. Add category and aggregate owed views to assertions.
-3. Add failed withdrawal and reentrancy receiver actions.
+3. Add failed withdrawal and rejecting-receiver actions.
 4. Bound operation count to keep CI stable.
 
 Required tests/checks:
 
 - `forge test --match-path test/StreamPaymentsInvariant.t.sol -vvv`
-- `forge test -vvv`
+- Focused payment/emergency suite with `Stream(AuctionPayments|FixedPricePayments|CuratorsPool|EmergencyWithdraw|RandomizerPayments|PaymentsInvariant)Test`
+- `python scripts/check_randomizer_operations.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- `scripts/check.ps1`
 
 Acceptance criteria:
 
@@ -1249,6 +1254,7 @@ Acceptance criteria:
 Evidence artifacts: None.
 
 Dependencies: Existing payment invariant baseline.
+Issue: [`#380`](https://github.com/6529-Collections/6529Stream/issues/380).
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 

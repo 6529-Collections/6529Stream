@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/pause-settlement-matrix-invariants` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/377` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/378` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/379` |
-| Next issue | TBD after ADV-004; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/payment-forced-eth-invariants` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/379` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/380` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/381` |
+| Next issue | TBD after ADV-005; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 04:11 UTC` |
+| Last updated | `2026-06-15 04:56 UTC` |
 
 ## Packaging Notes
 
@@ -242,19 +242,82 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 178 | Add auction/drop/randomizer adversarial sequence tests | Gate D/Gate F support | Extend the protocol state-machine test with adversarial ordering coverage for cancelled/expired/stale/replayed drops, reverted fixed-price withdrawals, auction pre-settlement ordering, settlement idempotence, late bids, and failed auction withdrawals without production contract changes | Merged in PR #373 |
 | 179 | Fold clean-main reviewer rebaseline into roadmap | Gate G support | Record the reviewer-confirmed fixed surfaces, remaining 10/10 product/evidence gaps, benchmark inputs, and backlog mapping without changing readiness claims | Merged in PR #376 |
 | 180 | Add signer compromise and revocation fuzz tests | Gate D/Gate F support | Add deterministic and bounded fuzz coverage for signer compromise response paths: drop-execution pause, signer rotation, epoch invalidation, per-drop cancellation, replay rejection, recovered fixed-price and auction payloads, and invalid-attempt no-mutation assertions | Merged in PR #377 |
-| 181 | Add pause and settlement matrix invariants | Gate D/Gate F support | Add snapshot-backed matrix coverage for auction bid pauses, settlement pauses, failed proceeds withdrawals, user withdrawal liveness, emergency-withdrawal owed-fund boundaries, and duplicate-settlement rejection without production contract changes | In progress on issue #378 |
+| 181 | Add pause and settlement matrix invariants | Gate D/Gate F support | Add snapshot-backed matrix coverage for auction bid pauses, settlement pauses, failed proceeds withdrawals, user withdrawal liveness, emergency-withdrawal owed-fund boundaries, and duplicate-settlement rejection without production contract changes | Merged in PR #379 |
+| 182 | Expand payment and forced-ETH invariants | Gate D/Gate F support | Extend the bounded payment invariant with failed-withdrawal rollback actions, auction curator proceeds withdrawals, randomizer forced-reserve injection, and explicit category/reserve equality checks without production contract changes | In progress on issue #380 |
 
 ## Current PR Worklog
 
-### PR candidate: Add pause and settlement matrix invariants (Queue Item 181)
+### PR candidate: Expand payment and forced-ETH invariants (Queue Item 182)
 
-Status: PR #379 open; final local precision pass completed after bot
-nice-to-have feedback, amended push and final CI follow-up pending.
+Status: PR #381 open; CI passed on initial head, bot nice-to-have follow-up prepared locally.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/380`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/381`.
+Branch: `codex/payment-forced-eth-invariants`.
+Branch started from PR #379 squash merge commit
+`217a3b38ae5058f397da324d54a343439bc5b2c8`.
+Initial PR head: `067c31cfc33ff0025c0a73d18faade4c1dddc249`.
+
+Goal:
+
+- Expand ADV-005 payment invariant coverage without production contract
+  changes.
+- Include generated failed-withdrawal rollback paths for fixed-price credits,
+  auction bidder credits, auction proceeds credits, and curator credits.
+- Include auction curator proceeds withdrawals in generated auction credit
+  withdrawal sequences.
+- Include deterministic forced-balance injection into the randomizer adapter and
+  assert randomizer balance equals `totalRandomnessReserved()`/`totalOwed()`/
+  `totalReserved()` while remaining non-emergency-withdrawable.
+- Preserve CI stability with the existing 24-step bounded sequence.
+
+Validation completed so far:
+
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`
+  passed locally with 256 fuzz runs after splitting the auction failed-withdrawal
+  helper to avoid stack-too-deep.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-contract "Stream(AuctionPayments|FixedPricePayments|CuratorsPool|EmergencyWithdraw|RandomizerPayments|PaymentsInvariant)Test" -vvv`
+  passed locally with 59 tests passing across the focused payment and emergency
+  withdrawal suites, including the ADV-005 invariant.
+- `python scripts\check_randomizer_operations.py` passed after refreshing the
+  retained `test/StreamPaymentsInvariant.t.sol` evidence hash in the local
+  randomizer operations bundle.
+- `python scripts\generate_release_manifest.py --check` and
+  `python scripts\generate_release_checksums.py --check` passed after
+  regenerating deterministic release artifacts sequentially.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed locally at `2026-06-15 04:45 UTC` with existing compiler and Foundry
+  trace warning noise only.
+- PR #381 was marked ready for review and CodeRabbit review was requested in
+  comment `4704661319`; CodeRabbit replied `Review finished` in comment
+  `4704661702`, while its initial rate-limit warning comment `4704657752`
+  produced a success status and no actionable review threads.
+- GitHub Actions run `27524707053` passed on initial head
+  `d2a18efd299ea5a150ceb86377846b261b4e2a15`, including Windows PowerShell
+  wrapper job `81349567851` and Foundry smoke job `81349567865`.
+- 6529bot general review comment `4704665314` marked the PR good to merge with
+  non-blocking nice-to-haves; 6529bot security review comment `4704665519`
+  reported no security findings.
+- Local follow-up for the nice-to-haves added comments documenting the
+  intentional exact `ETH failed` assertion and current full-balance randomizer
+  reserve model. Focused validation passed:
+  `forge fmt --check test\StreamPaymentsInvariant.t.sol`,
+  `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`,
+  `python scripts\check_randomizer_operations.py`,
+  `python scripts\generate_release_manifest.py --check`,
+  `python scripts\generate_release_checksums.py --check`,
+  `python scripts\check_changelog.py`, and `git diff --check`.
+
+### Completed: Add pause and settlement matrix invariants (Queue Item 181)
+
+Status: merged as PR #379; issue #378 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/378`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/379`.
 Branch: `codex/pause-settlement-matrix-invariants`.
 Branch started from PR #377 squash merge commit
 `7d14e95df61f0ef0f1185c42a7a70e3bb50a1ec9`.
+Final PR head: `11a0b3a47d445ed90c8bb95abcf65b172d4106e7`.
+Squash merge commit:
+`217a3b38ae5058f397da324d54a343439bc5b2c8`.
 
 Goal:
 
@@ -303,6 +366,13 @@ Validation completed so far:
   no-mutation assertions. The targeted pause suite passed again, and the full
   local gate passed again at 2026-06-15 04:11 UTC with the same existing
   compiler/NatSpec warning noise only.
+- Final PR #379 CI run `27523500886` passed on head
+  `11a0b3a47d445ed90c8bb95abcf65b172d4106e7`, including Windows PowerShell
+  wrapper job `81346089967` and Foundry smoke job `81346089983`. CodeRabbit was
+  requested in comment `4704484566`, replied `Review finished` in comment
+  `4704484979`, and the final thread/review scan had no unresolved threads or
+  requested-change reviews. PR #379 squash-merged as
+  `217a3b38ae5058f397da324d54a343439bc5b2c8`.
 
 ### Completed: Add signer compromise and revocation fuzz tests (Queue Item 180)
 
@@ -13716,6 +13786,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 04:56 | Address PR #381 nice-to-haves | CI passed on initial head `d2a18efd299ea5a150ceb86377846b261b4e2a15`, CodeRabbit status was success despite a rate-limit banner, and 6529bot marked the PR good to merge with non-blocking suggestions. Accepted the low-risk clarity suggestions by documenting the exact `ETH failed` assertion and the current full-balance randomizer reserve model, then refreshed randomizer evidence and release artifacts before focused validation. |
+| 2026-06-15 04:48 | Open PR #381 | PR #381 opened for issue #380 on head `067c31cfc33ff0025c0a73d18faade4c1dddc249`, expands ADV-005 payment and forced-ETH invariant coverage without production contract changes, refreshes retained randomizer operations evidence and deterministic release artifacts, records the clean-main reviewer roadmap additions already folded into the current roadmap/backlog, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-15 02:58 | Merge PR #376 and start Queue Item 180 | PR #376 squash-merged as `ba83f54ca2ea952a62403a8b74faa09e11e150c7` after CI run `27520925937` passed Foundry smoke job `81338566333` and Windows PowerShell wrapper job `81338566247`; CodeRabbit status was success with no submitted reviews and no review threads, merge-decision comment `4704081007` documented the non-actionable rate-limit banner, issue #375 closed completed, and branch `codex/signer-compromise-fuzz` started from the merged baseline for issue #374 / ADV-003 signer compromise and revocation fuzz coverage. |
 | 2026-06-15 02:33 | Start Queue Item 179 | User supplied clean-main reviewer comments for the roadmap after PR #373 merged; issue #375 and branch `codex/reviewer-roadmap-rebaseline` track a bounded documentation/state reconciliation that records the fixed-versus-missing rebaseline, source benchmarks, backlog mapping, and latest verification metadata before returning to substantive ADV-003 signer-compromise fuzz work. |
 | 2026-06-14 18:08 | Merge PR #356 and start Queue Item 174 | PR #356 squash-merged as `dd61e79d1fba5dbfec105b46ee0544fed105b95e` after CI run `27507051549` passed Windows PowerShell wrapper job `81300070339` and Foundry smoke job `81300070342`; CodeRabbit status was success with review-finished reply `4702550060`, no review threads were open, merge-decision comment `4702573973` documented the autonomous merge basis and the process correction to avoid standalone bookkeeping PRs by default, issue #355 closed completed, issue #357 opened for testnet deployment rehearsal retained-artifact checker support, and branch `codex/testnet-deployment-rehearsal-evidence-checker` started from the merged baseline. |

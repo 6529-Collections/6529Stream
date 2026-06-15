@@ -25,6 +25,11 @@ the release policy in `docs/release-policy.md`.
   proceeds withdrawals, user withdrawal liveness, forced-surplus
   emergency-withdrawal boundaries, and duplicate-settlement rejection without
   production contract changes.
+- Added ADV-005 payment and forced-ETH invariant coverage for failed
+  fixed-price, auction bidder/proceeds, and curator withdrawals, auction curator
+  proceeds withdrawals in generated sequences, randomizer forced-reserve
+  accounting, and explicit randomizer balance/reserve equality without
+  production contract changes.
 - Expanded the reviewer-supplied 1/1 product-excellence roadmap into
   issue-ready backlog entries and strategic release requirements for
   contract-level metadata, provenance manifests, royalty policy, collector
