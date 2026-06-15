@@ -49,8 +49,8 @@
         "0x0000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000002"
       ],
-      "abi_hash": "sha256:785dbbfca158b11a373a034fe76e10d76f396282954d207e76a32a7bcdee3530",
-      "bytecode_hash": "sha256:01302eae2c6dfd37358d64b3399c8b856d3af045476c092db2bb77bf4f13cc6f",
+      "abi_hash": "sha256:be6dcfbe4bc78781206a9b5bb2ea029628ff8f665ccb923ae0530f943272cb49",
+      "bytecode_hash": "sha256:1f4a88b235a347cb42a130ce896435f8dc67b869791e96410fb60345156e2cc2",
       "verification_status": "not_applicable"
     },
     "StreamContractMetadata": {
@@ -177,11 +177,11 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:22f10c5e9eccc0d42e5dfa6d02d1aa72e6b57595f91fe19dc14abbcb40361d38",
+    "manifest_sha256": "sha256:84b863b9719393497f2590f6cfef9ab6b66a809f53cce983c3c6357a2fea6a94",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-      "StreamCore": "sha256:785dbbfca158b11a373a034fe76e10d76f396282954d207e76a32a7bcdee3530",
+      "StreamCore": "sha256:be6dcfbe4bc78781206a9b5bb2ea029628ff8f665ccb923ae0530f943272cb49",
       "StreamContractMetadata": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
       "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",

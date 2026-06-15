@@ -12,7 +12,7 @@
     "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
     "StreamAuctions": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
     "StreamContractMetadata": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-    "StreamCore": "sha256:785dbbfca158b11a373a034fe76e10d76f396282954d207e76a32a7bcdee3530",
+    "StreamCore": "sha256:be6dcfbe4bc78781206a9b5bb2ea029628ff8f665ccb923ae0530f943272cb49",
     "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
     "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
     "StreamMinter": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e"
@@ -104,13 +104,13 @@
     },
     "StreamCore": {
       "creation": {
-        "sha256": "sha256:1c58d62db002a291ad8d0047bf4a97a51b350f68459a49ad0c7c2aca08a38920",
+        "sha256": "sha256:18f60f7389c86751d2dc2024f250ab32156ce0c43868e8926325eb1b2a21fe10",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
         "size_bytes": 25231
       },
       "runtime": {
-        "sha256": "sha256:01302eae2c6dfd37358d64b3399c8b856d3af045476c092db2bb77bf4f13cc6f",
+        "sha256": "sha256:1f4a88b235a347cb42a130ce896435f8dc67b869791e96410fb60345156e2cc2",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
         "size_bytes": 24070
@@ -277,12 +277,12 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:785dbbfca158b11a373a034fe76e10d76f396282954d207e76a32a7bcdee3530",
-      "bytecode_sha256": "sha256:1c58d62db002a291ad8d0047bf4a97a51b350f68459a49ad0c7c2aca08a38920",
+      "abi_sha256": "sha256:be6dcfbe4bc78781206a9b5bb2ea029628ff8f665ccb923ae0530f943272cb49",
+      "bytecode_sha256": "sha256:18f60f7389c86751d2dc2024f250ab32156ce0c43868e8926325eb1b2a21fe10",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
       "bytecode_size_bytes": 25231,
-      "deployed_bytecode_sha256": "sha256:01302eae2c6dfd37358d64b3399c8b856d3af045476c092db2bb77bf4f13cc6f",
+      "deployed_bytecode_sha256": "sha256:1f4a88b235a347cb42a130ce896435f8dc67b869791e96410fb60345156e2cc2",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "deployed_bytecode_size_bytes": 24070,
