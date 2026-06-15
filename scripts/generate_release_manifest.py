@@ -16,6 +16,7 @@ import check_drop_authorization_signing_evidence as drop_signing_evidence_checke
 import check_admin_ceremony_evidence as admin_ceremony_checker
 import check_non_local_release_evidence as non_local_evidence_checker
 import check_public_beta_evidence as public_beta_checker
+import check_risk_register as risk_register_checker
 import check_release_signatures as release_signature_checker
 import check_signer_custody_readiness as signer_custody_checker
 
@@ -32,6 +33,7 @@ DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
 PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
+RISK_REGISTER_FILENAME = "risk-register.json"
 RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
 RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
 RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME = (
@@ -752,6 +754,39 @@ def public_beta_evidence_record(path: Path, repo_root: Path) -> dict[str, Any]:
     return record
 
 
+def risk_register_record(path: Path, repo_root: Path) -> dict[str, Any]:
+    """Load, validate, and summarize the release risk register."""
+    try:
+        risk_register_checker.validate_risk_register(repo_root, path)
+    except risk_register_checker.RiskRegisterError as exc:
+        raise ReleaseManifestError(f"invalid risk register {path}: {exc}") from exc
+
+    data = require_dict(load_json(path), str(path))
+    risks = data["risks"]
+    record = file_record(path, repo_root, schema_required=True)
+    record.update(
+        {
+            "maturity": require_string(data.get("maturity"), "maturity"),
+            "risk_count": len(risks),
+            "open_blocker_count": sum(
+                1 for risk in risks if risk.get("status") == "open_blocker"
+            ),
+            "planned_mitigation_count": sum(
+                1 for risk in risks if risk.get("status") == "planned_mitigation"
+            ),
+            "accepted_local_baseline_count": sum(
+                1
+                for risk in risks
+                if risk.get("status") == "accepted_local_baseline"
+            ),
+            "areas": sorted(
+                {require_string(risk.get("area"), "risk.area") for risk in risks}
+            ),
+        }
+    )
+    return record
+
+
 def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> dict[str, Any]:
     path = release_artifacts_dir / "release-artifact-manifest.json"
     data = require_dict(load_json(path), str(path))
@@ -997,6 +1032,10 @@ def build_manifest(
             ),
             "public_beta_evidence": public_beta_evidence_record(
                 release_artifacts_dir / PUBLIC_BETA_EVIDENCE_FILENAME,
+                repo_root,
+            ),
+            "risk_register": risk_register_record(
+                release_artifacts_dir / RISK_REGISTER_FILENAME,
                 repo_root,
             ),
             "public_beta_blocker_report": file_record(

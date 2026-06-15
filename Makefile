@@ -178,6 +178,14 @@ public-beta-evidence-check:
 	$(PYTHON) scripts/test_public_beta_evidence.py
 	$(PYTHON) scripts/check_public_beta_evidence.py
 
+risk-register:
+	$(PYTHON) scripts/generate_risk_register.py
+
+risk-register-check:
+	$(PYTHON) scripts/test_risk_register.py
+	$(PYTHON) scripts/check_risk_register.py
+	$(PYTHON) scripts/generate_risk_register.py --check
+
 public-beta-blocker-report:
 	$(PYTHON) scripts/generate_public_beta_blocker_report.py
 
@@ -262,10 +270,10 @@ release-readiness-check:
 	$(PYTHON) scripts/test_release_readiness.py
 	$(PYTHON) scripts/check_release_readiness.py
 
-release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-markdown-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
+release-manifest: address-books source-verification-inputs dependency-artifacts ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check risk-register public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-markdown-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
 	$(PYTHON) scripts/generate_release_manifest.py
 
-release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-markdown-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
+release-manifest-check: address-books-check source-verification-inputs-check dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check drop-authorization-signing-evidence-check signer-custody-readiness-check public-beta-evidence-check risk-register-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-markdown-check architecture-threat-model-check audit-package-check incident-response-check drop-authorization-fixtures-check release-readiness-check
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 

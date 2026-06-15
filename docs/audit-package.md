@@ -64,6 +64,7 @@ deferrals are appropriate for launch.
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
+| Canonical release risk register | [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json) |
 | Incident response runbook | [`docs/incident-response.md`](incident-response.md) |
 | Drop authorization signing fixtures, unsigned payload tooling, and signing evidence | [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) |
 | Signer custody readiness evidence | [`docs/signer-custody-readiness.md`](signer-custody-readiness.md) |
@@ -170,6 +171,16 @@ Local deployment and release evidence:
   is the machine-readable checksum bundle and includes the bytecode-to-release
   proof even though the proof is intentionally not embedded into the release
   manifest to avoid a manifest/proof hash cycle.
+- [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json)
+  is the generated risk register for launch blockers, accepted local-baseline
+  risks, and planned mitigations. Its source-document and evidence hashes are
+  validated by [`scripts/check_risk_register.py`](../scripts/check_risk_register.py)
+  and refreshed by
+  [`scripts/generate_risk_register.py`](../scripts/generate_risk_register.py).
+  The schema is retained at
+  [`release-artifacts/schema/risk-register.schema.json`](../release-artifacts/schema/risk-register.schema.json),
+  and the focused regression suite lives in
+  [`scripts/test_risk_register.py`](../scripts/test_risk_register.py).
 - [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json)
   records local placeholder signature evidence and the self-referential
   manifest/checksum boundary.
@@ -211,11 +222,11 @@ Local deployment and release evidence:
 The release manifest includes this audit package as a governance document. The
 release manifest also includes the architecture map, threat model, incident
 response runbook, drop authorization signing guide, and signer custody
-readiness guide as governance documents, and it summarizes the public-beta
-evidence status. The bytecode-to-release proof records the release-manifest
+readiness guide as governance documents, summarizes the public-beta evidence
+status, and records the generated risk register. The bytecode-to-release proof records the release-manifest
 hash and is covered by the checksum bundle; it is deliberately not embedded
 back into the release manifest. The checksum bundle covers the release
-manifest, proof, address books, retained evidence, and release artifacts, so
+manifest, proof, risk register, address books, retained evidence, and release artifacts, so
 changes to the audit package, architecture map, threat model,
 incident-response runbook, drop authorization signing guide, signer custody
 readiness guide, public-beta evidence status, or release-proof artifacts must
@@ -225,7 +236,9 @@ refresh release evidence before a release-oriented PR can pass.
 
 Known unresolved blockers are tracked in
 [`docs/known-blockers.md`](known-blockers.md) and
-[`ops/ROADMAP.md`](../ops/ROADMAP.md). Current major unresolved categories
+[`ops/ROADMAP.md`](../ops/ROADMAP.md), then summarized in the generated
+[`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json).
+Current major unresolved categories
 include fork/testnet/live deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
 signatures, reviewed signer custody readiness evidence, non-local randomizer
@@ -286,6 +299,9 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_risk_register.py
+python scripts/check_risk_register.py
+python scripts/generate_risk_register.py --check
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_bytecode_release_proof.py
@@ -329,7 +345,8 @@ notes:
   at the same protocol boundaries.
 - `ops/SLITHER_BASELINE.md` has no unexplained high/medium production finding.
 - `docs/known-blockers.md`, `docs/release-readiness.md`, public-beta blocker
-  report, and production-release blocker report agree on external evidence gaps.
+  report, production-release blocker report, and risk register agree on
+  external evidence gaps and accepted local-baseline risks.
 - Release manifest, bytecode-to-release proof, source verification inputs,
   checksum bundle, and signed release tag gate are current.
 - Test evidence covers the state-machine, adversarial ordering, signer
@@ -376,6 +393,9 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_risk_register.py
+python scripts/check_risk_register.py
+python scripts/generate_risk_register.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py
 python scripts/test_bytecode_release_proof.py

@@ -130,6 +130,9 @@ jobs:
             scripts/test_testnet_deployment_rehearsal_evidence.py \
             scripts/check_public_beta_evidence.py \
             scripts/test_public_beta_evidence.py \
+            scripts/check_risk_register.py \
+            scripts/generate_risk_register.py \
+            scripts/test_risk_register.py \
             scripts/generate_public_beta_blocker_report.py \
             scripts/test_public_beta_blocker_report.py \
             scripts/generate_production_release_blocker_report.py \
@@ -394,6 +397,9 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_public_beta_evidence.py 2>&1 | tee ci-logs/public-beta-evidence-tests.log
           python3 scripts/check_public_beta_evidence.py 2>&1 | tee ci-logs/public-beta-evidence-check.log
+          python3 scripts/test_risk_register.py 2>&1 | tee ci-logs/risk-register-tests.log
+          python3 scripts/check_risk_register.py 2>&1 | tee ci-logs/risk-register-check.log
+          python3 scripts/generate_risk_register.py --check 2>&1 | tee ci-logs/risk-register-generate-check.log
           python3 scripts/test_public_beta_blocker_report.py 2>&1 | tee ci-logs/public-beta-blocker-report-tests.log
           python3 scripts/generate_public_beta_blocker_report.py --check 2>&1 | tee ci-logs/public-beta-blocker-report-check.log
           python3 scripts/test_production_release_blocker_report.py 2>&1 | tee ci-logs/production-release-blocker-report-tests.log

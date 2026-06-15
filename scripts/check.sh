@@ -84,6 +84,9 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_testnet_deployment_rehearsal_evidence.py
 "$python_bin" scripts/test_public_beta_evidence.py
 "$python_bin" scripts/check_public_beta_evidence.py
+"$python_bin" scripts/test_risk_register.py
+"$python_bin" scripts/check_risk_register.py
+"$python_bin" scripts/generate_risk_register.py --check
 "$python_bin" scripts/test_public_beta_blocker_report.py
 "$python_bin" scripts/generate_public_beta_blocker_report.py --check
 "$python_bin" scripts/test_production_release_blocker_report.py

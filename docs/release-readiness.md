@@ -41,7 +41,11 @@ as the committed tracker map from those generated backlog entries to GitHub
 issues. Use
 [`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md)
 as the generated no-secret review view for exact GitHub issue body payloads
-derived from that backlog and tracker map. Run
+derived from that backlog and tracker map. Use
+[`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json)
+as the generated risk register for launch blockers, accepted local-baseline
+risks, planned mitigations, source-document hashes, and evidence links.
+Run
 `python scripts/check_release_evidence_issue_closure.py` before closing any
 linked tracker issue; that release evidence issue closure readiness check loads
 the tracker map, `release-evidence-issue-backlog.json` backlog artifact,
@@ -74,7 +78,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet ceremony/randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, and reviewed live bytecode proof missing |
+| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, risk register, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, and reviewed live bytecode proof missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -112,6 +116,15 @@ The current local baseline includes:
   `python scripts/generate_bytecode_release_proof.py --check`, which tie
   committed local/fork addresses and runtime bytecode hashes to the release
   manifest without claiming live production bytecode verification;
+- generated risk register under
+  [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json),
+  backed by
+  [`release-artifacts/schema/risk-register.schema.json`](../release-artifacts/schema/risk-register.schema.json),
+  `python scripts/test_risk_register.py`,
+  `python scripts/check_risk_register.py`, and
+  `python scripts/generate_risk_register.py --check`, which summarize launch
+  blockers, accepted local-baseline risks, planned mitigations, source-document
+  hashes, and evidence links without changing readiness claims;
 - source verification inputs under
   [`release-artifacts/latest/source-verification-inputs.json`](../release-artifacts/latest/source-verification-inputs.json);
 - ABI compatibility and gas baselines under
@@ -292,6 +305,7 @@ Release artifacts:
 - [release-artifacts/latest/release-manifest.json](../release-artifacts/latest/release-manifest.json)
 - [release-artifacts/latest/SHA256SUMS](../release-artifacts/latest/SHA256SUMS)
 - [release-artifacts/latest/release-checksums.json](../release-artifacts/latest/release-checksums.json)
+- [release-artifacts/latest/risk-register.json](../release-artifacts/latest/risk-register.json)
 - [release-artifacts/latest/public-beta-evidence.json](../release-artifacts/latest/public-beta-evidence.json)
 - [release-artifacts/latest/public-beta-blockers.md](../release-artifacts/latest/public-beta-blockers.md)
 - [release-artifacts/latest/production-release-blockers.md](../release-artifacts/latest/production-release-blockers.md)
@@ -304,6 +318,7 @@ Release artifacts:
 - [release-artifacts/latest/release-evidence-issue-body-sync.md](../release-artifacts/latest/release-evidence-issue-body-sync.md)
 - [release-artifacts/latest/source-verification-inputs.json](../release-artifacts/latest/source-verification-inputs.json)
 - [release-artifacts/schema/public-beta-evidence.schema.json](../release-artifacts/schema/public-beta-evidence.schema.json)
+- [release-artifacts/schema/risk-register.schema.json](../release-artifacts/schema/risk-register.schema.json)
 - [release-artifacts/schema/release-evidence-live-audit-report.schema.json](../release-artifacts/schema/release-evidence-live-audit-report.schema.json)
 - [release-artifacts/evidence/release-evidence-live-audit-report-template.json](../release-artifacts/evidence/release-evidence-live-audit-report-template.json)
 - [release-artifacts/evidence/release-evidence-live-audit-report-template.md](../release-artifacts/evidence/release-evidence-live-audit-report-template.md)
@@ -349,6 +364,9 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
+python scripts/test_risk_register.py
+python scripts/check_risk_register.py
+python scripts/generate_risk_register.py --check
 python scripts/test_production_release_blocker_report.py
 python scripts/generate_production_release_blocker_report.py --check
 python scripts/test_release_evidence_packet_index.py

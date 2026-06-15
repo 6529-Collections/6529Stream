@@ -35,6 +35,7 @@ REQUIRED_PHRASES = [
     "bytecode-to-release proof",
     "signed release tag",
     "external evidence gaps",
+    "risk register",
 ]
 
 REQUIRED_COMMANDS = [
@@ -65,6 +66,9 @@ REQUIRED_COMMANDS = [
     "python scripts/check_release_readiness.py",
     "python scripts/test_public_beta_evidence.py",
     "python scripts/check_public_beta_evidence.py",
+    "python scripts/test_risk_register.py",
+    "python scripts/check_risk_register.py",
+    "python scripts/generate_risk_register.py --check",
     "python scripts/test_release_manifest.py",
     "python scripts/generate_release_manifest.py --check",
     "python scripts/test_bytecode_release_proof.py",
@@ -116,10 +120,12 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/SHA256SUMS",
     "release-artifacts/latest/release-checksums.json",
     "release-artifacts/latest/source-verification-inputs.json",
+    "release-artifacts/latest/risk-register.json",
     "release-artifacts/latest/public-beta-evidence.json",
     "release-artifacts/latest/public-beta-blockers.md",
     "release-artifacts/latest/production-release-blockers.md",
     "release-artifacts/schema/public-beta-evidence.schema.json",
+    "release-artifacts/schema/risk-register.schema.json",
     "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt",
@@ -139,6 +145,9 @@ REQUIRED_LINK_TARGETS = [
     "test/StreamDeploymentManifest.t.sol",
     "scripts/generate_bytecode_release_proof.py",
     "scripts/check_signed_release_tag.py",
+    "scripts/check_risk_register.py",
+    "scripts/generate_risk_register.py",
+    "scripts/test_risk_register.py",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
