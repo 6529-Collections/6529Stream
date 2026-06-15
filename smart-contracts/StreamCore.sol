@@ -784,21 +784,14 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
                 0x00,
                 or(
                     or(eq(id, 0x49064906), eq(id, 0x2a55205a)),
-                    or(
-                        or(eq(id, 0x80ac58cd), eq(id, 0x5b5e139f)),
-                        eq(id, 0x01ffc9a7)
-                    )
+                    or(or(eq(id, 0x80ac58cd), eq(id, 0x5b5e139f)), eq(id, 0x01ffc9a7))
                 )
             )
             return(0x00, 0x20)
         }
     }
 
-    function royaltyInfo(uint256, uint256 salePrice)
-        public
-        view
-        returns (address, uint256)
-    {
+    function royaltyInfo(uint256, uint256 salePrice) public view returns (address, uint256) {
         assembly ("memory-safe") {
             let numerator := mul(salePrice, 690)
             if and(salePrice, iszero(eq(div(numerator, salePrice), 690))) {

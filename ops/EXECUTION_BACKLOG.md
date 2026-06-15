@@ -2892,7 +2892,7 @@ coverage.
 
 ### ONE-003: Decide Royalty Philosophy And Enforcement Boundary
 
-Status: In progress on branch `codex/royalty-policy-boundary`.
+Status: Merged in PR #417; issue #416 closed completed.
 
 Gate: G/F.
 
@@ -2978,7 +2978,8 @@ Dependencies: release policy, `INT-005`, `ONE-005`.
 
 ### ONE-004: Add Collector-Verifiable Permanence Package
 
-Status: Planned.
+Status: In progress on issue #418 and branch
+`codex/collector-permanence-package`.
 
 Gate: G/F.
 
@@ -2995,13 +2996,17 @@ proof, and explicit fully-on-chain versus decentralized-storage guarantees.
 
 Files likely touched:
 
+- `docs/permanence-packages.md`
 - `docs/metadata.md`
 - `docs/dependency-operations.md`
+- `docs/integrations/README.md`
 - `docs/release-readiness.md`
-- `release-artifacts/dependencies/`
+- `docs/release-policy.md`
+- `release-artifacts/permanence/`
 - `release-artifacts/schema/`
+- `release-artifacts/latest/one-of-one-permanence-manifest.json`
 - `scripts/` package/checker/generator tests
-- `test/fixtures/metadata/`
+- release manifest, bytecode proof, checksum, and risk-register artifacts
 
 Implementation steps:
 
@@ -3014,6 +3019,20 @@ Implementation steps:
 5. Add docs for collector verification and frontend rendering teams.
 6. Keep live/final package evidence blocked until real final drop artifacts are
    retained and reviewed.
+
+Current implementation slice:
+
+- Adds an artifact-only permanence package model with no Solidity changes and
+  no new `StreamCore` storage, preserving the current bytecode budget.
+- Adds a no-secret schema, template descriptor, retained-artifact template,
+  checker, generator, and focused unit tests.
+- Generates a deterministic latest permanence manifest from committed
+  descriptors and wires drift checks into Makefile, bash, PowerShell, and CI.
+- Links the permanence package into integration docs, release readiness,
+  release policy, release manifest coverage, checksum coverage, risk-register
+  source tracking, and changelog state.
+- Keeps reviewed/final 1/1 output hashes, browser proof, and live storage
+  guarantees blocked until real final-drop artifacts are retained and approved.
 
 Required tests/checks:
 
@@ -3316,9 +3335,9 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | Merged in PR #411; non-local marketplace/indexer evidence remains under `ONE-005` |
-| `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | In progress on issue #412 |
-| `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | governance ADR update |
-| `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | dependency artifact manifest |
+| `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | Merged in PR #413 |
+| `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | Merged in PR #417 |
+| `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | In progress on issue #418 |
 | `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |
 | `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is tight | G | `CON-005` |
 | `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | formatting/static-analysis gates |
