@@ -24,6 +24,10 @@ accompany reviewed non-local signing evidence.
 Use [`docs/provenance-manifests.md`](provenance-manifests.md) for the checked
 1/1 provenance manifest model, generated provenance artifact catalog, and
 frontend/indexer display boundaries for artist/story/authenticity context.
+Use [`docs/permanence-packages.md`](permanence-packages.md) for the checked
+`ONE-004` collector-verifiable permanence package model, generated
+one-of-one permanence manifest, replay commands, browser proof, output hashes,
+and fully on-chain versus decentralized storage boundaries.
 Use [`docs/royalty-policy.md`](royalty-policy.md) for the checked `ONE-003`
 royalty policy, current ERC-2981 disclosure, governance boundary, marketplace
 display guidance, and royalty disclosure, not payment enforcement caveat.
@@ -138,7 +142,7 @@ local tests prove protocol correctness.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet ceremony/randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, risk register, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
+| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, risk register, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
 | Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -179,6 +183,20 @@ The current local baseline includes:
   which establish the artifact-only artist/story/authenticity model without
   claiming token finality, marketplace readiness, royalty enforcement, or
   ownership proof beyond chain state;
+- collector-verifiable permanence package guidance, schema, checked template,
+  retained-artifact checklist, generated one-of-one permanence manifest, and
+  checker in [`docs/permanence-packages.md`](permanence-packages.md),
+  [`release-artifacts/schema/one-of-one-permanence-package.schema.json`](../release-artifacts/schema/one-of-one-permanence-package.schema.json),
+  [`release-artifacts/permanence/one-of-one-permanence-template.permanence.json`](../release-artifacts/permanence/one-of-one-permanence-template.permanence.json),
+  [`release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md`](../release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md),
+  [`release-artifacts/latest/one-of-one-permanence-manifest.json`](../release-artifacts/latest/one-of-one-permanence-manifest.json),
+  [`scripts/check_one_of_one_permanence_package.py`](../scripts/check_one_of_one_permanence_package.py),
+  and
+  [`scripts/generate_one_of_one_permanence_manifest.py`](../scripts/generate_one_of_one_permanence_manifest.py),
+  which establish the artifact-only replay command, renderer/dependency/source
+  hash, browser proof, output hash, and fully on-chain versus decentralized
+  storage boundary without claiming final collector proof until reviewed
+  non-local or final-drop evidence exists;
 - royalty policy guidance in
   [`docs/royalty-policy.md`](royalty-policy.md), covered by
   `python scripts/test_royalty_policy.py` and
@@ -366,6 +384,7 @@ Audit and protocol evidence:
 - [docs/drop-authorization-signing.md](drop-authorization-signing.md)
 - [docs/signer-custody-readiness.md](signer-custody-readiness.md)
 - [docs/provenance-manifests.md](provenance-manifests.md)
+- [docs/permanence-packages.md](permanence-packages.md)
 - [docs/royalty-policy.md](royalty-policy.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
@@ -428,6 +447,10 @@ Release artifacts:
 - [release-artifacts/provenance/one-of-one-provenance-template.provenance.json](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json)
 - [release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md](../release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md)
 - [release-artifacts/latest/one-of-one-provenance-manifest.json](../release-artifacts/latest/one-of-one-provenance-manifest.json)
+- [release-artifacts/schema/one-of-one-permanence-package.schema.json](../release-artifacts/schema/one-of-one-permanence-package.schema.json)
+- [release-artifacts/permanence/one-of-one-permanence-template.permanence.json](../release-artifacts/permanence/one-of-one-permanence-template.permanence.json)
+- [release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md](../release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md)
+- [release-artifacts/latest/one-of-one-permanence-manifest.json](../release-artifacts/latest/one-of-one-permanence-manifest.json)
 - [release-artifacts/schema/non-local-release-evidence.schema.json](../release-artifacts/schema/non-local-release-evidence.schema.json)
 - [release-artifacts/evidence/non-local-release-evidence-template.json](../release-artifacts/evidence/non-local-release-evidence-template.json)
 - [release-artifacts/evidence/non-local-template-retained-artifact.txt](../release-artifacts/evidence/non-local-template-retained-artifact.txt)
@@ -480,6 +503,9 @@ python scripts/check_signer_custody_readiness.py
 python scripts/test_one_of_one_provenance_manifest.py
 python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check
+python scripts/test_one_of_one_permanence_package.py
+python scripts/check_one_of_one_permanence_package.py
+python scripts/generate_one_of_one_permanence_manifest.py --check
 python scripts/test_royalty_policy.py
 python scripts/check_royalty_policy.py
 python scripts/test_public_beta_evidence.py

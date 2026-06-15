@@ -25,6 +25,7 @@ DEFAULT_EIP_170_RUNTIME_LIMIT_BYTES = 24_576
 DOWNSTREAM_RELEASE_FILES = {
     "bytecode-release-proof.json",
     "dependency-artifact-manifest.json",
+    "one-of-one-permanence-manifest.json",
     "one-of-one-provenance-manifest.json",
     "production-release-blockers.md",
     "public-beta-blockers.md",
