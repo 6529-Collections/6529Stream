@@ -1,0 +1,76 @@
+{
+  "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1",
+  "generated_by": "scripts/generate_one_of_one_permanence_manifest.py:1",
+  "source": {
+    "output": "release-artifacts/latest/one-of-one-permanence-manifest.json",
+    "descriptor_dir": "release-artifacts/permanence",
+    "descriptor_count": 1
+  },
+  "packages": [
+    {
+      "descriptor": {
+        "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
+        "sha256": "sha256:9aaec476f09f9a9b6a2cd91e2b4b0a3962975369a7641b0e8365d950d1dfeccd",
+        "size_bytes": 8272,
+        "schema_version": "6529stream.one-of-one-permanence-package.v1"
+      },
+      "package_id": "one-of-one-permanence-template",
+      "record_type": "template",
+      "review_status": "template",
+      "environment": "local",
+      "protocol_version": "0.1.0",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "scope": {
+        "chain_id": 31337,
+        "core_contract": "0x0000000000000000000000000000000000000003",
+        "contract_metadata_adapter": "0x000000000000000000000000000000000000000a",
+        "collection_id": 1,
+        "token_id": 1,
+        "metadata_schema_version": "6529stream-v1",
+        "contract_uri_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "collection_freeze_manifest_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "renderer": {
+        "renderer_name": "StreamMetadataRenderer",
+        "renderer_version": "0.1.0",
+        "rendering_mode": "animation_html"
+      },
+      "dependencies": {
+        "dependency_registry": "0x0000000000000000000000000000000000000004",
+        "dependency_count": 1
+      },
+      "replay": {
+        "deterministic_replay_status": "template",
+        "replay_requires_network": false,
+        "replay_command_count": 2
+      },
+      "output_evidence": {
+        "metadata_json_sha256": "not_available_local",
+        "rendered_output_sha256": "not_available_local",
+        "browser_proof_status": "template",
+        "output_hash_status": "template"
+      },
+      "storage_guarantees": {
+        "fully_on_chain_components": [
+          "collection and token identifiers",
+          "metadata schema state exposed by StreamCore",
+          "dependency registry references",
+          "collection freeze manifest hash when frozen"
+        ],
+        "decentralized_storage_components": [
+          "future reviewed source archive",
+          "future reviewed rendered media or browser proof artifacts"
+        ],
+        "external_service_dependencies": [
+          "gateway availability for decentralized storage retrieval",
+          "browser/runtime availability for independent replay"
+        ]
+      },
+      "retained_artifact_count": 5,
+      "review": {
+        "approval_status": "template",
+        "reviewer": "TBD"
+      }
+    }
+  ]
+}

@@ -7,6 +7,15 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-004 collector-verifiable permanence package support with
+  `docs/permanence-packages.md`, a checked JSON schema, no-secret retained
+  artifact template, generated
+  `release-artifacts/latest/one-of-one-permanence-manifest.json`, local/CI
+  checker and generator wiring, integration/release-readiness documentation,
+  release-manifest/checksum coverage, and explicit boundaries that permanence
+  package evidence is not final collector proof, marketplace proof, royalty
+  enforcement, ownership proof beyond chain state, or production release
+  approval until reviewed non-local or final-drop evidence exists.
 - Added ONE-003 royalty policy coverage with `docs/royalty-policy.md`, a
   checker/test pair, local/CI gate wiring, integration/release-readiness
   navigation, release-manifest/checksum coverage, and explicit ERC-2981

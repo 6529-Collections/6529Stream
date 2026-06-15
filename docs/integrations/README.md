@@ -34,10 +34,10 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, ERC-2981 royalty disclosure, cache, animation sandbox, marketplace, and React/Next reference architecture guidance is documented for the local baseline |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, marketplace, and React/Next reference architecture guidance is documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
-| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), and [`metadata-rendering.md`](metadata-rendering.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, ERC-2981 royalty display boundary, and cache invalidation are documented for the local baseline |
+| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`events-and-indexing.md`](events-and-indexing.md), and [`metadata-rendering.md`](metadata-rendering.md) | Auction lifecycle, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, and cache invalidation are documented for the local baseline |
 | Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, release-readiness dashboard, and [`operator-admin-ui.md`](operator-admin-ui.md) | Current `INT-010` operator personas, Safe/multisig ceremony, role, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and evidence-boundary guidance is documented |
 | Backend signing service | Use EIP-712, ERC-1271, Safe, signer custody, drop authorization signing docs, and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Local templates and integration guidance only; production signing evidence remains blocked |
 
@@ -68,6 +68,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated launch blockers, planned mitigations, and accepted local-baseline risks |
 | Metadata | [`docs/metadata.md`](../metadata.md) | Metadata schema, contract-level metadata adapter, cache, browser, and freeze semantics |
 | 1/1 provenance | [`docs/provenance-manifests.md`](../provenance-manifests.md), [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json), [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json), [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json) | Artifact-only provenance model for artist/story/authenticity context; not token finality, ownership, royalty enforcement, marketplace readiness, or indexer readiness proof |
+| 1/1 permanence | [`docs/permanence-packages.md`](../permanence-packages.md), [`release-artifacts/latest/one-of-one-permanence-manifest.json`](../../release-artifacts/latest/one-of-one-permanence-manifest.json), [`release-artifacts/schema/one-of-one-permanence-package.schema.json`](../../release-artifacts/schema/one-of-one-permanence-package.schema.json), [`release-artifacts/permanence/one-of-one-permanence-template.permanence.json`](../../release-artifacts/permanence/one-of-one-permanence-template.permanence.json) | Artifact-only collector-verifiable permanence package model for replay commands, renderer/dependency/source hashes, browser proof, output hashes, and fully on-chain versus decentralized storage boundaries |
 | Royalty policy | [`docs/royalty-policy.md`](../royalty-policy.md), [`test/StreamRoyalty.t.sol`](../../test/StreamRoyalty.t.sol), [`smart-contracts/StreamCore.sol`](../../smart-contracts/StreamCore.sol), [`smart-contracts/IERC2981.sol`](../../smart-contracts/IERC2981.sol) | Current `ONE-003` ERC-2981 royalty disclosure, not payment enforcement; No production-readiness claim depends on marketplaces honoring royalties |
 | Drop signing | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | EIP-712 and ERC-1271 local fixture guidance |
 | Fixed-price mint flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Current `INT-002` transaction, event, credit, and failure-state guide |
@@ -93,6 +94,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md)
 - [`docs/metadata.md`](../metadata.md)
 - [`docs/provenance-manifests.md`](../provenance-manifests.md)
+- [`docs/permanence-packages.md`](../permanence-packages.md)
 - [`docs/royalty-policy.md`](../royalty-policy.md)
 - [`docs/release-policy.md`](../release-policy.md)
 - [`docs/release-signatures.md`](../release-signatures.md)
@@ -128,6 +130,9 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json)
 - [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json)
 - [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json)
+- [`release-artifacts/latest/one-of-one-permanence-manifest.json`](../../release-artifacts/latest/one-of-one-permanence-manifest.json)
+- [`release-artifacts/schema/one-of-one-permanence-package.schema.json`](../../release-artifacts/schema/one-of-one-permanence-package.schema.json)
+- [`release-artifacts/permanence/one-of-one-permanence-template.permanence.json`](../../release-artifacts/permanence/one-of-one-permanence-template.permanence.json)
 - [`deployments/README.md`](../../deployments/README.md)
 - [`deployments/schema/deployment-manifest.schema.json`](../../deployments/schema/deployment-manifest.schema.json)
 - [`deployments/schema/address-book.schema.json`](../../deployments/schema/address-book.schema.json)
@@ -165,6 +170,10 @@ to understand what is still intentionally future work:
 - `ONE-003`: the royalty policy is now
   [`docs/royalty-policy.md`](../royalty-policy.md), recording the current
   ERC-2981 royalty disclosure, not payment enforcement boundary.
+- `ONE-004`: the collector-verifiable permanence package is now
+  [`docs/permanence-packages.md`](../permanence-packages.md), recording the
+  artifact-only one-of-one permanence manifest, replay commands, browser proof,
+  output hashes, and fully on-chain versus decentralized storage boundaries.
 
 Until the remaining specs exist, integrators should treat the linked artifacts
 as source material and the existing tests/docs as examples, not as a finished
@@ -188,6 +197,11 @@ particular:
   artist/story/authenticity context, not a tokenURI finality signal,
   marketplace discovery claim, royalty enforcement mechanism, or ownership
   proof beyond chain state.
+- The collector-verifiable permanence package is a checked release-artifact
+  model for replay commands, renderer/dependency/source hashes, browser proof,
+  output hashes, and fully on-chain versus decentralized storage boundaries,
+  not final-drop completion evidence until reviewed non-local or final package
+  artifacts exist.
 - The royalty policy is a checked local governance/integration document for
   ERC-2981 royalty disclosure, not payment enforcement. No
   production-readiness claim depends on marketplaces honoring royalties.
@@ -227,6 +241,9 @@ python scripts/check_metadata_rendering.py
 python scripts/test_one_of_one_provenance_manifest.py
 python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check
+python scripts/test_one_of_one_permanence_package.py
+python scripts/check_one_of_one_permanence_package.py
+python scripts/generate_one_of_one_permanence_manifest.py --check
 python scripts/test_royalty_policy.py
 python scripts/check_royalty_policy.py
 python scripts/test_react_next_reference.py
