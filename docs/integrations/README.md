@@ -34,8 +34,8 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, and release-readiness dashboard | Entry point only; detailed flow specs remain future `INT` work |
-| Mobile app | Use the same contract surface artifacts plus wallet/signing docs | Entry point only; WalletConnect and deep-link guidance remains future `INT-008` work |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, release-readiness dashboard, and [`contract-flows.md`](contract-flows.md) | Fixed-price mint flow is documented; other detailed flow specs remain future `INT` work |
+| Mobile app | Use the same contract surface artifacts plus wallet/signing docs and [`contract-flows.md`](contract-flows.md) | Fixed-price mint flow is documented; WalletConnect and deep-link guidance remains future `INT-008` work |
 | Electron app | Use web-app artifacts plus strict renderer/process security assumptions | Entry point only; Electron security guidance remains future `INT-009` work |
 | Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, and release manifest | Entry point only; event replay spec remains future `INT-005` work |
 | Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, and release-readiness dashboard | Entry point only; dashboard query model remains future `GOV`/`INT` work |
@@ -68,6 +68,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated launch blockers, planned mitigations, and accepted local-baseline risks |
 | Metadata | [`docs/metadata.md`](../metadata.md) | Metadata schema, cache, browser, and freeze semantics |
 | Drop signing | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | EIP-712 and ERC-1271 local fixture guidance |
+| Fixed-price mint flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Current `INT-002` transaction, event, credit, and failure-state guide |
 | Release signatures | [`docs/release-signatures.md`](../release-signatures.md) | No production signatures are committed |
 
 ## Canonical Artifacts
@@ -87,6 +88,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/architecture.md`](../architecture.md)
 - [`docs/threat-model.md`](../threat-model.md)
 - [`docs/known-blockers.md`](../known-blockers.md)
+- [`docs/integrations/contract-flows.md`](contract-flows.md)
 - [`release-artifacts/README.md`](../../release-artifacts/README.md)
 - [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json)
 - [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json)
@@ -115,7 +117,8 @@ can prove the entrypoint keeps all required local targets reachable:
 This file is an entrypoint, not the complete flow book. Use these backlog items
 to understand what is still intentionally future work:
 
-- `INT-002`: fixed-price mint and drop authorization flow spec.
+- `INT-002`: fixed-price mint and drop authorization flow spec is now
+  [`contract-flows.md`](contract-flows.md).
 - `INT-003`: auction frontend and indexer flow spec.
 - `INT-004`: wallet, EIP-712, ERC-1271, and Safe signing guide.
 - `INT-005`: event and indexer reconstruction spec.

@@ -29,6 +29,9 @@ for frontend, mobile, Electron, indexer, operator UI, and backend
 signing service teams that need to find canonical ABIs, address books,
 deployment manifests, event catalogs, metadata docs, signing docs, and release
 artifacts without treating local evidence as public beta or production proof.
+Use [`docs/integrations/contract-flows.md`](integrations/contract-flows.md) as
+the fixed-price mint and drop authorization flow spec for current INT-002
+frontend/backend-signing integration work.
 Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
@@ -358,6 +361,8 @@ python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_contract_flows.py
+python scripts/check_contract_flows.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check

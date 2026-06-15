@@ -1703,7 +1703,7 @@ Dependencies: `AUD-001`.
 
 ### INT-001: Add Integrations Entrypoint And Artifact Source Of Truth
 
-Status: In progress on issue #390 / branch `codex/integrations-entrypoint`.
+Status: Merged in PR #391; issue #390 closed completed.
 
 Gate: G.
 
@@ -1792,46 +1792,110 @@ Dependencies: `AUD-002`; best before `INT-002` through `INT-009`.
 
 ### INT-002: Add Fixed-Price Mint And Drop Authorization Flow Spec
 
-Status: Planned.
+Status: In progress on issue #392 / branch `codex/fixed-price-flow-spec`.
 
 Gate: G/D.
 
-Problem: Frontend teams need exact transaction/read/event/failure-state
-guidance for fixed-price minting and EIP-712 drop authorization.
+Problem: Frontend teams need exact transaction, read, event, credit,
+withdrawal, failure-state, and backend-signing guidance for fixed-price minting
+through `StreamDrops.mintDrop`. The repo has strong Solidity tests and signing
+docs, but a React, mobile, Electron, indexer, or backend signing service should
+not need to reverse-engineer the happy path, negative states, replay controls,
+credit accounting, or maturity boundaries from contract code.
 
-Outcome: A flow spec documents fixed-price mint integration, EIP-712 payloads,
-wallet signing, ERC-1271 handling, transaction submission, event monitoring,
-and UI states.
+Outcome: `docs/integrations/contract-flows.md` documents the fixed-price mint
+flow as a checked pre-audit local baseline. It covers artifact inputs,
+preflight reads, EIP-712 payload fields, EOA and ERC-1271 signing paths,
+`mintDrop` submission, event monitoring, poster/protocol credit withdrawal UX,
+curator reserve accounting, common failure states, frontend state transitions,
+and backend signing-service boundaries without claiming production readiness.
 
 Files likely touched:
 
 - `docs/integrations/contract-flows.md`
-- `docs/integrations/wallets-and-signatures.md`
-- `docs/drop-authorization-signing.md`
-- optional TypeScript snippet fixtures under `docs/integrations/examples/`
+- `docs/integrations/README.md`
+- `README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `scripts/check_contract_flows.py`
+- `scripts/test_contract_flows.py`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- Makefile, Bash, PowerShell, and CI gate wiring
+- generated release manifest, bytecode proof, risk register, and checksum
+  artifacts if docs or manifest inputs change
 
 Implementation steps:
 
-1. Document required reads before mint.
-2. Document payload fields and source of domain values.
-3. Document EOA and ERC-1271 signing paths.
-4. Document submit transaction and expected events.
-5. Document negative states: wrong chain, expired, consumed, cancelled, wrong
-   signer, stale epoch, paused, insufficient payment.
-6. Include viem-style pseudocode without creating a maintained SDK package yet.
+1. Document required source-of-truth artifacts before a frontend or backend
+   signing service wires the mint flow.
+2. Document preflight reads for `domainSeparator`, `tdhSigner`, `signerEpoch`,
+   drop pause state, consumed/cancelled drops, fixed-price credits, owed totals,
+   reserved funds, and surplus.
+3. Document payload fields and source of domain values, including
+   `saleMode = 1`, `deriveDropId`, `tokenDataHash`, payer rules, deadline, and
+   storage-backed replay controls.
+4. Document EOA and ERC-1271 signing paths and the backend signing-service
+   private-key boundary.
+5. Document `mintDrop(DropAuthorization,string,bytes)` submission, exact
+   `msg.value` requirements, atomic rollback expectations, and the need for an
+   `eth_call` simulation with the exact sender/value/payload/signature.
+6. Document events, post-transaction reads, poster/protocol withdrawal UX,
+   curator reserve accounting, forced ETH/surplus, and failed-withdrawal credit
+   preservation.
+7. Document negative states: wrong chain, wrong domain, paused drop execution,
+   expired, consumed, replayed, cancelled, wrong signer, stale signer epoch,
+   zero recipient, insufficient payment, minter/core rejection, ERC-1271
+   rejection, and metadata still pending after mint.
+8. Add a checker and tests requiring headings, maturity phrases, flow-critical
+   terms, local source links, and validation commands.
+9. Wire the checker into local and CI gates.
+10. Link the flow spec from integration, release-readiness, release-artifact,
+    and top-level docs.
+11. Regenerate downstream release artifacts after docs/checker changes.
 
 Required tests/checks:
 
-- Existing drop authorization fixture checks if examples are machine-readable.
-- Markdown heading check.
+- `python scripts/test_contract_flows.py`
+- `python scripts/check_contract_flows.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/test_risk_register.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts/check_contract_flows.py scripts/test_contract_flows.py`
 - `git diff --check`.
 
 Acceptance criteria:
 
-- A React/viem frontend can implement fixed-price mint without guessing.
+- A React, mobile, Electron, indexer, or backend-signing engineer can implement
+  or observe fixed-price mint without guessing from Solidity internals.
 - The doc explains replay protection as storage-backed, not provided by
   EIP-712 alone.
-- The doc covers ERC-1271 or explicitly links support status.
+- The doc covers ERC-1271 contract signers and EOA signatures.
+- The doc identifies the canonical tracked artifacts to use before copying ABIs
+  or event topics into an app.
+- The doc covers payment splits, withdrawable poster/protocol credits, reserved
+  curator accounting, owed totals, surplus, emergency-withdrawable balance, and
+  failed-withdrawal rollback behavior.
+- The doc requires `eth_call` simulation as the safest preflight and explains
+  why simple reads are insufficient.
+- The doc does not claim production signing service readiness, marketplace
+  proof, public beta readiness, or live deployment evidence.
+- Local/CI gates fail if the flow spec drops required maturity language,
+  headings, source links, validation commands, or flow-critical terms.
 
 Evidence artifacts: None.
 

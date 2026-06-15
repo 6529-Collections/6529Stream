@@ -72,6 +72,7 @@ REQUIRED_READINESS_PHRASES = [
     "non-local release evidence",
     "incident response",
     "integration entrypoint",
+    "fixed-price mint and drop authorization flow spec",
     "drop authorization signing fixtures",
     "unsigned payload-generator examples",
     "drop authorization signing evidence",
@@ -88,6 +89,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_signed_release_tag.py",
     "python scripts/test_incident_response.py",
     "python scripts/check_incident_response.py",
+    "python scripts/test_contract_flows.py",
+    "python scripts/check_contract_flows.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -195,6 +198,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/audit-package.md",
     "docs/incident-response.md",
     "docs/integrations/README.md",
+    "docs/integrations/contract-flows.md",
     "docs/architecture.md",
     "docs/threat-model.md",
     "docs/deployment.md",

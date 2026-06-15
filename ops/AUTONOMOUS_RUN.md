@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/integrations-entrypoint` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/389` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/390` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/391` |
-| Next issue | TBD after INT-001; likely `INT-002` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/fixed-price-flow-spec` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/391` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/392` |
+| Active PR | TBD |
+| Next issue | TBD after INT-002; likely `INT-003` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 08:25 UTC` |
+| Last updated | `2026-06-15 09:22 UTC` |
 
 ## Packaging Notes
 
@@ -248,20 +248,107 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | Merged in PR #385 |
 | 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | Merged in PR #387 |
 | 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | Merged in PR #389 |
-| 187 | Add integrations entrypoint and artifact source of truth | Gate G support | Add `docs/integrations/README.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links for frontend, mobile, Electron, indexer, operator, and backend-signing integrators | In progress on issue #390 |
+| 187 | Add integrations entrypoint and artifact source of truth | Gate G support | Add `docs/integrations/README.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links for frontend, mobile, Electron, indexer, operator, and backend-signing integrators | Merged in PR #391 |
+| 188 | Add fixed-price mint and drop authorization flow spec | Gate G/Gate D support | Add `docs/integrations/contract-flows.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links so frontend and backend-signing teams can trace fixed-price minting, EIP-712/ERC-1271 auth, events, credits, withdrawals, and failure states | In progress on issue #392 |
 
 ## Current PR Worklog
 
-### PR candidate: Add integrations entrypoint and artifact source of truth (Queue Item 187)
+### PR candidate: Add fixed-price mint and drop authorization flow spec (Queue Item 188)
 
-Status: PR #391 open; CodeRabbit requested in comment `4705979170`; CI and bot
-feedback pending.
+Status: Local validation complete; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/392`.
+PR: TBD.
+Branch: `codex/fixed-price-flow-spec`.
+Branch started from PR #391 squash merge commit
+`f4fdb5fb4e6923bfd787a734a59aca4457bd8755`.
+
+Goal:
+
+- Add `docs/integrations/contract-flows.md` as the INT-002 fixed-price mint and
+  drop authorization integration flow spec.
+- Document source-of-truth artifacts, preflight reads, EIP-712 payload fields,
+  EOA and ERC-1271 signing paths, `mintDrop` transaction submission, events,
+  post-transaction reads, payment credits, withdrawal UX, curator reserve
+  accounting, failure states, frontend state machine, and backend signing
+  service boundaries.
+- Add `scripts/check_contract_flows.py` and `scripts/test_contract_flows.py` so
+  required headings, maturity language, source links, validation commands, and
+  flow-critical terms cannot drift.
+- Wire the contract-flow checker into Makefile, Bash, PowerShell, and CI gates,
+  then include the doc in release-manifest and checksum coverage.
+- Link the new flow from README, integrations entrypoint, release-readiness, and
+  release-artifacts docs without making public-beta or production claims.
+
+Validation plan:
+
+- `python scripts/test_contract_flows.py`.
+- `python scripts/check_contract_flows.py`.
+- `python scripts/test_integrations_readme.py`.
+- `python scripts/check_integrations_readme.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_contract_flows.py scripts/test_contract_flows.py`.
+- `git diff --check`.
+- Full Windows gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Notes:
+
+- Read-only subagent trace confirmed the flow: `mintDrop` validates pause,
+  hashes and validates the EIP-712/ERC-1271 signer, validates fields, writes
+  `consumedDropIds`, emits `DropAuthorizationConsumed`, then executes
+  fixed-price minting. If downstream minting reverts, credit and consume writes
+  roll back.
+- Frontend preflight should include an `eth_call` simulation using the exact
+  sender, value, authorization, token data, and signature because simple reads
+  do not prove minter phase/supply, core freeze, randomizer, token-data limits,
+  or ERC-721 receiver behavior.
+- Curator reserve is accounted in `fixedPriceCuratorReserveCredits` and owed
+  totals but is not directly withdrawable through the fixed-price poster/protocol
+  withdrawal function.
+
+Open concerns:
+
+- This PR documents and checks integration behavior only. It must not claim a
+  production signing service, public beta readiness, marketplace proof, or live
+  deployment evidence.
+
+Validation result:
+
+- Focused contract-flow, integration README, release-readiness,
+  release-manifest, bytecode-release-proof, release-checksum, risk-register,
+  changelog, Python compile, and whitespace checks passed locally.
+- Full Windows wrapper `powershell -NoProfile -ExecutionPolicy Bypass -File
+  scripts\check.ps1` passed at `2026-06-15 09:22 UTC` after rerunning outside
+  the workspace sandbox so the installed Foundry binary could execute.
+
+### Completed: Add integrations entrypoint and artifact source of truth (Queue Item 187)
+
+Status: Merged in PR #391; issue #390 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/390`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/391`.
 Branch: `codex/integrations-entrypoint`.
 Branch started from PR #389 squash merge commit
 `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`.
 Initial PR head: `de5f291e4dde27085d6d2456d8c74051459e5f81`.
+Final pushed head: `9bb27e3761746f3c524c7e0cf1c06956325a84fb`.
+Squash merge: `f4fdb5fb4e6923bfd787a734a59aca4457bd8755`.
+Merge basis: CI run `27533663351` passed Windows PowerShell wrapper and
+Foundry smoke jobs, CodeRabbit status was success with no unresolved review
+threads, the CodeRabbit rate-limit banner was non-actionable, 6529bot security
+comment `4705983964` reported no security findings, 6529bot general comment
+`4705984002` reported "Good to merge" with only nice-to-have notes, and
+merge-decision comment `4706039924` documented the clean state before squash
+merge.
 
 Goal:
 
@@ -14201,6 +14288,9 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 09:22 | Finish Queue Item 188 local validation | Focused docs/artifact checks and full Windows `scripts\check.ps1` passed after regenerating risk-register, release-manifest, bytecode-release-proof, and checksum outputs; the first sandboxed full-wrapper attempt hit `Access is denied` launching the installed Foundry binary, and the escalated rerun passed. |
+| 2026-06-15 08:44 | Start Queue Item 188 | PR #391 squash-merged as `f4fdb5fb4e6923bfd787a734a59aca4457bd8755`; issue #392 and branch `codex/fixed-price-flow-spec` now track INT-002 so frontend and backend-signing teams get a checked fixed-price mint/drop authorization flow spec before deeper app architecture work. |
+| 2026-06-15 08:34 | Merge PR #391 | Integrations entrypoint PR merged after CI run `27533663351` passed latest head `9bb27e3761746f3c524c7e0cf1c06956325a84fb`, CodeRabbit status was success, no review threads were present, 6529bot reported no security findings and "Good to merge," and merge-decision comment `4706039924` documented the non-blocking nice-to-have notes. |
 | 2026-06-15 08:25 | Open PR #391 | Integrations entrypoint PR opened on head `de5f291e4dde27085d6d2456d8c74051459e5f81`, links issue #390, records full local Windows validation, and CodeRabbit review was requested in comment `4705979170`. |
 | 2026-06-15 08:13 | Start Queue Item 187 | PR #389 squash-merged as `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`; issue #390 and branch `codex/integrations-entrypoint` now track INT-001 so frontend, mobile, Electron, indexer, operator, and backend-signing integrators get a checked source-of-truth entrypoint without readiness overclaims. |
 | 2026-06-15 08:01 | Merge PR #389 | Risk-register PR merged after CI run `27531918837` passed final head `e9b3dbba51b45cab4b39a24986d108a0ebff0d1d`, CodeRabbit status was success, the non-actionable rate-limit banner had no unresolved threads, 6529bot reported no new findings in comments `4705658115` and `4705728912`, merge-decision comment `4705790858` documented the clean state, and issue #388 closed completed. |

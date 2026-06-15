@@ -69,6 +69,7 @@ EIP-712, ERC-1271, risk register, and public-beta evidence status are named.
 ## Integration Flows
 
 Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, and INT-009.
+The fixed-price mint flow is listed.
 
 ## Readiness Boundaries
 
