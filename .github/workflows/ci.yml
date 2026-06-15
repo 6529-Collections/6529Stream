@@ -181,6 +181,8 @@ jobs:
             scripts/test_react_next_reference.py \
             scripts/check_mobile_walletconnect.py \
             scripts/test_mobile_walletconnect.py \
+            scripts/check_electron_security_wallets.py \
+            scripts/test_electron_security_wallets.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -494,6 +496,8 @@ jobs:
           python3 scripts/check_react_next_reference.py 2>&1 | tee ci-logs/react-next-reference-check.log
           python3 scripts/test_mobile_walletconnect.py 2>&1 | tee ci-logs/mobile-walletconnect-tests.log
           python3 scripts/check_mobile_walletconnect.py 2>&1 | tee ci-logs/mobile-walletconnect-check.log
+          python3 scripts/test_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-tests.log
+          python3 scripts/check_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-check.log
 
       - name: Release readiness
         shell: bash

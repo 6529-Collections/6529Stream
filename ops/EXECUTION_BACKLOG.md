@@ -235,7 +235,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 
 ### MAP-001: Add 10/10 Execution Backlog
 
-Status: In progress on the current branch.
+Status: Merged in PR #359.
 
 Gate: A/G.
 
@@ -478,8 +478,8 @@ Dependencies: `EXT-001`, `EXT-002`, live Sepolia RPC access.
 
 ### EXT-004: Generate Sepolia Manifest, Address Book, And Source Verification Inputs
 
-Status: In progress on `codex/mobile-walletconnect-integration-guide`; issue
-`#404`.
+Status: Planned; blocked by reviewed testnet deployment evidence from
+`EXT-003`.
 
 Gate: E/G.
 
@@ -542,7 +542,8 @@ Dependencies: `EXT-003`.
 
 ### EXT-005: Retain Sepolia Explorer Verification Evidence
 
-Status: Planned.
+Status: Planned; blocked by generated Sepolia manifests and address books from
+`EXT-004`.
 
 Gate: E/G.
 
@@ -2529,29 +2530,75 @@ patterns.
 
 Files likely touched:
 
-- `docs/integrations/mobile-and-electron.md`
-- `docs/integrations/metadata-rendering.md`
-- `docs/security.md` if created, otherwise `SECURITY.md`
+- `docs/integrations/electron-security-wallets.md`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `scripts/check_electron_security_wallets.py`
+- `scripts/test_electron_security_wallets.py`
+- integration, release-readiness, release-manifest, checksum, and CI wiring
+- `CHANGELOG.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
 
 Implementation steps:
 
 1. Document main/renderer/preload responsibilities.
-2. Require context isolation and limited IPC.
-3. Prohibit private key handling in renderer/main unless a future audited
+2. Require `contextIsolation`, disabled `nodeIntegration`, sandboxing where
+   feasible, strict navigation/window-open policy, and CSP.
+3. Define a typed preload/contextBridge and IPC allowlist model.
+4. Prohibit private key handling in renderer/main unless a future audited
    wallet module exists.
-4. Document metadata animation sandbox and CSP.
-5. Document signed update expectations.
+5. Document wallet-provider boundaries for EIP-1193, WalletConnect, EIP-712,
+   ERC-1271, Safe, and hardware-backed signing.
+6. Document chain/address-book/domain guards before wallet prompts.
+7. Attribute replay protection to on-chain consumed/cancelled/signer-epoch
+   state, not Electron, WalletConnect, or EIP-712 alone.
+8. Document metadata animation sandbox, WebView caveats, and local
+   cache/secrets policy.
+9. Document signed-update, code-signing, autoUpdater, rollback, and release
+   integrity expectations.
+10. Link the guide from integration, release-readiness, release-artifact,
+    manifest, changelog, and autonomous state surfaces.
 
 Required tests/checks:
 
-- Markdown heading check.
-- `git diff --check`.
+- `python scripts/test_electron_security_wallets.py`
+- `python scripts/check_electron_security_wallets.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `make electron-security-wallets-check`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 
 Acceptance criteria:
 
 - Electron implementers are warned about the highest-risk patterns.
 - Metadata rendering guidance carries over from web to desktop.
 - Signing remains wallet-mediated or hardware-backed.
+- Main/renderer/preload boundaries are explicit.
+- Renderer hardening requires `contextIsolation`, disabled `nodeIntegration`,
+  sandboxing where feasible, strict navigation/window-open policy, and CSP.
+- IPC is allowlisted and typed; renderers never receive private keys, seed
+  phrases, signer-service credentials, raw signatures, WalletConnect pairing
+  secrets, unrestricted filesystem access, or privileged shell/network
+  capabilities.
+- Chain/address-book/domain mismatch halts before wallet prompts.
+- Replay protection is attributed to on-chain consumed/cancelled/signer-epoch
+  state, not Electron, WalletConnect, or EIP-712 alone.
+- Metadata `animation_url` and token HTML rendering are sandboxed away from
+  wallet/session state, filesystem access, Node APIs, and privileged IPC.
+- Signed-update, code-signing, rollback, and release-integrity expectations are
+  documented as product/release assumptions, not contract guarantees.
 
 Evidence artifacts: None.
 
