@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/collector-permanence-package` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/417` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/418` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/419` |
-| Next issue | After `ONE-004`, continue to `ONE-005` marketplace/indexer integration evidence unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/streamcore-headroom-recovery` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/419` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/420` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
+| Next issue | After the `CON-005` headroom recovery detour, continue to `ONE-005` marketplace/indexer integration evidence unless bot/CI feedback or roadmap priority requires another detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 21:21 UTC` |
+| Last updated | `2026-06-15 22:36 UTC` |
 
 ## Packaging Notes
 
@@ -15332,6 +15332,12 @@ Outcome:
 | 2026-06-15 20:55 | Merge PR #417 and select ONE-004 | Royalty policy boundary merged as `e9ca329f0ea6ee3cc5d0c5650ddc0d98dee3d0a0`, issue #416 closed completed, issue #418 opened for the collector-verifiable permanence package, and branch `codex/collector-permanence-package` created from updated `main`. |
 | 2026-06-15 21:05 | Implement ONE-004 local draft | Branch `codex/collector-permanence-package` adds `docs/permanence-packages.md`, permanence schema/template/retained-artifact template, generated `release-artifacts/latest/one-of-one-permanence-manifest.json`, checker/generator/tests, local/CI gate wiring, release manifest/checksum/risk-register coverage, and integration/release-readiness/release-policy docs. Solidity changes are intentionally out of scope and `StreamCore` still measures 24,047 runtime bytes with 529 bytes of EIP-170 headroom in this checkout. |
 | 2026-06-15 21:21 | Open PR #419 for ONE-004 | Full `make check`, Windows `scripts\check.ps1`, focused permanence/release/risk/checksum checks, `forge build --sizes --via-ir --skip test --skip script --force`, `python scripts\check_contract_size_budget.py`, and `git diff --check` passed. PR #419 is open on branch `codex/collector-permanence-package`, closes issue #418, and CodeRabbit review was requested in comment `4712556531`. Next action is to wait for CI and bot feedback, then resolve any actionable comments before merge. |
+| 2026-06-15 21:32 | Merge PR #419 and detour to headroom recovery | PR #419 merged as `9712037cab3651fa5b52bf15ef5583abb2dd9410`, issue #418 closed completed, CI and CodeRabbit passed, and 6529bot general/security reviews were clean. User raised concern about a possible 24,516-byte `StreamCore` runtime with only 60 bytes of EIP-170 margin; current `main` still measures 24,047 bytes with 529 bytes of margin, but issue #420 is opened and branch `codex/streamcore-headroom-recovery` will investigate and recover additional headroom or tighten size guardrails before returning to `ONE-005`. |
+| 2026-06-15 21:52 | Recover additional Core headroom locally | Branch `codex/streamcore-headroom-recovery` moves off-chain token URI formatting, token-name formatting, randomizer pending-state lookup, and old-randomizer pending-request probe helpers into the linked `StreamMetadataRenderer` library while preserving metadata and migration behavior. Production via-IR size build now measures `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom, recovering 386 bytes from the current 24,047-byte baseline. |
+| 2026-06-15 22:06 | Harden size artifact validation | The runtime size-budget checker now validates compiler metadata, optimizer runs, EVM version, compilation target, and current source Keccak hashes before trusting Foundry artifacts. Focused checker tests cover missing metadata, wrong compiler/profile, stale source hashes, placeholder counting, and EIP-170 failures; the production via-IR build plus checker passes with `StreamCore` at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
+| 2026-06-15 22:20 | Validate headroom recovery branch | Focused metadata/randomizer/royalty suites passed; `make release-checksums` refreshed bytecode, deployment, manifest, checksum, risk, provenance, permanence, and gas-snapshot artifacts; full `make check`, Windows `scripts\check.ps1`, touched-file formatting, release manifest/proof/checksum checks, and `git diff --check` all pass. The accepted gas snapshot trade is two small decreases and a +2,143 gas increase for final on-chain `tokenURI` in exchange for recovering 386 bytes of `StreamCore` runtime headroom. |
+| 2026-06-15 22:25 | Open PR #421 | PR #421 is open and marked ready for review after CodeRabbit skipped the initial draft state. CodeRabbit review has been requested again and CI/bot feedback is pending. |
+| 2026-06-15 22:36 | Address PR #421 review comments | CodeRabbit found two actionable follow-ups: a wording cleanup in `docs/known-blockers.md` and imported-source hash validation in `scripts/check_contract_size_budget.py`. The checker now validates every resolvable metadata source path against the checkout, `scripts/test_contract_size_budget.py` covers stale imported dependency hashes, and focused Python tests plus `python scripts\check_contract_size_budget.py` pass with `StreamCore` still at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 
 ## Resume Instructions
 
