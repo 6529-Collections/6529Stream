@@ -25,6 +25,9 @@ SOURCE_HASH = "sha256:" + "4" * 64
 ARTIFACT_HASH = "sha256:" + "5" * 64
 RELEASE_ARTIFACT_MANIFEST_HASH = "sha256:" + "7" * 64
 ADDRESS = "0x0000000000000000000000000000000000000001"
+CREATION_SIZE = 2
+RUNTIME_SIZE = 2
+EIP170_LIMIT = 24_576
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -54,12 +57,16 @@ def write_minimal_tree(root: Path) -> dict[str, Path]:
                 "artifact_path": "out/Example.sol/Example.json",
                 "abi_sha256": ABI_HASH,
                 "deployed_bytecode_sha256": RUNTIME_HASH,
+                "bytecode_size_bytes": CREATION_SIZE,
+                "deployed_bytecode_size_bytes": RUNTIME_SIZE,
+                "eip170_runtime_limit_bytes": EIP170_LIMIT,
+                "deployed_runtime_margin_bytes": EIP170_LIMIT - RUNTIME_SIZE,
             }
         },
         "bytecode_hashes": {
             "Example": {
-                "creation": {"sha256": CREATION_HASH},
-                "runtime": {"sha256": RUNTIME_HASH},
+                "creation": {"sha256": CREATION_HASH, "size_bytes": CREATION_SIZE},
+                "runtime": {"sha256": RUNTIME_HASH, "size_bytes": RUNTIME_SIZE},
             }
         },
     }
@@ -202,6 +209,10 @@ class BytecodeReleaseProofTests(unittest.TestCase):
         self.assertEqual(generated["schema_version"], proof.BYTECODE_RELEASE_PROOF_SCHEMA)
         self.assertEqual(generated["proof_status"]["production"], "missing_reviewed_live_proof")
         self.assertEqual(generated["contract_proofs"][0]["hashes"]["runtime_bytecode"], RUNTIME_HASH)
+        self.assertEqual(
+            generated["contract_proofs"][0]["sizes"]["runtime_margin_bytes"],
+            EIP170_LIMIT - RUNTIME_SIZE,
+        )
 
     def test_check_mode_rejects_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -256,6 +267,25 @@ class BytecodeReleaseProofTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 proof.BytecodeReleaseProofError,
                 "runtime bytecode hash mismatch",
+            ):
+                proof.build_proof(root, address_book_dir=Path("deployments/address-books"))
+
+    def test_rejects_runtime_size_margin_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = write_minimal_tree(root)
+            abi = read_json(paths["abi"])
+            abi["contracts"]["Example"]["deployed_runtime_margin_bytes"] = 1
+            write_json(paths["abi"], abi)
+            release_manifest = read_json(paths["release_manifest"])
+            release_manifest["release_artifacts"]["abi_checksums"][
+                "sha256"
+            ] = proof.file_sha256(paths["abi"])
+            write_json(paths["release_manifest"], release_manifest)
+
+            with self.assertRaisesRegex(
+                proof.BytecodeReleaseProofError,
+                "runtime size margin mismatch",
             ):
                 proof.build_proof(root, address_book_dir=Path("deployments/address-books"))
 

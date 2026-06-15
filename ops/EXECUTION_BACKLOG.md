@@ -172,7 +172,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility lacks retained proof | `ONE-005`, `INT-005`, `INT-006` | Retain no-secret evidence for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation |
-| `StreamCore` has only 437 bytes of EIP-170 headroom | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has only modest EIP-170 headroom despite the current 529-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -3094,13 +3094,15 @@ Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.
 
 ### ONE-006: Add Satellite-Extension Architecture Policy
 
-Status: Planned.
+Status: Partially started by CON-005 size-budget enforcement; broader architecture
+policy remains planned.
 
 Gate: G.
 
-Problem: `StreamCore` currently has limited EIP-170 bytecode headroom. Adding
-world-class 1/1 product surfaces directly to Core risks breaking deployment or
-forcing rushed size recovery after feature work is already written.
+Problem: `StreamCore` currently has limited EIP-170 bytecode headroom even after
+the 24,047-byte / 529-byte-margin size-budget pass. Adding world-class 1/1
+product surfaces directly to Core risks breaking deployment or forcing rushed
+size recovery after feature work is already written.
 
 Outcome: The repo has a documented architecture policy for future product
 features: prefer satellite contracts, read adapters, libraries, release
@@ -3123,12 +3125,13 @@ Implementation steps:
 3. Add review requirements for any PR that spends Core bytecode.
 4. Link the policy to contract-level metadata, provenance, royalties, and
    permanence work.
-5. Consider a checker or docs lint if size-budget exceptions need
-   machine-readable tracking.
+5. Keep the artifact-backed runtime size-budget checker as the minimum machine
+   gate and add exception tracking if a later PR needs to spend Core bytecode.
 
 Required tests/checks:
 
-- Production size command documentation check.
+- Production size command and `scripts/check_contract_size_budget.py`
+  documentation check.
 - Markdown heading check.
 - `git diff --check`.
 
@@ -3137,9 +3140,11 @@ Acceptance criteria:
 - Future product roadmap items have a default non-Core implementation path.
 - Any Core bytecode spend requires an explicit budget, measured delta, and
   release-risk note.
-- The policy aligns with current `StreamCore` headroom measurements.
+- The policy aligns with current `StreamCore` headroom measurements and the
+  configured 384-byte floor / 512-byte warning threshold.
 
-Evidence artifacts: None unless a size-budget tracker is added.
+Evidence artifacts: `release-artifacts/contracts.json` runtime-size budget and
+the generated ABI/proof size fields.
 
 Dependencies: `CON-005`, production size gate.
 

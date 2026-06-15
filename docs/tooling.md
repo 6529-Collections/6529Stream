@@ -26,6 +26,8 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_contract_size_budget.py
+python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
 python scripts/check_solidity_formatting.py
 python scripts/test_drop_authorization_payload_generator.py
@@ -117,7 +119,11 @@ forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeplo
 The size step is the production deployability gate. It skips test and script
 contracts so non-production artifacts do not pollute EIP-170/EIP-3860 evidence,
 and it uses `via_ir` because the current deployable `StreamCore` release profile
-needs the IR optimizer to fit under the runtime limit.
+needs the IR optimizer to fit under the runtime limit. The artifact-backed
+budget checker reads `release-artifacts/contracts.json`, treats unlinked
+Solidity library placeholders as their 20-byte deployed addresses for size
+counting, fails below the 384-byte `StreamCore` minimum margin, and reports a
+warning below the 512-byte future-work threshold.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
