@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-006 metadata rendering, cache, animation sandbox, and marketplace
+  integration guide with `docs/integrations/metadata-rendering.md`, a
+  checker/test pair, local/CI gate wiring, release-readiness navigation, and
+  release-manifest coverage so frontend, mobile, Electron, marketplace, cache,
+  analytics, and indexer teams can trace metadata states, tokenURI behavior,
+  ERC-4906 cache invalidation, animation sandbox boundaries, cache keys,
+  refresh triggers, marketplace evidence gaps, and public-beta evidence
+  boundaries without production-readiness or live-marketplace overclaims.
 - Added INT-005 event and indexer reconstruction spec with
   `docs/integrations/events-and-indexing.md`, a checker/test pair, local/CI gate
   wiring, release-readiness navigation, and release-manifest coverage so

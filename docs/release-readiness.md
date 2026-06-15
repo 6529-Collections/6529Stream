@@ -44,6 +44,10 @@ Use
 as the event and indexer reconstruction spec for current INT-005 integration
 work.
 Use
+[`docs/integrations/metadata-rendering.md`](integrations/metadata-rendering.md)
+as the metadata rendering, cache, animation sandbox, and marketplace
+integration guide for current INT-006 integration work.
+Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
 [`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md)
@@ -322,6 +326,7 @@ Audit and protocol evidence:
 - [docs/integrations/auction-flows.md](integrations/auction-flows.md)
 - [docs/integrations/wallets-and-signatures.md](integrations/wallets-and-signatures.md)
 - [docs/integrations/events-and-indexing.md](integrations/events-and-indexing.md)
+- [docs/integrations/metadata-rendering.md](integrations/metadata-rendering.md)
 
 Release artifacts:
 
@@ -385,6 +390,8 @@ python scripts/test_wallet_signature_flows.py
 python scripts/check_wallet_signature_flows.py
 python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
+python scripts/test_metadata_rendering.py
+python scripts/check_metadata_rendering.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check

@@ -62,6 +62,7 @@ the fixed-price mint and drop authorization flow spec,
 the auction frontend and indexer flow spec,
 the wallet, EIP-712, ERC-1271, and Safe signing guide,
 the event and indexer reconstruction spec,
+the metadata rendering, cache, animation sandbox, and marketplace integration guide,
 the risk register,
 release evidence packet index, drop authorization signing fixtures,
 release evidence issue backlog, release evidence issue links, release evidence issue body sync,
@@ -217,6 +218,21 @@ class ReleaseReadinessTests(unittest.TestCase):
                 checker.validate_release_readiness(
                     root, root / checker.DEFAULT_RELEASE_READINESS
                 )
+
+    def test_required_phrases_tolerate_markdown_wrapping(self) -> None:
+        """Required phrases may span Markdown-wrapped lines."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_release_readiness_doc().replace(
+                "metadata rendering, cache, animation sandbox, and marketplace integration guide",
+                "metadata rendering, cache, animation sandbox, and marketplace\nintegration guide",
+            )
+            write_text(root / checker.DEFAULT_RELEASE_READINESS, text)
+
+            checker.validate_release_readiness(
+                root, root / checker.DEFAULT_RELEASE_READINESS
+            )
 
     def test_rejects_missing_command(self) -> None:
         """Missing required commands are rejected."""

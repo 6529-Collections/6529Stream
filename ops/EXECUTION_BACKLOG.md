@@ -2129,8 +2129,7 @@ Dependencies: `INT-001`, current ERC-1271 tests.
 
 ### INT-005: Add Event And Indexer Reconstruction Spec
 
-Status: In progress on issue #398 / branch
-`codex/event-indexer-reconstruction-spec`.
+Status: Merged in PR #399; issue #398 closed completed.
 
 Gate: G/D.
 
@@ -2229,7 +2228,8 @@ Dependencies: `INT-001`, `CON-001` preferred.
 
 ### INT-006: Add Metadata Rendering And Cache Integration Guide
 
-Status: Planned.
+Status: In progress on issue #400 / branch
+`codex/metadata-rendering-cache-guide`.
 
 Gate: G/D.
 
@@ -2242,29 +2242,111 @@ sandboxing, cache invalidation, ERC-4906 handling, and marketplace caveats.
 Files likely touched:
 
 - `docs/integrations/metadata-rendering.md`
+- `docs/integrations/README.md`
+- `docs/release-readiness.md`
+- `release-artifacts/README.md`
+- `CHANGELOG.md`
+- `scripts/check_metadata_rendering.py`
+- `scripts/test_metadata_rendering.py`
+- `scripts/check_integrations_readme.py`
+- `scripts/test_integrations_readme.py`
+- `scripts/check_release_readiness.py`
+- `scripts/test_release_readiness.py`
+- `scripts/generate_release_manifest.py`
+- Makefile, Bash, PowerShell, and CI gate wiring
+- generated release manifest, bytecode proof, checksum artifacts, and risk
+  register outputs if docs or manifest inputs change
 - `docs/metadata.md`
 - `test/fixtures/metadata/`
+- `test/StreamMetadataGolden.t.sol`
+- `test/StreamMetadataEvents.t.sol`
+- `test/StreamMetadataFreeze.t.sol`
+- `test/StreamCoreBurn.t.sol`
+- `test/StreamRandomizerLifecycle.t.sol`
+- `test/StreamRandomizerRetry.t.sol`
+- `test/StreamDependencyRegistry.t.sol`
+- `scripts/check_metadata_fixtures.py`
+- `scripts/test_metadata_fixtures.py`
+- `scripts/check_metadata_browser_sandbox.py`
+- `scripts/test_metadata_browser_sandbox.py`
+- `scripts/check_rehearsal_metadata_browser_sandbox.py`
+- `scripts/test_rehearsal_metadata_browser_sandbox.py`
+- `release-artifacts/latest/event-topic-catalog.json`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/release-checksums.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/public-beta-evidence.json`
+- `release-artifacts/latest/risk-register.json`
+- `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json`
 
 Implementation steps:
 
-1. Document each metadata state and expected UI display.
-2. Document ERC-4906 event handling and non-handling on mint/burn where
+1. Document each metadata state and expected UI display for not-minted,
+   pending, stale, failed, retry-failed, final, frozen, burned,
+   dependency-pinned, dependency-deprecated, and cache-stale views.
+2. Document `tokenURI` behavior, base64 JSON expectations, strict UTF-8
+   boundaries, `metadata_schema_version`, `metadata_state`, attributes, and
+   `animation_url` expectations.
+3. Document ERC-4906 event handling and non-handling on mint/burn where
    intentional.
-3. Document animation URL sandbox and CSP guidance for web/electron.
-4. Document cache invalidation after randomness, dependency updates, and freeze.
-5. Link golden fixtures and browser sandbox checks.
+4. Document animation URL sandbox and CSP guidance for web, mobile, and
+   Electron consumers, including `allow-scripts`, parent isolation, private-key
+   boundaries, and unexpected outbound HTTP(S) rejection.
+5. Document cache invalidation after randomness, dependency updates, metadata
+   edits, collection updates, burns, and freeze.
+6. Document marketplace and evidence boundaries for OpenSea, Reservoir, Blur,
+   Manifold, public-beta evidence, and production-readiness claims.
+7. Link golden fixtures, Foundry metadata tests, browser sandbox checks, release
+   manifests, release checksums, risk register, and public-beta evidence.
+8. Add a checker and tests requiring headings, maturity phrases,
+   source-of-truth links, validation commands, metadata states, ERC-4906 terms,
+   sandbox terms, cache terms, marketplace terms, and evidence-boundary terms.
+9. Wire the checker into local and CI gates.
+10. Link the guide from integration, release-readiness, release-artifact,
+    changelog, backlog, and autonomous-run docs.
+11. Regenerate downstream release artifacts after docs/checker changes.
 
 Required tests/checks:
 
-- Metadata fixture checks if examples are added.
-- Metadata browser sandbox checks if examples are added.
-- Markdown heading check.
+- `python scripts/test_metadata_rendering.py`
+- `python scripts/check_metadata_rendering.py`
+- `python scripts/test_metadata_fixtures.py`
+- `python scripts/check_metadata_fixtures.py`
+- `python scripts/test_metadata_browser_sandbox.py`
+- `python scripts/check_metadata_browser_sandbox.py`
+- `python scripts/test_rehearsal_metadata_browser_sandbox.py`
+- `python scripts/check_rehearsal_metadata_browser_sandbox.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `git diff --check`.
 
 Acceptance criteria:
 
 - Frontends know when to refresh metadata and when not to.
 - Electron/mobile security constraints are called out.
 - Marketplace compatibility assumptions are explicit.
+- The guide distinguishes local metadata/browser evidence from public beta,
+  production, and live marketplace proof.
+- The guide documents `MetadataUpdate`, `BatchMetadataUpdate`,
+  `CollectionFrozen`, `DependencyVersionPinned`, `DependencyVersionCreated`,
+  `DependencyVersionDeprecated`, `TokenBurned`, and ERC-721 transfer-to-zero
+  handling.
+- The guide states that `supportsInterface(0x49064906)` advertises ERC-4906
+  support, while mint-only and burn paths intentionally do not emit ERC-4906
+  metadata events.
+- The guide gives cache keys, refresh triggers, read-after-event checks, stale
+  cache behavior, and marketplace refresh caveats.
+- Animation sandbox requirements include script isolation, parent isolation,
+  outbound-network rejection, and explicit Electron/private-key boundaries.
 
 Evidence artifacts: None.
 

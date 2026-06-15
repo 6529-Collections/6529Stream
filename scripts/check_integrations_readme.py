@@ -58,6 +58,7 @@ REQUIRED_PHRASES = [
     "INT-005",
     "event and indexer reconstruction spec",
     "INT-006",
+    "metadata rendering, cache, animation sandbox, and marketplace integration guide",
     "INT-007",
     "INT-008",
     "INT-009",
@@ -72,6 +73,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_wallet_signature_flows.py",
     "python scripts/test_events_and_indexing.py",
     "python scripts/check_events_and_indexing.py",
+    "python scripts/test_metadata_rendering.py",
+    "python scripts/check_metadata_rendering.py",
     "python scripts/check_release_readiness.py",
     "python scripts/check_changelog.py",
 ]
@@ -93,6 +96,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/auction-flows.md",
     "docs/integrations/wallets-and-signatures.md",
     "docs/integrations/events-and-indexing.md",
+    "docs/integrations/metadata-rendering.md",
     "release-artifacts/README.md",
     "release-artifacts/contracts.json",
     "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -186,7 +190,7 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
 
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     """Return required phrases that are absent from text, case-insensitively."""
-    normalized_text = text.lower()
+    normalized_text = " ".join(text.lower().split())
     return [phrase for phrase in phrases if phrase.lower() not in normalized_text]
 
 

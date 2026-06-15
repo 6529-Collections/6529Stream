@@ -84,6 +84,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/integrations/auction-flows.md"),
     Path("docs/integrations/wallets-and-signatures.md"),
     Path("docs/integrations/events-and-indexing.md"),
+    Path("docs/integrations/metadata-rendering.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]

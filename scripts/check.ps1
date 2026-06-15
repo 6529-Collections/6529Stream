@@ -174,6 +174,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_wallet_signature_flows.py"
 & $pythonPath @pythonArgs "scripts\test_events_and_indexing.py"
 & $pythonPath @pythonArgs "scripts\check_events_and_indexing.py"
+& $pythonPath @pythonArgs "scripts\test_metadata_rendering.py"
+& $pythonPath @pythonArgs "scripts\check_metadata_rendering.py"
 & $pythonPath @pythonArgs "scripts\test_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\check_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"
