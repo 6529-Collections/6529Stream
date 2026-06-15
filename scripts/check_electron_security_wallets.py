@@ -105,6 +105,41 @@ REQUIRED_PHRASES = [
     "not a maintained Electron reference app commitment",
 ]
 
+REQUIRED_SECTION_PHRASES = {
+    "Renderer Isolation And CSP": [
+        "private keys",
+        "seed phrases",
+        "mnemonics",
+        "signer-service credentials",
+        "WalletConnect pairing secrets",
+        "session topics",
+        "raw signatures",
+        "unreleased signed DropAuthorization payloads",
+    ],
+    "Local Storage Cache And Secrets": [
+        "private keys",
+        "seed phrases or mnemonics",
+        "signer-service credentials",
+        "code-signing certificates",
+        "auto-update publish credentials",
+        "WalletConnect pairing URIs",
+        "session topics",
+        "raw signatures",
+        "unreleased signed `DropAuthorization` payloads",
+    ],
+    "Telemetry Support And No-Secret Logs": [
+        "private keys",
+        "seed phrases or mnemonics",
+        "signer-service credentials",
+        "code-signing certificates",
+        "autoUpdater publish credentials",
+        "WalletConnect pairing URIs",
+        "session topics",
+        "raw signatures",
+        "unreleased signed `DropAuthorization` payloads",
+    ],
+}
+
 REQUIRED_COMMANDS = [
     "python scripts/test_electron_security_wallets.py",
     "python scripts/check_electron_security_wallets.py",
@@ -251,6 +286,16 @@ def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     ]
 
 
+def markdown_section(text: str, heading: str) -> str:
+    """Return the body for a level-two Markdown section."""
+    pattern = re.compile(
+        rf"^## {re.escape(heading)}\s*$([\s\S]*?)(?=^## |\Z)",
+        re.MULTILINE,
+    )
+    match = pattern.search(text)
+    return "" if match is None else match.group(1)
+
+
 def validate_electron_security_wallets(repo_root: Path, document_path: Path) -> None:
     """Validate the Electron security and wallet integration guide."""
     if not document_path.is_file():
@@ -279,6 +324,17 @@ def validate_electron_security_wallets(repo_root: Path, document_path: Path) -> 
         raise ElectronSecurityWalletsError(
             "Electron security and wallet guide is missing required content: "
             + ", ".join(missing_required_phrases)
+        )
+
+    missing_section_content = []
+    for heading, phrases in REQUIRED_SECTION_PHRASES.items():
+        section = markdown_section(text, heading)
+        for phrase in missing_phrases(section, phrases):
+            missing_section_content.append(f"{heading}: {phrase}")
+    if missing_section_content:
+        raise ElectronSecurityWalletsError(
+            "Electron security and wallet guide has incomplete sections: "
+            + ", ".join(missing_section_content)
         )
 
     command_lines = {line.strip() for line in text.splitlines()}

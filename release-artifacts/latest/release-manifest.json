@@ -1880,8 +1880,8 @@
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:0f750f20e954d6bb4dbfde67662bbfdc622cfe35b3e91663f32640dd599edd0d",
-        "size_bytes": 19461
+        "sha256": "sha256:f99ee60fdb537e259cd9696434221e174ede06a5e4b2a05e9739f2de8294b55d",
+        "size_bytes": 19407
       },
       {
         "path": "docs/integrations/contract-flows.md",

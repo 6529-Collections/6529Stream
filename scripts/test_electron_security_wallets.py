@@ -72,8 +72,8 @@ Electron boundaries are named.
 ## Renderer Isolation And CSP
 
 Private keys, seed phrases, mnemonics, signer-service credentials,
-WalletConnect pairing URIs, session topics, raw signatures, and unreleased
-signed `DropAuthorization` payloads are named.
+WalletConnect pairing secrets, session topics, raw signatures, and unreleased
+signed DropAuthorization payloads are named.
 
 ## Preload And IPC Contract
 
@@ -99,7 +99,10 @@ Metadata sandbox is named.
 
 ## Local Storage Cache And Secrets
 
-Secret storage is named.
+Secret storage is named. Private keys, seed phrases or mnemonics,
+signer-service credentials, code-signing certificates, auto-update publish
+credentials, WalletConnect pairing URIs, session topics, raw signatures, and
+unreleased signed `DropAuthorization` payloads are named.
 
 ## Updates Downloads And Release Integrity
 
@@ -107,7 +110,10 @@ Updates are named.
 
 ## Telemetry Support And No-Secret Logs
 
-Telemetry is named.
+Telemetry is named. Private keys, seed phrases or mnemonics, signer-service
+credentials, code-signing certificates, autoUpdater publish credentials,
+WalletConnect pairing URIs, session topics, raw signatures, and unreleased
+signed `DropAuthorization` payloads are named.
 
 ## Security Checklist
 
@@ -203,6 +209,30 @@ class ElectronSecurityWalletsTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.ElectronSecurityWalletsError, "missing required content"
+            ):
+                checker.validate_electron_security_wallets(
+                    root, root / checker.DEFAULT_ELECTRON_SECURITY_WALLETS
+                )
+
+    def test_rejects_missing_section_scoped_phrase(self) -> None:
+        """Secret-field coverage must appear in the intended guide sections."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_electron_security_wallets().replace(
+                (
+                    "Telemetry is named. Private keys, seed phrases or mnemonics, "
+                    "signer-service\ncredentials, code-signing certificates, "
+                    "autoUpdater publish credentials,\nWalletConnect pairing URIs, "
+                    "session topics, raw signatures, and unreleased\nsigned "
+                    "`DropAuthorization` payloads are named."
+                ),
+                "Telemetry is named.",
+            )
+            write_text(root / checker.DEFAULT_ELECTRON_SECURITY_WALLETS, text)
+
+            with self.assertRaisesRegex(
+                checker.ElectronSecurityWalletsError, "incomplete sections"
             ):
                 checker.validate_electron_security_wallets(
                     root, root / checker.DEFAULT_ELECTRON_SECURITY_WALLETS

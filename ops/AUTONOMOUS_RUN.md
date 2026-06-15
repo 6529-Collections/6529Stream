@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 14:43 UTC` |
+| Last updated | `2026-06-15 14:47 UTC` |
 
 ## Packaging Notes
 
@@ -15218,6 +15218,7 @@ Outcome:
 | 2026-06-15 14:38 | Validate INT-009 local draft | Focused Electron security/wallet, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
 | 2026-06-15 14:40 | Open PR #407 for INT-009 | PR #407 is open on branch `codex/electron-security-wallet-guide`, closes issue #406, and CodeRabbit review was requested in comment `4709069970`. |
 | 2026-06-15 14:43 | Address PR #407 bot bookkeeping note | 6529bot's first pass on the pre-state head was merge-ready but noticed stale backlog/run-state status markers; `ops/AUTONOMOUS_RUN.md` already named PR #407 on the final head, and the remaining stale `MAP-001`, `EXT-004`, and `EXT-005` status rows are now reconciled before follow-up review. |
+| 2026-06-15 14:47 | Address PR #407 optional checker nit | Accepted the 6529bot checker-quality suggestion by adding section-scoped forbidden-field assertions to `scripts/check_electron_security_wallets.py`, adding a regression test, and clarifying the Electron integrations README row so the mobile guide link does not read like a copy artifact. |
 
 ## Resume Instructions
 
