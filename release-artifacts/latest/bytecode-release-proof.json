@@ -1,0 +1,1429 @@
+{
+  "schema_version": "6529stream.bytecode-release-proof.v1",
+  "generated_by": "scripts/generate_bytecode_release_proof.py:1",
+  "source": {
+    "release_manifest": {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "sha256": "sha256:2820d851713391abbf4f8e046d82f6c0e2f5e8e6cb36edea9cc8306d657a29d5",
+      "size_bytes": 93531
+    },
+    "abi_checksums": {
+      "path": "release-artifacts/latest/abi-checksums.json",
+      "sha256": "sha256:6678bda73ee972cb1ae69f44bcea0a0bc2da8eaaaa6c93651ba8e0cf42fcce48",
+      "size_bytes": 11216
+    },
+    "source_verification_inputs": {
+      "path": "release-artifacts/latest/source-verification-inputs.json",
+      "sha256": "sha256:1fbea177413542f60749db26e5e150a7f7126bea5679eacf994c7982513fe983",
+      "size_bytes": 48684
+    },
+    "deployment_manifests": [
+      {
+        "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+        "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+        "size_bytes": 8299
+      },
+      {
+        "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+        "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+        "size_bytes": 8262
+      },
+      {
+        "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+        "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+        "size_bytes": 8445
+      }
+    ],
+    "address_books": [
+      {
+        "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+        "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd",
+        "size_bytes": 5082
+      },
+      {
+        "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+        "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9",
+        "size_bytes": 5062
+      },
+      {
+        "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+        "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4",
+        "size_bytes": 5099
+      }
+    ]
+  },
+  "release": {
+    "project": "6529Stream",
+    "status": "pre_audit_local_baseline",
+    "protocol_versions": [
+      "0.1.0"
+    ],
+    "deployment_versions": [
+      "anvil-6529stream-v0.1.0-001",
+      "anvil-6529stream-v0.1.0-001-broadcast",
+      "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "sepolia-6529stream-v0.1.0-001"
+    ]
+  },
+  "proof_status": {
+    "local_and_fork": "generated_from_committed_artifacts",
+    "production": "missing_reviewed_live_proof",
+    "production_completion_requires": [
+      "reviewed live deployment manifest or explorer verification evidence",
+      "reviewed live deployed runtime bytecode evidence",
+      "reviewed production address book evidence"
+    ]
+  },
+  "contract_proofs": [
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:DependencyRegistry",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "DependencyRegistry",
+        "address": "0x0000000000000000000000000000000000000002",
+        "source": "smart-contracts/DependencyRegistry.sol",
+        "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json"
+      },
+      "hashes": {
+        "abi": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+        "runtime_bytecode": "sha256:bb4f8dd875f49de1ca01cab226a0a1ac8b6bbf6d6411538ab56ab9e2acbd24dc",
+        "creation_bytecode": "sha256:d9d7f0a70bfd3e373e144dfc2e75d8fad67e3ffe8543e53796454d826902c566"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:beb2c655cbaf2fef56404c50485861aea209bea362a61d5c3ee6fe9d3532143c",
+        "source_solc_keccak256": "0xd04a0d525e560544e547be8ff03565adf4cf6571e584a2b73fcfd79a27a73e0d",
+        "artifact_sha256": "sha256:9465545392cd9631641cfc154c72ff9e0a75b4b31b8d80167757d48c0401e895",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:NextGenRandomizerRNG",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "NextGenRandomizerRNG",
+        "address": "0x0000000000000000000000000000000000000009",
+        "source": "smart-contracts/RandomizerRNG.sol",
+        "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json"
+      },
+      "hashes": {
+        "abi": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
+        "runtime_bytecode": "sha256:1cca41712129620c36f9d3284923e0feb9c12f73bdbe86fe7626bb23d7b65755",
+        "creation_bytecode": "sha256:1c6ed4f938dc974e573791b31f04727a28a001d453f7ee7bc70f0a1ff87fe029"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:963552f59ac9a869780a998801f4f6242853f5abd6c61e7ed063ed924e95782d",
+        "source_solc_keccak256": "0xa79810f5ea9e4456cd5b6277bfc3a1db3ce75217ce031f70cddaba798a46f1e8",
+        "artifact_sha256": "sha256:fae8c75962f0d97d6d535418780663f1b9c7e4aa0e71e89e91cd7d57c48d9247",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:NextGenRandomizerVRF",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "NextGenRandomizerVRF",
+        "address": "0x0000000000000000000000000000000000000008",
+        "source": "smart-contracts/RandomizerVRF.sol",
+        "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json"
+      },
+      "hashes": {
+        "abi": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
+        "runtime_bytecode": "sha256:893633502fa7fcfcdaacbe587747585af0edf56323652a4a5f192b95fd8609ee",
+        "creation_bytecode": "sha256:0c64bb70a7c6591068557cc3e1e73d389be216ff559539fe8e4bf6dfe095292d"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
+        "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
+        "artifact_sha256": "sha256:91667481eba7c0c0fa700fcde747924725cbc3179068b99a3814af95ca211001",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:StreamAdmins",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamAdmins",
+        "address": "0x0000000000000000000000000000000000000001",
+        "source": "smart-contracts/StreamAdmins.sol",
+        "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json"
+      },
+      "hashes": {
+        "abi": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+        "runtime_bytecode": "sha256:7611b836cc7f52c33e7e4b865bca6bc1ab11b28cfd5aefe9e6cbbbe948e23173",
+        "creation_bytecode": "sha256:766d287cf4ce8f9e9b29b2bff20ab87a887480e72f542f85cd2de2fcdde66667"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:a5f7198573426187d9c65b004be12b18575c2a591f66770c1dc4169e970d66ac",
+        "source_solc_keccak256": "0x1b4af101c5a603356ce0625b51f42985fa495ce885ee6b79dfb176be3dd3acad",
+        "artifact_sha256": "sha256:f6f9c891bf59b35d80750c77be1344b7cce6ec250650f7831ff94ddeb051558c",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:StreamAuctions",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamAuctions",
+        "address": "0x0000000000000000000000000000000000000007",
+        "source": "smart-contracts/AuctionContract.sol",
+        "artifact_path": "out/AuctionContract.sol/StreamAuctions.json"
+      },
+      "hashes": {
+        "abi": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
+        "runtime_bytecode": "sha256:4acfa2d5f7866a9eefa701506eec12d1aa396b1dbccc2efdd928ce62db8f212f",
+        "creation_bytecode": "sha256:db97bfe78094783a33c3751100dfd6a569727599874a499c1154554ae47401bf"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:9154ffffd227de64ae5920dac99ff93479b1dd450b18186d09b948fea3282478",
+        "source_solc_keccak256": "0x609312cc186cc57c1c12999f5753fbc820dcc9ad4a6ccc4c3dfd9cb680ecfb8c",
+        "artifact_sha256": "sha256:abcb5007ca71db56da506b222468d374f929761c632ac734ddb1608a0f4c31db",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:StreamCore",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamCore",
+        "address": "0x0000000000000000000000000000000000000003",
+        "source": "smart-contracts/StreamCore.sol",
+        "artifact_path": "out/StreamCore.sol/StreamCore.json"
+      },
+      "hashes": {
+        "abi": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+        "runtime_bytecode": "sha256:fc4d63d8b705101fb657badbc3f593c3664a0d1b1357e8f380db03f7bf54ee64",
+        "creation_bytecode": "sha256:2c6a29aa73126d2e54da97137a7bc6096af84bfad9eb0c95f8409bce777ea053"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:6b303f08333cfe94a9343ff9cbc309ddc5fa5d963dc7f83c72dde6bb151be0d0",
+        "source_solc_keccak256": "0x29315724a20e443d272f2f49831aa5e3f1411b211a7503465cd10d19a7b53f88",
+        "artifact_sha256": "sha256:e1f443f90f95cbe933e4754bb6e7adb23c0e73d24dfabe1006f7f3fe2be24fc9",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:StreamCuratorsPool",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamCuratorsPool",
+        "address": "0x0000000000000000000000000000000000000004",
+        "source": "smart-contracts/StreamCuratorsPool.sol",
+        "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json"
+      },
+      "hashes": {
+        "abi": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+        "runtime_bytecode": "sha256:ecf90b836a5b42c2c94c10a1ef55cff75a6e7e3659355ca6cda57bbf88b7adf7",
+        "creation_bytecode": "sha256:846e1eb848cd02bdef334f906ce414d4d5068584d3d9682611541a053d0328ba"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:e14a6bf7ad02183cdd68202ab99b7e278d4430500450256121e377c7b8519ad0",
+        "source_solc_keccak256": "0x5c5315958b2d2f9d0ce83c490bef11011f1eea0ec393065b4a43488ae37b4dac",
+        "artifact_sha256": "sha256:f75c44287d07043cbb9fd1bb550958fe77f21ffce164d385ef81858819923820",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:StreamDrops",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamDrops",
+        "address": "0x0000000000000000000000000000000000000006",
+        "source": "smart-contracts/StreamDrops.sol",
+        "artifact_path": "out/StreamDrops.sol/StreamDrops.json"
+      },
+      "hashes": {
+        "abi": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
+        "runtime_bytecode": "sha256:f3e6af9cb5113a49a2662511358ff18ec1b17adc4497099288af4f000adfd4cf",
+        "creation_bytecode": "sha256:94df9e28cb98ae55c094af29c24c1c78c8b49af58a274cc3566a3466ac2ea336"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:8c9d4138b8acfad39ebeded616a57827e5a8bf979198984a80ed4eece76cb958",
+        "source_solc_keccak256": "0x9c82c15097a94545edb201507acbcb0dbe762e13edf3bd187a80a2eef5fd6ee5",
+        "artifact_sha256": "sha256:b0258cc2a1f1a4f3bdfbf847e330e4e42f833a56726df3dd400a48fb524a7145",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001:StreamMinter",
+      "deployment_version": "anvil-6529stream-v0.1.0-001",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamMinter",
+        "address": "0x0000000000000000000000000000000000000005",
+        "source": "smart-contracts/StreamMinter.sol",
+        "artifact_path": "out/StreamMinter.sol/StreamMinter.json"
+      },
+      "hashes": {
+        "abi": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
+        "runtime_bytecode": "sha256:5ed37a2f19a2b5067ac9f444ff869a1dc072190c46810785475febb6af023518",
+        "creation_bytecode": "sha256:6998089fc3250c537f06b6959b3e68066476218d346c49c1851d5700f4cd7cd4"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:dcebc542df81a8bc077e0b239ec8b2bfd561bf2c92ad2f2f29f3355eb249a16f",
+        "source_solc_keccak256": "0x35c6367512e6f398605cb4670f757688dbd9fcd7158a4f479cc59c7f756d6205",
+        "artifact_sha256": "sha256:4ddf20b78ffc01faa0de2eeb20c9e64d4e5862b7bbc6c2de7a2a1d7c198ec3ae",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba33689872dbff8c1f67aefcd155814e5699fe35c1877fa7117f383d0937c009",
+          "release_artifact_manifest_sha256": "sha256:dda83d0d9fbce01b652c58e34edc97928e4ac3b21795764fcf5b38cc2f165d4e"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+          "sha256": "sha256:ba0d11cd59256c0c932dc9fd7e7b727187a874afd12d21fe36e9121836031ad9"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:DependencyRegistry",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "DependencyRegistry",
+        "address": "0x1000000000000000000000000000000000000002",
+        "source": "smart-contracts/DependencyRegistry.sol",
+        "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json"
+      },
+      "hashes": {
+        "abi": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+        "runtime_bytecode": "sha256:bb4f8dd875f49de1ca01cab226a0a1ac8b6bbf6d6411538ab56ab9e2acbd24dc",
+        "creation_bytecode": "sha256:d9d7f0a70bfd3e373e144dfc2e75d8fad67e3ffe8543e53796454d826902c566"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:beb2c655cbaf2fef56404c50485861aea209bea362a61d5c3ee6fe9d3532143c",
+        "source_solc_keccak256": "0xd04a0d525e560544e547be8ff03565adf4cf6571e584a2b73fcfd79a27a73e0d",
+        "artifact_sha256": "sha256:9465545392cd9631641cfc154c72ff9e0a75b4b31b8d80167757d48c0401e895",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:NextGenRandomizerRNG",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "NextGenRandomizerRNG",
+        "address": "0x1000000000000000000000000000000000000009",
+        "source": "smart-contracts/RandomizerRNG.sol",
+        "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json"
+      },
+      "hashes": {
+        "abi": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
+        "runtime_bytecode": "sha256:1cca41712129620c36f9d3284923e0feb9c12f73bdbe86fe7626bb23d7b65755",
+        "creation_bytecode": "sha256:1c6ed4f938dc974e573791b31f04727a28a001d453f7ee7bc70f0a1ff87fe029"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:963552f59ac9a869780a998801f4f6242853f5abd6c61e7ed063ed924e95782d",
+        "source_solc_keccak256": "0xa79810f5ea9e4456cd5b6277bfc3a1db3ce75217ce031f70cddaba798a46f1e8",
+        "artifact_sha256": "sha256:fae8c75962f0d97d6d535418780663f1b9c7e4aa0e71e89e91cd7d57c48d9247",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:NextGenRandomizerVRF",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "NextGenRandomizerVRF",
+        "address": "0x1000000000000000000000000000000000000008",
+        "source": "smart-contracts/RandomizerVRF.sol",
+        "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json"
+      },
+      "hashes": {
+        "abi": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
+        "runtime_bytecode": "sha256:893633502fa7fcfcdaacbe587747585af0edf56323652a4a5f192b95fd8609ee",
+        "creation_bytecode": "sha256:0c64bb70a7c6591068557cc3e1e73d389be216ff559539fe8e4bf6dfe095292d"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
+        "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
+        "artifact_sha256": "sha256:91667481eba7c0c0fa700fcde747924725cbc3179068b99a3814af95ca211001",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:StreamAdmins",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamAdmins",
+        "address": "0x1000000000000000000000000000000000000001",
+        "source": "smart-contracts/StreamAdmins.sol",
+        "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json"
+      },
+      "hashes": {
+        "abi": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+        "runtime_bytecode": "sha256:7611b836cc7f52c33e7e4b865bca6bc1ab11b28cfd5aefe9e6cbbbe948e23173",
+        "creation_bytecode": "sha256:766d287cf4ce8f9e9b29b2bff20ab87a887480e72f542f85cd2de2fcdde66667"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:a5f7198573426187d9c65b004be12b18575c2a591f66770c1dc4169e970d66ac",
+        "source_solc_keccak256": "0x1b4af101c5a603356ce0625b51f42985fa495ce885ee6b79dfb176be3dd3acad",
+        "artifact_sha256": "sha256:f6f9c891bf59b35d80750c77be1344b7cce6ec250650f7831ff94ddeb051558c",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:StreamAuctions",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamAuctions",
+        "address": "0x1000000000000000000000000000000000000007",
+        "source": "smart-contracts/AuctionContract.sol",
+        "artifact_path": "out/AuctionContract.sol/StreamAuctions.json"
+      },
+      "hashes": {
+        "abi": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
+        "runtime_bytecode": "sha256:4acfa2d5f7866a9eefa701506eec12d1aa396b1dbccc2efdd928ce62db8f212f",
+        "creation_bytecode": "sha256:db97bfe78094783a33c3751100dfd6a569727599874a499c1154554ae47401bf"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:9154ffffd227de64ae5920dac99ff93479b1dd450b18186d09b948fea3282478",
+        "source_solc_keccak256": "0x609312cc186cc57c1c12999f5753fbc820dcc9ad4a6ccc4c3dfd9cb680ecfb8c",
+        "artifact_sha256": "sha256:abcb5007ca71db56da506b222468d374f929761c632ac734ddb1608a0f4c31db",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:StreamCore",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamCore",
+        "address": "0x1000000000000000000000000000000000000003",
+        "source": "smart-contracts/StreamCore.sol",
+        "artifact_path": "out/StreamCore.sol/StreamCore.json"
+      },
+      "hashes": {
+        "abi": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+        "runtime_bytecode": "sha256:fc4d63d8b705101fb657badbc3f593c3664a0d1b1357e8f380db03f7bf54ee64",
+        "creation_bytecode": "sha256:2c6a29aa73126d2e54da97137a7bc6096af84bfad9eb0c95f8409bce777ea053"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:6b303f08333cfe94a9343ff9cbc309ddc5fa5d963dc7f83c72dde6bb151be0d0",
+        "source_solc_keccak256": "0x29315724a20e443d272f2f49831aa5e3f1411b211a7503465cd10d19a7b53f88",
+        "artifact_sha256": "sha256:e1f443f90f95cbe933e4754bb6e7adb23c0e73d24dfabe1006f7f3fe2be24fc9",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:StreamCuratorsPool",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamCuratorsPool",
+        "address": "0x1000000000000000000000000000000000000004",
+        "source": "smart-contracts/StreamCuratorsPool.sol",
+        "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json"
+      },
+      "hashes": {
+        "abi": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+        "runtime_bytecode": "sha256:ecf90b836a5b42c2c94c10a1ef55cff75a6e7e3659355ca6cda57bbf88b7adf7",
+        "creation_bytecode": "sha256:846e1eb848cd02bdef334f906ce414d4d5068584d3d9682611541a053d0328ba"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:e14a6bf7ad02183cdd68202ab99b7e278d4430500450256121e377c7b8519ad0",
+        "source_solc_keccak256": "0x5c5315958b2d2f9d0ce83c490bef11011f1eea0ec393065b4a43488ae37b4dac",
+        "artifact_sha256": "sha256:f75c44287d07043cbb9fd1bb550958fe77f21ffce164d385ef81858819923820",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:StreamDrops",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamDrops",
+        "address": "0x1000000000000000000000000000000000000006",
+        "source": "smart-contracts/StreamDrops.sol",
+        "artifact_path": "out/StreamDrops.sol/StreamDrops.json"
+      },
+      "hashes": {
+        "abi": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
+        "runtime_bytecode": "sha256:f3e6af9cb5113a49a2662511358ff18ec1b17adc4497099288af4f000adfd4cf",
+        "creation_bytecode": "sha256:94df9e28cb98ae55c094af29c24c1c78c8b49af58a274cc3566a3466ac2ea336"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:8c9d4138b8acfad39ebeded616a57827e5a8bf979198984a80ed4eece76cb958",
+        "source_solc_keccak256": "0x9c82c15097a94545edb201507acbcb0dbe762e13edf3bd187a80a2eef5fd6ee5",
+        "artifact_sha256": "sha256:b0258cc2a1f1a4f3bdfbf847e330e4e42f833a56726df3dd400a48fb524a7145",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "anvil-6529stream-v0.1.0-001-broadcast:StreamMinter",
+      "deployment_version": "anvil-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "anvil",
+        "chain_id": 31337
+      },
+      "contract": {
+        "name": "StreamMinter",
+        "address": "0x1000000000000000000000000000000000000005",
+        "source": "smart-contracts/StreamMinter.sol",
+        "artifact_path": "out/StreamMinter.sol/StreamMinter.json"
+      },
+      "hashes": {
+        "abi": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
+        "runtime_bytecode": "sha256:5ed37a2f19a2b5067ac9f444ff869a1dc072190c46810785475febb6af023518",
+        "creation_bytecode": "sha256:6998089fc3250c537f06b6959b3e68066476218d346c49c1851d5700f4cd7cd4"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:dcebc542df81a8bc077e0b239ec8b2bfd561bf2c92ad2f2f29f3355eb249a16f",
+        "source_solc_keccak256": "0x35c6367512e6f398605cb4670f757688dbd9fcd7158a4f479cc59c7f756d6205",
+        "artifact_sha256": "sha256:4ddf20b78ffc01faa0de2eeb20c9e64d4e5862b7bbc6c2de7a2a1d7c198ec3ae",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:8bfbb720f9beb15842ea9b4e0f113fcb0fc2a7269970973524d56ea3b43bb863",
+          "release_artifact_manifest_sha256": "sha256:bcc23bcf664523e385f2bef378c7412ea1136b61c12432db5623035036940609"
+        },
+        "address_book": {
+          "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:5fb901c5c9d05388244f1835488b72bfcd4ac7256a3ec61e1c7cef108ba55dcd"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:DependencyRegistry",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "DependencyRegistry",
+        "address": "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f",
+        "source": "smart-contracts/DependencyRegistry.sol",
+        "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json"
+      },
+      "hashes": {
+        "abi": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+        "runtime_bytecode": "sha256:bb4f8dd875f49de1ca01cab226a0a1ac8b6bbf6d6411538ab56ab9e2acbd24dc",
+        "creation_bytecode": "sha256:d9d7f0a70bfd3e373e144dfc2e75d8fad67e3ffe8543e53796454d826902c566"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:beb2c655cbaf2fef56404c50485861aea209bea362a61d5c3ee6fe9d3532143c",
+        "source_solc_keccak256": "0xd04a0d525e560544e547be8ff03565adf4cf6571e584a2b73fcfd79a27a73e0d",
+        "artifact_sha256": "sha256:9465545392cd9631641cfc154c72ff9e0a75b4b31b8d80167757d48c0401e895",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:NextGenRandomizerRNG",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "NextGenRandomizerRNG",
+        "address": "0x1e26a8b0cbccbb460bc208799a703a35bf287b67",
+        "source": "smart-contracts/RandomizerRNG.sol",
+        "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json"
+      },
+      "hashes": {
+        "abi": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
+        "runtime_bytecode": "sha256:1cca41712129620c36f9d3284923e0feb9c12f73bdbe86fe7626bb23d7b65755",
+        "creation_bytecode": "sha256:1c6ed4f938dc974e573791b31f04727a28a001d453f7ee7bc70f0a1ff87fe029"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:963552f59ac9a869780a998801f4f6242853f5abd6c61e7ed063ed924e95782d",
+        "source_solc_keccak256": "0xa79810f5ea9e4456cd5b6277bfc3a1db3ce75217ce031f70cddaba798a46f1e8",
+        "artifact_sha256": "sha256:fae8c75962f0d97d6d535418780663f1b9c7e4aa0e71e89e91cd7d57c48d9247",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:NextGenRandomizerVRF",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "NextGenRandomizerVRF",
+        "address": "0x9e3b3fd0017753ceb467036cf605a94660aae126",
+        "source": "smart-contracts/RandomizerVRF.sol",
+        "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json"
+      },
+      "hashes": {
+        "abi": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
+        "runtime_bytecode": "sha256:893633502fa7fcfcdaacbe587747585af0edf56323652a4a5f192b95fd8609ee",
+        "creation_bytecode": "sha256:0c64bb70a7c6591068557cc3e1e73d389be216ff559539fe8e4bf6dfe095292d"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
+        "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
+        "artifact_sha256": "sha256:91667481eba7c0c0fa700fcde747924725cbc3179068b99a3814af95ca211001",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:StreamAdmins",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "StreamAdmins",
+        "address": "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "source": "smart-contracts/StreamAdmins.sol",
+        "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json"
+      },
+      "hashes": {
+        "abi": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+        "runtime_bytecode": "sha256:7611b836cc7f52c33e7e4b865bca6bc1ab11b28cfd5aefe9e6cbbbe948e23173",
+        "creation_bytecode": "sha256:766d287cf4ce8f9e9b29b2bff20ab87a887480e72f542f85cd2de2fcdde66667"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:a5f7198573426187d9c65b004be12b18575c2a591f66770c1dc4169e970d66ac",
+        "source_solc_keccak256": "0x1b4af101c5a603356ce0625b51f42985fa495ce885ee6b79dfb176be3dd3acad",
+        "artifact_sha256": "sha256:f6f9c891bf59b35d80750c77be1344b7cce6ec250650f7831ff94ddeb051558c",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:StreamAuctions",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "StreamAuctions",
+        "address": "0x0192b664e3c73416451f23c0c361c4ff1dd385fa",
+        "source": "smart-contracts/AuctionContract.sol",
+        "artifact_path": "out/AuctionContract.sol/StreamAuctions.json"
+      },
+      "hashes": {
+        "abi": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
+        "runtime_bytecode": "sha256:4acfa2d5f7866a9eefa701506eec12d1aa396b1dbccc2efdd928ce62db8f212f",
+        "creation_bytecode": "sha256:db97bfe78094783a33c3751100dfd6a569727599874a499c1154554ae47401bf"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:9154ffffd227de64ae5920dac99ff93479b1dd450b18186d09b948fea3282478",
+        "source_solc_keccak256": "0x609312cc186cc57c1c12999f5753fbc820dcc9ad4a6ccc4c3dfd9cb680ecfb8c",
+        "artifact_sha256": "sha256:abcb5007ca71db56da506b222468d374f929761c632ac734ddb1608a0f4c31db",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:StreamCore",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "StreamCore",
+        "address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "source": "smart-contracts/StreamCore.sol",
+        "artifact_path": "out/StreamCore.sol/StreamCore.json"
+      },
+      "hashes": {
+        "abi": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+        "runtime_bytecode": "sha256:fc4d63d8b705101fb657badbc3f593c3664a0d1b1357e8f380db03f7bf54ee64",
+        "creation_bytecode": "sha256:2c6a29aa73126d2e54da97137a7bc6096af84bfad9eb0c95f8409bce777ea053"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:6b303f08333cfe94a9343ff9cbc309ddc5fa5d963dc7f83c72dde6bb151be0d0",
+        "source_solc_keccak256": "0x29315724a20e443d272f2f49831aa5e3f1411b211a7503465cd10d19a7b53f88",
+        "artifact_sha256": "sha256:e1f443f90f95cbe933e4754bb6e7adb23c0e73d24dfabe1006f7f3fe2be24fc9",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:StreamCuratorsPool",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "StreamCuratorsPool",
+        "address": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d",
+        "source": "smart-contracts/StreamCuratorsPool.sol",
+        "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json"
+      },
+      "hashes": {
+        "abi": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+        "runtime_bytecode": "sha256:ecf90b836a5b42c2c94c10a1ef55cff75a6e7e3659355ca6cda57bbf88b7adf7",
+        "creation_bytecode": "sha256:846e1eb848cd02bdef334f906ce414d4d5068584d3d9682611541a053d0328ba"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:e14a6bf7ad02183cdd68202ab99b7e278d4430500450256121e377c7b8519ad0",
+        "source_solc_keccak256": "0x5c5315958b2d2f9d0ce83c490bef11011f1eea0ec393065b4a43488ae37b4dac",
+        "artifact_sha256": "sha256:f75c44287d07043cbb9fd1bb550958fe77f21ffce164d385ef81858819923820",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:StreamDrops",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "StreamDrops",
+        "address": "0xba5a97857d9cbc39fd4c9c4e2420953765903aa0",
+        "source": "smart-contracts/StreamDrops.sol",
+        "artifact_path": "out/StreamDrops.sol/StreamDrops.json"
+      },
+      "hashes": {
+        "abi": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
+        "runtime_bytecode": "sha256:f3e6af9cb5113a49a2662511358ff18ec1b17adc4497099288af4f000adfd4cf",
+        "creation_bytecode": "sha256:94df9e28cb98ae55c094af29c24c1c78c8b49af58a274cc3566a3466ac2ea336"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:8c9d4138b8acfad39ebeded616a57827e5a8bf979198984a80ed4eece76cb958",
+        "source_solc_keccak256": "0x9c82c15097a94545edb201507acbcb0dbe762e13edf3bd187a80a2eef5fd6ee5",
+        "artifact_sha256": "sha256:b0258cc2a1f1a4f3bdfbf847e330e4e42f833a56726df3dd400a48fb524a7145",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    },
+    {
+      "proof_id": "fork-mainnet-6529stream-v0.1.0-001-broadcast:StreamMinter",
+      "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+      "lifecycle_state": "Rehearsed",
+      "network": {
+        "name": "fork-mainnet",
+        "chain_id": 1
+      },
+      "contract": {
+        "name": "StreamMinter",
+        "address": "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+        "source": "smart-contracts/StreamMinter.sol",
+        "artifact_path": "out/StreamMinter.sol/StreamMinter.json"
+      },
+      "hashes": {
+        "abi": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
+        "runtime_bytecode": "sha256:5ed37a2f19a2b5067ac9f444ff869a1dc072190c46810785475febb6af023518",
+        "creation_bytecode": "sha256:6998089fc3250c537f06b6959b3e68066476218d346c49c1851d5700f4cd7cd4"
+      },
+      "compiler": {
+        "version": "0.8.19+commit.7dd6d404",
+        "evm_version": "paris",
+        "optimizer_enabled": true,
+        "optimizer_runs": 200,
+        "via_ir": true,
+        "metadata_bytecode_hash": "ipfs"
+      },
+      "source_verification": {
+        "source_sha256": "sha256:dcebc542df81a8bc077e0b239ec8b2bfd561bf2c92ad2f2f29f3355eb249a16f",
+        "source_solc_keccak256": "0x35c6367512e6f398605cb4670f757688dbd9fcd7158a4f479cc59c7f756d6205",
+        "artifact_sha256": "sha256:4ddf20b78ffc01faa0de2eeb20c9e64d4e5862b7bbc6c2de7a2a1d7c198ec3ae",
+        "constructor_args_status": "retained_per_deployment_manifest",
+        "verification_status": "not_applicable"
+      },
+      "artifacts": {
+        "deployment_manifest": {
+          "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:087ca9ab36fe291efbd29994b9331e55d9570f56bd8dec67cc8720e9a47fe736",
+          "release_artifact_manifest_sha256": "sha256:ae66bf946957fac09c0790504f30d934329bfac971084385b1442f89b89ec115"
+        },
+        "address_book": {
+          "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+          "sha256": "sha256:34e0d4b267a4d8fb035d6971b14fd3ec03f4df15133af40039b0f19a3fac57d4"
+        }
+      },
+      "limitations": [
+        "This proof is generated from committed deployment artifacts and does not query live chain bytecode.",
+        "Production completion requires reviewed retained live RPC/explorer evidence."
+      ]
+    }
+  ]
+}

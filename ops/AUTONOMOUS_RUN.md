@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/signed-release-tag-gate` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/381` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/382` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/383` |
-| Next issue | TBD after REL-002; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/bytecode-release-proof` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/383` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/384` |
+| Active PR | TBD until branch push and PR creation |
+| Next issue | TBD after REL-003; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 05:44 UTC` |
+| Last updated | `2026-06-15 06:23 UTC` |
 
 ## Packaging Notes
 
@@ -244,19 +244,82 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 180 | Add signer compromise and revocation fuzz tests | Gate D/Gate F support | Add deterministic and bounded fuzz coverage for signer compromise response paths: drop-execution pause, signer rotation, epoch invalidation, per-drop cancellation, replay rejection, recovered fixed-price and auction payloads, and invalid-attempt no-mutation assertions | Merged in PR #377 |
 | 181 | Add pause and settlement matrix invariants | Gate D/Gate F support | Add snapshot-backed matrix coverage for auction bid pauses, settlement pauses, failed proceeds withdrawals, user withdrawal liveness, emergency-withdrawal owed-fund boundaries, and duplicate-settlement rejection without production contract changes | Merged in PR #379 |
 | 182 | Expand payment and forced-ETH invariants | Gate D/Gate F support | Extend the bounded payment invariant with failed-withdrawal rollback actions, auction curator proceeds withdrawals, randomizer forced-reserve injection, and explicit category/reserve equality checks without production contract changes | Merged in PR #381 |
-| 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | In progress on issue #382 |
+| 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | Merged in PR #383 |
+| 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | In progress on issue #384 |
 
 ## Current PR Worklog
 
-### PR candidate: Add signed release tag verification gate (Queue Item 183)
+### PR candidate: Add exact bytecode-to-release proof (Queue Item 184)
 
-Status: PR #383 open; bot-review hardening iteration in progress after 6529bot
-general review requested verifier changes.
+Status: local implementation complete; full Windows gate passed; PR not yet opened.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/384`.
+PR: TBD.
+Branch: `codex/bytecode-release-proof`.
+Branch started from PR #383 squash merge commit
+`b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9`.
+
+Goal:
+
+- Add `scripts/generate_bytecode_release_proof.py` and focused tests for
+  REL-003.
+- Generate `release-artifacts/latest/bytecode-release-proof.json` as a
+  deterministic local/fork proof that cross-checks release manifest references,
+  source verification inputs, ABI checksums, address books, deployment
+  manifests, contract addresses, compiler settings, artifact/source hashes,
+  runtime bytecode hashes, and creation bytecode hashes.
+- Keep the proof no-secret and local/fork scoped; production readiness still
+  requires reviewed live bytecode, explorer verification, and non-local
+  deployment evidence.
+- Keep the proof checksum-covered while intentionally avoiding a
+  release-manifest self-reference cycle.
+- Fold the latest clean-main reviewer comments into the roadmap/backlog:
+  production trust evidence remains the primary blocker; 1/1 provenance,
+  contract metadata, royalty philosophy, collector permanence,
+  marketplace/indexer evidence, `StreamCore` size discipline, and warning
+  hygiene remain explicit 10/10 work.
+
+Validation plan:
+
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile` for changed Python scripts.
+- `git diff --check`.
+- Full Windows gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Open concerns:
+
+- The artifact is expected to prove committed local/fork deployment artifacts,
+  not live production bytecode. PR language must avoid overstating readiness.
+- If CodeRabbit asks for stricter hash/path/schema validation, prioritize that
+  before merge.
+
+Latest local validation:
+
+- `2026-06-15 06:23 UTC`: full Windows
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed on branch `codex/bytecode-release-proof` with Foundry `v1.7.1`.
+
+### Completed: Add signed release tag verification gate (Queue Item 183)
+
+Status: Merged in PR #383; issue #382 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/382`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/383`.
 Branch: `codex/signed-release-tag-gate`.
 Branch started from PR #381 squash merge commit
 `7e47cdf3732111616d4cd24e2c051c894471108d`.
+Final head: `f4dd225ec6ddb152df5d797ed6990fd99dd12b98`.
+Squash merge: `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9`.
+Merge basis: Windows wrapper and Foundry smoke CI passed, CodeRabbit status
+passed with no unresolved review threads, bot-requested verifier hardening was
+implemented, and maintainer merge-decision comment `4704953415` documented the
+autonomous merge basis.
 
 Goal:
 
@@ -13851,6 +13914,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 06:09 | Add reviewer comments and continue REL-003 | A reviewer rechecked current main and confirmed the scary core contract gaps are mostly fixed while production trust evidence, 1/1 product surfaces, marketplace/indexer proof, `StreamCore` size discipline, and warning hygiene remain the next 10/10 work. Folded those comments into `ops/ROADMAP.md` and `ops/EXECUTION_BACKLOG.md` while continuing the bytecode-to-release proof branch for issue #384. |
+| 2026-06-15 05:52 | Merge PR #383 and start Queue Item 184 | PR #383 squash-merged as `b0ee33f59e7c3f28bd93cdd81fa5ed4e6e361fa9` after Windows wrapper and Foundry smoke CI passed, CodeRabbit status was success with no unresolved review threads, and verifier hardening from bot feedback was implemented on head `f4dd225ec6ddb152df5d797ed6990fd99dd12b98`; issue #382 closed completed and branch `codex/bytecode-release-proof` started for issue #384 / REL-003 exact bytecode-to-release proof. |
 | 2026-06-15 04:56 | Address PR #381 nice-to-haves | CI passed on initial head `d2a18efd299ea5a150ceb86377846b261b4e2a15`, CodeRabbit status was success despite a rate-limit banner, and 6529bot marked the PR good to merge with non-blocking suggestions. Accepted the low-risk clarity suggestions by documenting the exact `ETH failed` assertion and the current full-balance randomizer reserve model, then refreshed randomizer evidence and release artifacts before focused validation. |
 | 2026-06-15 04:48 | Open PR #381 | PR #381 opened for issue #380 on head `067c31cfc33ff0025c0a73d18faade4c1dddc249`, expands ADV-005 payment and forced-ETH invariant coverage without production contract changes, refreshes retained randomizer operations evidence and deterministic release artifacts, records the clean-main reviewer roadmap additions already folded into the current roadmap/backlog, and awaits CI plus CodeRabbit review before merge. |
 | 2026-06-15 02:58 | Merge PR #376 and start Queue Item 180 | PR #376 squash-merged as `ba83f54ca2ea952a62403a8b74faa09e11e150c7` after CI run `27520925937` passed Foundry smoke job `81338566333` and Windows PowerShell wrapper job `81338566247`; CodeRabbit status was success with no submitted reviews and no review threads, merge-decision comment `4704081007` documented the non-actionable rate-limit banner, issue #375 closed completed, and branch `codex/signer-compromise-fuzz` started from the merged baseline for issue #374 / ADV-003 signer compromise and revocation fuzz coverage. |

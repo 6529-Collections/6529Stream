@@ -52,9 +52,10 @@ The dashboard covers public beta and production release readiness.
 
 ## Readiness Summary
 
-Release manifest, checksum bundle, source verification inputs, ceremony evidence,
-randomizer operations evidence, release-signature evidence, Slither baseline,
-signed release tag gate, post-bundle release-signature evidence,
+Release manifest, checksum bundle, bytecode-to-release proof, live bytecode proof,
+source verification inputs, ceremony evidence, randomizer operations evidence,
+release-signature evidence, Slither baseline, signed release tag gate,
+post-bundle release-signature evidence,
 public-beta evidence status, non-local release evidence, incident response,
 release evidence packet index, drop authorization signing fixtures,
 release evidence issue backlog, release evidence issue links, release evidence issue body sync,

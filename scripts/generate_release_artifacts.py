@@ -21,6 +21,7 @@ INTERFACE_ID_SCHEMA = "6529stream.interface-ids.v1"
 MANIFEST_SCHEMA = "6529stream.release-artifact-manifest.v1"
 GENERATOR_VERSION = "1"
 DOWNSTREAM_RELEASE_FILES = {
+    "bytecode-release-proof.json",
     "dependency-artifact-manifest.json",
     "production-release-blockers.md",
     "public-beta-blockers.md",

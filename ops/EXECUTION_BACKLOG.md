@@ -116,6 +116,13 @@ The important distinction is:
 - Signed release provenance and signed tags are incomplete.
 - Production governance ceremony proof is incomplete.
 - Reviewed signer custody and production signing evidence are incomplete.
+- Public beta remains blocked until external audit evidence, testnet/live
+  deployment evidence, verified addresses, explorer verification, metadata
+  browser evidence, and randomizer operations evidence are retained and
+  reviewed. Production remains blocked until live ceremony evidence, production
+  deployment manifests, production signatures, signed tags, explorer
+  verification, live randomizer evidence, and post-audit remediation are
+  retained and reviewed.
 - Cross-contract adversarial testing is good but not exhaustive enough for the
   auction/drop/randomizer/admin interaction surface.
 - Integrator documentation is not yet sufficient for a 6529.io-style frontend,
@@ -126,19 +133,25 @@ The important distinction is:
 - 1/1 collector trust surfaces need a stronger product layer: artist statement,
   certificate/authenticity hash, curation notes, exhibition/history records,
   provenance events or retained evidence, and frozen provenance manifests.
+  Transient Labs-style story/provenance inscriptions are the comparison point.
 - Royalty philosophy is not explicit enough for a high-value 1/1 drop:
   ERC-2981 disclosure, governance controls, per-token/per-collection strategy,
-  and optional creator-fee enforcement must be a deliberate decision.
+  and optional transfer-validator/ERC721C-style creator-fee enforcement must be
+  a deliberate decision with the permissionless-transfer composability tradeoff
+  named.
 - Permanence needs an independently replayable collector package: renderer,
   dependencies, source archive, token output hashes, browser proof, and storage
-  guarantees.
+  guarantees. Art Blocks-style deterministic replayability is the benchmark for
+  renderer-dependent output.
 - Marketplace/indexer compatibility needs retained evidence, not just local
   metadata checks.
 - `StreamCore` bytecode headroom remains tight, so new feature surfaces should
   prefer satellite contracts, libraries, adapters, or explicit size-budget
   exceptions.
 - Compiler/lint/NatSpec warning noise should be burned down or dispositioned
-  before making "world-class" release claims.
+  before making "world-class" release claims, including unused randomizer
+  parameters, pure/view mutability suggestions, invalid NatSpec tags, and
+  accepted static-analysis/linter warnings.
 - The repo has accumulated too much run-state bookkeeping relative to
   substantive maturity work.
 
@@ -154,12 +167,12 @@ gap into a bounded issue or evidence artifact.
 | EIP-712 drop authorization, ERC-1271 signer support, replay controls, auction custody, pull credits, ERC-4906, freeze manifests, and randomizer lifecycle are already present on mainline | Gate C/D/F evidence | Preserve through adversarial tests, audit packet traceability, and no-secret release evidence; do not create generic rebuild issues |
 | Production trust evidence is still missing | `EXT`, `GOV`, `REL`, `AUD` | Prioritize reviewed testnet/live artifacts, explorer verification, signed release provenance, production signing/custody evidence, and completed external audit artifacts |
 | Contract-level metadata is missing | `ONE-001`, `INT-006`, `ONE-005` | Decide ERC-7572-style `contractURI()`, `ContractURIUpdated`, JSON schema, interface/event catalog updates, marketplace fallback, and non-local evidence |
-| 1/1 provenance is under-modeled | `ONE-002` | Define collection/token provenance manifests, artist statement, authenticity hash, curation/exhibition history, mutable versus frozen fields, and event/artifact boundaries |
-| Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement tradeoffs, and marketplace display evidence |
-| Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language |
+| 1/1 provenance is under-modeled | `ONE-002` | Define collection/token provenance manifests, artist statement, authenticity hash, curation/exhibition history, mutable versus frozen fields, and event/artifact boundaries; use Transient Labs-style story/provenance inscriptions as a benchmark |
+| Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
+| Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility lacks retained proof | `ONE-005`, `INT-005`, `INT-006` | Retain no-secret evidence for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation |
 | `StreamCore` has only 437 bytes of EIP-170 headroom | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
-| Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings, disposition accepted noise, and decide whether new warning categories should fail CI |
+| Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
 VRF best practices, Art Blocks on-chain storage practice, Manifold creator
@@ -205,18 +218,18 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | 16 | `ADV-005` | D/F | Audit confidence | Expand payment/forced-ETH invariants across all owed categories |
 | 17 | `REL-001` | F/G | Release proof | Add signed release provenance checker and retained artifact template |
 | 18 | `REL-002` | F/G | Release proof | Add signed tag and checksum verification gate |
-| 19 | `AUD-001` | F | Audit readiness | Refresh audit packet around actual current contract state |
-| 20 | `AUD-002` | F | Audit readiness | Add risk register and audit-boundary checker |
-| 21 | `INT-001` | G | Integration readiness | Add integrations doc entrypoint and artifact source-of-truth guide |
-| 22 | `INT-002` | G | Integration readiness | Add contract flow spec for fixed-price mint and drop authorization |
-| 23 | `INT-003` | G | Integration readiness | Add auction frontend/indexer flow spec |
-| 24 | `INT-004` | G | Integration readiness | Add wallet, EIP-712, ERC-1271, and Safe signing guide |
-| 25 | `INT-005` | G | Integration readiness | Add event/indexer reconstruction spec |
-| 26 | `INT-006` | G | Integration readiness | Add metadata rendering/cache/animation sandbox integration guide |
-| 27 | `INT-007` | G | Integration readiness | Add React/Next reference architecture |
-| 28 | `INT-008` | G | Integration readiness | Add mobile and WalletConnect integration guide |
-| 29 | `INT-009` | G | Integration readiness | Add Electron security and wallet integration guide |
-| 30 | `OSS-001` | A/G | Contributor quality | Refresh README/docs navigation around true maturity state |
+| 19 | `REL-003` | F/G | Release proof | Add exact bytecode-to-release proof |
+| 20 | `AUD-001` | F | Audit readiness | Refresh audit packet around actual current contract state |
+| 21 | `AUD-002` | F | Audit readiness | Add risk register and audit-boundary checker |
+| 22 | `INT-001` | G | Integration readiness | Add integrations doc entrypoint and artifact source-of-truth guide |
+| 23 | `INT-002` | G | Integration readiness | Add contract flow spec for fixed-price mint and drop authorization |
+| 24 | `INT-003` | G | Integration readiness | Add auction frontend/indexer flow spec |
+| 25 | `INT-004` | G | Integration readiness | Add wallet, EIP-712, ERC-1271, and Safe signing guide |
+| 26 | `INT-005` | G | Integration readiness | Add event/indexer reconstruction spec |
+| 27 | `INT-006` | G | Integration readiness | Add metadata rendering/cache/animation sandbox integration guide |
+| 28 | `INT-007` | G | Integration readiness | Add React/Next reference architecture |
+| 29 | `INT-008` | G | Integration readiness | Add mobile and WalletConnect integration guide |
+| 30 | `INT-009` | G | Integration readiness | Add Electron security and wallet integration guide |
 
 ## 4. Detailed PR Items
 
@@ -1401,7 +1414,7 @@ Dependencies: Existing release checksum bundle.
 
 ### REL-002: Add Signed Tag And Checksum Verification Gate
 
-Status: In progress on issue #382.
+Status: Completed in issue #382 / PR #383.
 
 Gate: F/G.
 
@@ -1456,7 +1469,7 @@ Dependencies: `REL-001`.
 
 ### REL-003: Add Exact Bytecode-To-Release Proof
 
-Status: Planned.
+Status: In progress on issue #384 and branch `codex/bytecode-release-proof`.
 
 Gate: F/G.
 
@@ -1468,25 +1481,31 @@ settings, bytecode hash, deployed address, chain ID, and release manifest.
 
 Files likely touched:
 
-- `scripts/check_bytecode_release_proof.py`
+- `scripts/generate_bytecode_release_proof.py`
 - `scripts/test_bytecode_release_proof.py`
 - `release-artifacts/latest/`
+- `.github/workflows/ci.yml`
+- `Makefile`
 - `docs/tooling.md`
 - `docs/release-policy.md`
+- `docs/deployment.md`
+- `docs/release-readiness.md`
 
 Implementation steps:
 
 1. Define proof schema for contract, address, chain ID, runtime bytecode hash,
    creation bytecode hash, compiler settings, artifact path, and release
    manifest hash.
-2. Generate proof for local/fork/testnet artifacts where data is available.
-3. Fail on hash mismatch or missing required fields in reviewed release mode.
-4. Keep testnet/local proof separate from production proof.
+2. Generate proof for committed local/fork artifacts where data is available.
+3. Fail on hash mismatch, address mismatch, chain mismatch, compiler-setting
+   mismatch, source-verification drift, release-manifest drift, or missing
+   required fields.
+4. Keep local/fork proof separate from production live-bytecode proof.
 
 Required tests/checks:
 
 - New script tests.
-- New checker.
+- New generator/checker.
 - Release manifest/checksum checks.
 
 Acceptance criteria:
@@ -1494,12 +1513,16 @@ Acceptance criteria:
 - A verifier can connect a deployed address to a specific release bundle.
 - Missing live production proof keeps production readiness blocked.
 - The proof is deterministic and no-secret.
+- The proof is checksum-covered without being embedded into the release
+  manifest, avoiding a manifest/proof hash cycle.
 
 Evidence artifacts:
 
 - Bytecode release proof JSON.
 
-Dependencies: `EXT-004`, `EXT-005`.
+Dependencies: committed deployment manifests, address books, source
+verification inputs, and release manifest; production completion depends on
+`EXT-004` and `EXT-005`.
 
 ### AUD-001: Refresh Audit Package Around Current Protocol State
 
@@ -2129,7 +2152,8 @@ Gate: G/F.
 Problem: A best-in-class 1/1 drop needs collector-verifiable provenance beyond
 generic token metadata: artist statement, certificate/authenticity hash,
 curation notes, exhibition/history records, and a clear policy for immutable
-versus append-only provenance updates.
+versus append-only provenance updates. Transient Labs-style story/provenance
+inscriptions are the comparison point for collector-facing expectations.
 
 Outcome: The repo defines a provenance manifest model and decides which parts
 belong on-chain, in frozen metadata manifests, in retained release artifacts,
@@ -2153,7 +2177,8 @@ Implementation steps:
    token-level 1/1 works.
 2. Decide whether collector-facing provenance updates are emitted as events,
    retained as release artifacts, represented in metadata JSON, or delegated to
-   a satellite contract.
+   a satellite contract, including how story/provenance updates remain
+   verifiable without silently mutating frozen artwork metadata.
 3. Bind provenance manifests to collection IDs, token IDs, metadata schema
    versions, freeze manifests, and release artifact hashes.
 4. Add schema/checker coverage if the provenance manifest is represented as a
@@ -2179,6 +2204,8 @@ Acceptance criteria:
 - The model can represent artist statement, certificate/authenticity hash,
   curation notes, exhibition/history records, and collector-facing provenance
   links.
+- The accepted model explains how collector-facing stories or provenance notes
+  can be added, frozen, or explicitly versioned.
 - Any on-chain surface includes stable IDs and event/query fields suitable for
   indexers.
 - Any off-chain retained artifact has no-secret validation and checksum
@@ -2205,7 +2232,7 @@ Problem: `royaltyInfo()` exposes ERC-2981 royalty information, but ERC-2981
 does not enforce secondary-sale payment. For high-value 1/1s, the repo must
 make an explicit product/governance choice about default royalties,
 per-collection or per-token overrides, marketplace disclosure, and optional
-transfer-validator or creator-fee enforcement.
+transfer-validator/ERC721C-style creator-fee enforcement.
 
 Outcome: The royalty policy is documented, testable, and reflected in
 integrator guidance. If new admin or enforcement surfaces are accepted, they
@@ -2227,7 +2254,8 @@ Implementation steps:
 2. Decide whether royalties remain fixed/default-only, become per collection,
    become per token, or move to a satellite royalty policy contract.
 3. Decide whether creator-fee enforcement is out of scope, optional, or a
-   future guarded module.
+   future guarded module, and explicitly record the permissionless-transfer
+   composability cost of any ERC721C-style enforcement path.
 4. If contract changes are accepted, add admin/event/test coverage for setter,
    bounds, zero-address behavior, freeze/release policy, and marketplace reads.
 5. Add marketplace/integrator guidance explaining what the contract can and
@@ -2247,7 +2275,8 @@ Acceptance criteria:
   enforcement.
 - The policy records who may change royalty data, when changes are allowed, and
   how changes are signaled.
-- Any enforcement proposal states transfer-composability and marketplace risks.
+- Any enforcement proposal states transfer-composability, permissionless
+  ownership-transfer, marketplace support, and wallet/indexer risks.
 - Integrators know how to display royalty data and where to find authoritative
   release artifacts.
 - No production-readiness claim depends on marketplaces honoring royalties.
@@ -2269,7 +2298,8 @@ Gate: G/F.
 Problem: Metadata hardening and dependency pinning exist, but collectors still
 need a replayable package that proves what was rendered, which source and
 dependencies were used, what output hashes were expected, and which browser or
-renderer assumptions were required.
+renderer assumptions were required. Art Blocks-style deterministic replay is
+the benchmark for renderer-dependent collector proof.
 
 Outcome: Release artifacts include a collector-verifiable permanence package
 for representative or final 1/1 outputs: renderer/dependency source archive
@@ -2314,6 +2344,8 @@ Acceptance criteria:
 - The package states which data is fully on-chain and which depends on
   decentralized storage, gateways, browsers, or external services.
 - Browser proof and token output hashes are retained or clearly marked missing.
+- The package is replayable by an independent reviewer using only retained
+  source/dependency artifacts, documented tooling, and no-secret inputs.
 - Release readiness remains blocked for live/final claims until reviewed
   non-local or final-drop evidence exists.
 

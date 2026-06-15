@@ -130,7 +130,8 @@ Before a public release tag:
 - Deployment rehearsal passes.
 - ABI, bytecode, interface ID, event topic, broadcast-derived manifest input,
   deployment manifest, address book, source verification input, release
-  manifest, and checksum artifacts are generated and checked.
+  manifest, bytecode-to-release proof, and checksum artifacts are generated and
+  checked.
 - Dependency source packages, migration plans, source-retention evidence,
   deprecation decisions, and unfrozen collection repins follow
   `docs/dependency-operations.md` when the release uses dependency registry
@@ -145,6 +146,10 @@ Before a public release tag:
   `python scripts/check_signed_release_tag.py` in non-release mode for ordinary
   PRs, and in `--mode release --tag <tag> --evidence <post-bundle-evidence>`
   mode before any public release tag claim.
+- Bytecode-to-release proof passes
+  `python scripts/generate_bytecode_release_proof.py --check`; the committed
+  local/fork proof is not live-chain verification, and production completion
+  requires reviewed retained live bytecode or explorer evidence.
 - Drop authorization signing evidence follows
   `docs/drop-authorization-signing.md` and passes
   `python scripts/check_drop_authorization_signing_evidence.py`.
