@@ -141,6 +141,10 @@ Before a public release tag:
   `python scripts/check_randomizer_operations.py`.
 - Release signature evidence follows `docs/release-signatures.md` and passes
   `python scripts/check_release_signatures.py`.
+- Signed release tag verification passes
+  `python scripts/check_signed_release_tag.py` in non-release mode for ordinary
+  PRs, and in `--mode release --tag <tag> --evidence <post-bundle-evidence>`
+  mode before any public release tag claim.
 - Drop authorization signing evidence follows
   `docs/drop-authorization-signing.md` and passes
   `python scripts/check_drop_authorization_signing_evidence.py`.
@@ -164,4 +168,6 @@ Before a public release tag:
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.
 - Detached checksum signatures and signed Git tags are produced for public
-  releases once maintainer signing-key policy is accepted.
+  releases once maintainer signing-key policy is accepted. Detached checksum
+  signature artifacts and the matching reviewed evidence must be retained as
+  post-bundle proof outside the `SHA256SUMS` file they verify.

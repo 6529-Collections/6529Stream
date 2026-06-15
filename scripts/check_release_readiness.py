@@ -46,6 +46,8 @@ REQUIRED_READINESS_PHRASES = [
     "ceremony evidence",
     "randomizer operations evidence",
     "release-signature evidence",
+    "signed release tag gate",
+    "post-bundle release-signature evidence",
     "public-beta evidence status",
     "release evidence packet index",
     "release evidence issue backlog",
@@ -78,6 +80,8 @@ REQUIRED_READINESS_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_release_readiness.py",
     "python scripts/check_release_readiness.py",
+    "python scripts/test_signed_release_tag.py",
+    "python scripts/check_signed_release_tag.py",
     "python scripts/test_incident_response.py",
     "python scripts/check_incident_response.py",
     "python scripts/test_drop_authorization_payload_generator.py",
@@ -149,6 +153,10 @@ REQUIRED_COMMANDS = [
     (
         "python scripts/generate_release_evidence_live_audit_archive.py "
         "--archive-dir release-artifacts/evidence/live-audit-reports --check"
+    ),
+    (
+        "python scripts/check_signed_release_tag.py --mode release --tag vX.Y.Z "
+        "--evidence path/to/post-bundle-release-signature-evidence.json"
     ),
     "python scripts/test_release_evidence_issue_labels.py",
     "python scripts/check_release_evidence_issue_labels.py",

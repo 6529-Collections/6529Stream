@@ -116,6 +116,12 @@ The current local baseline includes:
   [`deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json`](../deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json),
   [`deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json`](../deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json),
   and [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json);
+- signed release tag gate coverage through
+  `python scripts/test_signed_release_tag.py` and
+  `python scripts/check_signed_release_tag.py`; the default non-release mode
+  runs in local and CI gates without claiming release status, while strict
+  release mode requires a matching signed tag, current checksum bundle, and
+  post-bundle release-signature evidence outside the `SHA256SUMS` coverage set;
 - no-secret admin ceremony evidence schema, template, retained-artifact
   checklist, and checker under
   [`deployments/schema/admin-ceremony-evidence.schema.json`](../deployments/schema/admin-ceremony-evidence.schema.json),
@@ -322,6 +328,8 @@ Run the dashboard checker directly:
 ```sh
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_signed_release_tag.py
+python scripts/check_signed_release_tag.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_drop_authorization_payload_generator.py
@@ -375,6 +383,7 @@ python scripts/check_release_evidence_live_audit_markdown.py --report-json relea
 python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports
 python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check
 python scripts/generate_release_evidence_live_audit_archive.py --check
+python scripts/check_signed_release_tag.py --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 ```

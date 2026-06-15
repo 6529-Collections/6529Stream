@@ -58,6 +58,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_signed_release_tag.py
+python scripts/check_signed_release_tag.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py

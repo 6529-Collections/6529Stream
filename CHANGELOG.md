@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added REL-002 signed release tag verification with a default non-release
+  local/CI gate, strict release-mode checks for matching signed Git tags,
+  signer fingerprints, current checksum bundles, and post-bundle
+  release-signature evidence, plus release docs that prevent detached checksum
+  signatures from self-invalidating the `SHA256SUMS` bundle they verify. The
+  strict verifier now also requires an explicit good-signature marker, a
+  mandatory signer fingerprint matched as a bounded token, and a tighter
+  Git-safe release tag name.
 - Added a reusable ADV-001 protocol state-machine smoke harness with
   deterministic cross-contract coverage for fixed-price minting, auction
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,

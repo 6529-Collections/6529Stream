@@ -17,6 +17,7 @@ python scripts/generate_address_books.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_signed_release_tag.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
@@ -60,6 +61,8 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
+python scripts/test_signed_release_tag.py
+python scripts/check_signed_release_tag.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/test_drop_authorization_signing_evidence.py

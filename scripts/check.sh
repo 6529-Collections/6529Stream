@@ -71,6 +71,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_randomizer_operations.py
 "$python_bin" scripts/test_release_signatures.py
 "$python_bin" scripts/check_release_signatures.py
+"$python_bin" scripts/test_signed_release_tag.py
+"$python_bin" scripts/check_signed_release_tag.py
 "$python_bin" scripts/test_non_local_release_evidence_generator.py
 "$python_bin" scripts/test_non_local_release_evidence.py
 "$python_bin" scripts/check_non_local_release_evidence.py

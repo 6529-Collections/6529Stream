@@ -1352,7 +1352,7 @@ Dependencies: `CON-001`, `INT-005`.
 
 ### REL-001: Add Signed Release Provenance Evidence Checker
 
-Status: Planned.
+Status: Completed in issue #156 / PR #157.
 
 Gate: F/G.
 
@@ -1401,7 +1401,7 @@ Dependencies: Existing release checksum bundle.
 
 ### REL-002: Add Signed Tag And Checksum Verification Gate
 
-Status: Planned.
+Status: In progress on issue #382.
 
 Gate: F/G.
 
@@ -1416,6 +1416,8 @@ Files likely touched:
 - `scripts/check_signed_release_tag.py`
 - `scripts/test_signed_release_tag.py`
 - `docs/release-policy.md`
+- `docs/release-signatures.md`
+- `docs/release-readiness.md`
 - `.github/workflows/ci.yml`
 
 Implementation steps:
@@ -1423,20 +1425,28 @@ Implementation steps:
 1. Define local behavior for branches without tags: blocked or skipped with
    explicit non-release status.
 2. Verify tag points to current release commit when running in release mode.
-3. Verify tag signature status and checksum bundle signature when available.
-4. Document exact maintainer command sequence.
+3. Verify tag signature status, signer fingerprint, and checksum-bundle
+   freshness in release mode.
+4. Require matching post-bundle release-signature evidence so detached checksum
+   signatures do not self-invalidate the `SHA256SUMS` bundle they prove.
+5. Document exact maintainer command sequence.
 
 Required tests/checks:
 
 - New script tests.
 - New script.
 - Release readiness check.
+- Local/CI non-release gate.
 
 Acceptance criteria:
 
 - Non-release PRs do not falsely claim signed release status.
 - Release-mode checks fail if tag/signature/checksum linkage is missing.
+- Release-mode checks fail if the signed tag verification output does not
+  include the retained signer fingerprint.
 - Docs support independent verification by an external user.
+- Detached checksum signature evidence is rejected if it is already covered by
+  the checksum bundle being verified.
 
 Evidence artifacts:
 

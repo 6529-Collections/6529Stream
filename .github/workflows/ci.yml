@@ -118,6 +118,8 @@ jobs:
             scripts/test_randomizer_operations.py \
             scripts/check_release_signatures.py \
             scripts/test_release_signatures.py \
+            scripts/check_signed_release_tag.py \
+            scripts/test_signed_release_tag.py \
             scripts/check_non_local_release_evidence.py \
             scripts/test_non_local_release_evidence.py \
             scripts/check_external_audit_report_evidence.py \
@@ -366,6 +368,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_signatures.py 2>&1 | tee ci-logs/release-signature-tests.log
           python3 scripts/check_release_signatures.py 2>&1 | tee ci-logs/release-signature-check.log
+          python3 scripts/test_signed_release_tag.py 2>&1 | tee ci-logs/signed-release-tag-tests.log
+          python3 scripts/check_signed_release_tag.py 2>&1 | tee ci-logs/signed-release-tag-check.log
 
       - name: Non-local release evidence
         shell: bash

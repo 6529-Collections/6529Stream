@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/payment-forced-eth-invariants` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/379` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/380` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/381` |
-| Next issue | TBD after ADV-005; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/signed-release-tag-gate` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/381` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/382` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/383` |
+| Next issue | TBD after REL-002; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 04:56 UTC` |
+| Last updated | `2026-06-15 05:44 UTC` |
 
 ## Packaging Notes
 
@@ -243,19 +243,77 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 179 | Fold clean-main reviewer rebaseline into roadmap | Gate G support | Record the reviewer-confirmed fixed surfaces, remaining 10/10 product/evidence gaps, benchmark inputs, and backlog mapping without changing readiness claims | Merged in PR #376 |
 | 180 | Add signer compromise and revocation fuzz tests | Gate D/Gate F support | Add deterministic and bounded fuzz coverage for signer compromise response paths: drop-execution pause, signer rotation, epoch invalidation, per-drop cancellation, replay rejection, recovered fixed-price and auction payloads, and invalid-attempt no-mutation assertions | Merged in PR #377 |
 | 181 | Add pause and settlement matrix invariants | Gate D/Gate F support | Add snapshot-backed matrix coverage for auction bid pauses, settlement pauses, failed proceeds withdrawals, user withdrawal liveness, emergency-withdrawal owed-fund boundaries, and duplicate-settlement rejection without production contract changes | Merged in PR #379 |
-| 182 | Expand payment and forced-ETH invariants | Gate D/Gate F support | Extend the bounded payment invariant with failed-withdrawal rollback actions, auction curator proceeds withdrawals, randomizer forced-reserve injection, and explicit category/reserve equality checks without production contract changes | In progress on issue #380 |
+| 182 | Expand payment and forced-ETH invariants | Gate D/Gate F support | Extend the bounded payment invariant with failed-withdrawal rollback actions, auction curator proceeds withdrawals, randomizer forced-reserve injection, and explicit category/reserve equality checks without production contract changes | Merged in PR #381 |
+| 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | In progress on issue #382 |
 
 ## Current PR Worklog
 
-### PR candidate: Expand payment and forced-ETH invariants (Queue Item 182)
+### PR candidate: Add signed release tag verification gate (Queue Item 183)
 
-Status: PR #381 open; CI passed on initial head, bot nice-to-have follow-up prepared locally.
+Status: PR #383 open; bot-review hardening iteration in progress after 6529bot
+general review requested verifier changes.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/382`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/383`.
+Branch: `codex/signed-release-tag-gate`.
+Branch started from PR #381 squash merge commit
+`7e47cdf3732111616d4cd24e2c051c894471108d`.
+
+Goal:
+
+- Add `scripts/check_signed_release_tag.py` and focused tests for REL-002.
+- Keep ordinary PR/main runs in explicit non-release mode so local/CI gates do
+  not require tags or signing keys and do not claim release readiness.
+- Add strict release mode requiring a safe tag name, tag-to-HEAD match, verified
+  signed Git tag, current checksum bundle, and matching reviewed
+  release-signature evidence.
+- Reject release-mode signature evidence that is itself listed in the
+  `SHA256SUMS` bundle it is intended to prove, avoiding detached-signature
+  self-invalidation.
+- Wire the checker into `Makefile`, Bash/PowerShell wrappers, and CI, and
+  update release docs/readiness checks.
+
+Review iteration:
+
+- CodeRabbit was rate-limited but returned success after explicit review request
+  comment `4704863962`.
+- 6529bot security review on opening head `0d0231d9fcee68d7efab19b21bb92f6d1a5e74aa`
+  reported no security findings.
+- 6529bot general review requested stricter release verifier behavior: require
+  an explicit good-signature marker, require retained signer fingerprints in
+  release mode, match fingerprints as bounded tokens, tighten tag-name
+  validation, and add bypass-path tests.
+- Local follow-up hardening now implements those requests and expands the
+  signed-release-tag focused test suite.
+
+Validation completed so far:
+
+- `python scripts\test_signed_release_tag.py` passed locally with 14 tests.
+- `python scripts\check_signed_release_tag.py` passed locally in default
+  non-release mode, printing that no signed release status is claimed.
+- `python scripts\test_release_readiness.py` and
+  `python scripts\check_release_readiness.py` passed after adding the new
+  required command/language.
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed locally at `2026-06-15 05:29 UTC` with existing compiler/NatSpec and
+  Foundry trace warning noise only.
+- After the bot-review hardening iteration, `python scripts\test_signed_release_tag.py`,
+  `python scripts\check_signed_release_tag.py`, `python scripts\check_release_readiness.py`,
+  `python scripts\check_changelog.py`, release manifest/checksum tests and
+  drift checks, `git diff --check`, and the full PowerShell `scripts\check.ps1`
+  gate all passed locally again at `2026-06-15 05:44 UTC`.
+
+### Completed: Expand payment and forced-ETH invariants (Queue Item 182)
+
+Status: merged as PR #381; issue #380 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/380`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/381`.
 Branch: `codex/payment-forced-eth-invariants`.
 Branch started from PR #379 squash merge commit
 `217a3b38ae5058f397da324d54a343439bc5b2c8`.
 Initial PR head: `067c31cfc33ff0025c0a73d18faade4c1dddc249`.
+Final PR head: `63d2655202edf12f0dfa30c369f672944c3f3511`.
+Squash merge commit:
+`7e47cdf3732111616d4cd24e2c051c894471108d`.
 
 Goal:
 
@@ -306,6 +364,13 @@ Validation completed so far:
   `python scripts\generate_release_manifest.py --check`,
   `python scripts\generate_release_checksums.py --check`,
   `python scripts\check_changelog.py`, and `git diff --check`.
+- Final PR #381 CI run `27524979955` passed on head
+  `63d2655202edf12f0dfa30c369f672944c3f3511`, including Windows PowerShell
+  wrapper job `81350359315` and Foundry smoke job `81350359309`. 6529bot's
+  follow-up comment `4704708712` reported no new findings, CodeRabbit status
+  remained success, the final review/thread scan found no unresolved threads or
+  requested-change reviews, and PR #381 squash-merged as
+  `7e47cdf3732111616d4cd24e2c051c894471108d`.
 
 ### Completed: Add pause and settlement matrix invariants (Queue Item 181)
 
