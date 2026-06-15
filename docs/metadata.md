@@ -78,6 +78,28 @@ are documented in [`docs/dependency-operations.md`](dependency-operations.md).
 Fork/testnet/live production-evidence browser coverage and live deployment
 release manifests remain open.
 
+## Artist Approval Provenance
+
+Artist approval is stored as collection-level provenance state, not embedded
+inside `tokenURI` metadata. The display string remains available through
+`artistsSignatures(collectionId)`, while `artistApprovalHashes(collectionId)`
+records the canonical typed approval digest the artist approved.
+`hashArtistApproval(collectionId)` returns the digest for the collection's
+current on-chain state, and `artistSigned(collectionId)` returns true only when
+the retained approval hash still matches that current digest. Indexers and
+frontends should treat `artistSigned(collectionId) == true` as the signal that
+the display string is backed by the current on-chain collection state. If
+mutable collection fields change after an approval, the contract keeps the
+display string and stored hash as historical provenance, `artistSigned` returns
+false, and the artist can approve the new current hash.
+
+Artists can approve directly from the configured artist address or through a
+relayed EIP-712 approval. EOA signers use the digest returned by
+`hashArtistApproval(collectionId)`, and contract-wallet artists are validated
+through ERC-1271 `isValidSignature(bytes32,bytes)`. Frozen collections can still
+receive a final artist approval, allowing the stored approval hash to bind the
+final immutable collection state.
+
 ## Escaping And Attribute Fragments
 
 On-chain JSON string fields are escaped before base64 encoding:

@@ -115,6 +115,8 @@ the release policy in `docs/release-policy.md`.
   approval text/signature as provenance.
 - Added ERC-1271 contract-wallet artist approval support with strict
   `isValidSignature(bytes32,bytes)` magic-value validation.
+- Documented artist approval provenance semantics for direct, EIP-712, and
+  ERC-1271 approvals, including stale state-bound approval handling.
 - Added a reusable ADV-001 protocol state-machine smoke harness with
   deterministic cross-contract coverage for fixed-price minting, auction
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,
