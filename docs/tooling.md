@@ -199,6 +199,21 @@ lowercase, and are regenerated with `python scripts/generate_address_books.py`.
 The default drift check includes the Anvil placeholder, Anvil broadcast-derived,
 and reviewed fork-mainnet broadcast-derived address books.
 
+The bytecode-to-release proof step writes
+`release-artifacts/latest/bytecode-release-proof.json` after release manifest
+generation:
+
+```sh
+python scripts/test_bytecode_release_proof.py
+python scripts/generate_bytecode_release_proof.py --check
+```
+
+The proof cross-checks address books, deployment manifests, ABI/runtime
+bytecode hashes, source verification inputs, compiler settings, chain IDs, and
+the current release manifest hash. It is checksum-covered and no-secret, but it
+does not query live chain bytecode; live production bytecode proof remains a
+reviewed non-local evidence requirement.
+
 The ceremony-evidence step validates retained no-secret deployment evidence
 bundles under `deployments/ceremony-evidence/`. The committed Anvil bundle ties
 local deployment/admin/signer, metadata-browser, auction, emergency

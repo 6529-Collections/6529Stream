@@ -324,6 +324,15 @@ command templates for each production contract without claiming live explorer
 verification before a broadcast deployment supplies real addresses, linked
 library addresses, and encoded constructor args.
 
+Bytecode-to-release proof generation writes
+`release-artifacts/latest/bytecode-release-proof.json` after the release
+manifest. It ties each committed local/fork deployment address to its
+deployment manifest, address book, ABI hash, runtime bytecode hash, creation
+bytecode hash, compiler settings, source verification record, chain ID, and the
+current release manifest hash. It is a deterministic no-secret proof over
+committed artifacts only; live production bytecode proof still requires
+reviewed RPC or explorer evidence before any public release claim.
+
 Release manifest generation writes
 `release-artifacts/latest/release-manifest.json` as the top-level machine-readable
 index over the release artifact catalog, ABI compatibility baseline, deployment
@@ -464,6 +473,7 @@ Before a deployment can become public-beta eligible:
 - Generate and check the ceremony evidence bundle.
 - Generate and check the randomizer operations evidence bundle.
 - Generate and check the release manifest.
+- Generate and check the bytecode-to-release proof.
 - Generate and check the release checksum bundle.
 
 Live fork/testnet broadcast, production broadcast retention, contract

@@ -36,6 +36,7 @@ python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
+python scripts/generate_bytecode_release_proof.py
 python scripts/generate_release_checksums.py
 ```
 
@@ -105,6 +106,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
+python scripts/test_bytecode_release_proof.py
+python scripts/generate_bytecode_release_proof.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 ```
@@ -140,6 +143,15 @@ public-beta evidence status, schema hashes, governance doc hashes including
 `docs/non-local-release-evidence.md`, and `docs/release-readiness.md`, and the
 release-ceremony items that are not yet available for this pre-audit local
 baseline.
+
+`latest/bytecode-release-proof.json` is generated after the release manifest.
+It cross-checks committed deployment manifests, address books, ABI/runtime
+bytecode checksums, source verification inputs, compiler settings, deployed
+addresses, chain IDs, and the current release manifest hash into one
+auditor-facing proof. It does not query live chain bytecode and does not make a
+production verification claim; production completion still requires reviewed
+live RPC or explorer evidence. The proof is checksum-covered, but it is not
+embedded into the release manifest to avoid a manifest/proof hash cycle.
 
 `latest/public-beta-evidence.json` is the no-secret status manifest for
 public-beta and production-release evidence. It stays blocked in the committed
@@ -380,6 +392,7 @@ python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
+python scripts/generate_bytecode_release_proof.py
 python scripts/generate_release_checksums.py
 ```
 

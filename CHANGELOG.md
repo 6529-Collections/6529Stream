@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added REL-003 bytecode-to-release proof generation with a checked
+  `release-artifacts/latest/bytecode-release-proof.json` tying committed
+  deployment manifests, address books, runtime bytecode hashes, source
+  verification inputs, and the current release manifest together while keeping
+  production live-bytecode proof explicitly blocked until reviewed evidence
+  exists.
 - Added REL-002 signed release tag verification with a default non-release
   local/CI gate, strict release-mode checks for matching signed Git tags,
   signer fingerprints, current checksum bundles, and post-bundle

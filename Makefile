@@ -26,7 +26,7 @@ RM_RF := rm -rf out cache broadcast
 endif
 PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)$(PATH)
 
-.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check windows-check-wrapper-policy windows-check-wrapper-runtime drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check admin-ceremony-evidence-check solidity-formatting-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check signed-release-tag-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check public-beta-evidence-check public-beta-blocker-report public-beta-blocker-report-check production-release-blocker-report production-release-blocker-report-check release-evidence-packet-index release-evidence-packet-index-check release-evidence-issue-backlog release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-report-check release-evidence-live-audit-markdown-check release-evidence-live-audit-archive release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
+.PHONY: check build test gas-snapshot gas-snapshot-check size deploy-rehearsal metadata-fixtures-check windows-check-wrapper-policy windows-check-wrapper-runtime drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check admin-ceremony-evidence-check solidity-formatting-check release-artifacts release-artifacts-check source-verification-inputs source-verification-inputs-check abi-compatibility abi-compatibility-check broadcast-manifest-inputs broadcast-manifest-inputs-check deployment-manifests deployment-manifest-check address-books address-books-check dependency-artifacts dependency-artifacts-check ceremony-evidence-check randomizer-operations-check release-signatures-check signed-release-tag-check bytecode-release-proof bytecode-release-proof-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check public-beta-evidence-check public-beta-blocker-report public-beta-blocker-report-check production-release-blocker-report production-release-blocker-report-check release-evidence-packet-index release-evidence-packet-index-check release-evidence-issue-backlog release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-report-check release-evidence-live-audit-markdown-check release-evidence-live-audit-archive release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-manifest release-manifest-check release-checksums release-checksums-check changelog-check fmt-check slither clean
 
 check: build test gas-snapshot-check size solidity-formatting-check windows-check-wrapper-policy metadata-fixtures-check drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check admin-ceremony-evidence-check release-artifacts-check source-verification-inputs-check abi-compatibility-check signed-release-tag-check non-local-release-evidence-check external-audit-report-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check incident-response-check release-readiness-check release-checksums-check changelog-check deploy-rehearsal
 
@@ -151,6 +151,13 @@ signed-release-tag-check:
 	$(PYTHON) scripts/test_signed_release_tag.py
 	$(PYTHON) scripts/check_signed_release_tag.py
 
+bytecode-release-proof: release-manifest
+	$(PYTHON) scripts/generate_bytecode_release_proof.py
+
+bytecode-release-proof-check: release-manifest-check
+	$(PYTHON) scripts/test_bytecode_release_proof.py
+	$(PYTHON) scripts/generate_bytecode_release_proof.py --check
+
 non-local-release-evidence-check:
 	$(PYTHON) scripts/test_non_local_release_evidence.py
 	$(PYTHON) scripts/check_non_local_release_evidence.py
@@ -262,10 +269,10 @@ release-manifest-check: address-books-check source-verification-inputs-check dep
 	$(PYTHON) scripts/test_release_manifest.py
 	$(PYTHON) scripts/generate_release_manifest.py --check
 
-release-checksums: release-manifest
+release-checksums: bytecode-release-proof
 	$(PYTHON) scripts/generate_release_checksums.py
 
-release-checksums-check: release-manifest-check
+release-checksums-check: bytecode-release-proof-check
 	$(PYTHON) scripts/test_release_checksums.py
 	$(PYTHON) scripts/generate_release_checksums.py --check
 

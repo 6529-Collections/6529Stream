@@ -120,6 +120,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_release_readiness.py
 "$python_bin" scripts/test_release_manifest.py
 "$python_bin" scripts/generate_release_manifest.py --check
+"$python_bin" scripts/test_bytecode_release_proof.py
+"$python_bin" scripts/generate_bytecode_release_proof.py --check
 "$python_bin" scripts/test_release_checksums.py
 "$python_bin" scripts/generate_release_checksums.py --check
 "$python_bin" scripts/test_changelog_check.py

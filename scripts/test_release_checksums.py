@@ -81,6 +81,33 @@ class ReleaseChecksumTests(unittest.TestCase):
                 path.stat().st_size,
             )
 
+    def test_committed_checksums_cover_bytecode_release_proof(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        relative_path = "release-artifacts/latest/bytecode-release-proof.json"
+        checksum_text = (
+            repo_root / generator.DEFAULT_OUTPUT_DIR / generator.CHECKSUM_FILE_NAME
+        ).read_text(encoding="utf-8")
+        checksum_entries = {
+            path: digest for digest, path in generator.parse_checksum_file(checksum_text)
+        }
+        self.assertIn(relative_path, checksum_entries)
+
+        proof_path = repo_root / relative_path
+        expected_hash = generator.file_sha256(proof_path)
+        self.assertEqual(checksum_entries[relative_path], expected_hash.removeprefix("sha256:"))
+
+        manifest = json.loads(
+            (
+                repo_root
+                / generator.DEFAULT_OUTPUT_DIR
+                / generator.CHECKSUM_MANIFEST_NAME
+            ).read_text(encoding="utf-8")
+        )
+        manifest_entries = {entry["path"]: entry for entry in manifest["files"]}
+        self.assertIn(relative_path, manifest_entries)
+        self.assertEqual(manifest_entries[relative_path]["sha256"], expected_hash)
+        self.assertEqual(manifest_entries[relative_path]["size_bytes"], proof_path.stat().st_size)
+
     def test_generator_writes_sorted_checksums_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
