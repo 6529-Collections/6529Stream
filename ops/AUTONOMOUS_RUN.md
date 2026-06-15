@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reviewer-roadmap-rebaseline` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/373` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/375` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/376` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/374` (`ADV-003` signer compromise and revocation fuzz tests); `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
@@ -246,12 +246,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Fold clean-main reviewer rebaseline into roadmap (Queue Item 179)
 
-Status: local draft; PR not opened yet.
+Status: PR #376 open; CI and CodeRabbit pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/375`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/376`.
 Branch: `codex/reviewer-roadmap-rebaseline`.
 Branch started from PR #373 squash merge commit
 `7684b800606b31d2487f078b87f2f6a19fd27777`.
+Opening PR head: `1169e98dec528ec1f2b54d42ed4a36b4fba5e12f`.
 
 Goal:
 
@@ -275,6 +276,9 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed locally on 2026-06-15 02:43 UTC with existing compiler/NatSpec
   warning noise only.
+- PR #376 opened as ready-for-review and CodeRabbit was requested explicitly in
+  issue comment `4704053622`; Claude intentionally skipped per current user
+  instruction.
 
 ### Completed: Add auction/drop/randomizer adversarial sequence tests (Queue Item 178)
 
