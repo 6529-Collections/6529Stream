@@ -115,15 +115,6 @@
         "StreamCore"
       ]
     },
-    "smart-contracts/ERC2981.sol": {
-      "path": "smart-contracts/ERC2981.sol",
-      "sha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a",
-      "solc_keccak256": "0x7b5b7a1aee191e477887f0477c100636d872bc47f5359223b0821c4d3fa85165",
-      "license": "MIT",
-      "used_by": [
-        "StreamCore"
-      ]
-    },
     "smart-contracts/ERC721.sol": {
       "path": "smart-contracts/ERC721.sol",
       "sha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702",
@@ -420,8 +411,8 @@
     },
     "smart-contracts/StreamCore.sol": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:83d00b8f98bfe1f77c4dbd9558df1c4838e3dfbcc95805c27b6fb170a0d31773",
-      "solc_keccak256": "0x5939df55ca9e8678b3caf8d612bb2b8423a4ae79dcf6fc55180ab6abe12f4eef",
+      "sha256": "sha256:df9ac6d3f65aee308fccc229f3e5f5bffa4ebd3452ddfdc52ff8e3a33cae5fbc",
+      "solc_keccak256": "0x2d10325ca3904b52269b4310ce3c849a95749393fd1f0ea51880408cace2ee56",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -684,7 +675,7 @@
       "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
       "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:de6dc998343c42ed3d9f66b52156d99c55781d641db2c21ce746fd1344285d54",
+      "artifact_sha256": "sha256:b5c57cd28cab6174c4b2a4127d578e2584b6a8967e3abc8671c2da409b827910",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1027,10 +1018,10 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "source_sha256": "sha256:83d00b8f98bfe1f77c4dbd9558df1c4838e3dfbcc95805c27b6fb170a0d31773",
-      "source_solc_keccak256": "0x5939df55ca9e8678b3caf8d612bb2b8423a4ae79dcf6fc55180ab6abe12f4eef",
+      "source_sha256": "sha256:df9ac6d3f65aee308fccc229f3e5f5bffa4ebd3452ddfdc52ff8e3a33cae5fbc",
+      "source_solc_keccak256": "0x2d10325ca3904b52269b4310ce3c849a95749393fd1f0ea51880408cace2ee56",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:a2c6e8b4a5bf699592e6b8c9cac26f6cac46c7e821c56403e76bd098aa26fc6d",
+      "artifact_sha256": "sha256:83bc62ef3a4fc7fc6ffac288bf8fc451437a1409fce36fd4ec2cca71010d9d24",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1047,16 +1038,16 @@
       "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:fe33c70141846785ffa49fc17435d9dc61f5e9eb0ccbaa3ebb8e07e1570e3fd6",
+          "sha256": "sha256:18b60f2c151d04651e79686b9b6b3f98c1a52852591f2d99ef70f8389be951da",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:fe33c70141846785ffa49fc17435d9dc61f5e9eb0ccbaa3ebb8e07e1570e3fd6"
+          "release_artifact_sha256": "sha256:18b60f2c151d04651e79686b9b6b3f98c1a52852591f2d99ef70f8389be951da"
         },
         "runtime": {
-          "sha256": "sha256:27880f24e0475a4736a411dd08b3f40108d61b648ad05a7b257e90df021fea7b",
+          "sha256": "sha256:d08fa98cc379cd1b94e681d2d3b5532491ee96c37721ecfe843427873f608bd5",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:27880f24e0475a4736a411dd08b3f40108d61b648ad05a7b257e90df021fea7b"
+          "release_artifact_sha256": "sha256:d08fa98cc379cd1b94e681d2d3b5532491ee96c37721ecfe843427873f608bd5"
         }
       },
       "constructor": {
@@ -1102,11 +1093,11 @@
             "library": "StreamArtistApprovals",
             "positions": [
               {
-                "start": 13803,
+                "start": 13732,
                 "length": 20
               },
               {
-                "start": 25042,
+                "start": 24902,
                 "length": 20
               }
             ]
@@ -1116,67 +1107,67 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 7977,
+                "start": 7913,
                 "length": 20
               },
               {
-                "start": 8082,
+                "start": 8018,
                 "length": 20
               },
               {
-                "start": 8140,
+                "start": 8076,
                 "length": 20
               },
               {
-                "start": 8251,
+                "start": 8187,
                 "length": 20
               },
               {
-                "start": 10275,
+                "start": 10210,
                 "length": 20
               },
               {
-                "start": 10430,
+                "start": 10364,
                 "length": 20
               },
               {
-                "start": 12293,
+                "start": 12222,
                 "length": 20
               },
               {
-                "start": 12483,
+                "start": 12412,
                 "length": 20
               },
               {
-                "start": 15160,
+                "start": 15000,
                 "length": 20
               },
               {
-                "start": 20067,
+                "start": 19927,
                 "length": 20
               },
               {
-                "start": 20827,
+                "start": 20687,
                 "length": 20
               },
               {
-                "start": 21405,
+                "start": 21265,
                 "length": 20
               },
               {
-                "start": 22455,
+                "start": 22315,
                 "length": 20
               },
               {
-                "start": 23238,
+                "start": 23098,
                 "length": 20
               },
               {
-                "start": 24383,
+                "start": 24243,
                 "length": 20
               },
               {
-                "start": 25277,
+                "start": 25137,
                 "length": 20
               }
             ]
@@ -1188,11 +1179,11 @@
             "library": "StreamArtistApprovals",
             "positions": [
               {
-                "start": 12579,
+                "start": 12571,
                 "length": 20
               },
               {
-                "start": 23818,
+                "start": 23741,
                 "length": 20
               }
             ]
@@ -1202,67 +1193,67 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 6753,
+                "start": 6752,
                 "length": 20
               },
               {
-                "start": 6858,
+                "start": 6857,
                 "length": 20
               },
               {
-                "start": 6916,
+                "start": 6915,
                 "length": 20
               },
               {
-                "start": 7027,
+                "start": 7026,
                 "length": 20
               },
               {
-                "start": 9051,
+                "start": 9049,
                 "length": 20
               },
               {
-                "start": 9206,
+                "start": 9203,
                 "length": 20
               },
               {
-                "start": 11069,
+                "start": 11061,
                 "length": 20
               },
               {
-                "start": 11259,
+                "start": 11251,
                 "length": 20
               },
               {
-                "start": 13936,
+                "start": 13839,
                 "length": 20
               },
               {
-                "start": 18843,
+                "start": 18766,
                 "length": 20
               },
               {
-                "start": 19603,
+                "start": 19526,
                 "length": 20
               },
               {
-                "start": 20181,
+                "start": 20104,
                 "length": 20
               },
               {
-                "start": 21231,
+                "start": 21154,
                 "length": 20
               },
               {
-                "start": 22014,
+                "start": 21937,
                 "length": 20
               },
               {
-                "start": 23159,
+                "start": 23082,
                 "length": 20
               },
               {
-                "start": 24053,
+                "start": 23976,
                 "length": 20
               }
             ]
