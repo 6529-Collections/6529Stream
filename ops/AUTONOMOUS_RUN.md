@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/satellite-extension-policy` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/426` |
-| Active PR | None yet |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/427` |
 | Next issue | Implement `ONE-006` satellite-extension architecture policy so future 1/1 product surfaces default to satellites/read adapters/libraries/release artifacts unless an explicit measured `StreamCore` size-budget exception is accepted. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 23:57 UTC` |
+| Last updated | `2026-06-15 23:59 UTC` |
 
 ## Packaging Notes
 
@@ -265,9 +265,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add satellite-extension architecture policy (Queue Item ONE-006)
 
-Status: Ready to commit and open PR after local validation; no PR open yet.
+Status: PR #427 open and ready for review; CodeRabbit review requested in
+comment `4713528373`; CI and bot comments pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/426`.
-PR: None yet.
+PR: `https://github.com/6529-Collections/6529Stream/pull/427`.
 Branch: `codex/satellite-extension-policy`.
 Branch started from PR #425 squash merge commit
 `48eae446f47f6d4d65d844b1413059e275d8f0e9`.
@@ -15491,6 +15492,7 @@ Outcome:
 | 2026-06-15 23:41 | Open PR #425 for ONE-005 | PR #425 is open and ready for review, closes issue #422, and CodeRabbit review was requested in comment `4713416626`. Tracker issues #423 and #424 remain open for future reviewed public-beta and production marketplace/indexer evidence. |
 | 2026-06-15 23:51 | Address PR #425 bot nice-to-haves | 6529bot security found no findings and general review marked the PR good to merge. Confirmed `docs/public-beta-evidence.md` list numbering is sequential in the current head, then added direct envelope-template SHA validation to `scripts/check_marketplace_indexer_evidence.py` plus focused matching/drift tests. Focused marketplace-indexer, release manifest/proof/checksum, changelog, Python compile, and `git diff --check` checks passed locally. |
 | 2026-06-15 23:52 | Merge PR #425 and start ONE-006 | PR #425 merged as `48eae446f47f6d4d65d844b1413059e275d8f0e9`, issue #422 closed completed, CodeRabbit status was success, 6529bot follow-up review on the latest head reported no new findings, and GitHub CI run `27583841942` passed. Created issue #426 and branch `codex/satellite-extension-policy` for the satellite-extension architecture policy. |
+| 2026-06-15 23:59 | Open PR #427 for ONE-006 | PR #427 is open and ready for review, closes issue #426, and CodeRabbit review was requested in comment `4713528373`. Local focused validation and the policy Make target passed before opening. |
 
 ## Resume Instructions
 
