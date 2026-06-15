@@ -6,6 +6,7 @@ import "../smart-contracts/DependencyRegistry.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
@@ -15,6 +16,7 @@ interface ScriptVm {
     function startBroadcast(address broadcaster) external;
     function stopBroadcast() external;
     function envAddress(string calldata key) external view returns (address value);
+    function envString(string calldata key) external view returns (string memory value);
     function envUint(string calldata key) external view returns (uint256 value);
 }
 
@@ -33,6 +35,7 @@ contract RehearseDeployment {
     struct DeploymentConfig {
         string protocolVersion;
         string deploymentVersion;
+        string contractMetadataURI;
         address deployer;
         address adminSafe;
         address pauseGuardian;
@@ -49,6 +52,7 @@ contract RehearseDeployment {
         address admins;
         address dependencyRegistry;
         address core;
+        address contractMetadata;
         address curatorsPool;
         address minter;
         address drops;
@@ -66,6 +70,7 @@ contract RehearseDeployment {
         config = DeploymentConfig({
             protocolVersion: PROTOCOL_VERSION,
             deploymentVersion: DEPLOYMENT_VERSION,
+            contractMetadataURI: "ipfs://6529stream-contract-metadata/rehearsal.json",
             deployer: address(0x0000000000000000000000000000000000006537),
             adminSafe: address(0x0000000000000000000000000000000000006529),
             pauseGuardian: address(0x0000000000000000000000000000000000006530),
@@ -95,6 +100,7 @@ contract RehearseDeployment {
         config = DeploymentConfig({
             protocolVersion: PROTOCOL_VERSION,
             deploymentVersion: SEPOLIA_DEPLOYMENT_VERSION,
+            contractMetadataURI: vm.envString("SEPOLIA_CONTRACT_METADATA_URI"),
             deployer: vm.envAddress("SEPOLIA_DEPLOYER_ADDRESS"),
             adminSafe: vm.envAddress("SEPOLIA_ADMIN_SAFE"),
             pauseGuardian: vm.envAddress("SEPOLIA_PAUSE_GUARDIAN"),
@@ -137,6 +143,7 @@ contract RehearseDeployment {
         StreamAdmins admins;
         DependencyRegistry dependencyRegistry;
         StreamCore core;
+        StreamContractMetadata contractMetadata;
         StreamCuratorsPool curatorsPool;
         StreamMinter minter;
         StreamDrops drops;
@@ -153,6 +160,8 @@ contract RehearseDeployment {
         DependencyRegistry dependencyRegistry = new DependencyRegistry(address(admins));
         StreamCore core =
             new StreamCore("6529 Stream", "STREAM", address(admins), address(dependencyRegistry));
+        StreamContractMetadata contractMetadata =
+            new StreamContractMetadata(address(core), address(admins), config.contractMetadataURI);
         StreamCuratorsPool curatorsPool = new StreamCuratorsPool(address(admins), config.delegation);
         StreamMinter minter = new StreamMinter(address(core), address(admins), address(0));
         StreamDrops drops = new StreamDrops(
@@ -176,6 +185,7 @@ contract RehearseDeployment {
             admins: admins,
             dependencyRegistry: dependencyRegistry,
             core: core,
+            contractMetadata: contractMetadata,
             curatorsPool: curatorsPool,
             minter: minter,
             drops: drops,
@@ -245,6 +255,7 @@ contract RehearseDeployment {
             admins: address(deployed.admins),
             dependencyRegistry: address(deployed.dependencyRegistry),
             core: address(deployed.core),
+            contractMetadata: address(deployed.contractMetadata),
             curatorsPool: address(deployed.curatorsPool),
             minter: address(deployed.minter),
             drops: address(deployed.drops),
@@ -271,6 +282,7 @@ contract RehearseDeployment {
                 MANIFEST_SCHEMA_VERSION,
                 _versionHash(config),
                 _adminHash(config),
+                _contractMetadataHash(config),
                 _externalDependencyHash(config),
                 chainId,
                 collectionId,
@@ -282,6 +294,14 @@ contract RehearseDeployment {
 
     function _versionHash(DeploymentConfig memory config) private pure returns (bytes32) {
         return keccak256(abi.encode(config.protocolVersion, config.deploymentVersion));
+    }
+
+    function _contractMetadataHash(DeploymentConfig memory config)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(bytes(config.contractMetadataURI));
     }
 
     function _adminHash(DeploymentConfig memory config) private pure returns (bytes32) {
@@ -315,6 +335,7 @@ contract RehearseDeployment {
     function _requireConfig(DeploymentConfig memory config) private pure {
         _requireNonEmpty(config.protocolVersion, "Empty protocol version");
         _requireNonEmpty(config.deploymentVersion, "Empty deployment version");
+        _requireNonEmpty(config.contractMetadataURI, "Empty contract metadata URI");
         _requireNonZero(config.deployer, "Zero deployer");
         _requireNonZero(config.adminSafe, "Zero admin safe");
         _requireNonZero(config.pauseGuardian, "Zero pause guardian");

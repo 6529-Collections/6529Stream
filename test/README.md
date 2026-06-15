@@ -317,9 +317,9 @@ Production bytecode size is checked through the local/CI gate
 because the deployable contracts use the IR-optimized release profile while
 test-only invariant handlers can exceed initcode limits. The current Core UTF-8
 slice plus lifecycle-aware stale/failed metadata state display now keeps
-`StreamCore` deployable at 24,139 runtime bytes with 437 bytes of EIP-170
-headroom, above the documented 384-byte release floor but still below the
-512-byte warning threshold for larger Core feature work. The size recovery also
+`StreamCore` deployable at 24,047 runtime bytes with 529 bytes of EIP-170
+headroom, above the documented 384-byte release floor and 512-byte warning
+threshold for larger Core feature work. The size recovery also
 adds randomizer migration regressions for unsupported lifecycle providers and
 for lifecycle-aware providers whose pending-request probe fails.
 
@@ -330,6 +330,15 @@ availability, excludes burned tokens from live supply while retaining audit
 state, rejects remint attempts for previously burned token IDs, and records
 valid VRF/arRNG post-burn randomness as audit-only state without ERC-4906
 metadata updates or freeze-manifest changes.
+
+Contract-level metadata now has ONE-001 target-state coverage in
+`StreamContractMetadata.t.sol`: the release-tracked adapter exposes
+ERC-7572-style `contractURI()` and `ContractURIUpdated`, records the core/admin
+binding and URI hash, validates URI/UTF-8 policy, supports target-scoped
+function admin and global admin updates, rejects unauthorized and invalid admin
+updates, and blocks `updateContractURI` while the `METADATA_MUTATION` pause
+domain is active. `StreamDeploymentManifest.t.sol` also asserts the deployment
+rehearsal wires the adapter into the local stack and manifest result.
 
 Collection freeze boundaries now have P1-META-002 target-state coverage in
 `StreamMetadataFreeze.t.sol`: freeze requires the mint window and final-supply

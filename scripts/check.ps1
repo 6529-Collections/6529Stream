@@ -73,6 +73,8 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+& $pythonPath @pythonArgs "scripts\test_contract_size_budget.py"
+& $pythonPath @pythonArgs "scripts\check_contract_size_budget.py"
 & $pythonPath @pythonArgs "scripts\test_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\check_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\test_windows_check_wrapper.py"
@@ -91,6 +93,9 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_drop_authorization_signing_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_signer_custody_readiness.py"
 & $pythonPath @pythonArgs "scripts\check_signer_custody_readiness.py"
+& $pythonPath @pythonArgs "scripts\test_one_of_one_provenance_manifest.py"
+& $pythonPath @pythonArgs "scripts\check_one_of_one_provenance_manifest.py"
+& $pythonPath @pythonArgs "scripts\generate_one_of_one_provenance_manifest.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_admin_ceremony_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_admin_ceremony_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"

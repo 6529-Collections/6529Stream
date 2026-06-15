@@ -164,6 +164,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "incident-response.md",
         root / "docs" / "drop-authorization-signing.md",
         root / "docs" / "signer-custody-readiness.md",
+        root / "docs" / "provenance-manifests.md",
         root / "docs" / "release-readiness.md",
         root / "docs" / "integrations" / "README.md",
         root / "docs" / "integrations" / "contract-flows.md",
@@ -225,6 +226,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         latest / "source-verification-inputs.json",
         {"schema_version": "6529stream.source-verification-inputs.v1", "contracts": {}},
+    )
+    write_json(
+        latest / "one-of-one-provenance-manifest.json",
+        {
+            "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1",
+            "manifests": [],
+        },
     )
     write_text(output, "{}\n")
     write_text(latest / "SHA256SUMS", "placeholder\n")
@@ -1226,6 +1234,12 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["dependency_artifact_manifest"]["schema_version"],
                 "6529stream.dependency-artifact-manifest.v1",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["one_of_one_provenance_manifest"][
+                    "schema_version"
+                ],
+                "6529stream.one-of-one-provenance-release-manifest.v1",
             )
             self.assertEqual(
                 manifest["release_artifacts"]["gas_snapshot_baseline"]["path"],

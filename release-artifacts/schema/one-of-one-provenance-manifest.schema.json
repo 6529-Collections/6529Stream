@@ -1,0 +1,555 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/one-of-one-provenance-manifest.schema.json",
+  "title": "6529Stream 1/1 Provenance Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "provenance_id",
+    "record_type",
+    "review_status",
+    "environment",
+    "protocol_version",
+    "deployment_version",
+    "source",
+    "scope",
+    "artwork",
+    "authenticity",
+    "provenance_entries",
+    "mutability_policy",
+    "release_bindings",
+    "integration_guidance",
+    "review",
+    "retained_artifacts",
+    "redaction_policy",
+    "template_notice",
+    "operator_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.one-of-one-provenance-manifest.v1"
+    },
+    "provenance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_type": {
+      "enum": ["template", "evidence"]
+    },
+    "review_status": {
+      "enum": ["template", "pending_review", "reviewed"]
+    },
+    "environment": {
+      "enum": ["local", "fork", "testnet", "mainnet", "production"]
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "scope": {
+      "$ref": "#/$defs/scope"
+    },
+    "artwork": {
+      "$ref": "#/$defs/artwork"
+    },
+    "authenticity": {
+      "$ref": "#/$defs/authenticity"
+    },
+    "provenance_entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/provenance_entry"
+      }
+    },
+    "mutability_policy": {
+      "$ref": "#/$defs/mutability_policy"
+    },
+    "release_bindings": {
+      "$ref": "#/$defs/release_bindings"
+    },
+    "integration_guidance": {
+      "$ref": "#/$defs/integration_guidance"
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "retained_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/retained_artifact"
+      }
+    },
+    "redaction_policy": {
+      "$ref": "#/$defs/redaction_policy"
+    },
+    "template_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "source_dirty", "ci_run"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "source_dirty": {
+          "type": "boolean"
+        },
+        "ci_run": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_type",
+        "chain_id",
+        "core_contract",
+        "contract_metadata_adapter",
+        "collection_id",
+        "token_id",
+        "token_standard",
+        "metadata_schema_version",
+        "contract_uri_hash",
+        "collection_freeze_manifest_hash"
+      ],
+      "properties": {
+        "scope_type": {
+          "const": "one_of_one_token"
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "core_contract": {
+          "$ref": "#/$defs/address"
+        },
+        "contract_metadata_adapter": {
+          "$ref": "#/$defs/address"
+        },
+        "collection_id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "token_id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "token_standard": {
+          "const": "ERC721"
+        },
+        "metadata_schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_uri_hash": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "collection_freeze_manifest_hash": {
+          "$ref": "#/$defs/bytes32"
+        }
+      }
+    },
+    "artwork": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "artist",
+        "artist_statement",
+        "medium",
+        "creation_date",
+        "image_uri",
+        "animation_uri"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artist": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artist_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "medium": {
+          "type": "string",
+          "minLength": 1
+        },
+        "creation_date": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image_uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "animation_uri": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "authenticity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authenticity_status",
+        "authority",
+        "authority_reference",
+        "artist_statement_sha256",
+        "artwork_content_sha256",
+        "certificate_sha256"
+      ],
+      "properties": {
+        "authenticity_status": {
+          "enum": ["template", "pending_review", "reviewed"]
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artist_statement_sha256": {
+          "$ref": "#/$defs/sha_or_placeholder"
+        },
+        "artwork_content_sha256": {
+          "$ref": "#/$defs/sha_or_placeholder"
+        },
+        "certificate_sha256": {
+          "$ref": "#/$defs/sha_or_placeholder"
+        }
+      }
+    },
+    "provenance_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_id",
+        "entry_type",
+        "occurred_at",
+        "title",
+        "description",
+        "evidence_refs"
+      ],
+      "properties": {
+        "entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_type": {
+          "enum": [
+            "creation",
+            "curation",
+            "exhibition",
+            "publication",
+            "collector_note",
+            "correction",
+            "append_only_story",
+            "transfer_context",
+            "release_binding"
+          ]
+        },
+        "occurred_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidence_ref"
+          }
+        }
+      }
+    },
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "uri", "sha256", "notes"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha_or_placeholder"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "mutability_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token_metadata_boundary",
+        "contract_metadata_boundary",
+        "freeze_boundary",
+        "provenance_update_policy",
+        "correction_policy",
+        "authority_rotation_policy"
+      ],
+      "properties": {
+        "token_metadata_boundary": {
+          "enum": ["separate_from_token_uri", "token_uri_embedded"]
+        },
+        "contract_metadata_boundary": {
+          "enum": ["separate_from_contract_uri", "contract_uri_embedded"]
+        },
+        "freeze_boundary": {
+          "enum": ["not_in_collection_freeze_manifest", "included_in_collection_freeze_manifest"]
+        },
+        "provenance_update_policy": {
+          "enum": ["append_only", "frozen", "mutable_until_review"]
+        },
+        "correction_policy": {
+          "const": "append_only_with_supersedes"
+        },
+        "authority_rotation_policy": {
+          "enum": ["not_available_local", "reviewed_release_ceremony"]
+        }
+      }
+    },
+    "release_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "release_manifest",
+        "release_checksums",
+        "deployment_manifest",
+        "address_book",
+        "contract_uri_hash_source",
+        "collection_freeze_manifest_hash_source"
+      ],
+      "properties": {
+        "release_manifest": {
+          "$ref": "#/$defs/binding_ref"
+        },
+        "release_checksums": {
+          "$ref": "#/$defs/binding_ref"
+        },
+        "deployment_manifest": {
+          "$ref": "#/$defs/binding_ref"
+        },
+        "address_book": {
+          "$ref": "#/$defs/binding_ref"
+        },
+        "contract_uri_hash_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "collection_freeze_manifest_hash_source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "binding_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "status"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha_or_self_ref"
+        },
+        "status": {
+          "enum": ["template", "pending_review", "reviewed", "self_referential"]
+        }
+      }
+    },
+    "integration_guidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frontend_display",
+        "indexer_source",
+        "marketplace_boundary",
+        "ownership_boundary"
+      ],
+      "properties": {
+        "frontend_display": {
+          "type": "string",
+          "minLength": 1
+        },
+        "indexer_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marketplace_boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownership_boundary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "reviewer",
+        "approval_status",
+        "approval_reference",
+        "reviewed_at"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_status": {
+          "enum": ["template", "pending", "approved", "rejected"]
+        },
+        "approval_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retained_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "path", "sha256"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "redaction_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_secrets", "redacted_fields"],
+      "properties": {
+        "no_secrets": {
+          "const": true
+        },
+        "redacted_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^/"
+          },
+          {
+            "pattern": "\\\\"
+          },
+          {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        ]
+      }
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "bytes32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "sha_or_placeholder": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sha256"
+        },
+        {
+          "const": "not_available_local"
+        }
+      ]
+    },
+    "sha_or_self_ref": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sha256"
+        },
+        {
+          "enum": ["not_available_local", "not_available_self_referential"]
+        }
+      ]
+    }
+  }
+}

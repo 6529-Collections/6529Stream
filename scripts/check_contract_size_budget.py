@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Check production runtime bytecode sizes against the release budget."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Any, Sequence
+
+
+BUDGET_SCHEMA = "6529stream.contract-runtime-size-budget.v1"
+DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
+DEFAULT_FOUNDRY_OUT = Path("out")
+HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
+SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
+
+
+class SizeBudgetError(RuntimeError):
+    pass
+
+
+def load_json(path: Path) -> Any:
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError as exc:
+        raise SizeBudgetError(f"missing required file: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise SizeBudgetError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def require_dict(value: Any, path: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise SizeBudgetError(f"{path} must be an object")
+    return value
+
+
+def require_int(value: Any, path: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise SizeBudgetError(f"{path} must be an integer")
+    return value
+
+
+def require_string(value: Any, path: str) -> str:
+    if not isinstance(value, str) or value == "":
+        raise SizeBudgetError(f"{path} must be a non-empty string")
+    return value
+
+
+def normalize_path(path: Path, repo_root: Path) -> str:
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def production_contracts(config: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    contracts = config.get("production_contracts")
+    if not isinstance(contracts, list) or not contracts:
+        raise SizeBudgetError("production_contracts must be a non-empty list")
+
+    by_name: dict[str, dict[str, Any]] = {}
+    for index, entry in enumerate(contracts):
+        record = require_dict(entry, f"production_contracts[{index}]")
+        name = require_string(record.get("name"), f"production_contracts[{index}].name")
+        if name in by_name:
+            raise SizeBudgetError(f"duplicate production contract: {name}")
+        by_name[name] = record
+    return by_name
+
+
+def find_artifact(foundry_out: Path, name: str, source: str | None) -> Path:
+    if source:
+        direct = foundry_out / Path(source).name / f"{name}.json"
+        if direct.exists():
+            return direct
+
+    matches = sorted(foundry_out.glob(f"**/{name}.json"))
+    if not matches:
+        raise SizeBudgetError(f"could not find Foundry artifact for {name} under {foundry_out}")
+    if len(matches) > 1:
+        locations = ", ".join(str(match) for match in matches)
+        raise SizeBudgetError(f"ambiguous Foundry artifact for {name}: {locations}")
+    return matches[0]
+
+
+def deployed_runtime_size_bytes(artifact: dict[str, Any], artifact_path: Path) -> int:
+    deployed = require_dict(artifact.get("deployedBytecode"), f"{artifact_path}.deployedBytecode")
+    bytecode = require_string(deployed.get("object"), f"{artifact_path}.deployedBytecode.object")
+    hex_value = bytecode[2:] if bytecode.startswith("0x") else bytecode
+    linked_equivalent = SOLIDITY_LINK_PLACEHOLDER_RE.sub("0" * 40, hex_value)
+    if len(linked_equivalent) % 2 != 0 or not HEX_RE.fullmatch(linked_equivalent):
+        raise SizeBudgetError(
+            f"{artifact_path}.deployedBytecode.object must be hex or Solidity link placeholders"
+        )
+    return len(linked_equivalent) // 2
+
+
+def budget_contracts(config: dict[str, Any]) -> tuple[int, dict[str, dict[str, Any]]]:
+    budget = require_dict(config.get("runtime_size_budget"), "runtime_size_budget")
+    schema = require_string(budget.get("schema_version"), "runtime_size_budget.schema_version")
+    if schema != BUDGET_SCHEMA:
+        raise SizeBudgetError(f"runtime_size_budget.schema_version must be {BUDGET_SCHEMA}")
+    eip_170_limit = require_int(
+        budget.get("eip_170_runtime_limit_bytes"),
+        "runtime_size_budget.eip_170_runtime_limit_bytes",
+    )
+    if eip_170_limit <= 0:
+        raise SizeBudgetError("runtime_size_budget.eip_170_runtime_limit_bytes must be positive")
+    contracts = require_dict(budget.get("contracts"), "runtime_size_budget.contracts")
+    if not contracts:
+        raise SizeBudgetError("runtime_size_budget.contracts must not be empty")
+    return eip_170_limit, {str(name): require_dict(value, f"runtime_size_budget.contracts.{name}") for name, value in contracts.items()}
+
+
+def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[dict[str, Any]]:
+    config_abs = config_path if config_path.is_absolute() else repo_root / config_path
+    foundry_out_abs = foundry_out if foundry_out.is_absolute() else repo_root / foundry_out
+    config = require_dict(load_json(config_abs), str(config_abs))
+    production = production_contracts(config)
+    default_limit, budgets = budget_contracts(config)
+
+    report = []
+    for name in sorted(budgets):
+        if name not in production:
+            raise SizeBudgetError(f"runtime_size_budget contract is not production-listed: {name}")
+
+    for name in sorted(production):
+        production_entry = production[name]
+        budget = budgets.get(name, {})
+        source = require_string(production_entry.get("source"), f"production_contracts.{name}.source")
+        configured_source = budget.get("source")
+        if configured_source is not None and configured_source != source:
+            raise SizeBudgetError(f"{name} budget source does not match production source")
+
+        artifact_path = find_artifact(foundry_out_abs, name, source)
+        artifact = require_dict(load_json(artifact_path), str(artifact_path))
+        runtime_size = deployed_runtime_size_bytes(artifact, artifact_path)
+        runtime_limit = require_int(
+            budget.get("runtime_limit_bytes", default_limit),
+            f"runtime_size_budget.contracts.{name}.runtime_limit_bytes",
+        )
+        if runtime_limit <= 0:
+            raise SizeBudgetError(f"{name} runtime limit must be positive")
+        if name in budgets:
+            minimum_margin = require_int(
+                budget.get("minimum_runtime_margin_bytes"),
+                f"runtime_size_budget.contracts.{name}.minimum_runtime_margin_bytes",
+            )
+            warning_margin = require_int(
+                budget.get("warning_runtime_margin_bytes", minimum_margin),
+                f"runtime_size_budget.contracts.{name}.warning_runtime_margin_bytes",
+            )
+        else:
+            minimum_margin = 0
+            warning_margin = 0
+        if minimum_margin < 0 or warning_margin < minimum_margin:
+            raise SizeBudgetError(f"{name} has invalid runtime margin thresholds")
+
+        margin = runtime_limit - runtime_size
+        status = "pass"
+        if margin < minimum_margin:
+            status = "fail"
+        elif margin < warning_margin:
+            status = "warn"
+        report.append(
+            {
+                "contract": name,
+                "source": source,
+                "artifact": normalize_path(artifact_path, repo_root),
+                "runtime_size_bytes": runtime_size,
+                "runtime_limit_bytes": runtime_limit,
+                "runtime_margin_bytes": margin,
+                "minimum_runtime_margin_bytes": minimum_margin,
+                "warning_runtime_margin_bytes": warning_margin,
+                "status": status,
+                "tracking": budget.get("tracking", ""),
+            }
+        )
+    return report
+
+
+def print_report(report: list[dict[str, Any]]) -> None:
+    for row in report:
+        print(
+            "{contract}: runtime {runtime_size_bytes} bytes, margin {runtime_margin_bytes} "
+            "bytes, minimum {minimum_runtime_margin_bytes}, warning "
+            "{warning_runtime_margin_bytes} [{status}]".format(**row)
+        )
+
+
+def check_report(report: list[dict[str, Any]]) -> int:
+    failing = [row for row in report if row["status"] == "fail"]
+    if failing:
+        for row in failing:
+            print(
+                "error: {contract} runtime margin {runtime_margin_bytes} is below "
+                "minimum {minimum_runtime_margin_bytes}; see {tracking}".format(**row),
+                file=sys.stderr,
+            )
+        return 1
+
+    warnings = [row for row in report if row["status"] == "warn"]
+    for row in warnings:
+        print(
+            "warning: {contract} runtime margin {runtime_margin_bytes} is below "
+            "warning threshold {warning_runtime_margin_bytes}; see {tracking}".format(**row),
+            file=sys.stderr,
+        )
+    return 0
+
+
+def parse_args(argv: Sequence[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--foundry-out", type=Path, default=DEFAULT_FOUNDRY_OUT)
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv or sys.argv[1:])
+    repo_root = args.repo_root.resolve()
+    try:
+        report = build_report(repo_root, args.config, args.foundry_out)
+    except SizeBudgetError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    print_report(report)
+    return check_report(report)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

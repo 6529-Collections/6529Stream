@@ -53,6 +53,16 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamContractMetadata",
+        "address": "0x200000000000000000000000000000000000000a",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "ipfs://6529stream-contract-metadata/rehearsal.json"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamCuratorsPool",
         "address": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d",
         "constructor_args": [
@@ -171,7 +181,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:554852de9ecdefb01dae1a7724c47d4379e876d2ba5ee06778d9fef78258a08f",
+    "broadcast_sha256": "sha256:287fa1a9480e61106bfa3e4e1f46333a40b9db7fee13a6c3749a64424b6f8169",
     "template_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 1,
@@ -190,6 +200,11 @@
         "contract": "StreamCore",
         "address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
         "transaction_hash": "0x286f4dc1a75a5692fddb9ec3413301985f8973382808fc5dd860cdd2a9628c83"
+      },
+      {
+        "contract": "StreamContractMetadata",
+        "address": "0x200000000000000000000000000000000000000a",
+        "transaction_hash": "0x0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a"
       },
       {
         "contract": "StreamCuratorsPool",

@@ -13,7 +13,8 @@ fork/testnet/live evidence required for public beta or production release.
 Use this with the integration entrypoint in
 [`docs/integrations/README.md`](README.md), the event/indexer model in
 [`docs/integrations/events-and-indexing.md`](events-and-indexing.md), metadata
-policy in [`docs/metadata.md`](../metadata.md), release policy in
+policy in [`docs/metadata.md`](../metadata.md), 1/1 provenance policy in
+[`docs/provenance-manifests.md`](../provenance-manifests.md), release policy in
 [`docs/release-policy.md`](../release-policy.md), release readiness in
 [`docs/release-readiness.md`](../release-readiness.md), dependency operations in
 [`docs/dependency-operations.md`](../dependency-operations.md), and non-local
@@ -26,7 +27,10 @@ This guide covers:
 
 - token metadata states and expected display/cache behavior;
 - `tokenURI` and schema-versioned on-chain JSON behavior;
+- ERC-7572-style contract-level metadata through the release-tracked
+  `StreamContractMetadata` adapter;
 - ERC-4906 `MetadataUpdate` and `BatchMetadataUpdate` cache invalidation;
+- `ContractURIUpdated` cache invalidation for contract-level metadata;
 - intentional non-emissions on mint-only and burn paths;
 - randomizer pending, stale, failed, retry-failed, and final states;
 - freeze, burn, dependency pin, dependency deprecation, and release-artifact
@@ -63,6 +67,7 @@ rather than hand-maintained metadata snippets.
 | --- | --- | --- |
 | Integration entrypoint | [`docs/integrations/README.md`](README.md) | Starts artifact, address, ABI, event, metadata, and flow discovery |
 | Metadata policy | [`docs/metadata.md`](../metadata.md) | Current schema, URI policy, size limits, UTF-8 policy, ERC-4906, burn, freeze, dependency, and browser sandbox behavior |
+| 1/1 provenance model | [`docs/provenance-manifests.md`](../provenance-manifests.md) | Artifact-only artist/story/authenticity context model and display boundary |
 | Event/indexer model | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Event subscriptions, read-after-event calls, confirmation/reorg policy, and event/read gaps |
 | Fixed-price flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Mint-time metadata and randomizer expectations |
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Auction display states before final ownership |
@@ -76,19 +81,23 @@ rather than hand-maintained metadata snippets.
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated metadata/marketplace blocker source |
 | Release manifest | [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json) | Generated source-of-truth manifest |
 | Release checksums | [`release-artifacts/latest/release-checksums.json`](../../release-artifacts/latest/release-checksums.json), [`release-artifacts/latest/SHA256SUMS`](../../release-artifacts/latest/SHA256SUMS) | Signable checksum bundle |
+| 1/1 provenance manifest | [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json), [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json), [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json) | Checked release artifact for one-of-one provenance records; not marketplace readiness proof |
 | Event topic catalog | [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json) | Metadata event signature source |
 | ABI checksums | [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI/bytecode checksum source |
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | ERC-4906 support lookup |
 | Core metadata contract | [`smart-contracts/StreamCore.sol`](../../smart-contracts/StreamCore.sol) | `tokenURI`, metadata state, ERC-4906, burn, freeze, and dependency pins |
+| Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | ERC-7572-style `contractURI()`, `ContractURIUpdated`, URI hash, admin authority, and core address binding |
 | Metadata renderer | [`smart-contracts/StreamMetadataRenderer.sol`](../../smart-contracts/StreamMetadataRenderer.sol) | JSON escaping, URI policy, UTF-8 policy, and animation wrapper behavior |
 | Randomizer lifecycle | [`smart-contracts/StreamRandomizerLifecycle.sol`](../../smart-contracts/StreamRandomizerLifecycle.sol) | Pending/stale/failed/final request state |
 | Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Versioned dependency bytes, content hashes, and deprecation |
 | ERC-4906 interface | [`smart-contracts/IERC4906.sol`](../../smart-contracts/IERC4906.sol) | Metadata update event interface |
+| ERC-7572-style interface | [`smart-contracts/IERC7572.sol`](../../smart-contracts/IERC7572.sol) | Contract-level metadata interface used by `StreamContractMetadata` |
+| Stream contract metadata interface | [`smart-contracts/IStreamContractMetadata.sol`](../../smart-contracts/IStreamContractMetadata.sol) | Adapter-specific views for core/admin/URI hash binding |
 | Golden fixtures | [`test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt), [`test/fixtures/metadata/onchain-stale-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-stale-schema-v1-token-uri.txt), [`test/fixtures/metadata/onchain-failed-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-failed-schema-v1-token-uri.txt), [`test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt) | Current on-chain JSON examples |
 | Off-chain fixtures | [`test/fixtures/metadata/offchain-pending-token-uri.txt`](../../test/fixtures/metadata/offchain-pending-token-uri.txt), [`test/fixtures/metadata/offchain-stale-token-uri.txt`](../../test/fixtures/metadata/offchain-stale-token-uri.txt), [`test/fixtures/metadata/offchain-failed-token-uri.txt`](../../test/fixtures/metadata/offchain-failed-token-uri.txt), [`test/fixtures/metadata/offchain-final-token-uri.txt`](../../test/fixtures/metadata/offchain-final-token-uri.txt) | Current off-chain URI examples |
 | Fixture tests | [`test/StreamMetadataGolden.t.sol`](../../test/StreamMetadataGolden.t.sol), [`scripts/check_metadata_fixtures.py`](../../scripts/check_metadata_fixtures.py), [`scripts/test_metadata_fixtures.py`](../../scripts/test_metadata_fixtures.py) | Golden output and fixture policy checks |
 | Browser sandbox tests | [`scripts/check_metadata_browser_sandbox.py`](../../scripts/check_metadata_browser_sandbox.py), [`scripts/test_metadata_browser_sandbox.py`](../../scripts/test_metadata_browser_sandbox.py), [`scripts/check_rehearsal_metadata_browser_sandbox.py`](../../scripts/check_rehearsal_metadata_browser_sandbox.py), [`scripts/test_rehearsal_metadata_browser_sandbox.py`](../../scripts/test_rehearsal_metadata_browser_sandbox.py) | Local browser execution checks |
-| Metadata behavior tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol), [`test/StreamMetadataFreeze.t.sol`](../../test/StreamMetadataFreeze.t.sol), [`test/StreamCoreBurn.t.sol`](../../test/StreamCoreBurn.t.sol), [`test/StreamRandomizerLifecycle.t.sol`](../../test/StreamRandomizerLifecycle.t.sol), [`test/StreamRandomizerRetry.t.sol`](../../test/StreamRandomizerRetry.t.sol), [`test/StreamDependencyRegistry.t.sol`](../../test/StreamDependencyRegistry.t.sol) | Current event/state behavior |
+| Metadata behavior tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol), [`test/StreamContractMetadata.t.sol`](../../test/StreamContractMetadata.t.sol), [`test/StreamMetadataFreeze.t.sol`](../../test/StreamMetadataFreeze.t.sol), [`test/StreamCoreBurn.t.sol`](../../test/StreamCoreBurn.t.sol), [`test/StreamRandomizerLifecycle.t.sol`](../../test/StreamRandomizerLifecycle.t.sol), [`test/StreamRandomizerRetry.t.sol`](../../test/StreamRandomizerRetry.t.sol), [`test/StreamDependencyRegistry.t.sol`](../../test/StreamDependencyRegistry.t.sol) | Current event/state behavior |
 | Future public-beta template | [`release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json`](../../release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json) | Template only, not completed evidence |
 
 Raw ABIs under ignored `out/` are local build products. For committed review,
@@ -149,6 +158,63 @@ Clients should treat `metadata_schema_version` as part of cache identity.
 Schema changes are release-impacting and should be covered by release policy,
 golden fixtures, and release manifest/checksum updates.
 
+## Contract-Level Metadata
+
+Contract-level metadata is exposed by `StreamContractMetadata`, not by
+`StreamCore`. The satellite/read-adapter is release-tracked in address books
+and manifests and returns an ERC-7572-style `contractURI()` plus a
+`contractURIHash()` view. It also binds itself to the canonical core and admin
+contracts through
+`streamCore()` and `adminsContract()`.
+
+The current adapter stores a content URI, not inline JSON. Accepted contract
+metadata URI schemes are `https://`, `ipfs://`, and `ar://`; unsafe, empty,
+oversized, whitespace-bearing, control-character, and invalid UTF-8 values are
+rejected before storage. `updateContractURI` follows the existing
+target-scoped function-admin/global-admin model and is blocked while the
+`METADATA_MUTATION` pause domain is active. `updateAdminContract` is also
+authorized by the current admin contract and blocked by the same pause before
+the adapter can bind to a replacement admin contract.
+
+Subscribe to `ContractURIUpdated()` from the adapter address and then re-read
+`contractURI()`, `contractURIHash()`, `streamCore()`, and `adminsContract()`.
+Cache keys for contract-level metadata should include chain ID, adapter
+address, core address, deployment manifest hash, release manifest hash, and
+`contractURIHash()`.
+`contractURIHash()` is `keccak256(bytes(contractURI()))` over the exact stored
+URI bytes; clients should not normalize the URI before comparing hashes.
+
+This is not yet proof that marketplaces will discover contract-level metadata
+from the ERC-721 address. Clients that rely on OpenSea, Reservoir, Blur,
+Manifold, wallet, or aggregator behavior must retain fork/testnet/live
+evidence showing the exact integration path they use. Until that evidence
+exists, treat the adapter as a first-party release/integration source of truth,
+not a universal marketplace-discovery guarantee.
+
+## 1/1 Provenance Manifests
+
+One-of-one provenance is currently modeled as a checked release artifact, not as
+additional `tokenURI` JSON and not as new `StreamCore` storage. Product clients
+that want to show artist statement, authenticity status, certificate/media
+hashes, curation history, exhibition/publication notes, collector notes, or
+corrections should read the generated
+`release-artifacts/latest/one-of-one-provenance-manifest.json` catalog and the
+schemaed provenance descriptor it points to.
+
+Display provenance as contextual story and authenticity information. Do not use
+it as proof that token metadata is final, proof that the collection is frozen,
+proof that a marketplace has discovered or refreshed metadata, royalty
+enforcement, ownership proof beyond chain state, or a substitute for retained
+fork/testnet/live indexer or marketplace evidence.
+
+The current provenance manifest deliberately records that its token metadata
+boundary is separate from `tokenURI`, its contract metadata boundary is
+separate from `contractURI()`, and its freeze boundary is not inside
+`collectionFreezeManifestHash(collectionId)`. If a future release embeds
+provenance in token metadata, contract-level metadata, or the freeze manifest,
+that change must update the schema, generated artifact, integration docs, and
+release-readiness evidence.
+
 ## JSON And Fixture Expectations
 
 The committed fixtures are characterization fixtures for the local baseline,
@@ -199,6 +265,8 @@ In short: the current policy is no mint-only ERC-4906 and no burn ERC-4906.
 `CollectionFrozen` records permanence state and manifest data but does not
 change `tokenURI` bytes by itself. Dependency version creation or deprecation
 does not change output for collections pinned to an earlier version.
+`ContractURIUpdated` invalidates contract-level metadata only; it does not
+imply token JSON changed and should not be treated as an ERC-4906 event.
 
 ## Randomness And Retry States
 
@@ -272,6 +340,7 @@ Cache keys should include:
 
 - chain ID;
 - contract address;
+- contract metadata adapter address and `contractURIHash()` where applicable;
 - deployment manifest ID or release manifest hash;
 - token ID;
 - `metadata_schema_version`;
@@ -286,6 +355,7 @@ Invalidate or refresh after:
 - `MetadataUpdate`;
 - `BatchMetadataUpdate`;
 - `CollectionFrozen`;
+- `ContractURIUpdated`;
 - `DependencyVersionPinned`;
 - `TokenBurned`;
 - ERC-721 transfer-to-zero;
@@ -321,6 +391,9 @@ Run these when editing this guide:
 ```sh
 python scripts/test_metadata_rendering.py
 python scripts/check_metadata_rendering.py
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
 python scripts/test_metadata_fixtures.py
 python scripts/check_metadata_fixtures.py
 python scripts/test_metadata_browser_sandbox.py
@@ -348,6 +421,7 @@ release manifest, bytecode proof, and checksum bundle.
 Update this guide when any of these change:
 
 - metadata schema version or JSON fields;
+- 1/1 provenance schema, generated artifact, or display boundary;
 - `tokenURI` behavior;
 - metadata state values;
 - ERC-4906 event emission policy;
