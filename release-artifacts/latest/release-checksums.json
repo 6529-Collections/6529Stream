@@ -30,7 +30,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:2cb159b836fe1fb9d1eef3c4ee6c8b3378e8c8509fe01fd12080c1aa45eba977"
+    "sha256": "sha256:d99ebb41a0c266e15f5bacaa834ef266c24802e925ca0d4c0da361dfc099a136"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -39,17 +39,17 @@
   "files": [
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:87b0e6b1524d1538d5c95ad9368f577e965d6cf59d1c42c402fc89747c4eae10",
+      "sha256": "sha256:20211cca98b4f5273c768c72103f7ec56cc6ea79f7c979a37b8f8ea721e24ac2",
       "size_bytes": 5576
     },
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:26d71a8d367f5b78360b8456c1b72435754c7cbb550ff73e250c92c19e7c505c",
+      "sha256": "sha256:6793584adaa2693895bd98ff9904cc0b22dfe00d737dd4bca5d2576373abd080",
       "size_bytes": 5556
     },
     {
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:54104a4f2dea8dcd0423ab49e5a54f984fb77f5fc7f055ac87988d0f5cba461a",
+      "sha256": "sha256:86c479e7a9cc742716a7f4fe964baee791a66572d1cac76061da986737fbb34e",
       "size_bytes": 5593
     },
     {
@@ -104,17 +104,17 @@
     },
     {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:bf526214a8e0ca6e7a0c6311bf24e8b551c6a2c2482bfe65b1b20e213b7f9093",
+      "sha256": "sha256:f939f05c1cdcf61a43bef921605a6eaa92f4b6c6dbbde85ac046c35b15c44f4e",
       "size_bytes": 8951
     },
     {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:4b9f9c1d927cfc7c120f4ac4eb6aef68685a60ac1e1d43bbdc34d3788a958720",
+      "sha256": "sha256:0c75f7c77e7d1d1fbe26913f5f19443bc808a58ed0097ff9bc3aefe1ce11916f",
       "size_bytes": 8914
     },
     {
       "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:8cc558485c253e40c80674eca95ba6d37e026923db460e09d0aae9f6923bb897",
+      "sha256": "sha256:4198644dbcf2a597e2e0bfdccfb5da66a63f8b3b77199023378d9bffd4c90b4f",
       "size_bytes": 9097
     },
     {
@@ -414,12 +414,12 @@
     },
     {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:ada1e23f27daf1b67be40785c30e3637e27ced6c5f3293fcf9db13aa21990a9c",
+      "sha256": "sha256:7a60aa0b9b4203b2eb074f19ab694ff7768e2500d7d76857b4413c6410052e0a",
       "size_bytes": 14787
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:34987aa47b8f50628c9af6573d19999533c9ab0c6ba5631e74aa061ed17dc3a1",
+      "sha256": "sha256:d3da095cc3a69fb4521d00b034688cb88e3d2c4eb4f81b98d9ee31421ad58013",
       "size_bytes": 79958
     },
     {
@@ -439,12 +439,12 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:74ceebb43c5c610253d38dfbb4fcebe57935fd440d1d59f2bc1259b16c50013f",
+      "sha256": "sha256:79b4891f221f915f278cc43fbdb5f0bffd75676845f621c66095b46267be4c1b",
       "size_bytes": 2913
     },
     {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:bb5fd3f3b9cd2950ebee44ea42763f34d511776bf68c411eb596675b84e65756",
+      "sha256": "sha256:6702604c432ae96aada7299f5c6cc7da237c24b303970336e9d9bbe1a8ccf309",
       "size_bytes": 2177
     },
     {
@@ -464,7 +464,7 @@
     },
     {
       "path": "release-artifacts/latest/release-artifact-manifest.json",
-      "sha256": "sha256:9601be2b06ddbc359e2758672f2aa758d5c6ef5f8b8cf1056c94b40bb6a031ec",
+      "sha256": "sha256:d982e0d8272ee2e6f3f8d293bff042576859f4ad1fdd5c396addf515c7a7ce03",
       "size_bytes": 737
     },
     {
@@ -514,17 +514,17 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:c0be5b57ea2869c8988e4286b9fb985aa15fc2bf75078c2b065f12815cb85c49",
+      "sha256": "sha256:ce08ac237971fae9c91b255a2d4c022ee7dbde613a05e34b0ad22c39067f92ea",
       "size_bytes": 97871
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:1e206f3fa9e45dcb89a19945abb5ea228697c7f919e58e326c61ab92bc7966d6",
+      "sha256": "sha256:a66aafca9c3104add9d433b0d20ec9b9528f46571a42c326e3fe1a7e167b042c",
       "size_bytes": 21257
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:29b53690490503224c6943cb7bf21dc850cfa384f2f64007ea6952ba62463d50",
+      "sha256": "sha256:d607c4418ad7e19ad94bfcbb02b7fc4b3727baabd28ff49fff27364174c998a7",
       "size_bytes": 55069
     },
     {
@@ -534,7 +534,7 @@
     },
     {
       "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-      "sha256": "sha256:9aaec476f09f9a9b6a2cd91e2b4b0a3962975369a7641b0e8365d950d1dfeccd",
+      "sha256": "sha256:f4c400cb581e2dd35acd0c617366951d323b6eae97d79e1764bfdde623ea5c0e",
       "size_bytes": 8272
     },
     {
@@ -544,7 +544,7 @@
     },
     {
       "path": "release-artifacts/provenance/one-of-one-provenance-template.provenance.json",
-      "sha256": "sha256:93560acb5143a2b6dad373aa2f6eabd26dd0c2a5d8c92b7b42089c6099a9c84b",
+      "sha256": "sha256:2c0673bdafc1b03f88a923fcccd953b0ff5ddcb0f0e29d8b59ff8fe05b9d6ccd",
       "size_bytes": 6161
     },
     {
