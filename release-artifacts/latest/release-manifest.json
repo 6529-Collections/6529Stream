@@ -1748,7 +1748,7 @@
     "ceremony_evidence": [
       {
         "path": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:b67c643df78c7a38fd4d5d2384a9a81405bcd23e7359e6d239a94c6504676918",
+        "sha256": "sha256:6a950fc5b60b63a5bc20e484548f3be44dcc8c7af2ecf421b6c46c9da87b49a6",
         "size_bytes": 5668,
         "schema_version": "6529stream.deployment-ceremony-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-local",
