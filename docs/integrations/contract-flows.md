@@ -228,6 +228,12 @@ Paid fixed-price mint proceeds are credited as:
 - curator reserve credit: `msg.value / 4`;
 - protocol credit: `msg.value - posterCredit - curatorReserveCredit`.
 
+These ratios are pinned by
+`testFixedPriceMintCreditsProceedsWithoutPushPayouts`,
+`testFixedPriceOddWeiRemainderAccruesToProtocolCredit`, and
+`testOneWeiFixedPriceRemainderCreditsOnlyProtocol` in
+[`test/StreamFixedPricePayments.t.sol`](../../test/StreamFixedPricePayments.t.sol).
+
 Poster and protocol recipients use `withdrawFixedPriceCredit()` or
 `withdrawFixedPriceCreditTo(recipient)` for withdrawable credits.
 `FixedPriceCreditWithdrawn` is emitted for each withdrawn credit category.

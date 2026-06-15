@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 10:05 UTC` |
+| Last updated | `2026-06-15 10:17 UTC` |
 
 ## Packaging Notes
 
@@ -255,7 +255,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add fixed-price mint and drop authorization flow spec (Queue Item 188)
 
-Status: PR #393 open; CI and bot feedback pending.
+Status: PR #393 open; CodeRabbit status success, 6529bot non-blocking payment-split drift observation addressed locally; CI pending on latest push.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/392`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/393`.
 Branch: `codex/fixed-price-flow-spec`.
@@ -331,6 +331,11 @@ Validation result:
 - Full Windows wrapper `powershell -NoProfile -ExecutionPolicy Bypass -File
   scripts\check.ps1` passed at `2026-06-15 09:22 UTC` after rerunning outside
   the workspace sandbox so the installed Foundry binary could execute.
+- Follow-up payment-split drift guard validation passed locally with
+  `python scripts/test_contract_flows.py`, `python scripts/check_contract_flows.py`,
+  `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_bytecode_release_proof.py --check`, and
+  `python scripts/generate_release_checksums.py --check`.
 
 ### Completed: Add integrations entrypoint and artifact source of truth (Queue Item 187)
 
@@ -14289,6 +14294,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 10:17 | Address PR #393 6529bot observation | Added checker-enforced fixed-price split ratio terms and exact `StreamFixedPricePayments` test references, then regenerated release manifest, bytecode proof, and checksums; focused contract-flow and artifact drift checks pass locally. |
 | 2026-06-15 10:05 | Open PR #393 | Fixed-price drop flow spec PR opened on head `58cd06346c29bbc562a9d8da65ea2a0b3b43b5de`, links issue #392, records local validation evidence, and awaits CI plus CodeRabbit/6529bot feedback. |
 | 2026-06-15 09:22 | Finish Queue Item 188 local validation | Focused docs/artifact checks and full Windows `scripts\check.ps1` passed after regenerating risk-register, release-manifest, bytecode-release-proof, and checksum outputs; the first sandboxed full-wrapper attempt hit `Access is denied` launching the installed Foundry binary, and the escalated rerun passed. |
 | 2026-06-15 08:44 | Start Queue Item 188 | PR #391 squash-merged as `f4fdb5fb4e6923bfd787a734a59aca4457bd8755`; issue #392 and branch `codex/fixed-price-flow-spec` now track INT-002 so frontend and backend-signing teams get a checked fixed-price mint/drop authorization flow spec before deeper app architecture work. |

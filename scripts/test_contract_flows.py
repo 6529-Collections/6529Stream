@@ -60,6 +60,11 @@ fixedPriceProtocolCredits, fixedPriceCuratorReserveCredits, totalFixedPriceOwed,
 totalReserved, surplus, DROP_EXECUTION, wrong chain, wrong domain, expired,
 cancelled, consumed, replay, wrong signer, zero recipient, insufficient payment,
 eth_call simulation, StreamMinter, StreamCore, and failed withdrawals preserve credit.
+Payment ratios are msg.value / 2, msg.value / 4, and
+msg.value - posterCredit - curatorReserveCredit.
+Ratio tests are testFixedPriceMintCreditsProceedsWithoutPushPayouts,
+testFixedPriceOddWeiRemainderAccruesToProtocolCredit, and
+testOneWeiFixedPriceRemainderCreditsOnlyProtocol.
 
 ## Source Of Truth
 
