@@ -243,8 +243,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add Safe/admin ceremony evidence checker (Queue Item 176)
 
-Status: PR #369 opened as draft; full local gate passed after sidecar fixes;
-CI and CodeRabbit review pending.
+Status: PR #369 is ready for review; full local gate passed after sidecar
+fixes; CI and CodeRabbit review pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/362`.
 Parent evidence issue: `https://github.com/6529-Collections/6529Stream/issues/217`
 remains open for real reviewed Sepolia/testnet evidence.
@@ -314,8 +314,9 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 00:13 UTC with existing Foundry warning noise only after sidecar fixes.
 - `git diff --check` passed with only the existing CRLF warning for
   `scripts/check.ps1`.
-- PR #369 opened as a draft; CodeRabbit review requested after PR creation and
-  after the state-only follow-up push.
+- PR #369 opened as a draft, then was marked ready for review after GitHub
+  showed no workflow runs and CodeRabbit skipped automatic draft review.
+  CodeRabbit review was requested again after the ready-for-review transition.
 
 ### Completed: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
 
