@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/streamcore-size-budget-headroom` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/413` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/414` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/415` |
 | Next issue | After CON-005, resume `ONE-003` royalty philosophy unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 18:35 UTC` |
+| Last updated | `2026-06-15 19:10 UTC` |
 
 ## Packaging Notes
 
@@ -15323,6 +15323,7 @@ Outcome:
 | 2026-06-15 18:10 | Open PR #413 for ONE-002 | PR #413 opened on branch `codex/provenance-manifest-model`, closes issue #412, and CodeRabbit review was requested in comment `4710926034`. |
 | 2026-06-15 18:20 | Merge PR #413 and select CON-005 | Provenance manifest model merged as `2d83464c7127589c79b65ebdfc58cc5015e7771d`, issue #412 closed completed, and issue #414 opened to enforce `StreamCore` runtime size budget and recover sustainable headroom. |
 | 2026-06-15 18:35 | Implement CON-005 local draft | Branch `codex/streamcore-size-budget-headroom` replaces unused inherited ERC-2981 default-royalty machinery with fixed `royaltyInfo` logic and explicit ERC-2981 interface support, adds `StreamRoyalty` regressions, adds an artifact-backed runtime size-budget checker wired into Makefile, bash, PowerShell, and CI, records budget thresholds in `release-artifacts/contracts.json`, and regenerates release/deployment artifacts. Focused checks currently pass and `StreamCore` measures 24,047 runtime bytes with 529 bytes of EIP-170 headroom. |
+| 2026-06-15 19:10 | Open PR #415 for CON-005 | Full `make check`, Windows `scripts\check.ps1`, focused size-budget/royalty/artifact checks, `forge build --sizes --via-ir --skip test --skip script --force`, and `git diff --check` passed. PR #415 is open on branch `codex/streamcore-size-budget-headroom`, closes issue #414, and CodeRabbit review was requested in comment `4711435580`. |
 
 ## Resume Instructions
 
