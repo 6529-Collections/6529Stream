@@ -203,6 +203,34 @@ class BytecodeReleaseProofTests(unittest.TestCase):
         self.assertEqual(generated["proof_status"]["production"], "missing_reviewed_live_proof")
         self.assertEqual(generated["contract_proofs"][0]["hashes"]["runtime_bytecode"], RUNTIME_HASH)
 
+    def test_check_mode_rejects_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = write_minimal_tree(root)
+            proof.write_proof(
+                root,
+                paths["output"],
+                Path("release-artifacts/latest/release-manifest.json"),
+                Path("release-artifacts/latest/abi-checksums.json"),
+                Path("release-artifacts/latest/source-verification-inputs.json"),
+                Path("deployments/address-books"),
+            )
+            with paths["output"].open("a", encoding="utf-8") as handle:
+                handle.write("\n")
+
+            with self.assertRaisesRegex(
+                proof.BytecodeReleaseProofError,
+                "changed release-artifacts/latest/bytecode-release-proof.json",
+            ):
+                proof.check_proof(
+                    root,
+                    paths["output"],
+                    Path("release-artifacts/latest/release-manifest.json"),
+                    Path("release-artifacts/latest/abi-checksums.json"),
+                    Path("release-artifacts/latest/source-verification-inputs.json"),
+                    Path("deployments/address-books"),
+                )
+
     def test_rejects_deployment_manifest_hash_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
