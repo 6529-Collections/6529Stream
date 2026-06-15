@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/electron-security-wallet-guide` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/405` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/406` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/407` |
 | Next issue | `INT-010` operator admin UI specification after INT-009 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 14:38 UTC` |
+| Last updated | `2026-06-15 14:40 UTC` |
 
 ## Packaging Notes
 
@@ -15216,6 +15216,7 @@ Outcome:
 | 2026-06-15 14:14 | Merge PR #405 and select INT-009 | Mobile and WalletConnect integration guide merged as `45a3ce17995319624bb74f3974a671c9b897bb52` after CI run `27551931250` passed, CodeRabbit review finished, review threads were empty, 6529bot follow-up reported no new findings on final head `c044db0d498e3eec9cb200725393e1e668b0c2c8`, and issue #404 closed completed. |
 | 2026-06-15 14:15 | Create issue #406 and start INT-009 | Next substantive integration-readiness slice is the Electron security and wallet integration guide on branch `codex/electron-security-wallet-guide`; issue #406 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, signed-update/code-signing boundaries, and no-Electron-app/no-production-readiness boundaries. |
 | 2026-06-15 14:38 | Validate INT-009 local draft | Focused Electron security/wallet, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed. |
+| 2026-06-15 14:40 | Open PR #407 for INT-009 | PR #407 is open on branch `codex/electron-security-wallet-guide`, closes issue #406, and CodeRabbit review was requested in comment `4709069970`. |
 
 ## Resume Instructions
 
