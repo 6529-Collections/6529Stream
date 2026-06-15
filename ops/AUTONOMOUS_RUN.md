@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/wallet-signing-guide` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/395` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/396` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/397` |
-| Next issue | TBD after INT-004. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/event-indexer-reconstruction-spec` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/397` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/398` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/399` |
+| Next issue | TBD after INT-005. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 11:23 UTC` |
+| Last updated | `2026-06-15 11:54 UTC` |
 
 ## Packaging Notes
 
@@ -15192,6 +15192,10 @@ Outcome:
 | 2026-06-15 11:02 | Create issue #396 and select INT-004 | Next substantive integration-readiness slice is the wallet, EIP-712, ERC-1271, and Safe signing guide on branch `codex/wallet-signing-guide`; no existing open issue matched, so issue #396 now tracks the guide/checker/local-CI/release-manifest work. |
 | 2026-06-15 11:20 | Open PR #397 for INT-004 | PR #397 is open on branch `codex/wallet-signing-guide`, closes issue #396, and CodeRabbit review was requested. Local evidence includes the wallet guide checker/test, integration/release-readiness checks, release manifest/proof/checksum checks, focused EIP-712/ERC-1271 Forge tests, PowerShell parser check, and `git diff --check`. |
 | 2026-06-15 11:23 | Address PR #397 bot nice-to-have | Tightened `scripts/check_wallet_signature_flows.py` required phrases from generic schema words to code-token field names so the checker better protects the typed-data domain and replay fields. |
+| 2026-06-15 11:28 | Merge PR #397 | Wallet signature integration guide merged as `2dba644e6b29e3e32474a59ebc3b13db493232fe` after CI passed, CodeRabbit status was success, review threads were empty, and issue #396 closed completed. |
+| 2026-06-15 11:29 | Create issue #398 and select INT-005 | Next substantive integration-readiness slice is the event and indexer reconstruction spec on branch `codex/event-indexer-reconstruction-spec`; issue #398 now tracks the guide/checker/local-CI/release-manifest work. |
+| 2026-06-15 11:52 | Open PR #399 for INT-005 | PR #399 is open on branch `codex/event-indexer-reconstruction-spec`, closes issue #398, and CodeRabbit review was requested. Local evidence includes the event/indexer guide checker/test, integration/release-readiness checks, risk-register/release-manifest/proof/checksum drift checks, shell and PowerShell syntax checks, `git diff --check`, and full `make check`. |
+| 2026-06-15 11:54 | Address PR #399 bot nice-to-haves | Tightened generic event/entity checker phrases, added a source-file mapping for `StreamAuctions` / `StreamMinter`, and added path-like link-label validation for the event/indexer guide checker. |
 
 ## Resume Instructions
 

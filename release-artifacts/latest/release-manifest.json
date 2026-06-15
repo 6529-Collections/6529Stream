@@ -104,7 +104,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:91c82e4ab7777f43861356ee8490d19d18337bd0cf20c726a494a329c66a864f",
+      "sha256": "sha256:52426996f6c59eb65ce85951c053fa2e721bffae8e39417ee65f064b5beedd56",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1804,14 +1804,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3414fc4ab635fb915126a088137a88858e6ae41b4c5cf0c90dadf005980b8c55",
-      "size_bytes": 29998
+      "sha256": "sha256:771f08a1c295dbdaf3e1f0fa69de9a3c0ae473bbe9343b009daea905ad344837",
+      "size_bytes": 30555
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:7e11549c107a2f0075891c2f48631ea71216d7d367b9cb59eee855ffdca9d903",
-        "size_bytes": 8552
+        "sha256": "sha256:bbd5013d252ed910596d70e490915ce0b29e41db9b4052087c48f7d167a33fc1",
+        "size_bytes": 8763
       },
       {
         "path": "docs/deployment.md",
@@ -1875,13 +1875,13 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:fb1e9539848649336c93fcd625f31015cf619e3c9e1758b0f60b31faf5176a72",
-        "size_bytes": 34889
+        "sha256": "sha256:ecd24f43614ea6c166d415802f6340735925df46134eacb5587880dc2679889b",
+        "size_bytes": 35227
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:828e80c2430562f14beadfc20eeebe204f1598779870b5952d673b5206f6584e",
-        "size_bytes": 15360
+        "sha256": "sha256:d384762d9743a7ccde6e0d0855b8bb4c5442af4f17e8c73eed2936edc2901afa",
+        "size_bytes": 15866
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -1897,6 +1897,11 @@
         "path": "docs/integrations/wallets-and-signatures.md",
         "sha256": "sha256:924fa149b1dd0ac87f5c52e7e73a13cc413aa09cb23c459ff37d5af1336455d1",
         "size_bytes": 23179
+      },
+      {
+        "path": "docs/integrations/events-and-indexing.md",
+        "sha256": "sha256:947b337384e9bf61962fef0823d145e17f90788df44a77ee63753deb70ae9a62",
+        "size_bytes": 28362
       },
       {
         "path": "docs/tooling.md",

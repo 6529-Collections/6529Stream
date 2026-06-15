@@ -169,6 +169,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "integrations" / "contract-flows.md",
         root / "docs" / "integrations" / "auction-flows.md",
         root / "docs" / "integrations" / "wallets-and-signatures.md",
+        root / "docs" / "integrations" / "events-and-indexing.md",
     ]
 
     write_json(

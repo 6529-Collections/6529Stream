@@ -72,6 +72,7 @@ Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, and 
 The fixed-price mint flow is listed.
 The auction frontend and indexer flow spec is listed.
 The wallet, EIP-712, ERC-1271, and Safe signing guide is listed.
+The event and indexer reconstruction spec is listed.
 
 ## Readiness Boundaries
 
