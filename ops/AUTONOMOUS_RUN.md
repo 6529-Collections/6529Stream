@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/risk-register` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/387` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/388` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/389` |
 | Next issue | TBD after AUD-002; likely `INT-001` unless bot feedback or release-evidence priority changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 07:38 UTC` |
+| Last updated | `2026-06-15 07:41 UTC` |
 
 ## Packaging Notes
 
@@ -247,18 +247,20 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | Merged in PR #383 |
 | 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | Merged in PR #385 |
 | 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | Merged in PR #387 |
-| 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | Validated locally on issue #388; PR pending |
+| 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | PR #389 open; CodeRabbit requested |
 
 ## Current PR Worklog
 
 ### PR candidate: Add risk register and audit-boundary checker (Queue Item 186)
 
-Status: Validated locally; PR not opened yet.
+Status: PR #389 open; CodeRabbit review requested in comment `4705647847`;
+awaiting CI and bot feedback.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/388`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/389`.
 Branch: `codex/risk-register`.
 Branch started from PR #387 squash merge commit
 `193a208f42246841a8469386ce2097b5b50097b9`.
+Initial PR head: `3bff44156310a8ea171fbd02ca6e984110db28a6`.
 
 Goal:
 
@@ -14085,6 +14087,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 07:41 | Open PR #389 | Risk-register PR opened on head `3bff44156310a8ea171fbd02ca6e984110db28a6`, links issue #388, records full local validation, and CodeRabbit review was requested in comment `4705647847`. |
 | 2026-06-15 07:38 | Complete Queue Item 186 local validation | Risk-register generator/checker/tests, audit package/readiness checks, release artifact/manifest/proof/checksum checks, changelog gate, Python compile, diff hygiene, and full Windows check wrapper all passed locally before opening the PR. |
 | 2026-06-15 07:27 | Start Queue Item 186 | PR #387 squash-merged as `193a208f42246841a8469386ce2097b5b50097b9`; issue #388 and branch `codex/risk-register` now track AUD-002 so reviewer-supplied production trust, 1/1 product, marketplace/indexer, size, warning, and evidence gaps become a generated checked risk register rather than prose-only roadmap notes. |
 | 2026-06-15 07:09 | Merge PR #387 | Audit package refresh merged as `193a208f42246841a8469386ce2097b5b50097b9`; final head `9b54e2c55a6d891537719f70da485b88241a119d` passed CI run `27529308375`, CodeRabbit status was success, 6529bot reported no new findings, merge-decision comment `4705363421` documented the clean state, and issue #386 closed completed. |
