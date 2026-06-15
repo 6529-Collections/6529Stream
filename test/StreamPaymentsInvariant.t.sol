@@ -32,37 +32,45 @@ contract StreamPaymentsInvariantTest is DropAuthTestHelper, StreamFixture {
     }
 
     function _runAction(uint256 actionSeed, uint256 firstArg, uint256 secondArg) private {
-        uint256 action = actionSeed % 15;
+        uint256 action = actionSeed % 19;
         if (action == 0) {
             handler.mintFixedPrice(firstArg, secondArg);
         } else if (action == 1) {
             handler.withdrawFixedPriceCredit(firstArg);
         } else if (action == 2) {
-            handler.forceDropsSurplus(firstArg);
+            handler.failFixedPriceWithdrawal(firstArg);
         } else if (action == 3) {
-            handler.mintAuction(firstArg, secondArg);
+            handler.forceDropsSurplus(firstArg);
         } else if (action == 4) {
+            handler.mintAuction(firstArg, secondArg);
+        } else if (action == 5) {
             uint256 bidSeed = uint256(keccak256(abi.encode(actionSeed, "bid")));
             handler.bidAuction(firstArg, secondArg, bidSeed);
-        } else if (action == 5) {
-            handler.settleAuction(firstArg);
         } else if (action == 6) {
-            handler.withdrawAuctionCredit(firstArg);
+            handler.settleAuction(firstArg);
         } else if (action == 7) {
-            handler.forceAuctionSurplus(firstArg);
+            handler.withdrawAuctionCredit(firstArg);
         } else if (action == 8) {
-            handler.claimCuratorReward(firstArg, secondArg);
+            handler.failAuctionCreditWithdrawal(firstArg);
         } else if (action == 9) {
-            handler.withdrawCuratorCredit(firstArg);
+            handler.forceAuctionSurplus(firstArg);
         } else if (action == 10) {
-            handler.forceCuratorPoolSurplus(firstArg);
+            handler.claimCuratorReward(firstArg, secondArg);
         } else if (action == 11) {
-            handler.forceMinterSurplus(firstArg);
+            handler.withdrawCuratorCredit(firstArg);
         } else if (action == 12) {
-            handler.fundRandomizerReserve(firstArg);
+            handler.failCuratorWithdrawal(firstArg);
         } else if (action == 13) {
+            handler.forceCuratorPoolSurplus(firstArg);
+        } else if (action == 14) {
+            handler.forceMinterSurplus(firstArg);
+        } else if (action == 15) {
+            handler.fundRandomizerReserve(firstArg);
+        } else if (action == 16) {
+            handler.forceRandomizerReserve(firstArg);
+        } else if (action == 17) {
             handler.requestRandomizerWords(firstArg, secondArg);
-        } else {
+        } else if (action == 18) {
             handler.emergencyWithdrawSurplus(firstArg);
         }
     }
@@ -92,11 +100,24 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
     uint256 private constant MAX_CURATOR_CLAIMS = 8;
     uint256 private constant MAX_PAYMENT = 8 ether;
 
+    struct AuctionProceedsFailureSnapshot {
+        uint256 posterCredit;
+        uint256 protocolCredit;
+        uint256 curatorCredit;
+        uint256 posterTotal;
+        uint256 protocolTotal;
+        uint256 curatorTotal;
+        uint256 proceedsTotal;
+        uint256 totalOwed;
+        uint256 balance;
+    }
+
     DeployedStream private deployed;
     StreamAuctions private auctions;
     StreamCuratorsPool private curatorsPool;
     StreamMinter private surplusMinter;
     NextGenRandomizerRNG private randomizer;
+    RejectingInvariantRecipient private rejectingRecipient;
 
     uint256 private nonce = 1;
     uint256 private mintedDrops;
@@ -110,6 +131,7 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
     constructor(address signer) {
         deployed = deployStreamWithSigner(PAYOUT, CURATORS_POOL, signer);
         deployed.admins.updateEmergencyRecipient(WITHDRAW_RECIPIENT);
+        rejectingRecipient = new RejectingInvariantRecipient();
         auctions = new StreamAuctions(
             address(deployed.minter),
             address(deployed.core),
@@ -176,6 +198,41 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         }
         vm.prank(account);
         deployed.drops.withdrawFixedPriceCreditTo(payable(WITHDRAW_RECIPIENT));
+    }
+
+    function failFixedPriceWithdrawal(uint256 accountSeed) external {
+        address account = _fixedPriceWithdrawAccount(accountSeed);
+        uint256 posterCreditBefore = deployed.drops.fixedPricePosterCredits(account);
+        uint256 protocolCreditBefore = deployed.drops.fixedPriceProtocolCredits(account);
+        if (posterCreditBefore + protocolCreditBefore == 0) {
+            return;
+        }
+
+        uint256 posterTotalBefore = deployed.drops.totalFixedPricePosterOwed();
+        uint256 protocolTotalBefore = deployed.drops.totalFixedPriceProtocolOwed();
+        uint256 totalBefore = deployed.drops.totalOwed();
+        uint256 balanceBefore = address(deployed.drops).balance;
+
+        vm.prank(account);
+        (bool success, bytes memory revertData) = address(deployed.drops)
+            .call(
+                abi.encodeWithSelector(
+                    deployed.drops.withdrawFixedPriceCreditTo.selector,
+                    payable(address(rejectingRecipient))
+                )
+            );
+
+        _assertEthFailed(success, revertData, "fixed failed withdrawal");
+        deployed.drops.fixedPricePosterCredits(account)
+            .assertEq(posterCreditBefore, "fixed poster rollback");
+        deployed.drops.fixedPriceProtocolCredits(account)
+            .assertEq(protocolCreditBefore, "fixed protocol rollback");
+        deployed.drops.totalFixedPricePosterOwed()
+            .assertEq(posterTotalBefore, "fixed poster total rollback");
+        deployed.drops.totalFixedPriceProtocolOwed()
+            .assertEq(protocolTotalBefore, "fixed protocol total rollback");
+        deployed.drops.totalOwed().assertEq(totalBefore, "fixed total rollback");
+        address(deployed.drops).balance.assertEq(balanceBefore, "fixed balance rollback");
     }
 
     function forceDropsSurplus(uint256 rawAmount) external {
@@ -279,6 +336,80 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         }
     }
 
+    function failAuctionCreditWithdrawal(uint256 accountSeed) external {
+        address account = _auctionWithdrawAccount(accountSeed);
+        uint256 bidderCredit = auctions.auctionBidderCredits(account);
+        uint256 proceedsCredit = auctions.auctionPosterCredits(account)
+            + auctions.auctionProtocolCredits(account) + auctions.auctionCuratorCredits(account);
+
+        if (bidderCredit != 0) {
+            _failAuctionBidderWithdrawal(account, bidderCredit);
+        }
+
+        if (proceedsCredit != 0) {
+            _failAuctionProceedsWithdrawal(account);
+        }
+    }
+
+    function _failAuctionBidderWithdrawal(address account, uint256 bidderCredit) private {
+        uint256 bidderTotalBefore = auctions.totalBidderOwed();
+        uint256 totalBefore = auctions.totalOwed();
+        uint256 balanceBefore = address(auctions).balance;
+
+        vm.prank(account);
+        (bool success, bytes memory revertData) = address(auctions)
+            .call(
+                abi.encodeWithSelector(
+                    auctions.withdrawBidderCreditTo.selector, payable(address(rejectingRecipient))
+                )
+            );
+
+        _assertEthFailed(success, revertData, "auction bidder failed withdrawal");
+        auctions.auctionBidderCredits(account).assertEq(bidderCredit, "auction bidder rollback");
+        auctions.totalBidderOwed().assertEq(bidderTotalBefore, "auction bidder total");
+        auctions.totalOwed().assertEq(totalBefore, "auction total after bidder failure");
+        address(auctions).balance.assertEq(balanceBefore, "auction bidder balance rollback");
+    }
+
+    function _failAuctionProceedsWithdrawal(address account) private {
+        AuctionProceedsFailureSnapshot memory beforeFailure = AuctionProceedsFailureSnapshot({
+            posterCredit: auctions.auctionPosterCredits(account),
+            protocolCredit: auctions.auctionProtocolCredits(account),
+            curatorCredit: auctions.auctionCuratorCredits(account),
+            posterTotal: auctions.totalPosterOwed(),
+            protocolTotal: auctions.totalProtocolOwed(),
+            curatorTotal: auctions.totalCuratorOwed(),
+            proceedsTotal: auctions.totalProceedsOwed(),
+            totalOwed: auctions.totalOwed(),
+            balance: address(auctions).balance
+        });
+
+        vm.prank(account);
+        (bool success, bytes memory revertData) = address(auctions)
+            .call(
+                abi.encodeWithSelector(
+                    auctions.withdrawAuctionProceedsCreditTo.selector,
+                    payable(address(rejectingRecipient))
+                )
+            );
+
+        _assertEthFailed(success, revertData, "auction proceeds failed withdrawal");
+        auctions.auctionPosterCredits(account)
+            .assertEq(beforeFailure.posterCredit, "auction poster rollback");
+        auctions.auctionProtocolCredits(account)
+            .assertEq(beforeFailure.protocolCredit, "auction protocol rollback");
+        auctions.auctionCuratorCredits(account)
+            .assertEq(beforeFailure.curatorCredit, "auction curator rollback");
+        auctions.totalPosterOwed().assertEq(beforeFailure.posterTotal, "auction poster total");
+        auctions.totalProtocolOwed().assertEq(beforeFailure.protocolTotal, "auction protocol total");
+        auctions.totalCuratorOwed().assertEq(beforeFailure.curatorTotal, "auction curator total");
+        auctions.totalProceedsOwed().assertEq(beforeFailure.proceedsTotal, "auction proceeds total");
+        auctions.totalOwed()
+            .assertEq(beforeFailure.totalOwed, "auction total after proceeds failure");
+        address(auctions).balance
+            .assertEq(beforeFailure.balance, "auction proceeds balance rollback");
+    }
+
     function forceAuctionSurplus(uint256 rawAmount) external {
         _forceBalance(address(auctions), rawAmount);
     }
@@ -314,6 +445,31 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         curatorsPool.withdrawCuratorCreditTo(payable(WITHDRAW_RECIPIENT));
     }
 
+    function failCuratorWithdrawal(uint256 curatorSeed) external {
+        address curator = _curator(curatorSeed);
+        uint256 creditBefore = curatorsPool.curatorCredits(curator);
+        if (creditBefore == 0) {
+            return;
+        }
+
+        uint256 totalBefore = curatorsPool.totalOwed();
+        uint256 balanceBefore = address(curatorsPool).balance;
+
+        vm.prank(curator);
+        (bool success, bytes memory revertData) = address(curatorsPool)
+            .call(
+                abi.encodeWithSelector(
+                    curatorsPool.withdrawCuratorCreditTo.selector,
+                    payable(address(rejectingRecipient))
+                )
+            );
+
+        _assertEthFailed(success, revertData, "curator failed withdrawal");
+        curatorsPool.curatorCredits(curator).assertEq(creditBefore, "curator credit rollback");
+        curatorsPool.totalOwed().assertEq(totalBefore, "curator owed rollback");
+        address(curatorsPool).balance.assertEq(balanceBefore, "curator balance rollback");
+    }
+
     function forceCuratorPoolSurplus(uint256 rawAmount) external {
         _forceBalance(address(curatorsPool), rawAmount);
     }
@@ -333,6 +489,10 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         // slither-disable-next-line arbitrary-send-eth
         (bool success,) = address(randomizer).call{ value: amount }("");
         require(success, "randomizer funding failed");
+    }
+
+    function forceRandomizerReserve(uint256 rawAmount) external {
+        _forceBalance(address(randomizer), rawAmount);
     }
 
     function requestRandomizerWords(uint256 rawCost, uint256 tokenSeed) external {
@@ -373,6 +533,8 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         _assertCuratorTotals();
         surplusMinter.totalOwed().assertEq(0, "minter owed");
         surplusMinter.totalReserved().assertEq(0, "minter reserved");
+        address(randomizer).balance
+            .assertEq(randomizer.totalRandomnessReserved(), "randomizer balance reserved");
         randomizer.totalOwed().assertEq(randomizer.totalRandomnessReserved(), "randomizer owed");
         randomizer.totalReserved()
             .assertEq(randomizer.totalRandomnessReserved(), "randomizer reserved");
@@ -509,7 +671,7 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
     }
 
     function _auctionWithdrawAccount(uint256 seed) private pure returns (address) {
-        uint256 account = seed % 5;
+        uint256 account = seed % 6;
         if (account == 0) {
             return FIRST_BIDDER;
         }
@@ -522,7 +684,10 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         if (account == 3) {
             return SECOND_POSTER;
         }
-        return PAYOUT;
+        if (account == 4) {
+            return PAYOUT;
+        }
+        return CURATORS_POOL;
     }
 
     function _forceBalance(address target, uint256 rawAmount) private {
@@ -535,6 +700,18 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
         vm.deal(target, target.balance + amount);
     }
 
+    function _assertEthFailed(bool success, bytes memory revertData, string memory message)
+        private
+        pure
+    {
+        require(!success, message);
+        require(
+            keccak256(revertData)
+                == keccak256(abi.encodeWithSignature("Error(string)", "ETH failed")),
+            message
+        );
+    }
+
     function _tokenData(uint256 id) private pure returns (string memory) {
         if (id % 3 == 0) {
             return "alpha";
@@ -543,6 +720,12 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
             return "beta";
         }
         return "gamma";
+    }
+}
+
+contract RejectingInvariantRecipient {
+    receive() external payable {
+        revert("reject invariant withdrawal");
     }
 }
 
