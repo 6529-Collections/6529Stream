@@ -3065,7 +3065,8 @@ Dependencies: dependency artifact manifest, metadata browser sandbox,
 
 ### ONE-005: Retain Marketplace And Indexer Integration Evidence
 
-Status: Planned.
+Status: In progress locally on issue #422 and branch
+`codex/marketplace-indexer-evidence-model`.
 
 Gate: G/E.
 
@@ -3079,13 +3080,20 @@ complete the row without private context.
 
 Files likely touched:
 
-- `docs/integrations/marketplaces.md`
-- `docs/integrations/indexing.md`
+- `docs/integrations/marketplace-indexer-evidence.md`
+- `docs/integrations/README.md`
+- `docs/integrations/events-and-indexing.md`
+- `docs/integrations/metadata-rendering.md`
+- `docs/royalty-policy.md`
+- `docs/release-readiness.md`
+- `docs/non-local-release-evidence.md`
 - `docs/public-beta-evidence.md`
+- `release-artifacts/evidence/marketplace-indexer/`
 - `release-artifacts/evidence/public-beta-templates/`
 - `release-artifacts/evidence/production-release-templates/`
 - `release-artifacts/schema/`
-- `scripts/check_*marketplace*_evidence.py`
+- `scripts/check_marketplace_indexer_evidence.py`
+- `scripts/test_marketplace_indexer_evidence.py`
 - generated release artifacts
 
 Implementation steps:
@@ -3125,6 +3133,8 @@ Acceptance criteria:
 Evidence artifacts:
 
 - Evidence schema/template/checker.
+- `fork_testnet_marketplace_indexer_evidence` tracker issue #423.
+- `live_marketplace_indexer_evidence` tracker issue #424.
 - Future reviewed marketplace/indexer retained artifacts.
 
 Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.

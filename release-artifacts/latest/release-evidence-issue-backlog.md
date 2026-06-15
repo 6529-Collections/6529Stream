@@ -23,8 +23,8 @@ The committed baseline remains blocked for public beta and production release.
 
 | Phase | Issue Entries | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | 7 | 7 | 0 | 0 | 0 | 0 | 0 |
-| Production Release | 9 | 9 | 0 | 0 | 0 | 0 | 0 |
+| Public Beta | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
+| Production Release | 10 | 10 | 0 | 0 | 0 | 0 | 0 |
 
 ## Issue Entries
 
@@ -210,6 +210,75 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_public_beta_blocker_report.py`
+- `python scripts/test_production_release_blocker_report.py`
+- `python scripts/generate_public_beta_blocker_report.py --check`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+
+## Non-Goals
+
+- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
+- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
+- Do not use the checked template alone as completion evidence.
+
+## Acceptance Criteria
+
+- Reviewed retained evidence exists and is no-secret or properly redacted.
+- The evidence manifest references the retained evidence path and hash.
+- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
+- All validation commands above pass.
+```
+
+### Retain public beta evidence: fork_testnet_marketplace_indexer_evidence
+
+| Field | Value |
+| --- | --- |
+| Entry ID | `public-beta-fork-testnet-marketplace-indexer-evidence` |
+| Phase | `Public Beta` |
+| Requirement ID | `fork_testnet_marketplace_indexer_evidence` |
+| Status | `missing` |
+| Evidence posture | external/future |
+| Suggested labels | `release`, `evidence`, `roadmap`, `public-beta` |
+| Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
+| Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
+| Template | `release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json` |
+| Retained artifact expectation | `release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`; Replace this template with reviewed fork/testnet marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale or simulated sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation. |
+| Template-only can complete | `false` |
+
+Suggested issue body:
+
+```md
+## Evidence Requirement
+
+- Phase: `Public Beta`
+- Requirement ID: `fork_testnet_marketplace_indexer_evidence`
+- Current status: `missing`
+- Evidence posture: external/future
+- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
+
+## Source Links
+
+- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_marketplace_indexer_evidence`
+- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json`
+- Retained artifact placeholder: `release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`
+
+## Required Evidence
+
+- Retained artifact expectation: Replace this template with reviewed fork/testnet marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale or simulated sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`. Template-only evidence cannot complete the row.
+- Template-only can complete: `false`
+
+## Validation
+
+- `python scripts/test_release_evidence_packet_index.py`
+- `python scripts/test_public_beta_evidence.py`
+- `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_marketplace_indexer_evidence.py`
+- `python scripts/check_marketplace_indexer_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
@@ -970,6 +1039,75 @@ Suggested issue body:
 - All validation commands above pass.
 ```
 
+### Retain production release evidence: live_marketplace_indexer_evidence
+
+| Field | Value |
+| --- | --- |
+| Entry ID | `production-release-live-marketplace-indexer-evidence` |
+| Phase | `Production Release` |
+| Requirement ID | `live_marketplace_indexer_evidence` |
+| Status | `missing` |
+| Evidence posture | external/future |
+| Suggested labels | `release`, `evidence`, `roadmap`, `production-release` |
+| Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
+| Blocker report | `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows |
+| Template | `release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json` |
+| Retained artifact expectation | `release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`; Replace this template with reviewed live marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation. |
+| Template-only can complete | `false` |
+
+Suggested issue body:
+
+```md
+## Evidence Requirement
+
+- Phase: `Production Release`
+- Requirement ID: `live_marketplace_indexer_evidence`
+- Current status: `missing`
+- Evidence posture: external/future
+- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
+
+## Source Links
+
+- Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_marketplace_indexer_evidence`
+- Evidence template: `release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json`
+- Retained artifact placeholder: `release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`
+
+## Required Evidence
+
+- Retained artifact expectation: Replace this template with reviewed live marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`. Template-only evidence cannot complete the row.
+- Template-only can complete: `false`
+
+## Validation
+
+- `python scripts/test_release_evidence_packet_index.py`
+- `python scripts/test_public_beta_evidence.py`
+- `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_marketplace_indexer_evidence.py`
+- `python scripts/check_marketplace_indexer_evidence.py`
+- `python scripts/test_public_beta_blocker_report.py`
+- `python scripts/test_production_release_blocker_report.py`
+- `python scripts/generate_production_release_blocker_report.py --check`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+
+## Non-Goals
+
+- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
+- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
+- Do not use the checked template alone as completion evidence.
+
+## Acceptance Criteria
+
+- Reviewed retained evidence exists and is no-secret or properly redacted.
+- The evidence manifest references the retained evidence path and hash.
+- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
+- All validation commands above pass.
+```
+
 ### Retain production release evidence: live_explorer_verification
 
 | Field | Value |
@@ -1109,6 +1247,7 @@ Suggested issue body:
 | Command |
 | --- |
 | `python scripts/check_external_audit_report_evidence.py` |
+| `python scripts/check_marketplace_indexer_evidence.py` |
 | `python scripts/check_non_local_release_evidence.py` |
 | `python scripts/check_public_beta_evidence.py` |
 | `python scripts/check_testnet_deployment_rehearsal_evidence.py` |
@@ -1119,6 +1258,7 @@ Suggested issue body:
 | `python scripts/generate_release_evidence_packet_index.py --check` |
 | `python scripts/generate_release_manifest.py --check` |
 | `python scripts/test_external_audit_report_evidence.py` |
+| `python scripts/test_marketplace_indexer_evidence.py` |
 | `python scripts/test_non_local_release_evidence.py` |
 | `python scripts/test_production_release_blocker_report.py` |
 | `python scripts/test_public_beta_blocker_report.py` |
