@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:07f2506049c8458c7d33a04760e7abb98a6e6155d28e6e511b7203e66bfadbe9"
+      "sha256": "sha256:ca46388ff25cdf6cc6a3d4c6d1e2c884d08e6878a317c6de73a3229d877ecf34"
     },
     {
       "path": "docs/audit-package.md",
@@ -126,7 +126,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:07f2506049c8458c7d33a04760e7abb98a6e6155d28e6e511b7203e66bfadbe9"
+          "sha256": "sha256:ca46388ff25cdf6cc6a3d4c6d1e2c884d08e6878a317c6de73a3229d877ecf34"
         }
       ],
       "risk_acceptance": null
@@ -227,7 +227,7 @@
       "evidence": [
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:bea2428d54adaa986af92574908b5d644b26f132e43f86550c25ac7d69cd51aa"
+          "sha256": "sha256:deed441298659d5408d6f214cc4df8457db96674ef8c7712d3b861ab871c1a40"
         },
         {
           "path": "docs/release-readiness.md",
@@ -266,11 +266,11 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:07f2506049c8458c7d33a04760e7abb98a6e6155d28e6e511b7203e66bfadbe9"
+          "sha256": "sha256:ca46388ff25cdf6cc6a3d4c6d1e2c884d08e6878a317c6de73a3229d877ecf34"
         },
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:bea2428d54adaa986af92574908b5d644b26f132e43f86550c25ac7d69cd51aa"
+          "sha256": "sha256:deed441298659d5408d6f214cc4df8457db96674ef8c7712d3b861ab871c1a40"
         }
       ],
       "risk_acceptance": null
@@ -301,7 +301,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:6fcea34fa9ae78e72aefd52234ca83697a05eece5bae23dce42c5ac023ae8140"
+          "sha256": "sha256:ee4015d6caaaa393443ce5ec749d980427b3f270baa63e45b97018613b8c270b"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -337,7 +337,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:1fbea177413542f60749db26e5e150a7f7126bea5679eacf994c7982513fe983"
+          "sha256": "sha256:3e451c5f9980f4b19cb615c03b5411cff06abc2286f13059514364c3649cad4a"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -440,7 +440,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:07f2506049c8458c7d33a04760e7abb98a6e6155d28e6e511b7203e66bfadbe9"
+          "sha256": "sha256:ca46388ff25cdf6cc6a3d4c6d1e2c884d08e6878a317c6de73a3229d877ecf34"
         },
         {
           "path": "docs/tooling.md",

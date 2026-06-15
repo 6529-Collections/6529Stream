@@ -26,7 +26,10 @@ This guide covers:
 
 - token metadata states and expected display/cache behavior;
 - `tokenURI` and schema-versioned on-chain JSON behavior;
+- ERC-7572-style contract-level metadata through the release-tracked
+  `StreamContractMetadata` adapter;
 - ERC-4906 `MetadataUpdate` and `BatchMetadataUpdate` cache invalidation;
+- `ContractURIUpdated` cache invalidation for contract-level metadata;
 - intentional non-emissions on mint-only and burn paths;
 - randomizer pending, stale, failed, retry-failed, and final states;
 - freeze, burn, dependency pin, dependency deprecation, and release-artifact
@@ -80,15 +83,18 @@ rather than hand-maintained metadata snippets.
 | ABI checksums | [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI/bytecode checksum source |
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | ERC-4906 support lookup |
 | Core metadata contract | [`smart-contracts/StreamCore.sol`](../../smart-contracts/StreamCore.sol) | `tokenURI`, metadata state, ERC-4906, burn, freeze, and dependency pins |
+| Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | ERC-7572-style `contractURI()`, `ContractURIUpdated`, URI hash, admin authority, and core address binding |
 | Metadata renderer | [`smart-contracts/StreamMetadataRenderer.sol`](../../smart-contracts/StreamMetadataRenderer.sol) | JSON escaping, URI policy, UTF-8 policy, and animation wrapper behavior |
 | Randomizer lifecycle | [`smart-contracts/StreamRandomizerLifecycle.sol`](../../smart-contracts/StreamRandomizerLifecycle.sol) | Pending/stale/failed/final request state |
 | Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Versioned dependency bytes, content hashes, and deprecation |
 | ERC-4906 interface | [`smart-contracts/IERC4906.sol`](../../smart-contracts/IERC4906.sol) | Metadata update event interface |
+| ERC-7572-style interface | [`smart-contracts/IERC7572.sol`](../../smart-contracts/IERC7572.sol) | Contract-level metadata interface used by `StreamContractMetadata` |
+| Stream contract metadata interface | [`smart-contracts/IStreamContractMetadata.sol`](../../smart-contracts/IStreamContractMetadata.sol) | Adapter-specific views for core/admin/URI hash binding |
 | Golden fixtures | [`test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt), [`test/fixtures/metadata/onchain-stale-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-stale-schema-v1-token-uri.txt), [`test/fixtures/metadata/onchain-failed-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-failed-schema-v1-token-uri.txt), [`test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt`](../../test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt) | Current on-chain JSON examples |
 | Off-chain fixtures | [`test/fixtures/metadata/offchain-pending-token-uri.txt`](../../test/fixtures/metadata/offchain-pending-token-uri.txt), [`test/fixtures/metadata/offchain-stale-token-uri.txt`](../../test/fixtures/metadata/offchain-stale-token-uri.txt), [`test/fixtures/metadata/offchain-failed-token-uri.txt`](../../test/fixtures/metadata/offchain-failed-token-uri.txt), [`test/fixtures/metadata/offchain-final-token-uri.txt`](../../test/fixtures/metadata/offchain-final-token-uri.txt) | Current off-chain URI examples |
 | Fixture tests | [`test/StreamMetadataGolden.t.sol`](../../test/StreamMetadataGolden.t.sol), [`scripts/check_metadata_fixtures.py`](../../scripts/check_metadata_fixtures.py), [`scripts/test_metadata_fixtures.py`](../../scripts/test_metadata_fixtures.py) | Golden output and fixture policy checks |
 | Browser sandbox tests | [`scripts/check_metadata_browser_sandbox.py`](../../scripts/check_metadata_browser_sandbox.py), [`scripts/test_metadata_browser_sandbox.py`](../../scripts/test_metadata_browser_sandbox.py), [`scripts/check_rehearsal_metadata_browser_sandbox.py`](../../scripts/check_rehearsal_metadata_browser_sandbox.py), [`scripts/test_rehearsal_metadata_browser_sandbox.py`](../../scripts/test_rehearsal_metadata_browser_sandbox.py) | Local browser execution checks |
-| Metadata behavior tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol), [`test/StreamMetadataFreeze.t.sol`](../../test/StreamMetadataFreeze.t.sol), [`test/StreamCoreBurn.t.sol`](../../test/StreamCoreBurn.t.sol), [`test/StreamRandomizerLifecycle.t.sol`](../../test/StreamRandomizerLifecycle.t.sol), [`test/StreamRandomizerRetry.t.sol`](../../test/StreamRandomizerRetry.t.sol), [`test/StreamDependencyRegistry.t.sol`](../../test/StreamDependencyRegistry.t.sol) | Current event/state behavior |
+| Metadata behavior tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol), [`test/StreamContractMetadata.t.sol`](../../test/StreamContractMetadata.t.sol), [`test/StreamMetadataFreeze.t.sol`](../../test/StreamMetadataFreeze.t.sol), [`test/StreamCoreBurn.t.sol`](../../test/StreamCoreBurn.t.sol), [`test/StreamRandomizerLifecycle.t.sol`](../../test/StreamRandomizerLifecycle.t.sol), [`test/StreamRandomizerRetry.t.sol`](../../test/StreamRandomizerRetry.t.sol), [`test/StreamDependencyRegistry.t.sol`](../../test/StreamDependencyRegistry.t.sol) | Current event/state behavior |
 | Future public-beta template | [`release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json`](../../release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json) | Template only, not completed evidence |
 
 Raw ABIs under ignored `out/` are local build products. For committed review,
@@ -149,6 +155,35 @@ Clients should treat `metadata_schema_version` as part of cache identity.
 Schema changes are release-impacting and should be covered by release policy,
 golden fixtures, and release manifest/checksum updates.
 
+## Contract-Level Metadata
+
+Contract-level metadata is exposed by `StreamContractMetadata`, not by
+`StreamCore`. The satellite/read-adapter is release-tracked in address books
+and manifests and returns an ERC-7572-style `contractURI()` plus a
+`contractURIHash()` view. It also binds itself to the canonical core and admin
+contracts through
+`streamCore()` and `adminsContract()`.
+
+The current adapter stores a content URI, not inline JSON. Accepted contract
+metadata URI schemes are `https://`, `ipfs://`, and `ar://`; unsafe, empty,
+oversized, whitespace-bearing, control-character, and invalid UTF-8 values are
+rejected before storage. `updateContractURI` follows the existing
+target-scoped function-admin/global-admin model and is blocked while the
+`METADATA_MUTATION` pause domain is active.
+
+Subscribe to `ContractURIUpdated()` from the adapter address and then re-read
+`contractURI()`, `contractURIHash()`, `streamCore()`, and `adminsContract()`.
+Cache keys for contract-level metadata should include chain ID, adapter
+address, core address, deployment manifest hash, release manifest hash, and
+`contractURIHash()`.
+
+This is not yet proof that marketplaces will discover contract-level metadata
+from the ERC-721 address. Clients that rely on OpenSea, Reservoir, Blur,
+Manifold, wallet, or aggregator behavior must retain fork/testnet/live
+evidence showing the exact integration path they use. Until that evidence
+exists, treat the adapter as a first-party release/integration source of truth,
+not a universal marketplace-discovery guarantee.
+
 ## JSON And Fixture Expectations
 
 The committed fixtures are characterization fixtures for the local baseline,
@@ -199,6 +234,8 @@ In short: the current policy is no mint-only ERC-4906 and no burn ERC-4906.
 `CollectionFrozen` records permanence state and manifest data but does not
 change `tokenURI` bytes by itself. Dependency version creation or deprecation
 does not change output for collections pinned to an earlier version.
+`ContractURIUpdated` invalidates contract-level metadata only; it does not
+imply token JSON changed and should not be treated as an ERC-4906 event.
 
 ## Randomness And Retry States
 
@@ -272,6 +309,7 @@ Cache keys should include:
 
 - chain ID;
 - contract address;
+- contract metadata adapter address and `contractURIHash()` where applicable;
 - deployment manifest ID or release manifest hash;
 - token ID;
 - `metadata_schema_version`;
@@ -286,6 +324,7 @@ Invalidate or refresh after:
 - `MetadataUpdate`;
 - `BatchMetadataUpdate`;
 - `CollectionFrozen`;
+- `ContractURIUpdated`;
 - `DependencyVersionPinned`;
 - `TokenBurned`;
 - ERC-721 transfer-to-zero;

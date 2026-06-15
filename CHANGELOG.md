@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-001 contract-level metadata support with a release-tracked
+  `StreamContractMetadata` adapter, `IERC7572`/`IStreamContractMetadata`
+  interfaces, `contractURI()`/`contractURIHash()` views,
+  `ContractURIUpdated` event catalog coverage, metadata-pause enforcement,
+  deployment rehearsal wiring, generated manifest/address-book/source
+  verification artifacts, and integration docs that preserve the current
+  marketplace-evidence boundary.
 - Added INT-010 operator admin UI specification with
   `docs/integrations/operator-admin-ui.md`, a checker/test pair, local/CI gate
   wiring, integration/release-readiness navigation, release-manifest coverage,

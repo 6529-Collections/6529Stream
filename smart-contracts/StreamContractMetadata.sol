@@ -1,0 +1,102 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.19;
+
+import "./ERC165.sol";
+import "./IERC7572.sol";
+import "./IStreamAdmins.sol";
+import "./IStreamContractMetadata.sol";
+import "./StreamMetadataRenderer.sol";
+import "./StreamPauseDomains.sol";
+
+contract StreamContractMetadata is ERC165, IStreamContractMetadata {
+    uint256 public constant MAX_CONTRACT_URI_BYTES = 2_048;
+
+    bytes32 private constant _FIELD_CONTRACT_URI = "contractURI";
+
+    address public immutable streamCore;
+    IStreamAdmins private _adminsContract;
+    string private _contractURI;
+    bytes32 private _contractURIHash;
+
+    error EmptyContractURI();
+    error FunctionAdminUnauthorized();
+    error InvalidAdminContract();
+    error InvalidCoreContract();
+    error MetadataMutationPaused();
+
+    modifier FunctionAdminRequired(bytes4 selector) {
+        if (
+            !_adminsContract.retrieveFunctionAdmin(msg.sender, address(this), selector)
+                && !_adminsContract.retrieveGlobalAdmin(msg.sender)
+        ) {
+            revert FunctionAdminUnauthorized();
+        }
+        _;
+    }
+
+    constructor(address core, address admins, string memory initialContractURI) {
+        if (core.code.length == 0) revert InvalidCoreContract();
+        streamCore = core;
+        _setAdminContract(admins);
+        _setContractURI(initialContractURI);
+    }
+
+    function adminsContract() external view returns (address) {
+        return address(_adminsContract);
+    }
+
+    function contractURI() external view returns (string memory) {
+        return _contractURI;
+    }
+
+    function contractURIHash() external view returns (bytes32) {
+        return _contractURIHash;
+    }
+
+    function isStreamContractMetadata() external pure returns (bool) {
+        return true;
+    }
+
+    function updateAdminContract(address newAdminsContract)
+        external
+        FunctionAdminRequired(this.updateAdminContract.selector)
+    {
+        _setAdminContract(newAdminsContract);
+    }
+
+    function updateContractURI(string memory newContractURI)
+        external
+        FunctionAdminRequired(this.updateContractURI.selector)
+    {
+        StreamMetadataRenderer.requireNotPaused(
+            address(_adminsContract),
+            StreamPauseDomains.METADATA_MUTATION,
+            MetadataMutationPaused.selector
+        );
+        _setContractURI(newContractURI);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC165) returns (bool) {
+        return interfaceId == type(IERC7572).interfaceId
+            || interfaceId == type(IStreamContractMetadata).interfaceId
+            || super.supportsInterface(interfaceId);
+    }
+
+    function _setAdminContract(address admins) private {
+        StreamMetadataRenderer.requireContractMarker(
+            admins, IStreamAdmins.isAdminContract.selector, InvalidAdminContract.selector
+        );
+        _adminsContract = IStreamAdmins(admins);
+    }
+
+    function _setContractURI(string memory newContractURI) private {
+        if (bytes(newContractURI).length == 0) revert EmptyContractURI();
+        StreamMetadataRenderer.requireValidUtf8ContentUri(
+            _FIELD_CONTRACT_URI, newContractURI, MAX_CONTRACT_URI_BYTES, false
+        );
+        _contractURI = newContractURI;
+        _contractURIHash = keccak256(bytes(newContractURI));
+        emit ContractURIUpdated();
+    }
+}

@@ -20,6 +20,7 @@ SEPOLIA_TEMPLATE = (
 )
 SEPOLIA_REQUIRED_ENV_VARS = {
     "SEPOLIA_RPC_URL",
+    "SEPOLIA_CONTRACT_METADATA_URI",
     "SEPOLIA_DEPLOYER_ADDRESS",
     "SEPOLIA_ADMIN_SAFE",
     "SEPOLIA_PAUSE_GUARDIAN",
@@ -36,6 +37,7 @@ SEPOLIA_EXPECTED_CONTRACTS = {
     "StreamAdmins",
     "DependencyRegistry",
     "StreamCore",
+    "StreamContractMetadata",
     "StreamCuratorsPool",
     "StreamMinter",
     "StreamDrops",

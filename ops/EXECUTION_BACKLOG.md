@@ -2607,7 +2607,7 @@ Dependencies: `INT-006`, `INT-008`.
 
 ### INT-010: Add Operator Admin UI Specification
 
-Status: In progress on `codex/operator-admin-ui-spec`; issue #408.
+Status: Merged in PR #409; issue #408 closed completed.
 
 Gate: G/F.
 
@@ -2671,7 +2671,8 @@ Dependencies: `GOV-001`, `INT-005`.
 
 ### ONE-001: Decide And Implement Contract-Level Metadata Surface
 
-Status: Planned.
+Status: Local validation complete on `codex/contract-level-metadata-surface`;
+issue #410; PR pending.
 
 Gate: G/F.
 
@@ -2686,13 +2687,22 @@ implemented, the surface follows an ERC-7572-style shape, emits
 `ContractURIUpdated` when the contract metadata changes, and has retained
 marketplace/indexer evidence before release claims.
 
-Files likely touched:
+Files touched:
 
 - `docs/adr/0006-metadata-freeze.md`
 - `docs/metadata.md`
 - `docs/integrations/metadata-rendering.md`
-- `smart-contracts/` only if implementation is accepted
-- `test/` contract metadata tests if implementation is accepted
+- `docs/integrations/events-and-indexing.md`
+- `docs/integrations/README.md`
+- `smart-contracts/StreamContractMetadata.sol`
+- `smart-contracts/IERC7572.sol`
+- `smart-contracts/IStreamContractMetadata.sol`
+- `test/StreamContractMetadata.t.sol`
+- `script/RehearseDeployment.s.sol`
+- `deployments/` config, manifest, address-book, broadcast, and local evidence
+  artifacts
+- `release-artifacts/contracts.json`
+- `release-artifacts/baselines/v0.1.0/abi-surface.json`
 - `release-artifacts/latest/interface-ids.json`
 - `release-artifacts/latest/event-topic-catalog.json`
 
@@ -2737,8 +2747,11 @@ Acceptance criteria:
 Evidence artifacts:
 
 - ADR/design update.
-- Tests if implemented.
-- Interface/event catalog updates if implemented.
+- `test/StreamContractMetadata.t.sol`
+- Interface/event catalog updates.
+- Deployment rehearsal, manifest, address-book, source verification,
+  bytecode-proof, checksum, ceremony, and randomizer-operation local evidence
+  updates.
 - Future retained marketplace/indexer evidence.
 
 Dependencies: `INT-001`, `INT-006`, `CON-005`.

@@ -22,6 +22,10 @@
       "source": "smart-contracts/AuctionContract.sol"
     },
     {
+      "name": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol"
+    },
+    {
       "name": "StreamCore",
       "source": "smart-contracts/StreamCore.sol"
     },
@@ -59,6 +63,10 @@
       "interface_id": "0x49064906"
     },
     {
+      "name": "IERC7572",
+      "source": "smart-contracts/IERC7572.sol"
+    },
+    {
       "name": "IERC721",
       "source": "smart-contracts/IERC721.sol",
       "interface_id": "0x80ac58cd"
@@ -88,6 +96,10 @@
     {
       "name": "IStreamAuctions",
       "source": "smart-contracts/IStreamAuctions.sol"
+    },
+    {
+      "name": "IStreamContractMetadata",
+      "source": "smart-contracts/IStreamContractMetadata.sol"
     },
     {
       "name": "IStreamCore",
