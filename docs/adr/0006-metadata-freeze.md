@@ -143,6 +143,15 @@ The public-beta target design is:
     outside per-collection freeze manifests until a later ADR accepts a global
     contract-metadata freeze or moves an equivalent surface into the core/proxy
     address.
+17. 1/1 provenance manifests are accepted as checked release artifacts for the
+    current release track. They may describe artist statements, authenticity
+    status, certificate hashes, curation notes, exhibition history, retained
+    artifact hashes, and append-only story/provenance entries, but they do not
+    change `tokenURI()` output, `contractURI()` output,
+    `collectionFreezeManifestHash(collectionId)`, ERC-721 ownership state, or
+    royalty enforcement. Future on-chain provenance events/views or a
+    satellite provenance contract require a separate size-budget and
+    integration decision.
 
 ## Metadata Modes
 
@@ -165,6 +174,24 @@ by the same metadata-mutation pause; the replacement admin marker is an
 interface guard, not an operator-trust proof. Marketplace or wallet claims still
 need retained non-local evidence because third parties that probe only the
 ERC-721 contract address may not discover an external adapter automatically.
+
+### 1/1 Provenance Manifests
+
+1/1 provenance manifests are release artifacts that sit beside, not inside, the
+current metadata freeze surface. The canonical runbook is
+[`docs/provenance-manifests.md`](../provenance-manifests.md); checked
+descriptors live under `release-artifacts/provenance/`; and
+`release-artifacts/latest/one-of-one-provenance-manifest.json` is the generated
+catalog included in release manifest and checksum coverage.
+
+The current provenance model is artifact-only. It helps collectors and
+integrators verify artist/story/authenticity context, but it is not additional
+`tokenURI()` JSON, not additional `contractURI()` JSON, not included in
+`collectionFreezeManifestHash(collectionId)`, not marketplace readiness proof,
+not royalty enforcement, and not ownership proof beyond canonical chain state.
+Append-only provenance updates must be represented as explicit descriptor
+entries with retained hashes and reviewer status rather than silent mutation of
+frozen artwork metadata.
 
 ### Off-Chain Metadata
 
@@ -627,6 +654,9 @@ signal that metadata changed before freeze.
   owns that decision.
 - Defining final randomness provider behavior beyond the metadata interactions
   inherited from ADR 0005.
+- Implementing on-chain provenance events/views or a provenance satellite
+  contract. The current accepted provenance surface is a checked release
+  artifact because `StreamCore` remains byte-tight.
 
 ## Accepted Risks
 

@@ -70,7 +70,9 @@ logs must be idempotent are named.
 ReleaseArtifactSnapshot, ContractDeployment, ContractMetadataState,
 | `Collection` |, | `Token` |, DropExecution, | `Auction` |, CreditAccount,
 RandomnessRequest, MetadataState, AdminRole, PauseDomain, DependencyVersion,
-and CuratorRoot are named.
+CuratorRoot, ProvenanceManifest, one-of-one-provenance-manifest.json,
+artifact-only, separate from `tokenURI`, separate from `contractURI()`, and
+not included in `collectionFreezeManifestHash(collectionId)` are named.
 
 ## Event Processing Rules
 
