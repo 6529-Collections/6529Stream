@@ -125,11 +125,12 @@ The important distinction is:
   retained and reviewed.
 - Cross-contract adversarial testing is good but not exhaustive enough for the
   auction/drop/randomizer/admin interaction surface.
-- Integrator documentation is not yet sufficient for a 6529.io-style frontend,
-  mobile app, Electron app, indexer, or operator dashboard.
-- Contract-level metadata is not yet a first-class release item. ERC-7572-style
-  `contractURI()` is draft-standard work, but marketplaces already depend on
-  contract-level metadata surfaces.
+- Integrator documentation now covers frontend, mobile, Electron, indexer,
+  wallet, metadata, auction, fixed-price, and operator UI consumers, but typed
+  snippets, conformance fixtures, and reference UI code remain follow-up work.
+- Contract-level metadata now exists as a release-tracked
+  `StreamContractMetadata` satellite/read-adapter, but non-local marketplace
+  and indexer discovery evidence remains incomplete.
 - 1/1 collector trust surfaces need a stronger product layer: artist statement,
   certificate/authenticity hash, curation notes, exhibition/history records,
   provenance events or retained evidence, and frozen provenance manifests.
@@ -166,7 +167,7 @@ gap into a bounded issue or evidence artifact.
 | --- | --- | --- |
 | EIP-712 drop authorization, ERC-1271 signer support, replay controls, auction custody, pull credits, ERC-4906, freeze manifests, and randomizer lifecycle are already present on mainline | Gate C/D/F evidence | Preserve through adversarial tests, audit packet traceability, and no-secret release evidence; do not create generic rebuild issues |
 | Production trust evidence is still missing | `EXT`, `GOV`, `REL`, `AUD` | Prioritize reviewed testnet/live artifacts, explorer verification, signed release provenance, production signing/custody evidence, and completed external audit artifacts |
-| Contract-level metadata is missing | `ONE-001`, `INT-006`, `ONE-005` | Decide ERC-7572-style `contractURI()`, `ContractURIUpdated`, JSON schema, interface/event catalog updates, marketplace fallback, and non-local evidence |
+| Contract-level metadata lacks non-local discovery evidence | `ONE-001`, `INT-006`, `ONE-005` | Preserve the merged ERC-7572-style `StreamContractMetadata` adapter, `ContractURIUpdated`, URI hash semantics, interface/event catalog updates, and marketplace fallback docs; retain marketplace/indexer evidence before release claims |
 | 1/1 provenance is under-modeled | `ONE-002` | Define collection/token provenance manifests, artist statement, authenticity hash, curation/exhibition history, mutable versus frozen fields, and event/artifact boundaries; use Transient Labs-style story/provenance inscriptions as a benchmark |
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
@@ -2671,11 +2672,7 @@ Dependencies: `GOV-001`, `INT-005`.
 
 ### ONE-001: Decide And Implement Contract-Level Metadata Surface
 
-Status: PR #411 open on `codex/contract-level-metadata-surface`; issue #410.
-Initial CodeRabbit review was requested, and 6529bot general review comment
-`4710176032` has a validated local response prepared for push: pause-gate admin
-rebinding, document/test exact `contractURIHash()` semantics, expand URI
-negative tests, and refresh generated release/deployment evidence.
+Status: Merged in PR #411; issue #410 closed completed.
 
 Gate: G/F.
 
@@ -2782,7 +2779,8 @@ Dependencies: `INT-001`, `INT-006`, `CON-005`.
 
 ### ONE-002: Add 1/1 Provenance Manifest Model
 
-Status: Planned.
+Status: In progress on issue #412 and branch
+`codex/provenance-manifest-model`.
 
 Gate: G/F.
 
@@ -2798,63 +2796,96 @@ or in future satellite contracts. The model is explicit enough for a frontend,
 indexer, collector tool, and auditor to verify provenance without private
 context.
 
-Files likely touched:
+Files touched:
 
 - `docs/metadata.md`
+- `docs/provenance-manifests.md`
+- `docs/adr/0006-metadata-freeze.md`
+- `docs/integrations/README.md`
+- `docs/integrations/events-and-indexing.md`
 - `docs/integrations/metadata-rendering.md`
 - `docs/release-readiness.md`
-- `release-artifacts/schema/` if a machine-readable manifest is added
-- `release-artifacts/evidence/` if retained provenance evidence templates are
-  added
-- `smart-contracts/` and `test/` only if on-chain events/views are accepted
+- `release-artifacts/README.md`
+- `release-artifacts/schema/one-of-one-provenance-manifest.schema.json`
+- `release-artifacts/provenance/one-of-one-provenance-template.provenance.json`
+- `release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md`
+- `release-artifacts/latest/one-of-one-provenance-manifest.json`
+- `scripts/check_one_of_one_provenance_manifest.py`
+- `scripts/generate_one_of_one_provenance_manifest.py`
+- `scripts/test_one_of_one_provenance_manifest.py`
+- local/CI gate wiring, release manifest/checksum generators, changelog, and
+  run-state docs
 
 Implementation steps:
 
 1. Define required and optional provenance fields for collection-level and
    token-level 1/1 works.
-2. Decide whether collector-facing provenance updates are emitted as events,
-   retained as release artifacts, represented in metadata JSON, or delegated to
-   a satellite contract, including how story/provenance updates remain
-   verifiable without silently mutating frozen artwork metadata.
-3. Bind provenance manifests to collection IDs, token IDs, metadata schema
-   versions, freeze manifests, and release artifact hashes.
-4. Add schema/checker coverage if the provenance manifest is represented as a
-   release artifact.
-5. Add contract tests if any provenance event or view is implemented.
-6. Document how frontends show provenance, curation notes, and authenticity
-   hashes without confusing mutable notes with frozen artwork metadata.
+2. Accept the initial provenance surface as a checked release artifact, not
+   `StreamCore` storage, `tokenURI()` JSON, `contractURI()` JSON, or a
+   freeze-manifest extension.
+3. Bind provenance descriptors to collection IDs, token IDs, metadata schema
+   versions, freeze manifest hashes, contract metadata adapter labels, release
+   artifact hashes, and deployment/address-book evidence where available.
+4. Add schema/checker/generator coverage for committed descriptors and the
+   generated aggregate manifest.
+5. Include the generated aggregate in release manifest and checksum coverage.
+6. Document how frontends show provenance, curation notes, authenticity hashes,
+   and append-only story/provenance entries without confusing mutable notes
+   with frozen artwork metadata.
+7. Leave future on-chain provenance events/views or a satellite provenance
+   contract to a separate size-budget and integration decision.
 
 Required tests/checks:
 
-- Manifest schema/checker tests if a release artifact is added
-- `forge test --match-path <provenance-test-file> -vvv` if on-chain support is
-  added
+- `python scripts/test_one_of_one_provenance_manifest.py`
+- `python scripts/check_one_of_one_provenance_manifest.py`
+- `python scripts/generate_one_of_one_provenance_manifest.py --check`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_metadata_rendering.py`
+- `python scripts/check_metadata_rendering.py`
+- `python scripts/test_events_and_indexing.py`
+- `python scripts/check_events_and_indexing.py`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
 - `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_bytecode_release_proof.py --check`
 - `python scripts/generate_release_checksums.py --check`
-- Markdown heading check
+- `python scripts/generate_release_artifacts.py --check`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts/check_one_of_one_provenance_manifest.py scripts/generate_one_of_one_provenance_manifest.py scripts/test_one_of_one_provenance_manifest.py`
+- `make check`
+- `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
+- Markdown heading scan
 - `git diff --check`
 
 Acceptance criteria:
 
 - Provenance fields, update authority, mutability, and freeze interaction are
-  documented.
+  documented in `docs/provenance-manifests.md` and cross-linked from metadata,
+  integration, release-readiness, and release-artifact docs.
 - The model can represent artist statement, certificate/authenticity hash,
   curation notes, exhibition/history records, and collector-facing provenance
   links.
 - The accepted model explains how collector-facing stories or provenance notes
   can be added, frozen, or explicitly versioned.
-- Any on-chain surface includes stable IDs and event/query fields suitable for
-  indexers.
-- Any off-chain retained artifact has no-secret validation and checksum
-  coverage.
+- The current artifact-only model explicitly says provenance is not
+  `tokenURI()` JSON, not `contractURI()` JSON, not
+  `collectionFreezeManifestHash(collectionId)`, not marketplace readiness proof,
+  not royalty enforcement, and not ownership proof beyond chain state.
+- The generated aggregate manifest has no-secret validation, release manifest
+  coverage, checksum coverage, and CI/local gate wiring.
+- The current implementation spends no additional `StreamCore` bytecode.
 - Product docs clearly separate provenance evidence from marketplace-enforced
   ownership or royalty claims.
 
 Evidence artifacts:
 
 - Provenance model docs.
-- Optional schema/checker and retained artifact template.
-- Optional tests/events/views.
+- `release-artifacts/schema/one-of-one-provenance-manifest.schema.json`.
+- `release-artifacts/provenance/one-of-one-provenance-template.provenance.json`.
+- `release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md`.
+- `release-artifacts/latest/one-of-one-provenance-manifest.json`.
 
 Dependencies: `ONE-001`, metadata freeze model, release manifest/checksum
 coverage.
@@ -3260,8 +3291,8 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | size budget, `INT-001` |
-| `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | metadata freeze model |
+| `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | Merged in PR #411; non-local marketplace/indexer evidence remains under `ONE-005` |
+| `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | In progress on issue #412 |
 | `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | governance ADR update |
 | `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | dependency artifact manifest |
 | `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |

@@ -60,7 +60,7 @@ consumers are named here.
 
 ABIs, address books, deployment manifests, release manifest, source verification inputs,
 ABI compatibility baseline, event topic catalog, interface IDs, metadata,
-EIP-712, ERC-1271, risk register, and public-beta evidence status are named.
+1/1 provenance manifest, EIP-712, ERC-1271, risk register, and public-beta evidence status are named.
 
 ## Canonical Artifacts
 

@@ -1,0 +1,154 @@
+{
+  "schema_version": "6529stream.one-of-one-provenance-manifest.v1",
+  "provenance_id": "one-of-one-provenance-template",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "local",
+  "protocol_version": "0.1.0",
+  "deployment_version": "anvil-6529stream-v0.1.0-001",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "scope": {
+    "scope_type": "one_of_one_token",
+    "chain_id": 31337,
+    "core_contract": "0x0000000000000000000000000000000000000003",
+    "contract_metadata_adapter": "0x000000000000000000000000000000000000000a",
+    "collection_id": 1,
+    "token_id": 1,
+    "token_standard": "ERC721",
+    "metadata_schema_version": "6529stream-v1",
+    "contract_uri_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "collection_freeze_manifest_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "artwork": {
+    "title": "Template 1/1 Artwork",
+    "artist": "6529Stream Template Artist",
+    "artist_statement": "Template only. Replace with a reviewed artist statement before a release claim.",
+    "medium": "generative art",
+    "creation_date": "not_available_local",
+    "image_uri": "ipfs://example-one-of-one-image-cid",
+    "animation_uri": "ipfs://example-one-of-one-animation-cid"
+  },
+  "authenticity": {
+    "authenticity_status": "template",
+    "authority": "TBD",
+    "authority_reference": "TBD",
+    "artist_statement_sha256": "not_available_local",
+    "artwork_content_sha256": "not_available_local",
+    "certificate_sha256": "not_available_local"
+  },
+  "provenance_entries": [
+    {
+      "entry_id": "creation-template",
+      "entry_type": "creation",
+      "occurred_at": "not_available_local",
+      "title": "Creation placeholder",
+      "description": "Template-only creation entry. Replace with reviewed no-secret evidence before release.",
+      "evidence_refs": [
+        {
+          "label": "creation evidence placeholder",
+          "uri": "not_available_local",
+          "sha256": "not_available_local",
+          "notes": "Template only; not completion evidence."
+        }
+      ]
+    },
+    {
+      "entry_id": "release-binding-template",
+      "entry_type": "release_binding",
+      "occurred_at": "not_available_local",
+      "title": "Release binding placeholder",
+      "description": "Template-only release binding entry for manifest/checksum/deployment references.",
+      "evidence_refs": [
+        {
+          "label": "release binding evidence placeholder",
+          "uri": "release-artifacts/latest/one-of-one-provenance-manifest.json",
+          "sha256": "not_available_local",
+          "notes": "The generated catalog is checksum-covered but is not release completion evidence."
+        }
+      ]
+    }
+  ],
+  "mutability_policy": {
+    "token_metadata_boundary": "separate_from_token_uri",
+    "contract_metadata_boundary": "separate_from_contract_uri",
+    "freeze_boundary": "not_in_collection_freeze_manifest",
+    "provenance_update_policy": "append_only",
+    "correction_policy": "append_only_with_supersedes",
+    "authority_rotation_policy": "not_available_local"
+  },
+  "release_bindings": {
+    "release_manifest": {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "sha256": "not_available_self_referential",
+      "status": "self_referential"
+    },
+    "release_checksums": {
+      "path": "release-artifacts/latest/SHA256SUMS",
+      "sha256": "not_available_self_referential",
+      "status": "self_referential"
+    },
+    "deployment_manifest": {
+      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:525ba3b1495e53b79111b93ffd4421c95eec1c4ec84bd1e5f098bf1b199a2a75",
+      "status": "template"
+    },
+    "address_book": {
+      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "sha256:535a73441dc6c96b01e4ac66420e7558d15367e92a0aec029b6ccf4bb1005ac1",
+      "status": "template"
+    },
+    "contract_uri_hash_source": "StreamContractMetadata.contractURIHash(); zero value is template-only.",
+    "collection_freeze_manifest_hash_source": "StreamCore.collectionFreezeManifestHash(collectionId); zero value is template-only."
+  },
+  "integration_guidance": {
+    "frontend_display": "Display provenance as artist/story/authenticity context, not as token finality or ownership proof.",
+    "indexer_source": "Index from release artifacts and checksum changes in the current artifact-only model.",
+    "marketplace_boundary": "This template does not prove marketplace discovery, display, refresh, or royalty behavior.",
+    "ownership_boundary": "On-chain ownership and transfer state remain authoritative for ownership."
+  },
+  "review": {
+    "owner": "TBD",
+    "reviewer": "TBD",
+    "approval_status": "template",
+    "approval_reference": "TBD",
+    "reviewed_at": "not_available_local"
+  },
+  "retained_artifacts": [
+    {
+      "category": "provenance_schema",
+      "path": "release-artifacts/schema/one-of-one-provenance-manifest.schema.json",
+      "sha256": "sha256:db7141bebf3ccd275d4e2ba7bbbd716114729a7dc65c9727a962f31b40573dac"
+    },
+    {
+      "category": "provenance_retained_artifact_template",
+      "path": "release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md",
+      "sha256": "sha256:f3bbab5179ae594b2f6ccf37ce08d54ddfb09bee436b8b1a93ea17b0d9466b25"
+    },
+    {
+      "category": "provenance_runbook",
+      "path": "docs/provenance-manifests.md",
+      "sha256": "sha256:af43a565f5269274845f9499e1fd5f8ff8955dd764f780648a4199f8382dd293"
+    }
+  ],
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "raw_signature",
+      "unreleased_drop_payload",
+      "session_cookie",
+      "bearer_token"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence.",
+  "operator_notes": "No-secret local template for the 1/1 provenance model."
+}

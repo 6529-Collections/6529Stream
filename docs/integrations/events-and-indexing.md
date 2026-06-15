@@ -62,6 +62,7 @@ copies.
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Auction states, bids, no-bid settlement, credits, pause domains, and event/read gaps |
 | Wallet/signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Domain, signer epoch, consumed/cancelled drops, EOA, ERC-1271, Safe, and failure states |
 | Metadata policy | [`docs/metadata.md`](../metadata.md) | Token JSON state, contract-level metadata, ERC-4906 behavior, burn, freeze, cache, and browser sandbox semantics |
+| 1/1 provenance policy | [`docs/provenance-manifests.md`](../provenance-manifests.md) | Artifact-only provenance entity, release binding, and frontend/indexer display boundaries |
 | Release policy | [`docs/release-policy.md`](../release-policy.md) | Event signature/indexed-field changes are breaking unless approved |
 | Drop signing guide | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | Typed-data schema and fixture expectations |
 | Auction custody guide | [`docs/auction-custody.md`](../auction-custody.md) | Custody and no-bid claimant behavior |
@@ -71,6 +72,7 @@ copies.
 | Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated blocker and risk source |
 | Release manifest | [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json) | Generated source-of-truth manifest |
 | Release checksums | [`release-artifacts/latest/release-checksums.json`](../../release-artifacts/latest/release-checksums.json), [`release-artifacts/latest/SHA256SUMS`](../../release-artifacts/latest/SHA256SUMS) | Signable checksum bundle |
+| 1/1 provenance manifest | [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../../release-artifacts/latest/one-of-one-provenance-manifest.json), [`release-artifacts/schema/one-of-one-provenance-manifest.schema.json`](../../release-artifacts/schema/one-of-one-provenance-manifest.schema.json), [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../../release-artifacts/provenance/one-of-one-provenance-template.provenance.json) | Generated provenance catalog and schemaed descriptor for artifact-only 1/1 provenance |
 | ABI review surface | [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json) | External function/event/error baseline |
 | ABI checksums | [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI and bytecode checksum source |
 | Event topic catalog | [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json) | Canonical committed topic/signature list |
@@ -167,6 +169,7 @@ Minimum local entities:
 | `RandomnessRequest` | `chainId:randomizerAddress:requestId` | randomizer lifecycle events and reads |
 | `MetadataState` | `chainId:coreAddress:tokenId` or `collectionId` | `MetadataUpdate`, `BatchMetadataUpdate`, freeze/dependency events, metadata reads |
 | `ContractMetadataState` | `chainId:contractMetadataAddress` | `ContractURIUpdated`, adapter reads, release manifest/address book |
+| `ProvenanceManifest` | `chainId:coreAddress:collectionId:tokenId:provenanceId` | `release-artifacts/latest/one-of-one-provenance-manifest.json` and checksum-covered provenance descriptors |
 | `AdminRole` | `chainId:adminsAddress:roleKey:account:target:selector` | role update events and admin reads |
 | `PauseDomain` | `chainId:adminsAddress:domain` | `PauseUpdated` and pause reads |
 | `DependencyVersion` | `chainId:registryAddress:dependencyNameAndVersion:version` | dependency registry events and registry reads |
@@ -213,7 +216,7 @@ Required read-after-event calls by surface:
 | Randomizer | randomizer lifecycle events | pending/fulfilled/stale/failure request views where available, token metadata state, burned-token randomness state |
 | Curator | `MerkleRootUpdated`, `Reward`, `CuratorCreditCreated`, `CuratorCreditWithdrawn` | current root epoch/root, curator credit views, total curator owed/reserved views |
 | Admin | role/pause/emergency/ownership events | admin role reads, `isPaused(domain)`, emergency recipient, owner |
-| Release artifact | new release checkout | release manifest, release checksums, ABI checksums, event topic catalog, interface IDs, address books |
+| Release artifact | new release checkout | release manifest, release checksums, ABI checksums, event topic catalog, interface IDs, address books, one-of-one provenance manifest |
 
 Reads should happen at the same block as the triggering log when the RPC
 supports historical reads. If historical reads are unavailable, store the log
@@ -362,6 +365,13 @@ Re-read `contractURI()`, `contractURIHash()`, `streamCore()`, and
 normalization. That event is not ERC-4906 and does not imply token-level JSON
 changed.
 
+For 1/1 provenance, build a `ProvenanceManifest` entity from the generated
+release artifact catalog, not protocol logs. The current model is artifact-only:
+it is separate from `tokenURI`, separate from `contractURI()`, and not included
+in `collectionFreezeManifestHash(collectionId)`. Treat provenance catalog
+changes as release artifact/checksum changes. Do not infer marketplace display,
+ownership, royalties, or token finality from provenance records.
+
 ## Governance And Pause Reconstruction
 
 Admin and pause state is event-backed but should still be read after event:
@@ -449,6 +459,9 @@ Run these when editing this guide:
 ```sh
 python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
 python scripts/test_release_readiness.py
@@ -476,6 +489,7 @@ Update this guide when any of these change:
 - auction state, custody, bid, settlement, or credit behavior;
 - fixed-price payment behavior;
 - metadata, ERC-4906, burn, freeze, or dependency behavior;
+- 1/1 provenance artifact, descriptor, or indexer entity behavior;
 - randomizer request lifecycle behavior;
 - admin, pause, signer, or ownership behavior;
 - confirmation depth or reorg policy; or

@@ -87,6 +87,12 @@
       "size_bytes": 54223,
       "schema_version": "6529stream.source-verification-inputs.v1"
     },
+    "one_of_one_provenance_manifest": {
+      "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
+      "sha256": "sha256:d43cc126a213ebcf4d0bdf289176bdc16b9567204fa49a3a5cc45e4eff6bcc31",
+      "size_bytes": 2177,
+      "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1"
+    },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
       "sha256": "sha256:297276d12c08ab5af18bb14f010274195749acf0fcd1d3832c11a44ffcc5f073",
@@ -104,7 +110,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:b66c45777a02e6d2e3d57a94e2b9597da02ed3b6beabf4628e7261f16e9df46c",
+      "sha256": "sha256:d19cccfd7cf462a943116aa668fbca10ed26f2373562abe44eac5cb76965593b",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1810,8 +1816,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:7875cfed50d19b24b620db582354669e16d0e5cb66e98c4c178ee6085b980721",
-      "size_bytes": 34151
+      "sha256": "sha256:c513103e09d7e26144b0fb4d65033225d28dd93b8a55855f5a95e398de653d17",
+      "size_bytes": 34665
     },
     "governance_docs": [
       {
@@ -1880,14 +1886,19 @@
         "size_bytes": 4878
       },
       {
+        "path": "docs/provenance-manifests.md",
+        "sha256": "sha256:af43a565f5269274845f9499e1fd5f8ff8955dd764f780648a4199f8382dd293",
+        "size_bytes": 6296
+      },
+      {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:767964908ca528c2eab65a53d9e86ae3baf0f9b97bb3254f5b16399081691bba",
-        "size_bytes": 38435
+        "sha256": "sha256:03d85cb2d98ff7a904ee24d1b216831d6089b98ebd406f3851aaf16f2cb8fedb",
+        "size_bytes": 40949
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:9c46b94d1ee728ade780f070df68498a308fadef6cfaeda30492e20872db4db7",
-        "size_bytes": 20661
+        "sha256": "sha256:d62393a6a8afb3902e78866f86c55f4ab55ee4b77c60e7037c73689da7760e77",
+        "size_bytes": 22401
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -1906,13 +1917,13 @@
       },
       {
         "path": "docs/integrations/events-and-indexing.md",
-        "sha256": "sha256:7003690970f5dea212578632e704565746b418302398cf12eca9a6b183c7bc21",
-        "size_bytes": 29697
+        "sha256": "sha256:19aec4fcfda25a6d1dfecbd72bc93857206fe841bb3553edb5a6f7862e5da165",
+        "size_bytes": 31363
       },
       {
         "path": "docs/integrations/metadata-rendering.md",
-        "sha256": "sha256:1fad87af5969443556a8047eda682179cbb3fbd58f45d8d293f7979c2eef9509",
-        "size_bytes": 23107
+        "sha256": "sha256:78259160bdf0d28edcd35bba33f0476b34af40a93c1c860229ef67d0026ba5d1",
+        "size_bytes": 25510
       },
       {
         "path": "docs/integrations/frontend-reference-architecture.md",

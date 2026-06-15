@@ -202,6 +202,38 @@ can match selectors deterministically. New custom errors include
 `NotMinterContract()`, `TokenOutsideCollectionRange()`, and
 `ZeroTokenHash()`.
 
+## 1/1 Provenance Manifests
+
+1/1 provenance is a collector-facing release artifact, not an additional
+`StreamCore` token-rendering input in the current release track. The canonical
+policy is [docs/provenance-manifests.md](provenance-manifests.md), the checked
+schema is
+[release-artifacts/schema/one-of-one-provenance-manifest.schema.json](../release-artifacts/schema/one-of-one-provenance-manifest.schema.json),
+and the generated catalog is
+[release-artifacts/latest/one-of-one-provenance-manifest.json](../release-artifacts/latest/one-of-one-provenance-manifest.json).
+The current no-secret template is
+[release-artifacts/provenance/one-of-one-provenance-template.provenance.json](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json).
+
+The manifest model can describe artist statements, authenticity status,
+certificate hashes, curation notes, exhibition or publication history, retained
+artifact hashes, and append-only story/provenance entries. These fields help
+frontends, indexers, collectors, and auditors display and verify 1/1 context
+without treating that context as ownership proof, marketplace readiness proof,
+royalty enforcement, or a replacement for chain state.
+
+This boundary is intentional while `StreamCore` remains close to the EIP-170
+bytecode limit. The provenance manifest is not `tokenURI()` JSON, not
+`contractURI()` JSON, not `collectionFreezeManifestHash(collectionId)`, and not
+new `StreamCore` storage. A future on-chain provenance event/view or satellite
+contract must be accepted in a separate size-budget and integration decision.
+Until then, provenance is validated through the release artifact toolchain:
+
+```text
+python scripts/test_one_of_one_provenance_manifest.py
+python scripts/check_one_of_one_provenance_manifest.py
+python scripts/generate_one_of_one_provenance_manifest.py --check
+```
+
 ## Size Limits
 
 `StreamCore` and `DependencyRegistry` now reject oversized metadata inputs
