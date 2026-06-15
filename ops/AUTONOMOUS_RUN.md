@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/audit-package-refresh` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/385` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/386` |
-| Active PR | TBD until pushed/opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/387` |
 | Next issue | TBD after AUD-001; `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 06:51 UTC` |
+| Last updated | `2026-06-15 06:53 UTC` |
 
 ## Packaging Notes
 
@@ -252,13 +252,14 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Refresh audit package around current protocol state (Queue Item 185)
 
-Status: Local draft on issue #386; full Windows wrapper gate passed after the
-focused audit/readiness and release-artifact checks.
+Status: PR #387 open; CodeRabbit review requested in comment `4705306474`;
+awaiting CI and bot feedback.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/386`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/387`.
 Branch: `codex/audit-package-refresh`.
 Branch started from PR #385 squash merge commit
 `8217dfcc0aaf201d7ffa42fba0340c59d883699c`.
+Initial PR head: `4a48ea983fe0ac4b655b90ef90fbfdba439a7a8b`.
 
 Goal:
 
@@ -13988,6 +13989,7 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 06:53 | Open PR #387 | Audit package refresh PR opened on head `4a48ea983fe0ac4b655b90ef90fbfdba439a7a8b`, links issue #386, records full Windows wrapper validation, and CodeRabbit review was requested in comment `4705306474`. |
 | 2026-06-15 06:41 | Start Queue Item 185 | PR #385 squash-merged as `8217dfcc0aaf201d7ffa42fba0340c59d883699c`; issue #386 and branch `codex/audit-package-refresh` now track AUD-001 so the audit package reflects the current protocol, release proof, signed-tag gate, and external evidence gaps before the next audit-readiness slice. |
 | 2026-06-15 06:33 | Merge PR #385 | CI passed on final head `6511e57a27b52cb7ab8b15aa7696ee923cf004fd`, CodeRabbit status was success, no unresolved review threads were visible, 6529bot's nice-to-have drift test was implemented, and issue #384 closed completed. |
 | 2026-06-15 06:27 | Address PR #385 nice-to-have | 6529bot marked PR #385 good to merge but suggested spot-checking checksum coverage and `--check` drift. Checksum membership was already covered in `scripts/test_release_checksums.py`; added `test_check_mode_rejects_drift` to the bytecode proof tests and pushed head `338cb34bd1269f05af7d65c5d650fdad3ae09191`. |
