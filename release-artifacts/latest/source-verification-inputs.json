@@ -411,8 +411,8 @@
     },
     "smart-contracts/StreamCore.sol": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:da4df8a206a96599c644674fa5929784414ce7a3acaad90be1f62967c8557026",
-      "solc_keccak256": "0x7d90918db853f50e23855ac2f3978b94e03978ddd8f141269749f7b27b8978ad",
+      "sha256": "sha256:d6fbdb94b33b0be71992e4c77cbe0d77219c166c358a0b9e6af0c6c17c2660d6",
+      "solc_keccak256": "0x930bcff1066f596d55b3d5b87c742c24f7479fdaf2692eb69659554a7de510ec",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -1018,10 +1018,10 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "source_sha256": "sha256:da4df8a206a96599c644674fa5929784414ce7a3acaad90be1f62967c8557026",
-      "source_solc_keccak256": "0x7d90918db853f50e23855ac2f3978b94e03978ddd8f141269749f7b27b8978ad",
+      "source_sha256": "sha256:d6fbdb94b33b0be71992e4c77cbe0d77219c166c358a0b9e6af0c6c17c2660d6",
+      "source_solc_keccak256": "0x930bcff1066f596d55b3d5b87c742c24f7479fdaf2692eb69659554a7de510ec",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:443b9ea9a969583ae7d5d62e3b62230f8b921cdb772adab309c2e4eee144e2b1",
+      "artifact_sha256": "sha256:9219aa62b01923c078e1f6579dac569500af799bd1a50cc8cb4d7a806a657539",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1035,19 +1035,19 @@
         "metadata_bytecode_hash": "ipfs",
         "libraries": {}
       },
-      "abi_sha256": "sha256:b2ef5a9a69026862bc297c92fef954a68aef1d14eaea9359c8b1f54258d16ac8",
+      "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:919fdca3e49f9a732a59aeb550b1292168caecc6a1c63f013574deeac429ecbd",
+          "sha256": "sha256:bf79eafa13e6a6d2147fdd32d1e052d16fc6d08b5631014c63e383d3f5c37263",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:919fdca3e49f9a732a59aeb550b1292168caecc6a1c63f013574deeac429ecbd"
+          "release_artifact_sha256": "sha256:bf79eafa13e6a6d2147fdd32d1e052d16fc6d08b5631014c63e383d3f5c37263"
         },
         "runtime": {
-          "sha256": "sha256:4b1cf3b8dd26f8958f9f76b1f1022d83147ff39f9030bebb47044e27d46e0529",
+          "sha256": "sha256:a4448c24e12573a674b1615c92051c0d0b2223c8d09bc4dc744c9930743b043f",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:4b1cf3b8dd26f8958f9f76b1f1022d83147ff39f9030bebb47044e27d46e0529"
+          "release_artifact_sha256": "sha256:a4448c24e12573a674b1615c92051c0d0b2223c8d09bc4dc744c9930743b043f"
         }
       },
       "constructor": {
