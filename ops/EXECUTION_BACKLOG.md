@@ -1469,7 +1469,7 @@ Dependencies: `REL-001`.
 
 ### REL-003: Add Exact Bytecode-To-Release Proof
 
-Status: PR #385 open for issue #384 on branch `codex/bytecode-release-proof`.
+Status: Merged in PR #385; issue #384 closed completed.
 
 Gate: F/G.
 
@@ -1526,7 +1526,7 @@ verification inputs, and release manifest; production completion depends on
 
 ### AUD-001: Refresh Audit Package Around Current Protocol State
 
-Status: Planned.
+Status: In progress on issue #386 / branch `codex/audit-package-refresh`.
 
 Gate: F.
 
@@ -1541,11 +1541,16 @@ integration assumptions.
 Files likely touched:
 
 - `docs/audit-package.md`
-- `docs/architecture.md`
-- `docs/threat-model.md`
-- `docs/known-blockers.md`
-- `ops/SLITHER_BASELINE.md`
+- `scripts/check_audit_package.py`
+- `scripts/test_audit_package.py`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/bytecode-release-proof.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
 - `ops/ROADMAP.md`
+- `CHANGELOG.md`
 
 Implementation steps:
 
@@ -1553,12 +1558,27 @@ Implementation steps:
 2. Update audit package sections with exact paths and commands.
 3. Separate fixed risks, accepted risks, open risks, and evidence gaps.
 4. Add audit submission checklist.
+5. Require the audit package checker to enforce the new snapshot, checklist,
+   bytecode proof, signed-tag, release-artifact, and external-evidence links.
+6. Refresh deterministic release manifest, bytecode proof, and checksum
+   artifacts because the audit package is a hashed governance document.
 
 Required tests/checks:
 
+- `python scripts/test_audit_package.py`
 - `python scripts/check_audit_package.py`
+- `python scripts/test_architecture_threat_model.py`
 - `python scripts/check_architecture_threat_model.py`
+- `python scripts/test_release_readiness.py`
 - `python scripts/check_release_readiness.py`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/check_changelog.py`
+- `python -m py_compile scripts/check_audit_package.py scripts/test_audit_package.py`
 - `git diff --check`
 
 Acceptance criteria:
@@ -1571,7 +1591,9 @@ Acceptance criteria:
 Evidence artifacts: Audit package docs only.
 
 Dependencies: Prefer after `EXT-003` through `EXT-008`, but can be partially
-refreshed earlier if audit scheduling requires it.
+refreshed earlier if audit scheduling requires it. This branch intentionally
+refreshes the local package now because the clean-main reviewer rebaseline and
+REL-003 release proof changed what auditors should inspect first.
 
 ### AUD-002: Add Risk Register And Audit Boundary Checker
 

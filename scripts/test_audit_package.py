@@ -36,10 +36,16 @@ def minimal_valid_package() -> str:
     return f"""# External Audit Package
 
 This pre-audit local baseline is not production-ready and not a security claim.
+It documents the bytecode-to-release proof, signed release tag gate, and
+external evidence gaps.
 
 ## Maturity And Scope
 
 The package covers the current local baseline only.
+
+## Current Protocol Snapshot
+
+Implemented surfaces, local evidence, and external evidence gaps are separated.
 
 ## Reviewer Entry Points
 
@@ -74,6 +80,10 @@ Use the linked security policy.
 ```sh
 {commands}
 ```
+
+## Audit Submission Checklist
+
+Use the checklist before sending the package to reviewers.
 
 ## Package Maintenance
 

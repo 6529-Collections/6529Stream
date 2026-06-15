@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Refreshed the AUD-001 external audit package with a current protocol
+  snapshot, explicit local-versus-external evidence gaps, bytecode-to-release
+  proof and signed release tag references, release-artifact traceability, and
+  an audit submission checklist enforced by the audit package checker.
 - Added REL-003 bytecode-to-release proof generation with a checked
   `release-artifacts/latest/bytecode-release-proof.json` tying committed
   deployment manifests, address books, runtime bytecode hashes, source

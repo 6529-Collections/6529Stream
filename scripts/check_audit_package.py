@@ -14,6 +14,7 @@ DEFAULT_PACKAGE = Path("docs/audit-package.md")
 REQUIRED_HEADINGS = [
     (1, "External Audit Package"),
     (2, "Maturity And Scope"),
+    (2, "Current Protocol Snapshot"),
     (2, "Reviewer Entry Points"),
     (2, "Protocol Decisions"),
     (2, "Invariants And Test Evidence"),
@@ -22,6 +23,7 @@ REQUIRED_HEADINGS = [
     (2, "Known Blockers And Accepted Risks"),
     (2, "Security Reporting"),
     (2, "Local Verification Commands"),
+    (2, "Audit Submission Checklist"),
     (2, "Package Maintenance"),
 ]
 
@@ -30,6 +32,9 @@ REQUIRED_PHRASES = [
     "not production-ready",
     "local baseline",
     "not a security claim",
+    "bytecode-to-release proof",
+    "signed release tag",
+    "external evidence gaps",
 ]
 
 REQUIRED_COMMANDS = [
@@ -60,8 +65,14 @@ REQUIRED_COMMANDS = [
     "python scripts/check_release_readiness.py",
     "python scripts/test_public_beta_evidence.py",
     "python scripts/check_public_beta_evidence.py",
+    "python scripts/test_release_manifest.py",
     "python scripts/generate_release_manifest.py --check",
+    "python scripts/test_bytecode_release_proof.py",
+    "python scripts/generate_bytecode_release_proof.py --check",
+    "python scripts/test_release_checksums.py",
     "python scripts/generate_release_checksums.py --check",
+    "python scripts/test_signed_release_tag.py",
+    "python scripts/check_signed_release_tag.py",
     "make check",
 ]
 
@@ -101,9 +112,13 @@ REQUIRED_LINK_TARGETS = [
     "docs/adr/0007-upgrade-redeployment.md",
     "release-artifacts/README.md",
     "release-artifacts/latest/release-manifest.json",
+    "release-artifacts/latest/bytecode-release-proof.json",
     "release-artifacts/latest/SHA256SUMS",
     "release-artifacts/latest/release-checksums.json",
+    "release-artifacts/latest/source-verification-inputs.json",
     "release-artifacts/latest/public-beta-evidence.json",
+    "release-artifacts/latest/public-beta-blockers.md",
+    "release-artifacts/latest/production-release-blockers.md",
     "release-artifacts/schema/public-beta-evidence.schema.json",
     "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
     "release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json",
@@ -117,8 +132,13 @@ REQUIRED_LINK_TARGETS = [
     "test/StreamPaymentsInvariant.t.sol",
     "test/StreamSupplyReplayFreezeInvariant.t.sol",
     "test/StreamAuctionInvariant.t.sol",
+    "test/StreamProtocolStateMachine.t.sol",
+    "test/StreamSignerCompromiseFuzz.t.sol",
+    "test/StreamPauseControls.t.sol",
     "test/StreamRandomizerPayments.t.sol",
     "test/StreamDeploymentManifest.t.sol",
+    "scripts/generate_bytecode_release_proof.py",
+    "scripts/check_signed_release_tag.py",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
