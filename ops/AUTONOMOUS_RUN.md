@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 10:47 UTC` |
+| Last updated | `2026-06-15 10:49 UTC` |
 
 ## Packaging Notes
 
@@ -256,8 +256,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add auction frontend and indexer flow spec (Queue Item 189)
 
-Status: PR #395 draft open; CodeRabbit review requested in comment
-`4707102005`; CI and bot feedback pending.
+Status: PR #395 ready for review; CodeRabbit review requested in comments
+`4707102005` and `4707115598`; CI and bot feedback pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/394`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/395`.
 Branch: `codex/auction-flow-spec`.
