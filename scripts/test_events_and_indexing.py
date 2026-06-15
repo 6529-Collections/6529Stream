@@ -49,7 +49,9 @@ Marketplace and indexer limits are named.
 
 ## Maturity And Scope
 
-INT-005 and CON-002 are named.
+INT-005, CON-002, ONE-005, retained marketplace/indexer evidence,
+fork_testnet_marketplace_indexer_evidence, and
+live_marketplace_indexer_evidence are named.
 
 ## Source Of Truth
 

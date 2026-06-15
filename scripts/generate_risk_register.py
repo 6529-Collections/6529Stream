@@ -184,16 +184,26 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ),
         "evidence_paths": [
             "docs/metadata.md",
+            "docs/integrations/marketplace-indexer-evidence.md",
             "docs/release-readiness.md",
             "release-artifacts/latest/public-beta-blockers.md",
+            "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
+            "release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md",
         ],
         "checks": [
             "python scripts/test_metadata_fixtures.py",
             "python scripts/check_metadata_fixtures.py",
             "python scripts/test_metadata_browser_sandbox.py",
             "python scripts/check_metadata_browser_sandbox.py",
+            "python scripts/test_marketplace_indexer_evidence.py",
+            "python scripts/check_marketplace_indexer_evidence.py",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/135"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/135",
+            "https://github.com/6529-Collections/6529Stream/issues/422",
+            "https://github.com/6529-Collections/6529Stream/issues/423",
+            "https://github.com/6529-Collections/6529Stream/issues/424",
+        ],
     },
     {
         "id": "RISK-ONE-001",

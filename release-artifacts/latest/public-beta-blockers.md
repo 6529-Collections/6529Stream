@@ -29,8 +29,8 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | `blocked` | 7 | 0 | 0 | 0 | 0 | 1 | 7 |
-| Production Release | `blocked` | 9 | 0 | 0 | 0 | 0 | 0 | 9 |
+| Public Beta | `blocked` | 8 | 0 | 0 | 0 | 0 | 1 | 8 |
+| Production Release | `blocked` | 10 | 0 | 0 | 0 | 0 | 0 | 10 |
 
 ## Incomplete Public Beta Rows
 
@@ -39,6 +39,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | `external_audit_report` | `missing` | TBD | external/future | 0 | none | A completed external audit report and issue-linked remediation status are not yet retained. |
 | `testnet_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | `fork_testnet_metadata_browser_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained. |
+| `fork_testnet_marketplace_indexer_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained. |
 | `fork_testnet_ceremony_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet deployment ceremony evidence is not yet retained. |
 | `fork_testnet_randomizer_operations_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet randomizer provider, funding, callback, reserve, and migration evidence is not yet retained. |
 | `verified_deployed_addresses` | `missing` | TBD | external/future | 0 | none | Verified deployed addresses for non-local environments are not yet retained. |
@@ -55,6 +56,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | `live_deployment_manifest` | `missing` | TBD | external/future | 0 | none | Live deployment manifests generated from production inputs are not yet retained. |
 | `live_ceremony_evidence` | `missing` | TBD | external/future | 0 | none | Live admin, signer, metadata, auction, and emergency ceremony evidence is not yet retained. |
 | `live_randomizer_operations_evidence` | `missing` | TBD | external/future | 0 | none | Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained. |
+| `live_marketplace_indexer_evidence` | `missing` | TBD | external/future | 0 | none | Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained. |
 | `live_explorer_verification` | `missing` | TBD | external/future | 0 | none | Live explorer verification outputs and verified contract-address links are not yet retained. |
 | `post_audit_remediation` | `missing` | TBD | external/future | 0 | none | Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained. |
 
@@ -71,6 +73,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Public Beta | `external_audit_report` | `missing` | A completed external audit report and issue-linked remediation status are not yet retained. |
 | Public Beta | `testnet_deployment_rehearsal` | `missing` | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | Public Beta | `fork_testnet_metadata_browser_evidence` | `missing` | Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained. |
+| Public Beta | `fork_testnet_marketplace_indexer_evidence` | `missing` | Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained. |
 | Public Beta | `fork_testnet_ceremony_evidence` | `missing` | Fork or testnet deployment ceremony evidence is not yet retained. |
 | Public Beta | `fork_testnet_randomizer_operations_evidence` | `missing` | Fork or testnet randomizer provider, funding, callback, reserve, and migration evidence is not yet retained. |
 | Public Beta | `verified_deployed_addresses` | `missing` | Verified deployed addresses for non-local environments are not yet retained. |
@@ -82,6 +85,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Production Release | `live_deployment_manifest` | `missing` | Live deployment manifests generated from production inputs are not yet retained. |
 | Production Release | `live_ceremony_evidence` | `missing` | Live admin, signer, metadata, auction, and emergency ceremony evidence is not yet retained. |
 | Production Release | `live_randomizer_operations_evidence` | `missing` | Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained. |
+| Production Release | `live_marketplace_indexer_evidence` | `missing` | Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained. |
 | Production Release | `live_explorer_verification` | `missing` | Live explorer verification outputs and verified contract-address links are not yet retained. |
 | Production Release | `post_audit_remediation` | `missing` | Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained. |
 
@@ -105,6 +109,8 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Ceremony evidence | `python scripts/check_ceremony_evidence.py` |
 | Randomizer operations | `python scripts/test_randomizer_operations.py` |
 | Randomizer operations | `python scripts/check_randomizer_operations.py` |
+| Marketplace/indexer evidence | `python scripts/test_marketplace_indexer_evidence.py` |
+| Marketplace/indexer evidence | `python scripts/check_marketplace_indexer_evidence.py` |
 | Release manifest | `python scripts/test_release_manifest.py` |
 | Release manifest | `python scripts/generate_release_manifest.py --check` |
 | Release checksums | `python scripts/test_release_checksums.py` |

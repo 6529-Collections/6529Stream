@@ -31,3 +31,9 @@ For testnet deployment rehearsal evidence, fill
 `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
 and run `python scripts/check_testnet_deployment_rehearsal_evidence.py` before
 generating the non-local evidence envelope.
+
+For marketplace/indexer evidence, fill
+`release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`
+and run `python scripts/check_marketplace_indexer_evidence.py` before
+generating the non-local evidence envelope for
+`fork_testnet_marketplace_indexer_evidence`.
