@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-003 auction frontend and indexer flow spec with
+  `docs/integrations/auction-flows.md`, a checker/test pair, local/CI gate
+  wiring, release-readiness navigation, and release-manifest coverage so
+  frontend and indexer teams can trace auction submission, bidding, settlement,
+  no-bid claims, cancellation, credits, withdrawals, pause domains, events, and
+  known event/read gaps without production-readiness overclaims.
 - Added INT-002 fixed-price mint and drop authorization flow spec with
   `docs/integrations/contract-flows.md`, a checker/test pair, local/CI gate
   wiring, release-readiness navigation, and release-manifest coverage so

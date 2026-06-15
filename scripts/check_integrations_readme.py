@@ -52,6 +52,7 @@ REQUIRED_PHRASES = [
     "public-beta evidence status",
     "INT-002",
     "INT-003",
+    "auction frontend and indexer flow spec",
     "INT-004",
     "INT-005",
     "INT-006",
@@ -63,6 +64,8 @@ REQUIRED_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_integrations_readme.py",
     "python scripts/check_integrations_readme.py",
+    "python scripts/test_auction_flows.py",
+    "python scripts/check_auction_flows.py",
     "python scripts/check_release_readiness.py",
     "python scripts/check_changelog.py",
 ]
@@ -81,6 +84,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/threat-model.md",
     "docs/known-blockers.md",
     "docs/integrations/contract-flows.md",
+    "docs/integrations/auction-flows.md",
     "release-artifacts/README.md",
     "release-artifacts/contracts.json",
     "release-artifacts/baselines/v0.1.0/abi-surface.json",

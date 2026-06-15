@@ -32,6 +32,9 @@ artifacts without treating local evidence as public beta or production proof.
 Use [`docs/integrations/contract-flows.md`](integrations/contract-flows.md) as
 the fixed-price mint and drop authorization flow spec for current INT-002
 frontend/backend-signing integration work.
+Use [`docs/integrations/auction-flows.md`](integrations/auction-flows.md) as
+the auction frontend and indexer flow spec for current INT-003 integration
+work.
 Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
@@ -306,6 +309,9 @@ Audit and protocol evidence:
 - [docs/tooling.md](tooling.md)
 - [docs/adr/README.md](adr/README.md)
 - [ops/SLITHER_BASELINE.md](../ops/SLITHER_BASELINE.md)
+- [docs/integrations/README.md](integrations/README.md)
+- [docs/integrations/contract-flows.md](integrations/contract-flows.md)
+- [docs/integrations/auction-flows.md](integrations/auction-flows.md)
 
 Release artifacts:
 
@@ -363,6 +369,8 @@ python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_contract_flows.py
 python scripts/check_contract_flows.py
+python scripts/test_auction_flows.py
+python scripts/check_auction_flows.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check

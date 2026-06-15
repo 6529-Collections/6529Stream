@@ -104,7 +104,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:91053d74ab29c52b226ee241c6a3da65c38c5cb653598dd21446f1b21120182e",
+      "sha256": "sha256:2abb47dfc68ffc631841eac767b9cbe85e71f67c880ad2aaaa1b9393e2c085d7",
       "size_bytes": 20415,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1804,8 +1804,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0b70d745cdf8becea6d97ba7783f684f839cbd9006e6f7a775f472b471ffdf2d",
-      "size_bytes": 29054
+      "sha256": "sha256:cea60315eb09e646d1296cc84bb538500bdedf545f1a375c1ed29cf81eaac3c4",
+      "size_bytes": 29487
     },
     "governance_docs": [
       {
@@ -1875,18 +1875,23 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:c51a6d4b2f7c1740f92612bc8d41cd4c3e898ed4efa4d43bc22411b446f66a43",
-        "size_bytes": 34090
+        "sha256": "sha256:f138b534dfe44f287f5ac497889f88c2087ec44528a7b3bc90d4798df5eb58d4",
+        "size_bytes": 34521
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:2876ad29fc14b6b43b999ad45fceca56a872b0f7029250977447419128d6936a",
-        "size_bytes": 14052
+        "sha256": "sha256:a084321f6bbfea343ea1ce74067c11ba4a9cf0b5451f051a3d9539356ae54d2a",
+        "size_bytes": 14578
       },
       {
         "path": "docs/integrations/contract-flows.md",
-        "sha256": "sha256:3cd85939ea7b78fed98b8fbf5713cc3193e71810e468042f56b2da33cc909f80",
-        "size_bytes": 16931
+        "sha256": "sha256:73c02b345705fc4bfe2cd676f2b8fb3c068c9ef4cc5b41e57b849fb2cf582ea5",
+        "size_bytes": 16983
+      },
+      {
+        "path": "docs/integrations/auction-flows.md",
+        "sha256": "sha256:2be964a883552258527437453767d8c8171a4ce3a9af5ee3376d8927b97d61e6",
+        "size_bytes": 30616
       },
       {
         "path": "docs/tooling.md",
