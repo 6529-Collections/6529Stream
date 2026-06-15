@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 20:29 UTC` |
+| Last updated | `2026-06-15 20:32 UTC` |
 
 ## Packaging Notes
 
@@ -15328,6 +15328,7 @@ Outcome:
 | 2026-06-15 20:06 | Start ONE-003 royalty policy boundary | PR #415 merged as `a10b9abbf01e654c51959c2f83ae75fef4727819`, issue #416 was opened for the royalty philosophy/enforcement boundary, and branch `codex/royalty-policy-boundary` is implementing a docs-first royalty policy with checker/test wiring, integration/release-readiness links, release-manifest coverage, and risk-register source tracking. Solidity changes are intentionally out of scope unless a future size-budget and governance decision accepts them. |
 | 2026-06-15 20:26 | Validate ONE-003 local draft | Added `docs/royalty-policy.md`, `scripts/check_royalty_policy.py`, `scripts/test_royalty_policy.py`, integration/release-readiness/release-policy cross-links, Makefile/bash/PowerShell/CI wiring, release-manifest/risk-register source tracking, and regenerated provenance/release/checksum artifacts. Focused royalty, integrations, release-readiness, provenance, risk-register, release-manifest, bytecode-proof, checksum, changelog, Python compile, heading scan, and `git diff --check` passed. Full `make check` and Windows `scripts\check.ps1` passed with existing Foundry warning noise only. |
 | 2026-06-15 20:29 | Open PR #417 for ONE-003 | PR #417 is open on branch `codex/royalty-policy-boundary`, closes issue #416, and CodeRabbit review was requested in comment `4712168464`. Next action is to wait for CI and bot feedback, then resolve any actionable comments before merge. |
+| 2026-06-15 20:32 | Address PR #417 source-constant review note | 6529bot reviewed the first PR head as good to merge with no security findings and suggested tying documented royalty constants to source/tests. Added checker assertions that `StreamCore.sol` and `StreamRoyalty.t.sol` still contain the documented receiver, `690` bps, `10_000` denominator, ERC-2981 interface ID, and retained royalty regression names, plus drift tests. Focused royalty, risk-register, release-manifest, bytecode-proof, checksum, changelog, `git diff --check`, and `make royalty-policy-check` passed. |
 
 ## Resume Instructions
 

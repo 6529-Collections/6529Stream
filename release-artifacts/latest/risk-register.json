@@ -26,7 +26,7 @@
     },
     {
       "path": "docs/royalty-policy.md",
-      "sha256": "sha256:8ab377ff6cf6705cf56f1436579ab5e4300d993e8b2cd29835e4002ed807e7ff"
+      "sha256": "sha256:67b03faf1eb835e30019d99e398e295894aec9dd099e9920595a7ca29118b447"
     },
     {
       "path": "docs/known-blockers.md",
@@ -280,7 +280,7 @@
         },
         {
           "path": "docs/royalty-policy.md",
-          "sha256": "sha256:8ab377ff6cf6705cf56f1436579ab5e4300d993e8b2cd29835e4002ed807e7ff"
+          "sha256": "sha256:67b03faf1eb835e30019d99e398e295894aec9dd099e9920595a7ca29118b447"
         }
       ],
       "risk_acceptance": null

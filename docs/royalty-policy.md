@@ -206,6 +206,10 @@ Royalty coverage should stay split across layers:
 - Documentation checks cover the non-enforcement boundary, governance policy,
   marketplace display wording, readiness caveats, validation commands, and
   source links.
+- The royalty policy checker cross-checks the documented receiver, `690` bps,
+  `10_000` denominator, ERC-2981 interface support, and retained royalty
+  regression names against `smart-contracts/StreamCore.sol` and
+  `test/StreamRoyalty.t.sol`.
 - Integration tests that use marketplaces, wallet flows, or indexers belong in
   retained non-local evidence before public beta or production claims.
 - If future work adds setter, override, satellite, validator, or enforcement

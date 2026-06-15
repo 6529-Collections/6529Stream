@@ -27,7 +27,39 @@ def write_text(path: Path, value: str) -> None:
 def seed_required_targets(root: Path) -> None:
     """Create placeholder files for every required policy link target."""
     for relative in checker.REQUIRED_LINK_TARGETS:
-        write_text(root / relative, f"seed for {relative}\n")
+        if relative == "smart-contracts/StreamCore.sol":
+            write_text(
+                root / relative,
+                """
+import "./IERC2981.sol";
+contract StreamCore is IERC2981 {
+    address private constant _DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
+    uint256 private constant _DEFAULT_ROYALTY_BPS = 690;
+    uint256 private constant _ROYALTY_DENOMINATOR = 10_000;
+    function supportsInterface(bytes4 interfaceId) public view returns (bool) {
+        return interfaceId == type(IERC2981).interfaceId;
+    }
+    function royaltyInfo(uint256, uint256 salePrice) public view returns (address, uint256) {
+        return (_DEFAULT_ROYALTY_RECEIVER, salePrice * _DEFAULT_ROYALTY_BPS / _ROYALTY_DENOMINATOR);
+    }
+}
+""",
+            )
+        elif relative == "test/StreamRoyalty.t.sol":
+            write_text(
+                root / relative,
+                """
+contract StreamRoyaltyTest {
+    bytes4 private constant ERC2981_INTERFACE_ID = 0x2a55205a;
+    address private constant ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
+    uint256 private constant ROYALTY_BPS = 690;
+    uint256 private constant ROYALTY_DENOMINATOR = 10_000;
+    function testDefaultRoyaltyIsFixedAt690BasisPoints() public {}
+}
+""",
+            )
+        else:
+            write_text(root / relative, f"seed for {relative}\n")
 
 
 def target_links() -> str:
@@ -303,6 +335,51 @@ class RoyaltyPolicyTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.RoyaltyPolicyError, "missing required commands"
+            ):
+                checker.validate_royalty_policy(
+                    root, root / checker.DEFAULT_ROYALTY_POLICY
+                )
+
+    def test_rejects_source_constant_drift(self) -> None:
+        """Documented royalty constants must stay tied to source constants."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            source = root / "smart-contracts" / "StreamCore.sol"
+            source.write_text(
+                source.read_text(encoding="utf-8").replace(
+                    "_DEFAULT_ROYALTY_BPS = 690", "_DEFAULT_ROYALTY_BPS = 700"
+                ),
+                encoding="utf-8",
+                newline="\n",
+            )
+            write_text(root / checker.DEFAULT_ROYALTY_POLICY, minimal_royalty_policy())
+
+            with self.assertRaisesRegex(
+                checker.RoyaltyPolicyError, "source constants drifted"
+            ):
+                checker.validate_royalty_policy(
+                    root, root / checker.DEFAULT_ROYALTY_POLICY
+                )
+
+    def test_rejects_test_constant_drift(self) -> None:
+        """The Solidity regression constants must stay tied to the policy."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            test_file = root / "test" / "StreamRoyalty.t.sol"
+            test_file.write_text(
+                test_file.read_text(encoding="utf-8").replace(
+                    "ERC2981_INTERFACE_ID = 0x2a55205a",
+                    "ERC2981_INTERFACE_ID = 0x00000000",
+                ),
+                encoding="utf-8",
+                newline="\n",
+            )
+            write_text(root / checker.DEFAULT_ROYALTY_POLICY, minimal_royalty_policy())
+
+            with self.assertRaisesRegex(
+                checker.RoyaltyPolicyError, "source constants drifted"
             ):
                 checker.validate_royalty_policy(
                     root, root / checker.DEFAULT_ROYALTY_POLICY
