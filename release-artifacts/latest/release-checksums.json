@@ -28,7 +28,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9f60b708fd50161e8235f621f5729e2c57179edcbca5a7ae2017eaef24fda334"
+    "sha256": "sha256:de95a8e314c335f640e2e9862571273d8dea9bf9242d366b9e3d47210cb768e3"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -37,17 +37,17 @@
   "files": [
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:4b4eb839b6d251d666d84d776dec10652c247a3758c43490a053985a611d97d2",
+      "sha256": "sha256:6c01c758ccaa5d301faeacc97a21a643822a68c364f1e29f539079331f3ac8f5",
       "size_bytes": 5082
     },
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:03a9355f44701677605caf1e7003af188b30b11c508a5b2da7eb6b7f8dfa6c31",
+      "sha256": "sha256:fea836fe3c305f42b81fcd065d6ae7cd48b00e85ecc20b63c0678e97a9165e9a",
       "size_bytes": 5062
     },
     {
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:42f04e6800a61d812b34e0f631e0f435b9d5d4ce8bb41df6e5643f58af725ca5",
+      "sha256": "sha256:e33bf8280c3da662eb15398f5600fc73294792f0c8989e4bcc2fff7e01527d83",
       "size_bytes": 5099
     },
     {
@@ -72,7 +72,7 @@
     },
     {
       "path": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
-      "sha256": "sha256:b70100b47243de437131106bcb8d6c9ad309397b4cfbabf8223ea9b5cd4730ce",
+      "sha256": "sha256:ec17c79aab94b069fb01997351da9f39db5afbb31d31f269c7a63b8597759ff3",
       "size_bytes": 5668
     },
     {
@@ -102,22 +102,22 @@
     },
     {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:d8de932bf2c741761b5689ec34b0243584a1827c0af99a4143b52866a841f048",
+      "sha256": "sha256:4db5cd7a24139ef0a82312a6a02067c69927e83d31da89d794160a04e6f410d2",
       "size_bytes": 8299
     },
     {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:878a51553ad12536a4c913740d593147fedd5d56797e367524ed9c06b1267ad5",
+      "sha256": "sha256:91456759f694e3a272a43d6adc26b2c896f7ca96f2d73150d9717b6e0a94aec1",
       "size_bytes": 8262
     },
     {
       "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:cfd4ba5b348df8375aafbc70a618085242bab609d52e7383461689a1d5723d05",
+      "sha256": "sha256:887c12ce7c9b000c72b432c2f677bf29196db6ff0cb7e2caaad358a41373e1bd",
       "size_bytes": 8445
     },
     {
       "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-      "sha256": "sha256:2c5200d4af5a772b464e403f31f52665f1b4f6585ec58a1210fc7c6a36d0eef1",
+      "sha256": "sha256:2041d20c9fd8c8ebc0b52fbf48c9db0ec8c02a15c4c997a49eb6a3db080b29c5",
       "size_bytes": 9421
     },
     {
@@ -152,7 +152,7 @@
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
-      "sha256": "sha256:c76dee61fb818aa64e89cf2d90cae5bb88ea726c3c9582100d28014962410901",
+      "sha256": "sha256:b294eb7741e93994d9d89bc25373517b83a47e45a167ed20f5affcf286e3f6b2",
       "size_bytes": 379
     },
     {
@@ -412,13 +412,13 @@
     },
     {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:c0738369da281b377e7407ecc62cab1624cc15533f450c92339145aa7c7f4a17",
+      "sha256": "sha256:9d7fa8629f0cb99694f451a8ddaa6eb24a9d7620866f438c725fedee00d352fb",
       "size_bytes": 11216
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:2dd2e7b9c2d9fd6974bc4ef65c88c6ae39d209e2e7c7d8955e433d2f775fcdd3",
-      "size_bytes": 66959
+      "sha256": "sha256:b2de453a7c0a740a03bb1a780f64743e289b3585587739a8c44bc3c4cfeed005",
+      "size_bytes": 67013
     },
     {
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
@@ -427,13 +427,13 @@
     },
     {
       "path": "release-artifacts/latest/event-topic-catalog.json",
-      "sha256": "sha256:a4389ae2a7156c489f18bc1331a2bfb3da0951ed2fcfc1c5746dc95baacb0a97",
-      "size_bytes": 130299
+      "sha256": "sha256:c6407a256a29b6a3b4606a8e2f7cce2de1a286f287702bf9f2cd5471f83ea7eb",
+      "size_bytes": 128227
     },
     {
       "path": "release-artifacts/latest/interface-ids.json",
-      "sha256": "sha256:054dc2db89927f55eac62b7650f50cf1db28295673cb7e35f55c361700933060",
-      "size_bytes": 18568
+      "sha256": "sha256:c16f55ed87ac2dd509cb93d52aa40bb2c53b1ac92153fff50a6b5dee007bf7fc",
+      "size_bytes": 18451
     },
     {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -452,7 +452,7 @@
     },
     {
       "path": "release-artifacts/latest/release-artifact-manifest.json",
-      "sha256": "sha256:efcb344c1520507b5a178b73f10903054cccb5ba996f4be28d1926237b85d201",
+      "sha256": "sha256:6b19164a47f4a9d8e7c4056ec3eb68937bcd3e3f629e9a771a3b1320e565d9b8",
       "size_bytes": 737
     },
     {
@@ -502,18 +502,18 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:aaee8cd0d4d39c30ee26061430972064aadf25208bfa9528d6952069c9022657",
+      "sha256": "sha256:9a5bb603d66a06a64e994a17901403005cc04c3f822673bcc8e90a22b2c18ab7",
       "size_bytes": 96464
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:4db19f81bffc4130643ee7ce2112ec51542ece4ca0696dcb0b536a974bbb434f",
+      "sha256": "sha256:6772d5a06ed342ead33f38eef9c0c107dae4fef23729eae4140e79e4b2351dc4",
       "size_bytes": 20415
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:dfb15d0103e8d4d8a9eec4385c94448148a5ecec2e707941449ec45a9305d322",
-      "size_bytes": 48644
+      "sha256": "sha256:801c4c908b7f1edffe2497b995aee145fb8f3a73748630aec84bcc04815f39f6",
+      "size_bytes": 48684
     },
     {
       "path": "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",

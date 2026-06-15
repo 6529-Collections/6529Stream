@@ -45,13 +45,14 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     );
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         keccak256("6529StreamLiveTokenMetadataAggregate(bytes32 accumulator,uint256 liveSupply)");
-    bytes32 public constant ARTIST_APPROVAL_TYPEHASH = keccak256(
+    bytes32 private constant _ARTIST_APPROVAL_TYPEHASH = keccak256(
         "6529StreamArtistApproval(uint256 collectionId,bytes32 schemaVersionHash,address artist,bytes32 collectionStateHash,bytes32 supplyStateHash,bytes32 liveTokenMetadataHash,bytes32 integrationStateHash,address core,uint256 chainId)"
     );
     bytes32 private constant _ARTIST_APPROVAL_SUPPLY_STATE_TYPEHASH = keccak256(
         "6529StreamArtistApprovalSupplyState(uint256 maxCollectionPurchases,uint256 circulationSupply,uint256 collectionTotalSupply,uint256 reservedMinTokenId,uint256 reservedMaxTokenId,uint256 finalSupplyDelay,uint256 burnCount)"
     );
-    string public constant ARTIST_APPROVAL_SCHEMA_VERSION = "6529stream-artist-approval-v1";
+    bytes32 private constant _ARTIST_APPROVAL_SCHEMA_VERSION_HASH =
+        keccak256("6529stream-artist-approval-v1");
     string private constant _METADATA_STATE_PENDING = "pending";
     string private constant _METADATA_STATE_STALE = "stale";
     string private constant _METADATA_STATE_FAILED = "failed";
@@ -259,12 +260,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         uint256 indexed _tokenId,
         address indexed operator,
         address owner
-    );
-    event ArtistApprovalRecorded(
-        uint256 indexed _collectionID,
-        address indexed artist,
-        bytes32 indexed approvalHash,
-        string signature
     );
 
     // constructor
@@ -564,7 +559,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         artistsSignatures[_collectionID] = _signature;
         artistApprovalHashes[_collectionID] = approvalHash;
         artistSigned[_collectionID] = true;
-        emit ArtistApprovalRecorded(_collectionID, msg.sender, approvalHash, _signature);
     }
 
     // function to change the metadata view of a collection
@@ -957,11 +951,6 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
         returns (bytes32)
     {
         return _collectionFreezeManifestHash(_collectionID);
-    }
-
-    /// @notice Computes the artist approval hash for the collection's current state.
-    function previewArtistApprovalHash(uint256 _collectionID) public view returns (bytes32) {
-        return _artistApprovalHash(_collectionID);
     }
 
     function collectionDependencyVersionState(uint256 _collectionID)
@@ -1368,9 +1357,9 @@ contract StreamCore is ERC721, ERC2981, Ownable, IERC4906 {
     function _artistApprovalHash(uint256 _collectionID) private view returns (bytes32) {
         return keccak256(
             abi.encode(
-                ARTIST_APPROVAL_TYPEHASH,
+                _ARTIST_APPROVAL_TYPEHASH,
                 _collectionID,
-                keccak256(bytes(ARTIST_APPROVAL_SCHEMA_VERSION)),
+                _ARTIST_APPROVAL_SCHEMA_VERSION_HASH,
                 collectionAdditionalData[_collectionID].collectionArtistAddress,
                 _freezeCollectionStateHash(_collectionID),
                 _artistApprovalSupplyStateHash(_collectionID),

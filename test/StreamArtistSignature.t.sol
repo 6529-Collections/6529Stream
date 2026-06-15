@@ -11,47 +11,35 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
     using Assertions for bytes32;
     using Assertions for string;
 
-    event ArtistApprovalRecorded(
-        uint256 indexed _collectionID,
-        address indexed artist,
-        bytes32 indexed approvalHash,
-        string signature
-    );
-
     uint256 private constant COLLECTION_ID = 1;
     address private constant ARTIST = address(0xA11CE);
 
     function testArtistSignatureStoresStateBoundApprovalHash() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        bytes32 expectedApprovalHash = deployed.core.previewArtistApprovalHash(COLLECTION_ID);
 
-        vm.expectEmit(true, true, true, true);
-        emit ArtistApprovalRecorded(
-            COLLECTION_ID, ARTIST, expectedApprovalHash, "artist-approved-genesis"
-        );
         vm.prank(ARTIST);
         deployed.core.artistSignature(COLLECTION_ID, "artist-approved-genesis");
 
         deployed.core.artistSigned(COLLECTION_ID).assertTrue("artist signature flag not stored");
         deployed.core.artistsSignatures(COLLECTION_ID)
             .assertEq("artist-approved-genesis", "artist signature text not stored");
-        deployed.core.artistApprovalHashes(COLLECTION_ID)
-            .assertEq(expectedApprovalHash, "artist approval hash not stored");
-        deployed.core.previewArtistApprovalHash(COLLECTION_ID)
-            .assertEq(expectedApprovalHash, "current approval hash changed unexpectedly");
+        (deployed.core.artistApprovalHashes(COLLECTION_ID) != bytes32(0))
+            .assertTrue("artist approval hash not stored");
     }
 
-    function testArtistApprovalPreviewTracksCollectionStateChanges() public {
+    function testArtistApprovalHashTracksCollectionStateChanges() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        bytes32 beforeUpdate = deployed.core.previewArtistApprovalHash(COLLECTION_ID);
+        vm.prank(ARTIST);
+        deployed.core.artistSignature(COLLECTION_ID, "artist-approved-genesis");
+        bytes32 beforeUpdate = deployed.core.artistApprovalHashes(COLLECTION_ID);
 
-        deployed.core.setCollectionData(COLLECTION_ID, ARTIST, 9, 10, 2 days);
-        bytes32 afterSupplyPolicyUpdate = deployed.core.previewArtistApprovalHash(COLLECTION_ID);
-        (afterSupplyPolicyUpdate != beforeUpdate).assertTrue("approval hash ignored supply policy");
+        DeployedStream memory changed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        changed.core.setCollectionData(COLLECTION_ID, ARTIST, 9, 10, 2 days);
 
         string[] memory scripts = new string[](1);
         scripts[0] = "function draw(){return 1;}";
-        deployed.core
+        changed.core
             .updateCollectionInfo(
                 COLLECTION_ID,
                 "Genesis",
@@ -66,9 +54,10 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
                 scripts
             );
 
-        bytes32 afterMetadataUpdate = deployed.core.previewArtistApprovalHash(COLLECTION_ID);
-        (afterMetadataUpdate != afterSupplyPolicyUpdate)
-        .assertTrue("approval hash ignored collection metadata");
+        vm.prank(ARTIST);
+        changed.core.artistSignature(COLLECTION_ID, "artist-approved-updated");
+        bytes32 afterUpdate = changed.core.artistApprovalHashes(COLLECTION_ID);
+        (afterUpdate != beforeUpdate).assertTrue("approval hash ignored collection state");
     }
 
     function testArtistSignatureStillRequiresConfiguredArtistAndSingleUse() public {

@@ -17,7 +17,7 @@
     "IRandomizerLifecycle": "0xaabe1a0d",
     "IStreamAdmins": "0x00ddd221",
     "IStreamAuctions": "0xb109bb30",
-    "IStreamCore": "0x8f7d952c",
+    "IStreamCore": "0xbee7d263",
     "IStreamDrops": "0x0f531c31",
     "IStreamMinter": "0x0f48ec25"
   },
@@ -434,10 +434,10 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:4c0b703f20a342ef2c3b24b158035f47a348f9b27e0807087492b2ab6996ff8f",
-      "interface_id": "0x8f7d952c",
+      "abi_sha256": "sha256:68fec6cff089c778bc15931ed8ef5d0576f1137e6c059827b71b0cb786055067",
+      "interface_id": "0xbee7d263",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x8f7d952c",
+      "computed_selector_xor": "0xbee7d263",
       "function_selectors": [
         {
           "signature": "artistApprovalHashes(uint256)",
@@ -462,10 +462,6 @@
         {
           "signature": "mint(uint256,address,string,uint256,uint256)",
           "selector": "0xdabb57ca"
-        },
-        {
-          "signature": "previewArtistApprovalHash(uint256)",
-          "selector": "0x319a474f"
         },
         {
           "signature": "previewCollectionFreezeManifestHash(uint256)",
