@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/risk-register` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/387` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/388` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/389` |
-| Next issue | TBD after AUD-002; likely `INT-001` unless bot feedback or release-evidence priority changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/integrations-entrypoint` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/389` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/390` |
+| Active PR | TBD |
+| Next issue | TBD after INT-001; likely `INT-002` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 07:51 UTC` |
+| Last updated | `2026-06-15 08:22 UTC` |
 
 ## Packaging Notes
 
@@ -247,20 +247,115 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 183 | Add signed release tag verification gate | Gate F/Gate G support | Add a non-release local/CI gate and strict release-mode verifier tying a signed Git tag, current checksum bundle, and post-bundle release-signature evidence together without producing production signatures | Merged in PR #383 |
 | 184 | Add exact bytecode-to-release proof | Gate F/Gate G support | Add a deterministic local/fork proof tying release manifests, source-verification inputs, address books, deployment manifests, compiler settings, and runtime/creation bytecode hashes together without claiming live production verification | Merged in PR #385 |
 | 185 | Refresh audit package around current protocol state | Gate F support | Refresh the auditor-facing package around actual local protocol/release state, explicit external evidence gaps, bytecode proof and signed-tag gates, and audit submission checklist coverage | Merged in PR #387 |
-| 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | PR #389 open; CodeRabbit requested |
+| 186 | Add risk register and audit-boundary checker | Gate F support | Add generated risk-register artifact, schema, checker/tests, manifest/checksum coverage, and audit/readiness links so residual risks and open launch blockers are checked | Merged in PR #389 |
+| 187 | Add integrations entrypoint and artifact source of truth | Gate G support | Add `docs/integrations/README.md`, checker/tests, local/CI gate wiring, release-manifest coverage, and navigation links for frontend, mobile, Electron, indexer, operator, and backend-signing integrators | In progress on issue #390 |
 
 ## Current PR Worklog
 
-### PR candidate: Add risk register and audit-boundary checker (Queue Item 186)
+### PR candidate: Add integrations entrypoint and artifact source of truth (Queue Item 187)
 
-Status: PR #389 open; CI passed on initial head, 6529bot non-blocking
-hardening note addressed locally and pending push.
+Status: In progress locally; PR not opened yet.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/390`.
+PR: TBD.
+Branch: `codex/integrations-entrypoint`.
+Branch started from PR #389 squash merge commit
+`9aafee7a6055726c3a7fb693cd8e8a7202a4132f`.
+
+Goal:
+
+- Add `docs/integrations/README.md` as the canonical pre-production
+  integration entrypoint for React, mobile, Electron, indexers, operator UIs,
+  and backend signing services.
+- State the maturity boundary clearly: pre-audit, not production-ready, local
+  evidence is not a security claim, and local baselines do not replace fork,
+  testnet, live, audit, or marketplace evidence.
+- Point integrators to canonical tracked artifacts: address books, deployment
+  manifests, release manifest, ABI compatibility baseline, ABI checksums,
+  interface IDs, event topic catalog, source verification inputs, bytecode proof,
+  checksums, risk register, public-beta evidence status, metadata docs, signing
+  docs, deployment docs, and release policy.
+- Add `scripts/check_integrations_readme.py` and
+  `scripts/test_integrations_readme.py` so future edits cannot drop the source
+  of truth, maturity caveats, validation commands, or follow-up INT-002 through
+  INT-009 flow map.
+- Wire the integrations README checks into Makefile, Bash, PowerShell, and CI
+  without changing Solidity bytecode or making readiness claims.
+- Link the integration entrypoint from README, release-readiness, and
+  release-artifacts documentation, and include it in release-manifest coverage.
+
+Validation plan:
+
+- `python scripts/test_integrations_readme.py`.
+- `python scripts/check_integrations_readme.py`.
+- `python scripts/test_release_readiness.py`.
+- `python scripts/check_release_readiness.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_integrations_readme.py scripts/test_integrations_readme.py`.
+- `git diff --check`.
+- Full Windows gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Validation completed locally at `2026-06-15 08:22 UTC`:
+
+- Focused integrations README checker/tests passed.
+- Release-readiness checker/tests passed.
+- Release manifest tests and `--check` passed.
+- Bytecode release proof tests and `--check` passed.
+- Release checksum tests and `--check` passed.
+- Risk-register tests, checker, and `--check` passed after regenerating for
+  roadmap/backlog changes.
+- Changelog gate passed.
+- `python -m py_compile scripts\check_integrations_readme.py scripts\test_integrations_readme.py`
+  passed.
+- `git diff --check` passed with Git's normal LF-to-CRLF warning for
+  `scripts/check.ps1`.
+- Full Windows gate passed:
+  `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Notes:
+
+- Read-only subagent scan confirmed the source-of-truth split: raw ABIs are
+  generated under ignored `out/` after `forge build`, while tracked integration
+  surfaces are ABI surface baselines, ABI checksums, interface IDs, event topic
+  catalogs, deployment manifests, address books, release manifests, source
+  verification inputs, checksum bundles, risk register, and evidence status
+  artifacts.
+- The same scan confirmed the honest gaps: no production/mainnet live manifest,
+  live verified addresses, live bytecode proof, signed production tag, completed
+  audit report, reviewed testnet evidence, or marketplace/indexer evidence.
+  INT-001 must explain those boundaries rather than masking them.
+
+Open concerns:
+
+- This PR is documentation/tooling for integration readiness only. It must not
+  claim public beta, production, marketplace, audit, or security readiness.
+- Later integration PRs must provide exact flow specs and examples; this PR is
+  the entrypoint and source-of-truth map.
+
+### Completed: Add risk register and audit-boundary checker (Queue Item 186)
+
+Status: Merged in PR #389; issue #388 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/388`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/389`.
 Branch: `codex/risk-register`.
 Branch started from PR #387 squash merge commit
 `193a208f42246841a8469386ce2097b5b50097b9`.
 Initial PR head: `3bff44156310a8ea171fbd02ca6e984110db28a6`.
+Final pushed head: `e9b3dbba51b45cab4b39a24986d108a0ebff0d1d`.
+Squash merge: `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`.
+Merge basis: CI run `27531918837` passed on final head, CodeRabbit status was
+success with no unresolved review threads, CodeRabbit's rate-limit banner was
+non-actionable, 6529bot comments `4705658115` and `4705728912` reported no new
+findings, and merge-decision comment `4705790858` documented the autonomous
+merge decision before squash merge.
 
 Goal:
 
@@ -14104,6 +14199,8 @@ Outcome:
 
 | Time UTC | Decision | Rationale |
 | --- | --- | --- |
+| 2026-06-15 08:13 | Start Queue Item 187 | PR #389 squash-merged as `9aafee7a6055726c3a7fb693cd8e8a7202a4132f`; issue #390 and branch `codex/integrations-entrypoint` now track INT-001 so frontend, mobile, Electron, indexer, operator, and backend-signing integrators get a checked source-of-truth entrypoint without readiness overclaims. |
+| 2026-06-15 08:01 | Merge PR #389 | Risk-register PR merged after CI run `27531918837` passed final head `e9b3dbba51b45cab4b39a24986d108a0ebff0d1d`, CodeRabbit status was success, the non-actionable rate-limit banner had no unresolved threads, 6529bot reported no new findings in comments `4705658115` and `4705728912`, merge-decision comment `4705790858` documented the clean state, and issue #388 closed completed. |
 | 2026-06-15 07:51 | Address PR #389 hardening note | 6529bot found no blocking issues but suggested validating risk-register `python scripts/*.py` check references. Implemented the stricter checker and fixture/test coverage before merge. |
 | 2026-06-15 07:41 | Open PR #389 | Risk-register PR opened on head `3bff44156310a8ea171fbd02ca6e984110db28a6`, links issue #388, records full local validation, and CodeRabbit review was requested in comment `4705647847`. |
 | 2026-06-15 07:38 | Complete Queue Item 186 local validation | Risk-register generator/checker/tests, audit package/readiness checks, release artifact/manifest/proof/checksum checks, changelog gate, Python compile, diff hygiene, and full Windows check wrapper all passed locally before opening the PR. |

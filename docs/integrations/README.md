@@ -1,0 +1,179 @@
+# Integrations
+
+This integrations entrypoint is for teams building against 6529Stream from a
+fresh checkout: React web apps, mobile apps, Electron apps, indexers, operator
+UI surfaces, and backend signing service components.
+
+The repository is a pre-audit local baseline. It is not production-ready and
+this document is not a security claim. Local evidence does not replace fork/testnet/live evidence
+for public beta or production use.
+
+## Maturity And Scope
+
+Use this file to find the current integration source of truth. It points at
+tracked artifacts, docs, and generated evidence that are committed in the repo.
+It does not promise stable mainnet addresses, production signatures, reviewed
+external audit evidence, marketplace display proof, or live indexer proof.
+
+Current maturity for integrators:
+
+- Local and retained fork-mainnet rehearsal artifacts exist.
+- Public beta remains blocked by missing external audit, testnet/live evidence,
+  verified deployed addresses, explorer verification, metadata browser
+  evidence, and randomizer operations evidence.
+- Production remains blocked by missing production signatures, signed Git tags,
+  live ceremony evidence, live deployment manifests, live explorer
+  verification, live randomizer evidence, and post-audit remediation evidence.
+- Raw ABIs are generated under ignored `out/` after `forge build`. The tracked
+  source of truth for review is the ABI surface baseline, ABI checksums,
+  interface IDs, event topic catalog, release manifest, and checksum bundle.
+
+## Consumer Surfaces
+
+Supported consumer categories for this entrypoint:
+
+| Consumer | Current entrypoint | Status |
+| --- | --- | --- |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, and release-readiness dashboard | Entry point only; detailed flow specs remain future `INT` work |
+| Mobile app | Use the same contract surface artifacts plus wallet/signing docs | Entry point only; WalletConnect and deep-link guidance remains future `INT-008` work |
+| Electron app | Use web-app artifacts plus strict renderer/process security assumptions | Entry point only; Electron security guidance remains future `INT-009` work |
+| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, and release manifest | Entry point only; event replay spec remains future `INT-005` work |
+| Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, and release-readiness dashboard | Entry point only; dashboard query model remains future `GOV`/`INT` work |
+| Backend signing service | Use EIP-712, ERC-1271, signer custody, and drop authorization signing docs | Local templates only; production signing evidence remains blocked |
+
+## Source Of Truth
+
+Use tracked generated artifacts rather than hand-maintained copies.
+
+| Need | Source of truth | Notes |
+| --- | --- | --- |
+| Repo status and public caveats | [`README.md`](../../README.md), [`docs/release-readiness.md`](../release-readiness.md), [`docs/known-blockers.md`](../known-blockers.md) | These are the first stop before any release or integration claim |
+| Architecture and protocol boundaries | [`docs/architecture.md`](../architecture.md), [`docs/threat-model.md`](../threat-model.md) | Use before designing frontend trust assumptions |
+| Deployment process | [`docs/deployment.md`](../deployment.md), [`deployments/README.md`](../../deployments/README.md) | Deployment docs explain local and retained evidence boundaries |
+| Release artifact policy | [`release-artifacts/README.md`](../../release-artifacts/README.md), [`docs/release-policy.md`](../release-policy.md) | Release artifacts are generated and checked |
+| Contract list | [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json) | Catalog of release-tracked contracts |
+| ABIs | Run `forge build` and read ignored `out/` artifacts locally | Raw ABI JSON is not a committed release artifact |
+| ABI review surface | [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json), [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI compatibility baseline and checksums are tracked |
+| Address books | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json), [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Generated integrator-facing address source, not hand-edited |
+| Deployment manifests | [`deployments/examples/anvil-6529stream-v0.1.0-001.json`](../../deployments/examples/anvil-6529stream-v0.1.0-001.json), [`deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Manifests are generated from deployment config and broadcast inputs |
+| Deployment schemas and chain config | [`deployments/schema/deployment-manifest.schema.json`](../../deployments/schema/deployment-manifest.schema.json), [`deployments/schema/address-book.schema.json`](../../deployments/schema/address-book.schema.json), [`deployments/config/sepolia-6529stream-v0.1.0-001.template.json`](../../deployments/config/sepolia-6529stream-v0.1.0-001.template.json) | Sepolia config is a template until reviewed testnet evidence exists |
+| Top-level release manifest | [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json) | Generated source of truth tying artifacts, docs, and evidence state together |
+| Release artifact catalog | [`release-artifacts/latest/release-artifact-manifest.json`](../../release-artifacts/latest/release-artifact-manifest.json) | Generated ABI, bytecode, interface, and event catalog index |
+| Source verification inputs | [`release-artifacts/latest/source-verification-inputs.json`](../../release-artifacts/latest/source-verification-inputs.json) | Local verification inputs, not live explorer proof |
+| Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | Generated interface identifiers |
+| Event topic catalog | [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json) | Generated event topic source for indexers |
+| Bytecode proof | [`release-artifacts/latest/bytecode-release-proof.json`](../../release-artifacts/latest/bytecode-release-proof.json) | Local proof only; live bytecode proof remains future evidence |
+| Signable checksums | [`release-artifacts/latest/SHA256SUMS`](../../release-artifacts/latest/SHA256SUMS), [`release-artifacts/latest/release-checksums.json`](../../release-artifacts/latest/release-checksums.json) | Checksum bundle is signable but not currently a production signature |
+| Public readiness | [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json), [`docs/public-beta-evidence.md`](../public-beta-evidence.md), [`docs/non-local-release-evidence.md`](../non-local-release-evidence.md) | public-beta evidence status is the readiness source |
+| Risk register | [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json) | Generated launch blockers, planned mitigations, and accepted local-baseline risks |
+| Metadata | [`docs/metadata.md`](../metadata.md) | Metadata schema, cache, browser, and freeze semantics |
+| Drop signing | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | EIP-712 and ERC-1271 local fixture guidance |
+| Release signatures | [`docs/release-signatures.md`](../release-signatures.md) | No production signatures are committed |
+
+## Canonical Artifacts
+
+The table above is intentionally redundant with the links below so the checker
+can prove the entrypoint keeps all required local targets reachable:
+
+- [`README.md`](../../README.md)
+- [`docs/release-readiness.md`](../release-readiness.md)
+- [`docs/deployment.md`](../deployment.md)
+- [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md)
+- [`docs/metadata.md`](../metadata.md)
+- [`docs/release-policy.md`](../release-policy.md)
+- [`docs/release-signatures.md`](../release-signatures.md)
+- [`docs/public-beta-evidence.md`](../public-beta-evidence.md)
+- [`docs/non-local-release-evidence.md`](../non-local-release-evidence.md)
+- [`docs/architecture.md`](../architecture.md)
+- [`docs/threat-model.md`](../threat-model.md)
+- [`docs/known-blockers.md`](../known-blockers.md)
+- [`release-artifacts/README.md`](../../release-artifacts/README.md)
+- [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json)
+- [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json)
+- [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json)
+- [`release-artifacts/latest/release-artifact-manifest.json`](../../release-artifacts/latest/release-artifact-manifest.json)
+- [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json)
+- [`release-artifacts/latest/bytecode-release-proof.json`](../../release-artifacts/latest/bytecode-release-proof.json)
+- [`release-artifacts/latest/SHA256SUMS`](../../release-artifacts/latest/SHA256SUMS)
+- [`release-artifacts/latest/release-checksums.json`](../../release-artifacts/latest/release-checksums.json)
+- [`release-artifacts/latest/source-verification-inputs.json`](../../release-artifacts/latest/source-verification-inputs.json)
+- [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json)
+- [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json)
+- [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json)
+- [`release-artifacts/latest/risk-register.json`](../../release-artifacts/latest/risk-register.json)
+- [`deployments/README.md`](../../deployments/README.md)
+- [`deployments/schema/deployment-manifest.schema.json`](../../deployments/schema/deployment-manifest.schema.json)
+- [`deployments/schema/address-book.schema.json`](../../deployments/schema/address-book.schema.json)
+- [`deployments/config/sepolia-6529stream-v0.1.0-001.template.json`](../../deployments/config/sepolia-6529stream-v0.1.0-001.template.json)
+- [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json)
+- [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json)
+- [`deployments/examples/anvil-6529stream-v0.1.0-001.json`](../../deployments/examples/anvil-6529stream-v0.1.0-001.json)
+- [`deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json)
+
+## Integration Flows
+
+This file is an entrypoint, not the complete flow book. Use these backlog items
+to understand what is still intentionally future work:
+
+- `INT-002`: fixed-price mint and drop authorization flow spec.
+- `INT-003`: auction frontend and indexer flow spec.
+- `INT-004`: wallet, EIP-712, ERC-1271, and Safe signing guide.
+- `INT-005`: event and indexer reconstruction spec.
+- `INT-006`: metadata rendering, cache, animation sandbox, and marketplace
+  integration guide.
+- `INT-007`: React/Next reference architecture.
+- `INT-008`: mobile and WalletConnect integration guide.
+- `INT-009`: Electron security and wallet integration guide.
+
+Until those specs exist, integrators should treat the linked artifacts as
+source material and the existing tests/docs as examples, not as a finished SDK
+or frontend contract.
+
+## Readiness Boundaries
+
+Do not use local artifacts as public beta or production approval. In
+particular:
+
+- Address books currently cover local Anvil and retained fork-mainnet rehearsal
+  examples, not a reviewed Sepolia or production deployment.
+- Source verification inputs are local inputs, not live explorer verification.
+- `bytecode-release-proof.json` proves committed local/fork artifact
+  consistency, not live chain bytecode.
+- Signing and signer custody docs are no-secret templates or local fixtures,
+  not reviewed production signing evidence.
+- Metadata/browser checks are local evidence, not marketplace or collector-tool
+  proof.
+- Indexer teams still need `INT-005` and retained non-local event replay
+  evidence before relying on production reconstruction.
+
+## Validation Commands
+
+Run the focused entrypoint checks before editing integration docs:
+
+```sh
+python scripts/test_integrations_readme.py
+python scripts/check_integrations_readme.py
+python scripts/check_release_readiness.py
+python scripts/check_changelog.py
+```
+
+For full local release-readiness verification, run the repo check wrapper from
+the root after installing Foundry and Python dependencies:
+
+```sh
+make check
+```
+
+## Maintenance
+
+Update this file when any of the following change:
+
+- Canonical release, deployment, address-book, event, interface, ABI, or
+  checksum artifact names.
+- Public-beta or production readiness status.
+- Integration flow docs under future `INT` work.
+- Signing, metadata, deployment, or release policy docs that frontend and
+  indexer teams depend on.
+
+Keep this page conservative. It should help integrators start quickly without
+weakening the repo's pre-audit and not-production-ready boundary.

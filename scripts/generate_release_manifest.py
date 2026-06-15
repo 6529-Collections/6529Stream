@@ -79,6 +79,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/drop-authorization-signing.md"),
     Path("docs/signer-custody-readiness.md"),
     Path("docs/release-readiness.md"),
+    Path("docs/integrations/README.md"),
     Path("docs/tooling.md"),
     Path("docs/status.md"),
 ]

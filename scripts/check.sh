@@ -119,6 +119,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_audit_package.py
 "$python_bin" scripts/test_incident_response.py
 "$python_bin" scripts/check_incident_response.py
+"$python_bin" scripts/test_integrations_readme.py
+"$python_bin" scripts/check_integrations_readme.py
 "$python_bin" scripts/test_release_readiness.py
 "$python_bin" scripts/check_release_readiness.py
 "$python_bin" scripts/test_release_manifest.py

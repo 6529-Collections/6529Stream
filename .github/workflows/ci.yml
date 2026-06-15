@@ -165,6 +165,8 @@ jobs:
             scripts/test_audit_package.py \
             scripts/check_incident_response.py \
             scripts/test_incident_response.py \
+            scripts/check_integrations_readme.py \
+            scripts/test_integrations_readme.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -450,6 +452,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_incident_response.py 2>&1 | tee ci-logs/incident-response-tests.log
           python3 scripts/check_incident_response.py 2>&1 | tee ci-logs/incident-response-check.log
+
+      - name: Integrations README
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_integrations_readme.py 2>&1 | tee ci-logs/integrations-readme-tests.log
+          python3 scripts/check_integrations_readme.py 2>&1 | tee ci-logs/integrations-readme-check.log
 
       - name: Release readiness
         shell: bash
