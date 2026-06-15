@@ -105,6 +105,9 @@ jobs:
             scripts/check_one_of_one_provenance_manifest.py \
             scripts/generate_one_of_one_provenance_manifest.py \
             scripts/test_one_of_one_provenance_manifest.py \
+            scripts/check_one_of_one_permanence_package.py \
+            scripts/generate_one_of_one_permanence_manifest.py \
+            scripts/test_one_of_one_permanence_package.py \
             scripts/check_admin_ceremony_evidence.py \
             scripts/test_admin_ceremony_evidence.py \
             scripts/generate_source_verification_inputs.py \
@@ -332,6 +335,15 @@ jobs:
           python3 scripts/test_one_of_one_provenance_manifest.py 2>&1 | tee ci-logs/one-of-one-provenance-manifest-tests.log
           python3 scripts/check_one_of_one_provenance_manifest.py 2>&1 | tee ci-logs/one-of-one-provenance-manifest-check.log
           python3 scripts/generate_one_of_one_provenance_manifest.py --check 2>&1 | tee ci-logs/one-of-one-provenance-manifest-drift-check.log
+
+      - name: 1/1 permanence package
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_one_of_one_permanence_package.py 2>&1 | tee ci-logs/one-of-one-permanence-package-tests.log
+          python3 scripts/check_one_of_one_permanence_package.py 2>&1 | tee ci-logs/one-of-one-permanence-package-check.log
+          python3 scripts/generate_one_of_one_permanence_manifest.py --check 2>&1 | tee ci-logs/one-of-one-permanence-manifest-drift-check.log
 
       - name: Admin ceremony evidence
         shell: bash

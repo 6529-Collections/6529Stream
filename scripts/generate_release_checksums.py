@@ -22,6 +22,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/evidence"),
     Path("release-artifacts/drop-authorization-signing"),
     Path("release-artifacts/signer-custody-readiness"),
+    Path("release-artifacts/permanence"),
     Path("release-artifacts/provenance"),
     Path("release-artifacts/signatures"),
     Path("release-artifacts/latest"),

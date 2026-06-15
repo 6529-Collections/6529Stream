@@ -259,6 +259,39 @@ python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check
 ```
 
+## Collector-Verifiable Permanence Packages
+
+Collector-verifiable permanence packages are release artifacts that sit beside
+metadata and provenance. The canonical policy is
+[docs/permanence-packages.md](permanence-packages.md), the checked schema is
+[release-artifacts/schema/one-of-one-permanence-package.schema.json](../release-artifacts/schema/one-of-one-permanence-package.schema.json),
+and the generated catalog is
+[release-artifacts/latest/one-of-one-permanence-manifest.json](../release-artifacts/latest/one-of-one-permanence-manifest.json).
+The current no-secret template is
+[release-artifacts/permanence/one-of-one-permanence-template.permanence.json](../release-artifacts/permanence/one-of-one-permanence-template.permanence.json).
+
+The package model can describe renderer source, dependency source and
+provenance hashes, source archive hashes, exact replay commands, metadata JSON
+hashes, animation HTML hashes, rendered output hashes, browser proof hashes,
+and fully on-chain versus decentralized storage guarantees. These fields help
+collectors, frontends, indexers, and auditors verify replayability without
+treating the package as marketplace readiness proof, royalty enforcement,
+ownership proof beyond chain state, or production release approval.
+
+This boundary is intentional while `StreamCore` remains close to the EIP-170
+bytecode limit. The permanence package is not `tokenURI()` JSON, not
+`contractURI()` JSON, not `collectionFreezeManifestHash(collectionId)`, and not
+new `StreamCore` storage. A future on-chain permanence event/view or satellite
+contract must be accepted in a separate size-budget and integration decision.
+Until then, permanence packages are validated through the release artifact
+toolchain:
+
+```text
+python scripts/test_one_of_one_permanence_package.py
+python scripts/check_one_of_one_permanence_package.py
+python scripts/generate_one_of_one_permanence_manifest.py --check
+```
+
 ## Size Limits
 
 `StreamCore` and `DependencyRegistry` now reject oversized metadata inputs
