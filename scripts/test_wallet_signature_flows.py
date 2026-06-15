@@ -59,11 +59,11 @@ are named.
 ## Domain And Typed Data
 
 EIP-712, ERC-1271, DropAuthorization, mintDrop, domainSeparator,
-EIP712Domain, name, version, chainId, verifyingContract, 6529StreamDrops,
+EIP712Domain, `name`, `version`, `chainId`, `verifyingContract`, 6529StreamDrops,
 DROP_AUTHORIZATION_TYPEHASH, DROP_ID_TYPEHASH,
 DropId(address signer,uint256 signerEpoch,uint256 nonce,uint256 salt),
 deriveDropId, hashDropAuthorization, tokenDataHash,
-keccak256(bytes(tokenData)), tdhSigner, signerEpoch, nonce, salt, and deadline
+keccak256(bytes(tokenData)), tdhSigner, signerEpoch, `nonce`, `salt`, and `deadline`
 are named.
 
 ## Replay And Revocation Controls

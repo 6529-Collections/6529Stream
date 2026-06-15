@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 11:20 UTC` |
+| Last updated | `2026-06-15 11:23 UTC` |
 
 ## Packaging Notes
 
@@ -15191,6 +15191,7 @@ Outcome:
 | 2026-06-15 11:01 | Merge PR #395 | Auction integration flow spec merged as `604f0db28dffb89c24c24bf0d28b5d028987cad0` after CI run #838 passed, 6529bot reported no new findings on final head `8c01b53f0595b360269c4d6c2b8e26987914c289`, review threads were empty, and CodeRabbit status was success despite an informational rate-limit comment. |
 | 2026-06-15 11:02 | Create issue #396 and select INT-004 | Next substantive integration-readiness slice is the wallet, EIP-712, ERC-1271, and Safe signing guide on branch `codex/wallet-signing-guide`; no existing open issue matched, so issue #396 now tracks the guide/checker/local-CI/release-manifest work. |
 | 2026-06-15 11:20 | Open PR #397 for INT-004 | PR #397 is open on branch `codex/wallet-signing-guide`, closes issue #396, and CodeRabbit review was requested. Local evidence includes the wallet guide checker/test, integration/release-readiness checks, release manifest/proof/checksum checks, focused EIP-712/ERC-1271 Forge tests, PowerShell parser check, and `git diff --check`. |
+| 2026-06-15 11:23 | Address PR #397 bot nice-to-have | Tightened `scripts/check_wallet_signature_flows.py` required phrases from generic schema words to code-token field names so the checker better protects the typed-data domain and replay fields. |
 
 ## Resume Instructions
 
