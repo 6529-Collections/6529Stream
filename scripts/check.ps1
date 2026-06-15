@@ -182,6 +182,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_mobile_walletconnect.py"
 & $pythonPath @pythonArgs "scripts\test_electron_security_wallets.py"
 & $pythonPath @pythonArgs "scripts\check_electron_security_wallets.py"
+& $pythonPath @pythonArgs "scripts\test_operator_admin_ui.py"
+& $pythonPath @pythonArgs "scripts\check_operator_admin_ui.py"
 & $pythonPath @pythonArgs "scripts\test_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\check_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"

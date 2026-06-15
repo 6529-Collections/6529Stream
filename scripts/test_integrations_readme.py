@@ -68,7 +68,7 @@ EIP-712, ERC-1271, risk register, and public-beta evidence status are named.
 
 ## Integration Flows
 
-Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, and INT-009.
+Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, and INT-010.
 The fixed-price mint flow is listed.
 The auction frontend and indexer flow spec is listed.
 The wallet, EIP-712, ERC-1271, and Safe signing guide is listed.
@@ -77,10 +77,13 @@ The metadata rendering, cache, animation sandbox, and marketplace integration gu
 The React/Next frontend reference architecture is listed.
 The mobile and WalletConnect integration guide is listed.
 The Electron security and wallet integration guide is listed.
+The operator admin UI specification is listed.
 The maintained frontend package, generated SDK, maintained mobile SDK,
 React Native app, WalletConnect dependency recommendation, maintained Electron app,
 native desktop app, desktop SDK, code-signing implementation, and
-signed-update implementation boundaries are listed.
+signed-update implementation, maintained operator dashboard, Safe app,
+multisig transaction builder, monitoring service, and production signer custody
+implementation boundaries are listed.
 
 ## Readiness Boundaries
 

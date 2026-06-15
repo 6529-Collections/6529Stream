@@ -50,6 +50,8 @@ python scripts/check_events_and_indexing.py
 python scripts/check_metadata_rendering.py
 python scripts/check_react_next_reference.py
 python scripts/check_mobile_walletconnect.py
+python scripts/check_electron_security_wallets.py
+python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
@@ -137,6 +139,10 @@ python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
 python scripts/test_mobile_walletconnect.py
 python scripts/check_mobile_walletconnect.py
+python scripts/test_electron_security_wallets.py
+python scripts/check_electron_security_wallets.py
+python scripts/test_operator_admin_ui.py
+python scripts/check_operator_admin_ui.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
@@ -179,6 +185,7 @@ public-beta evidence status, schema hashes, governance doc hashes including
 `docs/integrations/frontend-reference-architecture.md`,
 `docs/integrations/mobile-walletconnect.md`,
 `docs/integrations/electron-security-wallets.md`,
+`docs/integrations/operator-admin-ui.md`,
 `docs/integrations/examples/react-viem.md`, and
 `docs/release-readiness.md`, and the release-ceremony items that are not yet
 available for this pre-audit local baseline.
@@ -357,14 +364,15 @@ production admin ceremony completion.
 `docs/non-local-release-evidence.md`, `docs/signer-custody-readiness.md`,
 `docs/integrations/frontend-reference-architecture.md`,
 `docs/integrations/mobile-walletconnect.md`,
-`docs/integrations/electron-security-wallets.md`, and
+`docs/integrations/electron-security-wallets.md`,
+`docs/integrations/operator-admin-ui.md`, and
 `docs/release-readiness.md` are the
 auditor-facing architecture, trust-boundary, package, incident-response,
 evidence-status, non-local evidence intake, signer custody readiness, frontend
 reference, mobile/WalletConnect reference, Electron security/wallet reference,
-and Gate G readiness indexes for the current local baseline. They are validated before release manifest
-generation, and the release manifest records their hashes as governance
-documents.
+operator/admin UI reference, and Gate G readiness indexes for the current local
+baseline. They are validated before release manifest generation, and the
+release manifest records their hashes as governance documents.
 
 `evidence/external-audit-report/external-audit-report-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future

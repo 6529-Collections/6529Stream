@@ -75,6 +75,13 @@ REQUIRED_PHRASES = [
     "desktop SDK",
     "code-signing implementation",
     "signed-update implementation",
+    "INT-010",
+    "operator admin UI specification",
+    "maintained operator dashboard",
+    "Safe app",
+    "multisig transaction builder",
+    "monitoring service",
+    "production signer custody implementation",
 ]
 
 REQUIRED_COMMANDS = [
@@ -94,6 +101,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_mobile_walletconnect.py",
     "python scripts/test_electron_security_wallets.py",
     "python scripts/check_electron_security_wallets.py",
+    "python scripts/test_operator_admin_ui.py",
+    "python scripts/check_operator_admin_ui.py",
     "python scripts/check_release_readiness.py",
     "python scripts/check_changelog.py",
 ]
@@ -119,6 +128,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/frontend-reference-architecture.md",
     "docs/integrations/mobile-walletconnect.md",
     "docs/integrations/electron-security-wallets.md",
+    "docs/integrations/operator-admin-ui.md",
     "docs/integrations/examples/react-viem.md",
     "release-artifacts/README.md",
     "release-artifacts/contracts.json",

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/electron-security-wallet-guide` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/405` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/406` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/407` |
-| Next issue | `INT-010` operator admin UI specification after INT-009 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
+| Active PR branch | `codex/operator-admin-ui-spec` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/407` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/408` |
+| Active PR | `TBD` |
+| Next issue | `ONE-001` contract-level metadata surface after INT-010 unless bot/CI feedback or roadmap priority requires a detour. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 14:47 UTC` |
+| Last updated | `2026-06-15 15:34 UTC` |
 
 ## Packaging Notes
 
@@ -15219,6 +15219,9 @@ Outcome:
 | 2026-06-15 14:40 | Open PR #407 for INT-009 | PR #407 is open on branch `codex/electron-security-wallet-guide`, closes issue #406, and CodeRabbit review was requested in comment `4709069970`. |
 | 2026-06-15 14:43 | Address PR #407 bot bookkeeping note | 6529bot's first pass on the pre-state head was merge-ready but noticed stale backlog/run-state status markers; `ops/AUTONOMOUS_RUN.md` already named PR #407 on the final head, and the remaining stale `MAP-001`, `EXT-004`, and `EXT-005` status rows are now reconciled before follow-up review. |
 | 2026-06-15 14:47 | Address PR #407 optional checker nit | Accepted the 6529bot checker-quality suggestion by adding section-scoped forbidden-field assertions to `scripts/check_electron_security_wallets.py`, adding a regression test, and clarifying the Electron integrations README row so the mobile guide link does not read like a copy artifact. |
+| 2026-06-15 14:56 | Merge PR #407 and select INT-010 | Electron security and wallet integration guide merged as `d42c97ae49133339e744bc4492a5130d1cae54b5` after CI run `27554528257` passed, review threads were empty, 6529bot reported no new findings on final head `e172e800bcb6986bf8317ff9d00093488616d87d`, and issue #406 closed completed. |
+| 2026-06-15 14:57 | Create issue #408 and start INT-010 | Next substantive integration-readiness slice is the operator admin UI specification on branch `codex/operator-admin-ui-spec`; issue #408 now tracks the guide, checker/local-CI wiring, release-readiness navigation, release-manifest coverage, Safe/multisig, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and no-production-readiness boundaries. |
+| 2026-06-15 15:34 | Validate INT-010 local draft | Focused operator admin UI, integrations README, release-readiness, risk-register, release-manifest, bytecode-proof, checksum, changelog, shell syntax, PowerShell parser, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` validation passed with existing Foundry warning noise only. |
 
 ## Resume Instructions
 

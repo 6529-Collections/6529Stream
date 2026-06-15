@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added INT-010 operator admin UI specification with
+  `docs/integrations/operator-admin-ui.md`, a checker/test pair, local/CI gate
+  wiring, integration/release-readiness navigation, release-manifest coverage,
+  and no-production-readiness boundaries so operator UI implementers can trace
+  Safe/multisig ceremony, role grants, signer lifecycle, pause domains,
+  metadata freeze, dependency, randomizer, emergency, monitoring, and
+  no-secret evidence flows without treating local evidence as public beta or
+  production proof.
 - Added INT-009 Electron security and wallet integration guide with
   `docs/integrations/electron-security-wallets.md`, a checker/test pair,
   local/CI gate wiring, release-readiness navigation, release-manifest
