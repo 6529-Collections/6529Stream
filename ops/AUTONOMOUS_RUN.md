@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/protocol-state-machine-harness` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/369` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/370` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/371` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence; Sepolia execution is blocked locally by missing RPC/signer/funding environment) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 01:02 UTC` |
+| Last updated | `2026-06-15 01:04 UTC` |
 
 ## Packaging Notes
 
@@ -238,15 +238,15 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 174 | Add testnet deployment rehearsal retained artifact checker | Gate E/Gate G support | Add a dedicated no-secret retained artifact template, checker, tests, local/CI wiring, docs, and generated tracker updates for `testnet_deployment_rehearsal` without closing issue #217 or changing readiness claims | Merged in PR #359 |
 | 175 | Add Sepolia deployment config and no-secret rehearsal runbook | Gate E/Gate G support | Add a no-secret Sepolia config template, `runSepolia()` script entrypoint, operator runbook, template regression coverage, and release-artifact refresh without completing issue #217 or changing readiness claims | Merged in PR #361 |
 | 176 | Add Safe/admin ceremony evidence checker | Gate E/Gate F/Gate G support | Add a no-secret admin ceremony evidence schema, template, retained-artifact checklist, checker, tests, docs, local/CI wiring, release-manifest coverage, and checksum coverage without claiming reviewed fork/testnet/live governance ceremony completion | Merged in PR #369 |
-| 177 | Add end-to-end protocol state-machine harness | Gate D/Gate F support | Add a reusable Foundry helper plus deterministic smoke coverage across fixed-price mint, auction bid/settlement, payments, pause/signer/cancel controls, randomness finalization, metadata mutation, and collection freeze without production contract changes | In progress on issue #370 |
+| 177 | Add end-to-end protocol state-machine harness | Gate D/Gate F support | Add a reusable Foundry helper plus deterministic smoke coverage across fixed-price mint, auction bid/settlement, payments, pause/signer/cancel controls, randomness finalization, metadata mutation, and collection freeze without production contract changes | Draft PR #371 opened |
 
 ## Current PR Worklog
 
 ### PR candidate: Add end-to-end protocol state-machine harness (Queue Item 177)
 
-Status: local implementation validated; ready for PR publication.
+Status: draft PR #371 opened; CodeRabbit and CI pending on final pushed head.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/370`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/371`.
 Branch: `codex/protocol-state-machine-harness`.
 Branch started from PR #369 squash merge commit
 `689968b7d89fe44d2c208357519713981eba6a46`.
