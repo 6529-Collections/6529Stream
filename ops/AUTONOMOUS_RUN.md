@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/auction-flow-spec` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/393` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/394` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/395` |
 | Next issue | TBD after INT-003; likely `INT-004` unless bot feedback, CI, or a higher-priority release-evidence blocker changes the queue. `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal`) remains open for real reviewed testnet evidence, but Sepolia execution is blocked locally by missing RPC/signer/funding environment |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 10:44 UTC` |
+| Last updated | `2026-06-15 10:47 UTC` |
 
 ## Packaging Notes
 
@@ -256,8 +256,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add auction frontend and indexer flow spec (Queue Item 189)
 
-Status: Local implementation in progress; issue #394 open; PR TBD.
+Status: PR #395 draft open; CodeRabbit review requested in comment
+`4707102005`; CI and bot feedback pending.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/394`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/395`.
 Branch: `codex/auction-flow-spec`.
 Branch started from PR #393 squash merge commit
 `37583836372e55027ab447134629660812025788`.

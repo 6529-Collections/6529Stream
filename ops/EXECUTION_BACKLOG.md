@@ -1903,7 +1903,7 @@ Dependencies: `INT-001`.
 
 ### INT-003: Add Auction Frontend And Indexer Flow Spec
 
-Status: In progress on issue #394 / branch `codex/auction-flow-spec`.
+Status: PR #395 draft open on issue #394 / branch `codex/auction-flow-spec`.
 
 Gate: G/D.
 
