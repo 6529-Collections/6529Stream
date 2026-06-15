@@ -34,7 +34,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:edee714879f162e249854986d361c0ed04b14cdfc5cf32026464ea08080f5107"
+      "sha256": "sha256:1d482e70753985c8f4575450063b0249713193dded68c8c929c6c57b1c07e4a2"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -387,7 +387,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:edee714879f162e249854986d361c0ed04b14cdfc5cf32026464ea08080f5107"
+          "sha256": "sha256:1d482e70753985c8f4575450063b0249713193dded68c8c929c6c57b1c07e4a2"
         },
         {
           "path": "ops/ROADMAP.md",

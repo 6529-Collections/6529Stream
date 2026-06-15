@@ -131,6 +131,15 @@ def artifact_profile_error(artifact_path: Path, reason: str) -> SizeBudgetError:
     )
 
 
+def metadata_source_path(repo_root: Path, source_key: str) -> Path | None:
+    source_path = (repo_root / Path(source_key)).resolve()
+    try:
+        source_path.relative_to(repo_root.resolve())
+    except ValueError:
+        return None
+    return source_path
+
+
 def artifact_metadata(artifact: dict[str, Any], artifact_path: Path) -> dict[str, Any]:
     value = artifact.get("metadata")
     if value is None:
@@ -203,24 +212,34 @@ def validate_current_production_artifact(
         )
 
     sources = require_dict(metadata.get("sources"), f"{artifact_path}.metadata.sources")
-    source_metadata = require_dict(
+    require_dict(
         sources.get(normalized_source),
         f"{artifact_path}.metadata.sources.{normalized_source}",
     )
-    recorded_hash = require_string(
-        source_metadata.get("keccak256"),
-        f"{artifact_path}.metadata.sources.{normalized_source}.keccak256",
-    )
-    source_path = repo_root / normalized_source
-    try:
-        actual_hash = keccak256_hex(source_path.read_bytes())
-    except FileNotFoundError as exc:
-        raise artifact_profile_error(artifact_path, f"source file is missing: {source_path}") from exc
-    if recorded_hash.lower() != actual_hash.lower():
-        raise artifact_profile_error(
-            artifact_path,
-            f"source hash for {normalized_source} does not match the current checkout",
+
+    for source_key in sorted(sources):
+        source_metadata = require_dict(
+            sources.get(source_key),
+            f"{artifact_path}.metadata.sources.{source_key}",
         )
+        recorded_hash = require_string(
+            source_metadata.get("keccak256"),
+            f"{artifact_path}.metadata.sources.{source_key}.keccak256",
+        )
+        source_path = metadata_source_path(repo_root, source_key)
+        if source_path is None or not source_path.is_file():
+            if source_key == normalized_source:
+                raise artifact_profile_error(
+                    artifact_path,
+                    f"source file is missing: {repo_root / normalized_source}",
+                )
+            continue
+        actual_hash = keccak256_hex(source_path.read_bytes())
+        if recorded_hash.lower() != actual_hash.lower():
+            raise artifact_profile_error(
+                artifact_path,
+                f"source hash for {source_key} does not match the current checkout",
+            )
 
 
 def budget_contracts(config: dict[str, Any]) -> tuple[int, dict[str, dict[str, Any]]]:

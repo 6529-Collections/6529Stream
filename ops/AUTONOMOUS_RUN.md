@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 22:25 UTC` |
+| Last updated | `2026-06-15 22:36 UTC` |
 
 ## Packaging Notes
 
@@ -15337,6 +15337,7 @@ Outcome:
 | 2026-06-15 22:06 | Harden size artifact validation | The runtime size-budget checker now validates compiler metadata, optimizer runs, EVM version, compilation target, and current source Keccak hashes before trusting Foundry artifacts. Focused checker tests cover missing metadata, wrong compiler/profile, stale source hashes, placeholder counting, and EIP-170 failures; the production via-IR build plus checker passes with `StreamCore` at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 | 2026-06-15 22:20 | Validate headroom recovery branch | Focused metadata/randomizer/royalty suites passed; `make release-checksums` refreshed bytecode, deployment, manifest, checksum, risk, provenance, permanence, and gas-snapshot artifacts; full `make check`, Windows `scripts\check.ps1`, touched-file formatting, release manifest/proof/checksum checks, and `git diff --check` all pass. The accepted gas snapshot trade is two small decreases and a +2,143 gas increase for final on-chain `tokenURI` in exchange for recovering 386 bytes of `StreamCore` runtime headroom. |
 | 2026-06-15 22:25 | Open PR #421 | PR #421 is open and marked ready for review after CodeRabbit skipped the initial draft state. CodeRabbit review has been requested again and CI/bot feedback is pending. |
+| 2026-06-15 22:36 | Address PR #421 review comments | CodeRabbit found two actionable follow-ups: a wording cleanup in `docs/known-blockers.md` and imported-source hash validation in `scripts/check_contract_size_budget.py`. The checker now validates every resolvable metadata source path against the checkout, `scripts/test_contract_size_budget.py` covers stale imported dependency hashes, and focused Python tests plus `python scripts\check_contract_size_budget.py` pass with `StreamCore` still at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 
 ## Resume Instructions
 

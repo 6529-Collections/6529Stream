@@ -129,7 +129,7 @@ contributors who start from the README.
   `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom,
   which passes deployability, the documented 384-byte minimum release floor,
   and the 512-byte warning threshold. Large non-trivial Core feature work still
-  needs measured bytecode deltas or an explicit size-budget exception, and
+  needs bytecode deltas to be measured or an explicit size-budget exception, and
   deployment scripts, manifests, and rehearsals still need to use this
   production profile.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed

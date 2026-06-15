@@ -47,10 +47,17 @@ def artifact_metadata(
     optimizer_enabled: bool = True,
     optimizer_runs: int = checker.EXPECTED_OPTIMIZER_RUNS,
     source_hash: str | None = None,
+    extra_sources: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     normalized_source = Path(source).as_posix()
     if source_hash is None:
         source_hash = checker.keccak256_hex((root / normalized_source).read_bytes())
+    sources = {normalized_source: {"keccak256": source_hash}}
+    for extra_source in extra_sources:
+        normalized_extra = Path(extra_source).as_posix()
+        sources[normalized_extra] = {
+            "keccak256": checker.keccak256_hex((root / normalized_extra).read_bytes())
+        }
     return {
         "compiler": {"version": solc_version},
         "language": "Solidity",
@@ -59,7 +66,7 @@ def artifact_metadata(
             "evmVersion": evm_version,
             "optimizer": {"enabled": optimizer_enabled, "runs": optimizer_runs},
         },
-        "sources": {normalized_source: {"keccak256": source_hash}},
+        "sources": sources,
         "version": 1,
     }
 
@@ -352,6 +359,47 @@ class ContractSizeBudgetTests(unittest.TestCase):
             )
 
             with self.assertRaisesRegex(checker.SizeBudgetError, "source hash"):
+                checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_rejects_stale_imported_source_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=24_000)
+            dependency = "smart-contracts/Dependency.sol"
+            write_source(
+                root,
+                dependency,
+                "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\nlibrary Dependency {}\n",
+            )
+            write_json(
+                root / "out/Example.sol/Example.json",
+                artifact_json(
+                    root,
+                    name="Example",
+                    source="smart-contracts/Example.sol",
+                    runtime_object=runtime_hex(24_000),
+                    metadata=artifact_metadata(
+                        root,
+                        name="Example",
+                        source="smart-contracts/Example.sol",
+                        extra_sources=(dependency,),
+                    ),
+                ),
+            )
+            write_source(
+                root,
+                dependency,
+                (
+                    "// SPDX-License-Identifier: MIT\n"
+                    "pragma solidity 0.8.19;\n"
+                    "library Dependency { function changed() internal pure returns (uint256) { return 1; } }\n"
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.SizeBudgetError,
+                "source hash for smart-contracts/Dependency.sol",
+            ):
                 checker.build_report(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
 
 
