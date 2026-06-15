@@ -314,9 +314,8 @@ Validation completed so far:
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 00:13 UTC with existing Foundry warning noise only after sidecar fixes.
 - `git diff --check` passed with only the existing CRLF warning for
   `scripts/check.ps1`.
-- PR #369 opened as a draft on head
-  `331f308a6ac2cec0203eb976da5d11ff9b49f6d0`; CodeRabbit review requested in
-  comment `4703544180`.
+- PR #369 opened as a draft; CodeRabbit review requested after PR creation and
+  after the state-only follow-up push.
 
 ### Completed: Add Sepolia deployment config and no-secret rehearsal runbook (Queue Item 175)
 
