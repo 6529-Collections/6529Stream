@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:01d30bb90a5c666aa89dfd9c8ea38654d8a222ccb81f56f04aa4f2b9168a6a12",
+    "deployment_manifest_sha256": "sha256:f983cd60d936eafcef465bda222279b36ce776ed5c29fe25655c9c006856bd5a",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -26,7 +26,7 @@
       "source": "smart-contracts/DependencyRegistry.sol",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
       "abi_hash": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-      "runtime_bytecode_hash": "sha256:bb4f8dd875f49de1ca01cab226a0a1ac8b6bbf6d6411538ab56ab9e2acbd24dc",
+      "runtime_bytecode_hash": "sha256:e22f369c1462640d9c87e1e11fe32a00bbf7490b17e9455f7c106b9133552a96",
       "verification_status": "not_applicable"
     },
     "NextGenRandomizerRNG": {
@@ -66,7 +66,7 @@
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
       "abi_hash": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-      "runtime_bytecode_hash": "sha256:b1fe8124e21dd3375e09db954f8867f3afc9b17e16bde138f62dbffd5345a578",
+      "runtime_bytecode_hash": "sha256:bd9eaa998677c2b9aebd0609a428d3133cd1ca7929f8b5c9029c972ce22a9ba2",
       "verification_status": "not_applicable"
     },
     "StreamCore": {
@@ -74,7 +74,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
-      "runtime_bytecode_hash": "sha256:9843f4733757d582e03d6db2dc40f2e1ae3ffe9fbb7a94b8d0b981adb05d5b19",
+      "runtime_bytecode_hash": "sha256:6a10e70f97a4fde3fb7a8ec9021bc24b7ca6ef3f578b0a1c5fae82f32ae782a9",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
