@@ -227,7 +227,7 @@
       "evidence": [
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:86c6cb08eb6997d54e8b2752f6d008d63df532e2a257b07b6e390c729dc6db29"
+          "sha256": "sha256:61edf7d26a719cb0cc9d1a288bd5702ad34aa0b06d3738a455577594898eb657"
         },
         {
           "path": "docs/release-readiness.md",
@@ -270,7 +270,7 @@
         },
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:86c6cb08eb6997d54e8b2752f6d008d63df532e2a257b07b6e390c729dc6db29"
+          "sha256": "sha256:61edf7d26a719cb0cc9d1a288bd5702ad34aa0b06d3738a455577594898eb657"
         }
       ],
       "risk_acceptance": null

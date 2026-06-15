@@ -117,6 +117,8 @@ the release policy in `docs/release-policy.md`.
   `isValidSignature(bytes32,bytes)` magic-value validation.
 - Documented artist approval provenance semantics for direct, EIP-712, and
   ERC-1271 approvals, including stale state-bound approval handling.
+- Hardened artist approval digests to bind approval hashes to the freeze
+  manifest, supply settings, final-supply delay, core address, and chain ID.
 - Added a reusable ADV-001 protocol state-machine smoke harness with
   deterministic cross-contract coverage for fixed-price minting, auction
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,

@@ -91,6 +91,19 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
             .assertEq(expectedApprovalHash, "typed approval hash not stored");
     }
 
+    function testEIP712ArtistSignatureAcceptsCompactSignature() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        address signingArtist = vm.addr(ARTIST_PRIVATE_KEY);
+        deployed.core.setCollectionData(COLLECTION_ID, signingArtist, 5, 10, 1 days);
+        bytes32 expectedApprovalHash = deployed.core.hashArtistApproval(COLLECTION_ID);
+        bytes memory compactProof = _signCompactArtistApproval(deployed.core, ARTIST_PRIVATE_KEY);
+
+        deployed.core.artistSignature(COLLECTION_ID, "compact-typed-approval", compactProof);
+
+        deployed.core.artistApprovalHashes(COLLECTION_ID)
+            .assertEq(expectedApprovalHash, "compact approval hash not stored");
+    }
+
     function testEIP712ArtistSignatureRejectsWrongSigner() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         address signingArtist = vm.addr(ARTIST_PRIVATE_KEY);
@@ -145,7 +158,87 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"12716529");
     }
 
-    function testApprovedCollectionMutationInvalidatesArtistSignature() public {
+    function testERC1271ArtistSignatureRejectsRevertingContractWalletApproval() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+
+        artistWallet.setRevertingSignature();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"12716529");
+    }
+
+    function testERC1271ArtistSignatureRejectsEmptyContractWalletApprovalReturn() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+
+        artistWallet.setEmptyReturn();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"12716529");
+    }
+
+    function testERC1271ArtistSignatureRejectsShortContractWalletApprovalReturn() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+
+        artistWallet.setShortReturn();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"12716529");
+    }
+
+    function testERC1271ArtistSignatureRejectsExtraContractWalletApprovalReturn() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+
+        artistWallet.setExtraReturn();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"12716529");
+    }
+
+    function testERC1271ArtistSignatureRejectsWrongContractWalletProof() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+        bytes memory artistProof = hex"12716529";
+        artistWallet.setValidSignature(deployed.core.hashArtistApproval(COLLECTION_ID), artistProof);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", hex"bad1dead");
+    }
+
+    function testERC1271ArtistSignatureRejectsStaleContractWalletApproval() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        ArtistERC1271Mock artistWallet = new ArtistERC1271Mock();
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 5, 10, 1 days);
+        bytes memory artistProof = hex"12716529";
+        artistWallet.setValidSignature(deployed.core.hashArtistApproval(COLLECTION_ID), artistProof);
+
+        deployed.core.setCollectionData(COLLECTION_ID, address(artistWallet), 8, 10, 1 days);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistApprovals.ArtistSignatureInvalid.selector)
+        );
+        deployed.core.artistSignature(COLLECTION_ID, "contract-wallet-approval", artistProof);
+    }
+
+    function testApprovedCollectionMutationStalesArtistSignature() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
         vm.prank(ARTIST);
@@ -155,6 +248,8 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         deployed.core.setCollectionData(COLLECTION_ID, ARTIST, 9, 10, 2 days);
 
         deployed.core.artistSigned(COLLECTION_ID).assertFalse("artist approval not invalidated");
+        deployed.core.artistsSignatures(COLLECTION_ID)
+            .assertEq("artist-approved-genesis", "artist signature text not retained");
         deployed.core.artistApprovalHashes(COLLECTION_ID)
             .assertEq(previousApprovalHash, "stale approval hash not retained");
         (deployed.core.hashArtistApproval(COLLECTION_ID) != previousApprovalHash)
@@ -163,6 +258,11 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         vm.prank(ARTIST);
         deployed.core.artistSignature(COLLECTION_ID, "artist-reapproved-genesis");
         deployed.core.artistSigned(COLLECTION_ID).assertTrue("artist could not reapprove");
+        deployed.core.artistApprovalHashes(COLLECTION_ID)
+            .assertEq(
+                deployed.core.hashArtistApproval(COLLECTION_ID),
+                "reapproval did not store current hash"
+            );
     }
 
     function testArtistCanSignFinalFrozenCollectionState() public {
@@ -199,6 +299,17 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
         return abi.encodePacked(r, s, v);
     }
 
+    function _signCompactArtistApproval(StreamCore core, uint256 privateKey)
+        private
+        returns (bytes memory)
+    {
+        (uint8 v, bytes32 r, bytes32 s) =
+            vm.sign(privateKey, core.hashArtistApproval(COLLECTION_ID));
+        uint256 yParity = uint256(v) - 27;
+        bytes32 vs = bytes32(uint256(s) | (yParity << 255));
+        return abi.encodePacked(r, vs);
+    }
+
     function _mintToken(DeployedStream memory deployed) private {
         vm.prank(address(deployed.minter));
         deployed.core.mint(TOKEN_ID, ARTIST, "1,2,3", 7, COLLECTION_ID);
@@ -210,19 +321,45 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
 }
 
 contract ArtistERC1271Mock {
+    enum ResponseMode {
+        Strict,
+        InvalidMagic,
+        Revert,
+        EmptyReturn,
+        ShortReturn,
+        ExtraReturn
+    }
+
     bytes4 private constant MAGIC_VALUE = 0x1626ba7e;
+    bytes4 private constant INVALID_MAGIC_VALUE = 0xffffffff;
     bytes32 private validDigest;
     bytes private validSignature;
-    bytes4 private magicValue = MAGIC_VALUE;
+    ResponseMode private responseMode;
 
     function setValidSignature(bytes32 digest, bytes memory signature) external {
         validDigest = digest;
         validSignature = signature;
-        magicValue = MAGIC_VALUE;
+        responseMode = ResponseMode.Strict;
     }
 
     function setInvalidMagicValue() external {
-        magicValue = 0xffffffff;
+        responseMode = ResponseMode.InvalidMagic;
+    }
+
+    function setRevertingSignature() external {
+        responseMode = ResponseMode.Revert;
+    }
+
+    function setEmptyReturn() external {
+        responseMode = ResponseMode.EmptyReturn;
+    }
+
+    function setShortReturn() external {
+        responseMode = ResponseMode.ShortReturn;
+    }
+
+    function setExtraReturn() external {
+        responseMode = ResponseMode.ExtraReturn;
     }
 
     function isValidSignature(bytes32 digest, bytes memory signature)
@@ -230,12 +367,37 @@ contract ArtistERC1271Mock {
         view
         returns (bytes4)
     {
+        if (responseMode == ResponseMode.Revert) {
+            revert("ERC1271_REVERT");
+        }
+        if (responseMode == ResponseMode.EmptyReturn) {
+            assembly ("memory-safe") {
+                return(0, 0)
+            }
+        }
+        if (responseMode == ResponseMode.ShortReturn) {
+            bytes4 value = MAGIC_VALUE;
+            assembly ("memory-safe") {
+                let ptr := mload(0x40)
+                mstore(ptr, shl(224, value))
+                return(ptr, 0x04)
+            }
+        }
+        if (responseMode == ResponseMode.ExtraReturn) {
+            bytes4 value = MAGIC_VALUE;
+            assembly ("memory-safe") {
+                let ptr := mload(0x40)
+                mstore(ptr, shl(224, value))
+                mstore(add(ptr, 0x20), 1)
+                return(ptr, 0x40)
+            }
+        }
         if (
             digest == validDigest && keccak256(signature) == keccak256(validSignature)
-                && magicValue == MAGIC_VALUE
+                && responseMode == ResponseMode.Strict
         ) {
             return MAGIC_VALUE;
         }
-        return magicValue;
+        return INVALID_MAGIC_VALUE;
     }
 }
