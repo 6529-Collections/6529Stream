@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/adversarial-sequence-tests` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/371` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/372` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/373` |
 | Next issue | `https://github.com/6529-Collections/6529Stream/issues/217` (`testnet_deployment_rehearsal` remains open for real reviewed testnet evidence; Sepolia execution is blocked locally by missing RPC/signer/funding environment) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 01:35 UTC` |
+| Last updated | `2026-06-15 01:37 UTC` |
 
 ## Packaging Notes
 
@@ -245,12 +245,13 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add auction/drop/randomizer adversarial sequence tests (Queue Item 178)
 
-Status: local draft on `codex/adversarial-sequence-tests`; PR not opened yet.
+Status: draft PR #373 opened; CI and CodeRabbit pending on pushed head.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/372`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/373`.
 Branch: `codex/adversarial-sequence-tests`.
 Branch started from PR #371 squash merge commit
 `d86c54f0ce9e2ad03728623f0c6d1eac9465bb24`.
+Opening PR head: `d17501acf4efccd84d8576b4bc138ad4ca1017b2`.
 
 Goal:
 
@@ -279,6 +280,8 @@ Validation completed so far:
 - `python scripts\check_changelog.py`, roadmap/backlog heading scan, and
   `git diff --check` passed after the roadmap-only update.
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed locally on 2026-06-15 01:35 UTC with existing compiler/NatSpec warning noise only.
+- Draft PR #373 opened and CodeRabbit review requested in issue comment
+  `4703818536`; Claude intentionally skipped per current user instruction.
 
 ### PR candidate: Add end-to-end protocol state-machine harness (Queue Item 177)
 
