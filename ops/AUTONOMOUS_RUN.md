@@ -35,7 +35,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/minter-event-read-model` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/438` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/439` |
 | Next issue | TBD after CON-002 minter event read-model coverage lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
@@ -287,7 +287,7 @@ after the minter ABI/deployment artifact refresh; those bindings and derived
 risk/release/checksum artifacts were updated before the final passing wrapper
 run.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/438`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/439`.
 Branch: `codex/minter-event-read-model`.
 
 Goal:
@@ -350,6 +350,12 @@ Measured impact:
   EIP-170 margin.
 - Fixed-price mint gas snapshot increased from 622,483 to 627,264 gas due to
   the new per-recipient minter range event.
+
+Bot/review status:
+
+- PR #439 opened on branch `codex/minter-event-read-model`.
+- CodeRabbit review requested in comment `4715437386`.
+- CI and 6529bot feedback are pending.
 
 ### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 
