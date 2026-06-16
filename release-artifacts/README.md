@@ -7,8 +7,8 @@ Integrator-facing consumers should start from
 [`docs/integrations/README.md`](../docs/integrations/README.md). That page maps
 this directory's generated ABI checksums, address books, deployment manifests,
 event topics, interface IDs, release manifest, source verification inputs, risk
-register, and readiness artifacts into a single source-of-truth view without
-claiming public beta or production readiness.
+register, protocol surface report, and readiness artifacts into a single
+source-of-truth view without claiming public beta or production readiness.
 
 Run after the production build profile:
 
@@ -17,6 +17,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 python scripts/check_contract_size_budget.py
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_release_artifacts.py
+python scripts/generate_protocol_surface_report.py
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_dependency_artifact_manifest.py
 python scripts/check_abi_compatibility.py
@@ -68,6 +69,8 @@ python scripts/test_contract_size_budget.py
 python scripts/check_contract_size_budget.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_protocol_surface_report.py
+python scripts/generate_protocol_surface_report.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
@@ -164,6 +167,12 @@ python scripts/generate_release_checksums.py --check
 The generated files under `latest/` are intentionally tracked. They give
 deployment manifests stable ABI checksum, bytecode checksum, interface ID, and
 event topic catalog inputs before any live network broadcast exists.
+
+`latest/protocol-surface-report.json` is generated from the production contract
+set and Foundry artifacts. It records functions, selectors, events, topic0
+values, custom errors, ABI hashes, bytecode hashes, and runtime sizes for
+integrators and auditors. It is deterministic local evidence only; it does not
+claim protocol correctness, production readiness, or live deployment parity.
 
 `latest/source-verification-inputs.json` is generated from the production
 Foundry artifacts, source files, compiler settings, and contract config. It

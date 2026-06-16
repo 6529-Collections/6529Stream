@@ -46,6 +46,8 @@ python scripts/test_admin_ceremony_evidence.py
 python scripts/check_admin_ceremony_evidence.py
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_protocol_surface_report.py
+python scripts/generate_protocol_surface_report.py --check
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
@@ -118,6 +120,13 @@ forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --
 forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
 forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
 ```
+
+The protocol surface report step checks
+[`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json)
+against the current production Foundry artifacts. It is an integrator and audit
+review index over functions, selectors, events, topic0 values, custom errors,
+ABI hashes, bytecode hashes, and runtime sizes; it is not a production-readiness
+claim.
 
 The size step is the production deployability gate. It skips test and script
 contracts so non-production artifacts do not pollute EIP-170/EIP-3860 evidence,

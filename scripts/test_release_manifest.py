@@ -169,6 +169,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "royalty-policy.md",
         root / "docs" / "warning-dispositions.md",
         root / "docs" / "release-readiness.md",
+        root / "docs" / "protocol-surface.md",
         root / "docs" / "integrations" / "README.md",
         root / "docs" / "integrations" / "contract-flows.md",
         root / "docs" / "integrations" / "auction-flows.md",
@@ -206,6 +207,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         latest / "interface-ids.json",
         {"schema_version": "6529stream.interface-ids.v1", "interfaces": {}},
+    )
+    write_json(
+        latest / "protocol-surface-report.json",
+        {"schema_version": "6529stream.protocol-surface-report.v1", "contracts": {}},
     )
     write_json(
         latest / "release-artifact-manifest.json",
@@ -1246,6 +1251,10 @@ class ReleaseManifestTests(unittest.TestCase):
                 "6529stream.dependency-artifact-manifest.v1",
             )
             self.assertEqual(
+                manifest["release_artifacts"]["protocol_surface_report"]["schema_version"],
+                "6529stream.protocol-surface-report.v1",
+            )
+            self.assertEqual(
                 manifest["release_artifacts"]["one_of_one_provenance_manifest"][
                     "schema_version"
                 ],
@@ -1661,6 +1670,15 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 public_beta["sha256"],
                 generator.file_sha256(custom_latest / "public-beta-evidence.json"),
+            )
+            protocol_surface = manifest["release_artifacts"]["protocol_surface_report"]
+            self.assertEqual(
+                protocol_surface["path"],
+                "custom-release-artifacts/latest/protocol-surface-report.json",
+            )
+            self.assertEqual(
+                protocol_surface["sha256"],
+                generator.file_sha256(custom_latest / "protocol-surface-report.json"),
             )
             risk_register = manifest["release_artifacts"]["risk_register"]
             self.assertEqual(

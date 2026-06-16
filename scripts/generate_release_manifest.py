@@ -34,6 +34,7 @@ PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
 PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
 RISK_REGISTER_FILENAME = "risk-register.json"
+PROTOCOL_SURFACE_REPORT_FILENAME = "protocol-surface-report.json"
 RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
 RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
 RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME = (
@@ -85,6 +86,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/royalty-policy.md"),
     Path("docs/warning-dispositions.md"),
     Path("docs/release-readiness.md"),
+    Path("docs/protocol-surface.md"),
     Path("docs/integrations/README.md"),
     Path("docs/integrations/contract-flows.md"),
     Path("docs/integrations/auction-flows.md"),
@@ -1034,6 +1036,11 @@ def build_manifest(
             ),
             "interface_ids": file_record(
                 release_artifacts_dir / "interface-ids.json",
+                repo_root,
+                schema_required=True,
+            ),
+            "protocol_surface_report": file_record(
+                release_artifacts_dir / PROTOCOL_SURFACE_REPORT_FILENAME,
                 repo_root,
                 schema_required=True,
             ),

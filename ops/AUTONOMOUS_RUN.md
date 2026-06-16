@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-tokenuri-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/433` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/434` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/435` |
-| Next issue | TBD after PR #435 merges or is abandoned. |
+| Active PR branch | `codex/protocol-surface-report` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/435` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/436` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
+| Next issue | TBD after CON-001 protocol surface report lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 04:05 UTC` |
+| Last updated | `2026-06-16 05:10 UTC` |
 
 ## Packaging Notes
 
@@ -267,20 +267,107 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 203 | Burn down or disposition warning noise | Gate G/Gate F support | Add checked warning-disposition baseline and local/CI/Windows gate wiring | Merged in PR #429 |
 | 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | Merged in PR #431 |
 | 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | Merged in PR #433 |
-| 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Active issue #434 |
+| 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Merged in PR #435 |
+| 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Active issue #436 |
 
 ## Current PR Worklog
 
-### PR candidate: Recover tokenURI dispatch headroom (Queue Item 206)
+### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 
-Status: PR #435 open; local implementation, artifact refresh, `make check`,
-and Windows wrapper validation complete; addressing 6529bot request for
-explicit PR-local metadata-dispatch equivalence coverage.
+Status: issue created; branch started from PR #435 squash merge commit
+`ef33e5cf18871cbcdb61fed7b0686fb48e6efc69`; PR #437 open and updated with
+generator, tests, docs, local/CI gate wiring, release-manifest coverage,
+checksum coverage, canonical compact generated protocol-surface JSON to keep
+bot review inside line budgets, and refreshed generated artifacts.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/436`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/437`.
+Branch: `codex/protocol-surface-report`.
+
+Goal:
+
+- Add a deterministic protocol surface report for auditors, frontend/indexer
+  integrators, and maintainers.
+- Parse current Foundry artifacts for public/external functions, events, and
+  custom errors across release-relevant protocol contracts.
+- Classify function mutability and read/write posture, include signatures,
+  selectors/topics where available, and fail on committed-output drift.
+- Wire the report into release manifest/checksum coverage so exposed protocol
+  surface changes are visible in release packets.
+
+Validation plan:
+
+- Focused Python unit tests for the report generator.
+- Report generation and `--check` mode.
+- Release manifest/checksum checks after generated artifact refresh.
+- Release artifact downstream-file check.
+- Changelog gate.
+- `make check`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Validation completed locally:
+
+- `python scripts/test_protocol_surface_report.py`
+- `python scripts/generate_protocol_surface_report.py --check`
+- `python scripts/test_release_artifacts.py`
+- `python scripts/generate_release_artifacts.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python -m py_compile scripts\generate_protocol_surface_report.py scripts\test_protocol_surface_report.py`
+- `python scripts/test_risk_register.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_readiness.py`
+- `python scripts/check_release_readiness.py`
+- `python scripts/test_audit_package.py`
+- `python scripts/check_audit_package.py`
+- `python scripts/test_integrations_readme.py`
+- `python scripts/check_integrations_readme.py`
+- `python scripts/test_changelog_check.py`
+- `python scripts/check_changelog.py`
+- `make check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Bot/review notes:
+
+- First CodeRabbit review attempts on PR #437 were rate-limited.
+- After compacting the generated report to reduce the PR from 12k+ added lines
+  to under 1k, 6529bot reviewed head `0e9841f3ebbd7359151d017ce6dc96855e52bd14`
+  with no new findings.
+- 6529bot asked for a maintainer eyeball on committed summary-count drift and
+  deterministic output; these are now covered by
+  `test_committed_report_summary_matches_contract_entries` and
+  `test_committed_report_is_canonical_compact_json`.
+- `git diff --check`
+- `python -m py_compile scripts\generate_protocol_surface_report.py scripts\test_protocol_surface_report.py`
+
+Report summary:
+
+- Release contracts covered: 10.
+- Functions: 345 total, 243 read, 102 write, 4 payable.
+- Events: 71.
+- Custom errors: 73.
+
+Merge criteria:
+
+- No production Solidity behavior changes.
+- Generated report is deterministic and useful enough to support CON-002 event
+  gap analysis and audit packet review.
+- CI and bot feedback are clean or have documented autonomous disposition.
+
+### Completed PR: Recover tokenURI dispatch headroom (Queue Item 206)
+
+Status: merged in PR #435.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/434`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/435`.
 Branch: `codex/streamcore-tokenuri-headroom`.
 Branch started from PR #433 squash merge commit
 `f10b4eaab2c9bbe8a972db99f1a488cb370897b4`.
+Merged as `ef33e5cf18871cbcdb61fed7b0686fb48e6efc69`.
 
 Goal:
 
