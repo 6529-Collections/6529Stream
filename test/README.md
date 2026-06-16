@@ -135,6 +135,13 @@ withdrawals. Provider-specific wrong request/token/collection randomizer
 permutations stay in lifecycle-specific randomizer suites because this harness
 uses the immediate randomizer for compact cross-contract flows.
 
+`StreamCustomErrorNegative.t.sol` adds ADV-012 mutation-style negative coverage
+for representative release-tracked custom errors. It pins selected custom-error
+selectors to their signatures, probes low-level invalid calls for typed
+selectors instead of generic reverts, and asserts argument encodings for
+metadata and randomizer lifecycle failures. It complements the path-specific
+tests rather than replacing them.
+
 `StreamGasSnapshot.t.sol` provides the local Gate D gas snapshot surface. The
 committed baseline at `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`
 is generated and checked with `forge snapshot --match-path

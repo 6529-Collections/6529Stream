@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `StreamCustomErrorNegative.t.sol`, a mutation-style negative suite that
+  pins representative release-tracked custom-error selectors and argument
+  encodings across admin, minter, dependency, metadata, contract-metadata, and
+  randomizer lifecycle failure paths.
 - Added gas envelope coverage for high-risk user flows: expanded the local
   Foundry gas snapshot to fixed-price withdrawal, near-end outbid, bidder
   refund withdrawal, no-bid settlement, auction proceeds withdrawal, and curator

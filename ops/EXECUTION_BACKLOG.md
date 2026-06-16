@@ -3365,8 +3365,8 @@ unless an external dependency changes.
 | `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Merged in PR #441 |
 | `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Merged in PR #443 |
 | `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Merged in PR #445; issue #444 closed completed |
-| `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | PR #447 open; issue #446; branch `codex/gas-envelope-high-risk-flows` |
-| `ADV-012` | Add mutation-style negative tests for custom errors | D/F | custom error inventory |
+| `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | Merged in PR #447; issue #446 closed completed |
+| `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Active issue #448; local branch `codex/custom-error-negative-tests` |
 
 ### Contract/API Hardening
 
