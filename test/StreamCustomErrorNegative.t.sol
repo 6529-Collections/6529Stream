@@ -18,28 +18,18 @@ contract StreamCustomErrorNegativeTest is CharacterizationTestBase, StreamFixtur
     address private constant UNAUTHORIZED = address(0xBAD);
 
     function testRepresentativeCustomErrorSelectorsMatchReleaseSurface() public pure {
+        _assertSelector(StreamCore.FunctionAdminUnauthorized.selector, bytes4(0x9a763740));
+        _assertSelector(StreamCore.NotMinterContract.selector, bytes4(0x3acd46d7));
+        _assertSelector(StreamCore.MetadataFieldTooLarge.selector, bytes4(0x46caadcb));
+        _assertSelector(StreamCore.UnsafeMetadataURI.selector, bytes4(0x97dbd465));
+        _assertSelector(DependencyRegistry.DependencyKeyReserved.selector, bytes4(0x09fd460b));
+        _assertSelector(StreamContractMetadata.InvalidCoreContract.selector, bytes4(0xf48e6f72));
         _assertSelector(
-            StreamCore.FunctionAdminUnauthorized.selector, "FunctionAdminUnauthorized()"
-        );
-        _assertSelector(StreamCore.NotMinterContract.selector, "NotMinterContract()");
-        _assertSelector(
-            StreamCore.MetadataFieldTooLarge.selector,
-            "MetadataFieldTooLarge(bytes32,uint256,uint256)"
-        );
-        _assertSelector(StreamCore.UnsafeMetadataURI.selector, "UnsafeMetadataURI()");
-        _assertSelector(
-            DependencyRegistry.DependencyKeyReserved.selector, "DependencyKeyReserved(bytes32)"
-        );
-        _assertSelector(
-            StreamContractMetadata.InvalidCoreContract.selector, "InvalidCoreContract()"
-        );
-        _assertSelector(
-            StreamRandomizerLifecycle.UnknownRandomnessRequest.selector,
-            "UnknownRandomnessRequest(uint256)"
+            StreamRandomizerLifecycle.UnknownRandomnessRequest.selector, bytes4(0xab2112a6)
         );
         _assertSelector(
             StreamRandomizerLifecycle.TokenRandomnessRequestAlreadyExists.selector,
-            "TokenRandomnessRequestAlreadyExists(uint256,uint256)"
+            bytes4(0xa68fbeff)
         );
     }
 
@@ -143,8 +133,8 @@ contract StreamCustomErrorNegativeTest is CharacterizationTestBase, StreamFixtur
         vrf.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 456);
     }
 
-    function _assertSelector(bytes4 actual, string memory signature) private pure {
-        require(actual == bytes4(keccak256(bytes(signature))), "selector drift");
+    function _assertSelector(bytes4 actual, bytes4 expected) private pure {
+        require(actual == expected, "selector drift");
     }
 
     function _assertCallRevertsWithSelector(
@@ -161,6 +151,7 @@ contract StreamCustomErrorNegativeTest is CharacterizationTestBase, StreamFixtur
     }
 
     function _selectorOf(bytes memory revertData) private pure returns (bytes4 selector) {
+        require(revertData.length >= 4, "missing revert selector");
         assembly {
             selector := mload(add(revertData, 32))
         }
@@ -190,6 +181,7 @@ contract StreamCustomErrorNegativeTest is CharacterizationTestBase, StreamFixtur
 contract ADV012MockVrfCoordinator {
     uint256 public nextRequestId = 1;
 
+    // Deliberately permissive: this suite exercises lifecycle errors, not VRF request params.
     function requestRandomWords(bytes32, uint64, uint16, uint32, uint32)
         external
         returns (uint256 requestId)
