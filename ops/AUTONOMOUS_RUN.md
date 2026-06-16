@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/randomizer-adversarial-tests` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/449` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/450` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/451` |
 | Next issue | TBD after ADV-006 randomizer adversarial coverage lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 11:27 UTC` |
+| Last updated | `2026-06-16 11:42 UTC` |
 
 ## Packaging Notes
 
@@ -16077,6 +16077,7 @@ Outcome:
 | 2026-06-16 10:49 | Implement ADV-012 local draft | Added `test/StreamCustomErrorNegative.t.sol` with selector-drift assertions, low-level mutation probes for admin/minter/dependency failures, argument-checked metadata and randomizer lifecycle negative paths, plus test docs/changelog/run-state updates. Focused `forge test --match-path test/StreamCustomErrorNegative.t.sol -vvv` passed with existing known compiler warnings only. |
 | 2026-06-16 11:04 | Open PR #449 for ADV-012 | PR #449 is open at `https://github.com/6529-Collections/6529Stream/pull/449`, closes issue #448, and packages custom-error negative coverage plus release-artifact refresh. Local validation passed: focused custom-error suite, risk-register, bytecode-release-proof, release-manifest, release-checksum, changelog, `git diff --check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-16 11:27 | Merge PR #449 and start ADV-006 | PR #449 merged as `8d05474fd1afbd3c8e287aa92bf981824e5cf401`; CI Foundry smoke and Windows wrapper passed, CodeRabbit status was success, review threads were empty, and 6529bot final-head follow-up reported no new findings after the nice-to-haves were addressed. Created issue #450 and branch `codex/randomizer-adversarial-tests`; local draft adds `test/StreamRandomizerAdversarial.t.sol` covering VRF/arRNG duplicate callback reentry during core writes and stale-provider fulfillment preservation. Focused `forge test --match-path test/StreamRandomizerAdversarial.t.sol -vvv` passed with existing known compiler warnings only. |
+| 2026-06-16 11:42 | Open PR #451 for ADV-006 | PR #451 is open at `https://github.com/6529-Collections/6529Stream/pull/451`, closes issue #450, and CodeRabbit review was requested in comment `4718341904`. Local validation passed: focused randomizer adversarial suite, full `make check`, and Windows `scripts\check.ps1`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
