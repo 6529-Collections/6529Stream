@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/streamcore-script-headroom` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/429` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/430` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/431` |
 | Next issue | Recover additional `StreamCore` bytecode headroom by moving collection and dependency script assembly into the linked renderer library while preserving Core selectors and metadata output. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 02:36 UTC` |
+| Last updated | `2026-06-16 02:40 UTC` |
 
 ## Packaging Notes
 
@@ -271,10 +271,10 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Recover script assembly headroom (Queue Item 204)
 
-Status: issue #430 open; branch `codex/streamcore-script-headroom` is in local
-implementation and validation.
+Status: PR #431 open; CodeRabbit review requested in comment `4714313962`;
+waiting for CI and bot feedback.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/430`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/431`.
 Branch: `codex/streamcore-script-headroom`.
 Branch started from PR #429 squash merge commit
 `de81645fa20fbf7da4275b362c80d70c7483b326`.
