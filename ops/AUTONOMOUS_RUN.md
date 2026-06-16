@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/interface-version-views` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/457` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/458` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/459` |
 | Next issue | TBD after CON-007 interface/version views lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 15:16 UTC` |
+| Last updated | `2026-06-16 15:18 UTC` |
 
 ## Packaging Notes
 
@@ -16091,6 +16091,7 @@ Outcome:
 | 2026-06-16 14:34 | Address PR #457 NatSpec checker review | 6529bot requested stronger proof around multiline declarations, overload attribution, re-homed inherited declarations, and baseline refresh guardrails. The checker now records normalized ABI signatures for declarations before falling back to arity, `--write-baseline` prints explicit added/removed/status summaries, docs describe that reviewer summary, and focused tests cover multiline signatures, same-arity overloads, comment adjacency, `declaration_not_in_source` becoming stale after first-party re-declaration, committed docs summary drift, and baseline summary output. `make release-checksums`, focused NatSpec tests/check, release-manifest check, release-checksum check, and `git diff --check` passed locally. Next action is to commit/push the review-response head and wait for CI/bot follow-up. |
 | 2026-06-16 14:41 | Merge PR #457 and start CON-007 | PR #457 merged as `0116b383bb8a344f1fc0ffa7206888fa493df865` after CodeRabbit, Foundry smoke, and Windows wrapper checks passed; 6529bot follow-up reported no new findings and review threads were empty. Issue #458 is open for CON-007 interface/version views, and branch `codex/interface-version-views` starts from updated `main`. |
 | 2026-06-16 15:16 | Validate CON-007 local draft | Added `IStreamCompatibility` and implemented the adapter-based protocol/version/schema/release/interface-probe views on `StreamContractMetadata` so frontend compatibility checks do not consume `StreamCore` bytecode. Focused tests cover the marker, protocol name/version, metadata schema version, release tag/hash, adapter ERC-165 support, and delegated core probes for ERC-721, ERC-2981, and ERC-4906. Integration docs/checkers and release manifests now include the new compatibility guide. Local validation passed: `forge test --match-path test/StreamContractMetadata.t.sol -vvv`, focused NatSpec tests/check, integrations README tests/check, release-manifest tests, `make release-checksums`, full `make check`, and `git diff --check`. Build size from the release target: `StreamCore` runtime `22,184` bytes with `2,392` bytes of EIP-170 margin; `StreamContractMetadata` runtime `3,190` bytes. Next action is to commit, push, open the CON-007 PR, wait for CI/bot feedback, and merge only when clean. |
+| 2026-06-16 15:18 | Open PR #459 for CON-007 | PR #459 is open at `https://github.com/6529-Collections/6529Stream/pull/459`, closes issue #458, and packages adapter-based interface/version views, focused metadata-adapter tests, integration guidance, and regenerated release/deployment evidence. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
