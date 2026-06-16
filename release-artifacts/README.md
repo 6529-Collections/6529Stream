@@ -58,6 +58,7 @@ python scripts/check_mobile_walletconnect.py
 python scripts/check_electron_security_wallets.py
 python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
+python scripts/test_release_mode.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
@@ -160,6 +161,7 @@ python scripts/test_operator_admin_ui.py
 python scripts/check_operator_admin_ui.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_release_mode.py
 python scripts/test_release_notes.py
 python scripts/generate_release_notes.py --check
 python scripts/test_release_manifest.py
@@ -209,6 +211,15 @@ collection pin transactions, public-beta readiness, production readiness, or
 external audit acceptance. Validate it with
 `python scripts/test_dependency_provenance_attestation.py` and
 `python scripts/generate_dependency_provenance_attestation.py --check`.
+
+The release-mode gate is not part of the default artifact refresh path because
+the committed baseline is intentionally blocked. Use
+`python scripts/check_release_mode.py --phase public-beta`,
+`python scripts/check_release_mode.py --phase production-release`, or the manual
+Release Mode GitHub workflow only when reviewing a release candidate with
+retained live evidence. Those commands are expected to fail until every row
+for the selected phase is `complete` or `accepted_risk`; production release
+mode also requires public-beta readiness.
 
 `latest/one-of-one-provenance-manifest.json` is generated from schemaed
 descriptors under `provenance/`. It catalogs 1/1 provenance records, descriptor

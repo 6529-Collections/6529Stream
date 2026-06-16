@@ -210,6 +210,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_one_of_one_permanence_manifest.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_readiness.py"
 & $pythonPath @pythonArgs "scripts\check_release_readiness.py"
+& $pythonPath @pythonArgs "scripts\test_release_mode.py"
 & $pythonPath @pythonArgs "scripts\test_release_notes.py"
 & $pythonPath @pythonArgs "scripts\generate_release_notes.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_manifest.py"

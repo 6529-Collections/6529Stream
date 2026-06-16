@@ -205,6 +205,8 @@ jobs:
             scripts/test_warning_dispositions.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
+            scripts/check_release_mode.py \
+            scripts/test_release_mode.py \
             scripts/generate_dependency_provenance_attestation.py \
             scripts/test_dependency_provenance_attestation.py \
             scripts/generate_release_notes.py \
@@ -582,6 +584,7 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_readiness.py 2>&1 | tee ci-logs/release-readiness-tests.log
           python3 scripts/check_release_readiness.py 2>&1 | tee ci-logs/release-readiness-check.log
+          python3 scripts/test_release_mode.py 2>&1 | tee ci-logs/release-mode-tests.log
 
       - name: Release manifest
         shell: bash

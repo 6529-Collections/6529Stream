@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:46e5dc76abb44db9e010bdd86575f041d8471d9e39f55e0faf0652fc6d38d947",
-      "size_bytes": 45720
+      "sha256": "sha256:62640289a95c178d56f78847741ebb9408ff276cdcd921edc54e199bd576befe",
+      "size_bytes": 46173
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:5734fa3475ab740df3abb8213cf6cb2fc81b07e97365530dbea4e189d7f0a6ed",
+      "sha256": "sha256:4208368a5ba7d9fb4216660f4534a719213b75d5d05ec03415893918a4d60078",
       "size_bytes": 22887
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added an opt-in release-mode evidence gate with `scripts/check_release_mode.py`, focused tests, manual Makefile targets, a workflow-dispatch GitHub Actions profile, release-readiness/tooling docs, and checksum coverage. Default CI validates the checker and the structurally blocked evidence baseline; release-mode checks intentionally fail until public-beta or production-release evidence rows are complete or explicitly accepted as risk.",
       "Added a deterministic dependency provenance attestation bundle generated from the dependency artifact manifest, with descriptor/source hash revalidation, no-secret checks, validation commands, local/CI/Windows gate wiring, release manifest/checksum coverage, and explicit local-baseline limitations for non-live dependency evidence.",
       "Added deterministic release notes generation from changelog and committed release evidence, with JSON/Markdown outputs, tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, and explicit no-overclaim readiness boundaries for the pre-audit local baseline.",
       "Added `scripts/verify_release_artifacts.py`, an offline third-party verifier for the committed release bundle, with focused tests, local/CI/Windows gate wiring, checksum coverage for the verifier script, and documentation of what the check proves versus live deployment/readiness evidence it does not prove.",
