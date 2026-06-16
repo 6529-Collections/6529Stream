@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:639a119f4e36c6a29c1a4f177ae666b98ab621fa1e516b38c01a7a89f5b1980f",
-        "size_bytes": 47719,
+        "sha256": "sha256:6e9996a7620f1d55157445c59befb05bc6ebaa3a345d839d8552e2482ae9019e",
+        "size_bytes": 48061,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:18da053c8d2a2ff866f3a5a665c69b361629817915a6d7f5f88bfe29c6030fd3",
-        "size_bytes": 45276
+        "sha256": "sha256:92f968a3acf19ee9e747482742d83432dc29e605b22330a62dcaccf9b4600a10",
+        "size_bytes": 45611
       }
     },
     "artifact_manifest": {
@@ -105,6 +105,12 @@
       "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
       "size_bytes": 1701,
       "schema_version": "6529stream.dependency-artifact-manifest.v1"
+    },
+    "dependency_provenance_attestation": {
+      "path": "release-artifacts/latest/dependency-provenance-attestation.json",
+      "sha256": "sha256:45740a0e0d0c6a6042138ecee59a1cab54d5352bf96bcfa5a227b9136bcf882b",
+      "size_bytes": 3232,
+      "schema_version": "6529stream.dependency-provenance-attestation.v1"
     },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -141,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:44e07066b7adf7846b95fcfc3f2096a5f92a7f510a2dc86e52480ee6c9be2d65",
+      "sha256": "sha256:5734fa3475ab740df3abb8213cf6cb2fc81b07e97365530dbea4e189d7f0a6ed",
       "size_bytes": 22887,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1953,8 +1959,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f7a6484e8ca1f7637923005a7fec43dcc5d380147cc689cd8c7e6d60fec65f8f",
-      "size_bytes": 45377
+      "sha256": "sha256:46e5dc76abb44db9e010bdd86575f041d8471d9e39f55e0faf0652fc6d38d947",
+      "size_bytes": 45720
     },
     "governance_docs": [
       {
@@ -1969,8 +1975,8 @@
       },
       {
         "path": "docs/dependency-operations.md",
-        "sha256": "sha256:989a66a27e77db4226e979814297e049d2164698ddd6c45014681324b6ea8e20",
-        "size_bytes": 13854
+        "sha256": "sha256:65a30b7f5fd3e2356bbbbe7fb1a9388eb113f3b3cf572cae03b9a3404225f0af",
+        "size_bytes": 15061
       },
       {
         "path": "docs/randomizer-operations.md",

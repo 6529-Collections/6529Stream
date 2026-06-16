@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added a deterministic dependency provenance attestation bundle generated from the dependency artifact manifest, with descriptor/source hash revalidation, no-secret checks, validation commands, local/CI/Windows gate wiring, release manifest/checksum coverage, and explicit local-baseline limitations for non-live dependency evidence.
 - Added deterministic release notes generation from changelog and committed release evidence, with JSON/Markdown outputs, tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, and explicit no-overclaim readiness boundaries for the pre-audit local baseline.
 - Added `scripts/verify_release_artifacts.py`, an offline third-party verifier for the committed release bundle, with focused tests, local/CI/Windows gate wiring, checksum coverage for the verifier script, and documentation of what the check proves versus live deployment/readiness evidence it does not prove.
 - Added `IStreamCompatibility` and release-tracked compatibility views on the `StreamContractMetadata` adapter for frontend/indexer protocol checks: protocol name, protocol version, metadata schema version, release tag/hash, and adapter-or-core interface probing, with focused tests, integration docs, release-manifest/checksum coverage, and regenerated deployment/release artifacts while preserving `StreamCore` bytecode size.

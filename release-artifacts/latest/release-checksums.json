@@ -15,6 +15,7 @@
       "release-artifacts/signatures",
       "release-artifacts/latest",
       "release-artifacts/baselines",
+      "scripts/generate_dependency_provenance_attestation.py",
       "scripts/generate_release_notes.py",
       "scripts/verify_release_artifacts.py",
       "deployments/broadcasts",
@@ -32,7 +33,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:1b2b6fd27efa2eececa6b3fa1159b70b3a5819ed1ee4a0842f78d0b522f4a9ce"
+    "sha256": "sha256:61d0ea8cdeccbf0a93c58bd255e56f8ff6caab5754c373e36e8930d2566e3cd8"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -451,7 +452,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:1d57db9bf3243b656a8abb73152c18c6c559695c456cee38ac5810bd3fc025f3",
+      "sha256": "sha256:ba1c4177bf7b8652173d47810810bc958a98e00e19983e94b16836f569e4796e",
       "size_bytes": 79962
     },
     {
@@ -463,6 +464,11 @@
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
       "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
       "size_bytes": 1701
+    },
+    {
+      "path": "release-artifacts/latest/dependency-provenance-attestation.json",
+      "sha256": "sha256:45740a0e0d0c6a6042138ecee59a1cab54d5352bf96bcfa5a227b9136bcf882b",
+      "size_bytes": 3232
     },
     {
       "path": "release-artifacts/latest/event-topic-catalog.json",
@@ -556,22 +562,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:a4b8d3c0a118a70baf0b1e4d9a69fcc49f32ddd1250deca801ef7f39992c4c1a",
-      "size_bytes": 106620
+      "sha256": "sha256:f6f63cb2ee0161f84950ab4a11b933ba1546b4e60abb7ea84e64d9afc52cac2f",
+      "size_bytes": 106942
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:639a119f4e36c6a29c1a4f177ae666b98ab621fa1e516b38c01a7a89f5b1980f",
-      "size_bytes": 47719
+      "sha256": "sha256:6e9996a7620f1d55157445c59befb05bc6ebaa3a345d839d8552e2482ae9019e",
+      "size_bytes": 48061
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:18da053c8d2a2ff866f3a5a665c69b361629817915a6d7f5f88bfe29c6030fd3",
-      "size_bytes": 45276
+      "sha256": "sha256:92f968a3acf19ee9e747482742d83432dc29e605b22330a62dcaccf9b4600a10",
+      "size_bytes": 45611
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:44e07066b7adf7846b95fcfc3f2096a5f92a7f510a2dc86e52480ee6c9be2d65",
+      "sha256": "sha256:5734fa3475ab740df3abb8213cf6cb2fc81b07e97365530dbea4e189d7f0a6ed",
       "size_bytes": 22887
     },
     {
@@ -658,6 +664,11 @@
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
       "sha256": "sha256:b735c3468d421afe7e80ad71d52673f2e2c6ba9f863be8cc9ebcb120a2f15cb1",
       "size_bytes": 3470
+    },
+    {
+      "path": "scripts/generate_dependency_provenance_attestation.py",
+      "sha256": "sha256:6a7d21765cca4b494268ead6f93ef69fdddbcd9231283685c085ef61e1ba9a84",
+      "size_bytes": 16880
     },
     {
       "path": "scripts/generate_release_notes.py",

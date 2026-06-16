@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a deterministic dependency provenance attestation bundle generated from
+  the dependency artifact manifest, with descriptor/source hash revalidation,
+  no-secret checks, validation commands, local/CI/Windows gate wiring, release
+  manifest/checksum coverage, and explicit local-baseline limitations for
+  non-live dependency evidence.
 - Added deterministic release notes generation from changelog and committed
   release evidence, with JSON/Markdown outputs, tests, local/CI/Windows gate
   wiring, release-manifest/checksum coverage, and explicit no-overclaim

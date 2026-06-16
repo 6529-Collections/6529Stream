@@ -26,6 +26,7 @@ DOWNSTREAM_RELEASE_FILES = {
     "bytecode-release-proof.json",
     "custom-error-catalog.json",
     "dependency-artifact-manifest.json",
+    "dependency-provenance-attestation.json",
     "one-of-one-permanence-manifest.json",
     "one-of-one-provenance-manifest.json",
     "protocol-surface-report.json",

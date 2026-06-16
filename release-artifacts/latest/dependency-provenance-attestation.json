@@ -1,0 +1,74 @@
+{
+  "schema_version": "6529stream.dependency-provenance-attestation.v1",
+  "generated_by": "scripts/generate_dependency_provenance_attestation.py:1",
+  "release_status": {
+    "project": "6529Stream",
+    "status": "pre_audit_local_baseline",
+    "claims": [
+      "packaged dependency descriptors and source files exist in this checkout",
+      "dependency artifact manifest hashes match files on disk",
+      "dependency provenance strings are retained with the release bundle"
+    ],
+    "limitations": [
+      "does not prove live chain registration",
+      "does not prove public-beta or production readiness",
+      "does not replace external audit or maintainer release signatures"
+    ]
+  },
+  "source": {
+    "output": "release-artifacts/latest/dependency-provenance-attestation.json",
+    "dependency_artifact_manifest": {
+      "path": "release-artifacts/latest/dependency-artifact-manifest.json",
+      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
+      "size_bytes": 1701
+    },
+    "descriptor_dir": "release-artifacts/dependencies",
+    "descriptor_count": 1
+  },
+  "validation": {
+    "commands": [
+      "python scripts/test_dependency_artifact_manifest.py",
+      "python scripts/generate_dependency_artifact_manifest.py --check",
+      "python scripts/test_dependency_provenance_attestation.py",
+      "python scripts/generate_dependency_provenance_attestation.py --check",
+      "python scripts/generate_release_manifest.py --check",
+      "python scripts/generate_release_checksums.py --check",
+      "python scripts/verify_release_artifacts.py"
+    ],
+    "no_secret_policy": "attestation input and output reject secret-shaped values"
+  },
+  "artifacts": [
+    {
+      "identity": {
+        "protocol_version": "0.1.0",
+        "deployment_version": "anvil-6529stream-v0.1.0-001",
+        "registry_contract": "DependencyRegistry",
+        "dependency_name": "local-rehearsal-dependency",
+        "dependency_key": "0x25b8a42e532276effa1c2a1cbe01226a9a4a0426f51e5894791359b3a5c088df",
+        "dependency_key_preimage": "6529Stream.local.rehearsal.dependency.v1",
+        "dependency_version": 1
+      },
+      "descriptor": {
+        "path": "release-artifacts/dependencies/anvil-6529stream-v0.1.0-001/local-rehearsal-dependency.dependency.json",
+        "sha256": "sha256:e072f786d66e7052ff1d63f1c5e6a3fc9ef46c986bd2f0a1843626a5dc21cccc",
+        "size_bytes": 869,
+        "schema_version": "6529stream.dependency-artifact.v1"
+      },
+      "source": {
+        "registered_by": "script/RehearseDeployment.s.sol:_createSampleCollection",
+        "notes": "Local rehearsal dependency registered by the deterministic Anvil deployment rehearsal.",
+        "provenance": "local-anvil-rehearsal"
+      },
+      "files": [
+        {
+          "path": "release-artifacts/dependencies/anvil-6529stream-v0.1.0-001/local-rehearsal-dependency.js",
+          "sha256": "sha256:503899ff7e9210045c1be53a35992d47b2d4ca48d869bbc5d6d45034b9472692",
+          "size_bytes": 48,
+          "role": "script",
+          "media_type": "application/javascript"
+        }
+      ],
+      "artifact_digest": "sha256:acef094bd32a283fda3698d84fa28803fce393b7bc16607c7e0170b05a17bdbe"
+    }
+  ]
+}

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-notes-generator` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/461` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/462` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/463` |
-| Next issue | TBD after REL-006 release notes generator lands. |
+| Active PR branch | `codex/dependency-provenance-attestation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/463` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/464` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/465` |
+| Next issue | TBD after REL-007 dependency provenance attestation lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 16:58 UTC` |
+| Last updated | `2026-06-16 19:06 UTC` |
 
 ## Packaging Notes
 
@@ -16100,6 +16100,10 @@ Outcome:
 | 2026-06-16 16:12 | Merge PR #461 and start REL-006 | PR #461 merged as `e5ec12e0df1ee8a172838383c084f11b4420ca60` after Foundry smoke, Windows wrapper, CodeRabbit, and 6529bot follow-up were clean; issue #460 closed completed. Issue #462 is open for REL-006 release notes generation, and branch `codex/release-notes-generator` starts from updated `main`. The local draft adds `scripts/generate_release_notes.py`, focused release-note tests, JSON/Markdown release-note outputs, manifest/checksum coverage, gate wiring, docs, changelog, and run-state/backlog updates. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 16:43 | Validate REL-006 local draft | Full local `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` passed after adding deterministic release notes and release-artifact wiring. Focused checks also passed: release notes, release manifest, release checksums, third-party release artifact verifier, and `git diff --check` with only the existing PowerShell line-ending warning. PR #455 was also rechecked per user prompt and is already merged with CI/CodeRabbit clean, so the active lane remains REL-006. Next action is to commit, push, open the REL-006 PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 16:58 | Open PR #463 for REL-006 | PR #463 is open at `https://github.com/6529-Collections/6529Stream/pull/463`, closes issue #462, and packages deterministic release notes, JSON/Markdown outputs, wrapped-changelog preservation tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, third-party verifier coverage, docs, changelog, and regenerated release evidence. CodeRabbit review was requested in comment `4721139723`. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
+| 2026-06-16 17:36 | Start REL-007 dependency provenance attestation | PR #463 merged as `24d4208912766e58b10cceb220aeaad03619978f` after Foundry smoke, Windows wrapper, CodeRabbit, and 6529bot follow-up were clean; issue #462 closed completed. Issue #464 is open for REL-007, and branch `codex/dependency-provenance-attestation` adds a deterministic dependency provenance attestation generated from the dependency artifact manifest, focused tests, gate wiring, release-manifest/checksum coverage, release docs, changelog, and backlog/run-state updates. Next action is to refresh downstream release artifacts, run focused and full gates, commit, push, open the REL-007 PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-16 18:52 | Validate REL-007 local draft | Added `release-artifacts/latest/dependency-provenance-attestation.json`, `scripts/generate_dependency_provenance_attestation.py`, focused tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, dependency operations docs, release-artifact docs, changelog, and backlog/run-state traceability. Focused attestation, release-manifest, release-checksum, third-party verifier, changelog, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` both passed with existing compiler/Foundry warning noise only. `StreamCore` remains at 22,184 production runtime bytes with 2,392 bytes EIP-170 headroom. Next action is to refresh release checksums for this state update, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-16 18:59 | Open PR #465 for REL-007 | PR #465 is open at `https://github.com/6529-Collections/6529Stream/pull/465`, closes issue #464, and packages the dependency provenance attestation bundle plus gate wiring, docs, release-manifest/checksum coverage, and regenerated release evidence. CodeRabbit review was requested in comment `4722256677`. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
+| 2026-06-16 19:06 | Address PR #465 nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with nice-to-haves. Accepted the normalized-digest suggestion by computing `artifact_digest` from the already-validated identity block instead of re-reading raw fields, and added a symlink escape regression test that skips only if the platform cannot create symlinks. Kept `source.notes` optional because dependency artifact descriptors already allow absent notes while preserving an explicit empty string in the attestation. Focused attestation tests/check, release-manifest check, release-checksum check, third-party verifier, changelog, and `git diff --check` passed. Next action is to push the response commit, wait for latest CI/bot feedback, then merge if clean. |
 
 ## Resume Instructions
 
