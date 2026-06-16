@@ -105,6 +105,7 @@ copies.
 | Auction custody tests | [`test/StreamAuctionCustody.t.sol`](../../test/StreamAuctionCustody.t.sol) | Auction custody and no-bid state |
 | Auction payment tests | [`test/StreamAuctionPayments.t.sol`](../../test/StreamAuctionPayments.t.sol) | Bidder/proceeds credit behavior |
 | Minter event tests | [`test/StreamMinterEvents.t.sol`](../../test/StreamMinterEvents.t.sol) | Minter bridge event fields and read-after-event behavior |
+| Event reconstructability tests | [`test/StreamEventReconstructability.t.sol`](../../test/StreamEventReconstructability.t.sol) | Indexer-style log reconstruction for fixed-price, auction, minter bridge, and admin-reference flows |
 | Curator tests | [`test/StreamCuratorsPool.t.sol`](../../test/StreamCuratorsPool.t.sol) | Curator credit and root behavior |
 | Admin tests | [`test/StreamAdmins.t.sol`](../../test/StreamAdmins.t.sol) | Role event behavior |
 | Pause tests | [`test/StreamPauseControls.t.sol`](../../test/StreamPauseControls.t.sol) | Pause-domain behavior |
@@ -495,6 +496,7 @@ python scripts/generate_bytecode_release_proof.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
+forge test --match-path test/StreamEventReconstructability.t.sol
 forge test --match-path test/StreamMinterEvents.t.sol
 ```
 

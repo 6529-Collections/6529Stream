@@ -53,6 +53,7 @@ REQUIRED_PHRASES = [
     "read-after-event",
     "full rescan",
     "duplicate logs must be idempotent",
+    "event reconstructability",
     "chainId",
     "contractAddress",
     "blockHash",
@@ -99,6 +100,7 @@ REQUIRED_PHRASES = [
     "MinterAuctionMinted",
     "MinterAuctionEndTimeUpdated",
     "MinterContractReferenceUpdated",
+    "StreamEventReconstructability",
     "StreamMinter.updateContracts",
     "Indexers can filter by `option`, `newContract`, and `admin`",
     "Invalid options remain no-ops",
@@ -194,6 +196,7 @@ REQUIRED_COMMANDS = [
     "python scripts/test_release_checksums.py",
     "python scripts/generate_release_checksums.py --check",
     "python scripts/check_changelog.py",
+    "forge test --match-path test/StreamEventReconstructability.t.sol",
     "forge test --match-path test/StreamMinterEvents.t.sol",
 ]
 
@@ -244,6 +247,7 @@ REQUIRED_LINK_TARGETS = [
     "test/StreamDropsERC1271.t.sol",
     "test/StreamAuctionCustody.t.sol",
     "test/StreamAuctionPayments.t.sol",
+    "test/StreamEventReconstructability.t.sol",
     "test/StreamMinterEvents.t.sol",
     "test/StreamCuratorsPool.t.sol",
     "test/StreamAdmins.t.sol",
