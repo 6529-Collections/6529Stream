@@ -76,6 +76,8 @@ REQUIRED_PHRASES = [
     "AuctionCustodyConfirmed",
     "AuctionStatusChanged",
     "AuctionExtended",
+    "MinterAuctionMinted",
+    "MinterAuctionEndTimeUpdated",
     "AuctionCancelled",
     "NoBidSettlementPending",
     "NoBidTokenClaimed",
@@ -137,6 +139,7 @@ REQUIRED_COMMANDS = [
     "python scripts/generate_release_checksums.py --check",
     "forge test --match-path test/StreamAuctionCustody.t.sol",
     "forge test --match-path test/StreamAuctionPayments.t.sol",
+    "forge test --match-path test/StreamMinterEvents.t.sol",
 ]
 
 REQUIRED_LINK_TARGETS = [

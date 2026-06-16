@@ -52,8 +52,9 @@ The auction path is:
    `StreamMinter.mintAndAuction`, stores poster and reserve price reads, then
    calls `StreamAuctions.registerAuction`.
 5. `StreamMinter` mints custody to the auction contract, and
-   `StreamAuctions` records the auction, confirms custody, and emits the
-   auction registration/status events.
+   emits `MinterAuctionMinted` with the original custody target and minter
+   end time. `StreamAuctions` records the auction, confirms custody, and emits
+   the auction registration/status events.
 6. Bidders call `StreamAuctions.participateToAuction(tokenId)` with ETH.
    Outbid bidders receive withdrawable bidder credit.
 7. After the strict end condition `block.timestamp > auctionEndTime`, anyone
@@ -227,6 +228,7 @@ with:
 The submit path emits drop-side and auction-side events:
 
 - `DropAuthorizationConsumed`;
+- `MinterAuctionMinted`;
 - `AuctionRegistered`;
 - `AuctionCustodyConfirmed`;
 - `AuctionStatusChanged` with `Active`; and
@@ -452,6 +454,8 @@ Drop-side and token-side events needed for full reconstruction:
 
 - `DropAuthorizationConsumed`;
 - `AuctionContractChanged`;
+- `MinterAuctionMinted`;
+- `MinterAuctionEndTimeUpdated`;
 - ERC-721 `Transfer`; and
 - admin pause events emitted by the admin contract for `AUCTION_BID` and
   `AUCTION_SETTLEMENT`.
@@ -469,6 +473,11 @@ Indexer notes:
   `Transfer`, `AuctionStatusChanged`, and `ClaimAuction`.
 - `AuctionExtended` means the authoritative end time is
   `StreamAuctions.retrieveAuctionEndTime(tokenId)`.
+- `MinterAuctionMinted` records the original auction custody address and
+  minter bridge end time at mint.
+- `MinterAuctionEndTimeUpdated` records minter-side end-time edits, but
+  `StreamAuctions.retrieveAuctionEndTime(tokenId)` remains authoritative once
+  the auction contract is registered and can extend late bids.
 - The view-derived `EndedNoBid` and `EndedWithBid` states do not emit events
   when time crosses the boundary.
 
@@ -625,6 +634,7 @@ forge test --match-path test/StreamAuctionInvariant.t.sol
 forge test --match-path test/StreamPaymentsInvariant.t.sol
 forge test --match-path test/StreamPauseControls.t.sol
 forge test --match-path test/StreamProtocolStateMachine.t.sol
+forge test --match-path test/StreamMinterEvents.t.sol
 ```
 
 For release artifact drift after doc/checker updates:

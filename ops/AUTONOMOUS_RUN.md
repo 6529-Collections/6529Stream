@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/protocol-surface-report` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/435` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/436` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
-| Next issue | TBD after CON-001 protocol surface report lands. |
+| Active PR branch | `codex/minter-event-read-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/438` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/439` |
+| Next issue | TBD after CON-002 minter event read-model coverage lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 05:10 UTC` |
+| Last updated | `2026-06-16 06:45 UTC` |
 
 ## Packaging Notes
 
@@ -268,14 +268,130 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | Merged in PR #431 |
 | 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | Merged in PR #433 |
 | 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Merged in PR #435 |
-| 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Active issue #436 |
+| 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Merged in PR #437 |
+| 208 | Add StreamMinter event read-model coverage | Gate D/G support | Add additive minter bridge events for phases, fixed-price mint ranges, auction mint custody/end-time, auction end-time edits, and contract-reference updates, with focused tests, integration docs, and regenerated release artifacts | Active issue #438 |
 
 ## Current PR Worklog
 
+### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
+
+Status: PR opened; first 6529bot review addressed locally with the
+`MinterAuctionEndTimeUpdated` index set changed to `tokenId` plus `admin`, no-op
+`MinterContractReferenceUpdated` emissions removed for unchanged valid
+references, invalid `updateContracts` options retained as no-ops, the
+`updateContracts` option mapping documented for indexers, and a regression
+proving the minter-side auction end-time edit does not change the authoritative
+`StreamAuctions.retrieveAuctionEndTime` value. Branch started from PR #437
+squash merge commit `6360c6a02aab6bc4af22b2a891826ccd25ed2977`; implementation
+keeps additive `StreamMinter` events, focused Foundry event tests,
+events/indexing and auction-flow docs/checker coverage, gas snapshot refresh,
+ABI/event/protocol-surface/source-verification/deployment/address-book/release
+artifact refreshes, and production via-IR size validation. The full Windows
+wrapper caught stale retained hashes in the 1/1 provenance, permanence,
+ceremony-evidence, and randomizer-operations evidence bindings after the minter
+ABI/deployment artifact refresh; those bindings and derived
+risk/release/checksum artifacts were updated before the final passing wrapper
+run.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/438`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/439`.
+Branch: `codex/minter-event-read-model`.
+
+Goal:
+
+- Close the first concrete `CON-002` event/read-model gap without touching
+  `StreamCore` bytecode.
+- Add explicit minter bridge events for collection phase updates, fixed-price
+  batch mint token ranges, auction mint custody/end-time bridges, minter-side
+  auction end-time edits, and minter contract-reference updates.
+- Preserve existing storage semantics, admin permissions, and invalid
+  `updateContracts` no-op behavior.
+- Make the new event surface visible through tests, docs, event-topic catalog,
+  protocol-surface report, release manifest, and checksum coverage.
+
+Validation completed locally:
+
+- `forge fmt smart-contracts\StreamMinter.sol test\StreamMinterEvents.t.sol`
+- `forge test --match-path test\StreamMinterEvents.t.sol -vvv`
+- `forge test --match-path test\StreamMinterValidation.t.sol -vvv`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --snap release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- `python scripts/check_contract_size_budget.py`
+- `python scripts/test_release_artifacts.py`
+- `python scripts/generate_release_artifacts.py --check`
+- `python scripts/check_abi_compatibility.py`
+- `python scripts/test_protocol_surface_report.py`
+- `python scripts/generate_protocol_surface_report.py --check`
+- `python scripts/test_source_verification_inputs.py`
+- `python scripts/generate_source_verification_inputs.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/test_events_and_indexing.py`
+- `python scripts/check_events_and_indexing.py`
+- `python scripts/test_auction_flows.py`
+- `python scripts/check_auction_flows.py`
+- `python scripts/check_changelog.py`
+- `python scripts/test_one_of_one_provenance_manifest.py`
+- `python scripts/check_one_of_one_provenance_manifest.py`
+- `python scripts/generate_one_of_one_provenance_manifest.py --check`
+- `python scripts/test_one_of_one_permanence_package.py`
+- `python scripts/check_one_of_one_permanence_package.py`
+- `python scripts/generate_one_of_one_permanence_manifest.py --check`
+- `python scripts/check_ceremony_evidence.py`
+- `python scripts/check_randomizer_operations.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/generate_release_artifacts.py`
+- `python scripts/generate_source_verification_inputs.py`
+- `python scripts/generate_protocol_surface_report.py`
+- `python scripts/generate_deployment_manifest.py`
+- `python scripts/generate_address_books.py`
+- `python scripts/generate_one_of_one_provenance_manifest.py`
+- `python scripts/generate_one_of_one_permanence_manifest.py`
+- `python scripts/generate_release_manifest.py`
+- `python scripts/generate_bytecode_release_proof.py`
+- `python scripts/generate_release_checksums.py`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Measured impact:
+
+- `StreamCore` production runtime remains 22,184 bytes with 2,392 bytes of
+  EIP-170 margin.
+- `StreamMinter` production runtime is 6,519 bytes with 18,057 bytes of
+  EIP-170 margin.
+- Fixed-price mint gas snapshot increased from 622,483 to 627,264 gas due to
+  the new per-recipient minter range event.
+
+Bot/review status:
+
+- PR #439 opened on branch `codex/minter-event-read-model`.
+- CodeRabbit review requested in comment `4715437386`.
+- 6529bot security review on the initial head reported no findings.
+- 6529bot general review requested the end-time event indexing, authoritative
+  auction end-time proof, unchanged-reference no-op proof, and
+  `updateContracts` option mapping; those fixes pass local validation and are
+  ready to push as the PR follow-up head.
+- CodeRabbit requested that this run-state size note match the PR body and that
+  `StreamCore` ABI-baseline catch-up entries stay out of this minter-scoped PR.
+  The review-response head updates the size note, restores the `StreamCore`
+  baseline object to the current `origin/main` baseline, and keeps only the
+  `StreamMinter` event-surface additions in the PR diff.
+- 6529bot follow-up requested the contract-reference update event keep the most
+  useful filter topics. The review-response head indexes `option`, `newContract`,
+  and `admin`, with the previous reference retained in event data.
+- CodeRabbit status was still pending after a rate-limit notice; request a new
+  review after pushing the review-response head.
+
 ### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 
-Status: issue created; branch started from PR #435 squash merge commit
-`ef33e5cf18871cbcdb61fed7b0686fb48e6efc69`; PR #437 open and updated with
+Status: merged in PR #437 as squash merge
+`6360c6a02aab6bc4af22b2a891826ccd25ed2977`; branch started from PR #435 squash merge commit
+`ef33e5cf18871cbcdb61fed7b0686fb48e6efc69`; PR #437 shipped
 generator, tests, docs, local/CI gate wiring, release-manifest coverage,
 checksum coverage, canonical compact generated protocol-surface JSON to keep
 bot review inside line budgets, and refreshed generated artifacts.
@@ -15797,6 +15913,7 @@ Outcome:
 | 2026-06-16 01:02 | Merge PR #427 and start ONE-007 | PR #427 merged as `a09fcfc0a5670958a0080f0bb1f62972eb42cf43` after CI and CodeRabbit passed; a false-positive 6529bot size comment was documented in PR comment `4713885073` because remote head proof and CI showed `23,781`/`795`, not the requested `23,661`/`915`. Issue #426 closed completed. Issue #428 and branch `codex/warning-noise-disposition` now track ONE-007 warning-noise burn-down/disposition. |
 | 2026-06-16 01:35 | Validate ONE-007 local PR candidate | Comment-only NatSpec header cleanup, checked warning-disposition docs, Makefile/bash/PowerShell/CI wiring, risk/release manifest coverage, and regenerated release evidence artifacts are locally green. `make release-checksums`, focused warning/release/risk/readiness/audit/changelog checks, Python compilation, full `make check`, and `forge doc --build` passed. Current production size remains `StreamCore` `23,781` runtime bytes with `795` bytes of EIP-170 headroom. |
 | 2026-06-16 01:41 | Open PR #429 for ONE-007 | PR #429 opened at `https://github.com/6529-Collections/6529Stream/pull/429` on branch `codex/warning-noise-disposition`, closes issue #428, and CodeRabbit review was requested in comment `4714065314`. Next action is to wait for CI and bot feedback, resolve actionable comments, then merge when clean. |
+| 2026-06-16 06:45 | Validate PR #439 review-response head | Accepted the useful event-topic review by making `MinterContractReferenceUpdated` filterable by `option`, `newContract`, and `admin` while retaining `oldContract` in event data; restored the `StreamCore` ABI baseline object from current `origin/main` so this PR only carries `StreamMinter` surface additions; reconfirmed current `StreamCore` production runtime at `22,184` bytes with `2,392` bytes of EIP-170 headroom, superseding the older `24,516`/roughly `60`-byte concern. Focused event/indexing, auction-flow, event-suite, gas-snapshot, release-artifact, ABI-compatibility, size-budget, retained-evidence, provenance/permanence, risk, bytecode-proof, release-manifest/checksum, `git diff --check`, and full Windows `scripts\check.ps1` validation passed. The review-response head still needs commit, push, PR body update, bot-thread replies, and clean CI/re-review before merge. |
 
 ## Resume Instructions
 

@@ -46,6 +46,39 @@ contract StreamMinter {
         uint256 funds,
         uint256 resultingSurplus
     );
+    event CollectionPhasesUpdated(
+        uint256 indexed collectionId,
+        uint256 oldPublicStartTime,
+        uint256 oldPublicEndTime,
+        uint256 publicStartTime,
+        uint256 publicEndTime,
+        address indexed admin
+    );
+    event MinterTokensMinted(
+        uint256 indexed collectionId,
+        uint256 indexed firstTokenId,
+        address indexed recipient,
+        uint256 lastTokenId,
+        uint256 quantity
+    );
+    event MinterAuctionMinted(
+        uint256 indexed collectionId,
+        uint256 indexed tokenId,
+        address indexed custody,
+        uint256 auctionEndTime
+    );
+    event MinterAuctionEndTimeUpdated(
+        uint256 indexed tokenId,
+        uint256 oldAuctionEndTime,
+        uint256 newAuctionEndTime,
+        address indexed admin
+    );
+    event MinterContractReferenceUpdated(
+        uint8 indexed option,
+        address oldContract,
+        address indexed newContract,
+        address indexed admin
+    );
 
     // other variables
     address public streamDrops;
@@ -79,8 +112,18 @@ contract StreamMinter {
         uint256 _publicEndTime
     ) public FunctionAdminRequired(this.setCollectionPhases.selector) {
         require(gencore.retrievewereDataAdded(_collectionID) == true, "Add data");
+        uint256 oldPublicStartTime = collectionPhases[_collectionID].publicStartTime;
+        uint256 oldPublicEndTime = collectionPhases[_collectionID].publicEndTime;
         collectionPhases[_collectionID].publicStartTime = _publicStartTime;
         collectionPhases[_collectionID].publicEndTime = _publicEndTime;
+        emit CollectionPhasesUpdated(
+            _collectionID,
+            oldPublicStartTime,
+            oldPublicEndTime,
+            _publicStartTime,
+            _publicEndTime,
+            msg.sender
+        );
     }
 
     // mint token function - NextGenMinter airdrop function
@@ -117,11 +160,16 @@ contract StreamMinter {
             require(
                 collectionTokenMintIndex <= gencore.viewTokensIndexMax(_collectionID), "No supply"
             );
+            uint256 firstTokenId =
+                gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
             for (uint256 i = 0; i < _numberOfTokens[y]; i++) {
                 mintIndex = gencore.viewTokensIndexMin(_collectionID)
                     + gencore.viewCirSupply(_collectionID);
                 gencore.mint(mintIndex, _recipients[y], _tokenData[y], _saltfun_o[y], _collectionID);
             }
+            emit MinterTokensMinted(
+                _collectionID, firstTokenId, _recipients[y], mintIndex, _numberOfTokens[y]
+            );
         }
         return mintIndex;
     }
@@ -156,6 +204,7 @@ contract StreamMinter {
         mintToAuctionStatus[mintIndex] = true;
         // token is airdropped to the _recipient address and auction starts
         gencore.mint(mintIndex, _recipient, _tokenData, _saltfun_o, _collectionID);
+        emit MinterAuctionMinted(_collectionID, mintIndex, _recipient, _auctionEndTime);
         return mintIndex;
     }
 
@@ -165,7 +214,9 @@ contract StreamMinter {
         FunctionAdminRequired(this.updateAuctionEndTime.selector)
     {
         require(mintToAuctionStatus[_tokenId] == true);
+        uint256 oldAuctionEndTime = mintToAuctionData[_tokenId];
         mintToAuctionData[_tokenId] = _auctionEndTime;
+        emit MinterAuctionEndTimeUpdated(_tokenId, oldAuctionEndTime, _auctionEndTime, msg.sender);
     }
 
     // function to update contracts
@@ -174,12 +225,27 @@ contract StreamMinter {
         FunctionAdminRequired(this.updateContracts.selector)
     {
         if (_opt == 1) {
+            address oldContract = address(gencore);
+            if (oldContract == _newContract) {
+                return;
+            }
             gencore = IStreamCore(_newContract);
+            emit MinterContractReferenceUpdated(1, oldContract, _newContract, msg.sender);
         } else if (_opt == 2) {
             require(IStreamAdmins(_newContract).isAdminContract() == true, "Contract is not Admin");
+            address oldContract = address(adminsContract);
+            if (oldContract == _newContract) {
+                return;
+            }
             adminsContract = IStreamAdmins(_newContract);
+            emit MinterContractReferenceUpdated(2, oldContract, _newContract, msg.sender);
         } else if (_opt == 3) {
+            address oldContract = streamDrops;
+            if (oldContract == _newContract) {
+                return;
+            }
             streamDrops = _newContract;
+            emit MinterContractReferenceUpdated(3, oldContract, _newContract, msg.sender);
         }
     }
 
