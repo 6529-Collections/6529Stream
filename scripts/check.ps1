@@ -214,6 +214,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_bytecode_release_proof.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_checksums.py"
 & $pythonPath @pythonArgs "scripts\generate_release_checksums.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_verify_release_artifacts.py"
+& $pythonPath @pythonArgs "scripts\verify_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\test_changelog_check.py"
 & $pythonPath @pythonArgs "scripts\check_changelog.py"
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir

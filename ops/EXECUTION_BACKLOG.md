@@ -3376,7 +3376,7 @@ unless an external dependency changes.
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | issues #430 and #432 size reports |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
-| `CON-007` | Add interface/version views for frontend compatibility | G | Active issue #458; branch `codex/interface-version-views` |
+| `CON-007` | Add interface/version views for frontend compatibility | G | Merged in PR #459; issue #458 closed completed |
 
 ### 1/1 Product Excellence
 
@@ -3395,7 +3395,7 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | `REL-001` |
-| `REL-005` | Add release artifact verifier script for third-party users | G | `REL-003` |
+| `REL-005` | Add release artifact verifier script for third-party users | G | Active issue #460; branch `codex/release-artifact-verifier`; depends on `REL-003` |
 | `REL-006` | Add release notes generator from changelog and artifact diff | G | changelog policy |
 | `REL-007` | Add dependency provenance attestation bundle | F/G | dependency manifest |
 | `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | live evidence templates |

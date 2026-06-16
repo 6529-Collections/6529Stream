@@ -27,6 +27,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/signatures"),
     Path("release-artifacts/latest"),
     Path("release-artifacts/baselines"),
+    Path("scripts/verify_release_artifacts.py"),
     Path("deployments/broadcasts"),
     Path("deployments/config"),
     Path("deployments/examples"),

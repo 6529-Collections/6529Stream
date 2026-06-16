@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `scripts/verify_release_artifacts.py`, an offline third-party verifier
+  for the committed release bundle, with focused tests, local/CI/Windows gate
+  wiring, checksum coverage for the verifier script, and documentation of what
+  the check proves versus live deployment/readiness evidence it does not prove.
 - Added `IStreamCompatibility` and release-tracked compatibility views on the
   `StreamContractMetadata` adapter for frontend/indexer protocol checks:
   protocol name, protocol version, metadata schema version, release tag/hash,

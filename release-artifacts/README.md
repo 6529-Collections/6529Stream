@@ -162,6 +162,8 @@ python scripts/test_bytecode_release_proof.py
 python scripts/generate_bytecode_release_proof.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
+python scripts/test_verify_release_artifacts.py
+python scripts/verify_release_artifacts.py
 ```
 
 The generated files under `latest/` are intentionally tracked. They give
@@ -454,7 +456,8 @@ evidence and does not change public-beta readiness.
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
-baseline, deployment manifest config/examples, address books, ceremony evidence
+baseline, the third-party release verifier script, deployment manifest
+config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, drop
 authorization signing evidence, signer custody readiness evidence, artifact
 schemas, non-local release evidence metadata and templates, public-beta
@@ -463,6 +466,18 @@ and release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.
+
+Third-party consumers can run `python scripts/verify_release_artifacts.py` from
+the repository root to verify the committed release bundle without regenerating
+artifacts, rebuilding Solidity, using RPC, or contacting explorers. The
+verifier checks that `latest/SHA256SUMS`, `latest/release-checksums.json`,
+`latest/release-manifest.json`, and `latest/bytecode-release-proof.json` agree
+with the files on disk; that checksum-covered files exist and match their
+hashes; that canonical manifest/proof file records match current file hashes
+and sizes; and that the bytecode release proof is bound to the current release
+manifest hash. It is an offline integrity and consistency check only. It does
+not prove live deployed bytecode, explorer verification, production signatures,
+public-beta readiness, or production-release readiness.
 
 Because the checksum bundle covers `latest/release-manifest.json`, the release
 manifest cannot also embed the final checksum-bundle digests without creating a
