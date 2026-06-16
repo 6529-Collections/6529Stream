@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fork-safe-erc1271-smoke` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/441` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/442` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/443` |
-| Next issue | TBD after ADV-009 Safe/ERC-1271 smoke tests land. |
+| Active PR branch | `codex/mev-timing-attack-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/443` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/444` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/445` |
+| Next issue | TBD after ADV-010 MEV/timing attack model lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 08:39 UTC` |
+| Last updated | `2026-06-16 09:22 UTC` |
 
 ## Packaging Notes
 
@@ -16065,6 +16065,10 @@ Outcome:
 | 2026-06-16 01:35 | Validate ONE-007 local PR candidate | Comment-only NatSpec header cleanup, checked warning-disposition docs, Makefile/bash/PowerShell/CI wiring, risk/release manifest coverage, and regenerated release evidence artifacts are locally green. `make release-checksums`, focused warning/release/risk/readiness/audit/changelog checks, Python compilation, full `make check`, and `forge doc --build` passed. Current production size remains `StreamCore` `23,781` runtime bytes with `795` bytes of EIP-170 headroom. |
 | 2026-06-16 01:41 | Open PR #429 for ONE-007 | PR #429 opened at `https://github.com/6529-Collections/6529Stream/pull/429` on branch `codex/warning-noise-disposition`, closes issue #428, and CodeRabbit review was requested in comment `4714065314`. Next action is to wait for CI and bot feedback, resolve actionable comments, then merge when clean. |
 | 2026-06-16 06:45 | Validate PR #439 review-response head | Accepted the useful event-topic review by making `MinterContractReferenceUpdated` filterable by `option`, `newContract`, and `admin` while retaining `oldContract` in event data; restored the `StreamCore` ABI baseline object from current `origin/main` so this PR only carries `StreamMinter` surface additions; reconfirmed current `StreamCore` production runtime at `22,184` bytes with `2,392` bytes of EIP-170 headroom, superseding the older `24,516`/roughly `60`-byte concern. Focused event/indexing, auction-flow, event-suite, gas-snapshot, release-artifact, ABI-compatibility, size-budget, retained-evidence, provenance/permanence, risk, bytecode-proof, release-manifest/checksum, `git diff --check`, and full Windows `scripts\check.ps1` validation passed. The review-response head still needs commit, push, PR body update, bot-thread replies, and clean CI/re-review before merge. |
+| 2026-06-16 09:08 | Implement ADV-010 local draft | Branch `codex/mev-timing-attack-model` adds `test/StreamMEVTiming.t.sol`, covering third-party free signed-payload submission without recipient theft, paid-drop payer binding without failed-attempt consumption, inclusive deadline behavior, expired-attempt preservation, exact-end auction bid acceptance/extension, strict post-end late-bid rejection without custody/accounting mutation, and near-end outbid credit/extension behavior. Focused `forge test --match-path test/StreamMEVTiming.t.sol -vvv` passed with 6 tests and only existing warning-disposition noise. |
+| 2026-06-16 09:10 | Open PR #445 for ADV-010 | PR #445 is open at `https://github.com/6529-Collections/6529Stream/pull/445`, closes issue #444, and CodeRabbit review was requested in comment `4716823234`. CodeRabbit returned a rate-limit notice but left the status context as success. GitHub CI is running; next action is to wait for checks and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-16 09:22 | Address PR #445 test-hardening review | 6529bot security found no findings and general review marked the PR good to merge with test-robustness suggestions. Accepted the useful suggestions by asserting exact revert strings for replay, wrong-payer, expired, and late-bid paths; reading `extensionTime()` from `StreamAuctions`; retrieving/asserting the minted token ID from drop state instead of relying only on the fixture constant; and refreshing bytecode proof, release manifest, checksums, and risk artifacts. Focused `StreamMEVTiming`, bytecode proof, manifest/checksum drift checks, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all passed. |
+| 2026-06-16 09:28 | Resolve PR #445 revert-helper follow-up | 6529bot follow-up requested a selector-aware, readable revert assertion helper. Replaced the opaque revert-data hash comparison with `_assertRevertedWithReason`, which checks the `Error(string)` selector, decodes the revert reason, and asserts the exact source-confirmed reason strings (`Drop Executed`, `payer`, `Expired`, `Ended`). Focused `forge test --match-path test/StreamMEVTiming.t.sol -vvv`, bytecode proof tests/check, release manifest check, release checksum check, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` passed. |
 
 ## Resume Instructions
 

@@ -3363,8 +3363,8 @@ unless an external dependency changes.
 | `ADV-006` | Add randomizer callback reentrancy/stale-provider adversarial suite | D/F | `ADV-001` |
 | `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | metadata fixtures |
 | `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Merged in PR #441 |
-| `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Active issue #442 |
-| `ADV-010` | Add MEV/timing attack model and bounded simulations | F | threat-model refresh |
+| `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Merged in PR #443 |
+| `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Active issue #444; local branch `codex/mev-timing-attack-model` |
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | gas snapshot baseline |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | custom error inventory |
 
