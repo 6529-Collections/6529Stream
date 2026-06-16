@@ -70,6 +70,10 @@ changes:
 python scripts/check_natspec_coverage.py --write-baseline
 ```
 
+The refresh command prints the total explicit exclusions, added exclusions,
+removed exclusions, and per-status counts so reviewers can see whether the
+change burns debt down or accepts new debt.
+
 Then rerun:
 
 ```sh

@@ -2031,8 +2031,8 @@
       },
       {
         "path": "docs/natspec-coverage.md",
-        "sha256": "sha256:dcd67767e193c067b2ec4806b42082196df9f5920177e877fbea4242408ee7c9",
-        "size_bytes": 3625
+        "sha256": "sha256:a47c5cd38cb216c7fe6917d30c3e233391162f1689f47a72ae16e6dd0b25c112",
+        "size_bytes": 3821
       },
       {
         "path": "docs/release-readiness.md",

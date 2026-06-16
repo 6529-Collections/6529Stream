@@ -51,6 +51,7 @@ class Declaration:
     source: str
     kind: str
     name: str
+    signature: str | None
     arity: int | None
     line: int
     natspec: bool
@@ -226,6 +227,80 @@ def count_declaration_parameters(header: str) -> int:
     return count
 
 
+def declaration_parameter_text(header: str) -> str:
+    start = header.find("(")
+    if start < 0:
+        return ""
+
+    depth = 0
+    chars = []
+    for char in header[start + 1 :]:
+        if char == "(":
+            depth += 1
+            chars.append(char)
+        elif char == ")":
+            if depth == 0:
+                break
+            depth -= 1
+            chars.append(char)
+        else:
+            chars.append(char)
+    return "".join(chars).strip()
+
+
+def split_parameters(parameters: str) -> list[str]:
+    if parameters == "":
+        return []
+
+    parts: list[str] = []
+    depth = 0
+    start = 0
+    for index, char in enumerate(parameters):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append(parameters[start:index].strip())
+            start = index + 1
+    parts.append(parameters[start:].strip())
+    return parts
+
+
+def normalize_parameter_type(parameter: str) -> str:
+    # ABI signatures do not include names or data-location/indexing keywords.
+    tokens = [
+        token
+        for token in re.split(r"\s+", parameter.strip())
+        if token not in {"calldata", "memory", "storage", "indexed", "payable"}
+    ]
+    if not tokens:
+        return ""
+
+    first = tokens[0]
+    if first.startswith("("):
+        depth = 0
+        chars = []
+        for char in " ".join(tokens):
+            chars.append(char)
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+        return "".join(chars).replace(" ", "")
+    return first
+
+
+def declaration_signature(kind: str, name: str, header: str) -> str | None:
+    if kind not in DECLARATION_RE:
+        return None
+    parameters = declaration_parameter_text(header)
+    normalized = [normalize_parameter_type(part) for part in split_parameters(parameters)]
+    return f"{name}({','.join(normalized)})"
+
+
 def scan_source(repo_root: Path, source: str) -> list[Declaration]:
     source_path = repo_root / source
     if not source_path.is_file():
@@ -239,11 +314,13 @@ def scan_source(repo_root: Path, source: str) -> list[Declaration]:
             if match is None:
                 continue
             header = declaration_header(lines, index)
+            signature = declaration_signature(kind, match.group(1), header)
             declarations.append(
                 Declaration(
                     source=source,
                     kind=kind,
                     name=match.group(1),
+                    signature=signature,
                     arity=count_declaration_parameters(header),
                     line=index + 1,
                     natspec=line_has_natspec(lines, index),
@@ -257,6 +334,7 @@ def scan_source(repo_root: Path, source: str) -> list[Declaration]:
                     source=source,
                     kind="variable",
                     name=match.group(1),
+                    signature=None,
                     arity=None,
                     line=index + 1,
                     natspec=line_has_natspec(lines, index),
@@ -271,15 +349,25 @@ def declaration_for_item(
     declarations_by_source: dict[str, list[Declaration]],
 ) -> Declaration | None:
     declarations = declarations_by_source.get(item.source, [])
-    exact = [
+    exact_signature = [
+        declaration
+        for declaration in declarations
+        if declaration.kind == item.kind
+        and declaration.name == item.name
+        and declaration.signature == item.signature
+    ]
+    if exact_signature:
+        return exact_signature[0]
+
+    exact_arity = [
         declaration
         for declaration in declarations
         if declaration.kind == item.kind
         and declaration.name == item.name
         and declaration.arity == item.arity
     ]
-    if exact:
-        return exact[0]
+    if len(exact_arity) == 1:
+        return exact_arity[0]
 
     generated_getters = [
         declaration
@@ -443,6 +531,25 @@ def validate_coverage(repo_root: Path, surface_report: Path, baseline_path: Path
     )
 
 
+def render_baseline_summary(
+    gaps: list[CoverageGap],
+    old_ids: set[str],
+) -> str:
+    new_ids = {gap.item_id for gap in gaps}
+    by_status: dict[str, int] = {}
+    for gap in gaps:
+        by_status[gap.status] = by_status.get(gap.status, 0) + 1
+
+    lines = [
+        f"explicit exclusions: {len(gaps)}",
+        f"added exclusions: {len(new_ids - old_ids)}",
+        f"removed exclusions: {len(old_ids - new_ids)}",
+    ]
+    for status in sorted(by_status):
+        lines.append(f"{status}: {by_status[status]}")
+    return "\n".join(lines)
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
@@ -470,8 +577,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.write_baseline:
             report = load_json(surface_report)
             gaps = coverage_gaps(repo_root, report)
+            previous_ids: set[str] = set()
+            if baseline.exists():
+                previous_ids = set(validate_baseline(load_json(baseline)))
             write_json(baseline, baseline_from_gaps(gaps))
             print(normalize_repo_path(baseline, repo_root))
+            print(render_baseline_summary(gaps, previous_ids))
             return 0
         validate_coverage(repo_root, surface_report, baseline)
     except NatSpecCoverageError as exc:

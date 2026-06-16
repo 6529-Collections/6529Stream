@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 14:24 UTC` |
+| Last updated | `2026-06-16 14:34 UTC` |
 
 ## Packaging Notes
 
@@ -16088,6 +16088,7 @@ Outcome:
 | 2026-06-16 14:20 | Start CON-006 NatSpec coverage gate | PR #455 merged as `ccaadc8420bc1faec32eee7e93e80575b0ff5900`, issue #454 closed completed, CI and 6529bot were clean, and issue #456 opened for NatSpec coverage. Branch `codex/natspec-coverage-gate` adds `scripts/check_natspec_coverage.py`, focused checker tests, generated `release-artifacts/baselines/v0.1.0/natspec-coverage.json`, `docs/natspec-coverage.md`, Makefile/Bash/PowerShell/CI wiring, release-manifest coverage, docs/readiness/audit links, and changelog state. The current baseline is honest documentation debt: 9 documented entries and 485 explicit exclusions. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, then wait for CI/bot feedback. |
 | 2026-06-16 14:21 | Validate CON-006 local draft | NatSpec checker/tests, audit-package checks, release-readiness checks, release-manifest tests/check, bytecode proof tests/check, release-checksum tests/check, changelog gate, Python compile, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all passed locally. The baseline remains explicit documentation debt rather than completion proof: 9 documented entries and 485 explicit exclusions. Next action is to commit, push, open the CON-006 PR, request CodeRabbit, then wait for CI/bot feedback. |
 | 2026-06-16 14:24 | Open PR #457 for CON-006 | PR #457 is open at `https://github.com/6529-Collections/6529Stream/pull/457`, closes issue #456, and packages the NatSpec coverage checker, explicit baseline, docs, local/CI wiring, release-manifest/checksum coverage, and roadmap/run-state updates. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-16 14:34 | Address PR #457 NatSpec checker review | 6529bot requested stronger proof around multiline declarations, overload attribution, re-homed inherited declarations, and baseline refresh guardrails. The checker now records normalized ABI signatures for declarations before falling back to arity, `--write-baseline` prints explicit added/removed/status summaries, docs describe that reviewer summary, and focused tests cover multiline signatures, same-arity overloads, comment adjacency, `declaration_not_in_source` becoming stale after first-party re-declaration, committed docs summary drift, and baseline summary output. `make release-checksums`, focused NatSpec tests/check, release-manifest check, release-checksum check, and `git diff --check` passed locally. Next action is to commit/push the review-response head and wait for CI/bot follow-up. |
 
 ## Resume Instructions
 
