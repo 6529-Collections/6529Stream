@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 06:20 UTC` |
+| Last updated | `2026-06-16 06:45 UTC` |
 
 ## Packaging Notes
 
@@ -362,7 +362,7 @@ Measured impact:
 
 - `StreamCore` production runtime remains 22,184 bytes with 2,392 bytes of
   EIP-170 margin.
-- `StreamMinter` production runtime is 6,516 bytes with 18,060 bytes of
+- `StreamMinter` production runtime is 6,519 bytes with 18,057 bytes of
   EIP-170 margin.
 - Fixed-price mint gas snapshot increased from 622,483 to 627,264 gas due to
   the new per-recipient minter range event.
@@ -376,8 +376,16 @@ Bot/review status:
   auction end-time proof, unchanged-reference no-op proof, and
   `updateContracts` option mapping; those fixes pass local validation and are
   ready to push as the PR follow-up head.
+- CodeRabbit requested that this run-state size note match the PR body and that
+  `StreamCore` ABI-baseline catch-up entries stay out of this minter-scoped PR.
+  The review-response head updates the size note, restores the `StreamCore`
+  baseline object to the current `origin/main` baseline, and keeps only the
+  `StreamMinter` event-surface additions in the PR diff.
+- 6529bot follow-up requested the contract-reference update event keep the most
+  useful filter topics. The review-response head indexes `option`, `newContract`,
+  and `admin`, with the previous reference retained in event data.
 - CodeRabbit status was still pending after a rate-limit notice; request a new
-  review after pushing the follow-up head.
+  review after pushing the review-response head.
 
 ### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 
@@ -15905,6 +15913,7 @@ Outcome:
 | 2026-06-16 01:02 | Merge PR #427 and start ONE-007 | PR #427 merged as `a09fcfc0a5670958a0080f0bb1f62972eb42cf43` after CI and CodeRabbit passed; a false-positive 6529bot size comment was documented in PR comment `4713885073` because remote head proof and CI showed `23,781`/`795`, not the requested `23,661`/`915`. Issue #426 closed completed. Issue #428 and branch `codex/warning-noise-disposition` now track ONE-007 warning-noise burn-down/disposition. |
 | 2026-06-16 01:35 | Validate ONE-007 local PR candidate | Comment-only NatSpec header cleanup, checked warning-disposition docs, Makefile/bash/PowerShell/CI wiring, risk/release manifest coverage, and regenerated release evidence artifacts are locally green. `make release-checksums`, focused warning/release/risk/readiness/audit/changelog checks, Python compilation, full `make check`, and `forge doc --build` passed. Current production size remains `StreamCore` `23,781` runtime bytes with `795` bytes of EIP-170 headroom. |
 | 2026-06-16 01:41 | Open PR #429 for ONE-007 | PR #429 opened at `https://github.com/6529-Collections/6529Stream/pull/429` on branch `codex/warning-noise-disposition`, closes issue #428, and CodeRabbit review was requested in comment `4714065314`. Next action is to wait for CI and bot feedback, resolve actionable comments, then merge when clean. |
+| 2026-06-16 06:45 | Validate PR #439 review-response head | Accepted the useful event-topic review by making `MinterContractReferenceUpdated` filterable by `option`, `newContract`, and `admin` while retaining `oldContract` in event data; restored the `StreamCore` ABI baseline object from current `origin/main` so this PR only carries `StreamMinter` surface additions; reconfirmed current `StreamCore` production runtime at `22,184` bytes with `2,392` bytes of EIP-170 headroom, superseding the older `24,516`/roughly `60`-byte concern. Focused event/indexing, auction-flow, event-suite, gas-snapshot, release-artifact, ABI-compatibility, size-budget, retained-evidence, provenance/permanence, risk, bytecode-proof, release-manifest/checksum, `git diff --check`, and full Windows `scripts\check.ps1` validation passed. The review-response head still needs commit, push, PR body update, bot-thread replies, and clean CI/re-review before merge. |
 
 ## Resume Instructions
 

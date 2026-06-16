@@ -100,6 +100,7 @@ REQUIRED_PHRASES = [
     "MinterAuctionEndTimeUpdated",
     "MinterContractReferenceUpdated",
     "StreamMinter.updateContracts",
+    "Indexers can filter by `option`, `newContract`, and `admin`",
     "Invalid options remain no-ops",
     "unchanged references do not emit",
     "FixedPriceCreditCreated",

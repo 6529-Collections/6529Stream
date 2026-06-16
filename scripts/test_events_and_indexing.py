@@ -85,7 +85,8 @@ DropAuthorizationCancelled, SignerEpochChanged, DropSignerChanged,
 AuctionContractChanged, CollectionPhasesUpdated, MinterTokensMinted,
 MinterAuctionMinted, MinterAuctionEndTimeUpdated, MinterContractReferenceUpdated,
 StreamMinter.updateContracts, Invalid options remain no-ops, unchanged
-references do not emit,
+references do not emit, Indexers can filter by `option`, `newContract`, and
+`admin`,
 FixedPriceCreditCreated, FixedPriceCreditWithdrawn,
 AuctionRegistered, AuctionCustodyConfirmed, AuctionStatusChanged,
 AuctionExtended, AuctionCancelled, ClaimAuction, NoBidSettlementPending,

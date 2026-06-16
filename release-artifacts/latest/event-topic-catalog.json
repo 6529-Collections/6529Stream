@@ -905,7 +905,7 @@
           "index": 1,
           "name": "oldContract",
           "type": "address",
-          "indexed": true,
+          "indexed": false,
           "internal_type": "address"
         },
         {
@@ -919,7 +919,7 @@
           "index": 3,
           "name": "admin",
           "type": "address",
-          "indexed": false,
+          "indexed": true,
           "internal_type": "address"
         }
       ],
@@ -4949,7 +4949,7 @@
               "index": 1,
               "name": "oldContract",
               "type": "address",
-              "indexed": true,
+              "indexed": false,
               "internal_type": "address"
             },
             {
@@ -4963,7 +4963,7 @@
               "index": 3,
               "name": "admin",
               "type": "address",
-              "indexed": false,
+              "indexed": true,
               "internal_type": "address"
             }
           ]

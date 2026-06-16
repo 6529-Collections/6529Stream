@@ -75,9 +75,9 @@ contract StreamMinter {
     );
     event MinterContractReferenceUpdated(
         uint8 indexed option,
-        address indexed oldContract,
+        address oldContract,
         address indexed newContract,
-        address admin
+        address indexed admin
     );
 
     // other variables

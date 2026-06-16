@@ -15,7 +15,7 @@
     "StreamCore": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
     "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
     "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
-    "StreamMinter": "sha256:b04add166fe6d3727bfe8bcd0f76dc62c10142e7517fbfd90aee8788d4419e83"
+    "StreamMinter": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a"
   },
   "bytecode_hashes": {
     "DependencyRegistry": {
@@ -146,16 +146,16 @@
     },
     "StreamMinter": {
       "creation": {
-        "sha256": "sha256:689af69e7c2dab1ac5cd281f5c2febc236be370af9ba93864d176912c16bd3c4",
+        "sha256": "sha256:31fa5e696d22a614cfb9fb7ef4201b99f99f71e59070021f121efa56c6f7d89c",
         "linked": true,
         "hash_mode": "bytes",
-        "size_bytes": 6736
+        "size_bytes": 6739
       },
       "runtime": {
-        "sha256": "sha256:fa7e9e04023260f3572bae9682d961b48a6cce95399bdcaee5d99bf7842cb013",
+        "sha256": "sha256:80705a3272842c91cbba0f6d8001f26419870db18286ec4059e19c8bc58bc3cb",
         "linked": true,
         "hash_mode": "bytes",
-        "size_bytes": 6516
+        "size_bytes": 6519
       }
     }
   },
@@ -334,17 +334,17 @@
     "StreamMinter": {
       "source": "smart-contracts/StreamMinter.sol",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
-      "abi_sha256": "sha256:b04add166fe6d3727bfe8bcd0f76dc62c10142e7517fbfd90aee8788d4419e83",
-      "bytecode_sha256": "sha256:689af69e7c2dab1ac5cd281f5c2febc236be370af9ba93864d176912c16bd3c4",
+      "abi_sha256": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a",
+      "bytecode_sha256": "sha256:31fa5e696d22a614cfb9fb7ef4201b99f99f71e59070021f121efa56c6f7d89c",
       "bytecode_linked": true,
       "bytecode_hash_mode": "bytes",
-      "bytecode_size_bytes": 6736,
-      "deployed_bytecode_sha256": "sha256:fa7e9e04023260f3572bae9682d961b48a6cce95399bdcaee5d99bf7842cb013",
+      "bytecode_size_bytes": 6739,
+      "deployed_bytecode_sha256": "sha256:80705a3272842c91cbba0f6d8001f26419870db18286ec4059e19c8bc58bc3cb",
       "deployed_bytecode_linked": true,
       "deployed_bytecode_hash_mode": "bytes",
-      "deployed_bytecode_size_bytes": 6516,
+      "deployed_bytecode_size_bytes": 6519,
       "eip170_runtime_limit_bytes": 24576,
-      "deployed_runtime_margin_bytes": 18060,
+      "deployed_runtime_margin_bytes": 18057,
       "abi_entries": 25,
       "function_count": 17,
       "event_count": 7,

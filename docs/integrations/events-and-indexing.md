@@ -208,8 +208,9 @@ emitter contracts. The current catalog includes these high-value event groups:
 `MinterContractReferenceUpdated.option` uses the existing
 `StreamMinter.updateContracts` option mapping: `1` is the core contract
 reference, `2` is the admin contract reference, and `3` is the drops contract
-reference. Invalid options remain no-ops and unchanged references do not emit a
-phantom reference-update event.
+reference. Indexers can filter by `option`, `newContract`, and `admin`; the
+previous reference is retained in event data. Invalid options remain no-ops and
+unchanged references do not emit a phantom reference-update event.
 
 When an event is insufficient to derive the full entity, queue a read-after-event
 task instead of guessing.

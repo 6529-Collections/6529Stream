@@ -6053,11 +6053,11 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-      "abi_entries": 122,
+      "abi_sha256": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+      "abi_entries": 120,
       "entry_counts": {
         "constructors": 1,
-        "functions": 76,
+        "functions": 74,
         "events": 11,
         "errors": 34,
         "fallbacks": 0,
@@ -6271,27 +6271,6 @@
             "state_mutability": "nonpayable"
           },
           {
-            "key": "artistApprovalHashes(uint256)",
-            "kind": "function",
-            "name": "artistApprovalHashes",
-            "signature": "artistApprovalHashes(uint256)",
-            "inputs": [
-              {
-                "name": "",
-                "type": "uint256",
-                "internal_type": "uint256"
-              }
-            ],
-            "outputs": [
-              {
-                "name": "",
-                "type": "bytes32",
-                "internal_type": "bytes32"
-              }
-            ],
-            "state_mutability": "view"
-          },
-          {
             "key": "artistSignature(uint256,string)",
             "kind": "function",
             "name": "artistSignature",
@@ -6306,31 +6285,6 @@
                 "name": "_signature",
                 "type": "string",
                 "internal_type": "string"
-              }
-            ],
-            "outputs": [],
-            "state_mutability": "nonpayable"
-          },
-          {
-            "key": "artistSignature(uint256,string,bytes)",
-            "kind": "function",
-            "name": "artistSignature",
-            "signature": "artistSignature(uint256,string,bytes)",
-            "inputs": [
-              {
-                "name": "_collectionID",
-                "type": "uint256",
-                "internal_type": "uint256"
-              },
-              {
-                "name": "_signature",
-                "type": "string",
-                "internal_type": "string"
-              },
-              {
-                "name": "_artistSignature",
-                "type": "bytes",
-                "internal_type": "bytes"
               }
             ],
             "outputs": [],
@@ -10593,7 +10547,7 @@
     "StreamMinter": {
       "source": "smart-contracts/StreamMinter.sol",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
-      "abi_sha256": "sha256:b04add166fe6d3727bfe8bcd0f76dc62c10142e7517fbfd90aee8788d4419e83",
+      "abi_sha256": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a",
       "abi_entries": 25,
       "entry_counts": {
         "constructors": 1,
@@ -11149,7 +11103,7 @@
                 "name": "oldContract",
                 "type": "address",
                 "internal_type": "address",
-                "indexed": true
+                "indexed": false
               },
               {
                 "name": "newContract",
@@ -11161,7 +11115,7 @@
                 "name": "admin",
                 "type": "address",
                 "internal_type": "address",
-                "indexed": false
+                "indexed": true
               }
             ]
           },
