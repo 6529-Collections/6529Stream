@@ -347,6 +347,28 @@
       ]
     },
     {
+      "entry_id": "production-release-live-metadata-browser-evidence",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_metadata_browser_evidence",
+      "status": "missing",
+      "title": "Retain production release evidence: live_metadata_browser_evidence",
+      "issue_number": 473,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/473",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap",
+        "evidence",
+        "production-release"
+      ]
+    },
+    {
       "entry_id": "production-release-live-marketplace-indexer-evidence",
       "phase": "production_release",
       "phase_label": "Production Release",

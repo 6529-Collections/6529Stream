@@ -10,9 +10,9 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:0989582dc606be9af1ca107bfa544c26f8fc12e95a7ab4721f114516721fd96a` |
+| Backlog SHA-256 | `sha256:2618f36fda928eabb9243291923e6a40b0599c6aefd924815e54eb8b1dabbd49` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
-| Issue links SHA-256 | `sha256:a9790af58498df99f5978b7dfeb690197e7d2cf801e33dc065d377124bc0e590` |
+| Issue links SHA-256 | `sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50` |
 
 ## Policy
 
@@ -42,6 +42,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | [#227](https://github.com/6529-Collections/6529Stream/issues/227) | `production-release-live-deployment-manifest` | `missing` | `sha256:4a82682d40aa8b498be8caa99ed69f7db4b19b518dbeeb500e63b29d5efd3c3b` | 53 |
 | [#228](https://github.com/6529-Collections/6529Stream/issues/228) | `production-release-live-ceremony-evidence` | `missing` | `sha256:ece9d9c744c23a00979454a3b0dcd07755339759fcf34ef0cb0cd9344ea0e9a2` | 53 |
 | [#229](https://github.com/6529-Collections/6529Stream/issues/229) | `production-release-live-randomizer-operations-evidence` | `missing` | `sha256:63f0c2051c705c122f090ec56ddc057d340268e796fb5b024dd7df3b5173e8d7` | 53 |
+| [#473](https://github.com/6529-Collections/6529Stream/issues/473) | `production-release-live-metadata-browser-evidence` | `missing` | `sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37` | 55 |
 | [#424](https://github.com/6529-Collections/6529Stream/issues/424) | `production-release-live-marketplace-indexer-evidence` | `missing` | `sha256:14590dddc45694c02f9ca3aae0b46517fb5ffbc5255693d9a6e15c86579b02bd` | 55 |
 | [#230](https://github.com/6529-Collections/6529Stream/issues/230) | `production-release-live-explorer-verification` | `missing` | `sha256:e96af7de5bfef51fbd630a22ee560d9c2eeaa04e149f1e16706c7023e6150829` | 55 |
 | [#231](https://github.com/6529-Collections/6529Stream/issues/231) | `production-release-post-audit-remediation` | `missing` | `sha256:e29d33396ec6ac420e20d16b941421a1d1ef5b27eafd11f5b14f99353f3aef34` | 53 |
@@ -961,6 +962,70 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_public_beta_blocker_report.py`
+- `python scripts/test_production_release_blocker_report.py`
+- `python scripts/generate_production_release_blocker_report.py --check`
+- `python scripts/check_public_beta_evidence.py`
+- `python scripts/check_non_local_release_evidence.py`
+- `python scripts/generate_release_evidence_packet_index.py --check`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+
+## Non-Goals
+
+- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
+- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
+- Do not use the checked template alone as completion evidence.
+
+## Acceptance Criteria
+
+- Reviewed retained evidence exists and is no-secret or properly redacted.
+- The evidence manifest references the retained evidence path and hash.
+- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
+- All validation commands above pass.
+```
+
+### #473 production-release-live-metadata-browser-evidence
+
+- Issue: https://github.com/6529-Collections/6529Stream/issues/473
+- Body SHA-256: `sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37`
+- Source body SHA-256: `sha256:a3c025086f1dbc5441a28aacf02e7ef9aa409e83e23cf7add027d6bcdf257085`
+
+```markdown
+<!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-metadata-browser-evidence issue_number=473 -->
+
+Parent tracker: https://github.com/6529-Collections/6529Stream/issues/214
+Source backlog entry: `release-artifacts/latest/release-evidence-issue-backlog.json` / `production-release-live-metadata-browser-evidence`
+Issue-link artifact: `release-artifacts/latest/release-evidence-issue-links.json`
+Completion policy: this tracker issue can close only after reviewed retained evidence is referenced by the shared release evidence status manifest.
+
+## Evidence Requirement
+
+- Phase: `Production Release`
+- Requirement ID: `live_metadata_browser_evidence`
+- Current status: `missing`
+- Evidence posture: external/future
+- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
+
+## Source Links
+
+- Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_metadata_browser_evidence`
+- Evidence template: `release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json`
+- Retained artifact placeholder: `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`
+
+## Required Evidence
+
+- Retained artifact expectation: Replace this template with browser execution evidence for metadata generated from deployed live mainnet contracts, including contract addresses, token or collection IDs, browser sandbox command, tokenURI digest, console/page error summary, dependency request summary, parent isolation proof, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`. Template-only evidence cannot complete the row.
+- Template-only can complete: `false`
+
+## Validation
+
+- `python scripts/test_release_evidence_packet_index.py`
+- `python scripts/test_public_beta_evidence.py`
+- `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_live_metadata_browser_evidence.py`
+- `python scripts/check_live_metadata_browser_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`

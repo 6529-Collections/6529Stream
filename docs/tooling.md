@@ -566,6 +566,20 @@ metadata, and explicit redaction confirmations before a reviewed artifact can
 pass. The committed file is template-only and keeps production release blocked
 until future reviewed live address evidence is accepted.
 
+Live metadata-browser evidence has a dedicated no-secret retained artifact
+template at
+`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`.
+Run `python scripts/test_live_metadata_browser_evidence.py` and
+`python scripts/check_live_metadata_browser_evidence.py` before generating the
+non-local evidence envelope for `live_metadata_browser_evidence`. The checker
+requires retained browser-summary JSON, generated tokenURI output or digest,
+browser transcript or screenshot, live mainnet chain ID, deployed contract
+addresses, token and collection IDs, empty unexpected-request/error arrays,
+animation bootstrap success, parent-frame isolation, reviewer metadata, and
+explicit redaction confirmations before a reviewed artifact can pass. The
+committed file is template-only and keeps production release blocked until
+future reviewed live metadata browser evidence is accepted.
+
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, public-beta evidence, release evidence issue backlog, release

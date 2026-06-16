@@ -30,7 +30,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Public Beta | `blocked` | 8 | 0 | 0 | 0 | 0 | 1 | 8 |
-| Production Release | `blocked` | 10 | 0 | 0 | 0 | 0 | 0 | 10 |
+| Production Release | `blocked` | 11 | 0 | 0 | 0 | 0 | 0 | 11 |
 
 ## Incomplete Public Beta Rows
 
@@ -56,6 +56,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | `live_deployment_manifest` | `missing` | TBD | external/future | 0 | none | Live deployment manifests generated from production inputs are not yet retained. |
 | `live_ceremony_evidence` | `missing` | TBD | external/future | 0 | none | Live admin, signer, metadata, auction, and emergency ceremony evidence is not yet retained. |
 | `live_randomizer_operations_evidence` | `missing` | TBD | external/future | 0 | none | Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained. |
+| `live_metadata_browser_evidence` | `missing` | TBD | external/future | 0 | none | Live metadata browser-sandbox evidence generated from deployed production contracts is not yet retained. |
 | `live_marketplace_indexer_evidence` | `missing` | TBD | external/future | 0 | none | Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained. |
 | `live_explorer_verification` | `missing` | TBD | external/future | 0 | none | Live explorer verification outputs and verified contract-address links are not yet retained. |
 | `post_audit_remediation` | `missing` | TBD | external/future | 0 | none | Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained. |
@@ -85,6 +86,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Production Release | `live_deployment_manifest` | `missing` | Live deployment manifests generated from production inputs are not yet retained. |
 | Production Release | `live_ceremony_evidence` | `missing` | Live admin, signer, metadata, auction, and emergency ceremony evidence is not yet retained. |
 | Production Release | `live_randomizer_operations_evidence` | `missing` | Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained. |
+| Production Release | `live_metadata_browser_evidence` | `missing` | Live metadata browser-sandbox evidence generated from deployed production contracts is not yet retained. |
 | Production Release | `live_marketplace_indexer_evidence` | `missing` | Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained. |
 | Production Release | `live_explorer_verification` | `missing` | Live explorer verification outputs and verified contract-address links are not yet retained. |
 | Production Release | `post_audit_remediation` | `missing` | Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained. |

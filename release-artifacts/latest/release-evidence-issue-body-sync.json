@@ -9,14 +9,14 @@
   "source": {
     "backlog": {
       "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-      "sha256": "sha256:0989582dc606be9af1ca107bfa544c26f8fc12e95a7ab4721f114516721fd96a",
-      "size_bytes": 117970,
+      "sha256": "sha256:2618f36fda928eabb9243291923e6a40b0599c6aefd924815e54eb8b1dabbd49",
+      "size_bytes": 124987,
       "schema_version": "6529stream.release-evidence-issue-backlog.v1"
     },
     "issue_links": {
       "path": "release-artifacts/latest/release-evidence-issue-links.json",
-      "sha256": "sha256:a9790af58498df99f5978b7dfeb690197e7d2cf801e33dc065d377124bc0e590",
-      "size_bytes": 12538,
+      "sha256": "sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50",
+      "size_bytes": 13224,
       "schema_version": "6529stream.release-evidence-issue-links.v1"
     }
   },
@@ -48,9 +48,9 @@
     {
       "phase": "production_release",
       "label": "Production Release",
-      "entry_count": 10,
+      "entry_count": 11,
       "counts": {
-        "missing": 10,
+        "missing": 11,
         "pending": 0,
         "blocked": 0,
         "accepted_risk": 0,
@@ -464,6 +464,33 @@
       "body_sha256": "sha256:63f0c2051c705c122f090ec56ddc057d340268e796fb5b024dd7df3b5173e8d7",
       "body_line_count": 53,
       "expected_body": "<!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-randomizer-operations-evidence issue_number=229 -->\n\nParent tracker: https://github.com/6529-Collections/6529Stream/issues/214\nSource backlog entry: `release-artifacts/latest/release-evidence-issue-backlog.json` / `production-release-live-randomizer-operations-evidence`\nIssue-link artifact: `release-artifacts/latest/release-evidence-issue-links.json`\nCompletion policy: this tracker issue can close only after reviewed retained evidence is referenced by the shared release evidence status manifest.\n\n## Evidence Requirement\n\n- Phase: `Production Release`\n- Requirement ID: `live_randomizer_operations_evidence`\n- Current status: `missing`\n- Evidence posture: external/future\n- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_randomizer_operations_evidence`\n- Evidence template: `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_production_release_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass.\n"
+    },
+    {
+      "entry_id": "production-release-live-metadata-browser-evidence",
+      "phase": "production_release",
+      "phase_label": "Production Release",
+      "requirement_id": "live_metadata_browser_evidence",
+      "status": "missing",
+      "evidence_posture": "external/future",
+      "title": "Retain production release evidence: live_metadata_browser_evidence",
+      "issue_number": 473,
+      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/473",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "production-release"
+      ],
+      "applied_labels": [
+        "release",
+        "roadmap",
+        "evidence",
+        "production-release"
+      ],
+      "source_issue_body_sha256": "sha256:a3c025086f1dbc5441a28aacf02e7ef9aa409e83e23cf7add027d6bcdf257085",
+      "body_sha256": "sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37",
+      "body_line_count": 55,
+      "expected_body": "<!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-metadata-browser-evidence issue_number=473 -->\n\nParent tracker: https://github.com/6529-Collections/6529Stream/issues/214\nSource backlog entry: `release-artifacts/latest/release-evidence-issue-backlog.json` / `production-release-live-metadata-browser-evidence`\nIssue-link artifact: `release-artifacts/latest/release-evidence-issue-links.json`\nCompletion policy: this tracker issue can close only after reviewed retained evidence is referenced by the shared release evidence status manifest.\n\n## Evidence Requirement\n\n- Phase: `Production Release`\n- Requirement ID: `live_metadata_browser_evidence`\n- Current status: `missing`\n- Evidence posture: external/future\n- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_metadata_browser_evidence`\n- Evidence template: `release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace this template with browser execution evidence for metadata generated from deployed live mainnet contracts, including contract addresses, token or collection IDs, browser sandbox command, tokenURI digest, console/page error summary, dependency request summary, parent isolation proof, and reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_live_metadata_browser_evidence.py`\n- `python scripts/check_live_metadata_browser_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_production_release_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass.\n"
     },
     {
       "entry_id": "production-release-live-marketplace-indexer-evidence",

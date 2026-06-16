@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `live_metadata_browser_evidence` as a production-release evidence row
+  with a no-secret retained-artifact template, offline checker, focused tests,
+  local/CI/Windows gate wiring, release-evidence tracker issue #473, and packet
+  index/checksum coverage while preserving the blocked production-release
+  baseline until reviewed live metadata browser evidence is retained.
 - Added a no-secret production verified-addresses retained-artifact template
   and checker for future `production_address_books` and
   `live_explorer_verification` evidence, with address-book/deployment-manifest

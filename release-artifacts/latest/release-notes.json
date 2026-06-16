@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:8f007aed16b0b2324709abf4879b0d3b3baa8814fb57ee34f0865d3cd5197633",
-      "size_bytes": 47049
+      "sha256": "sha256:a8fd671e42525518a0d803eb528e1d0fdcac83a8a7d0d09521a9690a89265e6f",
+      "size_bytes": 47430
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:0f5cb4f84fc2a4f7da2d7eb411712ff48fa8bd7c651adfb2b73e6294b9b3ccfd",
+      "sha256": "sha256:a610c522e64ebf748af1871fd7c2b1adddef1c21dd1509a3ee81716a76152d18",
       "size_bytes": 22887
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added `live_metadata_browser_evidence` as a production-release evidence row with a no-secret retained-artifact template, offline checker, focused tests, local/CI/Windows gate wiring, release-evidence tracker issue #473, and packet index/checksum coverage while preserving the blocked production-release baseline until reviewed live metadata browser evidence is retained.",
       "Added a no-secret production verified-addresses retained-artifact template and checker for future `production_address_books` and `live_explorer_verification` evidence, with address-book/deployment-manifest agreement checks, verified explorer row validation, focused tests, local/CI/Windows gate wiring, release-readiness/tooling docs, packet-index command coverage, and checksum coverage while preserving the blocked production-release baseline until reviewed live address evidence is retained.",
       "Added a no-secret production broadcast retention retained-artifact template and checker for future `production_broadcast_retention` evidence, with focused tests, local/CI/Windows gate wiring, release-readiness/tooling docs, and checksum coverage while preserving the blocked production-release baseline until reviewed live broadcast artifacts are retained.",
       "Added an opt-in release-mode evidence gate with `scripts/check_release_mode.py`, focused tests, manual Makefile targets, a workflow-dispatch GitHub Actions profile, release-readiness/tooling docs, and checksum coverage. Default CI validates the checker and the structurally blocked evidence baseline; release-mode checks intentionally fail until public-beta or production-release evidence rows are complete or explicitly accepted as risk.",
