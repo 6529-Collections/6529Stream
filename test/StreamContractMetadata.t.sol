@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IERC7572.sol";
+import "../smart-contracts/IERC2981.sol";
+import "../smart-contracts/IERC721.sol";
+import "../smart-contracts/IStreamCompatibility.sol";
 import "../smart-contracts/IStreamContractMetadata.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
@@ -18,6 +21,7 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
 
     event ContractURIUpdated();
 
+    bytes4 private constant ERC4906_INTERFACE_ID = 0x49064906;
     address private constant FUNCTION_ADMIN = address(0xA11CE);
     string private constant INITIAL_URI = "ipfs://6529stream/contract-metadata.json";
     string private constant UPDATED_URI = "https://metadata.6529.io/stream/contract.json";
@@ -36,16 +40,54 @@ contract StreamContractMetadataTest is CharacterizationTestBase, StreamFixture {
         metadata.isStreamContractMetadata().assertTrue("metadata marker false");
     }
 
-    function testSupportsErc7572AndStreamMetadataInterfaces() public {
+    function testSupportsErc7572StreamMetadataAndCompatibilityInterfaces() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         StreamContractMetadata metadata = new StreamContractMetadata(
             address(deployed.core), address(deployed.admins), INITIAL_URI
         );
 
         metadata.supportsInterface(type(IERC7572).interfaceId).assertTrue("missing ERC-7572");
+        metadata.supportsInterface(type(IStreamCompatibility).interfaceId)
+            .assertTrue("missing stream compatibility interface");
         metadata.supportsInterface(type(IStreamContractMetadata).interfaceId)
             .assertTrue("missing stream metadata interface");
         metadata.supportsInterface(0xffffffff).assertFalse("invalid interface supported");
+    }
+
+    function testCompatibilityViewsExposeStableIntegratorVersions() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
+
+        metadata.isStreamCompatibility().assertTrue("compatibility marker false");
+        metadata.streamProtocolName().assertEq("6529Stream", "protocol name changed");
+        metadata.streamProtocolVersion().assertEq("0.1.0", "protocol version changed");
+        metadata.streamMetadataSchemaVersion().assertEq(
+            "6529stream-v1", "metadata schema version changed"
+        );
+        metadata.streamReleaseTag().assertEq("v0.1.0", "release tag changed");
+        metadata.streamReleaseHash()
+            .assertEq(keccak256(bytes("v0.1.0")), "release hash changed");
+    }
+
+    function testCompatibilityViewChecksAdapterAndCoreInterfaces() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+        StreamContractMetadata metadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), INITIAL_URI
+        );
+
+        metadata.supportsStreamInterface(type(IStreamCompatibility).interfaceId)
+            .assertTrue("missing adapter compatibility interface");
+        metadata.supportsStreamInterface(type(IStreamContractMetadata).interfaceId)
+            .assertTrue("missing adapter metadata interface");
+        metadata.supportsStreamInterface(type(IERC721).interfaceId)
+            .assertTrue("missing core ERC-721 interface");
+        metadata.supportsStreamInterface(type(IERC2981).interfaceId)
+            .assertTrue("missing core ERC-2981 interface");
+        metadata.supportsStreamInterface(ERC4906_INTERFACE_ID)
+            .assertTrue("missing core ERC-4906 interface");
+        metadata.supportsStreamInterface(0xffffffff).assertFalse("invalid interface supported");
     }
 
     function testFunctionAdminCanUpdateContractURIAndEmitErc7572Event() public {

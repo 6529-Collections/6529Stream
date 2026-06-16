@@ -111,6 +111,10 @@
       "source": "smart-contracts/IStreamAuctions.sol"
     },
     {
+      "name": "IStreamCompatibility",
+      "source": "smart-contracts/IStreamCompatibility.sol"
+    },
+    {
       "name": "IStreamContractMetadata",
       "source": "smart-contracts/IStreamContractMetadata.sol"
     },

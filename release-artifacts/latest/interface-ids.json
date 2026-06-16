@@ -18,6 +18,7 @@
     "IRandomizerLifecycle": "0xaabe1a0d",
     "IStreamAdmins": "0x00ddd221",
     "IStreamAuctions": "0xb109bb30",
+    "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0xbee7d263",
     "IStreamDrops": "0x0f531c31",
@@ -444,6 +445,44 @@
         {
           "signature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
           "selector": "0x89dd4dc6"
+        }
+      ]
+    },
+    "IStreamCompatibility": {
+      "source": "smart-contracts/IStreamCompatibility.sol",
+      "artifact_path": "out/IStreamCompatibility.sol/IStreamCompatibility.json",
+      "abi_sha256": "sha256:6bd73e252a944619732c85628400e6718bf263c6e98effffa45900a6279c636d",
+      "interface_id": "0x205fac5d",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x205fac5d",
+      "function_selectors": [
+        {
+          "signature": "isStreamCompatibility()",
+          "selector": "0x0bc9af69"
+        },
+        {
+          "signature": "streamMetadataSchemaVersion()",
+          "selector": "0xe601af13"
+        },
+        {
+          "signature": "streamProtocolName()",
+          "selector": "0x8b560515"
+        },
+        {
+          "signature": "streamProtocolVersion()",
+          "selector": "0x95dc3981"
+        },
+        {
+          "signature": "streamReleaseHash()",
+          "selector": "0x3749a20c"
+        },
+        {
+          "signature": "streamReleaseTag()",
+          "selector": "0x73f2859e"
+        },
+        {
+          "signature": "supportsStreamInterface(bytes4)",
+          "selector": "0x97a6b721"
         }
       ]
     },

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/natspec-coverage-gate` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/455` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/456` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/457` |
-| Next issue | TBD after CON-006 NatSpec coverage gate lands. |
+| Active PR branch | `codex/interface-version-views` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/457` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/458` |
+| Active PR | TBD |
+| Next issue | TBD after CON-007 interface/version views lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 14:34 UTC` |
+| Last updated | `2026-06-16 15:16 UTC` |
 
 ## Packaging Notes
 
@@ -16089,6 +16089,8 @@ Outcome:
 | 2026-06-16 14:21 | Validate CON-006 local draft | NatSpec checker/tests, audit-package checks, release-readiness checks, release-manifest tests/check, bytecode proof tests/check, release-checksum tests/check, changelog gate, Python compile, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all passed locally. The baseline remains explicit documentation debt rather than completion proof: 9 documented entries and 485 explicit exclusions. Next action is to commit, push, open the CON-006 PR, request CodeRabbit, then wait for CI/bot feedback. |
 | 2026-06-16 14:24 | Open PR #457 for CON-006 | PR #457 is open at `https://github.com/6529-Collections/6529Stream/pull/457`, closes issue #456, and packages the NatSpec coverage checker, explicit baseline, docs, local/CI wiring, release-manifest/checksum coverage, and roadmap/run-state updates. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-16 14:34 | Address PR #457 NatSpec checker review | 6529bot requested stronger proof around multiline declarations, overload attribution, re-homed inherited declarations, and baseline refresh guardrails. The checker now records normalized ABI signatures for declarations before falling back to arity, `--write-baseline` prints explicit added/removed/status summaries, docs describe that reviewer summary, and focused tests cover multiline signatures, same-arity overloads, comment adjacency, `declaration_not_in_source` becoming stale after first-party re-declaration, committed docs summary drift, and baseline summary output. `make release-checksums`, focused NatSpec tests/check, release-manifest check, release-checksum check, and `git diff --check` passed locally. Next action is to commit/push the review-response head and wait for CI/bot follow-up. |
+| 2026-06-16 14:41 | Merge PR #457 and start CON-007 | PR #457 merged as `0116b383bb8a344f1fc0ffa7206888fa493df865` after CodeRabbit, Foundry smoke, and Windows wrapper checks passed; 6529bot follow-up reported no new findings and review threads were empty. Issue #458 is open for CON-007 interface/version views, and branch `codex/interface-version-views` starts from updated `main`. |
+| 2026-06-16 15:16 | Validate CON-007 local draft | Added `IStreamCompatibility` and implemented the adapter-based protocol/version/schema/release/interface-probe views on `StreamContractMetadata` so frontend compatibility checks do not consume `StreamCore` bytecode. Focused tests cover the marker, protocol name/version, metadata schema version, release tag/hash, adapter ERC-165 support, and delegated core probes for ERC-721, ERC-2981, and ERC-4906. Integration docs/checkers and release manifests now include the new compatibility guide. Local validation passed: `forge test --match-path test/StreamContractMetadata.t.sol -vvv`, focused NatSpec tests/check, integrations README tests/check, release-manifest tests, `make release-checksums`, full `make check`, and `git diff --check`. Build size from the release target: `StreamCore` runtime `22,184` bytes with `2,392` bytes of EIP-170 margin; `StreamContractMetadata` runtime `3,190` bytes. Next action is to commit, push, open the CON-007 PR, wait for CI/bot feedback, and merge only when clean. |
 
 ## Resume Instructions
 

@@ -38,7 +38,7 @@ Current baseline summary:
 | `public_variable_getter_missing_natspec` | 99 | Compiler-generated public getter lacks NatSpec on the state variable |
 | `declaration_not_in_source` | 98 | ABI entry is inherited or otherwise not declared in the first-party source body |
 
-The checker reports 9 documented release-surface entries and 485 explicit
+The checker reports 16 documented release-surface entries and 485 explicit
 exclusions in this baseline. That is not acceptable as a final documentation
 standard; it is a machine-readable starting line for audit preparation.
 

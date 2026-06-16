@@ -81,6 +81,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Metadata rendering guide | [`docs/integrations/metadata-rendering.md`](metadata-rendering.md) | Current `INT-006` metadata state, tokenURI, ERC-4906 cache invalidation, animation sandbox, cache key, and marketplace evidence-boundary guide |
 | Marketplace/indexer evidence guide | [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Current `ONE-005` retained marketplace/indexer evidence requirements for OpenSea, Reservoir, Blur, Manifold, equivalent collector/indexer tooling, contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale paths, event replay, and cache invalidation |
 | Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | Release-tracked ERC-7572-style `contractURI()` adapter with `ContractURIUpdated` and URI hash views |
+| Interface/version compatibility | [`docs/integrations/interface-versioning.md`](interface-versioning.md), [`smart-contracts/IStreamCompatibility.sol`](../../smart-contracts/IStreamCompatibility.sol), [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | Current `CON-007` adapter-based protocol name, protocol version, metadata schema version, release tag/hash, and interface-probe guidance for fail-closed frontend compatibility checks |
 | React/Next reference architecture | [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md) | Current `INT-007` artifact import, client layering, query/cache, transaction, wallet, metadata, indexer, environment, and testing guide |
 | Mobile and WalletConnect guide | [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md) | Current `INT-008` mobile browser, native shell, WalletConnect session, foreground handoff, deep-link, reconnect, offline/background, telemetry, and no-secret guide |
 | Electron security and wallet guide | [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md) | Current `INT-009` Electron main/renderer/preload, context isolation, IPC allowlist, wallet-provider, metadata sandbox, signed-update, and no-secret guide |
@@ -113,6 +114,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/events-and-indexing.md`](events-and-indexing.md)
 - [`docs/integrations/metadata-rendering.md`](metadata-rendering.md)
 - [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md)
+- [`docs/integrations/interface-versioning.md`](interface-versioning.md)
 - [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md)
 - [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md)
 - [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md)
@@ -163,6 +165,10 @@ to understand what is still intentionally future work:
   [`events-and-indexing.md`](events-and-indexing.md).
 - `INT-006`: the metadata rendering, cache, animation sandbox, and marketplace
   integration guide is now [`metadata-rendering.md`](metadata-rendering.md).
+- `CON-007`: interface and version views for frontend compatibility are now
+  documented in [`interface-versioning.md`](interface-versioning.md), using the
+  release-tracked `IStreamCompatibility` adapter surface on
+  `StreamContractMetadata`.
 - `INT-007`: the React/Next frontend reference architecture is now
   [`frontend-reference-architecture.md`](frontend-reference-architecture.md),
   with pseudocode examples in
