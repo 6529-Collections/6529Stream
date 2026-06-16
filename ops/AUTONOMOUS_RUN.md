@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-artifact-verifier` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/459` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/460` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/461` |
 | Next issue | TBD after REL-005 release artifact verifier lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 15:53 UTC` |
+| Last updated | `2026-06-16 15:54 UTC` |
 
 ## Packaging Notes
 
@@ -16095,6 +16095,7 @@ Outcome:
 | 2026-06-16 15:34 | Start REL-005 verifier | PR #459 merged as `c3ea19f7daec8b7bd2c7f3f27720f48835b77efc` after CI, CodeRabbit contexts, and 6529bot feedback were clean; issue #458 closed completed. Issue #460 is open for REL-005, and branch `codex/release-artifact-verifier` adds an offline third-party verifier for `SHA256SUMS`, `release-checksums.json`, `release-manifest.json`, and `bytecode-release-proof.json`, with focused drift/failure tests and local/CI/Windows gate wiring. Next action is to regenerate release artifacts/checksums, run focused and full gates, commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 15:45 | Validate REL-005 local draft | Added `scripts/verify_release_artifacts.py`, focused verifier tests, checksum coverage for the verifier script, Makefile/Bash/PowerShell/CI wiring, release-artifact documentation, changelog entry, refreshed risk register, release manifest, bytecode proof, and checksum bundle. Focused validation passed: verifier tests, verifier CLI, release-manifest tests/check, bytecode-proof tests/check, release-checksum tests/check, changelog tests/check, Python compile, and `git diff --check` with only the existing PowerShell line-ending warning. Full `make check` passed with existing Solidity/selfdestruct and Foundry trace warnings only. Next action is to run the Windows wrapper, commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 15:53 | Validate REL-005 Windows wrapper | Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` passed after the verifier wiring, with the same existing Solidity warnings and Foundry trace warnings as the Unix-style gate. Next action is to commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
+| 2026-06-16 15:54 | Open PR #461 for REL-005 | PR #461 is open at `https://github.com/6529-Collections/6529Stream/pull/461`, closes issue #460, and packages the offline third-party release artifact verifier, focused failure-mode tests, gate wiring, checksum coverage, docs, and regenerated release evidence. Next action is to request CodeRabbit, wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
