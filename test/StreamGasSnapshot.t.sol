@@ -15,12 +15,15 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
     address private constant BIDDER = address(0x4004);
+    address private constant SECOND_BIDDER = address(0x4005);
     address private constant CURATOR = address(0x7007);
+    address payable private constant WITHDRAW_RECIPIENT = payable(address(0x8008));
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant TOKEN_ID = 10_000_000_000;
     uint256 private constant FIXED_PRICE = 4 ether;
     uint256 private constant RESERVE_PRICE = 5 ether;
+    uint256 private constant SECOND_BID = 6 ether;
     uint256 private constant REWARD_AMOUNT = 3 ether;
 
     function testGasFixedPriceMint() public {
@@ -46,6 +49,17 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         deployed.drops.mintDrop{ value: FIXED_PRICE }(authorization, "gas-fixed-price", signature);
     }
 
+    function testGasFixedPriceCreditWithdrawal() public {
+        vm.pauseGasMetering();
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        _executeFixedPriceDrop(deployed, "gas-fixed-price-withdraw");
+
+        vm.resumeGasMetering();
+        vm.prank(POSTER);
+        deployed.drops.withdrawFixedPriceCreditTo(WITHDRAW_RECIPIENT);
+    }
+
     function testGasAuctionBid() public {
         vm.pauseGasMetering();
         AuctionSetup memory setup = _createAuction();
@@ -54,6 +68,39 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         vm.resumeGasMetering();
         vm.prank(BIDDER);
         setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+    }
+
+    function testGasAuctionNearEndOutbid() public {
+        vm.pauseGasMetering();
+        AuctionSetup memory setup = _createAuction();
+        vm.deal(BIDDER, RESERVE_PRICE);
+        vm.prank(BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+        vm.deal(SECOND_BIDDER, SECOND_BID);
+        vm.warp(setup.auctionEndTime - setup.auctions.extensionTime() + 1);
+
+        vm.resumeGasMetering();
+        vm.prank(SECOND_BIDDER);
+        setup.auctions.participateToAuction{ value: SECOND_BID }(setup.tokenId);
+    }
+
+    function testGasAuctionBidderCreditWithdrawal() public {
+        vm.pauseGasMetering();
+        AuctionSetup memory setup = _createAuction();
+        _outbidAuction(setup);
+
+        vm.resumeGasMetering();
+        vm.prank(BIDDER);
+        setup.auctions.withdrawBidderCreditTo(WITHDRAW_RECIPIENT);
+    }
+
+    function testGasAuctionSettlementNoBid() public {
+        vm.pauseGasMetering();
+        AuctionSetup memory setup = _createAuction();
+        vm.warp(setup.auctionEndTime + 1);
+
+        vm.resumeGasMetering();
+        setup.auctions.claimAuction(setup.tokenId);
     }
 
     function testGasAuctionSettlementWithBid() public {
@@ -68,6 +115,20 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         setup.auctions.claimAuction(setup.tokenId);
     }
 
+    function testGasAuctionProceedsWithdrawal() public {
+        vm.pauseGasMetering();
+        AuctionSetup memory setup = _createAuction();
+        vm.deal(BIDDER, RESERVE_PRICE);
+        vm.prank(BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        vm.resumeGasMetering();
+        vm.prank(POSTER);
+        setup.auctions.withdrawAuctionProceedsCreditTo(WITHDRAW_RECIPIENT);
+    }
+
     function testGasCuratorRewardClaim() public {
         vm.pauseGasMetering();
         CuratorSetup memory setup = _deployCuratorPool();
@@ -77,6 +138,19 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         vm.resumeGasMetering();
         vm.prank(CURATOR);
         setup.pool.claimRewards(COLLECTION_ID, REWARD_AMOUNT, proof, address(0));
+    }
+
+    function testGasCuratorCreditWithdrawal() public {
+        vm.pauseGasMetering();
+        CuratorSetup memory setup = _deployCuratorPool();
+        bytes32[] memory proof = _setSingleLeafRoot(setup.pool, CURATOR, REWARD_AMOUNT);
+        vm.deal(address(setup.pool), REWARD_AMOUNT);
+        vm.prank(CURATOR);
+        setup.pool.claimRewards(COLLECTION_ID, REWARD_AMOUNT, proof, address(0));
+
+        vm.resumeGasMetering();
+        vm.prank(CURATOR);
+        setup.pool.withdrawCuratorCreditTo(WITHDRAW_RECIPIENT);
     }
 
     function testGasFinalOnchainTokenURI() public {
@@ -146,6 +220,36 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
 
         setup.deployed.drops.mintDrop(authorization, "gas-auction", signature);
         setup.tokenId = TOKEN_ID;
+    }
+
+    function _executeFixedPriceDrop(DeployedStream memory deployed, string memory tokenData)
+        private
+    {
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            deployed.drops,
+            POSTER,
+            RECIPIENT,
+            address(this),
+            tokenData,
+            COLLECTION_ID,
+            FIXED_PRICE,
+            101,
+            102,
+            block.timestamp + 1 days
+        );
+        bytes memory signature = signAuthorization(deployed.drops, authorization);
+        vm.deal(address(this), FIXED_PRICE);
+        deployed.drops.mintDrop{ value: FIXED_PRICE }(authorization, tokenData, signature);
+    }
+
+    function _outbidAuction(AuctionSetup memory setup) private {
+        vm.deal(BIDDER, RESERVE_PRICE);
+        vm.prank(BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+
+        vm.deal(SECOND_BIDDER, SECOND_BID);
+        vm.prank(SECOND_BIDDER);
+        setup.auctions.participateToAuction{ value: SECOND_BID }(setup.tokenId);
     }
 
     function _deployCuratorPool() private returns (CuratorSetup memory setup) {

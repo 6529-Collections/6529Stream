@@ -139,9 +139,12 @@ uses the immediate randomizer for compact cross-contract flows.
 committed baseline at `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`
 is generated and checked with `forge snapshot --match-path
 test/StreamGasSnapshot.t.sol`; it isolates setup with Foundry gas-metering
-cheatcodes and records fixed-price mint, auction bid, auction settlement,
-curator reward claim, final on-chain `tokenURI`, and dependency/script read
-operations.
+cheatcodes and records fixed-price mint and withdrawal, auction bid, near-end
+outbid, bidder refund withdrawal, no-bid settlement, with-bid settlement,
+auction proceeds withdrawal, curator reward claim and withdrawal, final
+on-chain `tokenURI`, and dependency/script read operations. The companion
+`release-artifacts/baselines/v0.1.0/gas-envelopes.json` file gives each row a
+named release ceiling enforced by `python scripts/check_gas_envelopes.py`.
 
 Admin permission tests now include P0-ADMIN-001 target-state coverage in
 `StreamAdminSelectors.t.sol` and `StreamAdmins.t.sol`: function-admin grants are

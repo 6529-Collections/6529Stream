@@ -30,7 +30,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:13c4c72bda9342de380380ad442581fa7ef7f48c6c2f2c05b254f491718832f8"
+    "sha256": "sha256:bb1f815333e496006b42f5a9652a03a5085406f65e18cf9b3ad21e14d76d9214"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -153,9 +153,14 @@
       "size_bytes": 345059
     },
     {
+      "path": "release-artifacts/baselines/v0.1.0/gas-envelopes.json",
+      "sha256": "sha256:4197307715efaec85f2aad6d06c2f8b60cc9bddf3831c081781d088f123346ec",
+      "size_bytes": 3627
+    },
+    {
       "path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
-      "sha256": "sha256:a14bc6a8044a557dc0514ae62a24e6fdefcbdbac03013be190cd19d9273cbfc3",
-      "size_bytes": 379
+      "sha256": "sha256:998e389b1e58fc86c089e001fcdb6c17e07e4c595a55bb4f47ffa0dad934bc8f",
+      "size_bytes": 794
     },
     {
       "path": "release-artifacts/contracts.json",
@@ -439,7 +444,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:cff0d7fd1e18af490486fb8473cde05da8151e12cfcc86f206cb4819cd9e50aa",
+      "sha256": "sha256:09d9b32fbf6aa5c5f2ce677295b02d2ea288588c772b647b282e83d5f68cf56e",
       "size_bytes": 79962
     },
     {
@@ -539,12 +544,12 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:19d58ebb3ea987c05fcff97080bf654dd5444037f7721af4846ed789a8051651",
-      "size_bytes": 104692
+      "sha256": "sha256:7f553c721e33a75bedb6316db2c869f6b636bacc2482dc13258a9785977c9a63",
+      "size_bytes": 104972
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f113d3440094aa4bdc7b4eca4cc2ed67d13d14d91cab57dcc272ed6fa9df1b23",
+      "sha256": "sha256:96523a8ed20ebba011a33fd2e0e782a3d3f3c27570f8d6ee6c88a6805499e938",
       "size_bytes": 22887
     },
     {

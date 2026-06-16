@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added gas envelope coverage for high-risk user flows: expanded the local
+  Foundry gas snapshot to fixed-price withdrawal, near-end outbid, bidder
+  refund withdrawal, no-bid settlement, auction proceeds withdrawal, and curator
+  credit withdrawal; added `gas-envelopes.json` plus checker/test wiring across
+  local gates, CI, release manifest, and checksum coverage.
 - Added `StreamMEVTiming.t.sol`, a focused MEV/timing adversarial suite
   covering third-party signed-payload submission semantics, paid-drop payer
   binding, inclusive deadline behavior, strict post-end auction bid rejection,

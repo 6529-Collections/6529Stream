@@ -122,7 +122,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f113d3440094aa4bdc7b4eca4cc2ed67d13d14d91cab57dcc272ed6fa9df1b23",
+      "sha256": "sha256:96523a8ed20ebba011a33fd2e0e782a3d3f3c27570f8d6ee6c88a6805499e938",
       "size_bytes": 22887,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1601,8 +1601,14 @@
     },
     "gas_snapshot_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
-      "sha256": "sha256:a14bc6a8044a557dc0514ae62a24e6fdefcbdbac03013be190cd19d9273cbfc3",
-      "size_bytes": 379
+      "sha256": "sha256:998e389b1e58fc86c089e001fcdb6c17e07e4c595a55bb4f47ffa0dad934bc8f",
+      "size_bytes": 794
+    },
+    "gas_envelope_baseline": {
+      "path": "release-artifacts/baselines/v0.1.0/gas-envelopes.json",
+      "sha256": "sha256:4197307715efaec85f2aad6d06c2f8b60cc9bddf3831c081781d088f123346ec",
+      "size_bytes": 3627,
+      "schema_version": "6529stream.gas-envelopes.v1"
     }
   },
   "deployment_artifacts": {
@@ -1922,8 +1928,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3c877dea9d4e5b7ac5fd9dca8a3b43a53c6eccb1a2e30e9097d1d5780d377baf",
-      "size_bytes": 42402
+      "sha256": "sha256:0a2a1c14804515f00d6d3dd4a6b4a556d455e636e3d20af464550af8830f7729",
+      "size_bytes": 42772
     },
     "governance_docs": [
       {
@@ -2013,8 +2019,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:cf17e4e201eb2706a27740589d909ed0598fc01af43579537407a29597aa2113",
-        "size_bytes": 46717
+        "sha256": "sha256:079a4b8877458af6fb6732d19a0cf4d64e9b523beacf9eb1b7beda98f27bab4a",
+        "size_bytes": 47093
       },
       {
         "path": "docs/protocol-surface.md",
