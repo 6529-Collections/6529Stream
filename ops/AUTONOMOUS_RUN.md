@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/custom-error-catalog` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/453` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/454` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/455` |
 | Next issue | TBD after CON-004 custom-error catalog lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 12:20 UTC` |
+| Last updated | `2026-06-16 12:52 UTC` |
 
 ## Packaging Notes
 
@@ -16082,6 +16082,7 @@ Outcome:
 | 2026-06-16 12:09 | Open PR #453 for ADV-007 | PR #453 is open at `https://github.com/6529-Collections/6529Stream/pull/453`, closes issue #452, and CodeRabbit review was requested in comment `4718562962`. Local validation passed: focused metadata cross-invariant suite, release manifest/checksum/bytecode/risk/changelog drift checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-16 12:20 | Merge PR #453 and start CON-004 | PR #453 merged as `bcd8eb12d287d37192aa6c83453e5efbf9401000`; CI Foundry smoke and Windows wrapper passed, CodeRabbit status was success, and 6529bot final-head follow-up reported no new findings. Created issue #454 and branch `codex/custom-error-catalog` for a generated custom-error catalog, documentation, and drift gate over release-relevant custom errors without changing Solidity behavior. |
 | 2026-06-16 12:50 | Validate CON-004 local draft | Added `release-artifacts/latest/custom-error-catalog.json`, `docs/custom-errors.md`, generator/test wiring, Makefile/Bash/PowerShell gates, release-manifest/checksum coverage, and docs/backlog/changelog traceability. Focused catalog, release-artifact, release-manifest, bytecode-proof, checksum, integration README, release-readiness, changelog, Python compile, and `git diff --check` checks passed. Full `make check` and Windows `scripts\check.ps1` passed with existing warning-disposition noise only. |
+| 2026-06-16 12:52 | Open PR #455 for CON-004 | PR #455 is open at `https://github.com/6529-Collections/6529Stream/pull/455`, closes issue #454, and packages the generated custom-error catalog plus release/check wiring. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve actionable comments, then merge only when clean. |
 
 ## Resume Instructions
 
