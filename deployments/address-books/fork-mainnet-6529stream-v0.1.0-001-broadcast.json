@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:2596aa4a8ebf0fbf980ecf10a4c4100438ce00c92d4d2f3c50eaa3805f17adca",
+    "deployment_manifest_sha256": "sha256:db62bb3db4cd6251678211a530a86044c5c0b2ab17977aad8a39f6b0f23a6d8f",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -65,8 +65,8 @@
       "address": "0x200000000000000000000000000000000000000a",
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
-      "abi_hash": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-      "runtime_bytecode_hash": "sha256:d1a956970039aa4972374c11868082a7313baf5e0e85ea64bf8f0cbe619ef83a",
+      "abi_hash": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
+      "runtime_bytecode_hash": "sha256:819712e64bc905c98a7f1832a35f040ccf83d77351344ae534090a6b411e4c0a",
       "verification_status": "not_applicable"
     },
     "StreamCore": {

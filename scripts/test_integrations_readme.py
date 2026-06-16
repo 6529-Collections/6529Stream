@@ -60,6 +60,7 @@ consumers are named here.
 
 ABIs, address books, deployment manifests, release manifest, source verification inputs,
 ABI compatibility baseline, event topic catalog, interface IDs, metadata,
+IStreamCompatibility, interface and version views for frontend compatibility,
 1/1 provenance manifest, collector-verifiable permanence package,
 one-of-one permanence manifest, browser proof, fully on-chain versus
 decentralized storage, royalty policy, ERC-2981, royalty disclosure, not
@@ -76,6 +77,7 @@ for OpenSea, Reservoir, Blur, and Manifold is named.
 
 Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, and INT-010.
 The fixed-price mint flow is listed.
+Interface and version views for frontend compatibility are listed.
 The auction frontend and indexer flow spec is listed.
 The wallet, EIP-712, ERC-1271, and Safe signing guide is listed.
 The event and indexer reconstruction spec is listed.

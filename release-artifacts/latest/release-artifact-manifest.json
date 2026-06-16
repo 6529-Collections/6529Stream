@@ -8,7 +8,7 @@
   "artifacts": {
     "abi-checksums.json": {
       "path": "abi-checksums.json",
-      "sha256": "sha256:712070621d51e8a1f37037c94f7084300501958d13bd46b1e110dff17c9ac9b7"
+      "sha256": "sha256:14fce264e498041a2c5d75b01ababf13676db6933af351632644ee372017e9a1"
     },
     "event-topic-catalog.json": {
       "path": "event-topic-catalog.json",
@@ -16,7 +16,7 @@
     },
     "interface-ids.json": {
       "path": "interface-ids.json",
-      "sha256": "sha256:c08553eecb83c119dd519a788f2d1253f251809be7922ced8de2165523307c22"
+      "sha256": "sha256:4ad7cf997f7a0a1ed27d2020e35b9e48cf1a1089f58bf1cffb05d629a8c9fad5"
     }
   }
 }

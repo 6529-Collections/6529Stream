@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `IStreamCompatibility` and release-tracked compatibility views on the
+  `StreamContractMetadata` adapter for frontend/indexer protocol checks:
+  protocol name, protocol version, metadata schema version, release tag/hash,
+  and adapter-or-core interface probing, with focused tests, integration docs,
+  release-manifest/checksum coverage, and regenerated deployment/release
+  artifacts while preserving `StreamCore` bytecode size.
 - Added a checked NatSpec coverage gate for the release-relevant protocol
   surface with `scripts/check_natspec_coverage.py`,
   `release-artifacts/baselines/v0.1.0/natspec-coverage.json`,
