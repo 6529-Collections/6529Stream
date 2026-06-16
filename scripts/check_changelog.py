@@ -39,7 +39,10 @@ RELEASE_IMPACTING_PATHS = {
         "scripts/check_changelog.py",
         "scripts/check_solidity_formatting.py",
         "scripts/test_solidity_formatting.py",
+        "scripts/check_warning_dispositions.py",
+        "scripts/test_warning_dispositions.py",
         "docs/tooling.md",
+        "docs/warning-dispositions.md",
         "docs/release-policy.md",
     ),
     "release-process": (

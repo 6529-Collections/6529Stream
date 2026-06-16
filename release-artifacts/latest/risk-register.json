@@ -14,15 +14,15 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:f134125cbe9badfc8d9db045aaf70e7071c62e830cfb186800297bb4abfaf440"
+      "sha256": "sha256:3c2d26e21f976ef0342e31491561a69abdb781b04ba33867dcfbc5c425e8d05f"
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:cdd0067611d7ca4bc756377fe55a83808394b16de342215fa43afd56fa512bb4"
+      "sha256": "sha256:a45471b56a35eec4ad7dbcdff66afdb39d5e577263fb274a70a8ad58f3c64935"
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:73394e0c198dca38b325f01ce3aaf43d4e4223c6f2e45d7a72983a09e7e753cf"
+      "sha256": "sha256:9b5f391d3bc9dc59bd903cfaf55e39f238b16c4f7d1f0514bedfba6b44564fa0"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -31,6 +31,10 @@
     {
       "path": "docs/royalty-policy.md",
       "sha256": "sha256:541441c734273a619cfbbd50b3f3357256d8ab03f9411bf0d989a7217f0cdefa"
+    },
+    {
+      "path": "docs/warning-dispositions.md",
+      "sha256": "sha256:32dd20cd1483b32816e590e9a8a557f6f045fb5df80b322face21956d5a11d9f"
     },
     {
       "path": "docs/known-blockers.md",
@@ -87,7 +91,7 @@
       "evidence": [
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:cdd0067611d7ca4bc756377fe55a83808394b16de342215fa43afd56fa512bb4"
+          "sha256": "sha256:a45471b56a35eec4ad7dbcdff66afdb39d5e577263fb274a70a8ad58f3c64935"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -130,11 +134,11 @@
         },
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:cdd0067611d7ca4bc756377fe55a83808394b16de342215fa43afd56fa512bb4"
+          "sha256": "sha256:a45471b56a35eec4ad7dbcdff66afdb39d5e577263fb274a70a8ad58f3c64935"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:f134125cbe9badfc8d9db045aaf70e7071c62e830cfb186800297bb4abfaf440"
+          "sha256": "sha256:3c2d26e21f976ef0342e31491561a69abdb781b04ba33867dcfbc5c425e8d05f"
         }
       ],
       "risk_acceptance": null
@@ -163,7 +167,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:73394e0c198dca38b325f01ce3aaf43d4e4223c6f2e45d7a72983a09e7e753cf"
+          "sha256": "sha256:9b5f391d3bc9dc59bd903cfaf55e39f238b16c4f7d1f0514bedfba6b44564fa0"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -248,7 +252,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:73394e0c198dca38b325f01ce3aaf43d4e4223c6f2e45d7a72983a09e7e753cf"
+          "sha256": "sha256:9b5f391d3bc9dc59bd903cfaf55e39f238b16c4f7d1f0514bedfba6b44564fa0"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -295,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:f134125cbe9badfc8d9db045aaf70e7071c62e830cfb186800297bb4abfaf440"
+          "sha256": "sha256:3c2d26e21f976ef0342e31491561a69abdb781b04ba33867dcfbc5c425e8d05f"
         },
         {
           "path": "docs/metadata.md",
@@ -338,7 +342,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:a87fbc1373c61bfeed02a605b8ba8b5621c4c7cc60118381ef3eb85fec72a164"
+          "sha256": "sha256:ce1b9f75a6f20d2a97ec43674b9421d197b55f2827ca5ea297f8e34199f6ff36"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -374,7 +378,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:08743863aea0d6790183f16681426784c207e2ea78eb9104befe2d09976c7f1b"
+          "sha256": "sha256:3677910be3bcd03e5414ace8d625bc0bf219a7a33370853114cc68517c56ee10"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -412,7 +416,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:8ae9694fc5689d8332a5c877eb515bc9696a2f484339c39e16ca8515b008bcb0"
+          "sha256": "sha256:ac65d9cd591cc6d5e50b3cd0e5f32cbd2a5268d332e8b6587aede9833df0d54b"
         }
       ],
       "risk_acceptance": null
@@ -456,19 +460,21 @@
       "title": "Compiler, NatSpec, lint, and warning noise still need release disposition",
       "area": "warning_hygiene",
       "severity": "medium",
-      "status": "planned_mitigation",
+      "status": "mitigated_local",
       "owner": "oss",
       "target_gate": "Gate G",
-      "source": "clean-main reviewer rebaseline",
-      "mitigation": "Capture warning categories, fix low-risk first-party warning noise, document accepted warning dispositions, and decide whether new warning categories fail CI.",
-      "residual_risk": "Warning noise can hide meaningful future regressions and weakens open-source reviewer confidence.",
+      "source": "ONE-007 warning disposition baseline",
+      "mitigation": "Capture warning categories, fix low-risk first-party NatSpec noise, document accepted solc, documentation, linter, vendored, test-only, ABI-compatibility, and size-tradeoff dispositions, and fail local and CI checks if the disposition document or source anchors drift.",
+      "residual_risk": "Accepted local-baseline warnings remain audit inputs and should be rechecked before public beta or production release.",
       "checks": [
         "forge build",
-        "python scripts/check_audit_package.py",
-        "python scripts/check_release_readiness.py"
+        "forge build --sizes --via-ir --skip test --skip script --force",
+        "forge doc --build",
+        "python scripts/test_warning_dispositions.py",
+        "python scripts/check_warning_dispositions.py"
       ],
       "tracking": [
-        "ops/EXECUTION_BACKLOG.md"
+        "https://github.com/6529-Collections/6529Stream/issues/428"
       ],
       "evidence": [
         {
@@ -477,11 +483,15 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:f134125cbe9badfc8d9db045aaf70e7071c62e830cfb186800297bb4abfaf440"
+          "sha256": "sha256:3c2d26e21f976ef0342e31491561a69abdb781b04ba33867dcfbc5c425e8d05f"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:46ae341b3c62751f2b973087aabd81e5147d8c184918ebbac7744450569df24b"
+          "sha256": "sha256:aa02e3ba5727d18b6ed9518856bbe979eb185ad3ade80ce14a716b9d2c697f69"
+        },
+        {
+          "path": "docs/warning-dispositions.md",
+          "sha256": "sha256:32dd20cd1483b32816e590e9a8a557f6f045fb5df80b322face21956d5a11d9f"
         }
       ],
       "risk_acceptance": null

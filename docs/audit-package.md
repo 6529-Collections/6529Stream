@@ -63,6 +63,7 @@ deferrals are appropriate for launch.
 | Threat model | [`docs/threat-model.md`](threat-model.md) |
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
+| Warning disposition baseline | [`docs/warning-dispositions.md`](warning-dispositions.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
 | Canonical release risk register | [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json) |
 | Incident response runbook | [`docs/incident-response.md`](incident-response.md) |
@@ -137,6 +138,9 @@ Static-analysis review inputs:
   local command.
 - [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) tracks high and
   medium findings, resolutions, false-positive dispositions, and test links.
+- [`docs/warning-dispositions.md`](warning-dispositions.md) tracks fixed
+  NatSpec warning noise and accepted solc, documentation, linter, vendored,
+  test-only, ABI-compatibility, and Core size-tradeoff warning dispositions.
 - [`docs/vendored-libraries.md`](vendored-libraries.md) documents retained
   vendored OpenZeppelin utility provenance and accepted Slither dispositions.
 
@@ -260,6 +264,9 @@ blockers:
 - Runtime size remains under the EIP-170 limit and above the current release
   floor, but close enough to the limit that large future `StreamCore` changes
   need explicit size-budget review.
+- Accepted warning-disposition rows are local-baseline review inputs only; new
+  first-party warning categories must be fixed or explicitly dispositioned in
+  [`docs/warning-dispositions.md`](warning-dispositions.md).
 
 No production risk is accepted for public launch by this audit package.
 
@@ -284,6 +291,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_warning_dispositions.py
+python scripts/check_warning_dispositions.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_drop_authorization_payload_generator.py
@@ -366,6 +375,8 @@ Update this package when any of the following changes:
 - audit scope, contract scope, or launch gate status;
 - accepted ADRs or protocol decisions;
 - static-analysis baseline disposition;
+- compiler, NatSpec, documentation, linter, vendored, test-only, ABI, or size
+  warning disposition;
 - invariant, gas, deployment, release, or ceremony evidence;
 - known blockers or accepted local-baseline risk dispositions;
 - security reporting process or release signing process.
@@ -380,6 +391,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_warning_dispositions.py
+python scripts/check_warning_dispositions.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_drop_authorization_payload_generator.py

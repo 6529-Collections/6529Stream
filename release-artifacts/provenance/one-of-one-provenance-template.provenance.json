@@ -94,12 +94,12 @@
     },
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:0b4866451aa8c74fcd0bf92d8906558c15cfeac2ee04229af3206505e475a758",
+      "sha256": "sha256:156190edb16a5a10f3c4814f8c2586831bd20a08a41a7d7d494eaa0f5a13aaa7",
       "status": "template"
     },
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:c4fcbe0659aca3e5c71feb912ef04e2389c89d64d04ee46ce0179095bfa6aad0",
+      "sha256": "sha256:62db370f694befed3b7c5dd669f9b6097a12d2bacbfd15befa374958455c4eea",
       "status": "template"
     },
     "contract_uri_hash_source": "StreamContractMetadata.contractURIHash(); zero value is template-only.",

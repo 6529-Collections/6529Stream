@@ -12,12 +12,12 @@
 
 /**
  *
- *  @title: NFTDelegation.com Management Contract
- *  @date: 20-Apr-2023 - 16:27
- *  @version: 5.20.15
- *  @notes: An advanced open-source trustless delegation and consolidation management contract.
- *  @author: 6529 team
- *  @contributors: https://github.com/6529-Collections/nftdelegation/graphs/contributors
+ *  @title NFTDelegation.com Management Contract
+ *  @custom:date 20-Apr-2023 - 16:27
+ *  @custom:version 5.20.15
+ *  @custom:notes An advanced open-source trustless delegation and consolidation management contract.
+ *  @author 6529 team
+ *  @custom:contributors https://github.com/6529-Collections/nftdelegation/graphs/contributors
  *
  */
 

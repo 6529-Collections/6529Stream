@@ -145,6 +145,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_operator_admin_ui.py
 "$python_bin" scripts/test_royalty_policy.py
 "$python_bin" scripts/check_royalty_policy.py
+"$python_bin" scripts/test_warning_dispositions.py
+"$python_bin" scripts/check_warning_dispositions.py
 "$python_bin" scripts/test_one_of_one_permanence_package.py
 "$python_bin" scripts/check_one_of_one_permanence_package.py
 "$python_bin" scripts/generate_one_of_one_permanence_manifest.py --check

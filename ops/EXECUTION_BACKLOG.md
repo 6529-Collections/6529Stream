@@ -650,7 +650,8 @@ Dependencies: `EXT-003`, `EXT-004`.
 
 ### EXT-007: Retain Sepolia Auction Ceremony Smoke Evidence
 
-Status: Planned.
+Status: In progress on issue #428. Local PR candidate validated on
+2026-06-16; PR link pending.
 
 Gate: E.
 
@@ -3215,6 +3216,11 @@ Files likely touched:
 - `ops/SLITHER_BASELINE.md`
 - `docs/tooling.md`
 - `docs/audit-package.md`
+- `docs/warning-dispositions.md`
+- `docs/release-readiness.md`
+- `docs/status.md`
+- `scripts/check_warning_dispositions.py`
+- `scripts/test_warning_dispositions.py`
 - `smart-contracts/` if warning burn-down changes code
 - `test/` if behavior-preserving warning fixes need regression coverage
 - CI/local gate scripts if a stricter warning policy is adopted
@@ -3236,6 +3242,14 @@ Required tests/checks:
 - `forge build`
 - `forge test -vvv`
 - `forge build --sizes --via-ir --skip test --skip script --force`
+- `forge doc --build`
+- `python scripts/test_warning_dispositions.py`
+- `python scripts/check_warning_dispositions.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/generate_risk_register.py --check`
+- `make warning-dispositions-check`
+- `make check`
 - Slither baseline check if touched
 - `python scripts/check_changelog.py`
 - `git diff --check`
@@ -3250,7 +3264,7 @@ Acceptance criteria:
 
 Evidence artifacts:
 
-- Warning baseline/disposition.
+- Warning baseline/disposition in `docs/warning-dispositions.md`.
 - Tests for behavior-preserving changes where needed.
 
 Dependencies: formatting/static-analysis gates, `CON-005`.

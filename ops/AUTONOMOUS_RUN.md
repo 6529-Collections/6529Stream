@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/satellite-extension-policy` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/426` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/427` |
-| Next issue | Implement `ONE-006` satellite-extension architecture policy so future 1/1 product surfaces default to satellites/read adapters/libraries/release artifacts unless an explicit measured `StreamCore` size-budget exception is accepted. |
+| Active PR branch | `codex/warning-noise-disposition` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/427` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/428` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/429` |
+| Next issue | Implement `ONE-007` warning-noise burn-down/disposition so release-grade compiler, NatSpec, lint, and static-analysis warnings are fixed or explicitly accepted before public release claims. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 00:51 UTC` |
+| Last updated | `2026-06-16 01:41 UTC` |
 
 ## Packaging Notes
 
@@ -263,10 +263,65 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ## Current PR Worklog
 
-### PR candidate: Add satellite-extension architecture policy (Queue Item ONE-006)
+### PR candidate: Burn down or disposition release-grade warning noise (Queue Item ONE-007)
 
-Status: PR #427 open and ready for review; CodeRabbit review requested in
-comment `4713528373`; CI and bot comments pending.
+Status: issue #428 open; branch `codex/warning-noise-disposition` locally
+validated and ready to publish.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/428`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/429`.
+Branch: `codex/warning-noise-disposition`.
+Branch started from PR #427 squash merge commit
+`a09fcfc0a5670958a0080f0bb1f62972eb42cf43`.
+
+Goal:
+
+- Capture the current compiler/NatSpec/lint warning output rather than leaving
+  it as ambient noise.
+- Split warnings into fixed-now, accepted-vendored, accepted-test-only,
+  accepted-size-tradeoff, and future-work buckets.
+- Fix low-risk first-party warnings where behavior and size impact are
+  acceptable.
+- Document retained warning dispositions with owner, reason, scope, and
+  follow-up policy.
+- Decide whether local/CI gates should fail on new first-party warning
+  categories or keep a checked warning baseline.
+
+Validation plan:
+
+- `forge build`.
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- `forge test -vvv` if Solidity behavior changes.
+- Warning/disposition checker tests if a checked baseline is introduced.
+- `python scripts/check_changelog.py`.
+- Release manifest/proof/checksum checks when covered files change.
+- `git diff --check`.
+
+Notes:
+
+- Prefer docs/checker/tooling plus low-risk first-party warning fixes.
+- Avoid `StreamCore` bytecode spend unless the size delta is measured and
+  accepted.
+- Current rebased `StreamCore` production size remains 23,781 runtime bytes
+  with 795 bytes of EIP-170 headroom.
+- Implemented comment-only NatSpec header cleanup across first-party Solidity
+  headers, added `docs/warning-dispositions.md`, added a warning-disposition
+  checker/test pair, wired it into Makefile/bash/PowerShell/CI gates, refreshed
+  release manifests/checksums/risk register/source-verification artifacts, and
+  linked the baseline from tooling, audit-package, readiness, and status docs.
+- Local validation passed: `make release-checksums`,
+  `make warning-dispositions-check`, `python scripts/generate_release_manifest.py --check`,
+  `python scripts/generate_release_checksums.py --check`,
+  `python scripts/generate_risk_register.py --check`,
+  focused release-readiness/audit-package/changelog/checksum tests/checkers,
+  Python compilation, full `make check`, and `forge doc --build`.
+- `forge doc --build` succeeds and retains only the documented mdBook warnings
+  from vendored VRF placeholder angle-bracket prose.
+- PR #429 opened on head `f56e5cd4af3ebd1eabd4dd183633ec824331645b`.
+  CodeRabbit review was requested in comment `4714065314`.
+
+### Completed: Add satellite-extension architecture policy (Queue Item ONE-006)
+
+Status: merged in PR #427; issue #426 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/426`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/427`.
 Branch: `codex/satellite-extension-policy`.
@@ -15497,6 +15552,9 @@ Outcome:
 | 2026-06-16 00:21 | Rebase PR #427 onto updated `main` | Rebasing onto `origin/main` at `4021b6d` resolved generated release-artifact conflicts, incorporated the merged artist-series stack, and refreshed current size evidence from `23,661`/`915` to `23,781`/`795`. `make release-checksums` and `make architecture-threat-model-check release-manifest-check release-checksums-check changelog-check` pass on the rebased tree. |
 | 2026-06-16 00:33 | Harden PR #427 size evidence after bot drift comment | Latest bot feedback appeared to compare docs against the pre-rebase `23,661`/`915` measurement while the rebased bytecode proof records `23,781`/`795`. Added proof-backed architecture-policy validation so `docs/architecture.md`, `docs/status.md`, `docs/release-policy.md`, and `docs/known-blockers.md` must match `release-artifacts/latest/bytecode-release-proof.json` for `StreamCore` runtime size and EIP-170 margin. |
 | 2026-06-16 00:51 | Remove stale current-size wording from PR #427 metadata docs | Remote head `cfd3c39` proof entries all show `StreamCore` `runtime_bytecode_bytes: 23781` and `runtime_margin_bytes: 795`, but 6529bot follow-up still cited the pre-rebase `23,661`/`915` values. Updated the PR body, clarified the changelog entry as the PR #421 measurement rather than current release state, and corrected the execution-backlog reviewer row to the current 795-byte margin. |
+| 2026-06-16 01:02 | Merge PR #427 and start ONE-007 | PR #427 merged as `a09fcfc0a5670958a0080f0bb1f62972eb42cf43` after CI and CodeRabbit passed; a false-positive 6529bot size comment was documented in PR comment `4713885073` because remote head proof and CI showed `23,781`/`795`, not the requested `23,661`/`915`. Issue #426 closed completed. Issue #428 and branch `codex/warning-noise-disposition` now track ONE-007 warning-noise burn-down/disposition. |
+| 2026-06-16 01:35 | Validate ONE-007 local PR candidate | Comment-only NatSpec header cleanup, checked warning-disposition docs, Makefile/bash/PowerShell/CI wiring, risk/release manifest coverage, and regenerated release evidence artifacts are locally green. `make release-checksums`, focused warning/release/risk/readiness/audit/changelog checks, Python compilation, full `make check`, and `forge doc --build` passed. Current production size remains `StreamCore` `23,781` runtime bytes with `795` bytes of EIP-170 headroom. |
+| 2026-06-16 01:41 | Open PR #429 for ONE-007 | PR #429 opened at `https://github.com/6529-Collections/6529Stream/pull/429` on branch `codex/warning-noise-disposition`, closes issue #428, and CodeRabbit review was requested in comment `4714065314`. Next action is to wait for CI and bot feedback, resolve actionable comments, then merge when clean. |
 
 ## Resume Instructions
 

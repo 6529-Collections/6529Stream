@@ -25,6 +25,7 @@ SOURCE_DOCUMENT_PATHS = [
     "docs/release-readiness.md",
     "docs/permanence-packages.md",
     "docs/royalty-policy.md",
+    "docs/warning-dispositions.md",
     "docs/known-blockers.md",
     "ops/SLITHER_BASELINE.md",
     "release-artifacts/latest/public-beta-evidence.json",
@@ -360,28 +361,34 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         "title": "Compiler, NatSpec, lint, and warning noise still need release disposition",
         "area": "warning_hygiene",
         "severity": "medium",
-        "status": "planned_mitigation",
+        "status": "mitigated_local",
         "owner": "oss",
         "target_gate": "Gate G",
-        "source": "clean-main reviewer rebaseline",
+        "source": "ONE-007 warning disposition baseline",
         "mitigation": (
-            "Capture warning categories, fix low-risk first-party warning noise, "
-            "document accepted warning dispositions, and decide whether new warning categories fail CI."
+            "Capture warning categories, fix low-risk first-party NatSpec noise, "
+            "document accepted solc, documentation, linter, vendored, test-only, "
+            "ABI-compatibility, and size-tradeoff dispositions, and fail local "
+            "and CI checks if the disposition document or source anchors drift."
         ),
         "residual_risk": (
-            "Warning noise can hide meaningful future regressions and weakens open-source reviewer confidence."
+            "Accepted local-baseline warnings remain audit inputs and should be "
+            "rechecked before public beta or production release."
         ),
         "evidence_paths": [
             "ops/ROADMAP.md",
             "ops/EXECUTION_BACKLOG.md",
             "docs/tooling.md",
+            "docs/warning-dispositions.md",
         ],
         "checks": [
             "forge build",
-            "python scripts/check_audit_package.py",
-            "python scripts/check_release_readiness.py",
+            "forge build --sizes --via-ir --skip test --skip script --force",
+            "forge doc --build",
+            "python scripts/test_warning_dispositions.py",
+            "python scripts/check_warning_dispositions.py",
         ],
-        "tracking": ["ops/EXECUTION_BACKLOG.md"],
+        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/428"],
     },
 ]
 

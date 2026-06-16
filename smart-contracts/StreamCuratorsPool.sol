@@ -2,10 +2,10 @@
 
 /**
  *
- *  @title: Stream 6529 Curators Pool
- *  @date: 27-June-2024
- *  @version: 0.3
- *  @author: 6529 team
+ *  @title Stream 6529 Curators Pool
+ *  @custom:date 27-June-2024
+ *  @custom:version 0.3
+ *  @author 6529 team
  */
 
 pragma solidity ^0.8.19;
