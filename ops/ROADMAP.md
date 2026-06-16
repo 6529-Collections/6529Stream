@@ -2386,9 +2386,16 @@ No P0 contract PR may merge without:
 ### API And NatSpec Docs
 
 - Fully annotate public/external Solidity interfaces.
+- Keep the checked `CON-006` NatSpec coverage gate current:
+  `scripts/check_natspec_coverage.py` validates the release surface from
+  `release-artifacts/latest/protocol-surface-report.json` against
+  `release-artifacts/baselines/v0.1.0/natspec-coverage.json`. The current
+  baseline is documentation debt, not completion evidence.
 - Generate API docs from NatSpec after external interfaces stabilize.
 - Document events, custom errors, structs, roles, permissions, and invariants.
-- Fix invalid NatSpec tags currently emitted by `forge build`.
+- Continue burning down missing NatSpec rows and accepted exclusions until the
+  baseline is either empty or explicitly accepted for inherited/generated
+  surfaces.
 - Add docs tests that run README commands in CI where practical.
 
 ### Security And Audit Docs

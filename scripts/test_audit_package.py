@@ -37,7 +37,8 @@ def minimal_valid_package() -> str:
 
 This pre-audit local baseline is not production-ready and not a security claim.
 It documents the bytecode-to-release proof, signed release tag gate, and
-external evidence gaps, with the risk register as the generated risk summary.
+external evidence gaps, with the risk register and NatSpec coverage as
+generated risk and documentation-debt summaries.
 
 ## Maturity And Scope
 

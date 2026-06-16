@@ -95,6 +95,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     baseline = root / "release-artifacts" / "baselines" / "v0.1.0" / "abi-surface.json"
     gas_snapshot = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-snapshot.snap"
     gas_envelopes = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-envelopes.json"
+    natspec_coverage = root / "release-artifacts" / "baselines" / "v0.1.0" / "natspec-coverage.json"
     contract_config = root / "release-artifacts" / "contracts.json"
     deployment_config_dir = root / "deployments" / "config"
     deployment_broadcast_dir = root / "deployments" / "broadcasts"
@@ -169,6 +170,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "permanence-packages.md",
         root / "docs" / "royalty-policy.md",
         root / "docs" / "warning-dispositions.md",
+        root / "docs" / "natspec-coverage.md",
         root / "docs" / "release-readiness.md",
         root / "docs" / "protocol-surface.md",
         root / "docs" / "integrations" / "README.md",
@@ -271,6 +273,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "schema_version": "6529stream.gas-envelopes.v1",
             "snapshot_path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
             "envelopes": [],
+        },
+    )
+    write_json(
+        natspec_coverage,
+        {
+            "schema_version": "6529stream.natspec-coverage-baseline.v1",
+            "exclusions": [],
         },
     )
     write_json(
@@ -1307,6 +1316,14 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["gas_envelope_baseline"]["schema_version"],
                 "6529stream.gas-envelopes.v1",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["natspec_coverage_baseline"]["path"],
+                "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["natspec_coverage_baseline"]["schema_version"],
+                "6529stream.natspec-coverage-baseline.v1",
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["broadcasts"][0]["path"],

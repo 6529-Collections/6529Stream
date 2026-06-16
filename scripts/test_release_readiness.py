@@ -101,7 +101,8 @@ decentralized storage, royalty policy, ERC-2981 disclosure, royalty
 disclosure, not payment enforcement, No production-readiness claim depends on
 marketplaces honoring royalties, warning disposition baseline, fixed NatSpec
 warning noise, accepted solc, documentation, linter, vendored, test-only,
-ABI-compatibility, StreamCore size-tradeoff warning decisions, and without token finality, marketplace
+ABI-compatibility, StreamCore size-tradeoff warning decisions, NatSpec coverage
+baseline, burn-down queue, and without token finality, marketplace
 readiness, royalty enforcement, or ownership proof beyond chain state.
 The test matrix and ADR index evidence are summarized.
 

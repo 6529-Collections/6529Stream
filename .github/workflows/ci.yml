@@ -88,6 +88,10 @@ jobs:
             scripts/generate_protocol_surface_report.py \
             scripts/test_release_artifacts.py \
             scripts/test_protocol_surface_report.py \
+            scripts/generate_custom_error_catalog.py \
+            scripts/test_custom_error_catalog.py \
+            scripts/check_natspec_coverage.py \
+            scripts/test_natspec_coverage.py \
             scripts/check_contract_size_budget.py \
             scripts/test_contract_size_budget.py \
             scripts/check_metadata_fixtures.py \
@@ -374,6 +378,10 @@ jobs:
           python3 scripts/generate_release_artifacts.py --check 2>&1 | tee ci-logs/release-artifacts-check.log
           python3 scripts/test_protocol_surface_report.py 2>&1 | tee ci-logs/protocol-surface-report-tests.log
           python3 scripts/generate_protocol_surface_report.py --check 2>&1 | tee ci-logs/protocol-surface-report-check.log
+          python3 scripts/test_custom_error_catalog.py 2>&1 | tee ci-logs/custom-error-catalog-tests.log
+          python3 scripts/generate_custom_error_catalog.py --check 2>&1 | tee ci-logs/custom-error-catalog-check.log
+          python3 scripts/test_natspec_coverage.py 2>&1 | tee ci-logs/natspec-coverage-tests.log
+          python3 scripts/check_natspec_coverage.py 2>&1 | tee ci-logs/natspec-coverage-check.log
 
       - name: Source verification inputs
         shell: bash

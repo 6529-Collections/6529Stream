@@ -3373,9 +3373,9 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | `INT-002` to `INT-005` |
-| `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Active issue #454; branch `codex/custom-error-catalog` |
+| `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | issues #430 and #432 size reports |
-| `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | `CON-001` |
+| `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Active issue #456; branch `codex/natspec-coverage-gate` |
 | `CON-007` | Add interface/version views for frontend compatibility | G | `INT-001` |
 
 ### 1/1 Product Excellence
