@@ -264,7 +264,28 @@ def seed_reviewed_retained_files(
     write_json(root / DEPLOYMENT_MANIFEST_PATH, manifest)
     write_json(root / EXPLORER_EVIDENCE_PATH, explorer)
     write_json(root / SOURCE_VERIFICATION_PATH, {"inputs": []})
-    write_json(root / BYTECODE_PROOF_PATH, {"proof": "local"})
+    write_json(
+        root / BYTECODE_PROOF_PATH,
+        {
+            "schema_version": "6529stream.bytecode-release-proof.v1",
+            "contract_proofs": [
+                {
+                    "contract": {
+                        "name": "StreamCore",
+                        "address": manifest_core_address,
+                    },
+                    "hashes": {"runtime_bytecode": "sha256:abc"},
+                },
+                {
+                    "contract": {
+                        "name": "StreamDrops",
+                        "address": "0x2222222222222222222222222222222222222222",
+                    },
+                    "hashes": {"runtime_bytecode": "sha256:def"},
+                },
+            ],
+        },
+    )
     if secret_text is not None:
         write_text(root / SOURCE_VERIFICATION_PATH, secret_text)
 
@@ -333,6 +354,25 @@ class ProductionVerifiedAddressesTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.ProductionVerifiedAddressesError,
                 "explorer address mismatch",
+            ):
+                checker.validate_artifact(path)
+
+    def test_bytecode_proof_contract_mismatch_fails(self) -> None:
+        """Reviewed address evidence fails on unrelated bytecode proof rows."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-bytecode-mismatch.md"
+            seed_reviewed_retained_files(Path(temp_dir))
+            proof_path = Path(temp_dir) / BYTECODE_PROOF_PATH
+            proof = json.loads(proof_path.read_text(encoding="utf-8"))
+            proof["contract_proofs"][0]["contract"]["address"] = (
+                "0x3333333333333333333333333333333333333333"
+            )
+            write_json(proof_path, proof)
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError,
+                "bytecode proof does not match",
             ):
                 checker.validate_artifact(path)
 
@@ -436,6 +476,43 @@ class ProductionVerifiedAddressesTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.ProductionVerifiedAddressesError,
                 "Production block or reference",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_template_notice_fails(self) -> None:
+        """Reviewed artifacts must remove the template-only notice."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-template-notice.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "# Production Verified Addresses Retained Artifact\n\n",
+                    "# Production Verified Addresses Retained Artifact\n\n"
+                    "> Template only. This file is not completion evidence.\n\n",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError,
+                "non-template evidence",
+            ):
+                checker.validate_artifact(path)
+
+    def test_template_without_notice_fails(self) -> None:
+        """Template-state artifacts must keep the template-only notice."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "template-without-notice.md"
+            write_text(
+                path,
+                valid_template().replace(
+                    "> Template only. This file is not completion evidence.\n\n",
+                    "",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError,
+                "template-only notice",
             ):
                 checker.validate_artifact(path)
 

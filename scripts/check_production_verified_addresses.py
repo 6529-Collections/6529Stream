@@ -185,6 +185,8 @@ def validate_no_secret_values(path: Path, text: str) -> None:
 
 def repo_root_for(path: Path) -> Path:
     """Return the root used for repo-relative retained artifact paths."""
+    # CLI use resolves paths from the checkout root. Tests may validate temp
+    # artifacts outside CWD, so those use the evidence file's parent as root.
     cwd = Path.cwd().resolve()
     resolved = path.resolve()
     try:
@@ -331,6 +333,65 @@ def explorer_contracts(path: Path) -> dict[str, dict[str, Any]]:
     return contracts
 
 
+def validate_bytecode_proof(
+    path: Path,
+    address_contracts: dict[str, dict[str, Any]],
+) -> None:
+    """Validate bytecode proof coverage for retained address-book contracts."""
+    data = require_dict(load_json(path), str(path))
+    proof_rows = data.get("contract_proofs")
+    if not isinstance(proof_rows, list) or not proof_rows:
+        raise ProductionVerifiedAddressesError(
+            f"{path}.contract_proofs must be a non-empty array"
+        )
+
+    proof_by_name: dict[str, list[dict[str, Any]]] = {}
+    for index, value in enumerate(proof_rows):
+        proof = require_dict(value, f"{path}.contract_proofs[{index}]")
+        contract = require_dict(
+            proof.get("contract"),
+            f"{path}.contract_proofs[{index}].contract",
+        )
+        name = contract.get("name")
+        if not isinstance(name, str) or not name:
+            raise ProductionVerifiedAddressesError(
+                f"{path}.contract_proofs[{index}].contract.name must be a string"
+            )
+        proof_by_name.setdefault(name, []).append(proof)
+
+    for name, address_record in address_contracts.items():
+        expected_address = require_address(
+            address_record.get("address"),
+            f"address book {name}",
+        )
+        expected_runtime_hash = address_record.get("runtime_bytecode_hash")
+        matching_rows = proof_by_name.get(name, [])
+        if not matching_rows:
+            raise ProductionVerifiedAddressesError(
+                f"bytecode proof is missing contract: {name}"
+            )
+        for proof in matching_rows:
+            contract = require_dict(proof.get("contract"), f"bytecode proof {name}.contract")
+            actual_address = require_address(
+                contract.get("address"),
+                f"bytecode proof {name}.address",
+            )
+            hashes = require_dict(proof.get("hashes"), f"bytecode proof {name}.hashes")
+            actual_runtime_hash = hashes.get("runtime_bytecode")
+            if (
+                actual_address == expected_address
+                and (
+                    expected_runtime_hash is None
+                    or actual_runtime_hash == expected_runtime_hash
+                )
+            ):
+                break
+        else:
+            raise ProductionVerifiedAddressesError(
+                f"bytecode proof does not match address book contract: {name}"
+            )
+
+
 def validate_verified_address_payloads(path: Path, fields: dict[str, str]) -> None:
     """Validate retained JSON evidence for reviewed/pending verified addresses."""
     targets = referenced_artifact_paths(path, fields)
@@ -352,6 +413,7 @@ def validate_verified_address_payloads(path: Path, fields: dict[str, str]) -> No
                 f"explorer address mismatch for {name}: expected "
                 f"{address_record.get('address')}, got {explorer_records[name].get('address')}"
             )
+    validate_bytecode_proof(targets["Bytecode release proof"], address_contracts)
 
 
 def validate_headings(path: Path, text: str) -> None:
