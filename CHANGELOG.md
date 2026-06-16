@@ -150,6 +150,8 @@ the release policy in `docs/release-policy.md`.
 - Changed artist approval validity so stored approvals become stale when the
   finalized collection-state digest changes, while retaining the original
   approval text/signature as provenance.
+- Added ERC-1271 contract-wallet artist approval support with strict
+  `isValidSignature(bytes32,bytes)` magic-value validation.
 - Added a reusable ADV-001 protocol state-machine smoke harness with
   deterministic cross-contract coverage for fixed-price minting, auction
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,
