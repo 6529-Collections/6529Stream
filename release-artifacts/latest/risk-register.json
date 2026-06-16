@@ -10,11 +10,11 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:0500d08d633b445969e5e6525de324dccbf5c222c063c4fbfa4f5aea2489da09"
+      "sha256": "sha256:c571886cccde964dce62ec3c075b36bd86c79bdfbdf3c549c0c41d342acffc13"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:1a88311560250276eefc011631c96718d1e30a37604885c481f2d1c32fdd9167"
+      "sha256": "sha256:7684c444173cfd18a177d11f183acf7897ca3126e46c7aefabc4a72e5e42b832"
     },
     {
       "path": "docs/audit-package.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:1a88311560250276eefc011631c96718d1e30a37604885c481f2d1c32fdd9167"
+          "sha256": "sha256:7684c444173cfd18a177d11f183acf7897ca3126e46c7aefabc4a72e5e42b832"
         }
       ],
       "risk_acceptance": null
@@ -295,11 +295,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:0500d08d633b445969e5e6525de324dccbf5c222c063c4fbfa4f5aea2489da09"
+          "sha256": "sha256:c571886cccde964dce62ec3c075b36bd86c79bdfbdf3c549c0c41d342acffc13"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:1a88311560250276eefc011631c96718d1e30a37604885c481f2d1c32fdd9167"
+          "sha256": "sha256:7684c444173cfd18a177d11f183acf7897ca3126e46c7aefabc4a72e5e42b832"
         },
         {
           "path": "docs/metadata.md",
@@ -412,7 +412,7 @@
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:0500d08d633b445969e5e6525de324dccbf5c222c063c4fbfa4f5aea2489da09"
+          "sha256": "sha256:c571886cccde964dce62ec3c075b36bd86c79bdfbdf3c549c0c41d342acffc13"
         },
         {
           "path": "docs/status.md",
@@ -479,11 +479,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:0500d08d633b445969e5e6525de324dccbf5c222c063c4fbfa4f5aea2489da09"
+          "sha256": "sha256:c571886cccde964dce62ec3c075b36bd86c79bdfbdf3c549c0c41d342acffc13"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:1a88311560250276eefc011631c96718d1e30a37604885c481f2d1c32fdd9167"
+          "sha256": "sha256:7684c444173cfd18a177d11f183acf7897ca3126e46c7aefabc4a72e5e42b832"
         },
         {
           "path": "docs/tooling.md",

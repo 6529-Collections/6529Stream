@@ -122,6 +122,30 @@ Non-goals:
 | Deployment and release | deployment ceremony drift, wrong bytecode, wrong addresses, missing verification, stale artifacts, unsigned release bundle, secret leakage | local deployment rehearsal, manifests, address books, source verification inputs, checksum bundle, local placeholder release signatures, no-secret evidence schemas | fork/testnet/live broadcast evidence, explorer verification, and real signatures remain open |
 | External integrations | indexer assumptions, wallet/marketplace metadata differences, browser execution differences, reorg assumptions | event catalog, metadata schema fixtures, release docs, known blocker separation | integration examples and live confirmation-depth evidence remain future Gate G work |
 
+## MEV And Timing Model
+
+Public transaction submission is not treated as private. Searchers can observe
+or relay signed payloads, and the protocol guarantee is that typed payload
+fields bind the actual recipient, payer, collection, token data, sale mode,
+deadline, signer epoch, nonce, salt, and drop ID. Free signed drops may be
+submitted by a third party, but the minted NFT must still go to the signed
+recipient and the consumed drop ID must block replay. Paid fixed-price drops
+additionally bind `payer` to `msg.sender`, so a third-party submitter cannot
+spend their own ETH to redirect a signed paid mint.
+
+Deadline checks are explicit protocol time-window logic. A drop with
+`deadline == block.timestamp` is valid, while a drop submitted after the
+deadline must fail without consuming the drop ID or minting a token. Auction
+end-time checks are similarly explicit: bids at exactly `endTime` remain valid
+and may trigger the documented extension window, while bids after `endTime`
+must fail without changing custody, highest-bid state, bidder credits, escrow,
+or contract balance.
+
+These tests do not claim protection against private orderflow leakage,
+validator ordering, RPC censorship, or wallet/indexer UX races. Frontends and
+operators should still use bounded deadlines, confirmation-depth policy,
+read-after-event checks, monitoring, and safe transaction replacement guidance.
+
 ## Existing Controls
 
 Current evidence links include:
@@ -146,6 +170,7 @@ Current evidence links include:
 - [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS)
 - [`test/helpers/ProtocolStateMachine.sol`](../test/helpers/ProtocolStateMachine.sol)
 - [`test/StreamProtocolStateMachine.t.sol`](../test/StreamProtocolStateMachine.t.sol)
+- [`test/StreamMEVTiming.t.sol`](../test/StreamMEVTiming.t.sol)
 
 ## Residual Risks And Open Blockers
 
