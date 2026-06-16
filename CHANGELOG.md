@@ -147,6 +147,9 @@ the release policy in `docs/release-policy.md`.
   refreshed release/deployment artifact catalogs.
 - Added EIP-712 artist approval signatures with compact EIP-2098 support and
   refreshed release/deployment artifact catalogs.
+- Changed artist approval validity so stored approvals become stale when the
+  finalized collection-state digest changes, while retaining the original
+  approval text/signature as provenance.
 - Added a reusable ADV-001 protocol state-machine smoke harness with
   deterministic cross-contract coverage for fixed-price minting, auction
   outbid/settlement, known credit withdrawals, pause/signer/cancel controls,
