@@ -10,7 +10,7 @@ import "./helpers/StreamFixture.sol";
 contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
     using Assertions for address;
     using Assertions for bool;
-    using Assertions for bytes32;
+    using Assertions for string;
     using Assertions for uint256;
 
     address private constant POSTER = address(0x1001);
@@ -25,6 +25,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
     uint256 private constant RESERVE_PRICE = 5 ether;
     uint256 private constant SECOND_BID = 6 ether;
     uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
+    bytes4 private constant ERROR_STRING_SELECTOR = bytes4(keccak256("Error(string)"));
 
     function testThirdPartyCanSubmitFreeDropButCannotStealRecipient() public {
         DeployedStream memory deployed =
@@ -61,7 +62,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
                     deployed.drops.mintDrop.selector, authorization, tokenData, signature
                 )
             );
-        _assertRevertedWithMessage(replaySuccess, replayData, "Drop Executed");
+        _assertRevertedWithReason(replaySuccess, replayData, "Drop Executed");
         deployed.core.totalSupply().assertEq(1, "replay minted another token");
     }
 
@@ -92,7 +93,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
                 deployed.drops.mintDrop.selector, authorization, tokenData, signature
             )
         );
-        _assertRevertedWithMessage(searcherSuccess, searcherData, "payer");
+        _assertRevertedWithReason(searcherSuccess, searcherData, "payer");
         deployed.drops.isDropConsumed(authorization.dropId)
             .assertFalse("failed payer consumed drop");
         deployed.core.totalSupply().assertEq(0, "failed payer minted token");
@@ -151,7 +152,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
                 )
             );
 
-        _assertRevertedWithMessage(expiredSuccess, expiredData, "Expired");
+        _assertRevertedWithReason(expiredSuccess, expiredData, "Expired");
         deployed.drops.isDropConsumed(expired.dropId).assertFalse("expired drop consumed");
         deployed.core.totalSupply().assertEq(1, "expired drop minted token");
     }
@@ -194,7 +195,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
             abi.encodeWithSelector(setup.auctions.participateToAuction.selector, setup.tokenId)
         );
 
-        _assertRevertedWithMessage(lateSuccess, lateData, "Ended");
+        _assertRevertedWithReason(lateSuccess, lateData, "Ended");
         setup.auctions.auctionHighestBid(setup.tokenId).assertEq(RESERVE_PRICE, "bid changed");
         setup.auctions.auctionHighestBidder(setup.tokenId).assertEq(BIDDER, "bidder changed");
         setup.auctions.totalAuctionBidEscrow().assertEq(escrowBefore, "escrow changed");
@@ -269,13 +270,24 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "custody");
     }
 
-    function _assertRevertedWithMessage(
-        bool success,
-        bytes memory revertData,
-        string memory message
-    ) private pure {
+    function _assertRevertedWithReason(bool success, bytes memory revertData, string memory message)
+        private
+        pure
+    {
         success.assertFalse("call unexpectedly succeeded");
-        bytes memory expected = abi.encodeWithSignature("Error(string)", message);
-        keccak256(revertData).assertEq(keccak256(expected), message);
+        (revertData.length >= 4).assertTrue("missing revert selector");
+
+        bytes4 selector;
+        assembly {
+            selector := mload(add(revertData, 32))
+        }
+        (selector == ERROR_STRING_SELECTOR).assertTrue("unexpected revert selector");
+
+        bytes memory encodedReason = new bytes(revertData.length - 4);
+        for (uint256 i = 0; i < encodedReason.length; i++) {
+            encodedReason[i] = revertData[i + 4];
+        }
+        string memory reason = abi.decode(encodedReason, (string));
+        reason.assertEq(message, "revert reason");
     }
 }
