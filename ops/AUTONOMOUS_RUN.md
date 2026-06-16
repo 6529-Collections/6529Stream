@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-metadata-browser-evidence-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/471` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/472` |
-| Active PR | TBD |
+| Active PR | [#474](https://github.com/6529-Collections/6529Stream/pull/474) |
 | Next issue | TBD after EXT-014 live metadata browser evidence checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 21:52 UTC` |
+| Last updated | `2026-06-16 22:17 UTC` |
 
 ## Packaging Notes
 
