@@ -72,8 +72,8 @@ build before relying on any size-budget claim.
 The current production profile is:
 
 - command: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 23,781 bytes;
-- current EIP-170 margin: 795 bytes;
+- current `StreamCore` runtime: 23,159 bytes;
+- current EIP-170 margin: 1,417 bytes;
 - minimum release floor: 384-byte minimum runtime margin;
 - warning threshold: 512-byte warning runtime margin.
 
@@ -103,8 +103,9 @@ The default classification for future feature work is:
 | Frontend, mobile, Electron, SDK, analytics, and indexer behavior | Integration docs, generated artifacts, release manifests, and off-chain code | No Core spend |
 | Deployment, ceremony, audit, release, signature, and evidence workflows | Release artifacts, deployment manifests, address books, runbooks, and retained evidence | No Core spend |
 
-This policy is intentionally conservative even with 795 bytes of current
-headroom. The goal is to keep `StreamCore` deployable, auditable, and stable
+This policy is intentionally conservative even with 1,417 bytes of current
+headroom after moving script assembly into the linked renderer library. The
+goal is to keep `StreamCore` deployable, auditable, and stable
 while allowing world-class 1/1 drop surfaces to evolve through explicit,
 versioned extension points.
 

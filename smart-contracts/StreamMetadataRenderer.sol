@@ -3,6 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "./Base64.sol";
+import "./IDependencyRegistry.sol";
 import "./IStreamAdmins.sol";
 import "./IRandomizerLifecycle.sol";
 import "./Strings.sol";
@@ -173,6 +174,56 @@ library StreamMetadataRenderer {
                 collectionScript
             )
         );
+    }
+
+    function generativeScriptFromSources(
+        bytes32 tokenHash,
+        uint256 tokenId,
+        string memory tokenData,
+        IDependencyRegistry dependencyRegistry,
+        bytes32 dependencyNameAndVersion,
+        uint256 dependencyVersion,
+        string[] memory collectionScript
+    ) public view returns (string memory) {
+        return generativeScript(
+            tokenHash,
+            tokenId,
+            tokenData,
+            dependencyScriptText(dependencyRegistry, dependencyNameAndVersion, dependencyVersion),
+            collectionScriptText(collectionScript)
+        );
+    }
+
+    function collectionScriptText(string[] memory script) public pure returns (string memory) {
+        string memory scriptText = "";
+        for (uint256 i = 0; i < script.length; i++) {
+            scriptText = string.concat(scriptText, script[i]);
+        }
+        return scriptText;
+    }
+
+    function dependencyScriptText(
+        IDependencyRegistry registry,
+        bytes32 dependencyNameAndVersion,
+        uint256 dependencyVersion
+    ) public view returns (string memory) {
+        string memory scriptText = "";
+        for (
+            uint256 i = 0;
+            i
+                < registry.getDependencyScriptCountAtVersion(
+                    dependencyNameAndVersion, dependencyVersion
+                );
+            i++
+        ) {
+            scriptText = string.concat(
+                scriptText,
+                registry.getDependencyScriptAtVersion(
+                    dependencyNameAndVersion, dependencyVersion, i
+                )
+            );
+        }
+        return scriptText;
     }
 
     function collectionScriptHash(string[] memory script) public pure returns (bytes32) {

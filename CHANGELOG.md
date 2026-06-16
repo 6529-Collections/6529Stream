@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a `StreamCore` headroom recovery slice that moves collection and
+  dependency script assembly into the linked `StreamMetadataRenderer` library
+  while preserving the `retrieveGenerativeScript` Core surface; the production
+  via-IR size gate now measures `StreamCore` at 23,159 runtime bytes with
+  1,417 bytes of EIP-170 headroom, with the gas snapshot refreshed for the
+  small dependency-script read decrease and final metadata/mint read-path
+  increases.
 - Added ONE-007 warning-disposition coverage with
   `docs/warning-dispositions.md`, a checker/test pair, local/CI/Windows gate
   wiring, release-manifest and risk-register coverage, first-party NatSpec

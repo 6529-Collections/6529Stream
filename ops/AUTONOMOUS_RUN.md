@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/warning-noise-disposition` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/427` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/428` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/429` |
-| Next issue | Implement `ONE-007` warning-noise burn-down/disposition so release-grade compiler, NatSpec, lint, and static-analysis warnings are fixed or explicitly accepted before public release claims. |
+| Active PR branch | `codex/streamcore-script-headroom` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/429` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/430` |
+| Active PR | TBD |
+| Next issue | Recover additional `StreamCore` bytecode headroom by moving collection and dependency script assembly into the linked renderer library while preserving Core selectors and metadata output. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 01:41 UTC` |
+| Last updated | `2026-06-16 02:36 UTC` |
 
 ## Packaging Notes
 
@@ -259,65 +259,88 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 195 | Add Electron security and wallet integration guide | Gate G support | Add Electron guide, checker/tests, release-readiness navigation, and release-manifest coverage | Merged in PR #407 |
 | 196 | Add operator admin UI specification | Gate G/Gate F support | Add operator-admin guide, checker/tests, Safe/governance/monitoring links, release-readiness navigation, and release-manifest coverage | Merged in PR #409 |
 | 197 | Add contract-level metadata adapter | Gate G/Gate F support | Add ERC-7572-style `StreamContractMetadata` satellite/read-adapter, tests, deployment wiring, release artifacts, and integration docs while preserving `StreamCore` bytecode headroom | Merged in PR #411 |
-| 198 | Add 1/1 provenance manifest model | Gate G/Gate F support | Add provenance model docs, schema, retained artifact template, generated manifest, local/CI checks, release-manifest/checksum coverage, and artifact-only boundaries while preserving `StreamCore` bytecode headroom | In progress on issue #412 |
+| 198 | Add 1/1 provenance manifest model | Gate G/Gate F support | Add provenance model docs, schema, retained artifact template, generated manifest, local/CI checks, release-manifest/checksum coverage, and artifact-only boundaries while preserving `StreamCore` bytecode headroom | Merged in PR #413 |
+| 199 | Add royalty policy boundary | Gate G/Gate F support | Document ERC-2981 disclosure, governance controls, and enforcement/composability tradeoffs while preserving `StreamCore` bytecode headroom | Merged in PR #417 |
+| 200 | Add collector permanence package | Gate G/Gate F support | Add permanence package docs, schema/template, generated manifest, checks, and release coverage while preserving `StreamCore` bytecode headroom | Merged in PR #419 |
+| 201 | Add marketplace/indexer evidence model | Gate G/Gate E support | Add retained evidence templates/checkers and release-evidence tracker coverage for marketplace/indexer discovery and cache proof | Merged in PR #425 |
+| 202 | Add satellite-extension architecture policy | Gate G support | Add checked satellite-first architecture policy and size-budget evidence matching | Merged in PR #427 |
+| 203 | Burn down or disposition warning noise | Gate G/Gate F support | Add checked warning-disposition baseline and local/CI/Windows gate wiring | Merged in PR #429 |
+| 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | In progress on issue #430 |
 
 ## Current PR Worklog
 
-### PR candidate: Burn down or disposition release-grade warning noise (Queue Item ONE-007)
+### PR candidate: Recover script assembly headroom (Queue Item 204)
 
-Status: issue #428 open; branch `codex/warning-noise-disposition` locally
-validated and ready to publish.
+Status: issue #430 open; branch `codex/streamcore-script-headroom` is in local
+implementation and validation.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/430`.
+PR: TBD.
+Branch: `codex/streamcore-script-headroom`.
+Branch started from PR #429 squash merge commit
+`de81645fa20fbf7da4275b362c80d70c7483b326`.
+
+Goal:
+
+- Recover additional `StreamCore` bytecode headroom without removing public
+  Core selectors or changing metadata output.
+- Move collection script concatenation and dependency-registry script assembly
+  into the linked `StreamMetadataRenderer` library.
+- Preserve `retrieveGenerativeScript(uint256)` behavior and ABI while shifting
+  composition bytecode out of Core.
+- Refresh release artifacts and size evidence from the actual via-IR production
+  build.
+
+Validation plan:
+
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`.
+- `forge test --match-path test\StreamDependencyRegistry.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataFreeze.t.sol -vvv`.
+- `python scripts/check_contract_size_budget.py`.
+- `python scripts/test_architecture_threat_model.py`.
+- `python scripts/check_architecture_threat_model.py`.
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`.
+- Release manifest/proof/checksum drift checks.
+- `python scripts/check_changelog.py`.
+- `git diff --check`.
+
+Notes:
+
+- Initial focused tests passed for metadata golden fixtures, dependency registry
+  rendering/pinning, and metadata freeze behavior.
+- The production size build measured `StreamCore` at 23,159 runtime bytes with
+  1,417 bytes of EIP-170 headroom, recovering 622 bytes from merged `main`.
+- `StreamMetadataRenderer` grows to 12,690 runtime bytes, still leaving 11,886
+  bytes of EIP-170 margin.
+- Gas snapshot impact is intentionally small and accepted for the bytecode
+  recovery: dependency script read decreases by 276 gas, final on-chain
+  `tokenURI` increases by 295 gas, and fixed-price mint increases by 224 gas.
+- Local validation passed: focused metadata golden, dependency registry,
+  metadata freeze, size-budget, architecture/threat-model, changelog,
+  gas-snapshot check, `make release-checksums`, full `make check`, Windows
+  `scripts\check.ps1`, and `git diff --check`.
+
+### Completed: Burn down or disposition release-grade warning noise (Queue Item ONE-007)
+
+Status: merged in PR #429; issue #428 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/428`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/429`.
 Branch: `codex/warning-noise-disposition`.
 Branch started from PR #427 squash merge commit
 `a09fcfc0a5670958a0080f0bb1f62972eb42cf43`.
 
-Goal:
+Validation result:
 
-- Capture the current compiler/NatSpec/lint warning output rather than leaving
-  it as ambient noise.
-- Split warnings into fixed-now, accepted-vendored, accepted-test-only,
-  accepted-size-tradeoff, and future-work buckets.
-- Fix low-risk first-party warnings where behavior and size impact are
-  acceptable.
-- Document retained warning dispositions with owner, reason, scope, and
-  follow-up policy.
-- Decide whether local/CI gates should fail on new first-party warning
-  categories or keep a checked warning baseline.
-
-Validation plan:
-
-- `forge build`.
-- `forge build --sizes --via-ir --skip test --skip script --force`.
-- `forge test -vvv` if Solidity behavior changes.
-- Warning/disposition checker tests if a checked baseline is introduced.
-- `python scripts/check_changelog.py`.
-- Release manifest/proof/checksum checks when covered files change.
-- `git diff --check`.
-
-Notes:
-
-- Prefer docs/checker/tooling plus low-risk first-party warning fixes.
-- Avoid `StreamCore` bytecode spend unless the size delta is measured and
-  accepted.
-- Current rebased `StreamCore` production size remains 23,781 runtime bytes
-  with 795 bytes of EIP-170 headroom.
-- Implemented comment-only NatSpec header cleanup across first-party Solidity
-  headers, added `docs/warning-dispositions.md`, added a warning-disposition
-  checker/test pair, wired it into Makefile/bash/PowerShell/CI gates, refreshed
-  release manifests/checksums/risk register/source-verification artifacts, and
-  linked the baseline from tooling, audit-package, readiness, and status docs.
-- Local validation passed: `make release-checksums`,
-  `make warning-dispositions-check`, `python scripts/generate_release_manifest.py --check`,
-  `python scripts/generate_release_checksums.py --check`,
-  `python scripts/generate_risk_register.py --check`,
-  focused release-readiness/audit-package/changelog/checksum tests/checkers,
-  Python compilation, full `make check`, and `forge doc --build`.
-- `forge doc --build` succeeds and retains only the documented mdBook warnings
-  from vendored VRF placeholder angle-bracket prose.
-- PR #429 opened on head `f56e5cd4af3ebd1eabd4dd183633ec824331645b`.
-  CodeRabbit review was requested in comment `4714065314`.
+- Comment-only NatSpec header cleanup, checked warning-disposition docs,
+  Makefile/bash/PowerShell/CI wiring, risk/release manifest coverage, and
+  regenerated release evidence artifacts were locally green.
+- `make release-checksums`, focused warning/release/risk/readiness/audit/
+  changelog checks, Python compilation, full `make check`, and
+  `forge doc --build` passed.
+- Current production size at merge remained `StreamCore` `23,781` runtime
+  bytes with `795` bytes of EIP-170 headroom.
+- CI run `27588316106` passed and CodeRabbit status was success; PR #429
+  squash-merged as `de81645fa20fbf7da4275b362c80d70c7483b326`.
 
 ### Completed: Add satellite-extension architecture policy (Queue Item ONE-006)
 
