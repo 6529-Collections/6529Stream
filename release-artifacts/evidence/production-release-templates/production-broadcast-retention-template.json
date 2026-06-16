@@ -8,7 +8,7 @@
   "block_or_reference": "template-only live broadcast block, transaction hash set, or deployment version",
   "command_or_source_system": "template-only Foundry broadcast source, broadcast manifest generator, or reviewer source",
   "retained_path": "release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md",
-  "sha256": "sha256:c21aecd3e93fe4204bad048f32fb8fe75d41e6e8aa7a4bb86fe62be9046bb479",
+  "sha256": "sha256:abb242bc235d2cd6f18e2aa129a9ed2f696d4f82798b3b34ed543516e34d9562",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

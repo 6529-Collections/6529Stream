@@ -69,3 +69,5 @@ python scripts/generate_release_checksums.py --check
   public-beta evidence manifest.
 - Do not retain private RPC URLs, private keys, API keys, signing material,
   unreleased drop payloads, or unredacted operator logs in this repository.
+- Replace private RPC or provider URLs with `<redacted>` before review; the
+  checker fails closed on provider/API-token-shaped URLs.

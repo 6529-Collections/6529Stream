@@ -182,7 +182,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:1a5166819ffe9c250ee2040b312b4fe35ed257404a2d5b2c51f4e97c843b518d",
+        "sha256": "sha256:b32ca3980163d5207b70421c2c40fbfd6b870d2e4f83923740765bc04b9749e2",
         "size_bytes": 60712,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -208,7 +208,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:ebf1e4dc61d107b8dde700afb2e493de237dd6bb6be2f8c9c1fa1d24805aa05e",
+        "sha256": "sha256:e1fdafa325f04f126cafffb2a85e62275f8553dcfbf201eee43259089760241c",
         "size_bytes": 116605,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -227,13 +227,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:e317870939d48ef3bed44e1affe409bc5763ead87071710cc882f4bafaeb0952",
+        "sha256": "sha256:ec9abec15f46ea2a40c8b6aa12006d1dc3100d275159ebcf01abb8539ed043e6",
         "size_bytes": 81560,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:ef99932dd862bbda39b998286bedf82d25c72ef537170f822197dbdddb9d54c0",
+        "sha256": "sha256:739c5fc7a79090e2528f238c504bc5e2d3b18590c52da574aa1919f8afc8184a",
         "size_bytes": 72112
       }
     },
@@ -760,7 +760,7 @@
       },
       {
         "path": "release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json",
-        "sha256": "sha256:38687f8da6a1ebb0982789a3c8bdf9b7e6096546ccd36e6d8be9d3a97e0c39f7",
+        "sha256": "sha256:7f4d9cd0bad2e962d21fea9388e3c968799d690b4dfa952d5929f4366cf5dc21",
         "size_bytes": 1658,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "production-release-template-production-broadcast-retention",
@@ -779,7 +779,7 @@
           "block_or_reference": "template-only live broadcast block, transaction hash set, or deployment version",
           "command_or_source_system": "template-only Foundry broadcast source, broadcast manifest generator, or reviewer source",
           "retained_path": "release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md",
-          "sha256": "sha256:c21aecd3e93fe4204bad048f32fb8fe75d41e6e8aa7a4bb86fe62be9046bb479",
+          "sha256": "sha256:abb242bc235d2cd6f18e2aa129a9ed2f696d4f82798b3b34ed543516e34d9562",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",

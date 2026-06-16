@@ -93,6 +93,7 @@ RETAINED_FILE_FIELDS = [
     "Generated live deployment manifest",
     "Generated live address book",
 ]
+ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 
 REQUIRED_COMMANDS = [
     "python scripts/test_production_broadcast_retention.py",
@@ -253,7 +254,9 @@ def require_field_value(
 def is_placeholder(value: str) -> bool:
     """Return whether a value is still placeholder/template text."""
     lowered = value.lower()
-    return lowered in {"tbd", "template", "template-only"} or "<" in value
+    return lowered in {"tbd", "template", "template-only"} or bool(
+        ANGLE_PLACEHOLDER_RE.search(value)
+    )
 
 
 def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None:
@@ -301,6 +304,8 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
         require_field_value(path, fields, "Review decision", "reviewed")
         for label in REVIEWED_YES_FIELDS:
             require_field_value(path, fields, label, "yes")
+        validate_referenced_artifacts(path, fields)
+    elif review_status == "pending_review":
         validate_referenced_artifacts(path, fields)
 
 

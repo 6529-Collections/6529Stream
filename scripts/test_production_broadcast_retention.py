@@ -173,6 +173,17 @@ python scripts/generate_release_checksums.py --check
 """
 
 
+def pending_review_artifact() -> str:
+    """Return a valid pending-review retained artifact."""
+    return reviewed_artifact().replace(
+        "- Review status: `reviewed`",
+        "- Review status: `pending_review`",
+    ).replace(
+        "- Review decision: `reviewed`",
+        "- Review decision: `pending_review`",
+    )
+
+
 REVIEWED_RETAINED_PATHS = [
     "release-artifacts/evidence/production-broadcast-retention/transcript.md",
     "deployments/broadcasts/mainnet-6529stream-v0.1.0-001-run-latest.json",
@@ -282,6 +293,33 @@ class ProductionBroadcastRetentionTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.ProductionBroadcastRetentionError,
                 "Production block or reference",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_literal_less_than_in_value_passes(self) -> None:
+        """Non-placeholder less-than symbols do not fail final value checks."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-less-than.md"
+            seed_reviewed_retained_files(Path(temp_dir))
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "`mainnet block 12345678`",
+                    "`mainnet block 12345678; observed gas < budget`",
+                ),
+            )
+
+            checker.validate_artifact(path)
+
+    def test_pending_review_missing_retained_file_fails(self) -> None:
+        """Pending-review evidence catches broken retained-file references."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "pending-review-missing-retained-file.md"
+            write_text(path, pending_review_artifact())
+
+            with self.assertRaisesRegex(
+                checker.ProductionBroadcastRetentionError,
+                "missing retained file",
             ):
                 checker.validate_artifact(path)
 
