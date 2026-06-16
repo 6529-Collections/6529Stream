@@ -512,8 +512,11 @@ the release policy in `docs/release-policy.md`.
 - Recovered another 386 bytes of `StreamCore` runtime bytecode headroom by
   moving off-chain token URI formatting, token-name formatting, and randomizer
   lifecycle probe helpers into the linked `StreamMetadataRenderer` library
-  while preserving metadata state and migration behavior. The production
-  IR-optimized runtime is now 23,661 bytes with 915 bytes of EIP-170 headroom.
+  while preserving metadata state and migration behavior. The PR #421
+  production IR-optimized runtime measured 23,661 bytes with 915 bytes of
+  EIP-170 headroom before later mainline additions; the current release proof
+  records the rebased `StreamCore` runtime as 23,781 bytes with 795 bytes of
+  EIP-170 headroom.
 - Hardened the runtime size-budget checker so it validates compiler metadata,
   optimizer settings, EVM version, compilation target, and current source
   Keccak hashes before trusting Foundry artifacts, with focused regression
