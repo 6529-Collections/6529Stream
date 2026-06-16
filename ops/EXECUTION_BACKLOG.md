@@ -3350,7 +3350,7 @@ unless an external dependency changes.
 | `EXT-009` | Retain fork metadata browser evidence from deployed fork contracts | E | fork deployment artifact |
 | `EXT-010` | Retain fork ceremony evidence for admin/signer/randomizer/auction operations | E/F | ceremony checker |
 | `EXT-011` | Retain fork randomizer operations evidence | E/F | randomizer operations checker |
-| `EXT-012` | Add production broadcast retention checker | F/G | release-mode policy |
+| `EXT-012` | Add production broadcast retention checker | F/G | Active issue #468; branch `codex/production-broadcast-retention-checker`; release-mode policy |
 | `EXT-013` | Add production verified-addresses evidence checker | F/G | explorer checker |
 | `EXT-014` | Add live metadata browser evidence checker | F/G | metadata browser evidence pattern |
 | `EXT-015` | Add live ceremony evidence checker | F/G | governance ceremony checker |
@@ -3398,7 +3398,7 @@ unless an external dependency changes.
 | `REL-005` | Add release artifact verifier script for third-party users | G | Merged in PR #461; issue #460 closed completed |
 | `REL-006` | Add release notes generator from changelog and artifact diff | G | Merged in PR #463; issue #462 closed completed |
 | `REL-007` | Add dependency provenance attestation bundle | F/G | Merged in PR #465; issue #464 closed completed |
-| `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | Active issue #466; branch `codex/release-mode-ci-profile`; live evidence templates |
+| `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | Merged in PR #467; issue #466 closed completed |
 
 ### Governance And Operations
 

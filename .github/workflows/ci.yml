@@ -142,6 +142,8 @@ jobs:
             scripts/test_fork_deployment_rehearsal_evidence.py \
             scripts/check_testnet_deployment_rehearsal_evidence.py \
             scripts/test_testnet_deployment_rehearsal_evidence.py \
+            scripts/check_production_broadcast_retention.py \
+            scripts/test_production_broadcast_retention.py \
             scripts/check_public_beta_evidence.py \
             scripts/test_public_beta_evidence.py \
             scripts/check_risk_register.py \
@@ -477,6 +479,8 @@ jobs:
           python3 scripts/check_fork_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/fork-deployment-rehearsal-evidence-check.log
           python3 scripts/test_testnet_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/testnet-deployment-rehearsal-evidence-tests.log
           python3 scripts/check_testnet_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/testnet-deployment-rehearsal-evidence-check.log
+          python3 scripts/test_production_broadcast_retention.py 2>&1 | tee ci-logs/production-broadcast-retention-tests.log
+          python3 scripts/check_production_broadcast_retention.py 2>&1 | tee ci-logs/production-broadcast-retention-check.log
           python3 scripts/test_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-tests.log
           python3 scripts/check_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-check.log
 

@@ -28,3 +28,9 @@ For live marketplace/indexer evidence, fill
 and run `python scripts/check_marketplace_indexer_evidence.py` before
 generating the non-local evidence envelope for
 `live_marketplace_indexer_evidence`.
+
+For production broadcast retention evidence, fill
+`release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`
+and run `python scripts/test_production_broadcast_retention.py` plus
+`python scripts/check_production_broadcast_retention.py` before generating the
+non-local evidence envelope for `production_broadcast_retention`.

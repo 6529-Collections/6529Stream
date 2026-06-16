@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret production broadcast retention retained-artifact template
+  and checker for future `production_broadcast_retention` evidence, with
+  focused tests, local/CI/Windows gate wiring, release-readiness/tooling docs,
+  and checksum coverage while preserving the blocked production-release
+  baseline until reviewed live broadcast artifacts are retained.
 - Added an opt-in release-mode evidence gate with
   `scripts/check_release_mode.py`, focused tests, manual Makefile targets, a
   workflow-dispatch GitHub Actions profile, release-readiness/tooling docs, and
