@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/production-verified-addresses-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/469` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/470` |
-| Active PR | TBD; local EXT-013 draft in progress. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/471` |
 | Next issue | TBD after EXT-013 production verified-addresses checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 21:12 UTC` |
+| Last updated | `2026-06-16 21:28 UTC` |
 
 ## Packaging Notes
 
@@ -16113,6 +16113,7 @@ Outcome:
 | 2026-06-16 20:40 | Address PR #469 checker review nice-to-haves | 6529bot security reported no findings, CodeRabbit was rate-limited but then marked the command finished, and 6529bot general marked the PR good to merge with nice-to-haves. Accepted the low-risk hardening by making angle-bracket placeholder detection pattern-based instead of any bare `<`, validating pending-review retained-file references, and documenting `<redacted>` as the private RPC/provider URL escape hatch. Focused production-broadcast tests/checks, non-local evidence, packet/backlog/body-sync currentness, manifest/proof/checksum currentness, and release verifier passed. Next action is to run full `make check` and Windows wrapper again, commit, push, then wait for follow-up CI/bot status. |
 | 2026-06-16 19:06 | Address PR #465 nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with nice-to-haves. Accepted the normalized-digest suggestion by computing `artifact_digest` from the already-validated identity block instead of re-reading raw fields, and added a symlink escape regression test that skips only if the platform cannot create symlinks. Kept `source.notes` optional because dependency artifact descriptors already allow absent notes while preserving an explicit empty string in the attestation. Focused attestation tests/check, release-manifest check, release-checksum check, third-party verifier, changelog, and `git diff --check` passed. Next action is to push the response commit, wait for latest CI/bot feedback, then merge if clean. |
 | 2026-06-16 21:12 | Start EXT-013 production verified-addresses checker | PR #469 merged as `1b8bf43d9e7989c10cd6cadda923fb5aca5d4ec4` after CI, CodeRabbit, and 6529bot follow-up were clean; issue #468 closed completed. Issue #470 is open for EXT-013, and branch `codex/production-verified-addresses-checker` adds a no-secret retained-artifact template and checker for future `production_address_books` and `live_explorer_verification` evidence without changing readiness claims. Local draft work includes address-book/deployment-manifest agreement checks, verified explorer row validation, focused tests, gate wiring, release-readiness/tooling/release-artifact docs, changelog, packet-index coverage, and backlog/run-state traceability. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-16 21:28 | Open PR #471 for EXT-013 | PR #471 is open at `https://github.com/6529-Collections/6529Stream/pull/471`, closes issue #470, and packages the production verified-addresses checker, dedicated retained-artifact template, production address-book/live explorer template handoff, local/CI/Windows gate wiring, docs, regenerated release evidence, and state updates. Local full `make check` and Windows `scripts\check.ps1` passed with existing compiler/Foundry warning noise only. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
