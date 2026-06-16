@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 08:30 UTC` |
+| Last updated | `2026-06-16 08:39 UTC` |
 
 ## Packaging Notes
 
@@ -324,6 +324,20 @@ Completed local validation:
 - `python scripts/generate_bytecode_release_proof.py --check`.
 - `python scripts/generate_release_checksums.py --check`.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Review-response validation:
+
+- 6529bot security review reported no security findings.
+- 6529bot general review marked the PR good to merge and raised
+  non-blocking test-clarity nice-to-haves.
+- Follow-up patch adds an explicit wrong-verifying-contract digest-difference
+  assertion, replaces low-level negative mint calls with exact
+  `Bad contract sig` revert expectations, and documents that the local
+  signature guard fields are not Safe signature encoding.
+- `forge fmt --check test\StreamSafeERC1271ForkSmoke.t.sol`.
+- `forge test --match-path test\StreamSafeERC1271ForkSmoke.t.sol -vvv`.
+- `forge test --match-path test\StreamDropsERC1271.t.sol -vvv`.
 - `git diff --check`.
 
 ### PR candidate: Add event reconstructability tests from emitted logs (Queue Item 209 / ADV-008)

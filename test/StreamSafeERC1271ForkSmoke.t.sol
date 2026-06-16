@@ -121,11 +121,10 @@ contract StreamSafeERC1271ForkSmokeTest is DropAuthTestHelper, StreamFixture {
         vm.prank(SAFE_OWNER_ONE);
         safeSigner.approveHash(digest);
 
-        bool success = callMint(
+        expectBadContractSignature(
             drops, authorization, tokenData, safeApprovedHashSignature(drops, authorization)
         );
 
-        success.assertFalse("single owner approval passed threshold");
         drops.isDropConsumed(authorization.dropId).assertFalse("threshold failure consumed drop");
     }
 
@@ -140,9 +139,8 @@ contract StreamSafeERC1271ForkSmokeTest is DropAuthTestHelper, StreamFixture {
         bytes memory forkSignature = safeApprovedHashSignature(drops, authorization);
 
         vm.chainId(LOCAL_CHAIN_ID);
-        bool success = callMint(drops, authorization, tokenData, forkSignature);
+        expectBadContractSignature(drops, authorization, tokenData, forkSignature);
 
-        success.assertFalse("fork signature passed on local chain");
         drops.isDropConsumed(authorization.dropId).assertFalse("wrong chain consumed drop");
     }
 
@@ -164,16 +162,18 @@ contract StreamSafeERC1271ForkSmokeTest is DropAuthTestHelper, StreamFixture {
             100,
             block.timestamp + 1 days
         );
-        approveSafeDigest(safeSigner, expectedDrops.hashDropAuthorization(authorization));
+        bytes32 expectedDigest = expectedDrops.hashDropAuthorization(authorization);
+        bytes32 otherDigest = otherDrops.hashDropAuthorization(authorization);
+        require(expectedDigest != otherDigest, "verifying contract did not affect digest");
+        approveSafeDigest(safeSigner, expectedDigest);
 
-        bool success = callMint(
+        expectBadContractSignature(
             otherDrops,
             authorization,
             tokenData,
             safeApprovedHashSignature(expectedDrops, authorization)
         );
 
-        success.assertFalse("signature passed wrong verifying contract");
         otherDrops.isDropConsumed(authorization.dropId).assertFalse("wrong contract consumed drop");
     }
 
@@ -225,17 +225,14 @@ contract StreamSafeERC1271ForkSmokeTest is DropAuthTestHelper, StreamFixture {
         );
     }
 
-    function callMint(
+    function expectBadContractSignature(
         StreamDrops drops,
         StreamDrops.DropAuthorization memory authorization,
         string memory tokenData,
         bytes memory signature
-    ) private returns (bool) {
-        (bool success,) = address(drops)
-            .call(
-                abi.encodeWithSelector(drops.mintDrop.selector, authorization, tokenData, signature)
-            );
-        return success;
+    ) private {
+        vm.expectRevert(bytes("Bad contract sig"));
+        drops.mintDrop(authorization, tokenData, signature);
     }
 }
 
@@ -277,6 +274,8 @@ contract MockSafeERC1271Signer {
         view
         returns (bytes4)
     {
+        // Safe approved-hash validation keys off the digest approved in storage.
+        // These extra fields are local smoke-test guardrails, not Safe signature encoding.
         (bytes32 tag, uint256 chainId, address verifyingContract, bytes32 dropId) =
             abi.decode(signature, (bytes32, uint256, address, bytes32));
         if (tag != SAFE_APPROVED_HASH_TAG) {
