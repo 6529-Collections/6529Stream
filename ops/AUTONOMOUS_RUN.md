@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-safe-erc1271-smoke` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/441` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/442` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/443` |
 | Next issue | TBD after ADV-009 Safe/ERC-1271 smoke tests land. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 08:17 UTC` |
+| Last updated | `2026-06-16 08:30 UTC` |
 
 ## Packaging Notes
 
@@ -277,11 +277,11 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add fork-aware Safe/ERC-1271 signature smoke tests (Queue Item 210 / ADV-009)
 
-Status: issue opened and branch started from PR #441 squash merge commit
-`ba73afe6b4592b80239d96c30da4084aa7fb884b`; local implementation validated
-and ready to publish.
+Status: PR #443 opened from PR #441 squash merge commit
+`ba73afe6b4592b80239d96c30da4084aa7fb884b`; local implementation validated,
+pushed, and awaiting CI/bot review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/442`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/443`.
 Branch: `codex/fork-safe-erc1271-smoke`.
 
 Goal:
