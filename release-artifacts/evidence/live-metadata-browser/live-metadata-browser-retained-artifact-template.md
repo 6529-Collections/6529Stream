@@ -58,7 +58,7 @@
 ```sh
 python scripts/test_live_metadata_browser_evidence.py
 python scripts/check_live_metadata_browser_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md --output release-artifacts/evidence/live-metadata-browser/live-metadata-browser-evidence.json --environment live --chain-id 1 --block-or-reference "<production block, token ID, collection ID, or browser transcript reference>" --command-or-source-system "<metadata browser transcript or CI job>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json --retained-artifact release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md --output release-artifacts/evidence/live-metadata-browser/live-metadata-browser-evidence.json --environment live --chain-id 1 --block-or-reference "<production block, token ID, collection ID, or browser transcript reference>" --command-or-source-system "<metadata browser transcript or CI job>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check

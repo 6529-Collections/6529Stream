@@ -110,6 +110,11 @@ REQUIRED_COMMANDS = [
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
 ]
+REQUIRED_TEMPLATE_ARGUMENT = (
+    "--template "
+    "release-artifacts/evidence/production-release-templates/"
+    "live-metadata-browser-evidence-template.json"
+)
 
 FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
@@ -129,7 +134,8 @@ CLI_SECRET_RE = re.compile(
     r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
     r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
-    r"https?://[^\s`]*(?:alchemy|infura|quicknode|api[_-]?key|apikey|token|secret)[^\s`]*"
+    r"https?://[^\s`]*(?:alchemy|infura|quicknode)[^\s`]*|"
+    r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
     r")",
     re.IGNORECASE,
 )
@@ -486,6 +492,10 @@ def validate_commands(path: Path, text: str) -> None:
             raise LiveMetadataBrowserEvidenceError(
                 f"{path} is missing validation command: {command}"
             )
+    if REQUIRED_TEMPLATE_ARGUMENT not in text:
+        raise LiveMetadataBrowserEvidenceError(
+            f"{path} is missing validation command argument: {REQUIRED_TEMPLATE_ARGUMENT}"
+        )
 
 
 def validate_artifact(path: Path) -> None:

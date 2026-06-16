@@ -37,7 +37,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:3cd2cb91d21255f5fa7a1eab0d530c18ec5b7d72ffc23fc87f7ba82c9574cfc4"
+    "sha256": "sha256:74bf11a55136631404fe5d7c60e272aea35509186af4f26573e13fc695b2135f"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -301,8 +301,8 @@
     },
     {
       "path": "release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md",
-      "sha256": "sha256:81df7923eb01326520f32c41ebf5369962601e6650c1a4ed2165b76f6c5929c4",
-      "size_bytes": 3120
+      "sha256": "sha256:e72fdb0c8e62f299ae391ebb6f1cd7337393d487e04b9ac4bcae7882f180c490",
+      "size_bytes": 3128
     },
     {
       "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
@@ -356,7 +356,7 @@
     },
     {
       "path": "release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json",
-      "sha256": "sha256:89048be4a34d11553f8aa3e84f69dfe0f5abc46e3f5a09bf95a47d9afafa13c6",
+      "sha256": "sha256:f8f1f2389a0c77a3c2367e2bddb7906689b702dc185218a27e4f650c0b7ac433",
       "size_bytes": 1836
     },
     {
@@ -476,7 +476,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:8f40dfa30ff180427b538e5ff8f6f7445f031224f8192d1132dc04f54ead7e3b",
+      "sha256": "sha256:5bd4a7b7a53ab5a043e28f64ba65899e55840d36430344bc176795c9cbb926c8",
       "size_bytes": 79962
     },
     {
@@ -576,7 +576,7 @@
     },
     {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:a307ebd4fd03849d4bea83151ce8006c904fca70b8bc1139dc57e5e03cc9211e",
+      "sha256": "sha256:7f62d377422cf064974203a232159c5503015ebb3985f4adecab70de8cf89617",
       "size_bytes": 64736
     },
     {
@@ -586,7 +586,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9c31b9168f6e82c0f249cc88bdaa6861410302101048c66525d5d8f1fcc9c8e4",
+      "sha256": "sha256:80a038489a17be925501edb0b55c7b2aa936d7c34a0d2764f125e37055d5bb73",
       "size_bytes": 110227
     },
     {
@@ -691,8 +691,8 @@
     },
     {
       "path": "scripts/check_live_metadata_browser_evidence.py",
-      "sha256": "sha256:ee315fa894b5cce99b202a7c41ae3bf950fb414841348a59d350b5b1b88f9f69",
-      "size_bytes": 19785
+      "sha256": "sha256:3f26b5444cbe0bee5770ca9e9d59030be921475fda4cfbb57721a72c7bd6f88f",
+      "size_bytes": 20187
     },
     {
       "path": "scripts/check_production_broadcast_retention.py",

@@ -200,7 +200,11 @@ TOKEN_DIGEST_PATH = "release-artifacts/evidence/live-metadata-browser/token-uri-
 BROWSER_TRANSCRIPT_PATH = "release-artifacts/evidence/live-metadata-browser/browser-transcript.md"
 
 
-def browser_summary(*, page_errors: list[str] | None = None) -> dict[str, object]:
+def browser_summary(
+    *,
+    contracts: dict[str, object] | None = None,
+    page_errors: list[str] | None = None,
+) -> dict[str, object]:
     """Return a compact retained live browser summary fixture."""
     return {
         "schema_version": "6529stream.live-metadata-browser-evidence.v1",
@@ -211,11 +215,8 @@ def browser_summary(*, page_errors: list[str] | None = None) -> dict[str, object
             "git_commit": "1234567890abcdef1234567890abcdef12345678",
             "command_or_source_system": "metadata browser transcript",
         },
-        "contracts": {
-            "StreamCore": {
-                "address": "0x1111111111111111111111111111111111111111"
-            }
-        },
+        "contracts": contracts
+        or {"StreamCore": {"address": "0x1111111111111111111111111111111111111111"}},
         "token_results": [
             {
                 "token_id": 10000000000,
@@ -438,6 +439,24 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_wrong_generate_template_argument_fails(self) -> None:
+        """The generator command must use the metadata-browser envelope template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "wrong-template-argument.md"
+            write_text(
+                path,
+                valid_template().replace(
+                    "live-metadata-browser-evidence-template.json",
+                    "live-ceremony-evidence-template.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "live-metadata-browser-evidence-template",
+            ):
+                checker.validate_artifact(path)
+
     def test_secret_like_values_fail(self) -> None:
         """Secret-shaped key/value text is rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -447,6 +466,34 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.LiveMetadataBrowserEvidenceError,
                 "secret-like",
+            ):
+                checker.validate_artifact(path)
+
+    def test_safe_token_explorer_url_passes_secret_scan(self) -> None:
+        """Safe explorer token URLs are not treated as provider credentials."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "safe-token-url.md"
+            write_text(
+                path,
+                valid_template()
+                + "\n- Explorer reference: https://etherscan.io/token/"
+                + "0x1111111111111111111111111111111111111111?a=10000000000\n",
+            )
+
+            checker.validate_artifact(path)
+
+    def test_credential_query_url_fails_secret_scan(self) -> None:
+        """Credential-bearing URL query parameters still fail closed."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "credential-query-url.md"
+            write_text(
+                path,
+                valid_template() + "\nhttps://example.invalid/path?token=do-not-commit\n",
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "secret-like CLI",
             ):
                 checker.validate_artifact(path)
 
@@ -463,6 +510,50 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.LiveMetadataBrowserEvidenceError,
                 "secret-like CLI",
+            ):
+                checker.validate_artifact(path)
+
+    def test_duplicate_summary_contract_address_fails(self) -> None:
+        """Browser summaries must not duplicate contract addresses."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-duplicate-contract.md"
+            seed_reviewed_retained_files(root)
+            summary_path = root / BROWSER_SUMMARY_PATH
+            summary = browser_summary(
+                contracts={
+                    "StreamCore": {
+                        "address": "0x1111111111111111111111111111111111111111"
+                    },
+                    "StreamMinter": {
+                        "address": "0x1111111111111111111111111111111111111111"
+                    },
+                }
+            )
+            write_json(summary_path, summary)
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "duplicates contract address",
+            ):
+                checker.validate_artifact(path)
+
+    def test_angle_bracket_placeholder_fails_non_template_artifact(self) -> None:
+        """Non-template artifacts cannot keep angle-bracket placeholders."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-angle-placeholder.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "`mainnet-6529stream-v0.1.0-001`",
+                    "`<deployment version>`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "Network and deployment version",
             ):
                 checker.validate_artifact(path)
 
