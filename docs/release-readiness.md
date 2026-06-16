@@ -353,6 +353,10 @@ The current local baseline includes:
   [`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md),
   validated offline with `python scripts/test_live_metadata_browser_evidence.py`
   and `python scripts/check_live_metadata_browser_evidence.py`,
+  plus live ceremony evidence for `live_ceremony_evidence` under
+  [`release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`](../release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md),
+  validated offline with `python scripts/test_live_ceremony_evidence.py` and
+  `python scripts/check_live_ceremony_evidence.py`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with

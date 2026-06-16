@@ -589,6 +589,18 @@ explicit redaction confirmations before a reviewed artifact can pass. The
 committed file is template-only and keeps production release blocked until
 future reviewed live metadata browser evidence is accepted.
 
+Live ceremony evidence has a dedicated no-secret retained artifact template at
+`release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`.
+Run `python scripts/test_live_ceremony_evidence.py` and
+`python scripts/check_live_ceremony_evidence.py` before generating the
+non-local evidence envelope for `live_ceremony_evidence`. The checker requires
+live deployment context, governance participant identities, ownership transfer,
+role grant/revoke, signer setup, metadata/freeze, auction, emergency-control,
+dry-run, monitoring handoff, generated live artifact references, reviewer
+metadata, and explicit redaction confirmations before a reviewed artifact can
+pass. The committed file is template-only and keeps production release blocked
+until future reviewed live ceremony evidence is accepted.
+
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, public-beta evidence, release evidence issue backlog, release

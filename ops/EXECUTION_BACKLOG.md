@@ -3353,7 +3353,7 @@ unless an external dependency changes.
 | `EXT-012` | Add production broadcast retention checker | F/G | Merged in PR #469; issue #468 closed completed |
 | `EXT-013` | Add production verified-addresses evidence checker | F/G | Merged in PR #471; issue #470 closed completed |
 | `EXT-014` | Add live metadata browser evidence checker | F/G | Merged in PR #474; issue #472 closed completed; tracker issue #473 remains open for future reviewed live evidence |
-| `EXT-015` | Add live ceremony evidence checker | F/G | governance ceremony checker |
+| `EXT-015` | Add live ceremony evidence checker | F/G | Active branch `codex/live-ceremony-evidence-checker`; issue #228; governance ceremony checker |
 | `EXT-016` | Add live randomizer operations evidence checker | F/G | randomizer operations pattern |
 
 ### Adversarial Testing
@@ -3429,7 +3429,7 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | `AUD-001` |
-| `AUD-004` | Add post-audit remediation evidence checker | F/G | Active branch `codex/post-audit-remediation-evidence-checker`; issue #231; external audit/report evidence pattern |
+| `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | README refresh |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | backlog labels |

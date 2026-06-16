@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/post-audit-remediation-evidence-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/474` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/231` |
-| Active PR | [#475](https://github.com/6529-Collections/6529Stream/pull/475) |
-| Next issue | TBD after AUD-004 post-audit remediation evidence checker lands. |
+| Active PR branch | `codex/live-ceremony-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/475` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/228` |
+| Active PR | TBD |
+| Next issue | TBD after EXT-015 live ceremony evidence checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 23:13 UTC` |
+| Last updated | `2026-06-16 23:38 UTC` |
 
 ## Packaging Notes
 
@@ -275,6 +275,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ## Current PR Worklog
 
+| 2026-06-16 23:38 | Start EXT-015 live ceremony evidence checker | PR #475 merged as `9631bf97470f45e3da67bbd06f8c7d8be1761d02` after CI and 6529bot follow-up were clean; issue #231 remains open for future completed post-audit remediation evidence. Branch `codex/live-ceremony-evidence-checker` adds a no-secret retained-artifact template and checker for future `live_ceremony_evidence` without changing production-release readiness claims. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-16 23:58 | Validate EXT-015 local draft | Added `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`, `scripts/check_live_ceremony_evidence.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, non-local evidence/tooling/release-readiness/release-artifact docs, packet-index command coverage, release-manifest/checksum coverage, and backlog/run-state traceability. Focused live-ceremony, packet-index, issue-body, release-notes, release-manifest, bytecode-proof, checksum, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` both passed with existing compiler/Foundry warning noise only. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:13 | Open PR #475 for AUD-004 | PR #474 merged as `a2516b3cc681b7712c5b7f3ee5c956767eba3513` after CI, CodeRabbit, and 6529bot were clean. PR #475 is open from branch `codex/post-audit-remediation-evidence-checker` and adds a dedicated no-secret retained-artifact template and checker for future `post_audit_remediation` evidence on issue #231 without changing readiness claims. Local validation passed: focused post-audit checker tests, packet-index/manifest/checksum checks, full `make check`, and full Windows `scripts/check.ps1`. Next action is to push this PR-number state update, request CodeRabbit, and wait for CI/bot feedback. |
 
 ### PR candidate: Add fork-aware Safe/ERC-1271 signature smoke tests (Queue Item 210 / ADV-009)

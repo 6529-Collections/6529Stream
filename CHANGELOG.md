@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret live ceremony retained-artifact template and checker for
+  future `live_ceremony_evidence`, with governance participant, ownership/role,
+  signer, metadata/freeze, auction, emergency-control, dry-run, monitoring,
+  retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index,
+  release-manifest, and checksum coverage while preserving the blocked
+  production-release baseline until reviewed live ceremony evidence is
+  retained.
 - Added a no-secret post-audit remediation retained-artifact template and
   checker for future `post_audit_remediation` evidence, with finding-by-finding
   remediation, retest, accepted-risk, release-note, reviewer-signoff, local/CI/
