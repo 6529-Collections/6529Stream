@@ -157,6 +157,11 @@ def evidence_document(
 class ReleaseModeTests(unittest.TestCase):
     """Release-mode evidence gate behavior."""
 
+    def test_rejects_unknown_phase_alias(self) -> None:
+        """Phase normalization rejects aliases outside the release-mode allowlist."""
+        with self.assertRaisesRegex(checker.ReleaseModeError, "phase must be one of"):
+            checker.normalize_phase("mainnet")
+
     def test_current_committed_public_beta_release_mode_fails(self) -> None:
         """The committed blocked baseline is structurally valid but not release-ready."""
         repo_root = Path(__file__).resolve().parents[1]

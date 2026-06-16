@@ -60,6 +60,8 @@ def load_validated_evidence(path: Path, repo_root: Path) -> dict[str, Any]:
 
 def release_mode_blockers(data: dict[str, Any], phase: str) -> list[str]:
     """Return human-readable blockers for the requested release mode."""
+    # Callers must run validate_evidence_document before using this helper; the
+    # direct indexing below depends on that schema and no-secret validation.
     phases = required_phases(phase)
     blockers: list[str] = []
 

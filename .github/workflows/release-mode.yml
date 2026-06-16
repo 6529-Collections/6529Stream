@@ -16,6 +16,8 @@ permissions:
   contents: read
 
 concurrency:
+  # Public-beta and production-release dispatches may run independently. The
+  # production checker still validates public-beta readiness before production.
   group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.release_phase }}
   cancel-in-progress: false
 
