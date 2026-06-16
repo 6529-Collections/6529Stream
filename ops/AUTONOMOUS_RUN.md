@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-metadata-browser-evidence-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/471` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/472` |
-| Active PR | [#474](https://github.com/6529-Collections/6529Stream/pull/474) |
-| Next issue | TBD after EXT-014 live metadata browser evidence checker lands. |
+| Active PR branch | `codex/post-audit-remediation-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/474` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/231` |
+| Active PR | TBD |
+| Next issue | TBD after AUD-004 post-audit remediation evidence checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 22:17 UTC` |
+| Last updated | `2026-06-16 22:53 UTC` |
 
 ## Packaging Notes
 
@@ -274,6 +274,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 210 | Add fork-aware Safe/ERC-1271 signature smoke tests | Gate D/Gate F support | Add no-RPC Safe-shaped ERC-1271 approved-hash threshold smoke coverage for fixed-price and auction drops, wrong-chain rejection, wrong-verifying-contract rejection, wallet docs/checker wiring, and release-state traceability | Active issue #442 |
 
 ## Current PR Worklog
+
+| 2026-06-16 22:53 | Start AUD-004 post-audit remediation evidence checker | PR #474 merged as `a2516b3cc681b7712c5b7f3ee5c956767eba3513` after CI, CodeRabbit, and 6529bot were clean; branch `codex/post-audit-remediation-evidence-checker` adds a dedicated no-secret retained-artifact template and checker for future `post_audit_remediation` evidence on issue #231 without changing readiness claims. Local draft work includes finding-by-finding remediation fields, retest and accepted-risk fields, focused checker tests, local/CI/Windows gate wiring, packet-index routing, release-readiness/tooling/release-artifact docs, changelog, and regenerated release artifacts. Next action is to complete drift/full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 
 ### PR candidate: Add fork-aware Safe/ERC-1271 signature smoke tests (Queue Item 210 / ADV-009)
 

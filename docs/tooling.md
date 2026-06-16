@@ -512,6 +512,15 @@ Run `python scripts/test_external_audit_report_evidence.py` and
 metadata envelope. The committed file is template-only and keeps
 `external_audit_report` missing until a final reviewed audit report, scope,
 finding/remediation map, retest status, and reviewer confirmation are retained.
+Post-audit remediation evidence for issue #231 has a Markdown retained artifact
+path at
+`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`.
+Run `python scripts/test_post_audit_remediation_evidence.py` and
+`python scripts/check_post_audit_remediation_evidence.py` before generating the
+metadata envelope. The committed file is template-only and keeps
+`post_audit_remediation` missing until finding-by-finding remediation status,
+fix PRs or commits, regression tests, retest evidence, accepted-risk records,
+release-note mapping, and reviewer confirmation are retained.
 Fork deployment rehearsal evidence for issue #216 also has a Markdown retained
 artifact path at
 `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
