@@ -373,6 +373,8 @@ contract AdversarialRandomizerCore {
         if (reentryMode == ReentryMode.None || reentryAttempted) {
             return;
         }
+        // Intentionally one nested duplicate callback per fulfillment: the
+        // adversary isolates fail-closed lifecycle behavior at the core write.
         reentryAttempted = true;
         if (reentryMode == ReentryMode.VrfCallback) {
             try vrfCoordinator.fulfill(reentrantVrf, reentrantRequestId, reentrantWords) {
