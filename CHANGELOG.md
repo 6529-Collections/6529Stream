@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `StreamEventReconstructability.t.sol`, an indexer-style log
+  reconstruction suite that proves representative fixed-price, auction, minter
+  bridge, and admin-reference flows can be rebuilt from emitted logs plus the
+  documented read-after-event calls.
 - Added additive `StreamMinter` event coverage for indexers and frontend read
   models: collection phase updates, fixed-price batch mint ranges, auction
   mint custody/end-time bridges, minter-side auction end-time edits, and

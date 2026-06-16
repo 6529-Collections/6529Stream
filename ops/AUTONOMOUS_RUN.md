@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/minter-event-read-model` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/438` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/439` |
-| Next issue | TBD after CON-002 minter event read-model coverage lands. |
+| Active PR branch | `codex/event-reconstructability-tests` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/439` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/440` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/441` |
+| Next issue | TBD after ADV-008 event reconstructability tests land. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 06:45 UTC` |
+| Last updated | `2026-06-16 07:47 UTC` |
 
 ## Packaging Notes
 
@@ -269,13 +269,94 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | Merged in PR #433 |
 | 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Merged in PR #435 |
 | 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Merged in PR #437 |
-| 208 | Add StreamMinter event read-model coverage | Gate D/G support | Add additive minter bridge events for phases, fixed-price mint ranges, auction mint custody/end-time, auction end-time edits, and contract-reference updates, with focused tests, integration docs, and regenerated release artifacts | Active issue #438 |
+| 208 | Add StreamMinter event read-model coverage | Gate D/G support | Add additive minter bridge events for phases, fixed-price mint ranges, auction mint custody/end-time, auction end-time edits, and contract-reference updates, with focused tests, integration docs, and regenerated release artifacts | Merged in PR #439 |
+| 209 | Add event reconstructability tests from emitted logs | Gate D/G support | Add an indexer-style test harness that consumes emitted logs from representative protocol flows and proves documented state can be reconstructed from events plus documented read-after-event calls | Active issue #440 |
 
 ## Current PR Worklog
 
+### PR candidate: Add event reconstructability tests from emitted logs (Queue Item 209 / ADV-008)
+
+Status: issue opened, branch started from PR #439 squash merge commit
+`41752a653b6f412123109a3005f549a374a19d1e`, and local implementation
+validated. PR #441 is open, review-response fixes are pushed, CI is green, and
+merge is next after the final state-only run-state update.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/440`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/441`.
+Branch: `codex/event-reconstructability-tests`.
+
+Goal:
+
+- Add executable indexer-style reconstructability coverage for the event/read
+  model shipped by PR #439 and the existing payment/auction/drop event surface.
+- Capture emitted logs from representative flows and assert stable IDs, indexed
+  fields, no-op emission guards, and documented read-after-event requirements.
+- Keep production contracts unchanged unless tests expose a real missing
+  event/read gap that belongs in a narrow follow-up.
+- Link the integration guide to the reconstructability suite so docs remain
+  tied to executable behavior.
+
+Planned validation:
+
+- `forge test --match-path test\StreamEventReconstructability.t.sol -vvv`
+- `forge test --match-path test\StreamMinterEvents.t.sol -vvv`
+- `python scripts/check_events_and_indexing.py`
+- `python scripts/check_auction_flows.py`
+- `python scripts/check_changelog.py`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Completed local validation:
+
+- `forge fmt --check test\StreamEventReconstructability.t.sol`
+- `forge test --match-path test\StreamEventReconstructability.t.sol -vvv`
+- `forge test --match-path test\StreamMinterEvents.t.sol -vvv`
+- `python scripts/test_events_and_indexing.py`
+- `python scripts/check_events_and_indexing.py`
+- `python scripts/check_auction_flows.py`
+- `python scripts/check_changelog.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+Validation notes:
+
+- The first full Windows wrapper run caught stale derived bytecode proof,
+  manifest, and checksum artifacts after the documentation/state hash changes.
+  The bytecode proof, release manifest, and checksums were regenerated before
+  the final passing full wrapper run.
+- The current checkout measures `StreamCore` at `22,184` production runtime
+  bytes with `2,392` bytes of EIP-170 headroom, superseding the stale
+  `24,516` byte / `60` byte margin concern.
+- PR #441 opened on head `5074e56b7c56ead4f56fd0703e25d504a0eb9cc2`;
+  CodeRabbit review requested in comment `4715957833`.
+- 6529bot marked the PR good to merge with no security findings and suggested
+  stronger test-only reconstructability checks. Accepted the valid
+  nice-to-haves by separating per-event-source reconstructed fields, asserting
+  cross-source consistency, adding exact topic/data shape guards, and tracking
+  `ClaimAuction` amount separately from the highest-bid model.
+- Review-fix validation passed:
+  `forge fmt --check test\StreamEventReconstructability.t.sol`,
+  `forge test --match-path test\StreamEventReconstructability.t.sol -vvv`,
+  `python scripts/check_events_and_indexing.py`, `git diff --check`, and
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- Remote validation on review-response head
+  `f1c8587815b59309cd06789d790daf36831ad30e`: GitHub CI passed
+  `Windows PowerShell wrapper` and `Foundry smoke`; CodeRabbit status was
+  successful but the detailed CodeRabbit review was rate-limited; 6529bot
+  follow-up confirmed the prior nice-to-haves were resolved with no new
+  findings.
+
 ### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
 
-Status: PR opened; first 6529bot review addressed locally with the
+Status: merged in PR #439 as squash merge
+`41752a653b6f412123109a3005f549a374a19d1e`; issue #438 closed completed. First
+6529bot review was addressed with the
 `MinterAuctionEndTimeUpdated` index set changed to `tokenId` plus `admin`, no-op
 `MinterContractReferenceUpdated` emissions removed for unchanged valid
 references, invalid `updateContracts` options retained as no-ops, the
@@ -386,6 +467,9 @@ Bot/review status:
   and `admin`, with the previous reference retained in event data.
 - CodeRabbit status was still pending after a rate-limit notice; request a new
   review after pushing the review-response head.
+- Final PR state: CI passed, CodeRabbit completed, CodeRabbit review threads
+  were resolved, 6529bot follow-up reported no new findings, and PR #439 merged
+  on `2026-06-16 06:54 UTC`.
 
 ### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 

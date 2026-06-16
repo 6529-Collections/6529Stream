@@ -49,7 +49,8 @@ Marketplace and indexer limits are named.
 
 ## Maturity And Scope
 
-INT-005, CON-002, ONE-005, retained marketplace/indexer evidence,
+INT-005, CON-002, ONE-005, event reconstructability,
+retained marketplace/indexer evidence,
 fork_testnet_marketplace_indexer_evidence, and
 live_marketplace_indexer_evidence are named.
 
@@ -84,9 +85,9 @@ DependencyVersionPinned, TokenBurned, DropAuthorizationConsumed,
 DropAuthorizationCancelled, SignerEpochChanged, DropSignerChanged,
 AuctionContractChanged, CollectionPhasesUpdated, MinterTokensMinted,
 MinterAuctionMinted, MinterAuctionEndTimeUpdated, MinterContractReferenceUpdated,
-StreamMinter.updateContracts, Invalid options remain no-ops, unchanged
-references do not emit, Indexers can filter by `option`, `newContract`, and
-`admin`,
+StreamEventReconstructability, StreamMinter.updateContracts,
+Invalid options remain no-ops, unchanged references do not emit,
+Indexers can filter by `option`, `newContract`, and `admin`,
 FixedPriceCreditCreated, FixedPriceCreditWithdrawn,
 AuctionRegistered, AuctionCustodyConfirmed, AuctionStatusChanged,
 AuctionExtended, AuctionCancelled, ClaimAuction, NoBidSettlementPending,
