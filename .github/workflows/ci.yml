@@ -269,6 +269,14 @@ jobs:
           mkdir -p ci-logs
           forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap 2>&1 | tee ci-logs/forge-gas-snapshot.log
 
+      - name: Gas envelopes
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_gas_envelopes.py 2>&1 | tee ci-logs/gas-envelope-tests.log
+          python3 scripts/check_gas_envelopes.py 2>&1 | tee ci-logs/gas-envelope-check.log
+
       - name: Production size
         shell: bash
         run: |

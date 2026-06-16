@@ -27,6 +27,8 @@ fi
 forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+"$python_bin" scripts/test_gas_envelopes.py
+"$python_bin" scripts/check_gas_envelopes.py
 forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/test_contract_size_budget.py
 "$python_bin" scripts/check_contract_size_budget.py

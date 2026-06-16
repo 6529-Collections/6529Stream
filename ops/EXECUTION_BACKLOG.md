@@ -3364,8 +3364,8 @@ unless an external dependency changes.
 | `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | metadata fixtures |
 | `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Merged in PR #441 |
 | `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Merged in PR #443 |
-| `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Active issue #444; local branch `codex/mev-timing-attack-model` |
-| `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | gas snapshot baseline |
+| `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Merged in PR #445; issue #444 closed completed |
+| `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | PR #447 open; issue #446; branch `codex/gas-envelope-high-risk-flows` |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | custom error inventory |
 
 ### Contract/API Hardening

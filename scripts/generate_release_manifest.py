@@ -29,6 +29,7 @@ DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 BASELINE_DIR = Path("release-artifacts/baselines")
 DEFAULT_BASELINE = BASELINE_DIR / "v0.1.0" / "abi-surface.json"
 GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
+GAS_ENVELOPES_FILENAME = "gas-envelopes.json"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
@@ -834,6 +835,11 @@ def default_gas_snapshot_path(protocol_versions: list[str]) -> Path:
     return BASELINE_DIR / f"v{protocol_version}" / GAS_SNAPSHOT_FILENAME
 
 
+def default_gas_envelopes_path(protocol_versions: list[str]) -> Path:
+    snapshot_path = default_gas_snapshot_path(protocol_versions)
+    return snapshot_path.with_name(GAS_ENVELOPES_FILENAME)
+
+
 def resolve_gas_snapshot_path(
     gas_snapshot_path: Path | None, protocol_versions: list[str], repo_root: Path
 ) -> Path:
@@ -861,6 +867,10 @@ def resolve_gas_snapshot_path(
             f"{expected_path}: {gas_snapshot_path}"
         )
     return expected_resolved
+
+
+def resolve_gas_envelopes_path(protocol_versions: list[str], repo_root: Path) -> Path:
+    return (repo_root / default_gas_envelopes_path(protocol_versions)).resolve()
 
 
 def checksum_bundle() -> dict[str, Any]:
@@ -988,6 +998,7 @@ def build_manifest(
     resolved_gas_snapshot_path = resolve_gas_snapshot_path(
         gas_snapshot_path, protocol_versions, repo_root
     )
+    resolved_gas_envelopes_path = resolve_gas_envelopes_path(protocol_versions, repo_root)
 
     return {
         "schema_version": RELEASE_MANIFEST_SCHEMA,
@@ -1146,6 +1157,11 @@ def build_manifest(
                 schema_required=True,
             ),
             "gas_snapshot_baseline": file_record(resolved_gas_snapshot_path, repo_root),
+            "gas_envelope_baseline": file_record(
+                resolved_gas_envelopes_path,
+                repo_root,
+                schema_required=True,
+            ),
         },
         "deployment_artifacts": {
             "configs": [

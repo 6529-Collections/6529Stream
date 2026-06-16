@@ -490,6 +490,10 @@ test/StreamGasSnapshot.t.sol --snap
 release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and checked with the same
 command's `--check` form. The snapshot intentionally covers deterministic local
 tests only; fork/testnet/mainnet gas measurements remain a later release step.
+`baselines/v0.1.0/gas-envelopes.json` adds named release envelopes for those
+snapshot rows. Check it with `python scripts/check_gas_envelopes.py`; the
+checker requires every snapshot row to have exactly one envelope and fails when
+any measured flow exceeds its documented ceiling.
 
 The generator uses Foundry's `cast sig-event` for Ethereum event topics and
 Foundry artifact `methodIdentifiers` for function selectors and interface IDs.

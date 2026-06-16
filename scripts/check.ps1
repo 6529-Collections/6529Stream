@@ -72,6 +72,8 @@ $pythonArgs = @()
 forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+& $pythonPath @pythonArgs "scripts\test_gas_envelopes.py"
+& $pythonPath @pythonArgs "scripts\check_gas_envelopes.py"
 forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_contract_size_budget.py"
 & $pythonPath @pythonArgs "scripts\check_contract_size_budget.py"

@@ -1,0 +1,84 @@
+{
+  "schema_version": "6529stream.gas-envelopes.v1",
+  "snapshot_path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
+  "profile": "local-foundry-v0.1.0",
+  "notes": [
+    "These envelopes are local deterministic release guardrails, not fork/testnet/mainnet gas evidence.",
+    "The exact Foundry snapshot remains the drift detector; these ceilings document maximum accepted release budgets for high-risk user flows.",
+    "Ceilings are rounded operational envelopes, usually around 10-20% above the committed local measurement unless the path is intentionally heavy; increases should be investigated and justified before bumping a ceiling."
+  ],
+  "envelopes": [
+    {
+      "test": "StreamGasSnapshotTest:testGasAuctionBid()",
+      "flow": "auction_first_bid",
+      "max_gas": 100000,
+      "rationale": "First bid is a core collector action and must remain comfortably below 100k gas locally."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasAuctionBidderCreditWithdrawal()",
+      "flow": "auction_bidder_refund_withdrawal",
+      "max_gas": 40000,
+      "rationale": "Outbid collectors must be able to withdraw credits through a compact pull-payment path."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasAuctionNearEndOutbid()",
+      "flow": "auction_near_end_outbid_and_extension",
+      "max_gas": 80000,
+      "rationale": "Near-end outbids create bidder credit and extend the auction; this MEV-sensitive path should stay bounded."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasAuctionProceedsWithdrawal()",
+      "flow": "auction_proceeds_withdrawal",
+      "max_gas": 45000,
+      "rationale": "Poster, curator, and protocol auction proceeds withdrawal must stay inexpensive for normal settlement operations."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasAuctionSettlementNoBid()",
+      "flow": "auction_settlement_no_bid",
+      "max_gas": 65000,
+      "rationale": "No-bid settlement returns custody and closes the auction without payment accounting."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasAuctionSettlementWithBid()",
+      "flow": "auction_settlement_with_bid",
+      "max_gas": 190000,
+      "rationale": "With-bid settlement transfers custody and allocates pull-payment credits across owed categories."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasCuratorCreditWithdrawal()",
+      "flow": "curator_reward_withdrawal",
+      "max_gas": 40000,
+      "rationale": "Curators must be able to withdraw earned credits through the pull-payment path."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasCuratorRewardClaim()",
+      "flow": "curator_reward_claim",
+      "max_gas": 120000,
+      "rationale": "Merkle reward claims are a recurring curator workflow and should stay bounded."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasDependencyScriptRead()",
+      "flow": "dependency_script_read",
+      "max_gas": 150000,
+      "rationale": "Dependency script reads are collector/indexer-facing metadata operations."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasFinalOnchainTokenURI()",
+      "flow": "final_onchain_token_uri",
+      "max_gas": 950000,
+      "rationale": "Final on-chain tokenURI rendering is intentionally heavy but must remain below the local one-million-gas envelope."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasFixedPriceCreditWithdrawal()",
+      "flow": "fixed_price_credit_withdrawal",
+      "max_gas": 45000,
+      "rationale": "Poster and protocol fixed-price pull-payment withdrawals should stay inexpensive."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasFixedPriceMint()",
+      "flow": "fixed_price_mint",
+      "max_gas": 700000,
+      "rationale": "Fixed-price signed mint execution is a primary drop path and should stay within the documented envelope."
+    }
+  ]
+}

@@ -94,6 +94,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     latest = root / "release-artifacts" / "latest"
     baseline = root / "release-artifacts" / "baselines" / "v0.1.0" / "abi-surface.json"
     gas_snapshot = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-snapshot.snap"
+    gas_envelopes = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-envelopes.json"
     contract_config = root / "release-artifacts" / "contracts.json"
     deployment_config_dir = root / "deployments" / "config"
     deployment_broadcast_dir = root / "deployments" / "broadcasts"
@@ -256,6 +257,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {"schema_version": "6529stream.abi-surface.v1", "contracts": {}},
     )
     write_text(gas_snapshot, "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n")
+    write_json(
+        gas_envelopes,
+        {
+            "schema_version": "6529stream.gas-envelopes.v1",
+            "snapshot_path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
+            "envelopes": [],
+        },
+    )
     write_json(
         deployment_config_dir / "anvil.json",
         {"schema_version": "6529stream.deployment-manifest-input.v1"},
@@ -1158,6 +1167,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "latest": latest,
         "baseline": baseline,
         "gas_snapshot": gas_snapshot,
+        "gas_envelopes": gas_envelopes,
         "contract_config": contract_config,
         "deployment_config_dir": deployment_config_dir,
         "deployment_broadcast_dir": deployment_broadcast_dir,
@@ -1277,6 +1287,18 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 manifest["release_artifacts"]["gas_snapshot_baseline"]["size_bytes"],
                 paths["gas_snapshot"].stat().st_size,
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_envelope_baseline"]["path"],
+                "release-artifacts/baselines/v0.1.0/gas-envelopes.json",
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_envelope_baseline"]["sha256"],
+                generator.file_sha256(paths["gas_envelopes"]),
+            )
+            self.assertEqual(
+                manifest["release_artifacts"]["gas_envelope_baseline"]["schema_version"],
+                "6529stream.gas-envelopes.v1",
             )
             self.assertEqual(
                 manifest["deployment_artifacts"]["broadcasts"][0]["path"],
