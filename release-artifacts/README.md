@@ -487,6 +487,14 @@ is the checked no-secret retained-artifact template for future
 non-local evidence envelope. The committed template is not audit evidence and
 does not change public-beta readiness.
 
+`evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future
+`post_audit_remediation` evidence. Validate it with
+`python scripts/test_post_audit_remediation_evidence.py` and
+`python scripts/check_post_audit_remediation_evidence.py` before generating a
+non-local evidence envelope. The committed template is not post-audit
+remediation evidence and does not change production-release readiness.
+
 `evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `testnet_deployment_rehearsal` evidence. Validate it with

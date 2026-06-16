@@ -205,6 +205,10 @@ def seed_all_templates(root: Path) -> None:
         "Live metadata browser retained artifact template.\n",
     )
     write_text(
+        root / generator.POST_AUDIT_REMEDIATION_RETAINED_ARTIFACT_TEMPLATE,
+        "Post-audit remediation retained artifact template.\n",
+    )
+    write_text(
         root / generator.PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
         "Production verified-addresses retained artifact template.\n",
     )

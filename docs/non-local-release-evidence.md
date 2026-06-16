@@ -447,6 +447,22 @@ audited commit/scope, finding remediation map, retest or accepted-risk status,
 and reviewer confirmation are retained and linked from the shared
 public-beta evidence manifest.
 
+The post-audit remediation row has a dedicated retained-artifact template at
+`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`.
+Before generating the non-local metadata envelope for
+`post_audit_remediation`, run:
+
+```sh
+python scripts/test_post_audit_remediation_evidence.py
+python scripts/check_post_audit_remediation_evidence.py
+```
+
+The committed template is not completion evidence. Issue #231 remains open and
+the production-release row remains `missing` until finding-by-finding
+remediation status, fix PRs or commits, regression tests, retest evidence,
+accepted-risk records, release-note mapping, and reviewer confirmation are
+retained and linked from the shared production-release evidence manifest.
+
 The testnet deployment rehearsal row has a dedicated retained-artifact template
 at
 `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`.

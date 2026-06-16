@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret post-audit remediation retained-artifact template and
+  checker for future `post_audit_remediation` evidence, with finding-by-finding
+  remediation, retest, accepted-risk, release-note, reviewer-signoff, local/CI/
+  Windows gate, packet-index command, release-manifest, and checksum coverage
+  while preserving the blocked production-release baseline until reviewed
+  post-audit remediation evidence is retained.
 - Added `live_metadata_browser_evidence` as a production-release evidence row
   with a no-secret retained-artifact template, offline checker, focused tests,
   local/CI/Windows gate wiring, release-evidence tracker issue #473, and packet

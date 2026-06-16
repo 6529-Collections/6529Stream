@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:2618f36fda928eabb9243291923e6a40b0599c6aefd924815e54eb8b1dabbd49` |
+| Backlog SHA-256 | `sha256:d5e1e5a92553ccf13de457564d6ca04436d808ae7d724945be57ff4cd810fcdf` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50` |
 
@@ -45,7 +45,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | [#473](https://github.com/6529-Collections/6529Stream/issues/473) | `production-release-live-metadata-browser-evidence` | `missing` | `sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37` | 55 |
 | [#424](https://github.com/6529-Collections/6529Stream/issues/424) | `production-release-live-marketplace-indexer-evidence` | `missing` | `sha256:14590dddc45694c02f9ca3aae0b46517fb5ffbc5255693d9a6e15c86579b02bd` | 55 |
 | [#230](https://github.com/6529-Collections/6529Stream/issues/230) | `production-release-live-explorer-verification` | `missing` | `sha256:e96af7de5bfef51fbd630a22ee560d9c2eeaa04e149f1e16706c7023e6150829` | 55 |
-| [#231](https://github.com/6529-Collections/6529Stream/issues/231) | `production-release-post-audit-remediation` | `missing` | `sha256:e29d33396ec6ac420e20d16b941421a1d1ef5b27eafd11f5b14f99353f3aef34` | 53 |
+| [#231](https://github.com/6529-Collections/6529Stream/issues/231) | `production-release-post-audit-remediation` | `missing` | `sha256:05afd48c865225bb2c4346c78d8c4a3481bb7391c4b293699c6bf3cc38c91548` | 55 |
 
 ### #215 public-beta-external-audit-report
 
@@ -1180,8 +1180,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #231 production-release-post-audit-remediation
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/231
-- Body SHA-256: `sha256:e29d33396ec6ac420e20d16b941421a1d1ef5b27eafd11f5b14f99353f3aef34`
-- Source body SHA-256: `sha256:39517e34e357f71616bd6366d32c6b402812dae53568dfbe2a113af69646daf3`
+- Body SHA-256: `sha256:05afd48c865225bb2c4346c78d8c4a3481bb7391c4b293699c6bf3cc38c91548`
+- Source body SHA-256: `sha256:af4ff80ef64b2be0f6c2dc49056ec26a384e891c3a25c87c8dd7cfde89f1f8d7`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-post-audit-remediation issue_number=231 -->
@@ -1203,12 +1203,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `post_audit_remediation`
 - Evidence template: `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with finding-by-finding remediation evidence, accepted risk records, retest status, release notes, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -1216,6 +1216,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_post_audit_remediation_evidence.py`
+- `python scripts/check_post_audit_remediation_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`
