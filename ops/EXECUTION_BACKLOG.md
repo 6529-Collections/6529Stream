@@ -1331,7 +1331,7 @@ Issue: [`#436`](https://github.com/6529-Collections/6529Stream/issues/436).
 ### CON-002: Close Event Schema Gaps For Indexers
 
 Status: First slice completed in issue #438 / PR #439. Event
-reconstructability coverage is active in issue #440.
+reconstructability coverage completed in issue #440 / PR #441.
 
 Gate: D/G.
 
@@ -1343,7 +1343,7 @@ Outcome: Contract events, docs, and tests cover each external state transition
 needed by product/indexer flows. The first slice added `StreamMinter` bridge
 events for phases, fixed-price mint ranges, auction mint custody/end-time,
 minter-side auction end-time edits, and minter contract-reference updates. The
-active follow-up proves reconstructability from emitted logs plus documented
+follow-up proves reconstructability from emitted logs plus documented
 read-after-event calls.
 
 Files likely touched:
@@ -1390,7 +1390,8 @@ Evidence artifacts: Generated event topic catalog.
 Dependencies: `CON-001`, `INT-005`.
 
 Issue: [`#438`](https://github.com/6529-Collections/6529Stream/issues/438).
-Follow-up: [`#440`](https://github.com/6529-Collections/6529Stream/issues/440).
+Follow-up: [`#440`](https://github.com/6529-Collections/6529Stream/issues/440)
+completed in PR #441.
 
 ### REL-001: Add Signed Release Provenance Evidence Checker
 
@@ -3361,8 +3362,8 @@ unless an external dependency changes.
 | --- | --- | --- | --- |
 | `ADV-006` | Add randomizer callback reentrancy/stale-provider adversarial suite | D/F | `ADV-001` |
 | `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | metadata fixtures |
-| `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Active issue #440 |
-| `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | fork tooling |
+| `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Merged in PR #441 |
+| `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Active issue #442 |
 | `ADV-010` | Add MEV/timing attack model and bounded simulations | F | threat-model refresh |
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | gas snapshot baseline |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | custom error inventory |

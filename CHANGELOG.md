@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `StreamSafeERC1271ForkSmoke.t.sol`, a no-RPC Safe-shaped ERC-1271
+  smoke suite covering approved-hash threshold validation, fixed-price and
+  auction drops, wrong-chain rejection, and wrong-verifying-contract rejection.
 - Added `StreamEventReconstructability.t.sol`, an indexer-style log
   reconstruction suite that proves representative fixed-price, auction, minter
   bridge, and admin-reference flows can be rebuilt from emitted logs plus the
