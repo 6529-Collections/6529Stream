@@ -262,6 +262,37 @@ class PostAuditRemediationEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_pending_review_template_decision_fails(self) -> None:
+        """Non-template artifacts cannot leave the review decision at template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "pending-template-decision.md"
+            write_text(
+                path,
+                reviewed_artifact()
+                .replace("Review status: `reviewed`", "Review status: `pending_review`")
+                .replace("Review decision: `reviewed`", "Review decision: `template`"),
+            )
+
+            with self.assertRaisesRegex(
+                checker.PostAuditRemediationEvidenceError,
+                "advance the review decision",
+            ):
+                checker.validate_artifact(path)
+
+    def test_comparison_angle_text_is_not_placeholder(self) -> None:
+        """Legitimate prose can contain comparison angle brackets."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "comparison-angle.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "Open finding exceptions: `none`",
+                    "Open finding exceptions: `0 critical findings < threshold`",
+                ),
+            )
+
+            checker.validate_artifact(path)
+
     def test_secret_like_values_fail(self) -> None:
         """Secret-shaped key/value text is rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -271,6 +302,18 @@ class PostAuditRemediationEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.PostAuditRemediationEvidenceError,
                 "secret-like",
+            ):
+                checker.validate_artifact(path)
+
+    def test_credentialed_urls_fail(self) -> None:
+        """Credentialed URLs cannot be retained in evidence artifacts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "credential-url.md"
+            write_text(path, valid_template() + "\nhttps://user:pass@example.invalid\n")
+
+            with self.assertRaisesRegex(
+                checker.PostAuditRemediationEvidenceError,
+                "credentialed URL",
             ):
                 checker.validate_artifact(path)
 

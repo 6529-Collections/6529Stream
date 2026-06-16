@@ -103,6 +103,7 @@ REQUIRED_COMMANDS = [
 ]
 
 FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
+ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
@@ -111,6 +112,7 @@ SECRET_VALUE_RE = re.compile(
     r")\s*[:=]",
     re.IGNORECASE,
 )
+CREDENTIAL_URL_RE = re.compile(r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+", re.IGNORECASE)
 
 
 class PostAuditRemediationEvidenceError(RuntimeError):
@@ -145,6 +147,11 @@ def validate_no_secret_values(path: Path, text: str) -> None:
     if match:
         raise PostAuditRemediationEvidenceError(
             f"{path} contains secret-like key/value text: {match.group(0)}"
+        )
+    match = CREDENTIAL_URL_RE.search(text)
+    if match:
+        raise PostAuditRemediationEvidenceError(
+            f"{path} contains credentialed URL text: {match.group(0)}"
         )
 
 
@@ -198,7 +205,9 @@ def require_field_value(
 def is_placeholder(value: str) -> bool:
     """Return whether a value is still placeholder/template text."""
     lowered = value.lower()
-    return lowered in {"tbd", "template", "template-only"} or "<" in value
+    return lowered in {"tbd", "template", "template-only"} or bool(
+        ANGLE_PLACEHOLDER_RE.fullmatch(value)
+    )
 
 
 def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None:
@@ -228,6 +237,10 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
     if "Template only. This file is not completion evidence." in text:
         raise PostAuditRemediationEvidenceError(
             f"{path} non-template evidence must remove the template-only notice"
+        )
+    if review_decision == "template":
+        raise PostAuditRemediationEvidenceError(
+            f"{path} non-template evidence must advance the review decision"
         )
 
     for label in FINAL_VALUE_FIELDS:
