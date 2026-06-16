@@ -24,16 +24,16 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:121ea9ec5f6e87220cf17c6a3997f2e7c10e591b650c2f09144be06299dfb6d4"
+      "sha256": "sha256:0b4866451aa8c74fcd0bf92d8906558c15cfeac2ee04229af3206505e475a758"
     },
-    "deployment_manifest_canonical_sha256": "sha256:59a000bb0e38316610cbc4b1927ef61b1e7595a634d0f040d127b62d5e20bcfd",
+    "deployment_manifest_canonical_sha256": "sha256:bab72453cd0940a9887676cd25286a18932cbee61c89311eb05351f625f6b994",
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:0d6914addc3fb822cd4bd8e2f9148b86fe4821d215a34529e276cc790d20950a"
+      "sha256": "sha256:c4fcbe0659aca3e5c71feb912ef04e2389c89d64d04ee46ce0179095bfa6aad0"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:b26d9318599493fd8804ae7449f8e9a4b7b3be30128f67612717d814c1802e5c"
+      "sha256": "sha256:3fee52a3227e11f7c6e4049c5a907f4f8a3780b85a8ad7b9bdd253f285915250"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
@@ -58,7 +58,7 @@
       "evidence": [
         {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:121ea9ec5f6e87220cf17c6a3997f2e7c10e591b650c2f09144be06299dfb6d4"
+          "sha256": "sha256:0b4866451aa8c74fcd0bf92d8906558c15cfeac2ee04229af3206505e475a758"
         }
       ],
       "notes": "The local manifest records the drop signer placeholder and signer-manager Safe placeholder."
@@ -106,17 +106,17 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:121ea9ec5f6e87220cf17c6a3997f2e7c10e591b650c2f09144be06299dfb6d4"
+      "sha256": "sha256:0b4866451aa8c74fcd0bf92d8906558c15cfeac2ee04229af3206505e475a758"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:0d6914addc3fb822cd4bd8e2f9148b86fe4821d215a34529e276cc790d20950a"
+      "sha256": "sha256:c4fcbe0659aca3e5c71feb912ef04e2389c89d64d04ee46ce0179095bfa6aad0"
     },
     {
       "category": "abi_checksums",
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:b26d9318599493fd8804ae7449f8e9a4b7b3be30128f67612717d814c1802e5c"
+      "sha256": "sha256:3fee52a3227e11f7c6e4049c5a907f4f8a3780b85a8ad7b9bdd253f285915250"
     }
   ],
   "redaction_policy": {

@@ -18,6 +18,7 @@ import "./IERC2981.sol";
 import "./Ownable.sol";
 import "./IDependencyRegistry.sol";
 import "./IERC4906.sol";
+import "./StreamArtistApprovals.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
 
@@ -41,12 +42,6 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         0xfee829cb9364f5ed51b7754feab34175a6f70cc276ce81fd31f74fe27e1aac16;
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         0x5c44b5ec16963f52f7b2e846dd70b46242c923fb633a9480bac7ff66698b3dd7;
-    bytes32 private constant _ARTIST_APPROVAL_TYPEHASH =
-        0xb58a0cc2e8fb0b2b70a8ad871f08e016a17c7830a7f3aa35dde23d62a9f382f1;
-    bytes32 private constant _ARTIST_APPROVAL_SUPPLY_STATE_TYPEHASH =
-        0x2a96b6ee6da06d99fd4570bbf590fbb02f3247e5b82348eea7a95c6b806d4c70;
-    bytes32 private constant _ARTIST_APPROVAL_SCHEMA_VERSION_HASH =
-        0x5fcafff68d4a50457828579205d8cb7973e3213bbdc84604bff840181b0435d3;
     string private constant _METADATA_STATE_PENDING = "pending";
     string private constant _METADATA_STATE_STALE = "stale";
     string private constant _METADATA_STATE_FAILED = "failed";
@@ -225,8 +220,6 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     uint256 private frozenCollectionCount;
 
     // checks if an artist signed its collection
-    mapping(uint256 => bool) public artistSigned;
-
     // external contracts declaration
     IStreamAdmins private adminsContract;
     IDependencyRegistry private dependencyRegistry;
@@ -351,9 +344,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
                 (_collectionID * _COLLECTION_TOKEN_RANGE) + _collectionTotalSupply - 1;
             wereDataAdded[_collectionID] = true;
         } else {
-            if (!artistSigned[_collectionID]) {
-                collectionData.collectionArtistAddress = _collectionArtistAddress;
-            }
+            collectionData.collectionArtistAddress = _collectionArtistAddress;
             collectionData.maxCollectionPurchases = _maxCollectionPurchases;
             collectionData.setFinalSupplyTimeAfterMint = _setFinalSupplyTimeAfterMint;
         }
@@ -524,18 +515,39 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
 
     // function that is used by artists for signing
     function artistSignature(uint256 _collectionID, string memory _signature) public {
+        _recordArtistApproval(
+            _collectionID, msg.sender, _signature, _hashArtistApproval(_collectionID)
+        );
+    }
+
+    // function that records an EIP-712 artist approval signed off-chain
+    function artistSignature(
+        uint256 _collectionID,
+        string memory _signature,
+        bytes calldata _artistSignature
+    ) public {
+        address artist = collectionAdditionalData[_collectionID].collectionArtistAddress;
+        bytes32 approvalHash = _hashArtistApproval(_collectionID);
+        StreamArtistApprovals.validateSignature(artist, approvalHash, _artistSignature);
+        _recordArtistApproval(_collectionID, artist, _signature, approvalHash);
+    }
+
+    function _recordArtistApproval(
+        uint256 _collectionID,
+        address _artist,
+        string memory _signature,
+        bytes32 _approvalHash
+    ) private {
         _requireMetadataMutationNotPaused();
         _requireCollectionNotFrozen(_collectionID);
-        if (
-            msg.sender != collectionAdditionalData[_collectionID].collectionArtistAddress
-                || artistSigned[_collectionID]
-        ) {
+        if (_artist != collectionAdditionalData[_collectionID].collectionArtistAddress) {
             revert ArtistSignatureUnauthorized();
         }
-        bytes32 approvalHash = _artistApprovalHash(_collectionID);
+        if (artistApprovalHashes[_collectionID] == _approvalHash) {
+            revert ArtistSignatureUnauthorized();
+        }
         artistsSignatures[_collectionID] = _signature;
-        artistApprovalHashes[_collectionID] = approvalHash;
-        artistSigned[_collectionID] = true;
+        artistApprovalHashes[_collectionID] = _approvalHash;
     }
 
     // function to change the metadata view of a collection
@@ -928,6 +940,19 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         returns (bytes32)
     {
         return _collectionFreezeManifestHash(_collectionID);
+    }
+
+    function artistSigned(uint256) external view returns (bool) {
+        uint256 collectionID;
+        assembly ("memory-safe") {
+            collectionID := calldataload(4)
+        }
+        bytes32 approvalHash = artistApprovalHashes[collectionID];
+        bytes32 currentHash = _hashArtistApproval(collectionID);
+        assembly ("memory-safe") {
+            mstore(0x00, eq(approvalHash, currentHash))
+            return(0x00, 0x20)
+        }
     }
 
     function collectionDependencyVersionState(uint256 _collectionID)
@@ -1377,56 +1402,15 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         return stateHash;
     }
 
-    function _artistApprovalHash(uint256 _collectionID) private view returns (bytes32) {
-        bytes32 typehash = _ARTIST_APPROVAL_TYPEHASH;
-        bytes32 schemaVersionHash = _ARTIST_APPROVAL_SCHEMA_VERSION_HASH;
-        address artist = collectionAdditionalData[_collectionID].collectionArtistAddress;
-        bytes32 collectionStateHash = _freezeCollectionStateHash(_collectionID);
-        bytes32 supplyStateHash = _artistApprovalSupplyStateHash(_collectionID);
-        bytes32 liveTokenMetadataHash = _liveTokenMetadataHash(_collectionID);
-        bytes32 integrationStateHash = _freezeIntegrationStateHash(_collectionID);
-        bytes32 approvalHash;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, typehash)
-            mstore(add(ptr, 0x20), _collectionID)
-            mstore(add(ptr, 0x40), schemaVersionHash)
-            mstore(add(ptr, 0x60), artist)
-            mstore(add(ptr, 0x80), collectionStateHash)
-            mstore(add(ptr, 0xa0), supplyStateHash)
-            mstore(add(ptr, 0xc0), liveTokenMetadataHash)
-            mstore(add(ptr, 0xe0), integrationStateHash)
-            mstore(add(ptr, 0x100), address())
-            mstore(add(ptr, 0x120), chainid())
-            approvalHash := keccak256(ptr, 0x140)
-        }
-        return approvalHash;
-    }
-
-    function _artistApprovalSupplyStateHash(uint256 _collectionID) private view returns (bytes32) {
+    function _hashArtistApproval(uint256 _collectionID) private view returns (bytes32) {
         collectionAdditonalDataStructure storage data = collectionAdditionalData[_collectionID];
-        bytes32 typehash = _ARTIST_APPROVAL_SUPPLY_STATE_TYPEHASH;
-        uint256 maxCollectionPurchases = data.maxCollectionPurchases;
-        uint256 circulationSupply = data.collectionCirculationSupply;
-        uint256 collectionTotalSupply = data.collectionTotalSupply;
-        uint256 reservedMinTokenId = data.reservedMinTokensIndex;
-        uint256 reservedMaxTokenId = data.reservedMaxTokensIndex;
-        uint256 finalSupplyDelay = data.setFinalSupplyTimeAfterMint;
-        uint256 burnCount = burnAmount[_collectionID];
-        bytes32 supplyStateHash;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, typehash)
-            mstore(add(ptr, 0x20), maxCollectionPurchases)
-            mstore(add(ptr, 0x40), circulationSupply)
-            mstore(add(ptr, 0x60), collectionTotalSupply)
-            mstore(add(ptr, 0x80), reservedMinTokenId)
-            mstore(add(ptr, 0xa0), reservedMaxTokenId)
-            mstore(add(ptr, 0xc0), finalSupplyDelay)
-            mstore(add(ptr, 0xe0), burnCount)
-            supplyStateHash := keccak256(ptr, 0x100)
-        }
-        return supplyStateHash;
+        return StreamArtistApprovals.hashApprovalDigestForCurrentContract(
+            data.collectionArtistAddress,
+            _collectionFreezeManifestHash(_collectionID),
+            data.maxCollectionPurchases,
+            data.collectionTotalSupply,
+            data.setFinalSupplyTimeAfterMint
+        );
     }
 
     function _tokenMetadataRecordHash(uint256 tokenId) private view returns (bytes32) {
