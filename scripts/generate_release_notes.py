@@ -253,6 +253,8 @@ def build_notes(
             ],
         },
     }
+    # Changelog entries are screened before inclusion; this catch-all also
+    # covers values projected from release manifests, bytecode proof, and risks.
     reject_secret_like_text(json.dumps(notes, sort_keys=True), "release notes")
     return notes
 
