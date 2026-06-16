@@ -364,6 +364,13 @@ finalizes collection supply to the minted-ever count, tightens the reserved max
 token ID, blocks dependency-registry swaps while any collection is frozen, and
 rejects current `StreamCore` metadata-significant writes after freeze.
 
+Metadata freeze cross-invariants now have ADV-007 coverage in
+`StreamMetadataCrossInvariants.t.sol`: frozen dependency pins survive registry
+version creation, deprecation, registry-swap attempts, and repin attempts;
+rejected late randomness writes cannot move frozen live-token metadata; and
+post-freeze callbacks for burned pending tokens are constrained to audit state
+without changing frozen manifests or live metadata.
+
 Mint-accounting state now has P0-CORE-001 target-state coverage in
 `StreamMintAccounting.t.sol`: never-written public/allowlist mint counters were
 removed from `StreamCore`, while the retained airdrop counter starts at zero,
