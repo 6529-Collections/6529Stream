@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 07:18 UTC` |
+| Last updated | `2026-06-16 07:38 UTC` |
 
 ## Packaging Notes
 
@@ -334,6 +334,16 @@ Validation notes:
   `24,516` byte / `60` byte margin concern.
 - PR #441 opened on head `5074e56b7c56ead4f56fd0703e25d504a0eb9cc2`;
   CodeRabbit review requested in comment `4715957833`.
+- 6529bot marked the PR good to merge with no security findings and suggested
+  stronger test-only reconstructability checks. Accepted the valid
+  nice-to-haves by separating per-event-source reconstructed fields, asserting
+  cross-source consistency, adding exact topic/data shape guards, and tracking
+  `ClaimAuction` amount separately from the highest-bid model.
+- Review-fix validation passed:
+  `forge fmt --check test\StreamEventReconstructability.t.sol`,
+  `forge test --match-path test\StreamEventReconstructability.t.sol -vvv`,
+  `python scripts/check_events_and_indexing.py`, `git diff --check`, and
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
 
 ### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
 
