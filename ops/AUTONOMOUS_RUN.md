@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 00:21 UTC` |
+| Last updated | `2026-06-16 00:33 UTC` |
 
 ## Packaging Notes
 
@@ -15495,6 +15495,7 @@ Outcome:
 | 2026-06-15 23:59 | Open PR #427 for ONE-006 | PR #427 is open and ready for review, closes issue #426, and CodeRabbit review was requested in comment `4713528373`. Local focused validation and the policy Make target passed before opening. |
 | 2026-06-16 00:10 | Address PR #427 bot hardening note | 6529bot found no security issues and marked the PR good to merge, with an optional checker-hardening note. Added explicit required link-target file existence validation to `scripts/check_architecture_threat_model.py`, updated focused regressions, and confirmed `StreamCore` measures `23,781` runtime bytes with `795` bytes of EIP-170 headroom after rebasing onto `origin/main`, rather than the earlier stale `24,516`/`60` concern. |
 | 2026-06-16 00:21 | Rebase PR #427 onto updated `main` | Rebasing onto `origin/main` at `4021b6d` resolved generated release-artifact conflicts, incorporated the merged artist-series stack, and refreshed current size evidence from `23,661`/`915` to `23,781`/`795`. `make release-checksums` and `make architecture-threat-model-check release-manifest-check release-checksums-check changelog-check` pass on the rebased tree. |
+| 2026-06-16 00:33 | Harden PR #427 size evidence after bot drift comment | Latest bot feedback appeared to compare docs against the pre-rebase `23,661`/`915` measurement while the rebased bytecode proof records `23,781`/`795`. Added proof-backed architecture-policy validation so `docs/architecture.md`, `docs/status.md`, `docs/release-policy.md`, and `docs/known-blockers.md` must match `release-artifacts/latest/bytecode-release-proof.json` for `StreamCore` runtime size and EIP-170 margin. |
 
 ## Resume Instructions
 

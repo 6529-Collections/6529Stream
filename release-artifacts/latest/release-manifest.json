@@ -116,7 +116,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:9347f29b6b7f9bebc75aa4ed88c63ce9c700e896d7b4bfa38c6b299cec56452b",
+      "sha256": "sha256:586447116ff5ccb579953d199034f5bc1a2f18e743b2b836a9d8db9387b48048",
       "size_bytes": 22294,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1916,14 +1916,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e929524b382798acebc9d1fb112f0d6887e53e0f9c0878af8cb8f236df9a1528",
-      "size_bytes": 38710
+      "sha256": "sha256:d3449c5af7f2f18f932ffabeed98a22594a8b23573c9404c672abe8169a5cd72",
+      "size_bytes": 38762
     },
     "governance_docs": [
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:57b9b7e8dfe42e9ef3059cd6a37b1eb191ffd88a95644b4749c5762304761ba6",
-        "size_bytes": 10883
+        "sha256": "sha256:123a330bf8337fb9b4c58a41cfce2f65718466e121595f00290b8581aa6d11b3",
+        "size_bytes": 11014
       },
       {
         "path": "docs/deployment.md",
@@ -1957,8 +1957,8 @@
       },
       {
         "path": "docs/architecture.md",
-        "sha256": "sha256:366b8ff5db4b9c3f6ab0b6b55547f8689e0790630c52d7bad3f911a4829c1d21",
-        "size_bytes": 15618
+        "sha256": "sha256:b3773eab06e26b3972971c5a7c12677e78f4c8c3bc0dfde6d635323df07fa100",
+        "size_bytes": 15848
       },
       {
         "path": "docs/threat-model.md",
@@ -2072,8 +2072,8 @@
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:d0e20be5ad70fff6e23c47b150621e3e693ff9ec96d8d2f7bad0be2a2e41b3c3",
-        "size_bytes": 22183
+        "sha256": "sha256:8ae9694fc5689d8332a5c877eb515bc9696a2f484339c39e16ca8515b008bcb0",
+        "size_bytes": 22277
       }
     ]
   },

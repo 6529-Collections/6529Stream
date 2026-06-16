@@ -74,9 +74,11 @@ include:
   outputs change.
 
 Current `StreamCore` runtime size is 23,781 bytes with 795 bytes of EIP-170
-headroom. That passes the production size gate, but it does not make Core the
-default home for future marketplace, provenance, permanence, royalty-policy,
-frontend, indexer, or collector-evidence features.
+headroom in the committed
+[`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json).
+That passes the production size gate, but it does not make Core the default
+home for future marketplace, provenance, permanence, royalty-policy, frontend,
+indexer, or collector-evidence features.
 
 ## Breaking Changes
 

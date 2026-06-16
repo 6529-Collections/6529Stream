@@ -60,9 +60,12 @@ release artifacts, or documentation-only evidence unless the feature is a
 Core invariant, token-ownership rule, or security boundary that must live in
 `StreamCore`.
 
-The current production size source of truth is
-[`release-artifacts/contracts.json`](../release-artifacts/contracts.json) plus
-the artifact-backed checker
+The current production size thresholds are recorded in
+[`release-artifacts/contracts.json`](../release-artifacts/contracts.json). The
+current measured `StreamCore` runtime and EIP-170 margin source of truth is the
+bytecode release proof
+[`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
+plus the artifact-backed checker
 [`scripts/check_contract_size_budget.py`](../scripts/check_contract_size_budget.py).
 Run `python scripts/check_contract_size_budget.py` after the production size
 build before relying on any size-budget claim.

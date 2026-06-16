@@ -11,8 +11,9 @@ the release policy in `docs/release-policy.md`.
   architecture-doc size-budget requirements, release-policy/status hooks, and
   explicit rules for measured `StreamCore` bytecode deltas, size-budget
   exceptions, and satellite/read-adapter/library/release-artifact defaults for
-  future 1/1 product surfaces, plus required link-target existence checks for
-  the architecture and threat-model evidence docs.
+  future 1/1 product surfaces, plus required link-target existence checks and
+  bytecode-release-proof size-evidence matching for the architecture and
+  threat-model evidence docs.
 - Added ONE-005 marketplace/indexer retained evidence coverage with
   `docs/integrations/marketplace-indexer-evidence.md`, fork/testnet and live
   retained-artifact templates, public-beta and production evidence rows,
