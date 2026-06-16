@@ -3360,13 +3360,13 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `ADV-006` | Add randomizer callback reentrancy/stale-provider adversarial suite | D/F | `ADV-001` |
+| `ADV-006` | Add randomizer callback reentrancy/stale-provider adversarial suite | D/F | Active issue #450; local branch `codex/randomizer-adversarial-tests` |
 | `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | metadata fixtures |
 | `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Merged in PR #441 |
 | `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Merged in PR #443 |
 | `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Merged in PR #445; issue #444 closed completed |
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | Merged in PR #447; issue #446 closed completed |
-| `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Active issue #448; local branch `codex/custom-error-negative-tests` |
+| `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
 
 ### Contract/API Hardening
 

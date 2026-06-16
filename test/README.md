@@ -222,6 +222,12 @@ requests, then allowed after fulfillment or explicit stale marking.
 `RandomizerNXT` cannot be configured as a production randomizer, and the
 concrete weak `XRandoms` helper contract has been removed from production
 source while tests retain only an inline mock helper for the legacy boundary.
+ADV-006 adds focused adversarial coverage in `StreamRandomizerAdversarial.t.sol`:
+VRF and arRNG duplicate callback reentry during the external core
+post-processing write fails closed while the outer fulfillment stores the
+canonical seed, and stale-provider fulfillment attempts preserve pending state,
+zero token hash, and pending counters until an authorized stale mark clears the
+request.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be

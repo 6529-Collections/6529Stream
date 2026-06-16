@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `StreamRandomizerAdversarial.t.sol`, a focused ADV-006 suite covering
+  VRF and arRNG duplicate callback reentry during core post-processing plus
+  stale-provider fulfillment attempts that must preserve pending request state
+  until explicit stale marking.
 - Added `StreamCustomErrorNegative.t.sol`, a mutation-style negative suite that
   pins representative release-tracked custom-error selectors and argument
   encodings across admin, minter, dependency, metadata, contract-metadata, and
