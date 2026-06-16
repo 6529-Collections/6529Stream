@@ -415,8 +415,8 @@
     },
     "smart-contracts/StreamCore.sol": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:ce69eb531083f132bad6c07818951f9103cbebaaff848fd7d834b68b12c3d328",
-      "solc_keccak256": "0x2d219d0e870bacd1a9b031c4565d7815a91f46f00dd7f679fcfee2be639925fd",
+      "sha256": "sha256:1c8255d05f1fb987d7c886832f1c1c6f8777c9966c667111a479cd9be007ebd0",
+      "solc_keccak256": "0xb6ca0c389558f64b02e2678e3982e7b3025ad28670592282e2fd6eba52eca593",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -442,8 +442,8 @@
     },
     "smart-contracts/StreamMetadataRenderer.sol": {
       "path": "smart-contracts/StreamMetadataRenderer.sol",
-      "sha256": "sha256:5ed93159760ef13ecd3577054e007ab5f4d42273f5f89257dfcfb6378b0d8b7f",
-      "solc_keccak256": "0x9f2caf26f19b8f17d48f51c0d0b636c6f7f9fb4a8550a7621345021cfa3df76f",
+      "sha256": "sha256:115ae4e6eef476779256ddffa9f506b8d86c9c440902d3dc5e4e29ba10f78e04",
+      "solc_keccak256": "0xc95f0cba7a925851422bfc54313d9f17dbcf41a237b136ffa8c9cf024f96a3d2",
       "license": "MIT",
       "used_by": [
         "DependencyRegistry",
@@ -523,7 +523,7 @@
       "source_sha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815",
       "source_solc_keccak256": "0xc0f7fac9d1f170d9817c2d1aad59ff02716d8db8608c4dd73acbc10756cac2ff",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
-      "artifact_sha256": "sha256:388ce14667994f7625ed8fd876fa66254bf78ecacf476a686241681952327b61",
+      "artifact_sha256": "sha256:e7ecd2c4a2932fef948587d4ee8ec772254c643c54bf87a7782142bb022ca448",
       "compilation_target": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -540,16 +540,16 @@
       "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c",
+          "sha256": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c"
+          "release_artifact_sha256": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0"
         },
         "runtime": {
-          "sha256": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984",
+          "sha256": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984"
+          "release_artifact_sha256": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb"
         }
       },
       "constructor": {
@@ -679,7 +679,7 @@
       "source_sha256": "sha256:41cc60fe13fdd3e80c1c37671302ba919dcd7d50e7c8795aca38e5494fffaad7",
       "source_solc_keccak256": "0xe317befb192295d051ede6e848c34e2e6c2bb917681ca106931d74eb57251455",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:2f1d7a1ffacdd7f48f26d2c9280b41625500e52f72e474bbef11d3657cd4f259",
+      "artifact_sha256": "sha256:6cc34f03fd415740a587d18e7673fd4fc18b1ded145058ed72f4b51f091ec3ed",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -910,7 +910,7 @@
       "source_sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
       "source_solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
-      "artifact_sha256": "sha256:0dcc8555d1c709117458c6f7ad918c6d76286f17874e96aa2afc701d0bd7c748",
+      "artifact_sha256": "sha256:0e6248e9fe6ca29c20262b0db520b457e899934970c166744d943ea52c0b8d9c",
       "compilation_target": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -927,16 +927,16 @@
       "abi_sha256": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3",
+          "sha256": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3"
+          "release_artifact_sha256": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a"
         },
         "runtime": {
-          "sha256": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe",
+          "sha256": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe"
+          "release_artifact_sha256": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c"
         }
       },
       "constructor": {
@@ -1022,10 +1022,10 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "source_sha256": "sha256:ce69eb531083f132bad6c07818951f9103cbebaaff848fd7d834b68b12c3d328",
-      "source_solc_keccak256": "0x2d219d0e870bacd1a9b031c4565d7815a91f46f00dd7f679fcfee2be639925fd",
+      "source_sha256": "sha256:1c8255d05f1fb987d7c886832f1c1c6f8777c9966c667111a479cd9be007ebd0",
+      "source_solc_keccak256": "0xb6ca0c389558f64b02e2678e3982e7b3025ad28670592282e2fd6eba52eca593",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:b40c926f6b8424a8f8e6cda9ef4dc87425067761a2795d626b56937874a3949b",
+      "artifact_sha256": "sha256:cc7efe1ab332878998db6cb5f8562f964b9be2cf7b0ffc391d22f709a62da355",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1042,16 +1042,16 @@
       "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93",
+          "sha256": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93"
+          "release_artifact_sha256": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3"
         },
         "runtime": {
-          "sha256": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046",
+          "sha256": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046"
+          "release_artifact_sha256": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851"
         }
       },
       "constructor": {
@@ -1097,11 +1097,11 @@
             "library": "StreamArtistApprovals",
             "positions": [
               {
-                "start": 13744,
+                "start": 13938,
                 "length": 20
               },
               {
-                "start": 23924,
+                "start": 23155,
                 "length": 20
               }
             ]
@@ -1111,75 +1111,71 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 7932,
+                "start": 3223,
                 "length": 20
               },
               {
-                "start": 8037,
+                "start": 4131,
                 "length": 20
               },
               {
-                "start": 8099,
+                "start": 8072,
                 "length": 20
               },
               {
-                "start": 8210,
+                "start": 9605,
                 "length": 20
               },
               {
-                "start": 10251,
+                "start": 10431,
                 "length": 20
               },
               {
-                "start": 10405,
+                "start": 10585,
                 "length": 20
               },
               {
-                "start": 12235,
+                "start": 11918,
                 "length": 20
               },
               {
-                "start": 12425,
+                "start": 12498,
                 "length": 20
               },
               {
-                "start": 14987,
+                "start": 12632,
                 "length": 20
               },
               {
-                "start": 19795,
+                "start": 15181,
                 "length": 20
               },
               {
-                "start": 20266,
+                "start": 20241,
                 "length": 20
               },
               {
-                "start": 20914,
+                "start": 20712,
                 "length": 20
               },
               {
-                "start": 21038,
+                "start": 21330,
                 "length": 20
               },
               {
-                "start": 21098,
+                "start": 21454,
                 "length": 20
               },
               {
-                "start": 22148,
+                "start": 21822,
                 "length": 20
               },
               {
-                "start": 22591,
+                "start": 22510,
                 "length": 20
               },
               {
-                "start": 23279,
-                "length": 20
-              },
-              {
-                "start": 24145,
+                "start": 23376,
                 "length": 20
               }
             ]
@@ -1191,11 +1187,11 @@
             "library": "StreamArtistApprovals",
             "positions": [
               {
-                "start": 12583,
+                "start": 12777,
                 "length": 20
               },
               {
-                "start": 22763,
+                "start": 21994,
                 "length": 20
               }
             ]
@@ -1205,75 +1201,71 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 6771,
+                "start": 2062,
                 "length": 20
               },
               {
-                "start": 6876,
+                "start": 2970,
                 "length": 20
               },
               {
-                "start": 6938,
+                "start": 6911,
                 "length": 20
               },
               {
-                "start": 7049,
+                "start": 8444,
                 "length": 20
               },
               {
-                "start": 9090,
+                "start": 9270,
                 "length": 20
               },
               {
-                "start": 9244,
+                "start": 9424,
                 "length": 20
               },
               {
-                "start": 11074,
+                "start": 10757,
                 "length": 20
               },
               {
-                "start": 11264,
+                "start": 11337,
                 "length": 20
               },
               {
-                "start": 13826,
+                "start": 11471,
                 "length": 20
               },
               {
-                "start": 18634,
+                "start": 14020,
                 "length": 20
               },
               {
-                "start": 19105,
+                "start": 19080,
                 "length": 20
               },
               {
-                "start": 19753,
+                "start": 19551,
                 "length": 20
               },
               {
-                "start": 19877,
+                "start": 20169,
                 "length": 20
               },
               {
-                "start": 19937,
+                "start": 20293,
                 "length": 20
               },
               {
-                "start": 20987,
+                "start": 20661,
                 "length": 20
               },
               {
-                "start": 21430,
+                "start": 21349,
                 "length": 20
               },
               {
-                "start": 22118,
-                "length": 20
-              },
-              {
-                "start": 22984,
+                "start": 22215,
                 "length": 20
               }
             ]

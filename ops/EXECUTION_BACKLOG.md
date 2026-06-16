@@ -172,7 +172,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility lacks retained proof | `ONE-005`, `INT-005`, `INT-006` | Retain no-secret evidence for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation |
-| `StreamCore` has finite EIP-170 headroom despite the current 1,417-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has finite EIP-170 headroom despite the current 2,186-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -3148,9 +3148,9 @@ Status: In progress locally on issue #426 and branch
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom even after
-the 23,159-byte / 1,417-byte-margin rebased headroom measurement. Adding world-class 1/1
-product surfaces directly to Core risks breaking deployment or forcing rushed
-size recovery after feature work is already written.
+the 22,390-byte / 2,186-byte-margin rebased headroom measurement. Adding
+world-class 1/1 product surfaces directly to Core risks breaking deployment or
+forcing rushed size recovery after feature work is already written.
 
 Outcome: The repo has a documented architecture policy for future product
 features: prefer satellite contracts, read adapters, libraries, release
@@ -3349,7 +3349,7 @@ unless an external dependency changes.
 | --- | --- | --- | --- |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | `INT-002` to `INT-005` |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | `CON-001` |
-| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | issue #430 size report |
+| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | issues #430 and #432 size reports |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | `CON-001` |
 | `CON-007` | Add interface/version views for frontend compatibility | G | `INT-001` |
 
@@ -3362,7 +3362,7 @@ unless an external dependency changes.
 | `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | Merged in PR #417 |
 | `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | Merged in PR #419 |
 | `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |
-| `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | `CON-005`, issues #420 and #430 |
+| `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | `CON-005`, issues #420, #430, and #432 |
 | `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | formatting/static-analysis gates |
 
 ### Release Engineering

@@ -18,22 +18,22 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4"
+      "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0"
     },
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+      "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:74eb8b6733836710fdc6ea794277047e07c26bda04a6c0776873453c1c290679"
+      "sha256": "sha256:2d40346b7f731f4c4bf2b930e4d601dcc896637c6d3239706580cf469a942ea9"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
       "digest_status": "not_available_self_referential",
       "reason": "The release checksum bundle covers randomizer operations evidence outputs, so its own digest is intentionally recorded by the top-level release manifest instead of this evidence file."
     },
-    "deployment_manifest_canonical_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+    "deployment_manifest_canonical_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
   },
   "provider_configuration": {
     "vrf": {
@@ -47,7 +47,7 @@
       "evidence": [
         {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0"
         },
         {
           "path": "docs/adr/0005-randomness.md",
@@ -67,7 +67,7 @@
       "evidence": [
         {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0"
         },
         {
           "path": "test/StreamRandomizerPayments.t.sol",
@@ -190,17 +190,17 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4"
+      "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+      "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
     },
     {
       "category": "abi_checksums",
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:74eb8b6733836710fdc6ea794277047e07c26bda04a6c0776873453c1c290679"
+      "sha256": "sha256:2d40346b7f731f4c4bf2b930e4d601dcc896637c6d3239706580cf469a942ea9"
     },
     {
       "category": "randomizer_adr",

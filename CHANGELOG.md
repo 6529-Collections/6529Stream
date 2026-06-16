@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a second `StreamCore` headroom recovery slice that moves
+  field-specific metadata validation profiles into the linked
+  `StreamMetadataRenderer` library while preserving public Core size constants,
+  custom-error selectors, and metadata output behavior; the production via-IR
+  size gate now measures `StreamCore` at 22,390 runtime bytes with 2,186 bytes
+  of EIP-170 headroom, with the gas snapshot refreshed for a +45 gas
+  dependency-script read delta, a -24 gas final on-chain `tokenURI` delta, and
+  a +38 gas fixed-price mint delta.
 - Added a `StreamCore` headroom recovery slice that moves collection and
   dependency script assembly into the linked `StreamMetadataRenderer` library
   while preserving the `retrieveGenerativeScript` Core surface; the production

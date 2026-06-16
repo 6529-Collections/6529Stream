@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-script-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/429` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/430` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/431` |
-| Next issue | Recover additional `StreamCore` bytecode headroom by moving collection and dependency script assembly into the linked renderer library while preserving Core selectors and metadata output. |
+| Active PR branch | `codex/streamcore-validation-headroom` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/431` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/432` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/433` |
+| Next issue | After issue #432, consider moving tokenURI/metadata-state dispatch helpers into `StreamMetadataRenderer` if the validation-profile slice merges cleanly and bot feedback stays favorable. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 02:40 UTC` |
+| Last updated | `2026-06-16 03:19 UTC` |
 
 ## Packaging Notes
 
@@ -265,14 +265,70 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 201 | Add marketplace/indexer evidence model | Gate G/Gate E support | Add retained evidence templates/checkers and release-evidence tracker coverage for marketplace/indexer discovery and cache proof | Merged in PR #425 |
 | 202 | Add satellite-extension architecture policy | Gate G support | Add checked satellite-first architecture policy and size-budget evidence matching | Merged in PR #427 |
 | 203 | Burn down or disposition warning noise | Gate G/Gate F support | Add checked warning-disposition baseline and local/CI/Windows gate wiring | Merged in PR #429 |
-| 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | In progress on issue #430 |
+| 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | Merged in PR #431 |
+| 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | PR #433 open |
 
 ## Current PR Worklog
 
-### PR candidate: Recover script assembly headroom (Queue Item 204)
+### PR candidate: Recover metadata validation headroom (Queue Item 205)
 
-Status: PR #431 open; CodeRabbit review requested in comment `4714313962`;
-waiting for CI and bot feedback.
+Status: local implementation and artifact refresh in progress.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/432`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/433`.
+Branch: `codex/streamcore-validation-headroom`.
+Branch started from PR #431 squash merge commit
+`dde46c305efa6177bdfcf593db78b96ff35112d6`.
+
+Goal:
+
+- Recover additional `StreamCore` bytecode headroom without removing public
+  Core selectors, public size constants, or declared custom errors.
+- Move field-specific metadata validation labels, size limits, URI policy
+  wrappers, raw-attribute wrappers, and generated-tokenURI size-limit wiring
+  into the linked `StreamMetadataRenderer` library.
+- Preserve size-before-UTF-8 revert ordering, `UnsafeRawAttributes(tokenId)`,
+  metadata golden outputs, and ABI compatibility.
+- Refresh release artifacts and size evidence from the actual via-IR production
+  build.
+
+Validation plan:
+
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- `forge test --match-path test\StreamMetadataSizeLimits.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataUtf8.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataUriPolicy.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataEscaping.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`.
+- `forge test --match-path test\StreamContractMetadata.t.sol -vvv`.
+- `python scripts/check_abi_compatibility.py --check`.
+- `python scripts/check_contract_size_budget.py`.
+- `python scripts/test_architecture_threat_model.py`.
+- `python scripts/check_architecture_threat_model.py`.
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`.
+- Release manifest/proof/checksum drift checks.
+- `python scripts/check_changelog.py`.
+- Full `make check`.
+- Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Notes:
+
+- Initial focused tests passed for metadata size limits, UTF-8, URI policy,
+  escaping/raw attributes, metadata golden fixtures, and contract metadata.
+- The production size build measured `StreamCore` at 22,390 runtime bytes with
+  2,186 bytes of EIP-170 headroom, recovering 769 bytes from PR #431 main.
+- `StreamMetadataRenderer` grows to 14,872 runtime bytes, still leaving 9,704
+  bytes of EIP-170 margin.
+- Gas snapshot impact is intentionally small and accepted for the bytecode
+  recovery: dependency script read increases by 45 gas, final on-chain
+  `tokenURI` decreases by 24 gas, and fixed-price mint increases by 38 gas.
+- Release artifacts, deployment manifests, address books, provenance/
+  permanence manifests, ceremony evidence, randomizer operations evidence,
+  bytecode proof, and checksums have been regenerated locally.
+
+### Completed: Recover script assembly headroom (Queue Item 204)
+
+Status: merged in PR #431; issue #430 closed completed.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/430`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/431`.
 Branch: `codex/streamcore-script-headroom`.

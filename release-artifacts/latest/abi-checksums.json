@@ -20,13 +20,13 @@
   "bytecode_hashes": {
     "DependencyRegistry": {
       "creation": {
-        "sha256": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c",
+        "sha256": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
         "size_bytes": 6151
       },
       "runtime": {
-        "sha256": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984",
+        "sha256": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
         "size_bytes": 6007
@@ -90,13 +90,13 @@
     },
     "StreamContractMetadata": {
       "creation": {
-        "sha256": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3",
+        "sha256": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
         "size_bytes": 3638
       },
       "runtime": {
-        "sha256": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe",
+        "sha256": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
         "size_bytes": 2476
@@ -104,16 +104,16 @@
     },
     "StreamCore": {
       "creation": {
-        "sha256": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93",
+        "sha256": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
-        "size_bytes": 24320
+        "size_bytes": 23551
       },
       "runtime": {
-        "sha256": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046",
+        "sha256": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851",
         "linked": false,
         "hash_mode": "unlinked_artifact_object",
-        "size_bytes": 23159
+        "size_bytes": 22390
       }
     },
     "StreamCuratorsPool": {
@@ -164,11 +164,11 @@
       "source": "smart-contracts/DependencyRegistry.sol",
       "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
       "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-      "bytecode_sha256": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c",
+      "bytecode_sha256": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
       "bytecode_size_bytes": 6151,
-      "deployed_bytecode_sha256": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984",
+      "deployed_bytecode_sha256": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "deployed_bytecode_size_bytes": 6007,
@@ -259,11 +259,11 @@
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
       "abi_sha256": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-      "bytecode_sha256": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3",
+      "bytecode_sha256": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
       "bytecode_size_bytes": 3638,
-      "deployed_bytecode_sha256": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe",
+      "deployed_bytecode_sha256": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
       "deployed_bytecode_size_bytes": 2476,
@@ -278,16 +278,16 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-      "bytecode_sha256": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93",
+      "bytecode_sha256": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3",
       "bytecode_linked": false,
       "bytecode_hash_mode": "unlinked_artifact_object",
-      "bytecode_size_bytes": 24320,
-      "deployed_bytecode_sha256": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046",
+      "bytecode_size_bytes": 23551,
+      "deployed_bytecode_sha256": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851",
       "deployed_bytecode_linked": false,
       "deployed_bytecode_hash_mode": "unlinked_artifact_object",
-      "deployed_bytecode_size_bytes": 23159,
+      "deployed_bytecode_size_bytes": 22390,
       "eip170_runtime_limit_bytes": 24576,
-      "deployed_runtime_margin_bytes": 1417,
+      "deployed_runtime_margin_bytes": 2186,
       "abi_entries": 122,
       "function_count": 76,
       "event_count": 11,
