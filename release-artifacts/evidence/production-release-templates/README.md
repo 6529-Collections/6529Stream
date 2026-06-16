@@ -8,9 +8,9 @@ production-release rows.
 
 They are not completion evidence. Each JSON file uses
 `record_type: "template"` and `review_status: "template"`, points at the
-shared retained-artifact placeholder, and keeps production release blocked
-until a future operator replaces the placeholder with reviewed no-secret
-evidence.
+shared retained-artifact placeholder or a requirement-specific retained
+artifact template, and keeps production release blocked until a future operator
+replaces the placeholder with reviewed no-secret evidence.
 
 Before using a template for real evidence:
 
@@ -34,3 +34,10 @@ For production broadcast retention evidence, fill
 and run `python scripts/test_production_broadcast_retention.py` plus
 `python scripts/check_production_broadcast_retention.py` before generating the
 non-local evidence envelope for `production_broadcast_retention`.
+
+For production address-book and live explorer verification evidence, fill
+`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
+and run `python scripts/test_production_verified_addresses.py` plus
+`python scripts/check_production_verified_addresses.py` before generating
+separate non-local evidence envelopes for `production_address_books` and
+`live_explorer_verification`.

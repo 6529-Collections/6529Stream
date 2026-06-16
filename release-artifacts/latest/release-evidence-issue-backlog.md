@@ -717,7 +717,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows |
 | Template | `release-artifacts/evidence/production-release-templates/production-address-books-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`; Replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`; Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -735,12 +735,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `production_address_books`
 - Evidence template: `release-artifacts/evidence/production-release-templates/production-address-books-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
 
 ## Required Evidence
 
-- Retained artifact expectation: Replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-address-books-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Retained artifact expectation: Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-address-books-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -748,6 +748,8 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_production_verified_addresses.py`
+- `python scripts/check_production_verified_addresses.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`
@@ -1121,7 +1123,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows |
 | Template | `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`; Replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`; Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -1139,12 +1141,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_explorer_verification`
 - Evidence template: `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
 
 ## Required Evidence
 
-- Retained artifact expectation: Replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Retained artifact expectation: Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -1152,6 +1154,8 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_production_verified_addresses.py`
+- `python scripts/check_production_verified_addresses.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`
@@ -1249,6 +1253,7 @@ Suggested issue body:
 | `python scripts/check_external_audit_report_evidence.py` |
 | `python scripts/check_marketplace_indexer_evidence.py` |
 | `python scripts/check_non_local_release_evidence.py` |
+| `python scripts/check_production_verified_addresses.py` |
 | `python scripts/check_public_beta_evidence.py` |
 | `python scripts/check_testnet_deployment_rehearsal_evidence.py` |
 | `python scripts/generate_production_release_blocker_report.py --check` |
@@ -1261,6 +1266,7 @@ Suggested issue body:
 | `python scripts/test_marketplace_indexer_evidence.py` |
 | `python scripts/test_non_local_release_evidence.py` |
 | `python scripts/test_production_release_blocker_report.py` |
+| `python scripts/test_production_verified_addresses.py` |
 | `python scripts/test_public_beta_blocker_report.py` |
 | `python scripts/test_public_beta_evidence.py` |
 | `python scripts/test_release_evidence_issue_backlog.py` |

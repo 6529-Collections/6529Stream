@@ -553,6 +553,19 @@ explicit redaction confirmations before a reviewed artifact can pass. The
 committed file is template-only and keeps production release blocked until a
 future reviewed production deployment retention record is accepted.
 
+Production verified-addresses evidence has a dedicated no-secret retained
+artifact template at
+`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`.
+Run `python scripts/test_production_verified_addresses.py` and
+`python scripts/check_production_verified_addresses.py` before generating
+non-local evidence envelopes for `production_address_books` or
+`live_explorer_verification`. The checker requires live address-book and
+deployment-manifest agreement, verified explorer rows, runtime bytecode,
+constructor-argument, linked-library, release manifest/checksum, reviewer
+metadata, and explicit redaction confirmations before a reviewed artifact can
+pass. The committed file is template-only and keeps production release blocked
+until future reviewed live address evidence is accepted.
+
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, public-beta evidence, release evidence issue backlog, release

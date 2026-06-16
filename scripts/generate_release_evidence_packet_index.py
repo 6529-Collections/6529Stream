@@ -93,6 +93,12 @@ EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/external-audit-report/"
     "external-audit-report-retained-artifact-template.md"
 )
+PRODUCTION_ADDRESS_BOOKS_REQUIREMENT_ID = "production_address_books"
+LIVE_EXPLORER_VERIFICATION_REQUIREMENT_ID = "live_explorer_verification"
+PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/production-verified-addresses/"
+    "production-verified-addresses-retained-artifact-template.md"
+)
 ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PUBLIC_BETA_PHASE, EXTERNAL_AUDIT_REQUIREMENT_ID): (
         "python scripts/test_external_audit_report_evidence.py",
@@ -113,6 +119,14 @@ ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PRODUCTION_PHASE, LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID): (
         "python scripts/test_marketplace_indexer_evidence.py",
         "python scripts/check_marketplace_indexer_evidence.py",
+    ),
+    (PRODUCTION_PHASE, PRODUCTION_ADDRESS_BOOKS_REQUIREMENT_ID): (
+        "python scripts/test_production_verified_addresses.py",
+        "python scripts/check_production_verified_addresses.py",
+    ),
+    (PRODUCTION_PHASE, LIVE_EXPLORER_VERIFICATION_REQUIREMENT_ID): (
+        "python scripts/test_production_verified_addresses.py",
+        "python scripts/check_production_verified_addresses.py",
     ),
 }
 
@@ -319,6 +333,19 @@ def retained_artifact_expectation(
             resolve_repo_path(
                 repo_root,
                 LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
+            ),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif phase == PRODUCTION_PHASE and requirement_id in {
+        PRODUCTION_ADDRESS_BOOKS_REQUIREMENT_ID,
+        LIVE_EXPLORER_VERIFICATION_REQUIREMENT_ID,
+    }:
+        record = file_record(
+            resolve_repo_path(
+                repo_root,
+                PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
             ),
             repo_root,
         )

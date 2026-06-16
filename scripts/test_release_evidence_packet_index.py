@@ -200,6 +200,10 @@ def seed_all_templates(root: Path) -> None:
         root / generator.LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
         "Live marketplace and indexer retained artifact template.\n",
     )
+    write_text(
+        root / generator.PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
+        "Production verified-addresses retained artifact template.\n",
+    )
     seed_templates(
         root,
         non_local_checker.PRODUCTION_RELEASE_TEMPLATE_DIR,
@@ -491,6 +495,59 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
                 "python scripts/check_marketplace_indexer_evidence.py",
                 live_row["validation_commands"],
             )
+
+    def test_production_verified_address_rows_use_canonical_retained_artifact(self) -> None:
+        """Production address and explorer rows point at the dedicated template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            rows = {
+                row["requirement_id"]: row
+                for row in packet["rows"]
+                if row["requirement_id"]
+                in {
+                    generator.PRODUCTION_ADDRESS_BOOKS_REQUIREMENT_ID,
+                    generator.LIVE_EXPLORER_VERIFICATION_REQUIREMENT_ID,
+                }
+            }
+
+            self.assertEqual(
+                set(rows),
+                {
+                    generator.PRODUCTION_ADDRESS_BOOKS_REQUIREMENT_ID,
+                    generator.LIVE_EXPLORER_VERIFICATION_REQUIREMENT_ID,
+                },
+            )
+            for row in rows.values():
+                self.assertEqual(
+                    row["retained_artifact_expectation"]["path"],
+                    generator.PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+                )
+                self.assertEqual(
+                    row["retained_artifact_expectation"]["sha256"],
+                    checker.file_sha256(
+                        root
+                        / generator.PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE
+                    ),
+                )
+                self.assertIn(
+                    "python scripts/test_production_verified_addresses.py",
+                    row["validation_commands"],
+                )
+                self.assertIn(
+                    "python scripts/check_production_verified_addresses.py",
+                    row["validation_commands"],
+                )
 
     def test_outputs_are_deterministic(self) -> None:
         """Rendering the same inputs twice produces identical JSON and Markdown."""

@@ -164,6 +164,8 @@ python scripts/check_release_readiness.py
 python scripts/test_release_mode.py
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
+python scripts/test_production_verified_addresses.py
+python scripts/check_production_verified_addresses.py
 python scripts/test_release_notes.py
 python scripts/generate_release_notes.py --check
 python scripts/test_release_manifest.py
@@ -500,6 +502,15 @@ is the checked no-secret retained-artifact template for future
 `python scripts/check_production_broadcast_retention.py` before generating a
 non-local evidence envelope. The committed template is not production broadcast
 evidence and does not change production-release readiness.
+
+`evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future production
+address-book and live explorer verification evidence. Validate it with
+`python scripts/test_production_verified_addresses.py` and
+`python scripts/check_production_verified_addresses.py` before generating
+non-local evidence envelopes for `production_address_books` or
+`live_explorer_verification`. The committed template is not verified live
+address evidence and does not change production-release readiness.
 
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
