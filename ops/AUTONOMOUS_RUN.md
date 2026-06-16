@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/warning-noise-disposition` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/427` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/428` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/429` |
 | Next issue | Implement `ONE-007` warning-noise burn-down/disposition so release-grade compiler, NatSpec, lint, and static-analysis warnings are fixed or explicitly accepted before public release claims. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 01:35 UTC` |
+| Last updated | `2026-06-16 01:41 UTC` |
 
 ## Packaging Notes
 
@@ -268,7 +268,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 Status: issue #428 open; branch `codex/warning-noise-disposition` locally
 validated and ready to publish.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/428`.
-PR: `TBD`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/429`.
 Branch: `codex/warning-noise-disposition`.
 Branch started from PR #427 squash merge commit
 `a09fcfc0a5670958a0080f0bb1f62972eb42cf43`.
@@ -316,6 +316,8 @@ Notes:
   Python compilation, full `make check`, and `forge doc --build`.
 - `forge doc --build` succeeds and retains only the documented mdBook warnings
   from vendored VRF placeholder angle-bracket prose.
+- PR #429 opened on head `f56e5cd4af3ebd1eabd4dd183633ec824331645b`.
+  CodeRabbit review was requested in comment `4714065314`.
 
 ### Completed: Add satellite-extension architecture policy (Queue Item ONE-006)
 
@@ -15552,6 +15554,7 @@ Outcome:
 | 2026-06-16 00:51 | Remove stale current-size wording from PR #427 metadata docs | Remote head `cfd3c39` proof entries all show `StreamCore` `runtime_bytecode_bytes: 23781` and `runtime_margin_bytes: 795`, but 6529bot follow-up still cited the pre-rebase `23,661`/`915` values. Updated the PR body, clarified the changelog entry as the PR #421 measurement rather than current release state, and corrected the execution-backlog reviewer row to the current 795-byte margin. |
 | 2026-06-16 01:02 | Merge PR #427 and start ONE-007 | PR #427 merged as `a09fcfc0a5670958a0080f0bb1f62972eb42cf43` after CI and CodeRabbit passed; a false-positive 6529bot size comment was documented in PR comment `4713885073` because remote head proof and CI showed `23,781`/`795`, not the requested `23,661`/`915`. Issue #426 closed completed. Issue #428 and branch `codex/warning-noise-disposition` now track ONE-007 warning-noise burn-down/disposition. |
 | 2026-06-16 01:35 | Validate ONE-007 local PR candidate | Comment-only NatSpec header cleanup, checked warning-disposition docs, Makefile/bash/PowerShell/CI wiring, risk/release manifest coverage, and regenerated release evidence artifacts are locally green. `make release-checksums`, focused warning/release/risk/readiness/audit/changelog checks, Python compilation, full `make check`, and `forge doc --build` passed. Current production size remains `StreamCore` `23,781` runtime bytes with `795` bytes of EIP-170 headroom. |
+| 2026-06-16 01:41 | Open PR #429 for ONE-007 | PR #429 opened at `https://github.com/6529-Collections/6529Stream/pull/429` on branch `codex/warning-noise-disposition`, closes issue #428, and CodeRabbit review was requested in comment `4714065314`. Next action is to wait for CI and bot feedback, resolve actionable comments, then merge when clean. |
 
 ## Resume Instructions
 
