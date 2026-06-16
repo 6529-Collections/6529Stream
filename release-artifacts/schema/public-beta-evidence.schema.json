@@ -62,7 +62,7 @@
       "items": {
         "$ref": "#/$defs/requirement"
       },
-      "minItems": 19
+      "minItems": 20
     },
     "retained_artifacts": {
       "type": "array",

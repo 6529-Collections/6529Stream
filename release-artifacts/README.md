@@ -512,6 +512,14 @@ non-local evidence envelopes for `production_address_books` or
 `live_explorer_verification`. The committed template is not verified live
 address evidence and does not change production-release readiness.
 
+`evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future
+`live_metadata_browser_evidence`. Validate it with
+`python scripts/test_live_metadata_browser_evidence.py` and
+`python scripts/check_live_metadata_browser_evidence.py` before generating a
+non-local evidence envelope. The committed template is not live browser proof
+and does not change production-release readiness.
+
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility

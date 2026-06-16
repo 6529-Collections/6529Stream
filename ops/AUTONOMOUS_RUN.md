@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/production-verified-addresses-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/469` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/470` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/471` |
-| Next issue | TBD after EXT-013 production verified-addresses checker lands. |
+| Active PR branch | `codex/live-metadata-browser-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/471` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/472` |
+| Active PR | TBD |
+| Next issue | TBD after EXT-014 live metadata browser evidence checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 21:28 UTC` |
+| Last updated | `2026-06-16 21:52 UTC` |
 
 ## Packaging Notes
 

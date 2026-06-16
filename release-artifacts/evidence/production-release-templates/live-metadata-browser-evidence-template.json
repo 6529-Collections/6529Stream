@@ -1,0 +1,35 @@
+{
+  "schema_version": "6529stream.non-local-release-evidence.v1",
+  "evidence_id": "production-release-template-live-metadata-browser-evidence",
+  "record_type": "template",
+  "review_status": "template",
+  "environment": "live",
+  "chain_id": 1,
+  "block_or_reference": "template-only live block, token ID, collection ID, CI run, or browser transcript reference",
+  "command_or_source_system": "template-only live metadata browser command, CI job, deployed contract call, or operator transcript",
+  "retained_path": "release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md",
+  "sha256": "sha256:81df7923eb01326520f32c41ebf5369962601e6650c1a4ed2165b76f6c5929c4",
+  "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
+  "owner": "TBD",
+  "reviewer": "TBD",
+  "public_beta_requirement_id": "live_metadata_browser_evidence",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "template"
+  },
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Template only. This file is not completion evidence and does not mark public beta or production ready.",
+  "operator_notes": "Replace this template with browser execution evidence for metadata generated from deployed live mainnet contracts, including contract addresses, token or collection IDs, browser sandbox command, tokenURI digest, console/page error summary, dependency request summary, parent isolation proof, and reviewer confirmation."
+}

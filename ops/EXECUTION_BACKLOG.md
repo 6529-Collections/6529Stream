@@ -3351,8 +3351,8 @@ unless an external dependency changes.
 | `EXT-010` | Retain fork ceremony evidence for admin/signer/randomizer/auction operations | E/F | ceremony checker |
 | `EXT-011` | Retain fork randomizer operations evidence | E/F | randomizer operations checker |
 | `EXT-012` | Add production broadcast retention checker | F/G | Merged in PR #469; issue #468 closed completed |
-| `EXT-013` | Add production verified-addresses evidence checker | F/G | Active issue #470; branch `codex/production-verified-addresses-checker`; explorer checker |
-| `EXT-014` | Add live metadata browser evidence checker | F/G | metadata browser evidence pattern |
+| `EXT-013` | Add production verified-addresses evidence checker | F/G | Merged in PR #471; issue #470 closed completed |
+| `EXT-014` | Add live metadata browser evidence checker | F/G | Active issue #472; branch `codex/live-metadata-browser-evidence-checker`; tracker issue #473; metadata browser evidence pattern |
 | `EXT-015` | Add live ceremony evidence checker | F/G | governance ceremony checker |
 | `EXT-016` | Add live randomizer operations evidence checker | F/G | randomizer operations pattern |
 

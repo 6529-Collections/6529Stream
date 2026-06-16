@@ -41,3 +41,9 @@ and run `python scripts/test_production_verified_addresses.py` plus
 `python scripts/check_production_verified_addresses.py` before generating
 separate non-local evidence envelopes for `production_address_books` and
 `live_explorer_verification`.
+
+For live metadata browser evidence, fill
+`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`
+and run `python scripts/test_live_metadata_browser_evidence.py` plus
+`python scripts/check_live_metadata_browser_evidence.py` before generating the
+non-local evidence envelope for `live_metadata_browser_evidence`.

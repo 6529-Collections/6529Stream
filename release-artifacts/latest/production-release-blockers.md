@@ -29,7 +29,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Production Release | `blocked` | 10 | 0 | 0 | 0 | 0 | 0 | 10 |
+| Production Release | `blocked` | 11 | 0 | 0 | 0 | 0 | 0 | 11 |
 
 ## Incomplete Production Release Rows
 
@@ -39,6 +39,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | `live_deployment_manifest` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json` | none | Live deployment manifests generated from production inputs are not yet retained. |
 | `live_explorer_verification` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` | none | Live explorer verification outputs and verified contract-address links are not yet retained. |
 | `live_marketplace_indexer_evidence` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json` | none | Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained. |
+| `live_metadata_browser_evidence` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json` | none | Live metadata browser-sandbox evidence generated from deployed production contracts is not yet retained. |
 | `live_randomizer_operations_evidence` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` | none | Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained. |
 | `post_audit_remediation` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json` | none | Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained. |
 | `production_address_books` | `missing` | TBD | external/future | 0 | `release-artifacts/evidence/production-release-templates/production-address-books-template.json` | none | Production address books generated from live deployment manifests are not yet retained. |
@@ -61,6 +62,7 @@ No reviewed production evidence rows are complete in the committed baseline.
 | `live_deployment_manifest` | `missing` | `release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json` | Live deployment manifests generated from production inputs are not yet retained. |
 | `live_ceremony_evidence` | `missing` | `release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json` | Live admin, signer, metadata, auction, and emergency ceremony evidence is not yet retained. |
 | `live_randomizer_operations_evidence` | `missing` | `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` | Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained. |
+| `live_metadata_browser_evidence` | `missing` | `release-artifacts/evidence/production-release-templates/live-metadata-browser-evidence-template.json` | Live metadata browser-sandbox evidence generated from deployed production contracts is not yet retained. |
 | `live_marketplace_indexer_evidence` | `missing` | `release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json` | Live marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale paths is not yet retained. |
 | `live_explorer_verification` | `missing` | `release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json` | Live explorer verification outputs and verified contract-address links are not yet retained. |
 | `post_audit_remediation` | `missing` | `release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json` | Post-audit remediation evidence, accepted-risk records, and retest status are not yet retained. |

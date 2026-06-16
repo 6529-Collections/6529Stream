@@ -162,6 +162,15 @@
       "notes": "Live randomizer provider, funding, reserve, callback, migration, stale, failed, retry, pause, and emergency evidence is not yet retained."
     },
     {
+      "id": "live_metadata_browser_evidence",
+      "phase": "production_release",
+      "status": "missing",
+      "owner": "TBD",
+      "evidence": [],
+      "risk_acceptance": null,
+      "notes": "Live metadata browser-sandbox evidence generated from deployed production contracts is not yet retained."
+    },
+    {
       "id": "live_marketplace_indexer_evidence",
       "phase": "production_release",
       "status": "missing",
@@ -193,7 +202,7 @@
     {
       "category": "public_beta_evidence_schema",
       "path": "release-artifacts/schema/public-beta-evidence.schema.json",
-      "sha256": "sha256:d73863ab1be2718f7cd60f89fd37f3df6fdbfbf9dac693071f6e9a12d4b38d65"
+      "sha256": "sha256:05b9568bfc5c7163fd30704d0b644ec5d3eb3987c54df99a10a5f43133376e7e"
     }
   ],
   "redaction_policy": {

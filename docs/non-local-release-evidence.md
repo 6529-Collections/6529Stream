@@ -315,8 +315,20 @@ Retain:
 - reviewer note confirming the artifact was produced from deployed contracts.
 
 Map fork/testnet evidence to `fork_testnet_metadata_browser_evidence` and live
-evidence to `live_ceremony_evidence` unless a later schema creates a dedicated
-live metadata requirement.
+evidence to `live_metadata_browser_evidence`.
+
+The live metadata-browser row has a dedicated retained-artifact template at
+`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`.
+Before generating the non-local metadata envelope, run:
+
+```sh
+python scripts/test_live_metadata_browser_evidence.py
+python scripts/check_live_metadata_browser_evidence.py
+```
+
+The checker validates retained no-secret browser proof only. It does not fetch
+live metadata, call a private RPC endpoint, or execute production browser work
+from CI.
 
 ### Marketplace And Indexer Evidence
 

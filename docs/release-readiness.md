@@ -348,6 +348,11 @@ The current local baseline includes:
   [`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md),
   validated with `python scripts/test_production_verified_addresses.py` and
   `python scripts/check_production_verified_addresses.py`,
+  plus live metadata-browser evidence for `live_metadata_browser_evidence`
+  under
+  [`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md),
+  validated offline with `python scripts/test_live_metadata_browser_evidence.py`
+  and `python scripts/check_live_metadata_browser_evidence.py`,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
