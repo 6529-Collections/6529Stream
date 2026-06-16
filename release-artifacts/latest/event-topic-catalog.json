@@ -206,6 +206,45 @@
       ]
     },
     {
+      "topic0": "0x1b8db7790d5ff84698df4f9d85fc0f988420d35a2f82aad72a15b8486522be2b",
+      "signature": "MinterAuctionEndTimeUpdated(uint256,uint256,uint256,address)",
+      "name": "MinterAuctionEndTimeUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "oldAuctionEndTime",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "newAuctionEndTime",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamMinter"
+      ]
+    },
+    {
       "topic0": "0x25cd81c3ce872bde5f7e7ddd309cd91c6091c1f6a2719c7c25c01b9f55fa1aec",
       "signature": "DependencyVersionPinned(uint256,bytes32,uint256,bytes32,address)",
       "name": "DependencyVersionPinned",
@@ -249,6 +288,59 @@
       ],
       "emitted_by": [
         "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x27b0cb05ae90e98bea65acdce95b33d551163166e8b568a6c06e4124bb97195a",
+      "signature": "CollectionPhasesUpdated(uint256,uint256,uint256,uint256,uint256,address)",
+      "name": "CollectionPhasesUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "oldPublicStartTime",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "oldPublicEndTime",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "publicStartTime",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 4,
+          "name": "publicEndTime",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamMinter"
       ]
     },
     {
@@ -797,6 +889,45 @@
       ]
     },
     {
+      "topic0": "0x7de0297b667a002203a2fd46d51bb498d6339931566b6e6b1181dc0441616f66",
+      "signature": "MinterContractReferenceUpdated(uint8,address,address,address)",
+      "name": "MinterContractReferenceUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "option",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 1,
+          "name": "oldContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "newContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamMinter"
+      ]
+    },
+    {
       "topic0": "0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab",
       "signature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
       "name": "DropAuthorizationConsumed",
@@ -1030,6 +1161,45 @@
       ],
       "emitted_by": [
         "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x8fa717d70debee827f61a501b454b2d1fd59e2aeed097b4d2f230e802d2d0fd9",
+      "signature": "MinterAuctionMinted(uint256,uint256,address,uint256)",
+      "name": "MinterAuctionMinted",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "custody",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "auctionEndTime",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamMinter"
       ]
     },
     {
@@ -1832,6 +2002,52 @@
       ],
       "emitted_by": [
         "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xf2b0b77950f12917a94ab713b1f9b84ebc2e4dfc847308f55a8ac4218101b05e",
+      "signature": "MinterTokensMinted(uint256,uint256,address,uint256,uint256)",
+      "name": "MinterTokensMinted",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "firstTokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "lastTokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 4,
+          "name": "quantity",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamMinter"
       ]
     },
     {
@@ -4552,6 +4768,56 @@
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
       "events": [
         {
+          "name": "CollectionPhasesUpdated",
+          "signature": "CollectionPhasesUpdated(uint256,uint256,uint256,uint256,uint256,address)",
+          "topic0": "0x27b0cb05ae90e98bea65acdce95b33d551163166e8b568a6c06e4124bb97195a",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "oldPublicStartTime",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "oldPublicEndTime",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "publicStartTime",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "publicEndTime",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
           "name": "EmergencyWithdrawal",
           "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
           "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8",
@@ -4588,6 +4854,157 @@
             {
               "index": 4,
               "name": "resultingSurplus",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "MinterAuctionEndTimeUpdated",
+          "signature": "MinterAuctionEndTimeUpdated(uint256,uint256,uint256,address)",
+          "topic0": "0x1b8db7790d5ff84698df4f9d85fc0f988420d35a2f82aad72a15b8486522be2b",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "oldAuctionEndTime",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "newAuctionEndTime",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "MinterAuctionMinted",
+          "signature": "MinterAuctionMinted(uint256,uint256,address,uint256)",
+          "topic0": "0x8fa717d70debee827f61a501b454b2d1fd59e2aeed097b4d2f230e802d2d0fd9",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "custody",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "MinterContractReferenceUpdated",
+          "signature": "MinterContractReferenceUpdated(uint8,address,address,address)",
+          "topic0": "0x7de0297b667a002203a2fd46d51bb498d6339931566b6e6b1181dc0441616f66",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "option",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "oldContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "newContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "MinterTokensMinted",
+          "signature": "MinterTokensMinted(uint256,uint256,address,uint256,uint256)",
+          "topic0": "0xf2b0b77950f12917a94ab713b1f9b84ebc2e4dfc847308f55a8ac4218101b05e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "firstTokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "lastTokenId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "quantity",
               "type": "uint256",
               "indexed": false,
               "internal_type": "uint256"

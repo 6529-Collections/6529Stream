@@ -92,7 +92,7 @@ copies.
 | Drops contract | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Drop authorization, signer, auction contract, and fixed-price credit events |
 | Auction contract | [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol) | Auction lifecycle, bid, settlement, and proceeds events |
 | Admin contract | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Role, pause, emergency recipient, and signer-lifecycle target events |
-| Minter bridge | [`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol) | Bridge reads such as original auction end-time values |
+| Minter bridge | [`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol) | Phase, fixed-price batch mint, auction mint, auction end-time, contract-reference events, and bridge reads such as original auction end-time values |
 | Randomizer lifecycle | [`smart-contracts/StreamRandomizerLifecycle.sol`](../../smart-contracts/StreamRandomizerLifecycle.sol) | Request, fulfillment, stale, failure, retry, and burned-token randomness events |
 | Curator pool | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Merkle roots, curator credits, and curator withdrawals |
 | Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Dependency version creation/deprecation events |
@@ -104,6 +104,7 @@ copies.
 | ERC-1271 tests | [`test/StreamDropsERC1271.t.sol`](../../test/StreamDropsERC1271.t.sol) | Contract signer behavior |
 | Auction custody tests | [`test/StreamAuctionCustody.t.sol`](../../test/StreamAuctionCustody.t.sol) | Auction custody and no-bid state |
 | Auction payment tests | [`test/StreamAuctionPayments.t.sol`](../../test/StreamAuctionPayments.t.sol) | Bidder/proceeds credit behavior |
+| Minter event tests | [`test/StreamMinterEvents.t.sol`](../../test/StreamMinterEvents.t.sol) | Minter bridge event fields and read-after-event behavior |
 | Curator tests | [`test/StreamCuratorsPool.t.sol`](../../test/StreamCuratorsPool.t.sol) | Curator credit and root behavior |
 | Admin tests | [`test/StreamAdmins.t.sol`](../../test/StreamAdmins.t.sol) | Role event behavior |
 | Pause tests | [`test/StreamPauseControls.t.sol`](../../test/StreamPauseControls.t.sol) | Pause-domain behavior |
@@ -194,6 +195,7 @@ emitter contracts. The current catalog includes these high-value event groups:
 | ERC-721 | `Transfer`, `Approval`, `ApprovalForAll` | Token owner, mint, burn, approval, and operator state |
 | Metadata | `MetadataUpdate`, `BatchMetadataUpdate`, `CollectionFrozen`, `DependencyVersionPinned`, `TokenBurned`, `ContractURIUpdated` | Token URI refresh, collection freeze, dependency pin, live-token state, contract-level metadata refresh |
 | Drop authorization | `DropAuthorizationConsumed`, `DropAuthorizationCancelled`, `SignerEpochChanged`, `DropSignerChanged`, `AuctionContractChanged` | Drop execution, replay/cancellation state, signer lifecycle, auction bridge address |
+| Minter bridge | `CollectionPhasesUpdated`, `MinterTokensMinted`, `MinterAuctionMinted`, `MinterAuctionEndTimeUpdated`, `MinterContractReferenceUpdated` | Public phase windows, fixed-price mint ranges, original auction bridge custody/end time, and minter contract references |
 | Fixed-price credits | `FixedPriceCreditCreated`, `FixedPriceCreditWithdrawn` | Poster, protocol, curator reserve, and withdrawal views |
 | Auction lifecycle | `AuctionRegistered`, `AuctionCustodyConfirmed`, `AuctionStatusChanged`, `AuctionExtended`, `AuctionCancelled`, `ClaimAuction`, `NoBidSettlementPending`, `NoBidTokenClaimed` | Auction state, custody, end time, settlement, no-bid claimant |
 | Auction credits | `Participate`, `OutbidCreditCreated`, `BidderCreditWithdrawn`, `AuctionProceedsCreditCreated`, `ProceedsCreditWithdrawn` | Highest bid, bidder refunds, poster/protocol/curator proceeds, withdrawals |
@@ -216,6 +218,7 @@ Required read-after-event calls by surface:
 | Contract metadata | `ContractURIUpdated` | `contractURI()`, `contractURIHash()`, `streamCore()`, `adminsContract()` from the adapter address in the selected address book |
 | Token | ERC-721 `Transfer`, `TokenBurned`, `MetadataUpdate` | `ownerOf` when minted and not burned, `tokenURI`, token metadata state, collection membership |
 | Drop | `DropAuthorizationConsumed`, `DropAuthorizationCancelled`, `SignerEpochChanged`, `DropSignerChanged` | `isDropConsumed(dropId)`, `isDropCancelled(dropId)`, `tdhSigner()`, `signerEpoch()` |
+| Minter bridge | `CollectionPhasesUpdated`, `MinterTokensMinted`, `MinterAuctionMinted`, `MinterAuctionEndTimeUpdated`, `MinterContractReferenceUpdated` | `retrieveCollectionPhases(collectionId)`, token ownership/metadata reads after mint, `getAuctionStatus(tokenId)`, `getAuctionEndTime(tokenId)`, minter `gencore()` and `streamDrops()` references |
 | Fixed-price credit | `FixedPriceCreditCreated`, `FixedPriceCreditWithdrawn` | poster/protocol/curator reserve credit views, `totalFixedPriceOwed()`, `totalReserved()`, `surplus()` |
 | Auction | `AuctionRegistered`, `AuctionStatusChanged`, `AuctionExtended`, `Participate`, `ClaimAuction`, `AuctionCancelled`, `NoBidTokenClaimed` | `auctionRecords(tokenId)`, `retrieveAuctionStatus(tokenId)`, `retrieveAuctionEndTime(tokenId)`, `auctionHighestBid(tokenId)`, `auctionHighestBidder(tokenId)`, `retrieveNoBidAuctionClaimant(tokenId)` |
 | Auction credit | `OutbidCreditCreated`, `BidderCreditWithdrawn`, `AuctionProceedsCreditCreated`, `ProceedsCreditWithdrawn` | bidder/poster/protocol/curator credit views, `totalAuctionBidEscrow()`, `totalBidderOwed()`, `totalProceedsOwed()`, `totalOwed()`, `totalReserved()`, `surplus()`, `emergencyWithdrawable()` |
@@ -287,9 +290,12 @@ Canonical auction states for indexing:
 | `SettledWithBid` | `ClaimAuction`, proceeds credits, and ERC-721 `Transfer` to winner reconciled |
 | `Cancelled` | `AuctionCancelled` or cancelled status read |
 
+`MinterAuctionMinted` records the original bridge custody target and end time
+at mint. `MinterAuctionEndTimeUpdated` records minter-side end-time edits.
 `StreamAuctions.retrieveAuctionEndTime(tokenId)` is authoritative after
 `AuctionExtended`. `StreamMinter.getAuctionEndTime(tokenId)` is only the
-original minter bridge value and can be stale.
+original or manually edited minter bridge value and can be stale after auction
+contract extensions.
 For source-file lookup, the deployed auction implementation is
 [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol)
 and the minter bridge is
@@ -445,7 +451,7 @@ Known local-baseline gaps to track as follow-up work:
 
 | Gap | Impact | Follow-up |
 | --- | --- | --- |
-| Derived `EndedNoBid` and `EndedWithBid` have no event | Indexer must derive from end time and bid reads | `CON-002` should decide whether explicit end events are worth adding |
+| Derived `EndedNoBid` and `EndedWithBid` have no event | Indexer must derive from end time and bid reads | `CON-002` added minter bridge events; a later auction-contract slice should decide whether explicit end events are worth adding |
 | Some no-bid settlement paths require ERC-721 `Transfer` plus reads | Recipient/custody can be ambiguous from one event alone | Keep read-after-event reconciliation mandatory |
 | Forced ETH has no receipt event | Surplus can change without protocol logs | Reconcile from balance/owed/surplus reads |
 | Historical reads may be unavailable on some RPC providers | Entity reconstruction can be less precise | Require archive RPC or mark read-derived repair tasks |
@@ -482,6 +488,7 @@ python scripts/generate_bytecode_release_proof.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
+forge test --match-path test/StreamMinterEvents.t.sol
 ```
 
 If release-manifest-tracked docs or scripts changed, regenerate and check the

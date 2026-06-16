@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added additive `StreamMinter` event coverage for indexers and frontend read
+  models: collection phase updates, fixed-price batch mint ranges, auction
+  mint custody/end-time bridges, minter-side auction end-time edits, and
+  minter contract-reference updates, with focused event tests and integration
+  docs/checker coverage.
 - Added a generated protocol surface report with
   `docs/protocol-surface.md`,
   `release-artifacts/latest/protocol-surface-report.json`, a

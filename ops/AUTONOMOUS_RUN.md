@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/protocol-surface-report` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/435` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/436` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
-| Next issue | TBD after CON-001 protocol surface report lands. |
+| Active PR branch | `codex/minter-event-read-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/437` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/438` |
+| Active PR | `TBD` |
+| Next issue | TBD after CON-002 minter event read-model coverage lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 05:10 UTC` |
+| Last updated | `2026-06-16 05:58 UTC` |
 
 ## Packaging Notes
 
@@ -268,14 +268,94 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | Merged in PR #431 |
 | 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | Merged in PR #433 |
 | 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Merged in PR #435 |
-| 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Active issue #436 |
+| 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Merged in PR #437 |
+| 208 | Add StreamMinter event read-model coverage | Gate D/G support | Add additive minter bridge events for phases, fixed-price mint ranges, auction mint custody/end-time, auction end-time edits, and contract-reference updates, with focused tests, integration docs, and regenerated release artifacts | Active issue #438 |
 
 ## Current PR Worklog
 
+### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
+
+Status: issue created; branch started from PR #437 squash merge commit
+`6360c6a02aab6bc4af22b2a891826ccd25ed2977`; implementation complete locally
+with additive `StreamMinter` events, focused Foundry event tests,
+events/indexing and auction-flow docs/checker coverage, gas snapshot refresh,
+ABI/event/protocol-surface/source-verification/deployment/address-book/release
+artifact refreshes, and production via-IR size validation.
+The full Windows wrapper caught stale retained hashes in the 1/1 provenance,
+permanence, ceremony-evidence, and randomizer-operations evidence bindings
+after the minter ABI/deployment artifact refresh; those bindings and derived
+risk/release/checksum artifacts were updated before the final passing wrapper
+run.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/438`.
+PR: `TBD`.
+Branch: `codex/minter-event-read-model`.
+
+Goal:
+
+- Close the first concrete `CON-002` event/read-model gap without touching
+  `StreamCore` bytecode.
+- Add explicit minter bridge events for collection phase updates, fixed-price
+  batch mint token ranges, auction mint custody/end-time bridges, minter-side
+  auction end-time edits, and minter contract-reference updates.
+- Preserve existing storage semantics, admin permissions, and invalid
+  `updateContracts` no-op behavior.
+- Make the new event surface visible through tests, docs, event-topic catalog,
+  protocol-surface report, release manifest, and checksum coverage.
+
+Validation completed locally:
+
+- `forge fmt smart-contracts\StreamMinter.sol test\StreamMinterEvents.t.sol`
+- `forge test --match-path test\StreamMinterEvents.t.sol -vvv`
+- `forge test --match-path test\StreamMinterValidation.t.sol -vvv`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --snap release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- `python scripts/check_contract_size_budget.py`
+- `python scripts/test_release_artifacts.py`
+- `python scripts/generate_release_artifacts.py --check`
+- `python scripts/check_abi_compatibility.py`
+- `python scripts/test_protocol_surface_report.py`
+- `python scripts/generate_protocol_surface_report.py --check`
+- `python scripts/test_source_verification_inputs.py`
+- `python scripts/generate_source_verification_inputs.py --check`
+- `python scripts/test_bytecode_release_proof.py`
+- `python scripts/generate_bytecode_release_proof.py --check`
+- `python scripts/test_release_manifest.py`
+- `python scripts/generate_release_manifest.py --check`
+- `python scripts/test_release_checksums.py`
+- `python scripts/generate_release_checksums.py --check`
+- `python scripts/test_events_and_indexing.py`
+- `python scripts/check_events_and_indexing.py`
+- `python scripts/test_auction_flows.py`
+- `python scripts/check_auction_flows.py`
+- `python scripts/check_changelog.py`
+- `python scripts/test_one_of_one_provenance_manifest.py`
+- `python scripts/check_one_of_one_provenance_manifest.py`
+- `python scripts/generate_one_of_one_provenance_manifest.py --check`
+- `python scripts/test_one_of_one_permanence_package.py`
+- `python scripts/check_one_of_one_permanence_package.py`
+- `python scripts/generate_one_of_one_permanence_manifest.py --check`
+- `python scripts/check_ceremony_evidence.py`
+- `python scripts/check_randomizer_operations.py`
+- `python scripts/check_risk_register.py`
+- `python scripts/generate_risk_register.py --check`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Measured impact:
+
+- `StreamCore` production runtime remains 22,184 bytes with 2,392 bytes of
+  EIP-170 margin.
+- `StreamMinter` production runtime is 6,433 bytes with 18,143 bytes of
+  EIP-170 margin.
+- Fixed-price mint gas snapshot increased from 622,483 to 627,264 gas due to
+  the new per-recipient minter range event.
+
 ### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 
-Status: issue created; branch started from PR #435 squash merge commit
-`ef33e5cf18871cbcdb61fed7b0686fb48e6efc69`; PR #437 open and updated with
+Status: merged in PR #437 as squash merge
+`6360c6a02aab6bc4af22b2a891826ccd25ed2977`; branch started from PR #435 squash merge commit
+`ef33e5cf18871cbcdb61fed7b0686fb48e6efc69`; PR #437 shipped
 generator, tests, docs, local/CI gate wiring, release-manifest coverage,
 checksum coverage, canonical compact generated protocol-surface JSON to keep
 bot review inside line budgets, and refreshed generated artifacts.

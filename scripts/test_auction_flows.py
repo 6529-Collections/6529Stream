@@ -116,7 +116,8 @@ and emergency withdrawal cannot withdraw owed are named.
 ## Events And Indexing
 
 AuctionRegistered, AuctionCustodyConfirmed, AuctionStatusChanged, event/read gaps,
-CON-003, and INT-005 are named.
+AuctionExtended, MinterAuctionMinted, MinterAuctionEndTimeUpdated, CON-003, and
+INT-005 are named.
 
 ## Pause And Emergency Boundaries
 

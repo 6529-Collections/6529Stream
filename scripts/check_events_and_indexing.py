@@ -94,6 +94,11 @@ REQUIRED_PHRASES = [
     "SignerEpochChanged",
     "DropSignerChanged",
     "AuctionContractChanged",
+    "CollectionPhasesUpdated",
+    "MinterTokensMinted",
+    "MinterAuctionMinted",
+    "MinterAuctionEndTimeUpdated",
+    "MinterContractReferenceUpdated",
     "FixedPriceCreditCreated",
     "FixedPriceCreditWithdrawn",
     "AuctionRegistered",
@@ -144,6 +149,9 @@ REQUIRED_PHRASES = [
     "isDropCancelled(dropId)",
     "tdhSigner()",
     "signerEpoch()",
+    "retrieveCollectionPhases(collectionId)",
+    "getAuctionStatus(tokenId)",
+    "getAuctionEndTime(tokenId)",
     "auctionRecords(tokenId)",
     "retrieveAuctionStatus(tokenId)",
     "retrieveAuctionEndTime(tokenId)",
@@ -182,6 +190,7 @@ REQUIRED_COMMANDS = [
     "python scripts/test_release_checksums.py",
     "python scripts/generate_release_checksums.py --check",
     "python scripts/check_changelog.py",
+    "forge test --match-path test/StreamMinterEvents.t.sol",
 ]
 
 REQUIRED_LINK_TARGETS = [
@@ -231,6 +240,7 @@ REQUIRED_LINK_TARGETS = [
     "test/StreamDropsERC1271.t.sol",
     "test/StreamAuctionCustody.t.sol",
     "test/StreamAuctionPayments.t.sol",
+    "test/StreamMinterEvents.t.sol",
     "test/StreamCuratorsPool.t.sol",
     "test/StreamAdmins.t.sol",
     "test/StreamPauseControls.t.sol",

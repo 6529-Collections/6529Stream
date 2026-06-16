@@ -67,8 +67,12 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   current custody models, P0-ADMIN-001 target-scoped function-admin checks
   cover the current protected-function surface, and P0-ADMIN-002
   domain-scoped pause/emergency-recipient controls now have target-state
-  coverage. P0-ADMIN-003 signer-manager controls now separate drop-signing
-  identities from signer-lifecycle authority. P0-RAND-001 through P0-RAND-007
+  coverage. The active CON-002 minter read-model slice adds additive
+  `StreamMinter` events for phase windows, fixed-price mint ranges, auction
+  mint custody/end times, auction end-time changes, and contract-reference
+  updates without spending `StreamCore` bytecode. P0-ADMIN-003 signer-manager
+  controls now separate drop-signing identities from signer-lifecycle
+  authority. P0-RAND-001 through P0-RAND-007
   randomizer lifecycle, callback, migration, failed-state, retry, and
   raw-output-hash work now have target-state coverage for VRF and arRNG
   adapters, and P0-RAND-008 removed the concrete `XRandoms` weak helper from
@@ -1888,7 +1892,10 @@ Acceptance criteria:
 - Reject zero-token entries unless intentionally allowed.
 - Define empty batch behavior.
 - Require `publicEndTime > publicStartTime`.
-- Emit phase update events.
+- Emit phase update events. The active CON-002 first slice covers
+  `StreamMinter` phase-window updates, fixed-price mint ranges, auction mint
+  custody/end times, auction end-time changes, and contract-reference updates
+  as additive bridge events in issue #438.
 - Define when phase updates are allowed after minting starts.
 - Review `burn(uint256 _collectionID, uint256 _tokenId)` and prefer deriving
   collection ID from token ID.
@@ -2570,6 +2577,9 @@ No P0 contract PR may merge without:
   `release-artifacts/latest/interface-ids.json`.
 - Event topic catalog. Initial generated catalog exists under
   `release-artifacts/latest/event-topic-catalog.json`.
+- `StreamMinter` bridge event read model for collection phase windows,
+  fixed-price mint token ranges, auction mint custody/end-time creation,
+  auction end-time changes, and minter contract-reference updates.
 - Fixed-price mint client.
 - Auction bid client.
 - Auction settlement client.
@@ -2784,6 +2794,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Randomness reserve accounting | Randomizer provider reserves are not emergency-withdrawable surplus | `test/StreamEmergencyWithdraw.t.sol`, `test/StreamRandomizerPayments.t.sol`, `test/StreamPaymentsInvariant.t.sol`, `scripts/check_randomizer_operations.py`, `deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json` | Passing for current adapter boundary: `NextGenRandomizerRNG` treats its full balance as `totalRandomnessReserved()`/`totalOwed()`/`totalReserved()` and reports zero `emergencyWithdrawable()`/`surplus()` balance, including direct ETH, forced ETH, multiple pending arRNG requests, request-cost spending, post-request remaining reserves, fulfilled requests, stale requests, failed post-processing, deterministic retry, unauthorized emergency-withdrawal attempts, and mixed sequence fuzz operations. ADV-005 explicitly asserts randomizer balance equals the reserve/owed/reserved views after generated funding, request, forced-balance, and emergency-withdrawal actions. Randomizer operations evidence now records the local adapter/provider addresses, provider epochs, local funding status, lifecycle controls, reserve evidence, retained artifacts, and redaction policy. Fork/testnet/live provider funding and request-health evidence remains Gate E release work. | [`P0-PAY-ADR`](https://github.com/6529-Collections/6529Stream/issues/24), [`P0-PAY-007`](https://github.com/6529-Collections/6529Stream/issues/31), [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-RAND-ADR`](https://github.com/6529-Collections/6529Stream/issues/14), [`#152`](https://github.com/6529-Collections/6529Stream/issues/152), [`#154`](https://github.com/6529-Collections/6529Stream/issues/154), [`#380`](https://github.com/6529-Collections/6529Stream/issues/380) | Gate C/Gate D/Gate E | TBD |
 | Auction custody failure | Auction settlement succeeds only with explicit custody/approval | `test/StreamAuctionCustody.t.sol` | Passing: explicit auction-contract escrow, registration, status views, active/ended/terminal states, with-bid settlement, failed NFT transfer, cancellation, extension, and post-terminal bid rejection are covered | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
 | No-bid settlement ambiguity | No-bid settlement ownership follows ADR | `test/StreamAuctionCustody.t.sol` | Passing: no-bid settlement targets the signed poster, contract posters create pending NFT claims, only the poster can complete the claim, and repeated settlement is rejected | [`P0-AUCT-001`](https://github.com/6529-Collections/6529Stream/issues/22) | Gate B1/Gate C | TBD |
+| `StreamMinter` bridge read model | Phase-window updates, fixed-price batch mint token ranges, auction mint custody/end-time creation, auction end-time updates, and minter contract-reference updates emit indexable events without moving logic into `StreamCore` | `test/StreamMinterEvents.t.sol`, `docs/integrations/events-and-indexing.md`, `docs/integrations/auction-flows.md` | In Progress locally for issue #438: exact event topic/data assertions cover collection phase changes, per-recipient token ranges, auction custody and end-time creation, auction end-time changes, and valid minter contract-reference options; integration docs/checkers and generated event/release artifacts are refreshed before merge | [`#438`](https://github.com/6529-Collections/6529Stream/issues/438) | Gate D/Gate G | TBD |
 | Admin selector mismatch | Wrong function selector cannot authorize mutation; intentional grouped permissions use explicit named roles | `test/StreamAdminSelectors.t.sol`, `test/StreamCoreAdminCharacterization.t.sol` | Passing: P0-ADMIN-001 fixes `setCollectionData`, `updateCollectionInfo`, and `setMultipleMerkleRoots` selector guards and covers wrong-selector regressions | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Function-admin target scope | Grant for one contract and selector cannot authorize another target with the same selector | `test/StreamAdminSelectors.t.sol` | Passing: function-admin grants are keyed by account, target, and selector; same selector on another target does not authorize; revocation and global-admin bypass are covered | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |
 | Collection-admin support | Collection admin can mutate only explicitly allowed fields for one collection, or unsupported interface behavior is explicit | `test/StreamAdmins.t.sol`, later `test/StreamCollectionAdmins.t.sol` | Passing for deferred support: `StreamAdmins.retrieveCollectionAdmin(...)` returns false and no collection-admin mutation path is implemented; positive collection-admin roles remain future work | [`P0-ADMIN-001`](https://github.com/6529-Collections/6529Stream/issues/34) | Gate C | TBD |

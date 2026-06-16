@@ -1276,7 +1276,7 @@ Issue: [`#380`](https://github.com/6529-Collections/6529Stream/issues/380).
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
-Status: Planned.
+Status: Completed in issue #436 / PR #437.
 
 Gate: C/D/G.
 
@@ -1330,7 +1330,7 @@ Issue: [`#436`](https://github.com/6529-Collections/6529Stream/issues/436).
 
 ### CON-002: Close Event Schema Gaps For Indexers
 
-Status: Planned.
+Status: Active first slice in issue #438.
 
 Gate: D/G.
 
@@ -1339,29 +1339,39 @@ state reconstruction. Any missing state transition events should be found
 before integration docs become canonical.
 
 Outcome: Contract events, docs, and tests cover each external state transition
-needed by product/indexer flows.
+needed by product/indexer flows. The first slice adds `StreamMinter` bridge
+events for phases, fixed-price mint ranges, auction mint custody/end-time,
+minter-side auction end-time edits, and minter contract-reference updates.
 
 Files likely touched:
 
-- `smart-contracts/*.sol`
-- event tests under `test/`
+- `smart-contracts/StreamMinter.sol`
+- `test/StreamMinterEvents.t.sol`
 - `release-artifacts/latest/event-topic-catalog.json`
-- `docs/metadata.md`
+- generated release/deployment artifacts that pin ABI, runtime, topics, source
+  verification, bytecode proof, manifests, and checksums
+- `docs/integrations/auction-flows.md`
 - `docs/integrations/events-and-indexing.md`
 - `CHANGELOG.md`
 
 Implementation steps:
 
 1. Use `CON-001` report and integration flows to identify event gaps.
-2. Add or document events for missing external state transitions.
-3. Add event assertion tests.
-4. Regenerate ABI/event/release artifacts.
-5. Document breaking-change impact if signatures change.
+2. Add additive `StreamMinter` bridge events for the first event-read-model
+   slice without touching `StreamCore`.
+3. Add event assertion tests for emitted fields and read-after-event views.
+4. Regenerate ABI/event/protocol-surface/source-verification/deployment/release
+   artifacts.
+5. Document the additive event/gas impact and keep remaining explicit auction
+   end-state events as a later auction-contract decision.
 
 Required tests/checks:
 
 - Targeted Foundry tests.
+- Gas snapshot update/check.
 - `python scripts/generate_release_artifacts.py --check`
+- Protocol surface, source verification, bytecode proof, manifest, checksum,
+  events/indexing, and auction-flow checks.
 - ABI compatibility check.
 - Changelog check.
 
@@ -1375,6 +1385,8 @@ Acceptance criteria:
 Evidence artifacts: Generated event topic catalog.
 
 Dependencies: `CON-001`, `INT-005`.
+
+Issue: [`#438`](https://github.com/6529-Collections/6529Stream/issues/438).
 
 ### REL-001: Add Signed Release Provenance Evidence Checker
 

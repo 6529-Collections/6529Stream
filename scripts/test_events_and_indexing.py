@@ -82,7 +82,9 @@ Transfer, `Approval`, `ApprovalForAll`, MetadataUpdate, BatchMetadataUpdate,
 ContractURIUpdated, CollectionCreated, CollectionFrozen, CollectionRandomizerUpdated,
 DependencyVersionPinned, TokenBurned, DropAuthorizationConsumed,
 DropAuthorizationCancelled, SignerEpochChanged, DropSignerChanged,
-AuctionContractChanged, FixedPriceCreditCreated, FixedPriceCreditWithdrawn,
+AuctionContractChanged, CollectionPhasesUpdated, MinterTokensMinted,
+MinterAuctionMinted, MinterAuctionEndTimeUpdated, MinterContractReferenceUpdated,
+FixedPriceCreditCreated, FixedPriceCreditWithdrawn,
 AuctionRegistered, AuctionCustodyConfirmed, AuctionStatusChanged,
 AuctionExtended, AuctionCancelled, ClaimAuction, NoBidSettlementPending,
 NoBidTokenClaimed, Participate, OutbidCreditCreated, BidderCreditWithdrawn,
@@ -100,6 +102,8 @@ and EmergencyWithdrawal are named.
 ## Read-After-Event Calls
 
 isDropConsumed(dropId), isDropCancelled(dropId), tdhSigner(), signerEpoch(),
+retrieveCollectionPhases(collectionId), getAuctionStatus(tokenId),
+getAuctionEndTime(tokenId),
 auctionRecords(tokenId), retrieveAuctionStatus(tokenId),
 retrieveAuctionEndTime(tokenId), auctionHighestBid(tokenId),
 auctionHighestBidder(tokenId), totalOwed(), totalReserved(), surplus(), and
