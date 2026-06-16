@@ -122,7 +122,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:96523a8ed20ebba011a33fd2e0e782a3d3f3c27570f8d6ee6c88a6805499e938",
+      "sha256": "sha256:e94c474abe4af7d5361f335ae0c599af6af7233eb3b1e108c7542993979650c5",
       "size_bytes": 22887,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1606,8 +1606,8 @@
     },
     "gas_envelope_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/gas-envelopes.json",
-      "sha256": "sha256:4197307715efaec85f2aad6d06c2f8b60cc9bddf3831c081781d088f123346ec",
-      "size_bytes": 3627,
+      "sha256": "sha256:a2bf6e86cf7ada2499b620d39f5b7f423948f9ea150f17f1f3883d53d991b9d2",
+      "size_bytes": 3851,
       "schema_version": "6529stream.gas-envelopes.v1"
     }
   },

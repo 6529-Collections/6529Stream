@@ -48,7 +48,9 @@ def minimal_envelopes(snapshot_path: Path, max_gas: int = 200) -> dict[str, obje
 class GasEnvelopeTests(unittest.TestCase):
     def test_committed_envelopes_pass(self) -> None:
         messages = checker.validate_envelopes(checker.DEFAULT_ENVELOPES)
-        self.assertGreaterEqual(len(messages), 12)
+        data = checker.load_json(checker.DEFAULT_ENVELOPES)
+        snapshot_path = checker.REPO_ROOT / data["snapshot_path"]
+        self.assertEqual(len(messages), len(checker.parse_snapshot(snapshot_path)))
 
     def test_rejects_budget_overrun(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

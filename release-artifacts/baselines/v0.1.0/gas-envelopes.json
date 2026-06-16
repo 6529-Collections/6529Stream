@@ -4,7 +4,8 @@
   "profile": "local-foundry-v0.1.0",
   "notes": [
     "These envelopes are local deterministic release guardrails, not fork/testnet/mainnet gas evidence.",
-    "The exact Foundry snapshot remains the drift detector; these ceilings document maximum accepted release budgets for high-risk user flows."
+    "The exact Foundry snapshot remains the drift detector; these ceilings document maximum accepted release budgets for high-risk user flows.",
+    "Ceilings are rounded operational envelopes, usually around 10-20% above the committed local measurement unless the path is intentionally heavy; increases should be investigated and justified before bumping a ceiling."
   ],
   "envelopes": [
     {

@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:6b3d83f508a04f20c032ce818253adef6e81e768f6f5d17fd4ac66cbeb516620"
+      "sha256": "sha256:39748cbfc0c3932375468e51d3e7efd1cef3f1ffc6f954b670b4c3412a929df9"
     },
     {
       "path": "docs/audit-package.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:6b3d83f508a04f20c032ce818253adef6e81e768f6f5d17fd4ac66cbeb516620"
+          "sha256": "sha256:39748cbfc0c3932375468e51d3e7efd1cef3f1ffc6f954b670b4c3412a929df9"
         }
       ],
       "risk_acceptance": null
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:6b3d83f508a04f20c032ce818253adef6e81e768f6f5d17fd4ac66cbeb516620"
+          "sha256": "sha256:39748cbfc0c3932375468e51d3e7efd1cef3f1ffc6f954b670b4c3412a929df9"
         },
         {
           "path": "docs/metadata.md",
@@ -483,7 +483,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:6b3d83f508a04f20c032ce818253adef6e81e768f6f5d17fd4ac66cbeb516620"
+          "sha256": "sha256:39748cbfc0c3932375468e51d3e7efd1cef3f1ffc6f954b670b4c3412a929df9"
         },
         {
           "path": "docs/tooling.md",

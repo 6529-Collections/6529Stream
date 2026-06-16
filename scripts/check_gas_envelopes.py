@@ -11,7 +11,10 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_ENVELOPES = Path("release-artifacts/baselines/v0.1.0/gas-envelopes.json")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_ENVELOPES = (
+    REPO_ROOT / "release-artifacts/baselines/v0.1.0/gas-envelopes.json"
+)
 EXPECTED_SCHEMA_VERSION = "6529stream.gas-envelopes.v1"
 SNAPSHOT_LINE_RE = re.compile(r"^(?P<test>[^ ]+) \(gas: (?P<gas>[0-9]+)\)$")
 
@@ -82,7 +85,7 @@ def validate_envelopes(envelope_path: Path) -> list[str]:
         raise GasEnvelopeError("gas envelope file must declare `snapshot_path`")
     snapshot_path = Path(snapshot_raw)
     if not snapshot_path.is_absolute():
-        snapshot_path = Path.cwd().joinpath(snapshot_raw).resolve()
+        snapshot_path = REPO_ROOT.joinpath(snapshot_raw).resolve()
 
     measurements = parse_snapshot(snapshot_path)
     envelopes = data.get("envelopes")
