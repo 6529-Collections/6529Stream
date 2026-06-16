@@ -284,8 +284,8 @@
     },
     "smart-contracts/IStreamCore.sol": {
       "path": "smart-contracts/IStreamCore.sol",
-      "sha256": "sha256:580d03b2bf3ee2e0f086a377430e2a0e0b41168c105d46bc096b8dcb2e8adc2c",
-      "solc_keccak256": "0x577d2f3ff93b75afffb1ab6d074c5cca6aa6b870970461b13e38102d05e3cc6e",
+      "sha256": "sha256:892449f4fa6c2c01238cb3bce7c2a93d7d9106ab2a6d349366bb19154e802bbc",
+      "solc_keccak256": "0x7a79fee032456ad49a8d688d8ef56813d76ab0158acbc70118e3ca11561ae94d",
       "license": "MIT",
       "used_by": [
         "NextGenRandomizerRNG",
@@ -404,8 +404,8 @@
     },
     "smart-contracts/StreamCore.sol": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:14ce20b03ee3ab12386e2a87558c8ba4afd86752b26a68b70711045531295283",
-      "solc_keccak256": "0xab1db0a460089ab836a725989ab759d6174984b492bde0271178bd698c35b49a",
+      "sha256": "sha256:369b82519fd359c71467f14a9b0e180a952abe0d37b5052a1e983bb99bdde34d",
+      "solc_keccak256": "0x183d64ddbfe3d768a1e6d47489a4287a7c74e3da2f8476d97de52e15d5c45ced",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -595,7 +595,7 @@
       "source_sha256": "sha256:963552f59ac9a869780a998801f4f6242853f5abd6c61e7ed063ed924e95782d",
       "source_solc_keccak256": "0xa79810f5ea9e4456cd5b6277bfc3a1db3ce75217ce031f70cddaba798a46f1e8",
       "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
-      "artifact_sha256": "sha256:39c4cfaa9473bc605537749385761b6871d4e49b21d57eeb95c0c59ef8052353",
+      "artifact_sha256": "sha256:f7c5ff1f941c569176973a1ec2698bba07dc38f127250c5488d761e2a2b5fe90",
       "compilation_target": "smart-contracts/RandomizerRNG.sol:NextGenRandomizerRNG",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -612,16 +612,16 @@
       "abi_sha256": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:1c6ed4f938dc974e573791b31f04727a28a001d453f7ee7bc70f0a1ff87fe029",
+          "sha256": "sha256:5ba44c9f6ef9a0370ab07beaa003e73f0b762bf063bdf53831892890991c2a99",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:1c6ed4f938dc974e573791b31f04727a28a001d453f7ee7bc70f0a1ff87fe029"
+          "release_artifact_sha256": "sha256:5ba44c9f6ef9a0370ab07beaa003e73f0b762bf063bdf53831892890991c2a99"
         },
         "runtime": {
-          "sha256": "sha256:1cca41712129620c36f9d3284923e0feb9c12f73bdbe86fe7626bb23d7b65755",
+          "sha256": "sha256:255858659003dcdcc9aff2d3066f6dbd19b77aeed12996d9ce11d70ef03f8669",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:1cca41712129620c36f9d3284923e0feb9c12f73bdbe86fe7626bb23d7b65755"
+          "release_artifact_sha256": "sha256:255858659003dcdcc9aff2d3066f6dbd19b77aeed12996d9ce11d70ef03f8669"
         }
       },
       "constructor": {
@@ -668,7 +668,7 @@
       "source_sha256": "sha256:e126bc7c0b08a3318dbb435ce24831a59b3f113c19df49752c3b71f85d748a4c",
       "source_solc_keccak256": "0xd5d9f10afe33ff40fa74816b9b5be05856d7a8f8a89a5b5dd22121c467291cb9",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:39637623c3d5d3d0b62051f4dda05b1a3e4a2237bfdbae3eb83a8adbe9bd8367",
+      "artifact_sha256": "sha256:79525e3a7ca2a285d83eb1b746955b69d707a8012ef3faacf874260d1f9260c3",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -685,16 +685,16 @@
       "abi_sha256": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:0c64bb70a7c6591068557cc3e1e73d389be216ff559539fe8e4bf6dfe095292d",
+          "sha256": "sha256:6c80d763a89671c28f4a26eeca39b885eb1abbbab4efd4d34e0ca83dd8948ce1",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:0c64bb70a7c6591068557cc3e1e73d389be216ff559539fe8e4bf6dfe095292d"
+          "release_artifact_sha256": "sha256:6c80d763a89671c28f4a26eeca39b885eb1abbbab4efd4d34e0ca83dd8948ce1"
         },
         "runtime": {
-          "sha256": "sha256:893633502fa7fcfcdaacbe587747585af0edf56323652a4a5f192b95fd8609ee",
+          "sha256": "sha256:60b364f5b4b9f896dec3dac8e8c2eb0772850a288ddd139386f2c2770b185a2d",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:893633502fa7fcfcdaacbe587747585af0edf56323652a4a5f192b95fd8609ee"
+          "release_artifact_sha256": "sha256:60b364f5b4b9f896dec3dac8e8c2eb0772850a288ddd139386f2c2770b185a2d"
         }
       },
       "constructor": {
@@ -899,7 +899,7 @@
       "source_sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
       "source_solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
-      "artifact_sha256": "sha256:8cec7e1a899f4737cecefd1a6137416a28e6db226c7813135951c590ad0e7662",
+      "artifact_sha256": "sha256:ef55c59fb2069d48b466b186617c3eb649dae3efda55b1a2059546bacae1c438",
       "compilation_target": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1011,10 +1011,10 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "source_sha256": "sha256:14ce20b03ee3ab12386e2a87558c8ba4afd86752b26a68b70711045531295283",
-      "source_solc_keccak256": "0xab1db0a460089ab836a725989ab759d6174984b492bde0271178bd698c35b49a",
+      "source_sha256": "sha256:369b82519fd359c71467f14a9b0e180a952abe0d37b5052a1e983bb99bdde34d",
+      "source_solc_keccak256": "0x183d64ddbfe3d768a1e6d47489a4287a7c74e3da2f8476d97de52e15d5c45ced",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:426443acf3fb4e022b1218c7e4f9b90ffa8579576accf6bcf0f2c48e8a57b13e",
+      "artifact_sha256": "sha256:da59a1c6e6327d350cd9d85104f4c5557973312b6edbcd2f4cd8441aafe7a514",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1028,19 +1028,19 @@
         "metadata_bytecode_hash": "ipfs",
         "libraries": {}
       },
-      "abi_sha256": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
+      "abi_sha256": "sha256:be6dcfbe4bc78781206a9b5bb2ea029628ff8f665ccb923ae0530f943272cb49",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:79655022a03e27f2234ef012b87bc9fb8f48ece0cf143719207cb3670b70f989",
+          "sha256": "sha256:2b1854907502e7db91cd7bac24b6f27d9239e4e515aa5599791cedf48b8fd9aa",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:79655022a03e27f2234ef012b87bc9fb8f48ece0cf143719207cb3670b70f989"
+          "release_artifact_sha256": "sha256:2b1854907502e7db91cd7bac24b6f27d9239e4e515aa5599791cedf48b8fd9aa"
         },
         "runtime": {
-          "sha256": "sha256:6a10e70f97a4fde3fb7a8ec9021bc24b7ca6ef3f578b0a1c5fae82f32ae782a9",
+          "sha256": "sha256:555dc3d76efe4bd405881e53892033eb089791ecb2c8980151d8bea6bcf741f3",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:6a10e70f97a4fde3fb7a8ec9021bc24b7ca6ef3f578b0a1c5fae82f32ae782a9"
+          "release_artifact_sha256": "sha256:555dc3d76efe4bd405881e53892033eb089791ecb2c8980151d8bea6bcf741f3"
         }
       },
       "constructor": {
@@ -1086,75 +1086,75 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 7847,
+                "start": 7900,
                 "length": 20
               },
               {
-                "start": 7952,
+                "start": 8005,
                 "length": 20
               },
               {
-                "start": 8010,
+                "start": 8063,
                 "length": 20
               },
               {
-                "start": 8121,
+                "start": 8174,
                 "length": 20
               },
               {
-                "start": 10141,
+                "start": 10205,
                 "length": 20
               },
               {
-                "start": 10294,
+                "start": 10361,
                 "length": 20
               },
               {
-                "start": 12144,
+                "start": 12229,
                 "length": 20
               },
               {
-                "start": 12334,
+                "start": 12419,
                 "length": 20
               },
               {
-                "start": 14744,
+                "start": 15132,
                 "length": 20
               },
               {
-                "start": 19550,
+                "start": 19851,
                 "length": 20
               },
               {
-                "start": 20021,
+                "start": 20322,
                 "length": 20
               },
               {
-                "start": 20669,
+                "start": 20970,
                 "length": 20
               },
               {
-                "start": 20793,
+                "start": 21094,
                 "length": 20
               },
               {
-                "start": 20853,
+                "start": 21154,
                 "length": 20
               },
               {
-                "start": 21903,
+                "start": 22204,
                 "length": 20
               },
               {
-                "start": 22588,
+                "start": 22889,
                 "length": 20
               },
               {
-                "start": 23746,
+                "start": 24116,
                 "length": 20
               },
               {
-                "start": 24607,
+                "start": 24680,
                 "length": 20
               }
             ]
@@ -1166,75 +1166,75 @@
             "library": "StreamMetadataRenderer",
             "positions": [
               {
-                "start": 6686,
+                "start": 6739,
                 "length": 20
               },
               {
-                "start": 6791,
+                "start": 6844,
                 "length": 20
               },
               {
-                "start": 6849,
+                "start": 6902,
                 "length": 20
               },
               {
-                "start": 6960,
+                "start": 7013,
                 "length": 20
               },
               {
-                "start": 8980,
+                "start": 9044,
                 "length": 20
               },
               {
-                "start": 9133,
+                "start": 9200,
                 "length": 20
               },
               {
-                "start": 10983,
+                "start": 11068,
                 "length": 20
               },
               {
-                "start": 11173,
+                "start": 11258,
                 "length": 20
               },
               {
-                "start": 13583,
+                "start": 13971,
                 "length": 20
               },
               {
-                "start": 18389,
+                "start": 18690,
                 "length": 20
               },
               {
-                "start": 18860,
+                "start": 19161,
                 "length": 20
               },
               {
-                "start": 19508,
+                "start": 19809,
                 "length": 20
               },
               {
-                "start": 19632,
+                "start": 19933,
                 "length": 20
               },
               {
-                "start": 19692,
+                "start": 19993,
                 "length": 20
               },
               {
-                "start": 20742,
+                "start": 21043,
                 "length": 20
               },
               {
-                "start": 21427,
+                "start": 21728,
                 "length": 20
               },
               {
-                "start": 22585,
+                "start": 22955,
                 "length": 20
               },
               {
-                "start": 23446,
+                "start": 23519,
                 "length": 20
               }
             ]
@@ -1403,7 +1403,7 @@
       "source_sha256": "sha256:dcebc542df81a8bc077e0b239ec8b2bfd561bf2c92ad2f2f29f3355eb249a16f",
       "source_solc_keccak256": "0x35c6367512e6f398605cb4670f757688dbd9fcd7158a4f479cc59c7f756d6205",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
-      "artifact_sha256": "sha256:ea5afae8066b45eecf26c6447eb237047f3ebef87e38682881cd3773b8bb2f3b",
+      "artifact_sha256": "sha256:9c8eb54105312271c7179ec39886fdc5b2fffbbdb21ee031d9335b3d0506e551",
       "compilation_target": "smart-contracts/StreamMinter.sol:StreamMinter",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1420,16 +1420,16 @@
       "abi_sha256": "sha256:5464ee3c1b5c40867aba4565d11fe6b708ea2b2e93aba4f7e3a52ebbe4296c3e",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:6998089fc3250c537f06b6959b3e68066476218d346c49c1851d5700f4cd7cd4",
+          "sha256": "sha256:c09dec7c729a711d40b58e4e31c396ca07dd6f007920b5ba87deca17a343ead8",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:6998089fc3250c537f06b6959b3e68066476218d346c49c1851d5700f4cd7cd4"
+          "release_artifact_sha256": "sha256:c09dec7c729a711d40b58e4e31c396ca07dd6f007920b5ba87deca17a343ead8"
         },
         "runtime": {
-          "sha256": "sha256:5ed37a2f19a2b5067ac9f444ff869a1dc072190c46810785475febb6af023518",
+          "sha256": "sha256:ec2d816cd043cde5d20ebcfcccde65d7ecb8b0c748be1065708164d300872ce0",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:5ed37a2f19a2b5067ac9f444ff869a1dc072190c46810785475febb6af023518"
+          "release_artifact_sha256": "sha256:ec2d816cd043cde5d20ebcfcccde65d7ecb8b0c748be1065708164d300872ce0"
         }
       },
       "constructor": {

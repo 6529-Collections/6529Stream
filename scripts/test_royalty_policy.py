@@ -191,6 +191,46 @@ class RoyaltyPolicyTests(unittest.TestCase):
 
             self.assertEqual(result, 0)
 
+    def test_accepts_optimized_assembly_royalty_source(self) -> None:
+        """The checker accepts the size-optimized retained royalty implementation."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            write_text(
+                root / "smart-contracts" / "StreamCore.sol",
+                """
+contract StreamCore {
+    address private constant _DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
+    uint256 private constant _DEFAULT_ROYALTY_BPS = 690;
+    uint256 private constant _ROYALTY_DENOMINATOR = 10_000;
+    function supportsInterface(bytes4 interfaceId) public view returns (bool) {
+        assembly ("memory-safe") {
+            let id := shr(224, interfaceId)
+            mstore(0x00, eq(id, 0x2a55205a))
+            return(0x00, 0x20)
+        }
+    }
+    function royaltyInfo(uint256, uint256 salePrice) public view returns (address, uint256) {
+        assembly ("memory-safe") {
+            let numerator := mul(salePrice, 690)
+            if and(salePrice, iszero(eq(div(numerator, salePrice), 690))) {
+                revert(0x00, 0x00)
+            }
+            mstore(0x00, _DEFAULT_ROYALTY_RECEIVER)
+            mstore(0x20, div(numerator, 10000))
+            return(0x00, 0x40)
+        }
+    }
+}
+""",
+            )
+            write_text(root / checker.DEFAULT_ROYALTY_POLICY, minimal_royalty_policy())
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(["--repo-root", str(root)])
+
+            self.assertEqual(result, 0)
+
     def test_rejects_missing_heading(self) -> None:
         """Missing required headings are rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:

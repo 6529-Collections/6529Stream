@@ -160,8 +160,6 @@ SOURCE_CONSTANT_ASSERTIONS = {
         "_DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377",
         "_DEFAULT_ROYALTY_BPS = 690",
         "_ROYALTY_DENOMINATOR = 10_000",
-        "type(IERC2981).interfaceId",
-        "salePrice * _DEFAULT_ROYALTY_BPS / _ROYALTY_DENOMINATOR",
     ],
     "test/StreamRoyalty.t.sol": [
         "ERC2981_INTERFACE_ID = 0x2a55205a",
@@ -169,6 +167,29 @@ SOURCE_CONSTANT_ASSERTIONS = {
         "ROYALTY_BPS = 690",
         "ROYALTY_DENOMINATOR = 10_000",
         "testDefaultRoyaltyIsFixedAt690BasisPoints",
+    ],
+}
+
+SOURCE_ALTERNATIVE_ASSERTIONS = {
+    "smart-contracts/StreamCore.sol": [
+        (
+            "ERC-2981 interface support",
+            [
+                ["type(IERC2981).interfaceId"],
+                ["0x2a55205a"],
+            ],
+        ),
+        (
+            "checked 690 bps royalty math",
+            [
+                ["salePrice * _DEFAULT_ROYALTY_BPS / _ROYALTY_DENOMINATOR"],
+                [
+                    "let numerator := mul(salePrice, 690)",
+                    "if and(salePrice, iszero(eq(div(numerator, salePrice), 690)))",
+                    "mstore(0x20, div(numerator, 10000))",
+                ],
+            ],
+        ),
     ],
 }
 
@@ -281,6 +302,19 @@ def validate_source_constants(repo_root: Path) -> None:
             normalized_snippet = re.sub(r"\s+", " ", snippet)
             if normalized_snippet not in source:
                 missing.append(f"{relative}: {snippet}")
+
+    for relative, assertion_groups in SOURCE_ALTERNATIVE_ASSERTIONS.items():
+        source_path = repo_root / relative
+        if not source_path.is_file():
+            missing.append(f"{relative}: missing file")
+            continue
+        source = re.sub(r"\s+", " ", source_path.read_text(encoding="utf-8"))
+        for label, alternatives in assertion_groups:
+            if not any(
+                all(re.sub(r"\s+", " ", snippet) in source for snippet in snippets)
+                for snippets in alternatives
+            ):
+                missing.append(f"{relative}: {label}")
 
     if missing:
         raise RoyaltyPolicyError(

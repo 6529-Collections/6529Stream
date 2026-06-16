@@ -19,7 +19,7 @@
     "IStreamAdmins": "0x00ddd221",
     "IStreamAuctions": "0xb109bb30",
     "IStreamContractMetadata": "0x88369d44",
-    "IStreamCore": "0x5f18110c",
+    "IStreamCore": "0xbee7d263",
     "IStreamDrops": "0x0f531c31",
     "IStreamMinter": "0x0f48ec25"
   },
@@ -488,11 +488,15 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:134c5092d689660352a344323ce8d24a52fd6f6b65da1e92b13917927d45ce2c",
-      "interface_id": "0x5f18110c",
+      "abi_sha256": "sha256:68fec6cff089c778bc15931ed8ef5d0576f1137e6c059827b71b0cb786055067",
+      "interface_id": "0xbee7d263",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x5f18110c",
+      "computed_selector_xor": "0xbee7d263",
       "function_selectors": [
+        {
+          "signature": "artistApprovalHashes(uint256)",
+          "selector": "0xe1ffc36f"
+        },
         {
           "signature": "collectionDependencyVersionState(uint256)",
           "selector": "0xb01db570"
