@@ -330,7 +330,8 @@ class ArchitectureThreatModelTests(unittest.TestCase):
             (root / "README.md").unlink()
 
             with self.assertRaisesRegex(
-                checker.ArchitectureThreatModelError, "linked targets are missing"
+                checker.ArchitectureThreatModelError,
+                "required link target files are missing",
             ):
                 checker.validate_architecture_threat_model(
                     root,

@@ -211,6 +211,21 @@ def linked_repo_paths(repo_root: Path, documents: dict[Path, str]) -> set[str]:
     return links
 
 
+def validate_required_link_targets_exist(repo_root: Path) -> None:
+    missing = []
+    for target in REQUIRED_LINK_TARGETS:
+        target_path = (repo_root / target).resolve()
+        relative = normalize_repo_path(target_path, repo_root)
+        if not target_path.exists():
+            missing.append(relative)
+
+    if missing:
+        raise ArchitectureThreatModelError(
+            "required link target files are missing: "
+            + ", ".join(sorted(set(missing)))
+        )
+
+
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     normalized_text = " ".join(text.lower().split())
     return [
@@ -309,6 +324,8 @@ def validate_architecture_threat_model(
             "architecture/threat model docs are missing required commands: "
             + ", ".join(missing_commands)
         )
+
+    validate_required_link_targets_exist(repo_root)
 
     architecture_links = linked_repo_paths(
         repo_root, {architecture_path: documents[architecture_path]}
