@@ -41,6 +41,8 @@ REQUIRED_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_audit_package.py",
     "python scripts/check_audit_package.py",
+    "python scripts/test_warning_dispositions.py",
+    "python scripts/check_warning_dispositions.py",
     "python scripts/test_incident_response.py",
     "python scripts/check_incident_response.py",
     "python scripts/test_drop_authorization_payload_generator.py",
@@ -95,6 +97,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/known-blockers.md",
     "docs/slither.md",
     "docs/tooling.md",
+    "docs/warning-dispositions.md",
     "docs/drop-authorization-signing.md",
     "docs/signer-custody-readiness.md",
     "docs/deployment.md",

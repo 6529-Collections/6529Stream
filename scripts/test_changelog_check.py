@@ -101,7 +101,10 @@ class ChangelogGateTests(unittest.TestCase):
                 ".github/workflows/ci.yml",
                 "scripts/check_changelog.py",
                 "scripts/check_solidity_formatting.py",
+                "scripts/check_warning_dispositions.py",
                 "scripts/test_solidity_formatting.py",
+                "scripts/test_warning_dispositions.py",
+                "docs/warning-dispositions.md",
             ],
             VALID_CHANGELOG,
         )
@@ -111,9 +114,12 @@ class ChangelogGateTests(unittest.TestCase):
             impacted,
             [
                 (".github/workflows/ci.yml", "release-tooling"),
+                ("docs/warning-dispositions.md", "release-tooling"),
                 ("scripts/check_changelog.py", "release-tooling"),
                 ("scripts/check_solidity_formatting.py", "release-tooling"),
+                ("scripts/check_warning_dispositions.py", "release-tooling"),
                 ("scripts/test_solidity_formatting.py", "release-tooling"),
+                ("scripts/test_warning_dispositions.py", "release-tooling"),
             ],
         )
 

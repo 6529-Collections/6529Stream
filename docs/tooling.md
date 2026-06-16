@@ -31,6 +31,8 @@ python scripts/test_contract_size_budget.py
 python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
 python scripts/check_solidity_formatting.py
+python scripts/test_warning_dispositions.py
+python scripts/check_warning_dispositions.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
@@ -581,6 +583,33 @@ and once in a lightweight `windows-latest` job under Windows PowerShell so
 native-command exit handling is covered in the environment that motivated the
 wrapper. The workflow wiring is protected by
 `scripts/test_windows_ci_wrapper.py`.
+
+## Warning Dispositions
+
+The warning disposition gate is:
+
+```bash
+make warning-dispositions-check
+```
+
+It runs:
+
+```bash
+python scripts/test_warning_dispositions.py
+python scripts/check_warning_dispositions.py
+```
+
+[`warning-dispositions.md`](warning-dispositions.md) is the checked `ONE-007`
+baseline for compiler, NatSpec, documentation, linter, vendored, test-only,
+ABI-compatibility, and `StreamCore` size-tradeoff warning decisions. The
+checker verifies that invalid first-party NatSpec header tags are gone, that
+accepted solc warnings remain anchored to the exact current source signatures,
+and that retained warning rows name an owner, disposition class, and follow-up.
+
+Do not change external ABI names, function `stateMutability`, or Core bytecode
+shape only to quiet cosmetic warning suggestions. Any such change needs the
+normal production evidence: focused tests, ABI compatibility checks, production
+size proof, release artifact regeneration, and changelog coverage.
 
 ## Bootstrap
 

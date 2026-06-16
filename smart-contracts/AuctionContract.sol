@@ -2,10 +2,10 @@
 
 /**
  *
- *  @title: Auction Contract for 6529 Stream (Not final)
- *  @date: 22-June-2024
- *  @version: 1.7
- *  @author: 6529 team
+ *  @title Auction Contract for 6529 Stream (Not final)
+ *  @custom:date 22-June-2024
+ *  @custom:version 1.7
+ *  @author 6529 team
  */
 
 pragma solidity ^0.8.19;

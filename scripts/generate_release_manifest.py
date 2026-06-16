@@ -83,6 +83,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/provenance-manifests.md"),
     Path("docs/permanence-packages.md"),
     Path("docs/royalty-policy.md"),
+    Path("docs/warning-dispositions.md"),
     Path("docs/release-readiness.md"),
     Path("docs/integrations/README.md"),
     Path("docs/integrations/contract-flows.md"),

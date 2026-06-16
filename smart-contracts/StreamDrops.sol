@@ -2,10 +2,10 @@
 
 /**
  *
- *  @title: Drops Contract for 6529 stream
- *  @date: 28-June-2024
- *  @version: 0.9
- *  @author: 6529 team
+ *  @title Drops Contract for 6529 stream
+ *  @custom:date 28-June-2024
+ *  @custom:version 0.9
+ *  @author 6529 team
  */
 
 pragma solidity ^0.8.19;

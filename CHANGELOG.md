@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-007 warning-disposition coverage with
+  `docs/warning-dispositions.md`, a checker/test pair, local/CI/Windows gate
+  wiring, release-manifest and risk-register coverage, first-party NatSpec
+  header cleanup, and explicit accepted dispositions for solc unused-parameter,
+  pure/view, documentation, linter, vendored, test-only, ABI-compatibility, and
+  `StreamCore` size-tradeoff warning rows.
 - Added ONE-006 satellite-extension architecture policy coverage with checked
   architecture-doc size-budget requirements, release-policy/status hooks, and
   explicit rules for measured `StreamCore` bytecode deltas, size-budget

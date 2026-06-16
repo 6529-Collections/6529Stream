@@ -2,10 +2,10 @@
 
 /**
  *
- *  @title: NextGen 6529 - Dependency Registry Contract
- *  @date: 29-January-2023
- *  @version: 1.1
- *  @author: 6529 team
+ *  @title NextGen 6529 - Dependency Registry Contract
+ *  @custom:date 29-January-2023
+ *  @custom:version 1.1
+ *  @author 6529 team
  */
 
 pragma solidity ^0.8.19;

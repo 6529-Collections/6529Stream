@@ -2,10 +2,10 @@
 
 /**
  *
- *  @title: Modified version of NextGen 6529 - Minter Contract to support 6529 Stream
- *  @date: 27-June-2024
- *  @version: 1.12
- *  @author: 6529 team
+ *  @title Modified version of NextGen 6529 - Minter Contract to support 6529 Stream
+ *  @custom:date 27-June-2024
+ *  @custom:version 1.12
+ *  @author 6529 team
  */
 
 pragma solidity ^0.8.19;

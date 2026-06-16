@@ -28,6 +28,14 @@ The current Gate A smoke baseline proves:
   formatting policy: 34 formatting-required first-party/provider files pass
   `forge fmt --check`, and the raw all-files diagnostic is allowed to fail
   only for the 17 documented vendored/provenance formatting exemptions.
+- `python scripts/test_warning_dispositions.py` and
+  `python scripts/check_warning_dispositions.py` enforce the checked warning
+  disposition baseline in
+  [`docs/warning-dispositions.md`](warning-dispositions.md). That baseline
+  records fixed NatSpec warning cleanup and accepted solc, documentation,
+  linter, vendored, test-only, ABI-compatibility, and `StreamCore`
+  size-tradeoff warning rows without treating warning quietness as protocol
+  correctness proof.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271

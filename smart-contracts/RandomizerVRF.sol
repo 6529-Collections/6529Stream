@@ -2,10 +2,10 @@
 
 /**
  *
- *  @title: NextGen 6529 - VRF Randomizer Contract
- *  @date: 20-December-2023
- *  @version: 1.9
- *  @author: 6529 team
+ *  @title NextGen 6529 - VRF Randomizer Contract
+ *  @custom:date 20-December-2023
+ *  @custom:version 1.9
+ *  @author 6529 team
  */
 
 pragma solidity ^0.8.19;

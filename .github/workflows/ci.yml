@@ -195,6 +195,8 @@ jobs:
             scripts/test_operator_admin_ui.py \
             scripts/check_royalty_policy.py \
             scripts/test_royalty_policy.py \
+            scripts/check_warning_dispositions.py \
+            scripts/test_warning_dispositions.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/generate_release_manifest.py \
@@ -542,6 +544,8 @@ jobs:
           python3 scripts/check_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-check.log
           python3 scripts/test_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-tests.log
           python3 scripts/check_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-check.log
+          python3 scripts/test_warning_dispositions.py 2>&1 | tee ci-logs/warning-disposition-tests.log
+          python3 scripts/check_warning_dispositions.py 2>&1 | tee ci-logs/warning-disposition-check.log
 
       - name: Release readiness
         shell: bash

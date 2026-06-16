@@ -31,6 +31,11 @@ and fully on-chain versus decentralized storage boundaries.
 Use [`docs/royalty-policy.md`](royalty-policy.md) for the checked `ONE-003`
 royalty policy, current ERC-2981 disclosure, governance boundary, marketplace
 display guidance, and royalty disclosure, not payment enforcement caveat.
+Use [`docs/warning-dispositions.md`](warning-dispositions.md) for the checked
+`ONE-007` warning disposition baseline covering fixed NatSpec warning noise and
+accepted solc, documentation, linter, vendored, test-only, ABI-compatibility,
+and `StreamCore` size-tradeoff warning decisions, including the plain-language
+StreamCore size-tradeoff warning decisions phrase used by the checker.
 Use [`docs/deployment.md`](deployment.md#admin-ceremony-evidence) for the
 no-secret admin ceremony evidence model that must accompany reviewed ownership,
 role, signer, pause, emergency, and post-state proof for non-local deployments.
@@ -149,7 +154,7 @@ local tests prove protocol correctness.
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet ceremony/randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
 | Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, risk register, ABI baseline, gas snapshot, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
-| Static analysis and tests | Slither baseline, test matrix, invariants, and local gas snapshot are tracked | Testnet/live invariant and gas evidence missing | External audit and production evidence missing |
+| Static analysis and tests | Slither baseline, warning disposition baseline, test matrix, invariants, and local gas snapshot are tracked | Testnet/live invariant and gas evidence missing | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
 
@@ -210,6 +215,13 @@ The current local baseline includes:
   disclosure, governance and enforcement boundaries, marketplace display
   guidance, and the rule that No production-readiness claim depends on
   marketplaces honoring royalties;
+- warning disposition guidance in
+  [`docs/warning-dispositions.md`](warning-dispositions.md), covered by
+  `python scripts/test_warning_dispositions.py` and
+  `python scripts/check_warning_dispositions.py`, which documents fixed NatSpec
+  warning noise and accepted solc, documentation, linter, vendored, test-only,
+  ABI-compatibility, and `StreamCore` size-tradeoff warning decisions without
+  treating warning quietness as protocol correctness proof;
 - release manifest and checksum bundle outputs under
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
@@ -392,6 +404,7 @@ Audit and protocol evidence:
 - [docs/provenance-manifests.md](provenance-manifests.md)
 - [docs/permanence-packages.md](permanence-packages.md)
 - [docs/royalty-policy.md](royalty-policy.md)
+- [docs/warning-dispositions.md](warning-dispositions.md)
 - [docs/architecture.md](architecture.md)
 - [docs/threat-model.md](threat-model.md)
 - [docs/deployment.md](deployment.md)
@@ -517,6 +530,8 @@ python scripts/check_one_of_one_permanence_package.py
 python scripts/generate_one_of_one_permanence_manifest.py --check
 python scripts/test_royalty_policy.py
 python scripts/check_royalty_policy.py
+python scripts/test_warning_dispositions.py
+python scripts/check_warning_dispositions.py
 python scripts/test_public_beta_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/test_risk_register.py

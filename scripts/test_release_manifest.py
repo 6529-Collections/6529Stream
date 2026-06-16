@@ -167,6 +167,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "provenance-manifests.md",
         root / "docs" / "permanence-packages.md",
         root / "docs" / "royalty-policy.md",
+        root / "docs" / "warning-dispositions.md",
         root / "docs" / "release-readiness.md",
         root / "docs" / "integrations" / "README.md",
         root / "docs" / "integrations" / "contract-flows.md",

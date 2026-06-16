@@ -99,7 +99,9 @@ are summarized with the collector-verifiable permanence package,
 one-of-one permanence manifest, browser proof, fully on-chain versus
 decentralized storage, royalty policy, ERC-2981 disclosure, royalty
 disclosure, not payment enforcement, No production-readiness claim depends on
-marketplaces honoring royalties, and without token finality, marketplace
+marketplaces honoring royalties, warning disposition baseline, fixed NatSpec
+warning noise, accepted solc, documentation, linter, vendored, test-only,
+ABI-compatibility, StreamCore size-tradeoff warning decisions, and without token finality, marketplace
 readiness, royalty enforcement, or ownership proof beyond chain state.
 The test matrix and ADR index evidence are summarized.
 
