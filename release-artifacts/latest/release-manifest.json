@@ -95,7 +95,7 @@
     },
     "one_of_one_permanence_manifest": {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:142282f3d7f3d959c2a88b631e0b7a2f59b169f330a0585ea403b7e07908e7da",
+      "sha256": "sha256:71ee405de271b4e5ba03d650d06e07211f6a75c9cf43f8ee3d5761b69fa603de",
       "size_bytes": 2913,
       "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1"
     },
@@ -116,7 +116,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:a78ed64285fcf67fd7154417dd744fb7cc16c2c23fc7d7e151a7755003ed7529",
+      "sha256": "sha256:5928715cfde5f41b2e26e413523c3db4f0632b429f5b1a49af5c9d57fe173ad9",
       "size_bytes": 22294,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1916,8 +1916,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:4f860a93dae0654b3364d79c795811ef1608311adb264d8d95518a48f6f650ff",
-      "size_bytes": 38124
+      "sha256": "sha256:4c59d68bcb666fedc8875eb4a35387936310c16ad53920c82510ad06367c3918",
+      "size_bytes": 38274
     },
     "governance_docs": [
       {

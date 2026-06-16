@@ -96,9 +96,22 @@ false, and the artist can approve the new current hash.
 Artists can approve directly from the configured artist address or through a
 relayed EIP-712 approval. EOA signers use the digest returned by
 `hashArtistApproval(collectionId)`, and contract-wallet artists are validated
-through ERC-1271 `isValidSignature(bytes32,bytes)`. Frozen collections can still
-receive a final artist approval, allowing the stored approval hash to bind the
-final immutable collection state.
+through ERC-1271 `isValidSignature(bytes32,bytes)`. The EIP-712 domain is
+`6529StreamArtistApproval` version `1`, with `chainId` and `verifyingContract`
+set to the deployed `StreamCore`. The signed approval type is:
+
+```text
+StreamArtistApproval(
+  address artist,
+  bytes32 freezeManifestHash,
+  uint256 maxCollectionPurchases,
+  uint256 collectionTotalSupply,
+  uint256 finalSupplyDelay
+)
+```
+
+Frozen collections can still receive a final artist approval, allowing the
+stored approval hash to bind the final immutable collection state.
 
 ## Escaping And Attribute Fragments
 
