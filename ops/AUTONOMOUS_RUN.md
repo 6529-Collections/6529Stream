@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/event-reconstructability-tests` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/439` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/440` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/441` |
-| Next issue | TBD after ADV-008 event reconstructability tests land. |
+| Active PR branch | `codex/fork-safe-erc1271-smoke` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/441` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/442` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/443` |
+| Next issue | TBD after ADV-009 Safe/ERC-1271 smoke tests land. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 07:47 UTC` |
+| Last updated | `2026-06-16 08:39 UTC` |
 
 ## Packaging Notes
 
@@ -270,16 +270,83 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Merged in PR #435 |
 | 207 | Add generated protocol surface report | Gate C/D/G support | Generate a deterministic public/external function, event, and custom-error surface report from Foundry artifacts for auditors and integrators, with drift tests and release-manifest coverage | Merged in PR #437 |
 | 208 | Add StreamMinter event read-model coverage | Gate D/G support | Add additive minter bridge events for phases, fixed-price mint ranges, auction mint custody/end-time, auction end-time edits, and contract-reference updates, with focused tests, integration docs, and regenerated release artifacts | Merged in PR #439 |
-| 209 | Add event reconstructability tests from emitted logs | Gate D/G support | Add an indexer-style test harness that consumes emitted logs from representative protocol flows and proves documented state can be reconstructed from events plus documented read-after-event calls | Active issue #440 |
+| 209 | Add event reconstructability tests from emitted logs | Gate D/G support | Add an indexer-style test harness that consumes emitted logs from representative protocol flows and proves documented state can be reconstructed from events plus documented read-after-event calls | Merged in PR #441 |
+| 210 | Add fork-aware Safe/ERC-1271 signature smoke tests | Gate D/Gate F support | Add no-RPC Safe-shaped ERC-1271 approved-hash threshold smoke coverage for fixed-price and auction drops, wrong-chain rejection, wrong-verifying-contract rejection, wallet docs/checker wiring, and release-state traceability | Active issue #442 |
 
 ## Current PR Worklog
 
+### PR candidate: Add fork-aware Safe/ERC-1271 signature smoke tests (Queue Item 210 / ADV-009)
+
+Status: PR #443 opened from PR #441 squash merge commit
+`ba73afe6b4592b80239d96c30da4084aa7fb884b`; local implementation validated,
+pushed, and awaiting CI/bot review.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/442`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/443`.
+Branch: `codex/fork-safe-erc1271-smoke`.
+
+Goal:
+
+- Add a no-secret, no-RPC Safe-shaped ERC-1271 smoke suite that runs under an
+  explicit fork-like chain ID via Foundry `vm.chainId`.
+- Prove fixed-price and auction drop authorization with a Safe-style
+  approved-hash threshold model.
+- Prove wrong-chain and wrong-verifying-contract signatures fail without
+  consuming drops.
+- Wire the wallet/signature integration guide and checker to the executable
+  smoke suite while preserving the boundary that local tests do not replace
+  reviewed fork/testnet/live Safe evidence.
+
+Planned validation:
+
+- `forge fmt --check test\StreamSafeERC1271ForkSmoke.t.sol`
+- `forge test --match-path test\StreamSafeERC1271ForkSmoke.t.sol -vvv`
+- `forge test --match-path test\StreamDropsERC1271.t.sol -vvv`
+- `python scripts/test_wallet_signature_flows.py`
+- `python scripts/check_wallet_signature_flows.py`
+- `python scripts/check_changelog.py`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+- `git diff --check`
+
+Completed local validation:
+
+- `forge build --sizes --via-ir --skip test --skip script --force`
+  reconfirmed `StreamCore` at `22,184` runtime bytes with `2,392` bytes of
+  EIP-170 headroom.
+- `python scripts/check_contract_size_budget.py`.
+- `forge fmt --check test\StreamSafeERC1271ForkSmoke.t.sol`.
+- `forge test --match-path test\StreamSafeERC1271ForkSmoke.t.sol -vvv`.
+- `forge test --match-path test\StreamDropsERC1271.t.sol -vvv`.
+- `python scripts/test_wallet_signature_flows.py`.
+- `python scripts/check_wallet_signature_flows.py`.
+- `python scripts/check_changelog.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/generate_release_checksums.py --check`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- `git diff --check`.
+
+Review-response validation:
+
+- 6529bot security review reported no security findings.
+- 6529bot general review marked the PR good to merge and raised
+  non-blocking test-clarity nice-to-haves.
+- Follow-up patch adds an explicit wrong-verifying-contract digest-difference
+  assertion, replaces low-level negative mint calls with exact
+  `Bad contract sig` revert expectations, and documents that the local
+  signature guard fields are not Safe signature encoding.
+- `forge fmt --check test\StreamSafeERC1271ForkSmoke.t.sol`.
+- `forge test --match-path test\StreamSafeERC1271ForkSmoke.t.sol -vvv`.
+- `forge test --match-path test\StreamDropsERC1271.t.sol -vvv`.
+- `git diff --check`.
+
 ### PR candidate: Add event reconstructability tests from emitted logs (Queue Item 209 / ADV-008)
 
-Status: issue opened, branch started from PR #439 squash merge commit
-`41752a653b6f412123109a3005f549a374a19d1e`, and local implementation
-validated. PR #441 is open, review-response fixes are pushed, CI is green, and
-merge is next after the final state-only run-state update.
+Status: merged in PR #441 as squash merge
+`ba73afe6b4592b80239d96c30da4084aa7fb884b`; issue #440 closed completed.
+Branch started from PR #439 squash merge commit
+`41752a653b6f412123109a3005f549a374a19d1e`, and local implementation was
+validated before merge.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/440`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/441`.
 Branch: `codex/event-reconstructability-tests`.

@@ -49,8 +49,9 @@ It does not replace fork/testnet/live evidence for public beta or production.
 ## Maturity And Scope
 
 React, mobile, Electron, operator UI, indexer, backend signing service,
-WalletConnect, and Safe teams are named. No private keys and no-secret policy
-are named.
+WalletConnect, and Safe teams are named. Fork-aware Safe/ERC-1271 smoke,
+StreamSafeERC1271ForkSmoke, MockSafeERC1271Signer, `vm.chainId`, no live RPC,
+no private keys, and no-secret policy are named.
 
 ## Source Of Truth
 

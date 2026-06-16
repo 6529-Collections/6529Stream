@@ -122,7 +122,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:3afab440510e931159e8b98aa5177375220b90fa4d8b4eb37dfaf9f35f297dee",
+      "sha256": "sha256:2198bc4d9d4dbd3ba3a8a2c070fa3a8ca122b162eccc095c91c59e0bfea7cb1e",
       "size_bytes": 22887,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1922,8 +1922,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:129bb28eb9901e016e1e59c97bf9b1d70ffc1719e0d39b0380418ed1c7ea17bf",
-      "size_bytes": 41829
+      "sha256": "sha256:23fcc53fa8148e0b53bc2496a8eaa2ca99f8a8c757e80006b55a649c7e6a69c7",
+      "size_bytes": 42058
     },
     "governance_docs": [
       {
@@ -2038,8 +2038,8 @@
       },
       {
         "path": "docs/integrations/wallets-and-signatures.md",
-        "sha256": "sha256:924fa149b1dd0ac87f5c52e7e73a13cc413aa09cb23c459ff37d5af1336455d1",
-        "size_bytes": 23179
+        "sha256": "sha256:34635822e02f85b395744b76ecae8bec250d2906470efc4162db667ce6951872",
+        "size_bytes": 24102
       },
       {
         "path": "docs/integrations/events-and-indexing.md",

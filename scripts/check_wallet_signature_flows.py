@@ -45,6 +45,11 @@ REQUIRED_PHRASES = [
     "backend signing service",
     "WalletConnect",
     "Safe",
+    "fork-aware Safe/ERC-1271 smoke",
+    "StreamSafeERC1271ForkSmoke",
+    "MockSafeERC1271Signer",
+    "`vm.chainId`",
+    "no live RPC",
     "EIP-712",
     "ERC-1271",
     "EIP-2098",
@@ -126,6 +131,7 @@ REQUIRED_COMMANDS = [
     "python scripts/generate_release_checksums.py --check",
     "forge test --match-path test/StreamDropsEIP712.t.sol",
     "forge test --match-path test/StreamDropsERC1271.t.sol",
+    "forge test --match-path test/StreamSafeERC1271ForkSmoke.t.sol",
 ]
 
 REQUIRED_LINK_TARGETS = [
@@ -151,6 +157,7 @@ REQUIRED_LINK_TARGETS = [
     "smart-contracts/StreamAdmins.sol",
     "test/StreamDropsEIP712.t.sol",
     "test/StreamDropsERC1271.t.sol",
+    "test/StreamSafeERC1271ForkSmoke.t.sol",
     "test/helpers/DropAuthTestHelper.sol",
     "test/fixtures/drop-authorization/fixed-price-eoa.json",
     "test/fixtures/drop-authorization/auction-eoa.json",

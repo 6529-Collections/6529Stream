@@ -68,6 +68,7 @@ Use tracked committed sources before wiring a wallet or signing service.
 | Admin and signer manager | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Signer lifecycle and permission target reference |
 | EIP-712 tests | [`test/StreamDropsEIP712.t.sol`](../../test/StreamDropsEIP712.t.sol) | EOA, wrong domain, wrong chain, expiry, replay, cancellation, epoch, malformed, and sale-field tests |
 | ERC-1271 tests | [`test/StreamDropsERC1271.t.sol`](../../test/StreamDropsERC1271.t.sol) | Contract-signer success and fail-closed tests |
+| Fork-aware Safe/ERC-1271 smoke tests | [`test/StreamSafeERC1271ForkSmoke.t.sol`](../../test/StreamSafeERC1271ForkSmoke.t.sol) | Safe-shaped approved-hash threshold, fixed-price, auction, wrong-chain, and wrong-verifying-contract smoke coverage |
 | Test helper | [`test/helpers/DropAuthTestHelper.sol`](../../test/helpers/DropAuthTestHelper.sol) | Digest/signature helpers and local signer keys |
 | Fixed-price EOA fixture | [`test/fixtures/drop-authorization/fixed-price-eoa.json`](../../test/fixtures/drop-authorization/fixed-price-eoa.json) | Local signed fixed-price example |
 | Auction EOA fixture | [`test/fixtures/drop-authorization/auction-eoa.json`](../../test/fixtures/drop-authorization/auction-eoa.json) | Local signed auction example |
@@ -216,6 +217,16 @@ different signer-validation path for the same `DropAuthorization` digest.
 
 Treat Safe signing as an ERC-1271 contract-signer integration until production
 evidence proves a different signer model.
+
+The local fork-aware Safe/ERC-1271 smoke suite is
+[`test/StreamSafeERC1271ForkSmoke.t.sol`](../../test/StreamSafeERC1271ForkSmoke.t.sol).
+It uses `MockSafeERC1271Signer` to model Safe-style approved-hash threshold
+validation under an explicit `vm.chainId` fork-chain simulation. The suite
+proves fixed-price and auction `mintDrop` execution, owner-threshold failure,
+wrong-chain rejection, and wrong-verifying-contract rejection with no live RPC,
+private keys, deployed Safe addresses, or external network access. It is local
+baseline coverage only; it does not replace retained fork/testnet/live Safe
+evidence.
 
 A Safe-based signing setup should define:
 
@@ -394,6 +405,7 @@ python scripts/generate_bytecode_release_proof.py --check
 python scripts/generate_release_checksums.py --check
 forge test --match-path test/StreamDropsEIP712.t.sol
 forge test --match-path test/StreamDropsERC1271.t.sol
+forge test --match-path test/StreamSafeERC1271ForkSmoke.t.sol
 ```
 
 If release-manifest-tracked docs or scripts changed, regenerate and check the
