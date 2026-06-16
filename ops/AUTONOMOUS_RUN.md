@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/mev-timing-attack-model` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/443` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/444` |
-| Active PR | TBD until branch is validated and opened |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/445` |
 | Next issue | TBD after ADV-010 MEV/timing attack model lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 09:08 UTC` |
+| Last updated | `2026-06-16 09:10 UTC` |
 
 ## Packaging Notes
 
@@ -16066,6 +16066,7 @@ Outcome:
 | 2026-06-16 01:41 | Open PR #429 for ONE-007 | PR #429 opened at `https://github.com/6529-Collections/6529Stream/pull/429` on branch `codex/warning-noise-disposition`, closes issue #428, and CodeRabbit review was requested in comment `4714065314`. Next action is to wait for CI and bot feedback, resolve actionable comments, then merge when clean. |
 | 2026-06-16 06:45 | Validate PR #439 review-response head | Accepted the useful event-topic review by making `MinterContractReferenceUpdated` filterable by `option`, `newContract`, and `admin` while retaining `oldContract` in event data; restored the `StreamCore` ABI baseline object from current `origin/main` so this PR only carries `StreamMinter` surface additions; reconfirmed current `StreamCore` production runtime at `22,184` bytes with `2,392` bytes of EIP-170 headroom, superseding the older `24,516`/roughly `60`-byte concern. Focused event/indexing, auction-flow, event-suite, gas-snapshot, release-artifact, ABI-compatibility, size-budget, retained-evidence, provenance/permanence, risk, bytecode-proof, release-manifest/checksum, `git diff --check`, and full Windows `scripts\check.ps1` validation passed. The review-response head still needs commit, push, PR body update, bot-thread replies, and clean CI/re-review before merge. |
 | 2026-06-16 09:08 | Implement ADV-010 local draft | Branch `codex/mev-timing-attack-model` adds `test/StreamMEVTiming.t.sol`, covering third-party free signed-payload submission without recipient theft, paid-drop payer binding without failed-attempt consumption, inclusive deadline behavior, expired-attempt preservation, exact-end auction bid acceptance/extension, strict post-end late-bid rejection without custody/accounting mutation, and near-end outbid credit/extension behavior. Focused `forge test --match-path test/StreamMEVTiming.t.sol -vvv` passed with 6 tests and only existing warning-disposition noise. |
+| 2026-06-16 09:10 | Open PR #445 for ADV-010 | PR #445 is open at `https://github.com/6529-Collections/6529Stream/pull/445`, closes issue #444, and CodeRabbit review was requested in comment `4716823234`. CodeRabbit returned a rate-limit notice but left the status context as success. GitHub CI is running; next action is to wait for checks and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
