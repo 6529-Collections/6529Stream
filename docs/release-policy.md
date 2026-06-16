@@ -105,8 +105,8 @@ compatible migration path:
   behavior change.
 - Randomness provider, request lifecycle, retry, or stale callback behavior
   change.
-- Deployment manifest, address book, release manifest, release checksum, ABI
-  compatibility, or artifact schema change.
+- Deployment manifest, address book, release manifest, release checksum,
+  protocol surface report, ABI compatibility, or artifact schema change.
 
 Breaking changes require:
 
@@ -129,10 +129,10 @@ The ABI compatibility gate compares the current production ABI surface against
   changelog entry when they are part of a release-impacting PR.
 - Baseline refreshes must happen in the same PR as the contract or artifact
   change, or in a follow-up PR linked from the original approval issue.
-- Event topic, interface ID, source verification input, broadcast-derived
-  manifest input, deployment manifest, address book, release manifest, and
-  checksum outputs must be regenerated before merge when their covered inputs
-  change.
+- Event topic, interface ID, protocol surface report, source verification
+  input, broadcast-derived manifest input, deployment manifest, address book,
+  release manifest, and checksum outputs must be regenerated before merge when
+  their covered inputs change.
 - Update [`docs/integrations/events-and-indexing.md`](integrations/events-and-indexing.md)
   when event signatures, indexed fields, emitting contracts, replay posture, or
   read-after-event requirements change.
@@ -166,10 +166,10 @@ Before a public release tag:
   `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
   release-artifacts/baselines/v0.1.0/gas-snapshot.snap`.
 - Deployment rehearsal passes.
-- ABI, bytecode, interface ID, event topic, broadcast-derived manifest input,
-  deployment manifest, address book, source verification input, release
-  manifest, bytecode-to-release proof, and checksum artifacts are generated and
-  checked.
+- ABI, bytecode, interface ID, event topic, protocol surface report,
+  broadcast-derived manifest input, deployment manifest, address book, source
+  verification input, release manifest, bytecode-to-release proof, and checksum
+  artifacts are generated and checked.
 - Dependency source packages, migration plans, source-retention evidence,
   deprecation decisions, and unfrozen collection repins follow
   `docs/dependency-operations.md` when the release uses dependency registry

@@ -26,7 +26,8 @@ Current maturity for integrators:
   verification, live randomizer evidence, and post-audit remediation evidence.
 - Raw ABIs are generated under ignored `out/` after `forge build`. The tracked
   source of truth for review is the ABI surface baseline, ABI checksums,
-  interface IDs, event topic catalog, release manifest, and checksum bundle.
+  protocol surface report, interface IDs, event topic catalog, release
+  manifest, and checksum bundle.
 
 ## Consumer Surfaces
 
@@ -54,6 +55,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Contract list | [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json) | Catalog of release-tracked contracts |
 | ABIs | Run `forge build` and read ignored `out/` artifacts locally | Raw ABI JSON is not a committed release artifact |
 | ABI review surface | [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json), [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI compatibility baseline and checksums are tracked |
+| Protocol surface report | [`docs/protocol-surface.md`](../protocol-surface.md), [`release-artifacts/latest/protocol-surface-report.json`](../../release-artifacts/latest/protocol-surface-report.json) | Generated functions, selectors, events, topic0 values, custom errors, ABI hashes, bytecode hashes, and runtime sizes for review |
 | Address books | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json), [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Generated integrator-facing address source, not hand-edited |
 | Deployment manifests | [`deployments/examples/anvil-6529stream-v0.1.0-001.json`](../../deployments/examples/anvil-6529stream-v0.1.0-001.json), [`deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Manifests are generated from deployment config and broadcast inputs |
 | Deployment schemas and chain config | [`deployments/schema/deployment-manifest.schema.json`](../../deployments/schema/deployment-manifest.schema.json), [`deployments/schema/address-book.schema.json`](../../deployments/schema/address-book.schema.json), [`deployments/config/sepolia-6529stream-v0.1.0-001.template.json`](../../deployments/config/sepolia-6529stream-v0.1.0-001.template.json) | Sepolia config is a template until reviewed testnet evidence exists |
@@ -119,6 +121,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json)
 - [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json)
 - [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json)
+- [`release-artifacts/latest/protocol-surface-report.json`](../../release-artifacts/latest/protocol-surface-report.json)
 - [`release-artifacts/latest/release-artifact-manifest.json`](../../release-artifacts/latest/release-artifact-manifest.json)
 - [`release-artifacts/latest/release-manifest.json`](../../release-artifacts/latest/release-manifest.json)
 - [`release-artifacts/latest/bytecode-release-proof.json`](../../release-artifacts/latest/bytecode-release-proof.json)

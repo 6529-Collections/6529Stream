@@ -195,6 +195,11 @@ The current Gate A smoke baseline proves:
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
   including ABI checksums, bytecode checksums, standard/custom interface IDs,
   and event topic catalog entries.
+- `scripts/test_protocol_surface_report.py` and
+  `scripts/generate_protocol_surface_report.py --check` prove the committed
+  `release-artifacts/latest/protocol-surface-report.json` matches the current
+  production Foundry artifacts for functions, selectors, events, topic0 values,
+  custom errors, ABI hashes, bytecode hashes, and runtime sizes.
 - `scripts/test_source_verification_inputs.py` and
   `scripts/generate_source_verification_inputs.py --check` prove the committed
   `release-artifacts/latest/source-verification-inputs.json` retains production

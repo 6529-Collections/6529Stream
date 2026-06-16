@@ -27,6 +27,7 @@ DOWNSTREAM_RELEASE_FILES = {
     "dependency-artifact-manifest.json",
     "one-of-one-permanence-manifest.json",
     "one-of-one-provenance-manifest.json",
+    "protocol-surface-report.json",
     "production-release-blockers.md",
     "public-beta-blockers.md",
     "public-beta-evidence.json",

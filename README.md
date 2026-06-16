@@ -10,9 +10,10 @@ This repository is pre-audit and not production-ready.
 
 The current CI and local smoke checks prove compilation, test command execution,
 the production size gate, a local deployment rehearsal, deterministic
-release-artifact catalog checks, ABI compatibility baseline checks, and
-deterministic local deployment manifest/address-book/checksum-bundle checks,
-plus retained source-verification inputs, a machine-readable release manifest,
+release-artifact catalog checks, protocol surface report checks, ABI
+compatibility baseline checks, and deterministic local deployment
+manifest/address-book/checksum-bundle checks, plus retained source-verification
+inputs, a machine-readable release manifest,
 architecture/threat-model checks, an audit-package check, a release-readiness
 dashboard check, a public-beta evidence status check, and changelog gate for
 release-impacting changes.
@@ -48,6 +49,8 @@ forge test -vvv
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/test_protocol_surface_report.py
+python scripts/generate_protocol_surface_report.py --check
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
@@ -91,7 +94,7 @@ The deployment rehearsal step is local-only and uses placeholder addresses; it
 proves the deploy-and-wire ceremony can execute without production secrets.
 
 The release-artifact step verifies the committed ABI checksums, bytecode
-checksums, interface IDs, and event topic catalog under
+checksums, interface IDs, event topic catalog, and protocol surface report under
 `release-artifacts/latest/` against the production `via-ir` build profile.
 
 The source-verification step verifies
@@ -103,6 +106,12 @@ deployment verification.
 The ABI compatibility step compares the current production contract ABI surface
 against the committed baseline under `release-artifacts/baselines/` and fails on
 removed or changed ABI entries while reporting additive entries.
+
+The protocol surface report step verifies
+[`release-artifacts/latest/protocol-surface-report.json`](release-artifacts/latest/protocol-surface-report.json),
+which records the release-tracked contracts' functions, selectors, events,
+topic0 values, custom errors, bytecode hashes, and runtime sizes for
+integrators and reviewers.
 
 The deployment manifest step verifies the generated local Anvil manifest under
 `deployments/examples/` against committed manifest inputs and the current
@@ -193,7 +202,7 @@ Current pinned versions:
 | `test/` | Foundry tests |
 | `script/` | Foundry scripts |
 | `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, source verification inputs, ABI compatibility baseline, public-beta evidence status, generated blocker reports, risk register, release manifest, and release checksum bundle |
+| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, protocol surface report, source verification inputs, ABI compatibility baseline, public-beta evidence status, generated blocker reports, risk register, release manifest, and release checksum bundle |
 | `docs/` | Project, security, ADR, integration, and operational docs |
 | `ops/` | Roadmap and execution state |
 
@@ -208,6 +217,7 @@ Current pinned versions:
 - [`docs/threat-model.md`](docs/threat-model.md)
 - [`docs/audit-package.md`](docs/audit-package.md)
 - [`docs/release-readiness.md`](docs/release-readiness.md)
+- [`docs/protocol-surface.md`](docs/protocol-surface.md)
 - [`docs/integrations/README.md`](docs/integrations/README.md)
 - [`docs/integrations/contract-flows.md`](docs/integrations/contract-flows.md)
 - [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md)

@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a generated protocol surface report with
+  `docs/protocol-surface.md`,
+  `release-artifacts/latest/protocol-surface-report.json`, a
+  generator/test pair, local/CI/Windows gate wiring, release-manifest and
+  checksum coverage, and explicit boundaries that the report is deterministic
+  review evidence rather than protocol correctness or production-readiness
+  proof.
 - Added a third `StreamCore` headroom recovery slice that moves tokenURI and
   metadata-state dispatch helpers into the linked `StreamMetadataRenderer`
   library while preserving exact off-chain/on-chain metadata output behavior;

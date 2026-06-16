@@ -64,6 +64,7 @@ deferrals are appropriate for launch.
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Warning disposition baseline | [`docs/warning-dispositions.md`](warning-dispositions.md) |
+| Protocol surface report | [`docs/protocol-surface.md`](protocol-surface.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
 | Canonical release risk register | [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json) |
 | Incident response runbook | [`docs/incident-response.md`](incident-response.md) |
@@ -107,6 +108,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/release-signatures.md`](release-signatures.md)
 - [`docs/public-beta-evidence.md`](public-beta-evidence.md)
 - [`docs/release-readiness.md`](release-readiness.md)
+- [`docs/protocol-surface.md`](protocol-surface.md)
 
 ## Invariants And Test Evidence
 
@@ -163,6 +165,12 @@ Local deployment and release evidence:
 - [`release-artifacts/latest/source-verification-inputs.json`](../release-artifacts/latest/source-verification-inputs.json)
   records source, artifact, compiler, constructor, and verification-command
   inputs for the current local/fork release artifacts.
+- [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json)
+  records the release-tracked contracts' functions, selectors, events, topic0
+  values, custom errors, ABI hashes, bytecode hashes, and runtime sizes for
+  integrator and audit review. It is checked by
+  [`scripts/generate_protocol_surface_report.py`](../scripts/generate_protocol_surface_report.py)
+  and is not protocol correctness proof.
 - [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
   is the bytecode-to-release proof. It ties committed local/fork address books,
   deployment manifests, ABI checksums, source verification inputs, compiler

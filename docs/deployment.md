@@ -271,14 +271,17 @@ constructor arguments or admin ceremony details. They follow
 `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and should be regenerated from manifests rather than edited by hand.
 
-ABI checksum, bytecode checksum, interface ID, and event topic catalog inputs
-are generated from the production `via-ir` Foundry artifacts:
+ABI checksum, bytecode checksum, interface ID, event topic catalog, and
+protocol surface report inputs are generated from the production `via-ir`
+Foundry artifacts:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/check_contract_size_budget.py
 python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
+python scripts/generate_protocol_surface_report.py
+python scripts/generate_protocol_surface_report.py --check
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/generate_broadcast_manifest_input.py
@@ -329,6 +332,13 @@ checksums, constructor ABI, and link references. It retains verification
 command templates for each production contract without claiming live explorer
 verification before a broadcast deployment supplies real addresses, linked
 library addresses, and encoded constructor args.
+
+Protocol surface report generation writes
+`release-artifacts/latest/protocol-surface-report.json` from the production
+contract set and Foundry artifacts. It records functions, selectors, events,
+topic0 values, custom errors, ABI hashes, bytecode hashes, and runtime sizes
+for integrators and reviewers without claiming protocol correctness or live
+deployment parity.
 
 Bytecode-to-release proof generation writes
 `release-artifacts/latest/bytecode-release-proof.json` after the release

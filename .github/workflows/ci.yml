@@ -85,7 +85,9 @@ jobs:
           python3 -m py_compile \
             scripts/argparse_helpers.py \
             scripts/generate_release_artifacts.py \
+            scripts/generate_protocol_surface_report.py \
             scripts/test_release_artifacts.py \
+            scripts/test_protocol_surface_report.py \
             scripts/check_contract_size_budget.py \
             scripts/test_contract_size_budget.py \
             scripts/check_metadata_fixtures.py \
@@ -362,6 +364,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-tests.log
           python3 scripts/generate_release_artifacts.py --check 2>&1 | tee ci-logs/release-artifacts-check.log
+          python3 scripts/test_protocol_surface_report.py 2>&1 | tee ci-logs/protocol-surface-report-tests.log
+          python3 scripts/generate_protocol_surface_report.py --check 2>&1 | tee ci-logs/protocol-surface-report-check.log
 
       - name: Source verification inputs
         shell: bash

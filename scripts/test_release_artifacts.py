@@ -176,6 +176,10 @@ class ReleaseArtifactTests(unittest.TestCase):
                 {"schema_version": "6529stream.release-manifest.v1"},
             )
             write_json(
+                output_dir / "protocol-surface-report.json",
+                {"schema_version": "6529stream.protocol-surface-report.v1"},
+            )
+            write_json(
                 output_dir / "risk-register.json",
                 {"schema_version": "6529stream.risk-register.v1"},
             )

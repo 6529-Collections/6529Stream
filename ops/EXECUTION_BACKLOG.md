@@ -702,7 +702,7 @@ Dependencies: `EXT-003`, `EXT-004`.
 
 ### EXT-008: Retain Sepolia Randomizer And Metadata Browser Evidence
 
-Status: Planned.
+Status: Active in issue #436.
 
 Gate: E/D.
 
@@ -1292,6 +1292,9 @@ Files likely touched:
 - `scripts/generate_protocol_surface_report.py`
 - `scripts/test_protocol_surface_report.py`
 - `release-artifacts/latest/protocol-surface-report.json`
+- `docs/protocol-surface.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/release-checksums.json`
 - `docs/architecture.md`
 - `docs/tooling.md`
 
@@ -1316,9 +1319,14 @@ Acceptance criteria:
 
 Evidence artifacts:
 
-- Generated protocol surface report.
+- Generated protocol surface report at
+  `release-artifacts/latest/protocol-surface-report.json`.
+- Release-manifest and checksum-bundle coverage.
+- Maintainer/integrator guidance in `docs/protocol-surface.md`.
 
 Dependencies: Release artifact generator patterns.
+
+Issue: [`#436`](https://github.com/6529-Collections/6529Stream/issues/436).
 
 ### CON-002: Close Event Schema Gaps For Indexers
 

@@ -100,6 +100,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_admin_ceremony_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\generate_release_artifacts.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_protocol_surface_report.py"
+& $pythonPath @pythonArgs "scripts\generate_protocol_surface_report.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_source_verification_inputs.py"
 & $pythonPath @pythonArgs "scripts\generate_source_verification_inputs.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_dependency_artifact_manifest.py"
