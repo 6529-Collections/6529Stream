@@ -240,6 +240,46 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
             .assertEq("ipfs://base/10000000000", "off-chain final URI changed");
     }
 
+    function testFinalTokenHashDoesNotRequireLifecycleLookup() public {
+        DeployedStream memory deployed = _deployWithLifecycleRandomizer();
+        _mintGoldenToken(deployed);
+        MetadataLifecycleRandomizer lifecycleRandomizer =
+            MetadataLifecycleRandomizer(address(deployed.randomizer));
+        lifecycleRandomizer.setTokenState(
+            COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
+        );
+        lifecycleRandomizer.finalizeToken(
+            IStreamCore(address(deployed.core)), COLLECTION_ID, TOKEN_ID, bytes32(uint256(9))
+        );
+        lifecycleRandomizer.setStateLookupReverts(true);
+
+        deployed.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
+        deployed.core.tokenURI(TOKEN_ID)
+            .assertEq("ipfs://base/10000000000", "off-chain final URI changed");
+    }
+
+    function testEmptyOffchainBaseUriReturnsEmptyForPendingAndFinalTokens() public {
+        DeployedStream memory pendingDeployment = deployStream(address(0xBEEF), address(0xCAFE));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        pendingDeployment.core.addRandomizer(COLLECTION_ID, address(noopRandomizer));
+        _setCollectionBaseURI(pendingDeployment.core, "");
+        _mintGoldenToken(pendingDeployment);
+
+        pendingDeployment.core.retrieveTokenHash(TOKEN_ID)
+            .assertEq(bytes32(0), "pending hash changed");
+        pendingDeployment.core.tokenURI(TOKEN_ID)
+            .assertEq("", "empty pending off-chain base URI changed");
+
+        DeployedStream memory finalDeployment = deployStream(address(0xBEEF), address(0xCAFE));
+        _setCollectionBaseURI(finalDeployment.core, "");
+        _mintGoldenToken(finalDeployment);
+
+        bool finalHashSet = finalDeployment.core.retrieveTokenHash(TOKEN_ID) != bytes32(0);
+        finalHashSet.assertTrue("expected final hash");
+        finalDeployment.core.tokenURI(TOKEN_ID)
+            .assertEq("", "empty final off-chain base URI changed");
+    }
+
     function testSetTokenHashRejectsZeroHashReservedForPendingState() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         NoopRandomizer noopRandomizer = new NoopRandomizer();
@@ -398,6 +438,23 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
     function _mintGoldenToken(DeployedStream memory deployed) private {
         vm.prank(address(deployed.minter));
         deployed.core.mint(TOKEN_ID, RECIPIENT, TOKEN_DATA, TOKEN_SALT, COLLECTION_ID);
+    }
+
+    function _setCollectionBaseURI(StreamCore core, string memory baseURI) private {
+        string[] memory scripts = new string[](1);
+        core.updateCollectionInfo(
+            COLLECTION_ID,
+            "",
+            "",
+            "",
+            "",
+            "",
+            baseURI,
+            "",
+            bytes32(0),
+            FULL_COLLECTION_UPDATE_INDEX - 1,
+            scripts
+        );
     }
 
     function _setGoldenTokenMetadataInputs(StreamCore core) private {

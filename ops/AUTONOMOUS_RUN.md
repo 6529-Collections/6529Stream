@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-validation-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/431` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/432` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/433` |
-| Next issue | After issue #432, consider moving tokenURI/metadata-state dispatch helpers into `StreamMetadataRenderer` if the validation-profile slice merges cleanly and bot feedback stays favorable. |
+| Active PR branch | `codex/streamcore-tokenuri-headroom` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/433` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/434` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/435` |
+| Next issue | TBD after PR #435 merges or is abandoned. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 03:19 UTC` |
+| Last updated | `2026-06-16 04:05 UTC` |
 
 ## Packaging Notes
 
@@ -266,13 +266,89 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 202 | Add satellite-extension architecture policy | Gate G support | Add checked satellite-first architecture policy and size-budget evidence matching | Merged in PR #427 |
 | 203 | Burn down or disposition warning noise | Gate G/Gate F support | Add checked warning-disposition baseline and local/CI/Windows gate wiring | Merged in PR #429 |
 | 204 | Recover script assembly headroom | Gate D/Gate G support | Move collection and dependency script assembly into `StreamMetadataRenderer`, preserve `retrieveGenerativeScript`, refresh release artifacts, and record the measured size delta | Merged in PR #431 |
-| 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | PR #433 open |
+| 205 | Recover metadata validation headroom | Gate D/Gate G support | Move field-specific metadata validation profiles into `StreamMetadataRenderer`, preserve Core public constants/errors/selectors and metadata output, refresh release artifacts, and record the measured size delta | Merged in PR #433 |
+| 206 | Recover tokenURI dispatch headroom | Gate D/Gate G support | Evaluate moving tokenURI and metadata-state dispatch helpers into `StreamMetadataRenderer` while preserving exact marketplace-facing bytes, final-hash override behavior, and ABI compatibility | Active issue #434 |
 
 ## Current PR Worklog
 
-### PR candidate: Recover metadata validation headroom (Queue Item 205)
+### PR candidate: Recover tokenURI dispatch headroom (Queue Item 206)
 
-Status: local implementation and artifact refresh in progress.
+Status: PR #435 open; local implementation, artifact refresh, `make check`,
+and Windows wrapper validation complete; addressing 6529bot request for
+explicit PR-local metadata-dispatch equivalence coverage.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/434`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/435`.
+Branch: `codex/streamcore-tokenuri-headroom`.
+Branch started from PR #433 squash merge commit
+`f10b4eaab2c9bbe8a972db99f1a488cb370897b4`.
+
+Goal:
+
+- Recover additional `StreamCore` bytecode headroom without changing
+  marketplace-facing `tokenURI` bytes or public `StreamCore` ABI behavior.
+- Move only reusable tokenURI/metadata-state dispatch helpers into
+  `StreamMetadataRenderer` if measured savings justify the slice.
+- Preserve empty off-chain base URI returning `""`, final token-hash override
+  behavior, pending/stale/failed/final state strings, and golden metadata output.
+- Refresh gas snapshots, release artifacts, and size evidence only if the
+  measured implementation is worth shipping.
+
+Validation plan:
+
+- `forge build --sizes --via-ir --skip test --skip script --force`.
+- `python scripts\check_contract_size_budget.py`.
+- `python scripts\check_abi_compatibility.py --check`.
+- `forge test --match-path test\StreamMetadataGolden.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataUriPolicy.t.sol -vvv`.
+- `forge test --match-path test\StreamMetadataEscaping.t.sol -vvv`.
+- `forge test --match-path test\StreamDropsIntegrationCharacterization.t.sol -vvv`.
+- `forge test --match-path test\StreamCoreBurn.t.sol -vvv`.
+- `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
+  or refresh after reviewing accepted gas deltas.
+- `make check`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+
+Measured baseline after PR #433:
+
+- `StreamCore`: 22,390 runtime bytes, 2,186-byte EIP-170 margin.
+- `StreamMetadataRenderer`: 14,872 runtime bytes, 9,704-byte EIP-170 margin.
+
+Measured implementation after this slice:
+
+- `StreamCore`: 22,184 runtime bytes, 2,392-byte EIP-170 margin.
+- `StreamMetadataRenderer`: 15,491 runtime bytes, 9,085-byte EIP-170 margin.
+- Net Core recovery: 206 runtime bytes beyond PR #433.
+- Gas snapshot deltas versus PR #433 baseline: auction settlement with bid
+  -12 gas, final on-chain `tokenURI` -2,569 gas, fixed-price mint +32 gas.
+  The final on-chain `tokenURI` gas drop is expected: finalized tokens now
+  resolve metadata state from the nonzero token hash before lifecycle probing,
+  preserving the returned bytes while avoiding an unnecessary randomizer state
+  lookup on the final path.
+- Focused golden/URI/escaping/drop-integration/burn suites passed, ABI
+  compatibility passed, release manifest/proof/checksum generation passed,
+  full `make check` passed, and Windows `scripts\check.ps1` passed.
+
+Reviewer response:
+
+- CodeRabbit auto-commented a rate-limit warning but its status context is
+  green for PR #435.
+- 6529bot security review reported no security findings.
+- 6529bot general review requested visible equivalence evidence for relocated
+  tokenURI/metadata-state dispatch, plus a minor architecture prose cleanup.
+  The response adds explicit regression tests for empty off-chain base URI on
+  pending/final tokens and final token-hash override when lifecycle lookup
+  reverts, and cleans up the architecture sentence.
+
+Merge criteria:
+
+- Ship only if the Core byte savings are material enough to justify moving
+  marketplace-facing URI dispatch into the renderer library.
+- Do not ship a no-op or fragile abstraction; abandon this branch if tests,
+  bytecode, or review feedback show the slice is not worth it.
+
+### Completed PR: Recover metadata validation headroom (Queue Item 205)
+
+Status: merged in PR #433.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/432`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/433`.
 Branch: `codex/streamcore-validation-headroom`.

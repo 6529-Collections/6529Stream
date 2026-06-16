@@ -317,12 +317,67 @@ library StreamMetadataRenderer {
             : string(abi.encodePacked(baseURI, metadataState));
     }
 
+    function offchainTokenURIForToken(
+        string memory baseURI,
+        uint256 tokenId,
+        address randomizer,
+        bytes32 tokenHash
+    ) public view returns (string memory) {
+        if (bytes(baseURI).length == 0) {
+            return "";
+        }
+
+        bool finalMetadata = tokenHash != bytes32(0);
+        return offchainTokenURI(
+            baseURI, tokenId, tokenMetadataState(randomizer, tokenId, tokenHash), finalMetadata
+        );
+    }
+
     function tokenName(string memory collectionName, uint256 tokenId, uint256 firstTokenId)
         public
         pure
         returns (string memory)
     {
         return string(abi.encodePacked(collectionName, " #", (tokenId - firstTokenId).toString()));
+    }
+
+    function tokenMetadataState(address randomizer, uint256 tokenId, bytes32 tokenHash)
+        public
+        view
+        returns (string memory)
+    {
+        if (tokenHash != bytes32(0)) {
+            return "final";
+        }
+
+        return pendingTokenMetadataState(randomizer, tokenId);
+    }
+
+    function onchainTokenURIForToken(
+        string memory schemaVersion,
+        string memory collectionName,
+        uint256 tokenId,
+        uint256 firstTokenId,
+        string memory description,
+        string memory image,
+        string memory attributes,
+        string memory collectionLibrary,
+        string memory animationScript,
+        address randomizer,
+        bytes32 tokenHash
+    ) public view returns (string memory) {
+        bool finalMetadata = tokenHash != bytes32(0);
+        return onchainTokenURIWithDefaultLimit(
+            schemaVersion,
+            tokenMetadataState(randomizer, tokenId, tokenHash),
+            tokenName(collectionName, tokenId, firstTokenId),
+            description,
+            image,
+            attributes,
+            collectionLibrary,
+            finalMetadata ? animationScript : "",
+            finalMetadata
+        );
     }
 
     function pendingTokenMetadataState(address randomizer, uint256 tokenId)

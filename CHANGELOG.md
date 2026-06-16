@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a third `StreamCore` headroom recovery slice that moves tokenURI and
+  metadata-state dispatch helpers into the linked `StreamMetadataRenderer`
+  library while preserving exact off-chain/on-chain metadata output behavior;
+  the production via-IR size gate now measures `StreamCore` at 22,184 runtime
+  bytes with 2,392 bytes of EIP-170 headroom, with the gas snapshot refreshed
+  for a -12 gas auction-settlement delta, a -2,569 gas final on-chain
+  `tokenURI` delta, and a +32 gas fixed-price mint delta.
 - Added a second `StreamCore` headroom recovery slice that moves
   field-specific metadata validation profiles into the linked
   `StreamMetadataRenderer` library while preserving public Core size constants,

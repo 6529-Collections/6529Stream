@@ -42,10 +42,6 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         0xfee829cb9364f5ed51b7754feab34175a6f70cc276ce81fd31f74fe27e1aac16;
     bytes32 private constant _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH =
         0x5c44b5ec16963f52f7b2e846dd70b46242c923fb633a9480bac7ff66698b3dd7;
-    string private constant _METADATA_STATE_PENDING = "pending";
-    string private constant _METADATA_STATE_STALE = "stale";
-    string private constant _METADATA_STATE_FAILED = "failed";
-    string private constant _METADATA_STATE_FINAL = "final";
     uint256 private constant _COLLECTION_TOKEN_RANGE = 10 ** 10;
     uint256 private constant _FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
     uint256 private constant _BASE_URI_UPDATE_INDEX = _FULL_COLLECTION_UPDATE_INDEX - 1;
@@ -782,22 +778,35 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         _requireMinted(tokenId);
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
-        bool finalMetadata = tokenToHash[tokenId] != bytes32(0);
+        bytes32 tokenHash = tokenToHash[tokenId];
 
         if (!onchainMetadata[collectionId]) {
-            string memory baseURI = collectionInfo[collectionId].collectionBaseURI;
-            if (bytes(baseURI).length == 0) {
-                return "";
-            }
-            return StreamMetadataRenderer.offchainTokenURI(
-                baseURI, tokenId, _pendingTokenMetadataState(tokenId, collectionId), finalMetadata
+            return StreamMetadataRenderer.offchainTokenURIForToken(
+                collectionInfo[collectionId].collectionBaseURI,
+                tokenId,
+                collectionAdditionalData[collectionId].randomizerContract,
+                tokenHash
             );
         }
 
-        string memory metadataState = finalMetadata
-            ? _METADATA_STATE_FINAL
-            : _pendingTokenMetadataState(tokenId, collectionId);
-        return _onchainTokenURI(tokenId, collectionId, metadataState, finalMetadata);
+        string memory animationScript = "";
+        if (tokenHash != bytes32(0)) {
+            animationScript = retrieveGenerativeScript(tokenId);
+        }
+
+        return StreamMetadataRenderer.onchainTokenURIForToken(
+            METADATA_SCHEMA_VERSION,
+            collectionInfo[collectionId].collectionName,
+            tokenId,
+            collectionAdditionalData[collectionId].reservedMinTokensIndex,
+            collectionInfo[collectionId].collectionDescription,
+            tokenImageAndAttributes[tokenId][0],
+            tokenImageAndAttributes[tokenId][1],
+            collectionInfo[collectionId].collectionLibrary,
+            animationScript,
+            collectionAdditionalData[collectionId].randomizerContract,
+            tokenHash
+        );
     }
 
     /// @notice Returns the active on-chain metadata schema version.
@@ -808,60 +817,14 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     /// @notice Returns the token's public metadata state under the active schema.
     function tokenMetadataState(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
-        return tokenToHash[tokenId] != bytes32(0)
-            ? _METADATA_STATE_FINAL
-            : _pendingTokenMetadataState(tokenId, tokenIdsToCollectionIds[tokenId]);
-    }
-
-    function _pendingTokenMetadataState(uint256 tokenId, uint256 collectionId)
-        private
-        view
-        returns (string memory)
-    {
-        return StreamMetadataRenderer.pendingTokenMetadataState(
-            collectionAdditionalData[collectionId].randomizerContract, tokenId
-        );
-    }
-
-    function _onchainTokenURI(
-        uint256 tokenId,
-        uint256 collectionId,
-        string memory metadataState,
-        bool finalMetadata
-    ) private view returns (string memory) {
-        string memory animationScript = "";
-        if (finalMetadata) {
-            animationScript = retrieveGenerativeScript(tokenId);
-        }
-
-        return StreamMetadataRenderer.onchainTokenURIWithDefaultLimit(
-            METADATA_SCHEMA_VERSION,
-            metadataState,
-            getTokenName(tokenId, collectionId),
-            collectionInfo[collectionId].collectionDescription,
-            tokenImageAndAttributes[tokenId][0],
-            tokenImageAndAttributes[tokenId][1],
-            collectionInfo[collectionId].collectionLibrary,
-            animationScript,
-            finalMetadata
+        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        return StreamMetadataRenderer.tokenMetadataState(
+            collectionAdditionalData[collectionId].randomizerContract, tokenId, tokenToHash[tokenId]
         );
     }
 
     function _requireMinted(uint256 tokenId) internal view override {
         if (!_exists(tokenId)) revert TokenNotMinted();
-    }
-
-    // function to retrieve the name attribute
-    function getTokenName(uint256 tokenId, uint256 collectionId)
-        private
-        view
-        returns (string memory)
-    {
-        return StreamMetadataRenderer.tokenName(
-            collectionInfo[collectionId].collectionName,
-            tokenId,
-            collectionAdditionalData[collectionId].reservedMinTokensIndex
-        );
     }
 
     // function to retrieve the collection freeze status
