@@ -214,6 +214,14 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         {"schema_version": "6529stream.protocol-surface-report.v1", "contracts": {}},
     )
     write_json(
+        latest / "custom-error-catalog.json",
+        {
+            "schema_version": "6529stream.custom-error-catalog.v1",
+            "summary": {"custom_error_count": 0},
+            "entries": [],
+        },
+    )
+    write_json(
         latest / "release-artifact-manifest.json",
         {
             "schema_version": "6529stream.release-artifact-manifest.v1",

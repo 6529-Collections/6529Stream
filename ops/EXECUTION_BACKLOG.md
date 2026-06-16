@@ -3361,7 +3361,7 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `ADV-006` | Add randomizer callback reentrancy/stale-provider adversarial suite | D/F | Merged in PR #451; issue #450 closed completed |
-| `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | Active issue #452; local branch `codex/metadata-freeze-cross-invariants` |
+| `ADV-007` | Add metadata freeze/dependency/randomness cross-invariant tests | D/F | Merged in PR #453; issue #452 closed completed |
 | `ADV-008` | Add event reconstructability tests from emitted logs | D/G | Merged in PR #441 |
 | `ADV-009` | Add fork-aware Safe/ERC-1271 signature smoke tests | D/F | Merged in PR #443 |
 | `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Merged in PR #445; issue #444 closed completed |
@@ -3373,7 +3373,7 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | `INT-002` to `INT-005` |
-| `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | `CON-001` |
+| `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Active issue #454; branch `codex/custom-error-catalog` |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | issues #430 and #432 size reports |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | `CON-001` |
 | `CON-007` | Add interface/version views for frontend compatibility | G | `INT-001` |
