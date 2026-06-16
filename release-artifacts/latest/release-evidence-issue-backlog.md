@@ -784,7 +784,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows |
 | Template | `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`; Replace this template with sanitized live Foundry broadcast outputs, derived manifest inputs, redaction confirmation, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`; Replace this template with sanitized live Foundry broadcast outputs, derived manifest inputs, redaction confirmation, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -802,12 +802,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `production_broadcast_retention`
 - Evidence template: `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with sanitized live Foundry broadcast outputs, derived manifest inputs, redaction confirmation, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation

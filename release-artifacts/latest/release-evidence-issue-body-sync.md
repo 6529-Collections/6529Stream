@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:e5fa16c4cbd68efbef97dc9f2f0b5cb909b261b703fbfe959d132ab895a84925` |
+| Backlog SHA-256 | `sha256:ebf1e4dc61d107b8dde700afb2e493de237dd6bb6be2f8c9c1fa1d24805aa05e` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:a9790af58498df99f5978b7dfeb690197e7d2cf801e33dc065d377124bc0e590` |
 
@@ -38,7 +38,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:4f0459bf397f4759dfced70caccfcf11f4ce35e1abc93064338e16c679842447` | 53 |
 | [#224](https://github.com/6529-Collections/6529Stream/issues/224) | `production-release-signed-git-tag` | `missing` | `sha256:257a6ed50cfb216a31169c5d53f89dcd8ce8b87830a6f90234fc8da165d4cef1` | 53 |
 | [#225](https://github.com/6529-Collections/6529Stream/issues/225) | `production-release-production-address-books` | `missing` | `sha256:5fc2a2a274cf8e87e1dab01751939d67d84c22ead6ee4ae23ca23f1f7156578d` | 53 |
-| [#226](https://github.com/6529-Collections/6529Stream/issues/226) | `production-release-production-broadcast-retention` | `missing` | `sha256:27b2faf50a382ca85b84d9bf5dd715e63ce9552cdcae3732f5356e78079400f1` | 53 |
+| [#226](https://github.com/6529-Collections/6529Stream/issues/226) | `production-release-production-broadcast-retention` | `missing` | `sha256:99e825429e152fa065b78eae8511755389d69f7bcfbd04d64932d1a72093ec9b` | 53 |
 | [#227](https://github.com/6529-Collections/6529Stream/issues/227) | `production-release-live-deployment-manifest` | `missing` | `sha256:4a82682d40aa8b498be8caa99ed69f7db4b19b518dbeeb500e63b29d5efd3c3b` | 53 |
 | [#228](https://github.com/6529-Collections/6529Stream/issues/228) | `production-release-live-ceremony-evidence` | `missing` | `sha256:ece9d9c744c23a00979454a3b0dcd07755339759fcf34ef0cb0cd9344ea0e9a2` | 53 |
 | [#229](https://github.com/6529-Collections/6529Stream/issues/229) | `production-release-live-randomizer-operations-evidence` | `missing` | `sha256:63f0c2051c705c122f090ec56ddc057d340268e796fb5b024dd7df3b5173e8d7` | 53 |
@@ -737,8 +737,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #226 production-release-production-broadcast-retention
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/226
-- Body SHA-256: `sha256:27b2faf50a382ca85b84d9bf5dd715e63ce9552cdcae3732f5356e78079400f1`
-- Source body SHA-256: `sha256:a47640456ad9c0478dde34bf28e9572b4b50d9fb60f85a544a3b3be2ef0f7cf6`
+- Body SHA-256: `sha256:99e825429e152fa065b78eae8511755389d69f7bcfbd04d64932d1a72093ec9b`
+- Source body SHA-256: `sha256:25c793cd395d4a6741eec8c4b31208edd4064ffdd3f9caf61ff8360a46b42cfd`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-production-broadcast-retention issue_number=226 -->
@@ -760,12 +760,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `production_broadcast_retention`
 - Evidence template: `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with sanitized live Foundry broadcast outputs, derived manifest inputs, redaction confirmation, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation

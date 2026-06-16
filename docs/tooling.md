@@ -540,6 +540,18 @@ The Sepolia setup template lives at
 `docs/deployment.md#sepolia-deployment-rehearsal-runbook` and
 `script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()"`
 when preparing future reviewed testnet evidence.
+Production broadcast retention evidence has a dedicated no-secret retained
+artifact template at
+`release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`.
+Run `python scripts/test_production_broadcast_retention.py` and
+`python scripts/check_production_broadcast_retention.py` before generating the
+metadata envelope for `production_broadcast_retention`. The checker requires
+sanitized command transcripts, sanitized Foundry broadcasts, derived
+broadcast-manifest inputs, generated live deployment manifests, generated live
+address books, release manifest/checksum digests, reviewer metadata, and
+explicit redaction confirmations before a reviewed artifact can pass. The
+committed file is template-only and keeps production release blocked until a
+future reviewed production deployment retention record is accepted.
 
 The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release

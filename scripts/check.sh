@@ -94,6 +94,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_fork_deployment_rehearsal_evidence.py
 "$python_bin" scripts/test_testnet_deployment_rehearsal_evidence.py
 "$python_bin" scripts/check_testnet_deployment_rehearsal_evidence.py
+"$python_bin" scripts/test_production_broadcast_retention.py
+"$python_bin" scripts/check_production_broadcast_retention.py
 "$python_bin" scripts/test_marketplace_indexer_evidence.py
 "$python_bin" scripts/check_marketplace_indexer_evidence.py
 "$python_bin" scripts/test_public_beta_evidence.py
