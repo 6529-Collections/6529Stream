@@ -11,6 +11,27 @@ import "./Strings.sol";
 library StreamMetadataRenderer {
     using Strings for uint256;
 
+    uint256 private constant _MAX_COLLECTION_TEXT_BYTES = 2_048;
+    uint256 private constant _MAX_TOKEN_DATA_BYTES = 4_096;
+    uint256 private constant _MAX_TOKEN_IMAGE_BYTES = 2_048;
+    uint256 private constant _MAX_TOKEN_ATTRIBUTES_BYTES = 8_192;
+    uint256 private constant _MAX_COLLECTION_SCRIPT_CHUNK_BYTES = 8_192;
+    uint256 private constant _MAX_COLLECTION_SCRIPT_CHUNKS = 32;
+    uint256 private constant _MAX_GENERATED_TOKEN_URI_BYTES = 65_536;
+    bytes32 private constant _FIELD_COLLECTION_NAME = "collection.name";
+    bytes32 private constant _FIELD_COLLECTION_ARTIST = "collection.artist";
+    bytes32 private constant _FIELD_COLLECTION_DESCRIPTION = "collection.description";
+    bytes32 private constant _FIELD_COLLECTION_WEBSITE = "collection.website";
+    bytes32 private constant _FIELD_COLLECTION_LICENSE = "collection.license";
+    bytes32 private constant _FIELD_COLLECTION_BASE_URI = "collection.baseURI";
+    bytes32 private constant _FIELD_COLLECTION_LIBRARY = "collection.library";
+    bytes32 private constant _FIELD_COLLECTION_SCRIPT = "collection.script";
+    bytes32 private constant _FIELD_COLLECTION_SCRIPT_COUNT = "collection.scriptCount";
+    bytes32 private constant _FIELD_TOKEN_DATA = "token.data";
+    bytes32 private constant _FIELD_TOKEN_IMAGE = "token.image";
+    bytes32 private constant _FIELD_TOKEN_ATTRIBUTES = "token.attributes";
+    bytes32 private constant _FIELD_TOKEN_URI = "tokenURI";
+
     bytes32 private constant _COLLECTION_SCRIPT_TYPEHASH =
         keccak256("6529StreamCollectionScript(uint256 chunkCount,bytes32 chunksHash)");
     bytes32 private constant _COLLECTION_SCRIPT_CHUNK_TYPEHASH = keccak256(
@@ -86,6 +107,32 @@ library StreamMetadataRenderer {
         );
         uint256 actual = bytes(tokenUri).length;
         if (actual > maximum) revert MetadataFieldTooLarge(field, actual, maximum);
+    }
+
+    function onchainTokenURIWithDefaultLimit(
+        string memory schemaVersion,
+        string memory metadataState,
+        string memory name,
+        string memory description,
+        string memory image,
+        string memory attributes,
+        string memory collectionLibrary,
+        string memory animationScript,
+        bool includeAnimation
+    ) public pure returns (string memory) {
+        return onchainTokenURIWithLimit(
+            schemaVersion,
+            metadataState,
+            name,
+            description,
+            image,
+            attributes,
+            collectionLibrary,
+            animationScript,
+            includeAnimation,
+            _FIELD_TOKEN_URI,
+            _MAX_GENERATED_TOKEN_URI_BYTES
+        );
     }
 
     function onchainMetadataJson(
@@ -653,6 +700,65 @@ library StreamMetadataRenderer {
         for (uint256 i = 0; i < chunks.length; i++) {
             requireValidUtf8Bytes(chunkField, chunks[i], maxChunkBytes);
         }
+    }
+
+    function requireCollectionInfoLimits(
+        string memory name,
+        string memory artist,
+        string memory description,
+        string memory website,
+        string memory license,
+        string memory baseURI,
+        string memory libraryUrl,
+        string[] memory script
+    ) public pure {
+        requireValidUtf8Bytes(_FIELD_COLLECTION_NAME, name, _MAX_COLLECTION_TEXT_BYTES);
+        requireValidUtf8Bytes(_FIELD_COLLECTION_ARTIST, artist, _MAX_COLLECTION_TEXT_BYTES);
+        requireValidUtf8Bytes(
+            _FIELD_COLLECTION_DESCRIPTION, description, _MAX_COLLECTION_TEXT_BYTES
+        );
+        requireValidUtf8Bytes(_FIELD_COLLECTION_WEBSITE, website, _MAX_COLLECTION_TEXT_BYTES);
+        requireValidUtf8Bytes(_FIELD_COLLECTION_LICENSE, license, _MAX_COLLECTION_TEXT_BYTES);
+        requireValidCollectionUris(
+            _FIELD_COLLECTION_BASE_URI,
+            baseURI,
+            _FIELD_COLLECTION_LIBRARY,
+            libraryUrl,
+            _MAX_COLLECTION_TEXT_BYTES
+        );
+        requireValidUtf8ByteChunks(
+            _FIELD_COLLECTION_SCRIPT_COUNT,
+            _FIELD_COLLECTION_SCRIPT,
+            script,
+            _MAX_COLLECTION_SCRIPT_CHUNKS,
+            _MAX_COLLECTION_SCRIPT_CHUNK_BYTES
+        );
+    }
+
+    function requireCollectionBaseURI(string memory baseURI) public pure {
+        requireValidUtf8ContentUri(
+            _FIELD_COLLECTION_BASE_URI, baseURI, _MAX_COLLECTION_TEXT_BYTES, true
+        );
+    }
+
+    function requireCollectionScriptChunk(string memory scriptChunk) public pure {
+        requireValidUtf8Bytes(
+            _FIELD_COLLECTION_SCRIPT, scriptChunk, _MAX_COLLECTION_SCRIPT_CHUNK_BYTES
+        );
+    }
+
+    function requireTokenData(string memory data) public pure {
+        requireValidUtf8Bytes(_FIELD_TOKEN_DATA, data, _MAX_TOKEN_DATA_BYTES);
+    }
+
+    function requireTokenImage(string memory image) public pure {
+        requireValidUtf8ContentUri(_FIELD_TOKEN_IMAGE, image, _MAX_TOKEN_IMAGE_BYTES, false);
+    }
+
+    function requireTokenAttributes(uint256 tokenId, string memory attributes) public pure {
+        requireValidUtf8RawAttributes(
+            tokenId, _FIELD_TOKEN_ATTRIBUTES, attributes, _MAX_TOKEN_ATTRIBUTES_BYTES
+        );
     }
 
     function isSafeRawAttributes(string memory raw) public pure returns (bool) {

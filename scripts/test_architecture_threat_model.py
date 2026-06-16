@@ -40,7 +40,7 @@ def seed_bytecode_proof(
             },
         }
     ]
-    sizes = [(23159, 1417)] if streamcore_sizes is None else streamcore_sizes
+    sizes = [(22390, 2186)] if streamcore_sizes is None else streamcore_sizes
     for index, (runtime, margin) in enumerate(sizes):
         contract_proofs.append(
             {
@@ -58,7 +58,7 @@ def seed_bytecode_proof(
     )
 
 
-def seed_size_evidence_docs(root: Path, runtime: int = 23159, margin: int = 1417) -> None:
+def seed_size_evidence_docs(root: Path, runtime: int = 22390, margin: int = 2186) -> None:
     for relative in [
         checker.DEFAULT_STATUS,
         checker.DEFAULT_RELEASE_POLICY,
@@ -93,7 +93,7 @@ def target_links() -> str:
     )
 
 
-def minimal_architecture_doc(runtime: int = 23159, margin: int = 1417) -> str:
+def minimal_architecture_doc(runtime: int = 22390, margin: int = 2186) -> str:
     commands = "\n".join(checker.REQUIRED_COMMANDS)
     links = target_links()
     return f"""# Architecture
@@ -439,7 +439,7 @@ class ArchitectureThreatModelTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            seed_bytecode_proof(root, [(23159, 1417), (23661, 915)])
+            seed_bytecode_proof(root, [(22390, 2186), (23661, 915)])
             write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
             write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
 

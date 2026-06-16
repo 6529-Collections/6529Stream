@@ -4,50 +4,50 @@
   "source": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:2d27b6606859241b16a34f2b8666c5ddb3e65f680f0e5b2bd5555a4629656cf7",
+      "sha256": "sha256:d9608c1b84dd49feee388f5a8b4189c933e6b1a975a9f06a9bec09ad8593570b",
       "size_bytes": 104217
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:74eb8b6733836710fdc6ea794277047e07c26bda04a6c0776873453c1c290679",
+      "sha256": "sha256:2d40346b7f731f4c4bf2b930e4d601dcc896637c6d3239706580cf469a942ea9",
       "size_bytes": 14788
     },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:ce90a7665b662c0f34b9ced694b6cc45fecef364b0e0d701b04c7191fb1ccb45",
-      "size_bytes": 55573
+      "sha256": "sha256:bc94be4f719fbe4eaf8a37727f59ba079046fe6ad829e89b135bfc4a586b2279",
+      "size_bytes": 55385
     },
     "deployment_manifests": [
       {
         "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
+        "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
         "size_bytes": 8951
       },
       {
         "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-        "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
+        "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
         "size_bytes": 8914
       },
       {
         "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
+        "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
         "size_bytes": 9097
       }
     ],
     "address_books": [
       {
         "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de",
+        "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029",
         "size_bytes": 5576
       },
       {
         "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-        "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb",
+        "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5",
         "size_bytes": 5556
       },
       {
         "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5",
+        "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076",
         "size_bytes": 5593
       }
     ]
@@ -91,8 +91,8 @@
       },
       "hashes": {
         "abi": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-        "runtime_bytecode": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984",
-        "creation_bytecode": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c"
+        "runtime_bytecode": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb",
+        "creation_bytecode": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0"
       },
       "sizes": {
         "runtime_bytecode_bytes": 6007,
@@ -111,19 +111,19 @@
       "source_verification": {
         "source_sha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815",
         "source_solc_keccak256": "0xc0f7fac9d1f170d9817c2d1aad59ff02716d8db8608c4dd73acbc10756cac2ff",
-        "artifact_sha256": "sha256:388ce14667994f7625ed8fd876fa66254bf78ecacf476a686241681952327b61",
+        "artifact_sha256": "sha256:e7ecd2c4a2932fef948587d4ee8ec772254c643c54bf87a7782142bb022ca448",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -174,12 +174,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -223,19 +223,19 @@
       "source_verification": {
         "source_sha256": "sha256:41cc60fe13fdd3e80c1c37671302ba919dcd7d50e7c8795aca38e5494fffaad7",
         "source_solc_keccak256": "0xe317befb192295d051ede6e848c34e2e6c2bb917681ca106931d74eb57251455",
-        "artifact_sha256": "sha256:2f1d7a1ffacdd7f48f26d2c9280b41625500e52f72e474bbef11d3657cd4f259",
+        "artifact_sha256": "sha256:6cc34f03fd415740a587d18e7673fd4fc18b1ded145058ed72f4b51f091ec3ed",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -286,12 +286,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -342,12 +342,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -371,8 +371,8 @@
       },
       "hashes": {
         "abi": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-        "runtime_bytecode": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe",
-        "creation_bytecode": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3"
+        "runtime_bytecode": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c",
+        "creation_bytecode": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a"
       },
       "sizes": {
         "runtime_bytecode_bytes": 2476,
@@ -391,19 +391,19 @@
       "source_verification": {
         "source_sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
         "source_solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
-        "artifact_sha256": "sha256:0dcc8555d1c709117458c6f7ad918c6d76286f17874e96aa2afc701d0bd7c748",
+        "artifact_sha256": "sha256:0e6248e9fe6ca29c20262b0db520b457e899934970c166744d943ea52c0b8d9c",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -427,14 +427,14 @@
       },
       "hashes": {
         "abi": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-        "runtime_bytecode": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046",
-        "creation_bytecode": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93"
+        "runtime_bytecode": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851",
+        "creation_bytecode": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3"
       },
       "sizes": {
-        "runtime_bytecode_bytes": 23159,
-        "creation_bytecode_bytes": 24320,
+        "runtime_bytecode_bytes": 22390,
+        "creation_bytecode_bytes": 23551,
         "eip170_runtime_limit_bytes": 24576,
-        "runtime_margin_bytes": 1417
+        "runtime_margin_bytes": 2186
       },
       "compiler": {
         "version": "0.8.19+commit.7dd6d404",
@@ -445,21 +445,21 @@
         "metadata_bytecode_hash": "ipfs"
       },
       "source_verification": {
-        "source_sha256": "sha256:ce69eb531083f132bad6c07818951f9103cbebaaff848fd7d834b68b12c3d328",
-        "source_solc_keccak256": "0x2d219d0e870bacd1a9b031c4565d7815a91f46f00dd7f679fcfee2be639925fd",
-        "artifact_sha256": "sha256:b40c926f6b8424a8f8e6cda9ef4dc87425067761a2795d626b56937874a3949b",
+        "source_sha256": "sha256:1c8255d05f1fb987d7c886832f1c1c6f8777c9966c667111a479cd9be007ebd0",
+        "source_solc_keccak256": "0xb6ca0c389558f64b02e2678e3982e7b3025ad28670592282e2fd6eba52eca593",
+        "artifact_sha256": "sha256:cc7efe1ab332878998db6cb5f8562f964b9be2cf7b0ffc391d22f709a62da355",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -510,12 +510,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -566,12 +566,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -622,12 +622,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:5956648d010dd60e6539f7b1d0852175a2bd10617c3b6f34ddd1c07333c774f4",
-          "release_artifact_manifest_sha256": "sha256:2283399a531bbd6a3d473c3c1b5aa32f0d93c0b163092bf0fbc545d58d86b5a5"
+          "sha256": "sha256:86afd70aae73ea337cfbfffbcca1963daed36f789fd19009ffc93d7d556450f0",
+          "release_artifact_manifest_sha256": "sha256:0d061930b920ef41fe487832e3fed033882d3af831f5e4774da8d8a3529ac833"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:3d64b8095cbe03cd04b8591a8a475e7abd895a37a5e45b8d94ec21cd916126cb"
+          "sha256": "sha256:788b01fdbab7156b656b9df3354782fda1bde2f05a26b609ae8b36451871f0f5"
         }
       },
       "limitations": [
@@ -651,8 +651,8 @@
       },
       "hashes": {
         "abi": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-        "runtime_bytecode": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984",
-        "creation_bytecode": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c"
+        "runtime_bytecode": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb",
+        "creation_bytecode": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0"
       },
       "sizes": {
         "runtime_bytecode_bytes": 6007,
@@ -671,19 +671,19 @@
       "source_verification": {
         "source_sha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815",
         "source_solc_keccak256": "0xc0f7fac9d1f170d9817c2d1aad59ff02716d8db8608c4dd73acbc10756cac2ff",
-        "artifact_sha256": "sha256:388ce14667994f7625ed8fd876fa66254bf78ecacf476a686241681952327b61",
+        "artifact_sha256": "sha256:e7ecd2c4a2932fef948587d4ee8ec772254c643c54bf87a7782142bb022ca448",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -734,12 +734,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -783,19 +783,19 @@
       "source_verification": {
         "source_sha256": "sha256:41cc60fe13fdd3e80c1c37671302ba919dcd7d50e7c8795aca38e5494fffaad7",
         "source_solc_keccak256": "0xe317befb192295d051ede6e848c34e2e6c2bb917681ca106931d74eb57251455",
-        "artifact_sha256": "sha256:2f1d7a1ffacdd7f48f26d2c9280b41625500e52f72e474bbef11d3657cd4f259",
+        "artifact_sha256": "sha256:6cc34f03fd415740a587d18e7673fd4fc18b1ded145058ed72f4b51f091ec3ed",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -846,12 +846,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -902,12 +902,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -931,8 +931,8 @@
       },
       "hashes": {
         "abi": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-        "runtime_bytecode": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe",
-        "creation_bytecode": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3"
+        "runtime_bytecode": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c",
+        "creation_bytecode": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a"
       },
       "sizes": {
         "runtime_bytecode_bytes": 2476,
@@ -951,19 +951,19 @@
       "source_verification": {
         "source_sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
         "source_solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
-        "artifact_sha256": "sha256:0dcc8555d1c709117458c6f7ad918c6d76286f17874e96aa2afc701d0bd7c748",
+        "artifact_sha256": "sha256:0e6248e9fe6ca29c20262b0db520b457e899934970c166744d943ea52c0b8d9c",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -987,14 +987,14 @@
       },
       "hashes": {
         "abi": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-        "runtime_bytecode": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046",
-        "creation_bytecode": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93"
+        "runtime_bytecode": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851",
+        "creation_bytecode": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3"
       },
       "sizes": {
-        "runtime_bytecode_bytes": 23159,
-        "creation_bytecode_bytes": 24320,
+        "runtime_bytecode_bytes": 22390,
+        "creation_bytecode_bytes": 23551,
         "eip170_runtime_limit_bytes": 24576,
-        "runtime_margin_bytes": 1417
+        "runtime_margin_bytes": 2186
       },
       "compiler": {
         "version": "0.8.19+commit.7dd6d404",
@@ -1005,21 +1005,21 @@
         "metadata_bytecode_hash": "ipfs"
       },
       "source_verification": {
-        "source_sha256": "sha256:ce69eb531083f132bad6c07818951f9103cbebaaff848fd7d834b68b12c3d328",
-        "source_solc_keccak256": "0x2d219d0e870bacd1a9b031c4565d7815a91f46f00dd7f679fcfee2be639925fd",
-        "artifact_sha256": "sha256:b40c926f6b8424a8f8e6cda9ef4dc87425067761a2795d626b56937874a3949b",
+        "source_sha256": "sha256:1c8255d05f1fb987d7c886832f1c1c6f8777c9966c667111a479cd9be007ebd0",
+        "source_solc_keccak256": "0xb6ca0c389558f64b02e2678e3982e7b3025ad28670592282e2fd6eba52eca593",
+        "artifact_sha256": "sha256:cc7efe1ab332878998db6cb5f8562f964b9be2cf7b0ffc391d22f709a62da355",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -1070,12 +1070,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -1126,12 +1126,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -1182,12 +1182,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:724bb1dc326837a58cdf4f6006a0e4fc52273ee5ce8ba0a0c87c13db874c0061",
-          "release_artifact_manifest_sha256": "sha256:ea31e9bdb3d442fcdf5a3720125c71fa81bb226d54b995d007f3fe3b220fd835"
+          "sha256": "sha256:ee9ae52dadbe2824745ab9bcfa865918a0246d9ceb3b98c6f25b63334d99570c",
+          "release_artifact_manifest_sha256": "sha256:83a4f0f08e2d592c2401036b055a67260dcb8eae3689287ee5a930a75250479c"
         },
         "address_book": {
           "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:586cdff611a6b8a1cddf2425286591388372b02ac0a46510307e4599ffe186de"
+          "sha256": "sha256:730d647f07243fde9e2d4dc7271f2248aa45ef9805b947e8dd3c248bef84d029"
         }
       },
       "limitations": [
@@ -1211,8 +1211,8 @@
       },
       "hashes": {
         "abi": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-        "runtime_bytecode": "sha256:bc4d23922af9508ce5efcc9b6e00fb6a1bc14be136f6cd5c33d9172018fed984",
-        "creation_bytecode": "sha256:043d4da56bef6972c718ce6f429f11cdf6711bb147c661a0b88e46a6d17e739c"
+        "runtime_bytecode": "sha256:95ac2032ad457f48a979b3427891cb6ef18e6bac8ab6f9d2f35ab95cb3b57aeb",
+        "creation_bytecode": "sha256:36b4ad5fc349cc7121a7e6c6a58480011a7e84790d594fd83ef04ec0bf9e63c0"
       },
       "sizes": {
         "runtime_bytecode_bytes": 6007,
@@ -1231,19 +1231,19 @@
       "source_verification": {
         "source_sha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815",
         "source_solc_keccak256": "0xc0f7fac9d1f170d9817c2d1aad59ff02716d8db8608c4dd73acbc10756cac2ff",
-        "artifact_sha256": "sha256:388ce14667994f7625ed8fd876fa66254bf78ecacf476a686241681952327b61",
+        "artifact_sha256": "sha256:e7ecd2c4a2932fef948587d4ee8ec772254c643c54bf87a7782142bb022ca448",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1294,12 +1294,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1343,19 +1343,19 @@
       "source_verification": {
         "source_sha256": "sha256:41cc60fe13fdd3e80c1c37671302ba919dcd7d50e7c8795aca38e5494fffaad7",
         "source_solc_keccak256": "0xe317befb192295d051ede6e848c34e2e6c2bb917681ca106931d74eb57251455",
-        "artifact_sha256": "sha256:2f1d7a1ffacdd7f48f26d2c9280b41625500e52f72e474bbef11d3657cd4f259",
+        "artifact_sha256": "sha256:6cc34f03fd415740a587d18e7673fd4fc18b1ded145058ed72f4b51f091ec3ed",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1406,12 +1406,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1462,12 +1462,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1491,8 +1491,8 @@
       },
       "hashes": {
         "abi": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-        "runtime_bytecode": "sha256:507e31ff8b392a7ee0beba637f9cfdb43200584fc9a5790f9cc9f7caa569eafe",
-        "creation_bytecode": "sha256:7c97debd66b7024f49c9f5e875a918bf0f768b317e9fb89c073aa02cfb5cc6b3"
+        "runtime_bytecode": "sha256:e69837e9d38bfa65e2c1bffdcff58f145103e44aa2e118174b574d39a4cdac0c",
+        "creation_bytecode": "sha256:b0f186db45bd3aa7d5c141c50f3071f0b614788942520c98b8a6d8b11e868b9a"
       },
       "sizes": {
         "runtime_bytecode_bytes": 2476,
@@ -1511,19 +1511,19 @@
       "source_verification": {
         "source_sha256": "sha256:44e791a7da98a551e218f457b5e1c6c210a469448a63b2a2b1d1696bc14ff556",
         "source_solc_keccak256": "0x57c2c8933a258f4b058ce24483f3394403378032cb901f24815b12349f5fb3df",
-        "artifact_sha256": "sha256:0dcc8555d1c709117458c6f7ad918c6d76286f17874e96aa2afc701d0bd7c748",
+        "artifact_sha256": "sha256:0e6248e9fe6ca29c20262b0db520b457e899934970c166744d943ea52c0b8d9c",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1547,14 +1547,14 @@
       },
       "hashes": {
         "abi": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-        "runtime_bytecode": "sha256:4a964358ccce0e08705f05aa4c9801b1eb5954608b6fef7ebd9dfbd3c28f7046",
-        "creation_bytecode": "sha256:781948b482776fb6afc42eafe86e6b89072f442a1f182ee69982e9c73db87f93"
+        "runtime_bytecode": "sha256:e5f61b47bd7ef4b9ebb59361424e076bf1160d0d895b0653f46375e9f5595851",
+        "creation_bytecode": "sha256:4aaad09b86c341b34b334d77304943d4e35e7f4ed4acb944f0cc6b74945f9ad3"
       },
       "sizes": {
-        "runtime_bytecode_bytes": 23159,
-        "creation_bytecode_bytes": 24320,
+        "runtime_bytecode_bytes": 22390,
+        "creation_bytecode_bytes": 23551,
         "eip170_runtime_limit_bytes": 24576,
-        "runtime_margin_bytes": 1417
+        "runtime_margin_bytes": 2186
       },
       "compiler": {
         "version": "0.8.19+commit.7dd6d404",
@@ -1565,21 +1565,21 @@
         "metadata_bytecode_hash": "ipfs"
       },
       "source_verification": {
-        "source_sha256": "sha256:ce69eb531083f132bad6c07818951f9103cbebaaff848fd7d834b68b12c3d328",
-        "source_solc_keccak256": "0x2d219d0e870bacd1a9b031c4565d7815a91f46f00dd7f679fcfee2be639925fd",
-        "artifact_sha256": "sha256:b40c926f6b8424a8f8e6cda9ef4dc87425067761a2795d626b56937874a3949b",
+        "source_sha256": "sha256:1c8255d05f1fb987d7c886832f1c1c6f8777c9966c667111a479cd9be007ebd0",
+        "source_solc_keccak256": "0xb6ca0c389558f64b02e2678e3982e7b3025ad28670592282e2fd6eba52eca593",
+        "artifact_sha256": "sha256:cc7efe1ab332878998db6cb5f8562f964b9be2cf7b0ffc391d22f709a62da355",
         "constructor_args_status": "retained_per_deployment_manifest",
         "verification_status": "not_applicable"
       },
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1630,12 +1630,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1686,12 +1686,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [
@@ -1742,12 +1742,12 @@
       "artifacts": {
         "deployment_manifest": {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:cf79374eb0ac370d7b2e44b1bc50888143f5725c0dd7bc7365d6362a28a44b79",
-          "release_artifact_manifest_sha256": "sha256:1944f3a865adbfdeaa52399bb1ebc23879109ff5bf98d20e7da27d79183abc73"
+          "sha256": "sha256:5340c5e009a5b435b604129cc832224d41717e4787b10d29daa49c743aaf8394",
+          "release_artifact_manifest_sha256": "sha256:1738fc6e3d639b107192dcced9d630466ca2c9fcea504dd0a827fa6fa6174221"
         },
         "address_book": {
           "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:49e6d7b926dea8c1b1881f49087962fbe100a8bf2dc954d473f81e983745cad5"
+          "sha256": "sha256:3bcf1498525174120a77ee4b6ffd06a8ce8ead430983ab5017689f303d28e076"
         }
       },
       "limitations": [

@@ -31,7 +31,7 @@
     "renderer_source": {
       "category": "renderer_source",
       "path": "smart-contracts/StreamMetadataRenderer.sol",
-      "sha256": "sha256:5ed93159760ef13ecd3577054e007ab5f4d42273f5f89257dfcfb6378b0d8b7f"
+      "sha256": "sha256:115ae4e6eef476779256ddffa9f506b8d86c9c440902d3dc5e4e29ba10f78e04"
     },
     "rendering_mode": "animation_html",
     "runtime_assumptions": {
@@ -146,7 +146,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:9c7e9d91bbc583f1471b135bf77217d85b40e1c89adee37b0df384e043f5fd12",
+      "sha256": "sha256:756a3e02d20210f48de14fbe85aae1a3d3736f34adbbbef2bb83c799a0a9bcfe",
       "status": "template"
     }
   },
@@ -187,7 +187,7 @@
     {
       "category": "provenance_manifest",
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:9c7e9d91bbc583f1471b135bf77217d85b40e1c89adee37b0df384e043f5fd12"
+      "sha256": "sha256:756a3e02d20210f48de14fbe85aae1a3d3736f34adbbbef2bb83c799a0a9bcfe"
     }
   ],
   "redaction_policy": {

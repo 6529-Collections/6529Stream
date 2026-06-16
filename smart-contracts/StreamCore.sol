@@ -56,19 +56,6 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     uint256 public constant MAX_COLLECTION_SCRIPT_CHUNK_BYTES = 8_192;
     uint256 public constant MAX_COLLECTION_SCRIPT_CHUNKS = 32;
     uint256 public constant MAX_GENERATED_TOKEN_URI_BYTES = 65_536;
-    bytes32 private constant _FIELD_COLLECTION_NAME = "collection.name";
-    bytes32 private constant _FIELD_COLLECTION_ARTIST = "collection.artist";
-    bytes32 private constant _FIELD_COLLECTION_DESCRIPTION = "collection.description";
-    bytes32 private constant _FIELD_COLLECTION_WEBSITE = "collection.website";
-    bytes32 private constant _FIELD_COLLECTION_LICENSE = "collection.license";
-    bytes32 private constant _FIELD_COLLECTION_BASE_URI = "collection.baseURI";
-    bytes32 private constant _FIELD_COLLECTION_LIBRARY = "collection.library";
-    bytes32 private constant _FIELD_COLLECTION_SCRIPT = "collection.script";
-    bytes32 private constant _FIELD_COLLECTION_SCRIPT_COUNT = "collection.scriptCount";
-    bytes32 private constant _FIELD_TOKEN_DATA = "token.data";
-    bytes32 private constant _FIELD_TOKEN_IMAGE = "token.image";
-    bytes32 private constant _FIELD_TOKEN_ATTRIBUTES = "token.attributes";
-    bytes32 private constant _FIELD_TOKEN_URI = "tokenURI";
 
     error CollectionAlreadyFrozen(uint256 collectionId);
     error CollectionDataMissing(uint256 collectionId);
@@ -289,7 +276,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         string[] memory _collectionScript
     ) public FunctionAdminRequired(this.createCollection.selector) {
         _requireMetadataMutationNotPaused();
-        _requireCollectionInfoLimits(
+        StreamMetadataRenderer.requireCollectionInfoLimits(
             _collectionName,
             _collectionArtist,
             _collectionDescription,
@@ -392,7 +379,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             revert NotMinterContract();
         }
         _requireCollectionNotFrozen(_collectionID);
-        _requireMaxBytes(_FIELD_TOKEN_DATA, _tokenData, MAX_TOKEN_DATA_BYTES);
+        StreamMetadataRenderer.requireTokenData(_tokenData);
         collectionAdditionalData[_collectionID].collectionCirculationSupply =
             collectionAdditionalData[_collectionID].collectionCirculationSupply + 1;
         if (
@@ -478,7 +465,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         _requireMetadataMutationNotPaused();
         _requireExistingMutableCollection(_collectionID);
         if (_index == _FULL_COLLECTION_UPDATE_INDEX) {
-            _requireCollectionInfoLimits(
+            StreamMetadataRenderer.requireCollectionInfoLimits(
                 _newCollectionName,
                 _newCollectionArtist,
                 _newCollectionDescription,
@@ -500,14 +487,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             collectionInfo[_collectionID].collectionScript = _newCollectionScript;
             _pinCollectionDependency(_collectionID, _newCollectionDependencyScript);
         } else if (_index == _BASE_URI_UPDATE_INDEX) {
-            StreamMetadataRenderer.requireValidUtf8ContentUri(
-                _FIELD_COLLECTION_BASE_URI, _newCollectionBaseURI, MAX_COLLECTION_TEXT_BYTES, true
-            );
+            StreamMetadataRenderer.requireCollectionBaseURI(_newCollectionBaseURI);
             collectionInfo[_collectionID].collectionBaseURI = _newCollectionBaseURI;
         } else {
-            _requireMaxBytes(
-                _FIELD_COLLECTION_SCRIPT, _newCollectionScript[0], MAX_COLLECTION_SCRIPT_CHUNK_BYTES
-            );
+            StreamMetadataRenderer.requireCollectionScriptChunk(_newCollectionScript[0]);
             collectionInfo[_collectionID].collectionScript[_index] = _newCollectionScript[0];
         }
         _emitCollectionMetadataUpdate(_collectionID);
@@ -570,7 +553,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         uint256 collectionId = tokenIdsToCollectionIds[_tokenId];
         _requireCollectionNotFrozen(collectionId);
         _requireMinted(_tokenId);
-        _requireMaxBytes(_FIELD_TOKEN_DATA, newData, MAX_TOKEN_DATA_BYTES);
+        StreamMetadataRenderer.requireTokenData(newData);
         tokenData[_tokenId] = newData;
         _refreshLiveTokenMetadataRecord(collectionId, _tokenId);
         emit MetadataUpdate(_tokenId);
@@ -590,12 +573,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             uint256 collectionId = tokenIdsToCollectionIds[_tokenId[x]];
             _requireCollectionNotFrozen(collectionId);
             _requireMinted(_tokenId[x]);
-            StreamMetadataRenderer.requireValidUtf8ContentUri(
-                _FIELD_TOKEN_IMAGE, _images[x], MAX_TOKEN_IMAGE_BYTES, false
-            );
-            StreamMetadataRenderer.requireValidUtf8RawAttributes(
-                _tokenId[x], _FIELD_TOKEN_ATTRIBUTES, _attributes[x], MAX_TOKEN_ATTRIBUTES_BYTES
-            );
+            StreamMetadataRenderer.requireTokenImage(_images[x]);
+            StreamMetadataRenderer.requireTokenAttributes(_tokenId[x], _attributes[x]);
             tokenImageAndAttributes[_tokenId[x]][0] = _images[x];
             tokenImageAndAttributes[_tokenId[x]][1] = _attributes[x];
             _refreshLiveTokenMetadataRecord(collectionId, _tokenId[x]);
@@ -855,7 +834,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             animationScript = retrieveGenerativeScript(tokenId);
         }
 
-        return StreamMetadataRenderer.onchainTokenURIWithLimit(
+        return StreamMetadataRenderer.onchainTokenURIWithDefaultLimit(
             METADATA_SCHEMA_VERSION,
             metadataState,
             getTokenName(tokenId, collectionId),
@@ -864,45 +843,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             tokenImageAndAttributes[tokenId][1],
             collectionInfo[collectionId].collectionLibrary,
             animationScript,
-            finalMetadata,
-            _FIELD_TOKEN_URI,
-            MAX_GENERATED_TOKEN_URI_BYTES
+            finalMetadata
         );
-    }
-
-    function _requireCollectionInfoLimits(
-        string memory name,
-        string memory artist,
-        string memory description,
-        string memory website,
-        string memory license,
-        string memory baseURI,
-        string memory libraryUrl,
-        string[] memory script
-    ) private pure {
-        _requireMaxBytes(_FIELD_COLLECTION_NAME, name, MAX_COLLECTION_TEXT_BYTES);
-        _requireMaxBytes(_FIELD_COLLECTION_ARTIST, artist, MAX_COLLECTION_TEXT_BYTES);
-        _requireMaxBytes(_FIELD_COLLECTION_DESCRIPTION, description, MAX_COLLECTION_TEXT_BYTES);
-        _requireMaxBytes(_FIELD_COLLECTION_WEBSITE, website, MAX_COLLECTION_TEXT_BYTES);
-        _requireMaxBytes(_FIELD_COLLECTION_LICENSE, license, MAX_COLLECTION_TEXT_BYTES);
-        StreamMetadataRenderer.requireValidCollectionUris(
-            _FIELD_COLLECTION_BASE_URI,
-            baseURI,
-            _FIELD_COLLECTION_LIBRARY,
-            libraryUrl,
-            MAX_COLLECTION_TEXT_BYTES
-        );
-        StreamMetadataRenderer.requireValidUtf8ByteChunks(
-            _FIELD_COLLECTION_SCRIPT_COUNT,
-            _FIELD_COLLECTION_SCRIPT,
-            script,
-            MAX_COLLECTION_SCRIPT_CHUNKS,
-            MAX_COLLECTION_SCRIPT_CHUNK_BYTES
-        );
-    }
-
-    function _requireMaxBytes(bytes32 field, string memory value, uint256 maximum) private pure {
-        StreamMetadataRenderer.requireValidUtf8Bytes(field, value, maximum);
     }
 
     function _requireMinted(uint256 tokenId) internal view override {
