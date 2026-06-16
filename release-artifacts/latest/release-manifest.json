@@ -63,8 +63,8 @@
     },
     "custom_error_catalog": {
       "path": "release-artifacts/latest/custom-error-catalog.json",
-      "sha256": "sha256:686c46d53b97f07afaf306ea4e8c24ad3d7830eaa9b84a91885b1cd394143ffb",
-      "size_bytes": 82600,
+      "sha256": "sha256:79d2c421b620404dd6cdc6003d2e938b79f96f3c46065ae5659b934cda0c5fda",
+      "size_bytes": 82575,
       "schema_version": "6529stream.custom-error-catalog.v1"
     },
     "artifact_manifest": {
@@ -2035,8 +2035,8 @@
       },
       {
         "path": "docs/custom-errors.md",
-        "sha256": "sha256:039207b4561b39c152d9fc2bf47ca40e9792e01103951492d206212b3a260cd1",
-        "size_bytes": 3965
+        "sha256": "sha256:554d353d6c4022fab3a9aef76917de91d8828f0a95a67022497c1ba046612ac5",
+        "size_bytes": 4298
       },
       {
         "path": "docs/integrations/README.md",

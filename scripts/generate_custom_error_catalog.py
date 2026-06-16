@@ -24,14 +24,64 @@ class CustomErrorCatalogError(RuntimeError):
     pass
 
 
-CATEGORY_RULES = [
-    ("access_control", ("Unauthorized", "OnlyCoordinator", "NotMinter")),
-    ("pause_emergency", ("Paused",)),
-    ("metadata_integrity", ("Metadata", "Dependency", "URI", "RawAttributes", "Frozen")),
-    ("randomness_lifecycle", ("Randomness", "RandomWords", "DerivedSeed", "Provider")),
-    ("auction_payment_safety", ("Reentrancy", "Royalty")),
-    ("supply_minting", ("Supply", "Mint", "Token", "Collection", "Burned")),
-]
+CATEGORY_BY_ERROR_NAME = {
+    "ArtistSignatureUnauthorized": "access_control",
+    "BurnedTokenRemintNotAllowed": "supply_minting",
+    "CollectionAlreadyFrozen": "metadata_integrity",
+    "CollectionDataMissing": "supply_minting",
+    "CollectionFinalSupplyWindowActive": "supply_minting",
+    "CollectionHasPendingTokenMetadata": "metadata_integrity",
+    "CollectionMintWindowActive": "supply_minting",
+    "CollectionNotCreated": "supply_minting",
+    "CollectionSupplyReached": "supply_minting",
+    "CollectionSupplyTooLarge": "supply_minting",
+    "DependencyChunkIndexOutOfBounds": "metadata_integrity",
+    "DependencyFieldInvalidUTF8": "metadata_integrity",
+    "DependencyFieldTooLarge": "metadata_integrity",
+    "DependencyKeyReserved": "metadata_integrity",
+    "DependencyVersionMissing": "metadata_integrity",
+    "EmptyContractURI": "metadata_integrity",
+    "EmptyRandomWords": "randomness_lifecycle",
+    "ERC2981InvalidDefaultRoyalty": "configuration",
+    "ERC2981InvalidDefaultRoyaltyReceiver": "configuration",
+    "ERC2981InvalidTokenRoyalty": "configuration",
+    "ERC2981InvalidTokenRoyaltyReceiver": "configuration",
+    "FinalSupplyTimeNotPassed": "supply_minting",
+    "FrozenCollectionDependencyRegistry": "metadata_integrity",
+    "FunctionAdminUnauthorized": "access_control",
+    "InvalidAdminContract": "configuration",
+    "InvalidCoreContract": "configuration",
+    "InvalidDependencyRegistryContract": "configuration",
+    "InvalidMinterContract": "configuration",
+    "InvalidRandomizerContract": "configuration",
+    "InvalidTokenMetadataInput": "metadata_integrity",
+    "MetadataFieldInvalidUTF8": "metadata_integrity",
+    "MetadataFieldTooLarge": "metadata_integrity",
+    "MetadataFrozen": "metadata_integrity",
+    "MetadataMutationPaused": "pause_emergency",
+    "NotMinterContract": "access_control",
+    "OnlyCoordinatorCanFulfill": "access_control",
+    "PendingRandomnessRequests": "randomness_lifecycle",
+    "RandomizerRequestReentrancy": "randomness_lifecycle",
+    "RandomnessPostProcessingRetryLimitReached": "randomness_lifecycle",
+    "RandomnessRequestAlreadyExists": "randomness_lifecycle",
+    "RandomnessRequestNotFailedPostProcessing": "randomness_lifecycle",
+    "RandomnessRequestNotFulfilled": "randomness_lifecycle",
+    "RandomnessRequestNotPending": "randomness_lifecycle",
+    "ReentrancyGuardReentrantCall": "auction_payment_safety",
+    "StaleRandomnessRequest": "randomness_lifecycle",
+    "TokenNotMinted": "supply_minting",
+    "TokenOutsideCollectionRange": "supply_minting",
+    "TokenRandomnessRequestAlreadyExists": "randomness_lifecycle",
+    "UnknownDependency": "metadata_integrity",
+    "UnknownRandomnessRequest": "randomness_lifecycle",
+    "UnsafeMetadataURI": "metadata_integrity",
+    "UnsafeRawAttributes": "metadata_integrity",
+    "WrongRandomnessProvider": "randomness_lifecycle",
+    "WrongRandomnessTokenCollection": "randomness_lifecycle",
+    "ZeroDerivedSeed": "randomness_lifecycle",
+    "ZeroTokenHash": "metadata_integrity",
+}
 
 SEVERITY_BY_CATEGORY = {
     "access_control": "critical",
@@ -59,7 +109,7 @@ TRACEABILITY_BY_CATEGORY = {
         "test/StreamCoreCustomErrors.t.sol",
     ],
     "pause_emergency": [
-        "test/StreamPauseSettlementMatrix.t.sol",
+        "test/StreamPauseControls.t.sol",
         "test/StreamCustomErrorNegative.t.sol",
     ],
     "metadata_integrity": [
@@ -73,7 +123,7 @@ TRACEABILITY_BY_CATEGORY = {
         "test/StreamCustomErrorNegative.t.sol",
     ],
     "auction_payment_safety": [
-        "test/StreamPaymentInvariant.t.sol",
+        "test/StreamPaymentsInvariant.t.sol",
         "test/StreamCustomErrorNegative.t.sol",
     ],
     "supply_minting": [
@@ -124,12 +174,12 @@ def require_list(value: Any, path: str) -> list[Any]:
 
 
 def classify_error(name: str, signature: str) -> str:
-    if name.startswith("ERC2981"):
-        return "configuration"
-    for category, needles in CATEGORY_RULES:
-        if any(needle in name or needle in signature for needle in needles):
-            return category
-    return "configuration"
+    try:
+        return CATEGORY_BY_ERROR_NAME[name]
+    except KeyError as exc:
+        raise CustomErrorCatalogError(
+            f"{signature} is not covered by custom error category map"
+        ) from exc
 
 
 def canonical_error_id(contract_name: str, signature: str) -> str:
@@ -211,7 +261,7 @@ def build_catalog(repo_root: Path, surface_path: Path, output_path: Path) -> dic
     }
 
 
-def validate_catalog(catalog: dict[str, Any]) -> None:
+def validate_catalog(catalog: dict[str, Any], repo_root: Path | None = None) -> None:
     if catalog.get("schema_version") != CATALOG_SCHEMA:
         raise CustomErrorCatalogError("custom error catalog has wrong schema_version")
     entries = require_list(catalog.get("entries"), "entries")
@@ -237,11 +287,15 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
         for test_path in tests:
             if not isinstance(test_path, str) or not test_path.startswith("test/"):
                 raise CustomErrorCatalogError(f"{entry_id} has invalid test traceability path")
+            if repo_root is not None and not (repo_root / test_path).is_file():
+                raise CustomErrorCatalogError(
+                    f"{entry_id} references missing test traceability file: {test_path}"
+                )
 
 
 def generate_catalog(repo_root: Path, surface_path: Path, output_path: Path) -> Path:
     catalog = build_catalog(repo_root, surface_path, output_path)
-    validate_catalog(catalog)
+    validate_catalog(catalog, repo_root)
     write_json(output_path, catalog)
     return output_path
 
@@ -255,7 +309,7 @@ def check_catalog(repo_root: Path, surface_path: Path, output_path: Path) -> int
         return 1
 
     try:
-        validate_catalog(require_dict(load_json(output_path), str(output_path)))
+        validate_catalog(require_dict(load_json(output_path), str(output_path)), repo_root)
     except CustomErrorCatalogError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -263,7 +317,7 @@ def check_catalog(repo_root: Path, surface_path: Path, output_path: Path) -> int
     with tempfile.TemporaryDirectory() as temp_dir:
         generated = Path(temp_dir) / output_path.name
         expected_catalog = build_catalog(repo_root, surface_path, output_path)
-        validate_catalog(expected_catalog)
+        validate_catalog(expected_catalog, repo_root)
         write_json(generated, expected_catalog)
         if not filecmp.cmp(generated, output_path, shallow=False):
             print(

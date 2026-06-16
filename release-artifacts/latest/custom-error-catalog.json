@@ -10,12 +10,12 @@
     "contract_count": 8,
     "category_counts": {
       "access_control": 5,
-      "auction_payment_safety": 4,
-      "configuration": 8,
+      "auction_payment_safety": 3,
+      "configuration": 10,
       "metadata_integrity": 17,
       "pause_emergency": 2,
-      "randomness_lifecycle": 25,
-      "supply_minting": 12
+      "randomness_lifecycle": 26,
+      "supply_minting": 10
     },
     "severity_counts": {
       "critical": 5,
@@ -296,14 +296,15 @@
       "name": "RandomizerRequestReentrancy",
       "signature": "RandomizerRequestReentrancy()",
       "selector": "0x7a189929",
-      "category": "auction_payment_safety",
+      "category": "randomness_lifecycle",
       "severity": "high",
       "inputs": [],
-      "caller_action": "Treat as a protected accounting or reentrancy boundary; refresh balances/credits and retry only through the documented flow.",
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
       "traceability": {
         "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamPaymentInvariant.t.sol",
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -1180,7 +1181,7 @@
       "traceability": {
         "source_artifact": "out/AuctionContract.sol/StreamAuctions.json",
         "tests": [
-          "test/StreamPaymentInvariant.t.sol",
+          "test/StreamPaymentsInvariant.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -1281,7 +1282,7 @@
       "traceability": {
         "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
-          "test/StreamPauseSettlementMatrix.t.sol",
+          "test/StreamPauseControls.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -1788,15 +1789,14 @@
       "name": "InvalidDependencyRegistryContract",
       "signature": "InvalidDependencyRegistryContract()",
       "selector": "0x385887d0",
-      "category": "metadata_integrity",
-      "severity": "high",
+      "category": "configuration",
+      "severity": "medium",
       "inputs": [],
-      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
       "traceability": {
         "source_artifact": "out/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamRoyalty.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -1809,14 +1809,14 @@
       "name": "InvalidMinterContract",
       "signature": "InvalidMinterContract()",
       "selector": "0xee6d1698",
-      "category": "supply_minting",
+      "category": "configuration",
       "severity": "medium",
       "inputs": [],
-      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
       "traceability": {
         "source_artifact": "out/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamRoyalty.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -1973,7 +1973,7 @@
       "traceability": {
         "source_artifact": "out/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamPauseSettlementMatrix.t.sol",
+          "test/StreamPauseControls.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -2163,14 +2163,15 @@
       "name": "ZeroTokenHash",
       "signature": "ZeroTokenHash()",
       "selector": "0xfd45fe73",
-      "category": "supply_minting",
-      "severity": "medium",
+      "category": "metadata_integrity",
+      "severity": "high",
       "inputs": [],
-      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
       "traceability": {
         "source_artifact": "out/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -2190,7 +2191,7 @@
       "traceability": {
         "source_artifact": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
         "tests": [
-          "test/StreamPaymentInvariant.t.sol",
+          "test/StreamPaymentsInvariant.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -2210,7 +2211,7 @@
       "traceability": {
         "source_artifact": "out/StreamDrops.sol/StreamDrops.json",
         "tests": [
-          "test/StreamPaymentInvariant.t.sol",
+          "test/StreamPaymentsInvariant.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"

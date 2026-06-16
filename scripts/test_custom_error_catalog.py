@@ -27,6 +27,14 @@ def write_json(path: Path, value: Any) -> None:
         handle.write("\n")
 
 
+def write_traceability_files(root: Path) -> None:
+    for paths in generator.TRACEABILITY_BY_CATEGORY.values():
+        for test_path in paths:
+            path = root / test_path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("// traceability fixture\n", encoding="utf-8")
+
+
 def fixture_surface() -> dict[str, Any]:
     return {
         "schema_version": "6529stream.protocol-surface-report.v1",
@@ -53,6 +61,12 @@ def fixture_surface() -> dict[str, Any]:
                                 "internal_type": "uint256",
                             }
                         ],
+                    },
+                    {
+                        "name": "MetadataMutationPaused",
+                        "signature": "MetadataMutationPaused()",
+                        "selector": "0xaaaaaaaa",
+                        "inputs": [],
                     },
                 ],
             },
@@ -97,6 +111,7 @@ class CustomErrorCatalogTests(unittest.TestCase):
             root = Path(temp_dir)
             surface = root / "surface.json"
             output = root / "catalog.json"
+            write_traceability_files(root)
             write_json(surface, fixture_surface())
 
             generator.generate_catalog(root, surface, output)
@@ -113,6 +128,11 @@ class CustomErrorCatalogTests(unittest.TestCase):
             self.assertEqual(metadata["severity"], "high")
             self.assertIn("refresh release artifacts", metadata["caller_action"])
 
+            paused = entries["ExampleCore:MetadataMutationPaused()"]
+            self.assertEqual(paused["category"], "pause_emergency")
+            self.assertEqual(paused["severity"], "high")
+            self.assertIn("unpaused", paused["caller_action"])
+
             royalty = entries[
                 "ExampleRoyalty:ERC2981InvalidDefaultRoyalty(uint256,uint256)"
             ]
@@ -122,6 +142,7 @@ class CustomErrorCatalogTests(unittest.TestCase):
     def test_catalog_records_duplicate_selectors_for_review(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
+            write_traceability_files(root)
             surface = fixture_surface()
             surface["contracts"]["Other"] = {
                 "source": "smart-contracts/Other.sol",
@@ -156,6 +177,7 @@ class CustomErrorCatalogTests(unittest.TestCase):
             root = Path(temp_dir)
             surface = root / "surface.json"
             output = root / "catalog.json"
+            write_traceability_files(root)
             write_json(surface, fixture_surface())
 
             generator.generate_catalog(root, surface, output)
@@ -172,6 +194,7 @@ class CustomErrorCatalogTests(unittest.TestCase):
     def test_invalid_selector_fails_generation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
+            write_traceability_files(root)
             surface = fixture_surface()
             surface["contracts"]["ExampleCore"]["custom_errors"][0]["selector"] = "0x1234"
             surface_path = root / "surface.json"
@@ -183,6 +206,40 @@ class CustomErrorCatalogTests(unittest.TestCase):
                 "invalid selector",
             ):
                 generator.generate_catalog(root, surface_path, output)
+
+    def test_unknown_error_name_fails_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_traceability_files(root)
+            surface = fixture_surface()
+            surface["contracts"]["ExampleCore"]["custom_errors"][0] = {
+                "name": "TotallyNewBoundary",
+                "signature": "TotallyNewBoundary()",
+                "selector": "0x12345678",
+                "inputs": [],
+            }
+            surface_path = root / "surface.json"
+            output = root / "catalog.json"
+            write_json(surface_path, surface)
+
+            with self.assertRaisesRegex(
+                generator.CustomErrorCatalogError,
+                "not covered by custom error category map",
+            ):
+                generator.generate_catalog(root, surface_path, output)
+
+    def test_missing_traceability_file_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            surface = root / "surface.json"
+            output = root / "catalog.json"
+            write_json(surface, fixture_surface())
+
+            with self.assertRaisesRegex(
+                generator.CustomErrorCatalogError,
+                "references missing test traceability file",
+            ):
+                generator.generate_catalog(root, surface, output)
 
 
 if __name__ == "__main__":

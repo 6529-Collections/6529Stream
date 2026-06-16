@@ -30,7 +30,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:208c93570220a622840b67ddd540dc7f034f7eee63edf726d9229a0e5b28996a"
+    "sha256": "sha256:d39eb8e183ec698f571c7d742d7e75791aebe4bc7ecd2e4896a827683d7adbdb"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -444,13 +444,13 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:e514c1ffdfd89632e2f0ebf5b99994d21280357c4f12c7a41f59daa99430919f",
+      "sha256": "sha256:849eb363c0c1615a5d9a551e04aa5a6c2a3b219f0772f1bc224b834830c72fbe",
       "size_bytes": 79962
     },
     {
       "path": "release-artifacts/latest/custom-error-catalog.json",
-      "sha256": "sha256:686c46d53b97f07afaf306ea4e8c24ad3d7830eaa9b84a91885b1cd394143ffb",
-      "size_bytes": 82600
+      "sha256": "sha256:79d2c421b620404dd6cdc6003d2e938b79f96f3c46065ae5659b934cda0c5fda",
+      "size_bytes": 82575
     },
     {
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
@@ -549,7 +549,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:cadf3e8a340bbf2bb5d43d589e5f325d835863b6ff07e0da94b43137e5acc8e8",
+      "sha256": "sha256:3989fe68fb48747b846cc54af9c0fb227cba7f697cf5601ace50e0cd0a7d1c84",
       "size_bytes": 105434
     },
     {

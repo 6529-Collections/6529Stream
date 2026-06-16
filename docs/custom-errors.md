@@ -15,9 +15,9 @@ The catalog is generated from:
 
 ## Scope
 
-The catalog covers release-relevant production contracts listed in
-`release-artifacts/contracts.json`. It records every ABI-visible custom error
-for those contracts with:
+The catalog covers release-relevant production contracts present in
+`release-artifacts/latest/protocol-surface-report.json`. It records every
+ABI-visible custom error for those contracts with:
 
 - contract and source path;
 - signature and selector;
@@ -25,6 +25,12 @@ for those contracts with:
 - category and severity;
 - caller action guidance;
 - source artifact and test traceability.
+
+The generator fails closed when a release-relevant custom error is not covered
+by the explicit per-error category map, or when its traceability paths do not
+exist in `test/`. New custom errors therefore need a deliberate
+category, severity, caller-action, and traceability policy before the catalog
+can be regenerated.
 
 This is documentation and traceability evidence. It does not prove protocol
 correctness by itself. Correctness still depends on the Solidity tests,
@@ -38,7 +44,7 @@ invariants, release checks, external evidence, and audit review.
 | `pause_emergency` | A pause or emergency domain intentionally blocks the attempted state transition. |
 | `metadata_integrity` | Metadata, dependency, freeze, URI, raw attribute, or rendering policy rejected the payload. |
 | `randomness_lifecycle` | Randomizer request, provider, epoch, callback, stale, failed, or retry state rejected the payload. |
-| `auction_payment_safety` | Reentrancy, payment, royalty, or accounting safety boundary rejected the call. |
+| `auction_payment_safety` | Reentrancy, payment, or accounting safety boundary rejected the call. |
 | `supply_minting` | Collection supply, token existence, mint window, burn, or collection-range state rejected the call. |
 | `configuration` | A configured address, parameter, royalty percentage, or other setup value is invalid. |
 
