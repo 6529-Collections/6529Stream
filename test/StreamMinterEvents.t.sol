@@ -2,13 +2,15 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/StreamCore.sol";
+import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
 import "./helpers/Assertions.sol";
-import "./helpers/CharacterizationTestBase.sol";
+import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";
 
-contract StreamMinterEventsTest is CharacterizationTestBase, StreamFixture {
+contract StreamMinterEventsTest is DropAuthTestHelper, StreamFixture {
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
@@ -18,11 +20,17 @@ contract StreamMinterEventsTest is CharacterizationTestBase, StreamFixture {
         keccak256("MinterTokensMinted(uint256,uint256,address,uint256,uint256)");
     bytes32 private constant MINTER_AUCTION_MINTED_TOPIC =
         keccak256("MinterAuctionMinted(uint256,uint256,address,uint256)");
+    bytes32 private constant MINTER_CONTRACT_REFERENCE_UPDATED_TOPIC =
+        keccak256("MinterContractReferenceUpdated(uint8,address,address,address)");
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
     address private constant FIRST_RECIPIENT = address(0xA11CE);
     address private constant SECOND_RECIPIENT = address(0xB0B);
+    address private constant PAYOUT = address(0x2002);
+    address private constant CURATORS_POOL = address(0x3003);
+    address private constant BIDDER = address(0x4004);
+    uint256 private constant RESERVE_PRICE = 5 ether;
 
     event CollectionPhasesUpdated(
         uint256 indexed collectionId,
@@ -34,9 +42,9 @@ contract StreamMinterEventsTest is CharacterizationTestBase, StreamFixture {
     );
     event MinterAuctionEndTimeUpdated(
         uint256 indexed tokenId,
-        uint256 indexed oldAuctionEndTime,
-        uint256 indexed newAuctionEndTime,
-        address admin
+        uint256 oldAuctionEndTime,
+        uint256 newAuctionEndTime,
+        address indexed admin
     );
     event MinterContractReferenceUpdated(
         uint8 indexed option,
@@ -135,7 +143,7 @@ contract StreamMinterEventsTest is CharacterizationTestBase, StreamFixture {
         uint256 tokenId = deployed.minter
             .mintAndAuction(address(0xA7C710), "1,2,3", 7, COLLECTION_ID, oldAuctionEndTime);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(true, false, false, true);
         emit MinterAuctionEndTimeUpdated(
             tokenId, oldAuctionEndTime, newAuctionEndTime, address(this)
         );
@@ -173,6 +181,79 @@ contract StreamMinterEventsTest is CharacterizationTestBase, StreamFixture {
         emit MinterContractReferenceUpdated(3, address(deployed.drops), newDrops, address(this));
         deployed.minter.updateContracts(3, newDrops);
         deployed.minter.streamDrops().assertEq(newDrops, "drops reference");
+    }
+
+    function testUpdateContractsSkipsEventsForInvalidAndUnchangedOptions() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        vm.recordLogs();
+        deployed.minter.updateContracts(99, address(0xBAD));
+        _countTopic(
+                vm.getRecordedLogs(),
+                address(deployed.minter),
+                MINTER_CONTRACT_REFERENCE_UPDATED_TOPIC
+            ).assertEq(0, "invalid option event count");
+        address(deployed.minter.gencore()).assertEq(address(deployed.core), "core after invalid");
+        deployed.minter.streamDrops().assertEq(address(deployed.drops), "drops after invalid");
+
+        vm.recordLogs();
+        deployed.minter.updateContracts(1, address(deployed.core));
+        deployed.minter.updateContracts(2, address(deployed.admins));
+        deployed.minter.updateContracts(3, address(deployed.drops));
+        _countTopic(
+                vm.getRecordedLogs(),
+                address(deployed.minter),
+                MINTER_CONTRACT_REFERENCE_UPDATED_TOPIC
+            ).assertEq(0, "unchanged reference event count");
+    }
+
+    function testMinterEndTimeUpdateDoesNotChangeAuthoritativeAuctionEndTime() public {
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        StreamAuctions auctions = new StreamAuctions(
+            address(deployed.minter),
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.drops),
+            PAYOUT,
+            CURATORS_POOL
+        );
+        deployed.drops.updateAuctionContract(address(auctions));
+        uint256 auctionEndTime = block.timestamp + 601;
+        StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
+            deployed.drops,
+            address(0xA7C710),
+            address(0),
+            "auction-data",
+            COLLECTION_ID,
+            RESERVE_PRICE,
+            auctionEndTime,
+            17,
+            18,
+            block.timestamp + 1 days
+        );
+
+        deployed.drops
+            .mintDrop(
+                authorization, "auction-data", signAuthorization(deployed.drops, authorization)
+            );
+        uint256 tokenId = FIRST_TOKEN_ID;
+        uint256 minterEditedEndTime = auctionEndTime + 777;
+        deployed.minter.updateAuctionEndTime(tokenId, minterEditedEndTime);
+
+        deployed.minter.getAuctionEndTime(tokenId)
+            .assertEq(minterEditedEndTime, "minter edited end");
+        auctions.retrieveAuctionEndTime(tokenId).assertEq(auctionEndTime, "registered auction end");
+
+        vm.deal(BIDDER, RESERVE_PRICE);
+        vm.warp(auctionEndTime - 299);
+        vm.prank(BIDDER);
+        auctions.participateToAuction{ value: RESERVE_PRICE }(tokenId);
+
+        auctions.retrieveAuctionEndTime(tokenId)
+            .assertEq(auctionEndTime + 300, "authoritative extended end");
+        deployed.minter.getAuctionEndTime(tokenId)
+            .assertEq(minterEditedEndTime, "minter bridge remains stale");
     }
 
     function _assertMinterTokensMintedLog(

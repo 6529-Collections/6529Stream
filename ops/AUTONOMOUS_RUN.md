@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 05:58 UTC` |
+| Last updated | `2026-06-16 06:20 UTC` |
 
 ## Packaging Notes
 
@@ -275,15 +275,21 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
 
-Status: issue created; branch started from PR #437 squash merge commit
-`6360c6a02aab6bc4af22b2a891826ccd25ed2977`; implementation complete locally
-with additive `StreamMinter` events, focused Foundry event tests,
+Status: PR opened; first 6529bot review addressed locally with the
+`MinterAuctionEndTimeUpdated` index set changed to `tokenId` plus `admin`, no-op
+`MinterContractReferenceUpdated` emissions removed for unchanged valid
+references, invalid `updateContracts` options retained as no-ops, the
+`updateContracts` option mapping documented for indexers, and a regression
+proving the minter-side auction end-time edit does not change the authoritative
+`StreamAuctions.retrieveAuctionEndTime` value. Branch started from PR #437
+squash merge commit `6360c6a02aab6bc4af22b2a891826ccd25ed2977`; implementation
+keeps additive `StreamMinter` events, focused Foundry event tests,
 events/indexing and auction-flow docs/checker coverage, gas snapshot refresh,
 ABI/event/protocol-surface/source-verification/deployment/address-book/release
-artifact refreshes, and production via-IR size validation.
-The full Windows wrapper caught stale retained hashes in the 1/1 provenance,
-permanence, ceremony-evidence, and randomizer-operations evidence bindings
-after the minter ABI/deployment artifact refresh; those bindings and derived
+artifact refreshes, and production via-IR size validation. The full Windows
+wrapper caught stale retained hashes in the 1/1 provenance, permanence,
+ceremony-evidence, and randomizer-operations evidence bindings after the minter
+ABI/deployment artifact refresh; those bindings and derived
 risk/release/checksum artifacts were updated before the final passing wrapper
 run.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/438`.
@@ -339,6 +345,16 @@ Validation completed locally:
 - `python scripts/check_randomizer_operations.py`
 - `python scripts/check_risk_register.py`
 - `python scripts/generate_risk_register.py --check`
+- `python scripts/generate_release_artifacts.py`
+- `python scripts/generate_source_verification_inputs.py`
+- `python scripts/generate_protocol_surface_report.py`
+- `python scripts/generate_deployment_manifest.py`
+- `python scripts/generate_address_books.py`
+- `python scripts/generate_one_of_one_provenance_manifest.py`
+- `python scripts/generate_one_of_one_permanence_manifest.py`
+- `python scripts/generate_release_manifest.py`
+- `python scripts/generate_bytecode_release_proof.py`
+- `python scripts/generate_release_checksums.py`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
 - `git diff --check`
 
@@ -346,7 +362,7 @@ Measured impact:
 
 - `StreamCore` production runtime remains 22,184 bytes with 2,392 bytes of
   EIP-170 margin.
-- `StreamMinter` production runtime is 6,433 bytes with 18,143 bytes of
+- `StreamMinter` production runtime is 6,516 bytes with 18,060 bytes of
   EIP-170 margin.
 - Fixed-price mint gas snapshot increased from 622,483 to 627,264 gas due to
   the new per-recipient minter range event.
@@ -355,7 +371,13 @@ Bot/review status:
 
 - PR #439 opened on branch `codex/minter-event-read-model`.
 - CodeRabbit review requested in comment `4715437386`.
-- CI and 6529bot feedback are pending.
+- 6529bot security review on the initial head reported no findings.
+- 6529bot general review requested the end-time event indexing, authoritative
+  auction end-time proof, unchanged-reference no-op proof, and
+  `updateContracts` option mapping; those fixes pass local validation and are
+  ready to push as the PR follow-up head.
+- CodeRabbit status was still pending after a rate-limit notice; request a new
+  review after pushing the follow-up head.
 
 ### PR candidate: Add generated protocol surface report (Queue Item 207 / CON-001)
 

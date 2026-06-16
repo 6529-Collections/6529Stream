@@ -222,21 +222,21 @@
           "index": 1,
           "name": "oldAuctionEndTime",
           "type": "uint256",
-          "indexed": true,
+          "indexed": false,
           "internal_type": "uint256"
         },
         {
           "index": 2,
           "name": "newAuctionEndTime",
           "type": "uint256",
-          "indexed": true,
+          "indexed": false,
           "internal_type": "uint256"
         },
         {
           "index": 3,
           "name": "admin",
           "type": "address",
-          "indexed": false,
+          "indexed": true,
           "internal_type": "address"
         }
       ],
@@ -4877,21 +4877,21 @@
               "index": 1,
               "name": "oldAuctionEndTime",
               "type": "uint256",
-              "indexed": true,
+              "indexed": false,
               "internal_type": "uint256"
             },
             {
               "index": 2,
               "name": "newAuctionEndTime",
               "type": "uint256",
-              "indexed": true,
+              "indexed": false,
               "internal_type": "uint256"
             },
             {
               "index": 3,
               "name": "admin",
               "type": "address",
-              "indexed": false,
+              "indexed": true,
               "internal_type": "address"
             }
           ]

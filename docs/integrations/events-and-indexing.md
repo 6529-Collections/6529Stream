@@ -205,6 +205,12 @@ emitter contracts. The current catalog includes these high-value event groups:
 | Dependencies | `DependencyVersionCreated`, `DependencyVersionDeprecated` | Immutable dependency records and deprecation status |
 | Emergency accounting | `Withdraw`, `EmergencyWithdrawal` | Legacy withdrawal events and surplus emergency withdrawal audit trail |
 
+`MinterContractReferenceUpdated.option` uses the existing
+`StreamMinter.updateContracts` option mapping: `1` is the core contract
+reference, `2` is the admin contract reference, and `3` is the drops contract
+reference. Invalid options remain no-ops and unchanged references do not emit a
+phantom reference-update event.
+
 When an event is insufficient to derive the full entity, queue a read-after-event
 task instead of guessing.
 

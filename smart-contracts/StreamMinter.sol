@@ -69,9 +69,9 @@ contract StreamMinter {
     );
     event MinterAuctionEndTimeUpdated(
         uint256 indexed tokenId,
-        uint256 indexed oldAuctionEndTime,
-        uint256 indexed newAuctionEndTime,
-        address admin
+        uint256 oldAuctionEndTime,
+        uint256 newAuctionEndTime,
+        address indexed admin
     );
     event MinterContractReferenceUpdated(
         uint8 indexed option,
@@ -226,15 +226,24 @@ contract StreamMinter {
     {
         if (_opt == 1) {
             address oldContract = address(gencore);
+            if (oldContract == _newContract) {
+                return;
+            }
             gencore = IStreamCore(_newContract);
             emit MinterContractReferenceUpdated(1, oldContract, _newContract, msg.sender);
         } else if (_opt == 2) {
             require(IStreamAdmins(_newContract).isAdminContract() == true, "Contract is not Admin");
             address oldContract = address(adminsContract);
+            if (oldContract == _newContract) {
+                return;
+            }
             adminsContract = IStreamAdmins(_newContract);
             emit MinterContractReferenceUpdated(2, oldContract, _newContract, msg.sender);
         } else if (_opt == 3) {
             address oldContract = streamDrops;
+            if (oldContract == _newContract) {
+                return;
+            }
             streamDrops = _newContract;
             emit MinterContractReferenceUpdated(3, oldContract, _newContract, msg.sender);
         }

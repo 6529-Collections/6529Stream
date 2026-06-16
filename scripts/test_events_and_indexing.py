@@ -84,6 +84,8 @@ DependencyVersionPinned, TokenBurned, DropAuthorizationConsumed,
 DropAuthorizationCancelled, SignerEpochChanged, DropSignerChanged,
 AuctionContractChanged, CollectionPhasesUpdated, MinterTokensMinted,
 MinterAuctionMinted, MinterAuctionEndTimeUpdated, MinterContractReferenceUpdated,
+StreamMinter.updateContracts, Invalid options remain no-ops, unchanged
+references do not emit,
 FixedPriceCreditCreated, FixedPriceCreditWithdrawn,
 AuctionRegistered, AuctionCustodyConfirmed, AuctionStatusChanged,
 AuctionExtended, AuctionCancelled, ClaimAuction, NoBidSettlementPending,

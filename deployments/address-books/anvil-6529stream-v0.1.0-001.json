@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-    "deployment_manifest_sha256": "sha256:cc7db118b3506168b1b9c60bcf84e5c916d3cb32774e0e3a1934c12efb6800ce",
+    "deployment_manifest_sha256": "sha256:bac51e3753bfe8dbd073f605e184f958527b84ea43c812267aff923e9d8adbce",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -97,8 +97,8 @@
       "address": "0x0000000000000000000000000000000000000005",
       "source": "smart-contracts/StreamMinter.sol",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
-      "abi_hash": "sha256:4218970fc7d2bab7642a94df03ebe01c93bdc945b152eab9c018ea2457c48e15",
-      "runtime_bytecode_hash": "sha256:12f1494445a5036d78db9837a7e4e2c63844b9d8b4b0a8263cbfa24c7bbf2662",
+      "abi_hash": "sha256:b04add166fe6d3727bfe8bcd0f76dc62c10142e7517fbfd90aee8788d4419e83",
+      "runtime_bytecode_hash": "sha256:fa7e9e04023260f3572bae9682d961b48a6cce95399bdcaee5d99bf7842cb013",
       "verification_status": "not_applicable"
     }
   }

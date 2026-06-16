@@ -10593,7 +10593,7 @@
     "StreamMinter": {
       "source": "smart-contracts/StreamMinter.sol",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
-      "abi_sha256": "sha256:4218970fc7d2bab7642a94df03ebe01c93bdc945b152eab9c018ea2457c48e15",
+      "abi_sha256": "sha256:b04add166fe6d3727bfe8bcd0f76dc62c10142e7517fbfd90aee8788d4419e83",
       "abi_entries": 25,
       "entry_counts": {
         "constructors": 1,
@@ -11083,19 +11083,19 @@
                 "name": "oldAuctionEndTime",
                 "type": "uint256",
                 "internal_type": "uint256",
-                "indexed": true
+                "indexed": false
               },
               {
                 "name": "newAuctionEndTime",
                 "type": "uint256",
                 "internal_type": "uint256",
-                "indexed": true
+                "indexed": false
               },
               {
                 "name": "admin",
                 "type": "address",
                 "internal_type": "address",
-                "indexed": false
+                "indexed": true
               }
             ]
           },
