@@ -1120,38 +1120,15 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function retrieveGenerativeScript(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
-        string[] storage collectionScript = collectionInfo[collectionId].collectionScript;
-        string memory scripttext = "";
-        for (uint256 i = 0; i < collectionScript.length; i++) {
-            scripttext = string.concat(scripttext, collectionScript[i]);
-        }
-        return StreamMetadataRenderer.generativeScript(
+        return StreamMetadataRenderer.generativeScriptFromSources(
             tokenToHash[tokenId],
             tokenId,
             tokenData[tokenId],
-            retrieveDependencyScript(tokenId),
-            scripttext
+            collectionDependencyRegistries[collectionId],
+            collectionInfo[collectionId].collectionDependencyScript,
+            collectionDependencyVersions[collectionId],
+            collectionInfo[collectionId].collectionScript
         );
-    }
-
-    // function to retrieve on-chain dependency script
-    function retrieveDependencyScript(uint256 tokenId) private view returns (string memory) {
-        uint256 collectionId = tokenIdsToCollectionIds[tokenId];
-        bytes32 dependencyNameAndVersion = collectionInfo[collectionId].collectionDependencyScript;
-        IDependencyRegistry registry = collectionDependencyRegistries[collectionId];
-        uint256 version = collectionDependencyVersions[collectionId];
-        string memory scripttext = "";
-        for (
-            uint256 i = 0;
-            i < registry.getDependencyScriptCountAtVersion(dependencyNameAndVersion, version);
-            i++
-        ) {
-            scripttext = string.concat(
-                scripttext,
-                registry.getDependencyScriptAtVersion(dependencyNameAndVersion, version, i)
-            );
-        }
-        return scripttext;
     }
 
     /// @notice Returns the typed dependency script content hash pinned for a minted token.
