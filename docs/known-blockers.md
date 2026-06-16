@@ -125,8 +125,9 @@ contributors who start from the README.
 - `StreamCore` now uses a linked metadata renderer library, removes optional
   ERC-721 Enumerable support, preserves a live `totalSupply()`
   view, and has a production-only size gate:
-  `forge build --sizes --via-ir --skip test --skip script --force`. That gate currently shows
-  `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom,
+  `forge build --sizes --via-ir --skip test --skip script --force`. The
+  committed `release-artifacts/latest/bytecode-release-proof.json` currently
+  records `StreamCore` runtime size at 23,781 bytes with 795 bytes of EIP-170 headroom,
   which passes deployability, the documented 384-byte minimum release floor,
   and the 512-byte warning threshold. Large non-trivial Core feature work still
   needs bytecode deltas to be measured or an explicit size-budget exception, and

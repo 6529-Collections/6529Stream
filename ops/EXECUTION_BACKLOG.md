@@ -172,7 +172,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility lacks retained proof | `ONE-005`, `INT-005`, `INT-006` | Retain no-secret evidence for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation |
-| `StreamCore` has finite EIP-170 headroom despite the current 915-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has finite EIP-170 headroom despite the current 795-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -3141,13 +3141,13 @@ Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.
 
 ### ONE-006: Add Satellite-Extension Architecture Policy
 
-Status: Partially started by CON-005 size-budget enforcement and issue #420
-headroom recovery; broader architecture policy remains planned.
+Status: In progress locally on issue #426 and branch
+`codex/satellite-extension-policy`.
 
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom even after
-the 23,661-byte / 915-byte-margin headroom recovery pass. Adding world-class 1/1
+the 23,781-byte / 795-byte-margin rebased headroom measurement. Adding world-class 1/1
 product surfaces directly to Core risks breaking deployment or forcing rushed
 size recovery after feature work is already written.
 

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/marketplace-indexer-evidence-model` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/421` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/422` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
-| Next issue | Implement `ONE-005` marketplace/indexer retained evidence model. Supporting evidence tracker issues were opened as `https://github.com/6529-Collections/6529Stream/issues/423` (`fork_testnet_marketplace_indexer_evidence`) and `https://github.com/6529-Collections/6529Stream/issues/424` (`live_marketplace_indexer_evidence`) and must remain incomplete until real reviewed external evidence is retained. |
+| Active PR branch | `codex/satellite-extension-policy` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/425` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/426` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/427` |
+| Next issue | Implement `ONE-006` satellite-extension architecture policy so future 1/1 product surfaces default to satellites/read adapters/libraries/release artifacts unless an explicit measured `StreamCore` size-budget exception is accepted. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-15 23:51 UTC` |
+| Last updated | `2026-06-16 00:51 UTC` |
 
 ## Packaging Notes
 
@@ -262,6 +262,68 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 198 | Add 1/1 provenance manifest model | Gate G/Gate F support | Add provenance model docs, schema, retained artifact template, generated manifest, local/CI checks, release-manifest/checksum coverage, and artifact-only boundaries while preserving `StreamCore` bytecode headroom | In progress on issue #412 |
 
 ## Current PR Worklog
+
+### PR candidate: Add satellite-extension architecture policy (Queue Item ONE-006)
+
+Status: PR #427 open and ready for review; CodeRabbit review requested in
+comment `4713528373`; CI and bot comments pending.
+Issue: `https://github.com/6529-Collections/6529Stream/issues/426`.
+PR: `https://github.com/6529-Collections/6529Stream/pull/427`.
+Branch: `codex/satellite-extension-policy`.
+Branch started from PR #425 squash merge commit
+`48eae446f47f6d4d65d844b1413059e275d8f0e9`.
+
+Goal:
+
+- Make future 1/1 product work satellite-first by default while `StreamCore`
+  bytecode headroom remains finite.
+- Define when a feature belongs in Core, a satellite contract, a read adapter,
+  a linked library, release artifacts, or docs-only evidence.
+- Require measured before/after `StreamCore` runtime deltas and explicit
+  size-budget exception notes for non-critical Core bytecode spend.
+- Tie the policy to the current production runtime of 23,781 bytes, 795 bytes
+  of EIP-170 headroom, the 384-byte minimum release floor, and the 512-byte
+  warning threshold.
+- Add checker/test coverage so future edits cannot quietly remove the
+  satellite-first policy or size-budget command references.
+
+Validation plan:
+
+- `python scripts/test_architecture_threat_model.py`.
+- `python scripts/check_architecture_threat_model.py`.
+- `python scripts/test_release_manifest.py`.
+- `python scripts/generate_release_manifest.py --check`.
+- `python scripts/test_bytecode_release_proof.py`.
+- `python scripts/generate_bytecode_release_proof.py --check`.
+- `python scripts/test_release_checksums.py`.
+- `python scripts/generate_release_checksums.py --check`.
+- `python scripts/test_risk_register.py`.
+- `python scripts/check_risk_register.py`.
+- `python scripts/generate_risk_register.py --check`.
+- `python scripts/check_changelog.py`.
+- `python -m py_compile scripts/check_architecture_threat_model.py scripts/test_architecture_threat_model.py`.
+- `make architecture-threat-model-check release-manifest-check release-checksums-check changelog-check`.
+- `git diff --check`.
+
+Notes:
+
+- This branch is policy/checker/docs only. No Solidity bytecode change is
+  planned.
+- PR #425 merged as `48eae446f47f6d4d65d844b1413059e275d8f0e9`; issue #422
+  is closed completed. Tracker issues #423 and #424 intentionally remain open
+  for future reviewed public-beta and production marketplace/indexer evidence.
+
+Validation result:
+
+- Architecture/threat-model checker tests and doc check passed.
+- Release manifest, bytecode release proof, release checksum, and risk-register
+  generator tests/checks passed after regenerating the derived artifacts.
+- `python scripts/check_changelog.py`, Python compile for touched checker
+  scripts, and `git diff --check` passed.
+- `make architecture-threat-model-check release-manifest-check
+  release-checksums-check changelog-check` passed, including the production
+  size build that measures `StreamCore` at 23,781 runtime bytes with
+  795 bytes of EIP-170 headroom after rebasing onto `origin/main`.
 
 ### PR candidate: Add marketplace and indexer retained evidence model (Queue Item ONE-005)
 
@@ -15420,15 +15482,21 @@ Outcome:
 | 2026-06-15 21:05 | Implement ONE-004 local draft | Branch `codex/collector-permanence-package` adds `docs/permanence-packages.md`, permanence schema/template/retained-artifact template, generated `release-artifacts/latest/one-of-one-permanence-manifest.json`, checker/generator/tests, local/CI gate wiring, release manifest/checksum/risk-register coverage, and integration/release-readiness/release-policy docs. Solidity changes are intentionally out of scope and `StreamCore` still measures 24,047 runtime bytes with 529 bytes of EIP-170 headroom in this checkout. |
 | 2026-06-15 21:21 | Open PR #419 for ONE-004 | Full `make check`, Windows `scripts\check.ps1`, focused permanence/release/risk/checksum checks, `forge build --sizes --via-ir --skip test --skip script --force`, `python scripts\check_contract_size_budget.py`, and `git diff --check` passed. PR #419 is open on branch `codex/collector-permanence-package`, closes issue #418, and CodeRabbit review was requested in comment `4712556531`. Next action is to wait for CI and bot feedback, then resolve any actionable comments before merge. |
 | 2026-06-15 21:32 | Merge PR #419 and detour to headroom recovery | PR #419 merged as `9712037cab3651fa5b52bf15ef5583abb2dd9410`, issue #418 closed completed, CI and CodeRabbit passed, and 6529bot general/security reviews were clean. User raised concern about a possible 24,516-byte `StreamCore` runtime with only 60 bytes of EIP-170 margin; current `main` still measures 24,047 bytes with 529 bytes of margin, but issue #420 is opened and branch `codex/streamcore-headroom-recovery` will investigate and recover additional headroom or tighten size guardrails before returning to `ONE-005`. |
-| 2026-06-15 21:52 | Recover additional Core headroom locally | Branch `codex/streamcore-headroom-recovery` moves off-chain token URI formatting, token-name formatting, randomizer pending-state lookup, and old-randomizer pending-request probe helpers into the linked `StreamMetadataRenderer` library while preserving metadata and migration behavior. Production via-IR size build now measures `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom, recovering 386 bytes from the current 24,047-byte baseline. |
-| 2026-06-15 22:06 | Harden size artifact validation | The runtime size-budget checker now validates compiler metadata, optimizer runs, EVM version, compilation target, and current source Keccak hashes before trusting Foundry artifacts. Focused checker tests cover missing metadata, wrong compiler/profile, stale source hashes, placeholder counting, and EIP-170 failures; the production via-IR build plus checker passes with `StreamCore` at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
+| 2026-06-15 21:52 | Recover additional Core headroom locally | Branch `codex/streamcore-headroom-recovery` moves off-chain token URI formatting, token-name formatting, randomizer pending-state lookup, and old-randomizer pending-request probe helpers into the linked `StreamMetadataRenderer` library while preserving metadata and migration behavior. The pre-rebase PR #421 production via-IR size build measured `StreamCore` at 23,661 runtime bytes with 915 bytes of EIP-170 headroom, recovering 386 bytes from the then-current 24,047-byte baseline. |
+| 2026-06-15 22:06 | Harden size artifact validation | The runtime size-budget checker now validates compiler metadata, optimizer runs, EVM version, compilation target, and current source Keccak hashes before trusting Foundry artifacts. Focused checker tests cover missing metadata, wrong compiler/profile, stale source hashes, placeholder counting, and EIP-170 failures; the pre-rebase PR #421 production via-IR build plus checker passed with `StreamCore` at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 | 2026-06-15 22:20 | Validate headroom recovery branch | Focused metadata/randomizer/royalty suites passed; `make release-checksums` refreshed bytecode, deployment, manifest, checksum, risk, provenance, permanence, and gas-snapshot artifacts; full `make check`, Windows `scripts\check.ps1`, touched-file formatting, release manifest/proof/checksum checks, and `git diff --check` all pass. The accepted gas snapshot trade is two small decreases and a +2,143 gas increase for final on-chain `tokenURI` in exchange for recovering 386 bytes of `StreamCore` runtime headroom. |
 | 2026-06-15 22:25 | Open PR #421 | PR #421 is open and marked ready for review after CodeRabbit skipped the initial draft state. CodeRabbit review has been requested again and CI/bot feedback is pending. |
-| 2026-06-15 22:36 | Address PR #421 review comments | CodeRabbit found two actionable follow-ups: a wording cleanup in `docs/known-blockers.md` and imported-source hash validation in `scripts/check_contract_size_budget.py`. The checker now validates every resolvable metadata source path against the checkout, `scripts/test_contract_size_budget.py` covers stale imported dependency hashes, and focused Python tests plus `python scripts\check_contract_size_budget.py` pass with `StreamCore` still at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
+| 2026-06-15 22:36 | Address PR #421 review comments | CodeRabbit found two actionable follow-ups: a wording cleanup in `docs/known-blockers.md` and imported-source hash validation in `scripts/check_contract_size_budget.py`. The checker now validates every resolvable metadata source path against the checkout, `scripts/test_contract_size_budget.py` covers stale imported dependency hashes, and focused Python tests plus `python scripts\check_contract_size_budget.py` passed on the pre-rebase PR #421 head with `StreamCore` still at 23,661 runtime bytes and 915 bytes of EIP-170 headroom. |
 | 2026-06-15 22:57 | Merge PR #421 and resume ONE-005 | PR #421 merged as `443921b93e42ea38fca4696bdecffdbea559d4bc`, issue #420 closed completed, CodeRabbit review threads were resolved, and GitHub CI passed. Created issue #422 for the marketplace/indexer retained evidence model plus evidence tracker issues #423 and #424 for future public-beta and production marketplace/indexer proof. Branch `codex/marketplace-indexer-evidence-model` is active from updated `main`. |
 | 2026-06-15 23:38 | Validate ONE-005 PR candidate | Marketplace/indexer evidence model, dedicated checker/tests, release-evidence rows, retained templates, release packet/backlog/body-sync, release manifest/checksums, risk register, integration docs, local `make check`, Windows `scripts\check.ps1`, and `git diff --check` passed locally. No Solidity bytecode changed; `StreamCore` remains at the PR #421 production runtime size. |
 | 2026-06-15 23:41 | Open PR #425 for ONE-005 | PR #425 is open and ready for review, closes issue #422, and CodeRabbit review was requested in comment `4713416626`. Tracker issues #423 and #424 remain open for future reviewed public-beta and production marketplace/indexer evidence. |
 | 2026-06-15 23:51 | Address PR #425 bot nice-to-haves | 6529bot security found no findings and general review marked the PR good to merge. Confirmed `docs/public-beta-evidence.md` list numbering is sequential in the current head, then added direct envelope-template SHA validation to `scripts/check_marketplace_indexer_evidence.py` plus focused matching/drift tests. Focused marketplace-indexer, release manifest/proof/checksum, changelog, Python compile, and `git diff --check` checks passed locally. |
+| 2026-06-15 23:52 | Merge PR #425 and start ONE-006 | PR #425 merged as `48eae446f47f6d4d65d844b1413059e275d8f0e9`, issue #422 closed completed, CodeRabbit status was success, 6529bot follow-up review on the latest head reported no new findings, and GitHub CI run `27583841942` passed. Created issue #426 and branch `codex/satellite-extension-policy` for the satellite-extension architecture policy. |
+| 2026-06-15 23:59 | Open PR #427 for ONE-006 | PR #427 is open and ready for review, closes issue #426, and CodeRabbit review was requested in comment `4713528373`. Local focused validation and the policy Make target passed before opening. |
+| 2026-06-16 00:10 | Address PR #427 bot hardening note | 6529bot found no security issues and marked the PR good to merge, with an optional checker-hardening note. Added explicit required link-target file existence validation to `scripts/check_architecture_threat_model.py`, updated focused regressions, and confirmed `StreamCore` measures `23,781` runtime bytes with `795` bytes of EIP-170 headroom after rebasing onto `origin/main`, rather than the earlier stale `24,516`/`60` concern. |
+| 2026-06-16 00:21 | Rebase PR #427 onto updated `main` | Rebasing onto `origin/main` at `4021b6d` resolved generated release-artifact conflicts, incorporated the merged artist-series stack, and refreshed current size evidence from `23,661`/`915` to `23,781`/`795`. `make release-checksums` and `make architecture-threat-model-check release-manifest-check release-checksums-check changelog-check` pass on the rebased tree. |
+| 2026-06-16 00:33 | Harden PR #427 size evidence after bot drift comment | Latest bot feedback appeared to compare docs against the pre-rebase `23,661`/`915` measurement while the rebased bytecode proof records `23,781`/`795`. Added proof-backed architecture-policy validation so `docs/architecture.md`, `docs/status.md`, `docs/release-policy.md`, and `docs/known-blockers.md` must match `release-artifacts/latest/bytecode-release-proof.json` for `StreamCore` runtime size and EIP-170 margin. |
+| 2026-06-16 00:51 | Remove stale current-size wording from PR #427 metadata docs | Remote head `cfd3c39` proof entries all show `StreamCore` `runtime_bytecode_bytes: 23781` and `runtime_margin_bytes: 795`, but 6529bot follow-up still cited the pre-rebase `23,661`/`915` values. Updated the PR body, clarified the changelog entry as the PR #421 measurement rather than current release state, and corrected the execution-backlog reviewer row to the current 795-byte margin. |
 
 ## Resume Instructions
 

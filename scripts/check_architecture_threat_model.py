@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -11,12 +12,23 @@ from pathlib import Path
 
 DEFAULT_ARCHITECTURE = Path("docs/architecture.md")
 DEFAULT_THREAT_MODEL = Path("docs/threat-model.md")
+DEFAULT_STATUS = Path("docs/status.md")
+DEFAULT_RELEASE_POLICY = Path("docs/release-policy.md")
+DEFAULT_KNOWN_BLOCKERS = Path("docs/known-blockers.md")
+DEFAULT_BYTECODE_PROOF = Path("release-artifacts/latest/bytecode-release-proof.json")
+SIZE_EVIDENCE_DOCUMENTS = [
+    DEFAULT_ARCHITECTURE,
+    DEFAULT_STATUS,
+    DEFAULT_RELEASE_POLICY,
+    DEFAULT_KNOWN_BLOCKERS,
+]
 
 REQUIRED_HEADINGS = {
     DEFAULT_ARCHITECTURE: [
         (1, "Architecture"),
         (2, "Maturity And Scope"),
         (2, "System Components"),
+        (2, "Product Extension And Size-Budget Policy"),
         (2, "Actor And Role Boundaries"),
         (2, "Protocol Flows"),
         (2, "Value And Custody Boundaries"),
@@ -63,6 +75,21 @@ REQUIRED_ARCHITECTURE_PHRASES = [
     "metadata",
     "deployment",
     "release",
+]
+
+REQUIRED_SIZE_POLICY_PHRASES = [
+    "satellite-first",
+    "satellite contracts",
+    "read adapters",
+    "linked libraries",
+    "release artifacts",
+    "bytecode release proof",
+    "explicit size-budget exception",
+    "measured before/after `StreamCore` runtime bytecode delta",
+    "384-byte minimum",
+    "512-byte warning",
+    "forge build --sizes --via-ir --skip test --skip script --force",
+    "python scripts/check_contract_size_budget.py",
 ]
 
 REQUIRED_THREAT_PHRASES = [
@@ -118,11 +145,14 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/release-manifest.json",
     "release-artifacts/latest/SHA256SUMS",
     "release-artifacts/latest/release-checksums.json",
+    "release-artifacts/latest/bytecode-release-proof.json",
+    "release-artifacts/contracts.json",
     "test/StreamPaymentsInvariant.t.sol",
     "test/StreamSupplyReplayFreezeInvariant.t.sol",
     "test/StreamAuctionInvariant.t.sol",
     "test/StreamRandomizerPayments.t.sol",
     "test/StreamDeploymentManifest.t.sol",
+    "scripts/check_contract_size_budget.py",
     "scripts/check_audit_package.py",
 ]
 
@@ -192,9 +222,134 @@ def linked_repo_paths(repo_root: Path, documents: dict[Path, str]) -> set[str]:
     return links
 
 
+def validate_required_link_targets_exist(repo_root: Path) -> None:
+    missing = []
+    for target in REQUIRED_LINK_TARGETS:
+        target_path = (repo_root / target).resolve()
+        relative = normalize_repo_path(target_path, repo_root)
+        if not target_path.exists():
+            missing.append(relative)
+
+    if missing:
+        raise ArchitectureThreatModelError(
+            "required link target files are missing: "
+            + ", ".join(sorted(set(missing)))
+        )
+
+
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
-    normalized_text = text.lower()
-    return [phrase for phrase in phrases if phrase.lower() not in normalized_text]
+    normalized_text = " ".join(text.lower().split())
+    return [
+        phrase
+        for phrase in phrases
+        if " ".join(phrase.lower().split()) not in normalized_text
+    ]
+
+
+def bytes_phrase(value: int) -> str:
+    return f"{value:,} bytes"
+
+
+def streamcore_size_from_bytecode_proof(
+    repo_root: Path, proof_path: Path = DEFAULT_BYTECODE_PROOF
+) -> tuple[int, int]:
+    if not proof_path.is_absolute():
+        proof_path = repo_root / proof_path
+    if not proof_path.is_file():
+        relative = normalize_repo_path(proof_path, repo_root)
+        raise ArchitectureThreatModelError(f"missing bytecode release proof: {relative}")
+
+    try:
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        relative = normalize_repo_path(proof_path, repo_root)
+        raise ArchitectureThreatModelError(
+            f"{relative} is not valid JSON: {exc.msg}"
+        ) from exc
+
+    contract_proofs = proof.get("contract_proofs")
+    if not isinstance(contract_proofs, list):
+        relative = normalize_repo_path(proof_path, repo_root)
+        raise ArchitectureThreatModelError(
+            f"{relative} is missing a contract_proofs array"
+        )
+
+    size_pairs = set()
+    for contract_proof in contract_proofs:
+        if not isinstance(contract_proof, dict):
+            continue
+        contract = contract_proof.get("contract")
+        if not isinstance(contract, dict) or contract.get("name") != "StreamCore":
+            continue
+        sizes = contract_proof.get("sizes")
+        if not isinstance(sizes, dict):
+            raise ArchitectureThreatModelError(
+                "bytecode release proof has StreamCore evidence without sizes"
+            )
+        runtime = sizes.get("runtime_bytecode_bytes")
+        margin = sizes.get("runtime_margin_bytes")
+        if not isinstance(runtime, int) or not isinstance(margin, int):
+            raise ArchitectureThreatModelError(
+                "bytecode release proof has non-integer StreamCore size evidence"
+            )
+        size_pairs.add((runtime, margin))
+
+    if not size_pairs:
+        raise ArchitectureThreatModelError(
+            "bytecode release proof is missing StreamCore size evidence"
+        )
+    if len(size_pairs) > 1:
+        formatted = ", ".join(
+            f"{bytes_phrase(runtime)} runtime / {bytes_phrase(margin)} margin"
+            for runtime, margin in sorted(size_pairs)
+        )
+        raise ArchitectureThreatModelError(
+            "bytecode release proof has inconsistent StreamCore size evidence: "
+            + formatted
+        )
+
+    return next(iter(size_pairs))
+
+
+def size_evidence_document_paths(
+    repo_root: Path, architecture_path: Path
+) -> list[Path]:
+    paths = []
+    for document_path in SIZE_EVIDENCE_DOCUMENTS:
+        if document_path == DEFAULT_ARCHITECTURE:
+            paths.append(architecture_path.resolve())
+        else:
+            paths.append((repo_root / document_path).resolve())
+    return paths
+
+
+def validate_streamcore_size_evidence(
+    repo_root: Path,
+    architecture_path: Path,
+    documents: dict[Path, str],
+    runtime: int,
+    margin: int,
+) -> None:
+    runtime_phrase = bytes_phrase(runtime)
+    margin_phrase = bytes_phrase(margin)
+
+    for document_path in size_evidence_document_paths(repo_root, architecture_path):
+        if document_path in documents:
+            text = documents[document_path]
+        else:
+            if not document_path.is_file():
+                relative = normalize_repo_path(document_path, repo_root)
+                raise ArchitectureThreatModelError(
+                    f"missing StreamCore size evidence document: {relative}"
+                )
+            text = document_path.read_text(encoding="utf-8")
+
+        if runtime_phrase not in text or margin_phrase not in text:
+            relative = normalize_repo_path(document_path, repo_root)
+            raise ArchitectureThreatModelError(
+                f"{relative} size evidence does not match bytecode release proof: "
+                f"expected {runtime_phrase} runtime and {margin_phrase} margin"
+            )
 
 
 def validate_document_headings(
@@ -260,6 +415,20 @@ def validate_architecture_threat_model(
             + ", ".join(missing_architecture)
         )
 
+    missing_size_policy = missing_phrases(
+        documents[architecture_path], REQUIRED_SIZE_POLICY_PHRASES
+    )
+    if missing_size_policy:
+        raise ArchitectureThreatModelError(
+            "architecture is missing required size-budget policy content: "
+            + ", ".join(missing_size_policy)
+        )
+
+    runtime, margin = streamcore_size_from_bytecode_proof(repo_root)
+    validate_streamcore_size_evidence(
+        repo_root, architecture_path, documents, runtime, margin
+    )
+
     missing_threats = missing_phrases(
         documents[threat_model_path], REQUIRED_THREAT_PHRASES
     )
@@ -277,6 +446,8 @@ def validate_architecture_threat_model(
             "architecture/threat model docs are missing required commands: "
             + ", ".join(missing_commands)
         )
+
+    validate_required_link_targets_exist(repo_root)
 
     architecture_links = linked_repo_paths(
         repo_root, {architecture_path: documents[architecture_path]}

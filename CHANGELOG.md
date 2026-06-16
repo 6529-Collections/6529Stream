@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added ONE-006 satellite-extension architecture policy coverage with checked
+  architecture-doc size-budget requirements, release-policy/status hooks, and
+  explicit rules for measured `StreamCore` bytecode deltas, size-budget
+  exceptions, and satellite/read-adapter/library/release-artifact defaults for
+  future 1/1 product surfaces, plus required link-target existence checks and
+  bytecode-release-proof size-evidence matching for the architecture and
+  threat-model evidence docs.
 - Added ONE-005 marketplace/indexer retained evidence coverage with
   `docs/integrations/marketplace-indexer-evidence.md`, fork/testnet and live
   retained-artifact templates, public-beta and production evidence rows,
@@ -505,8 +512,11 @@ the release policy in `docs/release-policy.md`.
 - Recovered another 386 bytes of `StreamCore` runtime bytecode headroom by
   moving off-chain token URI formatting, token-name formatting, and randomizer
   lifecycle probe helpers into the linked `StreamMetadataRenderer` library
-  while preserving metadata state and migration behavior. The production
-  IR-optimized runtime is now 23,661 bytes with 915 bytes of EIP-170 headroom.
+  while preserving metadata state and migration behavior. The PR #421
+  production IR-optimized runtime measured 23,661 bytes with 915 bytes of
+  EIP-170 headroom before later mainline additions; the current release proof
+  records the rebased `StreamCore` runtime as 23,781 bytes with 795 bytes of
+  EIP-170 headroom.
 - Hardened the runtime size-budget checker so it validates compiler metadata,
   optimizer settings, EVM version, compilation target, and current source
   Keccak hashes before trusting Foundry artifacts, with focused regression
