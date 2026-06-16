@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `StreamMetadataCrossInvariants.t.sol`, a focused ADV-007 suite covering
+  frozen dependency pins under registry version/deprecation churn, rejected
+  late randomness writes against frozen live metadata, and post-freeze burned
+  pending-token callback audit behavior without moving frozen manifests.
 - Added `StreamRandomizerAdversarial.t.sol`, a focused ADV-006 suite covering
   VRF and arRNG duplicate callback reentry during core post-processing plus
   stale-provider fulfillment attempts that must preserve pending request state

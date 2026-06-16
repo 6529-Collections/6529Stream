@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-adversarial-tests` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/449` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/450` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/451` |
-| Next issue | TBD after ADV-006 randomizer adversarial coverage lands. |
+| Active PR branch | `codex/metadata-freeze-cross-invariants` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/451` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/452` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/453` |
+| Next issue | TBD after ADV-007 metadata freeze/dependency/randomness cross-invariants land. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 11:42 UTC` |
+| Last updated | `2026-06-16 12:09 UTC` |
 
 ## Packaging Notes
 
@@ -16078,6 +16078,8 @@ Outcome:
 | 2026-06-16 11:04 | Open PR #449 for ADV-012 | PR #449 is open at `https://github.com/6529-Collections/6529Stream/pull/449`, closes issue #448, and packages custom-error negative coverage plus release-artifact refresh. Local validation passed: focused custom-error suite, risk-register, bytecode-release-proof, release-manifest, release-checksum, changelog, `git diff --check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-16 11:27 | Merge PR #449 and start ADV-006 | PR #449 merged as `8d05474fd1afbd3c8e287aa92bf981824e5cf401`; CI Foundry smoke and Windows wrapper passed, CodeRabbit status was success, review threads were empty, and 6529bot final-head follow-up reported no new findings after the nice-to-haves were addressed. Created issue #450 and branch `codex/randomizer-adversarial-tests`; local draft adds `test/StreamRandomizerAdversarial.t.sol` covering VRF/arRNG duplicate callback reentry during core writes and stale-provider fulfillment preservation. Focused `forge test --match-path test/StreamRandomizerAdversarial.t.sol -vvv` passed with existing known compiler warnings only. |
 | 2026-06-16 11:42 | Open PR #451 for ADV-006 | PR #451 is open at `https://github.com/6529-Collections/6529Stream/pull/451`, closes issue #450, and CodeRabbit review was requested in comment `4718341904`. Local validation passed: focused randomizer adversarial suite, full `make check`, and Windows `scripts\check.ps1`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-16 12:00 | Merge PR #451 and start ADV-007 | PR #451 merged as `ead71c1028ec6b05192e5bf99d21e761ba040a99`; CI Foundry smoke and Windows wrapper passed, CodeRabbit status was success despite a rate-limit warning comment, and 6529bot final-head follow-up reported no new findings after the single-shot reentry-probe comment was added. Created issue #452 and branch `codex/metadata-freeze-cross-invariants`; local draft adds `test/StreamMetadataCrossInvariants.t.sol` covering frozen dependency pins across registry churn, rejected late randomness against frozen live metadata, and post-freeze burned pending-token callback audit behavior. Focused `forge test --match-path test\StreamMetadataCrossInvariants.t.sol -vvv` passed with existing warning noise only. |
+| 2026-06-16 12:09 | Open PR #453 for ADV-007 | PR #453 is open at `https://github.com/6529-Collections/6529Stream/pull/453`, closes issue #452, and CodeRabbit review was requested in comment `4718562962`. Local validation passed: focused metadata cross-invariant suite, release manifest/checksum/bytecode/risk/changelog drift checks, full `make check`, Windows `scripts\check.ps1`, and `git diff --check`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
