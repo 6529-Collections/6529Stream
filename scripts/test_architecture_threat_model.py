@@ -50,7 +50,7 @@ release evidence.
 Future product work is satellite-first, uses satellite contracts, read
 adapters, linked libraries, release artifacts, or docs, and any explicit
 size-budget exception needs a measured before/after `StreamCore` runtime
-bytecode delta. Current StreamCore runtime is 23,661 bytes with 915 bytes of
+bytecode delta. Current StreamCore runtime is 23,781 bytes with 795 bytes of
 margin, above the 384-byte minimum and 512-byte warning thresholds. Run
 forge build --sizes --via-ir --skip test --skip script --force and
 python scripts/check_contract_size_budget.py.

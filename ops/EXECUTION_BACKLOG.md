@@ -3147,7 +3147,7 @@ Status: In progress locally on issue #426 and branch
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom even after
-the 23,661-byte / 915-byte-margin headroom recovery pass. Adding world-class 1/1
+the 23,781-byte / 795-byte-margin rebased headroom measurement. Adding world-class 1/1
 product surfaces directly to Core risks breaking deployment or forcing rushed
 size recovery after feature work is already written.
 

@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 00:10 UTC` |
+| Last updated | `2026-06-16 00:21 UTC` |
 
 ## Packaging Notes
 
@@ -281,7 +281,7 @@ Goal:
   a linked library, release artifacts, or docs-only evidence.
 - Require measured before/after `StreamCore` runtime deltas and explicit
   size-budget exception notes for non-critical Core bytecode spend.
-- Tie the policy to the current production runtime of 23,661 bytes, 915 bytes
+- Tie the policy to the current production runtime of 23,781 bytes, 795 bytes
   of EIP-170 headroom, the 384-byte minimum release floor, and the 512-byte
   warning threshold.
 - Add checker/test coverage so future edits cannot quietly remove the
@@ -322,8 +322,8 @@ Validation result:
   scripts, and `git diff --check` passed.
 - `make architecture-threat-model-check release-manifest-check
   release-checksums-check changelog-check` passed, including the production
-  size build that still measures `StreamCore` at 23,661 runtime bytes with
-  915 bytes of EIP-170 headroom.
+  size build that measures `StreamCore` at 23,781 runtime bytes with
+  795 bytes of EIP-170 headroom after rebasing onto `origin/main`.
 
 ### PR candidate: Add marketplace and indexer retained evidence model (Queue Item ONE-005)
 
@@ -15493,7 +15493,8 @@ Outcome:
 | 2026-06-15 23:51 | Address PR #425 bot nice-to-haves | 6529bot security found no findings and general review marked the PR good to merge. Confirmed `docs/public-beta-evidence.md` list numbering is sequential in the current head, then added direct envelope-template SHA validation to `scripts/check_marketplace_indexer_evidence.py` plus focused matching/drift tests. Focused marketplace-indexer, release manifest/proof/checksum, changelog, Python compile, and `git diff --check` checks passed locally. |
 | 2026-06-15 23:52 | Merge PR #425 and start ONE-006 | PR #425 merged as `48eae446f47f6d4d65d844b1413059e275d8f0e9`, issue #422 closed completed, CodeRabbit status was success, 6529bot follow-up review on the latest head reported no new findings, and GitHub CI run `27583841942` passed. Created issue #426 and branch `codex/satellite-extension-policy` for the satellite-extension architecture policy. |
 | 2026-06-15 23:59 | Open PR #427 for ONE-006 | PR #427 is open and ready for review, closes issue #426, and CodeRabbit review was requested in comment `4713528373`. Local focused validation and the policy Make target passed before opening. |
-| 2026-06-16 00:10 | Address PR #427 bot hardening note | 6529bot found no security issues and marked the PR good to merge, with an optional checker-hardening note. Added explicit required link-target file existence validation to `scripts/check_architecture_threat_model.py`, updated focused regressions, and confirmed `StreamCore` currently measures `23,661` runtime bytes with `915` bytes of EIP-170 headroom rather than the earlier stale `24,516`/`60` concern. |
+| 2026-06-16 00:10 | Address PR #427 bot hardening note | 6529bot found no security issues and marked the PR good to merge, with an optional checker-hardening note. Added explicit required link-target file existence validation to `scripts/check_architecture_threat_model.py`, updated focused regressions, and confirmed `StreamCore` measures `23,781` runtime bytes with `795` bytes of EIP-170 headroom after rebasing onto `origin/main`, rather than the earlier stale `24,516`/`60` concern. |
+| 2026-06-16 00:21 | Rebase PR #427 onto updated `main` | Rebasing onto `origin/main` at `4021b6d` resolved generated release-artifact conflicts, incorporated the merged artist-series stack, and refreshed current size evidence from `23,661`/`915` to `23,781`/`795`. `make release-checksums` and `make architecture-threat-model-check release-manifest-check release-checksums-check changelog-check` pass on the rebased tree. |
 
 ## Resume Instructions
 
