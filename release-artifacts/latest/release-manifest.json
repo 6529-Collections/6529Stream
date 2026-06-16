@@ -108,7 +108,7 @@
     },
     "dependency_provenance_attestation": {
       "path": "release-artifacts/latest/dependency-provenance-attestation.json",
-      "sha256": "sha256:837e48a794c185ef8701d36641d6708e3ca2a08c34b0b3dd8dba88a1d799c300",
+      "sha256": "sha256:45740a0e0d0c6a6042138ecee59a1cab54d5352bf96bcfa5a227b9136bcf882b",
       "size_bytes": 3232,
       "schema_version": "6529stream.dependency-provenance-attestation.v1"
     },

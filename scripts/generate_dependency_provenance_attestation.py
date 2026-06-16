@@ -164,17 +164,6 @@ def scan_no_secret_values(value: Any, path: str = "$") -> None:
             )
 
 
-def artifact_identity(record: dict[str, Any]) -> tuple[str, str, str, str, int]:
-    dependency = require_dict(record.get("dependency"), "artifact.dependency")
-    return (
-        require_string(record.get("protocol_version"), "artifact.protocol_version"),
-        require_string(record.get("deployment_version"), "artifact.deployment_version"),
-        require_string(dependency.get("registry_contract"), "artifact.dependency.registry_contract"),
-        require_dependency_key(dependency.get("key"), "artifact.dependency.key"),
-        require_positive_int(dependency.get("version"), "artifact.dependency.version"),
-    )
-
-
 def build_artifact_attestation(
     repo_root: Path,
     artifact: dict[str, Any],
@@ -237,25 +226,27 @@ def build_artifact_attestation(
     if not isinstance(source_notes, str):
         raise DependencyProvenanceAttestationError(f"artifacts[{index}].source.notes must be a string")
 
+    identity = {
+        "protocol_version": require_string(
+            artifact.get("protocol_version"),
+            f"artifacts[{index}].protocol_version",
+        ),
+        "deployment_version": require_string(
+            artifact.get("deployment_version"),
+            f"artifacts[{index}].deployment_version",
+        ),
+        "registry_contract": require_string(
+            dependency.get("registry_contract"),
+            f"artifacts[{index}].dependency.registry_contract",
+        ),
+        "dependency_name": dependency_name,
+        "dependency_key": dependency_key,
+        "dependency_key_preimage": key_preimage,
+        "dependency_version": dependency_version,
+    }
+
     return {
-        "identity": {
-            "protocol_version": require_string(
-                artifact.get("protocol_version"),
-                f"artifacts[{index}].protocol_version",
-            ),
-            "deployment_version": require_string(
-                artifact.get("deployment_version"),
-                f"artifacts[{index}].deployment_version",
-            ),
-            "registry_contract": require_string(
-                dependency.get("registry_contract"),
-                f"artifacts[{index}].dependency.registry_contract",
-            ),
-            "dependency_name": dependency_name,
-            "dependency_key": dependency_key,
-            "dependency_key_preimage": key_preimage,
-            "dependency_version": dependency_version,
-        },
+        "identity": identity,
         "descriptor": {
             **descriptor_record,
             "schema_version": schema,
@@ -268,7 +259,7 @@ def build_artifact_attestation(
         "files": sorted(file_records, key=lambda item: item["path"]),
         "artifact_digest": canonical_json_sha256(
             {
-                "identity": artifact_identity(artifact),
+                "identity": identity,
                 "descriptor": descriptor_record,
                 "files": sorted(file_records, key=lambda item: item["path"]),
                 "provenance": provenance,

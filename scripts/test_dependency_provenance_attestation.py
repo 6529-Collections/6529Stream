@@ -178,6 +178,30 @@ class DependencyProvenanceAttestationTests(unittest.TestCase):
             with self.assertRaisesRegex(generator.DependencyProvenanceAttestationError, "parent-directory"):
                 generator.build_output_text(root, manifest_path, output_path)
 
+    def test_generator_rejects_symlink_escape_when_supported(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "repo"
+            outside = Path(temp_dir) / "outside"
+            manifest_path, output_path = seed_dependency_bundle(root)
+            outside_source = outside / "outside.js"
+            write_text(outside_source, "function outside() {}\n")
+            link = root / "release-artifacts" / "dependencies" / "anvil" / "linked.js"
+            try:
+                link.symlink_to(outside_source)
+            except OSError as exc:
+                self.skipTest(f"symlink creation is not supported in this environment: {exc}")
+
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["artifacts"][0]["files"][0] = {
+                **file_record(root, "release-artifacts/dependencies/anvil/linked.js"),
+                "role": "script",
+                "media_type": "application/javascript",
+            }
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(generator.DependencyProvenanceAttestationError, "inside the repository"):
+                generator.build_output_text(root, manifest_path, output_path)
+
     def test_generator_rejects_secret_shaped_manifest_value(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
