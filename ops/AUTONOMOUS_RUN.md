@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/event-reconstructability-tests` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/439` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/440` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/441` |
 | Next issue | TBD after ADV-008 event reconstructability tests land. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 07:16 UTC` |
+| Last updated | `2026-06-16 07:18 UTC` |
 
 ## Packaging Notes
 
@@ -278,9 +278,9 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 Status: issue opened, branch started from PR #439 squash merge commit
 `41752a653b6f412123109a3005f549a374a19d1e`, and local implementation
-validated. PR creation is next.
+validated. PR #441 is open and awaiting CI plus CodeRabbit review.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/440`.
-PR: TBD.
+PR: `https://github.com/6529-Collections/6529Stream/pull/441`.
 Branch: `codex/event-reconstructability-tests`.
 
 Goal:
@@ -332,6 +332,8 @@ Validation notes:
 - The current checkout measures `StreamCore` at `22,184` production runtime
   bytes with `2,392` bytes of EIP-170 headroom, superseding the stale
   `24,516` byte / `60` byte margin concern.
+- PR #441 opened on head `5074e56b7c56ead4f56fd0703e25d504a0eb9cc2`;
+  CodeRabbit review requested in comment `4715957833`.
 
 ### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
 
