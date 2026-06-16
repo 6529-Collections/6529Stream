@@ -10,6 +10,7 @@ import "./helpers/StreamFixture.sol";
 contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
     using Assertions for address;
     using Assertions for bool;
+    using Assertions for bytes32;
     using Assertions for uint256;
 
     address private constant POSTER = address(0x1001);
@@ -46,19 +47,21 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         vm.prank(SEARCHER);
         deployed.drops.mintDrop(authorization, tokenData, signature);
 
-        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "recipient stolen");
-        deployed.drops.retrieveExecutionAddress(FIRST_TOKEN_ID)
+        uint256 tokenId = deployed.drops.retrieveTokenID(authorization.dropId);
+        tokenId.assertEq(FIRST_TOKEN_ID, "fixture token id");
+        deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "recipient stolen");
+        deployed.drops.retrieveExecutionAddress(tokenId)
             .assertEq(RECIPIENT, "execution address changed");
         deployed.drops.isDropConsumed(authorization.dropId).assertTrue("drop not consumed");
 
         vm.prank(RECIPIENT);
-        (bool replaySuccess,) = address(deployed.drops)
+        (bool replaySuccess, bytes memory replayData) = address(deployed.drops)
             .call(
                 abi.encodeWithSelector(
                     deployed.drops.mintDrop.selector, authorization, tokenData, signature
                 )
             );
-        replaySuccess.assertFalse("signed drop replayed after third-party submission");
+        _assertRevertedWithMessage(replaySuccess, replayData, "Drop Executed");
         deployed.core.totalSupply().assertEq(1, "replay minted another token");
     }
 
@@ -83,12 +86,13 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         vm.deal(PAYER, 2 ether);
 
         vm.prank(SEARCHER);
-        (bool searcherSuccess,) = address(deployed.drops).call{ value: 1 ether }(
+        (bool searcherSuccess, bytes memory searcherData) = address(deployed.drops)
+        .call{ value: 1 ether }(
             abi.encodeWithSelector(
                 deployed.drops.mintDrop.selector, authorization, tokenData, signature
             )
         );
-        searcherSuccess.assertFalse("wrong payer executed paid drop");
+        _assertRevertedWithMessage(searcherSuccess, searcherData, "payer");
         deployed.drops.isDropConsumed(authorization.dropId)
             .assertFalse("failed payer consumed drop");
         deployed.core.totalSupply().assertEq(0, "failed payer minted token");
@@ -96,7 +100,9 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         vm.prank(PAYER);
         deployed.drops.mintDrop{ value: 1 ether }(authorization, tokenData, signature);
 
-        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "paid recipient");
+        uint256 tokenId = deployed.drops.retrieveTokenID(authorization.dropId);
+        tokenId.assertEq(FIRST_TOKEN_ID, "fixture token id");
+        deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "paid recipient");
         deployed.drops.isDropConsumed(authorization.dropId).assertTrue("paid drop not consumed");
     }
 
@@ -138,14 +144,14 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         bytes memory expiredSignature = signAuthorization(deployed.drops, expired);
 
         vm.warp(block.timestamp + 1);
-        (bool expiredSuccess,) = address(deployed.drops)
+        (bool expiredSuccess, bytes memory expiredData) = address(deployed.drops)
             .call(
                 abi.encodeWithSelector(
                     deployed.drops.mintDrop.selector, expired, "deadline-expired", expiredSignature
                 )
             );
 
-        expiredSuccess.assertFalse("expired drop executed");
+        _assertRevertedWithMessage(expiredSuccess, expiredData, "Expired");
         deployed.drops.isDropConsumed(expired.dropId).assertFalse("expired drop consumed");
         deployed.core.totalSupply().assertEq(1, "expired drop minted token");
     }
@@ -154,6 +160,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         AuctionSetup memory setup = _createAuction(block.timestamp + 601, 401);
         vm.deal(BIDDER, 10 ether);
         vm.warp(setup.auctionEndTime);
+        uint256 extensionTime = setup.auctions.extensionTime();
 
         vm.prank(BIDDER);
         setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
@@ -162,7 +169,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         setup.auctions.auctionHighestBidder(setup.tokenId).assertEq(BIDDER, "bidder");
         setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "custody");
         setup.auctions.retrieveAuctionEndTime(setup.tokenId)
-            .assertEq(setup.auctionEndTime + 300, "extended end");
+            .assertEq(setup.auctionEndTime + extensionTime, "extended end");
         uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId))
             .assertEq(uint256(StreamAuctions.AuctionStatus.Active), "status");
     }
@@ -182,11 +189,12 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         vm.warp(endTime + 1);
 
         vm.prank(SECOND_BIDDER);
-        (bool lateSuccess,) = address(setup.auctions).call{ value: SECOND_BID }(
+        (bool lateSuccess, bytes memory lateData) = address(setup.auctions)
+        .call{ value: SECOND_BID }(
             abi.encodeWithSelector(setup.auctions.participateToAuction.selector, setup.tokenId)
         );
 
-        lateSuccess.assertFalse("late bid accepted");
+        _assertRevertedWithMessage(lateSuccess, lateData, "Ended");
         setup.auctions.auctionHighestBid(setup.tokenId).assertEq(RESERVE_PRICE, "bid changed");
         setup.auctions.auctionHighestBidder(setup.tokenId).assertEq(BIDDER, "bidder changed");
         setup.auctions.totalAuctionBidEscrow().assertEq(escrowBefore, "escrow changed");
@@ -200,10 +208,11 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         AuctionSetup memory setup = _createAuction(block.timestamp + 1 days, 601);
         vm.deal(BIDDER, 10 ether);
         vm.deal(SECOND_BIDDER, 10 ether);
+        uint256 extensionTime = setup.auctions.extensionTime();
 
         vm.prank(BIDDER);
         setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
-        vm.warp(setup.auctionEndTime - 299);
+        vm.warp(setup.auctionEndTime - extensionTime + 1);
 
         vm.prank(SECOND_BIDDER);
         setup.auctions.participateToAuction{ value: SECOND_BID }(setup.tokenId);
@@ -214,7 +223,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         setup.auctions.totalBidderOwed().assertEq(RESERVE_PRICE, "total bidder owed");
         setup.auctions.totalAuctionBidEscrow().assertEq(SECOND_BID, "active escrow");
         setup.auctions.retrieveAuctionEndTime(setup.tokenId)
-            .assertEq(setup.auctionEndTime + 300, "extended end");
+            .assertEq(setup.auctionEndTime + extensionTime, "extended end");
         setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "custody");
     }
 
@@ -255,6 +264,18 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
         bytes memory signature = signAuthorization(setup.deployed.drops, authorization);
 
         setup.deployed.drops.mintDrop(authorization, "timing-auction", signature);
-        setup.tokenId = FIRST_TOKEN_ID;
+        setup.tokenId = setup.deployed.drops.retrieveTokenID(authorization.dropId);
+        setup.tokenId.assertEq(FIRST_TOKEN_ID, "fixture token id");
+        setup.deployed.core.ownerOf(setup.tokenId).assertEq(address(setup.auctions), "custody");
+    }
+
+    function _assertRevertedWithMessage(
+        bool success,
+        bytes memory revertData,
+        string memory message
+    ) private pure {
+        success.assertFalse("call unexpectedly succeeded");
+        bytes memory expected = abi.encodeWithSignature("Error(string)", message);
+        keccak256(revertData).assertEq(keccak256(expected), message);
     }
 }
