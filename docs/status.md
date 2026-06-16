@@ -36,6 +36,12 @@ The current Gate A smoke baseline proves:
   linter, vendored, test-only, ABI-compatibility, and `StreamCore`
   size-tradeoff warning rows without treating warning quietness as protocol
   correctness proof.
+- `python scripts/test_natspec_coverage.py` and
+  `python scripts/check_natspec_coverage.py` enforce the checked NatSpec
+  coverage baseline in [`docs/natspec-coverage.md`](natspec-coverage.md) and
+  `release-artifacts/baselines/v0.1.0/natspec-coverage.json`. The current
+  baseline is a burn-down queue for missing release-surface NatSpec, not proof
+  that API documentation is complete.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
   function-admin permission regressions, domain-scoped pause controls,
   signer-manager lifecycle controls with approved targets, EIP-712 and ERC-1271

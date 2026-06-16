@@ -30,6 +30,7 @@ BASELINE_DIR = Path("release-artifacts/baselines")
 DEFAULT_BASELINE = BASELINE_DIR / "v0.1.0" / "abi-surface.json"
 GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
 GAS_ENVELOPES_FILENAME = "gas-envelopes.json"
+NATSPEC_COVERAGE_FILENAME = "natspec-coverage.json"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
@@ -87,6 +88,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/permanence-packages.md"),
     Path("docs/royalty-policy.md"),
     Path("docs/warning-dispositions.md"),
+    Path("docs/natspec-coverage.md"),
     Path("docs/release-readiness.md"),
     Path("docs/protocol-surface.md"),
     Path("docs/custom-errors.md"),
@@ -842,6 +844,11 @@ def default_gas_envelopes_path(protocol_versions: list[str]) -> Path:
     return snapshot_path.with_name(GAS_ENVELOPES_FILENAME)
 
 
+def default_natspec_coverage_path(protocol_versions: list[str]) -> Path:
+    snapshot_path = default_gas_snapshot_path(protocol_versions)
+    return snapshot_path.with_name(NATSPEC_COVERAGE_FILENAME)
+
+
 def resolve_gas_snapshot_path(
     gas_snapshot_path: Path | None, protocol_versions: list[str], repo_root: Path
 ) -> Path:
@@ -873,6 +880,10 @@ def resolve_gas_snapshot_path(
 
 def resolve_gas_envelopes_path(protocol_versions: list[str], repo_root: Path) -> Path:
     return (repo_root / default_gas_envelopes_path(protocol_versions)).resolve()
+
+
+def resolve_natspec_coverage_path(protocol_versions: list[str], repo_root: Path) -> Path:
+    return (repo_root / default_natspec_coverage_path(protocol_versions)).resolve()
 
 
 def checksum_bundle() -> dict[str, Any]:
@@ -1001,6 +1012,7 @@ def build_manifest(
         gas_snapshot_path, protocol_versions, repo_root
     )
     resolved_gas_envelopes_path = resolve_gas_envelopes_path(protocol_versions, repo_root)
+    resolved_natspec_coverage_path = resolve_natspec_coverage_path(protocol_versions, repo_root)
 
     return {
         "schema_version": RELEASE_MANIFEST_SCHEMA,
@@ -1166,6 +1178,11 @@ def build_manifest(
             "gas_snapshot_baseline": file_record(resolved_gas_snapshot_path, repo_root),
             "gas_envelope_baseline": file_record(
                 resolved_gas_envelopes_path,
+                repo_root,
+                schema_required=True,
+            ),
+            "natspec_coverage_baseline": file_record(
+                resolved_natspec_coverage_path,
                 repo_root,
                 schema_required=True,
             ),

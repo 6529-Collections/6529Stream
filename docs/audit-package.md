@@ -64,6 +64,7 @@ deferrals are appropriate for launch.
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Warning disposition baseline | [`docs/warning-dispositions.md`](warning-dispositions.md) |
+| NatSpec coverage baseline | [`docs/natspec-coverage.md`](natspec-coverage.md) |
 | Protocol surface report | [`docs/protocol-surface.md`](protocol-surface.md) |
 | Release-readiness dashboard | [`docs/release-readiness.md`](release-readiness.md) |
 | Canonical release risk register | [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json) |
@@ -109,6 +110,7 @@ Protocol-specific docs that are useful during review:
 - [`docs/public-beta-evidence.md`](public-beta-evidence.md)
 - [`docs/release-readiness.md`](release-readiness.md)
 - [`docs/protocol-surface.md`](protocol-surface.md)
+- [`docs/natspec-coverage.md`](natspec-coverage.md)
 
 ## Invariants And Test Evidence
 
@@ -171,6 +173,12 @@ Local deployment and release evidence:
   integrator and audit review. It is checked by
   [`scripts/generate_protocol_surface_report.py`](../scripts/generate_protocol_surface_report.py)
   and is not protocol correctness proof.
+- [`release-artifacts/baselines/v0.1.0/natspec-coverage.json`](../release-artifacts/baselines/v0.1.0/natspec-coverage.json)
+  records the current NatSpec coverage debt for release-surface functions,
+  public variable getters, events, and custom errors. It is checked by
+  [`scripts/check_natspec_coverage.py`](../scripts/check_natspec_coverage.py)
+  and keeps new undocumented protocol surface from entering silently; it is not
+  proof that API documentation is complete.
 - [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
   is the bytecode-to-release proof. It ties committed local/fork address books,
   deployment manifests, ABI checksums, source verification inputs, compiler
@@ -301,6 +309,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_warning_dispositions.py
 python scripts/check_warning_dispositions.py
+python scripts/test_natspec_coverage.py
+python scripts/check_natspec_coverage.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_drop_authorization_payload_generator.py
@@ -385,6 +395,7 @@ Update this package when any of the following changes:
 - static-analysis baseline disposition;
 - compiler, NatSpec, documentation, linter, vendored, test-only, ABI, or size
   warning disposition;
+- NatSpec coverage baseline exclusions or burn-down status;
 - invariant, gas, deployment, release, or ceremony evidence;
 - known blockers or accepted local-baseline risk dispositions;
 - security reporting process or release signing process.
@@ -401,6 +412,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_warning_dispositions.py
 python scripts/check_warning_dispositions.py
+python scripts/test_natspec_coverage.py
+python scripts/check_natspec_coverage.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_drop_authorization_payload_generator.py

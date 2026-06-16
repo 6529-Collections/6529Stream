@@ -36,6 +36,7 @@ REQUIRED_PHRASES = [
     "signed release tag",
     "external evidence gaps",
     "risk register",
+    "NatSpec coverage",
 ]
 
 REQUIRED_COMMANDS = [
@@ -43,6 +44,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_audit_package.py",
     "python scripts/test_warning_dispositions.py",
     "python scripts/check_warning_dispositions.py",
+    "python scripts/test_natspec_coverage.py",
+    "python scripts/check_natspec_coverage.py",
     "python scripts/test_incident_response.py",
     "python scripts/check_incident_response.py",
     "python scripts/test_drop_authorization_payload_generator.py",
@@ -98,6 +101,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/slither.md",
     "docs/tooling.md",
     "docs/warning-dispositions.md",
+    "docs/natspec-coverage.md",
     "docs/drop-authorization-signing.md",
     "docs/signer-custody-readiness.md",
     "docs/deployment.md",
@@ -123,6 +127,7 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/SHA256SUMS",
     "release-artifacts/latest/release-checksums.json",
     "release-artifacts/latest/source-verification-inputs.json",
+    "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
     "release-artifacts/latest/risk-register.json",
     "release-artifacts/latest/public-beta-evidence.json",
     "release-artifacts/latest/public-beta-blockers.md",

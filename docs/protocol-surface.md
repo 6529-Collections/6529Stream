@@ -18,6 +18,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_protocol_surface_report.py
 python scripts/generate_custom_error_catalog.py
+python scripts/check_natspec_coverage.py
 ```
 
 Check the committed report without rewriting it with:
@@ -27,10 +28,17 @@ python scripts/test_protocol_surface_report.py
 python scripts/generate_protocol_surface_report.py --check
 python scripts/test_custom_error_catalog.py
 python scripts/generate_custom_error_catalog.py --check
+python scripts/test_natspec_coverage.py
+python scripts/check_natspec_coverage.py
 ```
 
 The canonical local gate also runs those commands through `make check`,
 `scripts/check.sh`, `scripts/check.ps1`, and CI.
+
+The NatSpec coverage gate in
+[`docs/natspec-coverage.md`](natspec-coverage.md) uses this report as its
+source of truth for release-surface functions, public variable getters, events,
+and custom errors.
 
 ## Contents
 

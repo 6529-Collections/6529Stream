@@ -50,6 +50,8 @@ python scripts/test_protocol_surface_report.py
 python scripts/generate_protocol_surface_report.py --check
 python scripts/test_custom_error_catalog.py
 python scripts/generate_custom_error_catalog.py --check
+python scripts/test_natspec_coverage.py
+python scripts/check_natspec_coverage.py
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
@@ -137,6 +139,15 @@ errors by category and severity, records selector/signature data, and keeps
 test traceability plus caller-action guidance visible for auditors and
 integrators. It is documentation and traceability evidence, not a replacement
 for the Solidity tests or external audit.
+
+The NatSpec coverage step checks
+[`release-artifacts/baselines/v0.1.0/natspec-coverage.json`](../release-artifacts/baselines/v0.1.0/natspec-coverage.json)
+against the protocol surface report and first-party Solidity sources. It
+requires nearby NatSpec for release-surface functions, public variable getters,
+events, and custom errors unless the current gap is listed with an explicit
+reason. The current baseline has 485 explicit exclusions, so it is a checked
+burn-down queue rather than proof that API documentation is complete. See
+[`natspec-coverage.md`](natspec-coverage.md).
 
 The size step is the production deployability gate. It skips test and script
 contracts so non-production artifacts do not pollute EIP-170/EIP-3860 evidence,
@@ -686,6 +697,8 @@ python scripts/check_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/test_natspec_coverage.py
+python scripts/check_natspec_coverage.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_drop_authorization_payload_generator.py
@@ -752,6 +765,8 @@ python scripts/test_release_evidence_issue_closure.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
 python scripts/check_audit_package.py
+python scripts/test_natspec_coverage.py
+python scripts/check_natspec_coverage.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_drop_authorization_payload_generator.py

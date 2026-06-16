@@ -106,6 +106,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_protocol_surface_report.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_custom_error_catalog.py"
 & $pythonPath @pythonArgs "scripts\generate_custom_error_catalog.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_natspec_coverage.py"
+& $pythonPath @pythonArgs "scripts\check_natspec_coverage.py"
 & $pythonPath @pythonArgs "scripts\test_source_verification_inputs.py"
 & $pythonPath @pythonArgs "scripts\generate_source_verification_inputs.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_dependency_artifact_manifest.py"

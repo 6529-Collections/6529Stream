@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked NatSpec coverage gate for the release-relevant protocol
+  surface with `scripts/check_natspec_coverage.py`,
+  `release-artifacts/baselines/v0.1.0/natspec-coverage.json`,
+  `docs/natspec-coverage.md`, local/CI/Windows gate wiring, release-manifest
+  and checksum coverage, and explicit baseline debt for undocumented
+  functions, public variable getters, events, and custom errors.
 - Added a generated custom-error catalog with
   `release-artifacts/latest/custom-error-catalog.json`,
   `docs/custom-errors.md`, generator/test wiring, local/CI/Windows gates,

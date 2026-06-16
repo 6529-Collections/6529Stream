@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/custom-error-catalog` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/453` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/454` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/455` |
-| Next issue | TBD after CON-004 custom-error catalog lands. |
+| Active PR branch | `codex/natspec-coverage-gate` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/455` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/456` |
+| Active PR | TBD |
+| Next issue | TBD after CON-006 NatSpec coverage gate lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 12:52 UTC` |
+| Last updated | `2026-06-16 14:21 UTC` |
 
 ## Packaging Notes
 
@@ -16085,6 +16085,8 @@ Outcome:
 | 2026-06-16 12:52 | Open PR #455 for CON-004 | PR #455 is open at `https://github.com/6529-Collections/6529Stream/pull/455`, closes issue #454, and packages the generated custom-error catalog plus release/check wiring. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve actionable comments, then merge only when clean. |
 | 2026-06-16 13:09 | Address PR #455 catalog review findings | 6529bot correctly flagged silent category fallback, substring-order fragility, stale traceability-file claims, and source-doc wording. The review response replaces substring classification with an explicit per-error category map, fails generation for unmapped errors, validates traceability files exist under `test/`, preserves `MetadataMutationPaused` as `pause_emergency`, classifies `RandomizerRequestReentrancy` as `randomness_lifecycle`, keeps ERC-2981 errors as `configuration`, fixes stale traceability paths, updates `docs/custom-errors.md`, regenerates release artifacts, and passes focused catalog, release-artifact, bytecode-proof, manifest, checksum, changelog, and `git diff --check` gates. Full local gates still need to run before pushing. |
 | 2026-06-16 13:35 | Validate PR #455 review-response head | Full local `make check` and Windows `scripts\check.ps1` both passed after regenerating release artifacts, with only existing warning-disposition noise. The initial parallel full-gate attempt failed only because the final docs/run-state edits changed the release manifest; rerunning sequentially after `make release-checksums` was clean. Next action is to refresh release checksums for this run-state row, commit, push, and wait for PR #455 CI/bot follow-up. |
+| 2026-06-16 14:20 | Start CON-006 NatSpec coverage gate | PR #455 merged as `ccaadc8420bc1faec32eee7e93e80575b0ff5900`, issue #454 closed completed, CI and 6529bot were clean, and issue #456 opened for NatSpec coverage. Branch `codex/natspec-coverage-gate` adds `scripts/check_natspec_coverage.py`, focused checker tests, generated `release-artifacts/baselines/v0.1.0/natspec-coverage.json`, `docs/natspec-coverage.md`, Makefile/Bash/PowerShell/CI wiring, release-manifest coverage, docs/readiness/audit links, and changelog state. The current baseline is honest documentation debt: 9 documented entries and 485 explicit exclusions. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, then wait for CI/bot feedback. |
+| 2026-06-16 14:21 | Validate CON-006 local draft | NatSpec checker/tests, audit-package checks, release-readiness checks, release-manifest tests/check, bytecode proof tests/check, release-checksum tests/check, changelog gate, Python compile, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` all passed locally. The baseline remains explicit documentation debt rather than completion proof: 9 documented entries and 485 explicit exclusions. Next action is to commit, push, open the CON-006 PR, request CodeRabbit, then wait for CI/bot feedback. |
 
 ## Resume Instructions
 
