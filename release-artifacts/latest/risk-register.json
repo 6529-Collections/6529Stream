@@ -240,7 +240,7 @@
       "evidence": [
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:1ae029be1ef7e2bd46e6d23df346814addd3d53eea248dcca62088ee91adc872"
+          "sha256": "sha256:e9dcaba5df7b24e6023dd0e0b7cda469bee10c0faacf73ec2f0642385cfa1ad9"
         },
         {
           "path": "docs/integrations/marketplace-indexer-evidence.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:1ae029be1ef7e2bd46e6d23df346814addd3d53eea248dcca62088ee91adc872"
+          "sha256": "sha256:e9dcaba5df7b24e6023dd0e0b7cda469bee10c0faacf73ec2f0642385cfa1ad9"
         },
         {
           "path": "docs/permanence-packages.md",
