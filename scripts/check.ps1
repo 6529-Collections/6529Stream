@@ -112,6 +112,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\generate_source_verification_inputs.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_dependency_artifact_manifest.py"
 & $pythonPath @pythonArgs "scripts\generate_dependency_artifact_manifest.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_dependency_provenance_attestation.py"
+& $pythonPath @pythonArgs "scripts\generate_dependency_provenance_attestation.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_abi_compatibility.py"
 & $pythonPath @pythonArgs "scripts\check_abi_compatibility.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_broadcast_manifest_input.py"

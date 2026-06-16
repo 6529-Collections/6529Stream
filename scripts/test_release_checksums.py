@@ -38,6 +38,10 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         self.assertIn(Path("release-artifacts/permanence"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/provenance"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(
+            Path("scripts/generate_dependency_provenance_attestation.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("scripts/generate_release_notes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/verify_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("deployments/admin-ceremony"), generator.DEFAULT_COVERED_PATHS)

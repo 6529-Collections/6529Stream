@@ -205,6 +205,8 @@ jobs:
             scripts/test_warning_dispositions.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
+            scripts/generate_dependency_provenance_attestation.py \
+            scripts/test_dependency_provenance_attestation.py \
             scripts/generate_release_notes.py \
             scripts/test_release_notes.py \
             scripts/generate_release_manifest.py \
@@ -402,6 +404,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_dependency_artifact_manifest.py 2>&1 | tee ci-logs/dependency-artifact-tests.log
           python3 scripts/generate_dependency_artifact_manifest.py --check 2>&1 | tee ci-logs/dependency-artifact-check.log
+          python3 scripts/test_dependency_provenance_attestation.py 2>&1 | tee ci-logs/dependency-provenance-attestation-tests.log
+          python3 scripts/generate_dependency_provenance_attestation.py --check 2>&1 | tee ci-logs/dependency-provenance-attestation-check.log
 
       - name: ABI compatibility
         shell: bash

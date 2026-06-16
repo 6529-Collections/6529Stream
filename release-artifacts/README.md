@@ -20,6 +20,7 @@ python scripts/generate_release_artifacts.py
 python scripts/generate_protocol_surface_report.py
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_dependency_artifact_manifest.py
+python scripts/generate_dependency_provenance_attestation.py
 python scripts/check_abi_compatibility.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
@@ -77,6 +78,8 @@ python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_dependency_artifact_manifest.py
 python scripts/generate_dependency_artifact_manifest.py --check
+python scripts/test_dependency_provenance_attestation.py
+python scripts/generate_dependency_provenance_attestation.py --check
 python scripts/test_abi_compatibility.py
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
@@ -196,6 +199,16 @@ packaged dependency files under that policy so Windows and Linux checkouts
 produce the same manifest hashes.
 Production dependency version changes must follow
 `docs/dependency-operations.md` before public release.
+
+`latest/dependency-provenance-attestation.json` is generated from the checked
+dependency artifact manifest. It re-validates descriptor/source hashes, records
+dependency identity and provenance strings, lists release validation commands,
+and preserves the boundary that the current committed bundle is local
+pre-audit evidence only. It does not prove live dependency registration,
+collection pin transactions, public-beta readiness, production readiness, or
+external audit acceptance. Validate it with
+`python scripts/test_dependency_provenance_attestation.py` and
+`python scripts/generate_dependency_provenance_attestation.py --check`.
 
 `latest/one-of-one-provenance-manifest.json` is generated from schemaed
 descriptors under `provenance/`. It catalogs 1/1 provenance records, descriptor
@@ -538,6 +551,7 @@ python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
 python scripts/generate_source_verification_inputs.py
 python scripts/generate_dependency_artifact_manifest.py
+python scripts/generate_dependency_provenance_attestation.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py

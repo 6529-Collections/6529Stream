@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f7a6484e8ca1f7637923005a7fec43dcc5d380147cc689cd8c7e6d60fec65f8f",
-      "size_bytes": 45377
+      "sha256": "sha256:46e5dc76abb44db9e010bdd86575f041d8471d9e39f55e0faf0652fc6d38d947",
+      "size_bytes": 45720
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:44e07066b7adf7846b95fcfc3f2096a5f92a7f510a2dc86e52480ee6c9be2d65",
+      "sha256": "sha256:5734fa3475ab740df3abb8213cf6cb2fc81b07e97365530dbea4e189d7f0a6ed",
       "size_bytes": 22887
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a deterministic dependency provenance attestation bundle generated from the dependency artifact manifest, with descriptor/source hash revalidation, no-secret checks, validation commands, local/CI/Windows gate wiring, release manifest/checksum coverage, and explicit local-baseline limitations for non-live dependency evidence.",
       "Added deterministic release notes generation from changelog and committed release evidence, with JSON/Markdown outputs, tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, and explicit no-overclaim readiness boundaries for the pre-audit local baseline.",
       "Added `scripts/verify_release_artifacts.py`, an offline third-party verifier for the committed release bundle, with focused tests, local/CI/Windows gate wiring, checksum coverage for the verifier script, and documentation of what the check proves versus live deployment/readiness evidence it does not prove.",
       "Added `IStreamCompatibility` and release-tracked compatibility views on the `StreamContractMetadata` adapter for frontend/indexer protocol checks: protocol name, protocol version, metadata schema version, release tag/hash, and adapter-or-core interface probing, with focused tests, integration docs, release-manifest/checksum coverage, and regenerated deployment/release artifacts while preserving `StreamCore` bytecode size.",
