@@ -152,6 +152,14 @@ This dashboard covers release-readiness evidence only. It does not perform a
 real release, does not create production signatures, and does not assert that
 local tests prove protocol correctness.
 
+The release-mode CI profile is the opt-in hard gate for public-beta or
+production-release claims. It is exposed as a manual workflow_dispatch workflow
+and local `make release-mode-public-beta-check` /
+`make release-mode-production-release-check` targets, and it is expected to
+fail until retained evidence is complete or explicitly accepted as risk.
+Release mode requires public-beta readiness before production-release
+readiness, so a production run validates both phases.
+
 ## Readiness Summary
 
 | Area | Current state | Blocks public beta | Blocks production release |
@@ -513,6 +521,9 @@ Run the dashboard checker directly:
 ```sh
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_release_mode.py
+python scripts/check_release_mode.py --phase public-beta
+python scripts/check_release_mode.py --phase production-release
 python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
 python scripts/test_incident_response.py

@@ -16,6 +16,7 @@
       "release-artifacts/latest",
       "release-artifacts/baselines",
       "scripts/generate_dependency_provenance_attestation.py",
+      "scripts/check_release_mode.py",
       "scripts/generate_release_notes.py",
       "scripts/verify_release_artifacts.py",
       "deployments/broadcasts",
@@ -33,7 +34,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:61d0ea8cdeccbf0a93c58bd255e56f8ff6caab5754c373e36e8930d2566e3cd8"
+    "sha256": "sha256:334618b68f3dfef9013ad59af3e7de952ab345c7ff41861bc3fdd139a6377e90"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -452,7 +453,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:ba1c4177bf7b8652173d47810810bc958a98e00e19983e94b16836f569e4796e",
+      "sha256": "sha256:0a5df474aaa0b127fd75f92aa904793ae13978b84f28fd75cf13b897fab0fb6c",
       "size_bytes": 79962
     },
     {
@@ -562,22 +563,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:f6f63cb2ee0161f84950ab4a11b933ba1546b4e60abb7ea84e64d9afc52cac2f",
+      "sha256": "sha256:999f9971dd0c0336211c3fdc17806d268436b6246c373bd751fe1a1016079486",
       "size_bytes": 106942
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:6e9996a7620f1d55157445c59befb05bc6ebaa3a345d839d8552e2482ae9019e",
-      "size_bytes": 48061
+      "sha256": "sha256:6118fb99e1a0614d6af956a470de51e9962b08ae0b5489078f93d410dc7b729f",
+      "size_bytes": 48509
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:92f968a3acf19ee9e747482742d83432dc29e605b22330a62dcaccf9b4600a10",
-      "size_bytes": 45611
+      "sha256": "sha256:de56acdfcc2ca45b541ce24895eafa05d69747df84de9e0ec73dda45fa0cadc5",
+      "size_bytes": 46052
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:5734fa3475ab740df3abb8213cf6cb2fc81b07e97365530dbea4e189d7f0a6ed",
+      "sha256": "sha256:4208368a5ba7d9fb4216660f4534a719213b75d5d05ec03415893918a4d60078",
       "size_bytes": 22887
     },
     {
@@ -664,6 +665,11 @@
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
       "sha256": "sha256:b735c3468d421afe7e80ad71d52673f2e2c6ba9f863be8cc9ebcb120a2f15cb1",
       "size_bytes": 3470
+    },
+    {
+      "path": "scripts/check_release_mode.py",
+      "sha256": "sha256:a83229dee5364c49fa67cc3d948e6242bfcf7a9a13356b7a23bf81b230b6e494",
+      "size_bytes": 4666
     },
     {
       "path": "scripts/generate_dependency_provenance_attestation.py",

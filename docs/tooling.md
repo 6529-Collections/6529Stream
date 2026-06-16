@@ -315,6 +315,14 @@ separates passing local evidence and reviewed fork evidence from missing
 testnet/live evidence, production signatures, signed Git tags, verified
 deployed addresses, explorer verification, external audit, and post-audit
 remediation blockers.
+The release-mode CI profile is intentionally separate from `make check`: run
+`python scripts/test_release_mode.py` in the default baseline, then use
+`make release-mode-public-beta-check`,
+`make release-mode-production-release-check`, or the manual GitHub
+`workflow_dispatch` release-mode workflow only for release-candidate evidence
+reviews. Those release-mode commands are expected to fail until retained
+evidence is complete or explicitly accepted as risk, and production release
+mode requires public-beta readiness before production-release readiness.
 
 The public-beta evidence step validates
 [`public-beta-evidence.md`](public-beta-evidence.md) and

@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added an opt-in release-mode evidence gate with
+  `scripts/check_release_mode.py`, focused tests, manual Makefile targets, a
+  workflow-dispatch GitHub Actions profile, release-readiness/tooling docs, and
+  checksum coverage. Default CI validates the checker and the structurally
+  blocked evidence baseline; release-mode checks intentionally fail until
+  public-beta or production-release evidence rows are complete or explicitly
+  accepted as risk.
 - Added a deterministic dependency provenance attestation bundle generated from
   the dependency artifact manifest, with descriptor/source hash revalidation,
   no-secret checks, validation commands, local/CI/Windows gate wiring, release

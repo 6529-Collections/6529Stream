@@ -1,0 +1,56 @@
+name: Release Mode
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_phase:
+        description: Release evidence phase to enforce
+        required: true
+        default: public-beta
+        type: choice
+        options:
+          - public-beta
+          - production-release
+
+permissions:
+  contents: read
+
+concurrency:
+  # Public-beta and production-release dispatches may run independently. The
+  # production checker still validates public-beta readiness before production.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.release_phase }}
+  cancel-in-progress: false
+
+jobs:
+  release-mode:
+    name: ${{ inputs.release_phase }} evidence gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate release-mode profile
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m py_compile \
+            scripts/check_public_beta_evidence.py \
+            scripts/check_release_mode.py \
+            scripts/test_release_mode.py
+          python3 scripts/test_release_mode.py 2>&1 | tee ci-logs/release-mode-tests.log
+          python3 scripts/check_release_mode.py --phase "${{ inputs.release_phase }}" 2>&1 | tee ci-logs/release-mode-check.log
+
+      - name: Upload release-mode logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-mode-logs-${{ inputs.release_phase }}
+          path: ci-logs/
+          if-no-files-found: ignore
+          retention-days: 14

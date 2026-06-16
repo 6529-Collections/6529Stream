@@ -211,6 +211,12 @@ Before a public release tag:
   `python scripts/check_audit_package.py`.
 - The release-readiness dashboard follows `docs/release-readiness.md` and
   passes `python scripts/check_release_readiness.py`.
+- The opt-in release-mode CI profile is run with
+  `python scripts/check_release_mode.py --phase public-beta` or
+  `python scripts/check_release_mode.py --phase production-release` only for
+  release-candidate evidence review. The default baseline runs
+  `python scripts/test_release_mode.py`; the release-mode checks are expected
+  to fail until retained evidence is complete or explicitly accepted as risk.
 - Royalty policy follows `docs/royalty-policy.md` and passes
   `python scripts/check_royalty_policy.py`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
