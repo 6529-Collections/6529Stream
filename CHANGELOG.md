@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added deterministic release notes generation from changelog and committed
+  release evidence, with JSON/Markdown outputs, tests, local/CI/Windows gate
+  wiring, release-manifest/checksum coverage, and explicit no-overclaim
+  readiness boundaries for the pre-audit local baseline.
 - Added `scripts/verify_release_artifacts.py`, an offline third-party verifier
   for the committed release bundle, with focused tests, local/CI/Windows gate
   wiring, checksum coverage for the verifier script, and documentation of what

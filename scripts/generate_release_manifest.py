@@ -38,6 +38,8 @@ PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
 RISK_REGISTER_FILENAME = "risk-register.json"
 PROTOCOL_SURFACE_REPORT_FILENAME = "protocol-surface-report.json"
 CUSTOM_ERROR_CATALOG_FILENAME = "custom-error-catalog.json"
+RELEASE_NOTES_JSON_FILENAME = "release-notes.json"
+RELEASE_NOTES_MARKDOWN_FILENAME = "release-notes.md"
 RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
 RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
 RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME = (
@@ -1075,6 +1077,17 @@ def build_manifest(
                 repo_root,
                 schema_required=True,
             ),
+            "release_notes": {
+                "json": file_record(
+                    release_artifacts_dir / RELEASE_NOTES_JSON_FILENAME,
+                    repo_root,
+                    schema_required=True,
+                ),
+                "markdown": file_record(
+                    release_artifacts_dir / RELEASE_NOTES_MARKDOWN_FILENAME,
+                    repo_root,
+                ),
+            },
             "artifact_manifest": artifact_manifest_record(release_artifacts_dir, repo_root),
             "dependency_artifact_manifest": file_record(
                 release_artifacts_dir / "dependency-artifact-manifest.json",

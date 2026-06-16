@@ -57,6 +57,7 @@ python scripts/check_mobile_walletconnect.py
 python scripts/check_electron_security_wallets.py
 python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
+python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
 python scripts/generate_release_checksums.py
@@ -156,6 +157,8 @@ python scripts/test_operator_admin_ui.py
 python scripts/check_operator_admin_ui.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_release_notes.py
+python scripts/generate_release_notes.py --check
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_bytecode_release_proof.py
@@ -258,6 +261,17 @@ is validated by `scripts/check_risk_register.py`, refreshed by
 `scripts/generate_risk_register.py`, and backed by
 `schema/risk-register.schema.json`. It is checksum-covered and included in the
 top-level release manifest, but it is not itself launch approval.
+
+`latest/release-notes.json` and `latest/release-notes.md` are generated from
+`CHANGELOG.md`, the committed release manifest, bytecode release proof, and risk
+register. They provide deterministic operator/auditor release notes for the
+current local baseline: protocol and deployment versions, readiness boundary,
+Unreleased changelog entries, bytecode-proof status, risk status/area counts,
+and validation commands. They are review aids only; they do not prove live
+deployment, public-beta readiness, production readiness, signed tags, detached
+signatures, or explorer verification. Validate them with
+`python scripts/test_release_notes.py` and
+`python scripts/generate_release_notes.py --check`.
 
 `latest/public-beta-blockers.md` is generated from
 `latest/public-beta-evidence.json`. It lists incomplete public-beta and

@@ -15,6 +15,7 @@
       "release-artifacts/signatures",
       "release-artifacts/latest",
       "release-artifacts/baselines",
+      "scripts/generate_release_notes.py",
       "scripts/verify_release_artifacts.py",
       "deployments/broadcasts",
       "deployments/config",
@@ -31,7 +32,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:7852f702103f6df9c2f5297788ed9425f83527a9a43cf2018b1bdcd68f745b8e"
+    "sha256": "sha256:9cf38a46ab4bb3c80aee5b7f02d732c4b8e888c176d4d59700bd084520ffc08a"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -450,7 +451,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:f185b945b96121c4306a7a81998ce9a4e5373897b14db5c0b44c94d2d2013c16",
+      "sha256": "sha256:1d57db9bf3243b656a8abb73152c18c6c559695c456cee38ac5810bd3fc025f3",
       "size_bytes": 79962
     },
     {
@@ -555,12 +556,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:b6c9ad3c76f1e70e34728f243eb3459e1ff15c0bb661259fad018a5c049ae45f",
-      "size_bytes": 106114
+      "sha256": "sha256:a4b8d3c0a118a70baf0b1e4d9a69fcc49f32ddd1250deca801ef7f39992c4c1a",
+      "size_bytes": 106620
+    },
+    {
+      "path": "release-artifacts/latest/release-notes.json",
+      "sha256": "sha256:639a119f4e36c6a29c1a4f177ae666b98ab621fa1e516b38c01a7a89f5b1980f",
+      "size_bytes": 47719
+    },
+    {
+      "path": "release-artifacts/latest/release-notes.md",
+      "sha256": "sha256:18da053c8d2a2ff866f3a5a665c69b361629817915a6d7f5f88bfe29c6030fd3",
+      "size_bytes": 45276
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:2de1fc5b78fdbe2b9fce9507bf9e66c446cfd5bdb591b703b8efbcbc7e3734b3",
+      "sha256": "sha256:44e07066b7adf7846b95fcfc3f2096a5f92a7f510a2dc86e52480ee6c9be2d65",
       "size_bytes": 22887
     },
     {
@@ -647,6 +658,11 @@
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
       "sha256": "sha256:b735c3468d421afe7e80ad71d52673f2e2c6ba9f863be8cc9ebcb120a2f15cb1",
       "size_bytes": 3470
+    },
+    {
+      "path": "scripts/generate_release_notes.py",
+      "sha256": "sha256:192e12126255ba4c05ded44d260ec78bf46b38f7c18a6e9e011229d554d4be8d",
+      "size_bytes": 16467
     },
     {
       "path": "scripts/verify_release_artifacts.py",
