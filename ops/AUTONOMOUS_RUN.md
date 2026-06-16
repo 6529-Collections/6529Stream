@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/gas-envelope-high-risk-flows` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/445` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/446` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/447` |
 | Next issue | TBD after ADV-011 gas envelope coverage lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 10:02 UTC` |
+| Last updated | `2026-06-16 10:28 UTC` |
 
 ## Packaging Notes
 
@@ -16071,6 +16071,7 @@ Outcome:
 | 2026-06-16 09:28 | Resolve PR #445 revert-helper follow-up | 6529bot follow-up requested a selector-aware, readable revert assertion helper. Replaced the opaque revert-data hash comparison with `_assertRevertedWithReason`, which checks the `Error(string)` selector, decodes the revert reason, and asserts the exact source-confirmed reason strings (`Drop Executed`, `payer`, `Expired`, `Ended`). Focused `forge test --match-path test/StreamMEVTiming.t.sol -vvv`, bytecode proof tests/check, release manifest check, release checksum check, `git diff --check`, full `make check`, and Windows `scripts\check.ps1` passed. |
 | 2026-06-16 09:58 | Merge PR #445 and start ADV-011 | PR #445 merged as `aed9103aa282d0360af63c24f4f577cef0200c53`, issue #444 closed completed, CodeRabbit status was success, CI passed, and 6529bot follow-up on `a57e928` reported no new findings. Created issue #446 and branch `codex/gas-envelope-high-risk-flows` for ADV-011 gas envelope tests around high-risk user flows. |
 | 2026-06-16 10:02 | Implement ADV-011 local draft | Expanded `StreamGasSnapshot.t.sol` from 6 to 12 measured flows, adding fixed-price credit withdrawal, near-end outbid, bidder refund withdrawal, no-bid settlement, auction proceeds withdrawal, and curator credit withdrawal. Added `release-artifacts/baselines/v0.1.0/gas-envelopes.json`, `scripts/check_gas_envelopes.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, release-manifest coverage, and docs/readiness/changelog state updates. Focused gas snapshot and gas envelope checks passed locally. |
+| 2026-06-16 10:28 | Open PR #447 for ADV-011 | PR #447 is open at `https://github.com/6529-Collections/6529Stream/pull/447`, closes issue #446, and CodeRabbit review was requested in comment `4717629242`. Full local validation included `make check`, Windows `scripts\check.ps1`, gas snapshot/envelope checks, release artifact drift checks, and `git diff --check`; next action is to wait for CI and bot feedback, then resolve anything actionable before merge. |
 
 ## Resume Instructions
 
