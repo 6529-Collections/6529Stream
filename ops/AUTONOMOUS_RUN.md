@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 07:38 UTC` |
+| Last updated | `2026-06-16 07:47 UTC` |
 
 ## Packaging Notes
 
@@ -278,7 +278,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 Status: issue opened, branch started from PR #439 squash merge commit
 `41752a653b6f412123109a3005f549a374a19d1e`, and local implementation
-validated. PR #441 is open and awaiting CI plus CodeRabbit review.
+validated. PR #441 is open, review-response fixes are pushed, CI is green, and
+merge is next after the final state-only run-state update.
 Issue: `https://github.com/6529-Collections/6529Stream/issues/440`.
 PR: `https://github.com/6529-Collections/6529Stream/pull/441`.
 Branch: `codex/event-reconstructability-tests`.
@@ -344,6 +345,12 @@ Validation notes:
   `forge test --match-path test\StreamEventReconstructability.t.sol -vvv`,
   `python scripts/check_events_and_indexing.py`, `git diff --check`, and
   `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`.
+- Remote validation on review-response head
+  `f1c8587815b59309cd06789d790daf36831ad30e`: GitHub CI passed
+  `Windows PowerShell wrapper` and `Foundry smoke`; CodeRabbit status was
+  successful but the detailed CodeRabbit review was rate-limited; 6529bot
+  follow-up confirmed the prior nice-to-haves were resolved with no new
+  findings.
 
 ### PR candidate: Add StreamMinter event read-model coverage (Queue Item 208 / CON-002)
 
