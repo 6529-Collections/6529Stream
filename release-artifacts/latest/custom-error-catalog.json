@@ -1,0 +1,2221 @@
+{
+  "schema_version": "6529stream.custom-error-catalog.v1",
+  "generated_by": "scripts/generate_custom_error_catalog.py:1",
+  "source": {
+    "protocol_surface_report": "release-artifacts/latest/protocol-surface-report.json",
+    "output": "release-artifacts/latest/custom-error-catalog.json"
+  },
+  "summary": {
+    "custom_error_count": 73,
+    "contract_count": 8,
+    "category_counts": {
+      "access_control": 5,
+      "auction_payment_safety": 3,
+      "configuration": 10,
+      "metadata_integrity": 17,
+      "pause_emergency": 2,
+      "randomness_lifecycle": 26,
+      "supply_minting": 10
+    },
+    "severity_counts": {
+      "critical": 5,
+      "high": 48,
+      "medium": 20
+    },
+    "duplicate_selectors": {
+      "0x1c9aebc3": [
+        "StreamContractMetadata:MetadataMutationPaused()",
+        "StreamCore:MetadataMutationPaused()"
+      ],
+      "0x313ee3c2": [
+        "StreamContractMetadata:InvalidAdminContract()",
+        "StreamCore:InvalidAdminContract()"
+      ],
+      "0x3ee5aeb5": [
+        "StreamAuctions:ReentrancyGuardReentrantCall()",
+        "StreamCuratorsPool:ReentrancyGuardReentrantCall()",
+        "StreamDrops:ReentrancyGuardReentrantCall()"
+      ],
+      "0x490dd684": [
+        "NextGenRandomizerRNG:ZeroDerivedSeed(uint256)",
+        "NextGenRandomizerVRF:ZeroDerivedSeed(uint256)"
+      ],
+      "0x5e315374": [
+        "NextGenRandomizerRNG:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+        "NextGenRandomizerVRF:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)"
+      ],
+      "0x685e6fed": [
+        "NextGenRandomizerRNG:RandomnessRequestNotPending(uint256,uint8)",
+        "NextGenRandomizerVRF:RandomnessRequestNotPending(uint256,uint8)"
+      ],
+      "0x8b6fdc0a": [
+        "NextGenRandomizerRNG:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
+        "NextGenRandomizerVRF:RandomnessRequestNotFailedPostProcessing(uint256,uint8)"
+      ],
+      "0x95d22d86": [
+        "NextGenRandomizerRNG:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+        "NextGenRandomizerVRF:StaleRandomnessRequest(uint256,uint256,uint256,address,address)"
+      ],
+      "0x9a763740": [
+        "StreamContractMetadata:FunctionAdminUnauthorized()",
+        "StreamCore:FunctionAdminUnauthorized()"
+      ],
+      "0xa68fbeff": [
+        "NextGenRandomizerRNG:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+        "NextGenRandomizerVRF:TokenRandomnessRequestAlreadyExists(uint256,uint256)"
+      ],
+      "0xab2112a6": [
+        "NextGenRandomizerRNG:UnknownRandomnessRequest(uint256)",
+        "NextGenRandomizerVRF:UnknownRandomnessRequest(uint256)"
+      ],
+      "0xbc1cb82b": [
+        "NextGenRandomizerRNG:RandomnessRequestAlreadyExists(uint256)",
+        "NextGenRandomizerVRF:RandomnessRequestAlreadyExists(uint256)"
+      ],
+      "0xc1ae599b": [
+        "NextGenRandomizerRNG:WrongRandomnessProvider(uint256,address,address)",
+        "NextGenRandomizerVRF:WrongRandomnessProvider(uint256,address,address)"
+      ],
+      "0xc488549d": [
+        "NextGenRandomizerRNG:EmptyRandomWords(uint256)",
+        "NextGenRandomizerVRF:EmptyRandomWords(uint256)"
+      ],
+      "0xd6d556a3": [
+        "NextGenRandomizerRNG:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+        "NextGenRandomizerVRF:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)"
+      ],
+      "0xfae276cd": [
+        "NextGenRandomizerRNG:RandomnessRequestNotFulfilled(uint256,uint8)",
+        "NextGenRandomizerVRF:RandomnessRequestNotFulfilled(uint256,uint8)"
+      ]
+    }
+  },
+  "entries": [
+    {
+      "id": "DependencyRegistry:DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)",
+      "contract": "DependencyRegistry",
+      "source": "smart-contracts/DependencyRegistry.sol",
+      "name": "DependencyChunkIndexOutOfBounds",
+      "signature": "DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)",
+      "selector": "0xf385ff46",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "version",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/DependencyRegistry.sol/DependencyRegistry.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "DependencyRegistry:DependencyFieldInvalidUTF8(bytes32)",
+      "contract": "DependencyRegistry",
+      "source": "smart-contracts/DependencyRegistry.sol",
+      "name": "DependencyFieldInvalidUTF8",
+      "signature": "DependencyFieldInvalidUTF8(bytes32)",
+      "selector": "0xf533e9d7",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/DependencyRegistry.sol/DependencyRegistry.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "DependencyRegistry:DependencyFieldTooLarge(bytes32,uint256,uint256)",
+      "contract": "DependencyRegistry",
+      "source": "smart-contracts/DependencyRegistry.sol",
+      "name": "DependencyFieldTooLarge",
+      "signature": "DependencyFieldTooLarge(bytes32,uint256,uint256)",
+      "selector": "0x6f01a118",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "maximum",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/DependencyRegistry.sol/DependencyRegistry.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "DependencyRegistry:DependencyKeyReserved(bytes32)",
+      "contract": "DependencyRegistry",
+      "source": "smart-contracts/DependencyRegistry.sol",
+      "name": "DependencyKeyReserved",
+      "signature": "DependencyKeyReserved(bytes32)",
+      "selector": "0x09fd460b",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/DependencyRegistry.sol/DependencyRegistry.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "DependencyRegistry:DependencyVersionMissing(bytes32,uint256)",
+      "contract": "DependencyRegistry",
+      "source": "smart-contracts/DependencyRegistry.sol",
+      "name": "DependencyVersionMissing",
+      "signature": "DependencyVersionMissing(bytes32,uint256)",
+      "selector": "0x01b533a8",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "version",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/DependencyRegistry.sol/DependencyRegistry.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:EmptyRandomWords(uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "EmptyRandomWords",
+      "signature": "EmptyRandomWords(uint256)",
+      "selector": "0xc488549d",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:RandomizerRequestReentrancy()",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "RandomizerRequestReentrancy",
+      "signature": "RandomizerRequestReentrancy()",
+      "selector": "0x7a189929",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "RandomnessPostProcessingRetryLimitReached",
+      "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+      "selector": "0x5e315374",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "retryCount",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "maxRetryCount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:RandomnessRequestAlreadyExists(uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "RandomnessRequestAlreadyExists",
+      "signature": "RandomnessRequestAlreadyExists(uint256)",
+      "selector": "0xbc1cb82b",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "RandomnessRequestNotFailedPostProcessing",
+      "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
+      "selector": "0x8b6fdc0a",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:RandomnessRequestNotFulfilled(uint256,uint8)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "RandomnessRequestNotFulfilled",
+      "signature": "RandomnessRequestNotFulfilled(uint256,uint8)",
+      "selector": "0xfae276cd",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:RandomnessRequestNotPending(uint256,uint8)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "RandomnessRequestNotPending",
+      "signature": "RandomnessRequestNotPending(uint256,uint8)",
+      "selector": "0x685e6fed",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "StaleRandomnessRequest",
+      "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+      "selector": "0x95d22d86",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "expectedEpoch",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "actualEpoch",
+          "type": "uint256"
+        },
+        {
+          "index": 3,
+          "internal_type": "address",
+          "name": "expectedProvider",
+          "type": "address"
+        },
+        {
+          "index": 4,
+          "internal_type": "address",
+          "name": "actualProvider",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "TokenRandomnessRequestAlreadyExists",
+      "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+      "selector": "0xa68fbeff",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:UnknownRandomnessRequest(uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "UnknownRandomnessRequest",
+      "signature": "UnknownRandomnessRequest(uint256)",
+      "selector": "0xab2112a6",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:WrongRandomnessProvider(uint256,address,address)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "WrongRandomnessProvider",
+      "signature": "WrongRandomnessProvider(uint256,address,address)",
+      "selector": "0xc1ae599b",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "expectedProvider",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "actualProvider",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "WrongRandomnessTokenCollection",
+      "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+      "selector": "0xd6d556a3",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "expectedCollectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 3,
+          "internal_type": "uint256",
+          "name": "actualCollectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerRNG:ZeroDerivedSeed(uint256)",
+      "contract": "NextGenRandomizerRNG",
+      "source": "smart-contracts/RandomizerRNG.sol",
+      "name": "ZeroDerivedSeed",
+      "signature": "ZeroDerivedSeed(uint256)",
+      "selector": "0x490dd684",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:EmptyRandomWords(uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "EmptyRandomWords",
+      "signature": "EmptyRandomWords(uint256)",
+      "selector": "0xc488549d",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:OnlyCoordinatorCanFulfill(address,address)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "OnlyCoordinatorCanFulfill",
+      "signature": "OnlyCoordinatorCanFulfill(address,address)",
+      "selector": "0x1cf993f4",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "have",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "want",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "RandomnessPostProcessingRetryLimitReached",
+      "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+      "selector": "0x5e315374",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "retryCount",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "maxRetryCount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:RandomnessRequestAlreadyExists(uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "RandomnessRequestAlreadyExists",
+      "signature": "RandomnessRequestAlreadyExists(uint256)",
+      "selector": "0xbc1cb82b",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "RandomnessRequestNotFailedPostProcessing",
+      "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
+      "selector": "0x8b6fdc0a",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:RandomnessRequestNotFulfilled(uint256,uint8)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "RandomnessRequestNotFulfilled",
+      "signature": "RandomnessRequestNotFulfilled(uint256,uint8)",
+      "selector": "0xfae276cd",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:RandomnessRequestNotPending(uint256,uint8)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "RandomnessRequestNotPending",
+      "signature": "RandomnessRequestNotPending(uint256,uint8)",
+      "selector": "0x685e6fed",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "StaleRandomnessRequest",
+      "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+      "selector": "0x95d22d86",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "expectedEpoch",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "actualEpoch",
+          "type": "uint256"
+        },
+        {
+          "index": 3,
+          "internal_type": "address",
+          "name": "expectedProvider",
+          "type": "address"
+        },
+        {
+          "index": 4,
+          "internal_type": "address",
+          "name": "actualProvider",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "TokenRandomnessRequestAlreadyExists",
+      "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+      "selector": "0xa68fbeff",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:UnknownRandomnessRequest(uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "UnknownRandomnessRequest",
+      "signature": "UnknownRandomnessRequest(uint256)",
+      "selector": "0xab2112a6",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:WrongRandomnessProvider(uint256,address,address)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "WrongRandomnessProvider",
+      "signature": "WrongRandomnessProvider(uint256,address,address)",
+      "selector": "0xc1ae599b",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "expectedProvider",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "actualProvider",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "WrongRandomnessTokenCollection",
+      "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+      "selector": "0xd6d556a3",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "expectedCollectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 3,
+          "internal_type": "uint256",
+          "name": "actualCollectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "NextGenRandomizerVRF:ZeroDerivedSeed(uint256)",
+      "contract": "NextGenRandomizerVRF",
+      "source": "smart-contracts/RandomizerVRF.sol",
+      "name": "ZeroDerivedSeed",
+      "signature": "ZeroDerivedSeed(uint256)",
+      "selector": "0x490dd684",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamAuctions:ReentrancyGuardReentrantCall()",
+      "contract": "StreamAuctions",
+      "source": "smart-contracts/AuctionContract.sol",
+      "name": "ReentrancyGuardReentrantCall",
+      "signature": "ReentrancyGuardReentrantCall()",
+      "selector": "0x3ee5aeb5",
+      "category": "auction_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as a protected accounting or reentrancy boundary; refresh balances/credits and retry only through the documented flow.",
+      "traceability": {
+        "source_artifact": "out/AuctionContract.sol/StreamAuctions.json",
+        "tests": [
+          "test/StreamPaymentsInvariant.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamContractMetadata:EmptyContractURI()",
+      "contract": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "name": "EmptyContractURI",
+      "signature": "EmptyContractURI()",
+      "selector": "0x9fcc7185",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamContractMetadata:FunctionAdminUnauthorized()",
+      "contract": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "name": "FunctionAdminUnauthorized",
+      "signature": "FunctionAdminUnauthorized()",
+      "selector": "0x9a763740",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamContractMetadata:InvalidAdminContract()",
+      "contract": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "name": "InvalidAdminContract",
+      "signature": "InvalidAdminContract()",
+      "selector": "0x313ee3c2",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamContractMetadata:InvalidCoreContract()",
+      "contract": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "name": "InvalidCoreContract",
+      "signature": "InvalidCoreContract()",
+      "selector": "0xf48e6f72",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamContractMetadata:MetadataMutationPaused()",
+      "contract": "StreamContractMetadata",
+      "source": "smart-contracts/StreamContractMetadata.sol",
+      "name": "MetadataMutationPaused",
+      "signature": "MetadataMutationPaused()",
+      "selector": "0x1c9aebc3",
+      "category": "pause_emergency",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Do not retry until the relevant pause domain is unpaused by governance or the operator runbook.",
+      "traceability": {
+        "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+        "tests": [
+          "test/StreamPauseControls.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:ArtistSignatureUnauthorized()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "ArtistSignatureUnauthorized",
+      "signature": "ArtistSignatureUnauthorized()",
+      "selector": "0x850a39d1",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:BurnedTokenRemintNotAllowed(uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "BurnedTokenRemintNotAllowed",
+      "signature": "BurnedTokenRemintNotAllowed(uint256)",
+      "selector": "0x58e40b65",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionAlreadyFrozen(uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionAlreadyFrozen",
+      "signature": "CollectionAlreadyFrozen(uint256)",
+      "selector": "0xd902afce",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionDataMissing(uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionDataMissing",
+      "signature": "CollectionDataMissing(uint256)",
+      "selector": "0x02b6f1ac",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionFinalSupplyWindowActive(uint256,uint256,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionFinalSupplyWindowActive",
+      "signature": "CollectionFinalSupplyWindowActive(uint256,uint256,uint256)",
+      "selector": "0x446413e6",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "currentTimestamp",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "finalSupplyTimestamp",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionHasPendingTokenMetadata(uint256,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionHasPendingTokenMetadata",
+      "signature": "CollectionHasPendingTokenMetadata(uint256,uint256)",
+      "selector": "0x3b5e113e",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "pendingCount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionMintWindowActive(uint256,uint256,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionMintWindowActive",
+      "signature": "CollectionMintWindowActive(uint256,uint256,uint256)",
+      "selector": "0x44c46b86",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "currentTimestamp",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionNotCreated(uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionNotCreated",
+      "signature": "CollectionNotCreated(uint256)",
+      "selector": "0x8e1b4a4a",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionSupplyReached()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionSupplyReached",
+      "signature": "CollectionSupplyReached()",
+      "selector": "0x0380b3e0",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:CollectionSupplyTooLarge()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "CollectionSupplyTooLarge",
+      "signature": "CollectionSupplyTooLarge()",
+      "selector": "0xbbd89ae2",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:ERC2981InvalidDefaultRoyalty(uint256,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "ERC2981InvalidDefaultRoyalty",
+      "signature": "ERC2981InvalidDefaultRoyalty(uint256,uint256)",
+      "selector": "0x6f483d09",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "numerator",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "denominator",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:ERC2981InvalidDefaultRoyaltyReceiver(address)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "ERC2981InvalidDefaultRoyaltyReceiver",
+      "signature": "ERC2981InvalidDefaultRoyaltyReceiver(address)",
+      "selector": "0xb6d9900a",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:ERC2981InvalidTokenRoyalty(uint256,uint256,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "ERC2981InvalidTokenRoyalty",
+      "signature": "ERC2981InvalidTokenRoyalty(uint256,uint256,uint256)",
+      "selector": "0xdfd1fc1b",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "numerator",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "denominator",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:ERC2981InvalidTokenRoyaltyReceiver(uint256,address)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "ERC2981InvalidTokenRoyaltyReceiver",
+      "signature": "ERC2981InvalidTokenRoyaltyReceiver(uint256,address)",
+      "selector": "0x969f0852",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:FinalSupplyTimeNotPassed()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "FinalSupplyTimeNotPassed",
+      "signature": "FinalSupplyTimeNotPassed()",
+      "selector": "0x8f0232f3",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:FrozenCollectionDependencyRegistry()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "FrozenCollectionDependencyRegistry",
+      "signature": "FrozenCollectionDependencyRegistry()",
+      "selector": "0x5e337a1f",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:FunctionAdminUnauthorized()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "FunctionAdminUnauthorized",
+      "signature": "FunctionAdminUnauthorized()",
+      "selector": "0x9a763740",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:InvalidAdminContract()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "InvalidAdminContract",
+      "signature": "InvalidAdminContract()",
+      "selector": "0x313ee3c2",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:InvalidDependencyRegistryContract()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "InvalidDependencyRegistryContract",
+      "signature": "InvalidDependencyRegistryContract()",
+      "selector": "0x385887d0",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:InvalidMinterContract()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "InvalidMinterContract",
+      "signature": "InvalidMinterContract()",
+      "selector": "0xee6d1698",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:InvalidRandomizerContract()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "InvalidRandomizerContract",
+      "signature": "InvalidRandomizerContract()",
+      "selector": "0xf789d683",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:InvalidTokenMetadataInput()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "InvalidTokenMetadataInput",
+      "signature": "InvalidTokenMetadataInput()",
+      "selector": "0x1d064c52",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:MetadataFieldInvalidUTF8(bytes32)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "MetadataFieldInvalidUTF8",
+      "signature": "MetadataFieldInvalidUTF8(bytes32)",
+      "selector": "0x31099a9e",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:MetadataFieldTooLarge(bytes32,uint256,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "MetadataFieldTooLarge",
+      "signature": "MetadataFieldTooLarge(bytes32,uint256,uint256)",
+      "selector": "0x46caadcb",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "maximum",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:MetadataFrozen(uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "MetadataFrozen",
+      "signature": "MetadataFrozen(uint256)",
+      "selector": "0x7c9bd91d",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:MetadataMutationPaused()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "MetadataMutationPaused",
+      "signature": "MetadataMutationPaused()",
+      "selector": "0x1c9aebc3",
+      "category": "pause_emergency",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Do not retry until the relevant pause domain is unpaused by governance or the operator runbook.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamPauseControls.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:NotMinterContract()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "NotMinterContract",
+      "signature": "NotMinterContract()",
+      "selector": "0x3acd46d7",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:PendingRandomnessRequests(uint256,address,uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "PendingRandomnessRequests",
+      "signature": "PendingRandomnessRequests(uint256,address,uint256)",
+      "selector": "0x1364c2e2",
+      "category": "randomness_lifecycle",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "randomizer",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "pendingRequests",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRandomizerLifecycle.t.sol",
+          "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:TokenNotMinted()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "TokenNotMinted",
+      "signature": "TokenNotMinted()",
+      "selector": "0xd03ce9df",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:TokenOutsideCollectionRange()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "TokenOutsideCollectionRange",
+      "signature": "TokenOutsideCollectionRange()",
+      "selector": "0x4f4749ec",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:UnknownDependency(bytes32)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "UnknownDependency",
+      "signature": "UnknownDependency(bytes32)",
+      "selector": "0xc13fa60c",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "dependencyNameAndVersion",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:UnsafeMetadataURI()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "UnsafeMetadataURI",
+      "signature": "UnsafeMetadataURI()",
+      "selector": "0x97dbd465",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:UnsafeRawAttributes(uint256)",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "UnsafeRawAttributes",
+      "signature": "UnsafeRawAttributes(uint256)",
+      "selector": "0x77f2980d",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:ZeroTokenHash()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "ZeroTokenHash",
+      "signature": "ZeroTokenHash()",
+      "selector": "0xfd45fe73",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCuratorsPool:ReentrancyGuardReentrantCall()",
+      "contract": "StreamCuratorsPool",
+      "source": "smart-contracts/StreamCuratorsPool.sol",
+      "name": "ReentrancyGuardReentrantCall",
+      "signature": "ReentrancyGuardReentrantCall()",
+      "selector": "0x3ee5aeb5",
+      "category": "auction_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as a protected accounting or reentrancy boundary; refresh balances/credits and retry only through the documented flow.",
+      "traceability": {
+        "source_artifact": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
+        "tests": [
+          "test/StreamPaymentsInvariant.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamDrops:ReentrancyGuardReentrantCall()",
+      "contract": "StreamDrops",
+      "source": "smart-contracts/StreamDrops.sol",
+      "name": "ReentrancyGuardReentrantCall",
+      "signature": "ReentrancyGuardReentrantCall()",
+      "selector": "0x3ee5aeb5",
+      "category": "auction_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as a protected accounting or reentrancy boundary; refresh balances/credits and retry only through the documented flow.",
+      "traceability": {
+        "source_artifact": "out/StreamDrops.sol/StreamDrops.json",
+        "tests": [
+          "test/StreamPaymentsInvariant.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    }
+  ]
+}

@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a generated custom-error catalog with
+  `release-artifacts/latest/custom-error-catalog.json`,
+  `docs/custom-errors.md`, generator/test wiring, local/CI/Windows gates,
+  release-manifest and checksum coverage, and auditor/integrator traceability
+  for release-relevant custom errors without changing Solidity behavior.
 - Added `StreamMetadataCrossInvariants.t.sol`, a focused ADV-007 suite covering
   frozen dependency pins under registry version/deprecation churn, rejected
   late randomness writes against frozen live metadata, and post-freeze burned

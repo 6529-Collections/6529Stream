@@ -48,6 +48,8 @@ python scripts/test_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
 python scripts/test_protocol_surface_report.py
 python scripts/generate_protocol_surface_report.py --check
+python scripts/test_custom_error_catalog.py
+python scripts/generate_custom_error_catalog.py --check
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_abi_compatibility.py
@@ -127,6 +129,14 @@ against the current production Foundry artifacts. It is an integrator and audit
 review index over functions, selectors, events, topic0 values, custom errors,
 ABI hashes, bytecode hashes, and runtime sizes; it is not a production-readiness
 claim.
+
+The custom error catalog step checks
+[`release-artifacts/latest/custom-error-catalog.json`](../release-artifacts/latest/custom-error-catalog.json)
+against the protocol surface report. It classifies release-relevant custom
+errors by category and severity, records selector/signature data, and keeps
+test traceability plus caller-action guidance visible for auditors and
+integrators. It is documentation and traceability evidence, not a replacement
+for the Solidity tests or external audit.
 
 The size step is the production deployability gate. It skips test and script
 contracts so non-production artifacts do not pollute EIP-170/EIP-3860 evidence,

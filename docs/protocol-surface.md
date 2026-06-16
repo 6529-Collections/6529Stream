@@ -17,6 +17,7 @@ the Foundry production build artifacts under ignored `out/` after:
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/generate_release_artifacts.py
 python scripts/generate_protocol_surface_report.py
+python scripts/generate_custom_error_catalog.py
 ```
 
 Check the committed report without rewriting it with:
@@ -24,6 +25,8 @@ Check the committed report without rewriting it with:
 ```sh
 python scripts/test_protocol_surface_report.py
 python scripts/generate_protocol_surface_report.py --check
+python scripts/test_custom_error_catalog.py
+python scripts/generate_custom_error_catalog.py --check
 ```
 
 The canonical local gate also runs those commands through `make check`,
@@ -57,6 +60,9 @@ Use the report with these adjacent artifacts:
   for ABI compatibility review.
 - [`release-artifacts/latest/event-topic-catalog.json`](../release-artifacts/latest/event-topic-catalog.json)
   for indexer event topics.
+- [`release-artifacts/latest/custom-error-catalog.json`](../release-artifacts/latest/custom-error-catalog.json)
+  and [`docs/custom-errors.md`](custom-errors.md) for decoded error
+  categories, selector traceability, and caller action guidance.
 - [`release-artifacts/latest/interface-ids.json`](../release-artifacts/latest/interface-ids.json)
   for ERC-165 interface IDs.
 - [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json)

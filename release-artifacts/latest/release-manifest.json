@@ -61,6 +61,12 @@
       "size_bytes": 175498,
       "schema_version": "6529stream.protocol-surface-report.v1"
     },
+    "custom_error_catalog": {
+      "path": "release-artifacts/latest/custom-error-catalog.json",
+      "sha256": "sha256:79d2c421b620404dd6cdc6003d2e938b79f96f3c46065ae5659b934cda0c5fda",
+      "size_bytes": 82575,
+      "schema_version": "6529stream.custom-error-catalog.v1"
+    },
     "artifact_manifest": {
       "path": "release-artifacts/latest/release-artifact-manifest.json",
       "sha256": "sha256:adcf1dbd76ac7143c4fb946f3ba7eee16fa885fb07feb69e9532aba265b2f5b0",
@@ -122,7 +128,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:b5d025db1da88c9fd5a67ca549ba22d7e38b1307c64ffe978cd86969369cd997",
+      "sha256": "sha256:3aa90c31ee44fda51afd4f8aada6e6204a16851a501d6a612e9d49d78af60b5e",
       "size_bytes": 22887,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1928,8 +1934,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:ae654d5a4f1caf082595a5242a902d1854d6012a38ca4f365207cf01e6111cb9",
-      "size_bytes": 43615
+      "sha256": "sha256:d2b4c1369d86558e16b150d77cf04c1293f1e1751046c8d7d82399152b8ab438",
+      "size_bytes": 43942
     },
     "governance_docs": [
       {
@@ -2024,13 +2030,18 @@
       },
       {
         "path": "docs/protocol-surface.md",
-        "sha256": "sha256:91097337291336c35a3ad10e6035324a7cb7b6868b4aa23cddfb071ae6e73311",
-        "size_bytes": 3541
+        "sha256": "sha256:2d490c79fb014780c36129900f2a13ccec4eb4ef855a593d321ed4cc7805e4a0",
+        "size_bytes": 3934
+      },
+      {
+        "path": "docs/custom-errors.md",
+        "sha256": "sha256:554d353d6c4022fab3a9aef76917de91d8828f0a95a67022497c1ba046612ac5",
+        "size_bytes": 4298
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:14327c23a934b79cc2b86c161cdb652f4b8a3587a2c257ba0a869ed30e81b505",
-        "size_bytes": 27609
+        "sha256": "sha256:a86227b3d38c6330aa954df7d88fa225272666adc045f7c56fb1a3592bd63bb0",
+        "size_bytes": 27930
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -2089,8 +2100,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:183627103f17442d858bfb43baddc8d5e373f86268eeb4721ad99ec33d46f1ed",
-        "size_bytes": 44940
+        "sha256": "sha256:b1ce70bbb7628f6ae81ce1dcc99c89e935aeb49f0195e74c5e372649ad89ee1b",
+        "size_bytes": 45530
       },
       {
         "path": "docs/status.md",

@@ -56,6 +56,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_protocol_surface_report.py
 "$python_bin" scripts/generate_protocol_surface_report.py --check
+"$python_bin" scripts/test_custom_error_catalog.py
+"$python_bin" scripts/generate_custom_error_catalog.py --check
 "$python_bin" scripts/test_source_verification_inputs.py
 "$python_bin" scripts/generate_source_verification_inputs.py --check
 "$python_bin" scripts/test_dependency_artifact_manifest.py

@@ -36,6 +36,7 @@ PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
 PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
 RISK_REGISTER_FILENAME = "risk-register.json"
 PROTOCOL_SURFACE_REPORT_FILENAME = "protocol-surface-report.json"
+CUSTOM_ERROR_CATALOG_FILENAME = "custom-error-catalog.json"
 RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
 RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
 RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME = (
@@ -88,6 +89,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/warning-dispositions.md"),
     Path("docs/release-readiness.md"),
     Path("docs/protocol-surface.md"),
+    Path("docs/custom-errors.md"),
     Path("docs/integrations/README.md"),
     Path("docs/integrations/contract-flows.md"),
     Path("docs/integrations/auction-flows.md"),
@@ -1052,6 +1054,11 @@ def build_manifest(
             ),
             "protocol_surface_report": file_record(
                 release_artifacts_dir / PROTOCOL_SURFACE_REPORT_FILENAME,
+                repo_root,
+                schema_required=True,
+            ),
+            "custom_error_catalog": file_record(
+                release_artifacts_dir / CUSTOM_ERROR_CATALOG_FILENAME,
                 repo_root,
                 schema_required=True,
             ),
