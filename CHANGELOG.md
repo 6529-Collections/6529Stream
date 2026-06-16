@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret production verified-addresses retained-artifact template
+  and checker for future `production_address_books` and
+  `live_explorer_verification` evidence, with address-book/deployment-manifest
+  agreement checks, verified explorer row validation, focused tests,
+  local/CI/Windows gate wiring, release-readiness/tooling docs, packet-index
+  command coverage, and checksum coverage while preserving the blocked
+  production-release baseline until reviewed live address evidence is retained.
 - Added a no-secret production broadcast retention retained-artifact template
   and checker for future `production_broadcast_retention` evidence, with
   focused tests, local/CI/Windows gate wiring, release-readiness/tooling docs,

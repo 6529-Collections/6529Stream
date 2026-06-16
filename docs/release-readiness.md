@@ -343,6 +343,11 @@ The current local baseline includes:
   [`release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`](../release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md),
   validated with `python scripts/test_production_broadcast_retention.py` and
   `python scripts/check_production_broadcast_retention.py`,
+  plus the production verified-addresses checker and production
+  verified-addresses retained artifact template under
+  [`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md),
+  validated with `python scripts/test_production_verified_addresses.py` and
+  `python scripts/check_production_verified_addresses.py`,
   plus deterministic tracker-label checks with
   `python scripts/test_release_evidence_issue_labels.py` and
   `python scripts/check_release_evidence_issue_labels.py`,
@@ -407,7 +412,8 @@ Production release remains blocked until maintainers add or explicitly accept:
 - retained production broadcast outputs and generated live deployment manifests;
 - production broadcast retention retained artifact review following the
   production broadcast retention checker;
-- verified deployed addresses and explorer verification output;
+- verified deployed addresses and explorer verification output following the
+  production verified-addresses checker;
 - post-audit remediation evidence for every accepted audit finding;
 - dependency source retention and migration evidence following
   [`docs/dependency-operations.md`](dependency-operations.md);
@@ -533,6 +539,8 @@ python scripts/check_release_mode.py --phase public-beta
 python scripts/check_release_mode.py --phase production-release
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
+python scripts/test_production_verified_addresses.py
+python scripts/check_production_verified_addresses.py
 python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
 python scripts/test_incident_response.py

@@ -82,7 +82,8 @@ the risk register,
 release evidence packet index, drop authorization signing fixtures,
 release evidence issue backlog, release evidence issue links, release evidence issue body sync,
 release evidence issue closure readiness, release evidence live audit report bundle,
-production broadcast retention checker, and production broadcast retention retained artifact
+production broadcast retention checker, production broadcast retention retained artifact,
+production verified-addresses checker, and production verified-addresses retained artifact
 are summarized.
 The release evidence live audit report schema is summarized.
 The release evidence live audit Markdown parity is summarized.
