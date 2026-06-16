@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 15:54 UTC` |
+| Last updated | `2026-06-16 15:58 UTC` |
 
 ## Packaging Notes
 
@@ -16096,6 +16096,7 @@ Outcome:
 | 2026-06-16 15:45 | Validate REL-005 local draft | Added `scripts/verify_release_artifacts.py`, focused verifier tests, checksum coverage for the verifier script, Makefile/Bash/PowerShell/CI wiring, release-artifact documentation, changelog entry, refreshed risk register, release manifest, bytecode proof, and checksum bundle. Focused validation passed: verifier tests, verifier CLI, release-manifest tests/check, bytecode-proof tests/check, release-checksum tests/check, changelog tests/check, Python compile, and `git diff --check` with only the existing PowerShell line-ending warning. Full `make check` passed with existing Solidity/selfdestruct and Foundry trace warnings only. Next action is to run the Windows wrapper, commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 15:53 | Validate REL-005 Windows wrapper | Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` passed after the verifier wiring, with the same existing Solidity warnings and Foundry trace warnings as the Unix-style gate. Next action is to commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 15:54 | Open PR #461 for REL-005 | PR #461 is open at `https://github.com/6529-Collections/6529Stream/pull/461`, closes issue #460, and packages the offline third-party release artifact verifier, focused failure-mode tests, gate wiring, checksum coverage, docs, and regenerated release evidence. Next action is to request CodeRabbit, wait for CI and bot feedback, address anything actionable, then merge only when clean. |
+| 2026-06-16 15:58 | Address PR #461 verifier nice-to-haves | 6529bot reported `Good to merge` and no security findings, plus non-blocking verifier hardening suggestions. The follow-up commit makes malformed `path`/`sha256` records fail unless they use the explicit self-referential marker, documents the LF-pinned checksum parsing assumption, adds a CLI failure test for nonzero exit/stderr, refreshes the checksum bundle, and passes verifier tests/CLI plus release-checksum tests/check. Next action is to push, wait for CI/bot follow-up, and merge only when clean. |
 
 ## Resume Instructions
 

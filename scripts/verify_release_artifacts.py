@@ -28,6 +28,7 @@ CHECKSUM_FILE_NAME = "SHA256SUMS"
 CHECKSUM_MANIFEST_NAME = "release-checksums.json"
 RELEASE_MANIFEST_NAME = "release-manifest.json"
 BYTECODE_PROOF_NAME = "bytecode-release-proof.json"
+SELF_REFERENTIAL_SHA256_MARKERS = {"not_available_self_referential"}
 
 
 class ReleaseArtifactVerificationError(RuntimeError):
@@ -167,6 +168,8 @@ def verify_checksum_file(
     repo_root: Path,
     checksum_path: Path,
 ) -> dict[str, str]:
+    # SHA256SUMS is LF-pinned by the release policy; the byte-level digest check
+    # below still fails if a checkout rewrites it with CRLF line endings.
     checksum_text = checksum_path.read_text(encoding="utf-8")
     entries = parse_checksum_file(checksum_text)
     digests: dict[str, str] = {}
@@ -283,13 +286,15 @@ def iter_file_records(value: Any, source: str) -> Iterable[tuple[str, str, int |
         path = value.get("path")
         sha256 = value.get("sha256")
         size_bytes = value.get("size_bytes")
-        if (
-            isinstance(path, str)
-            and isinstance(sha256, str)
-            and isinstance(size_bytes, int)
-            and not isinstance(size_bytes, bool)
-        ):
-            if SHA256_PREFIX_RE.fullmatch(sha256):
+        if isinstance(path, str) and "sha256" in value:
+            if not isinstance(sha256, str):
+                raise ReleaseArtifactVerificationError(f"{source}.sha256 must be a string")
+            if not SHA256_PREFIX_RE.fullmatch(sha256):
+                if sha256 not in SELF_REFERENTIAL_SHA256_MARKERS:
+                    raise ReleaseArtifactVerificationError(
+                        f"{source}.sha256 has invalid sha256 marker for {path}"
+                    )
+            elif isinstance(size_bytes, int) and not isinstance(size_bytes, bool):
                 yield path, sha256, size_bytes, source
         for key, child in value.items():
             yield from iter_file_records(child, f"{source}.{key}")

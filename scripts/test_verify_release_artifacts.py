@@ -159,6 +159,17 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         data = json.loads(stdout.getvalue())
         self.assertGreater(data["checksum_entries"], 0)
 
+    def test_main_failure_returns_nonzero_and_stderr(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_text(root / "release-artifacts" / "latest" / "abi-checksums.json", "changed\n")
+            stderr = StringIO()
+            with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                result = verifier.main(["--repo-root", str(root)])
+            self.assertEqual(result, 1)
+            self.assertIn("error: SHA256SUMS hash mismatch", stderr.getvalue())
+
     def test_minimal_bundle_verifies(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -233,6 +244,29 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
                 "release-manifest.json.release_artifacts.abi_checksums hash mismatch",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_malformed_manifest_sha_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            manifest_path = root / "release-artifacts" / "latest" / "release-manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["checksum_bundle"]["outputs"][0]["sha256"] = "legacy-marker"
+            write_json(manifest_path, manifest)
+            write_checksum_bundle(
+                root,
+                [
+                    "deployments/examples/anvil.json",
+                    "release-artifacts/latest/abi-checksums.json",
+                    "release-artifacts/latest/bytecode-release-proof.json",
+                    "release-artifacts/latest/release-manifest.json",
+                ],
+            )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "invalid sha256 marker",
             ):
                 verifier.verify_release_artifacts(root)
 
