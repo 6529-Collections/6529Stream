@@ -211,6 +211,8 @@ jobs:
             scripts/test_bytecode_release_proof.py \
             scripts/generate_release_checksums.py \
             scripts/test_release_checksums.py \
+            scripts/verify_release_artifacts.py \
+            scripts/test_verify_release_artifacts.py \
             scripts/check_solidity_formatting.py \
             scripts/test_solidity_formatting.py \
             scripts/test_windows_check_wrapper.py \
@@ -598,6 +600,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_checksums.py 2>&1 | tee ci-logs/release-checksum-tests.log
           python3 scripts/generate_release_checksums.py --check 2>&1 | tee ci-logs/release-checksums-check.log
+
+      - name: Release artifact verifier
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_verify_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-verifier-tests.log
+          python3 scripts/verify_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-verifier-check.log
 
       - name: Changelog gate
         shell: bash

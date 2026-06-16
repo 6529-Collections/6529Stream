@@ -128,7 +128,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d17552404d153cde79b36c527ee5086cf92fd79b4e7f1acf63182380403598e1",
+      "sha256": "sha256:2de1fc5b78fdbe2b9fce9507bf9e66c446cfd5bdb591b703b8efbcbc7e3734b3",
       "size_bytes": 22887,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1940,8 +1940,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:db206edd924d83a8d51b000fcaad80a531972f0255f36a3b4429017d170939c3",
-      "size_bytes": 44779
+      "sha256": "sha256:82fa1fb70ebb4ea06b9362ce377f74536a595c84c3c3d20a0859d2e4ac80fbc1",
+      "size_bytes": 45095
     },
     "governance_docs": [
       {

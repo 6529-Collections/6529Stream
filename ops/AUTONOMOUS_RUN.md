@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/interface-version-views` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/457` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/458` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/459` |
-| Next issue | TBD after CON-007 interface/version views lands. |
+| Active PR branch | `codex/release-artifact-verifier` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/459` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/460` |
+| Active PR | TBD |
+| Next issue | TBD after REL-005 release artifact verifier lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 15:18 UTC` |
+| Last updated | `2026-06-16 15:53 UTC` |
 
 ## Packaging Notes
 
@@ -16092,6 +16092,9 @@ Outcome:
 | 2026-06-16 14:41 | Merge PR #457 and start CON-007 | PR #457 merged as `0116b383bb8a344f1fc0ffa7206888fa493df865` after CodeRabbit, Foundry smoke, and Windows wrapper checks passed; 6529bot follow-up reported no new findings and review threads were empty. Issue #458 is open for CON-007 interface/version views, and branch `codex/interface-version-views` starts from updated `main`. |
 | 2026-06-16 15:16 | Validate CON-007 local draft | Added `IStreamCompatibility` and implemented the adapter-based protocol/version/schema/release/interface-probe views on `StreamContractMetadata` so frontend compatibility checks do not consume `StreamCore` bytecode. Focused tests cover the marker, protocol name/version, metadata schema version, release tag/hash, adapter ERC-165 support, and delegated core probes for ERC-721, ERC-2981, and ERC-4906. Integration docs/checkers and release manifests now include the new compatibility guide. Local validation passed: `forge test --match-path test/StreamContractMetadata.t.sol -vvv`, focused NatSpec tests/check, integrations README tests/check, release-manifest tests, `make release-checksums`, full `make check`, and `git diff --check`. Build size from the release target: `StreamCore` runtime `22,184` bytes with `2,392` bytes of EIP-170 margin; `StreamContractMetadata` runtime `3,190` bytes. Next action is to commit, push, open the CON-007 PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 15:18 | Open PR #459 for CON-007 | PR #459 is open at `https://github.com/6529-Collections/6529Stream/pull/459`, closes issue #458, and packages adapter-based interface/version views, focused metadata-adapter tests, integration guidance, and regenerated release/deployment evidence. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
+| 2026-06-16 15:34 | Start REL-005 verifier | PR #459 merged as `c3ea19f7daec8b7bd2c7f3f27720f48835b77efc` after CI, CodeRabbit contexts, and 6529bot feedback were clean; issue #458 closed completed. Issue #460 is open for REL-005, and branch `codex/release-artifact-verifier` adds an offline third-party verifier for `SHA256SUMS`, `release-checksums.json`, `release-manifest.json`, and `bytecode-release-proof.json`, with focused drift/failure tests and local/CI/Windows gate wiring. Next action is to regenerate release artifacts/checksums, run focused and full gates, commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
+| 2026-06-16 15:45 | Validate REL-005 local draft | Added `scripts/verify_release_artifacts.py`, focused verifier tests, checksum coverage for the verifier script, Makefile/Bash/PowerShell/CI wiring, release-artifact documentation, changelog entry, refreshed risk register, release manifest, bytecode proof, and checksum bundle. Focused validation passed: verifier tests, verifier CLI, release-manifest tests/check, bytecode-proof tests/check, release-checksum tests/check, changelog tests/check, Python compile, and `git diff --check` with only the existing PowerShell line-ending warning. Full `make check` passed with existing Solidity/selfdestruct and Foundry trace warnings only. Next action is to run the Windows wrapper, commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
+| 2026-06-16 15:53 | Validate REL-005 Windows wrapper | Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` passed after the verifier wiring, with the same existing Solidity warnings and Foundry trace warnings as the Unix-style gate. Next action is to commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
 
 ## Resume Instructions
 

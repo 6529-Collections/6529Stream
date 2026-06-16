@@ -15,6 +15,7 @@
       "release-artifacts/signatures",
       "release-artifacts/latest",
       "release-artifacts/baselines",
+      "scripts/verify_release_artifacts.py",
       "deployments/broadcasts",
       "deployments/config",
       "deployments/examples",
@@ -30,7 +31,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:6067c9c1d5c0cd2be4e90b2069d76025894439dd856d869492d7b5271aa64e8d"
+    "sha256": "sha256:69559e752ca55e2a4c0743f4df9ddcb7bb5f27e7a02c95946c315f9d290f3c26"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -449,7 +450,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:56cf2523b1a291f3ea78bbc9b7cd23bf01a07cf8e71cb0764bee893b9db1f993",
+      "sha256": "sha256:f185b945b96121c4306a7a81998ce9a4e5373897b14db5c0b44c94d2d2013c16",
       "size_bytes": 79962
     },
     {
@@ -554,12 +555,12 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:4783688ecb35ca32bd99f56debfce7c563e2bfc5904b4fb760996581d644c5dc",
+      "sha256": "sha256:b6c9ad3c76f1e70e34728f243eb3459e1ff15c0bb661259fad018a5c049ae45f",
       "size_bytes": 106114
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d17552404d153cde79b36c527ee5086cf92fd79b4e7f1acf63182380403598e1",
+      "sha256": "sha256:2de1fc5b78fdbe2b9fce9507bf9e66c446cfd5bdb591b703b8efbcbc7e3734b3",
       "size_bytes": 22887
     },
     {
@@ -646,6 +647,11 @@
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
       "sha256": "sha256:b735c3468d421afe7e80ad71d52673f2e2c6ba9f863be8cc9ebcb120a2f15cb1",
       "size_bytes": 3470
+    },
+    {
+      "path": "scripts/verify_release_artifacts.py",
+      "sha256": "sha256:eb35c06f6d8be8ef3a027260ee4484408725b4273bf5969995d43c9f8dd15733",
+      "size_bytes": 16223
     },
     {
       "path": "test/fixtures/drop-authorization/auction-eoa.json",
