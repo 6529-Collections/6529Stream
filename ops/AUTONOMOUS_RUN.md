@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/post-audit-remediation-evidence-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/474` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/231` |
-| Active PR | TBD |
+| Active PR | [#475](https://github.com/6529-Collections/6529Stream/pull/475) |
 | Next issue | TBD after AUD-004 post-audit remediation evidence checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 22:53 UTC` |
+| Last updated | `2026-06-16 23:13 UTC` |
 
 ## Packaging Notes
 
@@ -275,7 +275,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ## Current PR Worklog
 
-| 2026-06-16 22:53 | Start AUD-004 post-audit remediation evidence checker | PR #474 merged as `a2516b3cc681b7712c5b7f3ee5c956767eba3513` after CI, CodeRabbit, and 6529bot were clean; branch `codex/post-audit-remediation-evidence-checker` adds a dedicated no-secret retained-artifact template and checker for future `post_audit_remediation` evidence on issue #231 without changing readiness claims. Local draft work includes finding-by-finding remediation fields, retest and accepted-risk fields, focused checker tests, local/CI/Windows gate wiring, packet-index routing, release-readiness/tooling/release-artifact docs, changelog, and regenerated release artifacts. Next action is to complete drift/full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-16 23:13 | Open PR #475 for AUD-004 | PR #474 merged as `a2516b3cc681b7712c5b7f3ee5c956767eba3513` after CI, CodeRabbit, and 6529bot were clean. PR #475 is open from branch `codex/post-audit-remediation-evidence-checker` and adds a dedicated no-secret retained-artifact template and checker for future `post_audit_remediation` evidence on issue #231 without changing readiness claims. Local validation passed: focused post-audit checker tests, packet-index/manifest/checksum checks, full `make check`, and full Windows `scripts/check.ps1`. Next action is to push this PR-number state update, request CodeRabbit, and wait for CI/bot feedback. |
 
 ### PR candidate: Add fork-aware Safe/ERC-1271 signature smoke tests (Queue Item 210 / ADV-009)
 
