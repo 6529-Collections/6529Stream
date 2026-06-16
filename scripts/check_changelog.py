@@ -36,6 +36,7 @@ RELEASE_IMPACTING_PATHS = {
         "scripts/generate_deployment_manifest.py",
         "scripts/generate_address_books.py",
         "scripts/generate_release_checksums.py",
+        "scripts/generate_release_notes.py",
         "scripts/check_changelog.py",
         "scripts/check_solidity_formatting.py",
         "scripts/test_solidity_formatting.py",

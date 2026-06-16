@@ -226,6 +226,11 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         },
     )
     write_json(
+        latest / "release-notes.json",
+        {"schema_version": "6529stream.release-notes.v1", "release": {}},
+    )
+    write_text(latest / "release-notes.md", "# 6529Stream Release Notes\n")
+    write_json(
         latest / "release-artifact-manifest.json",
         {
             "schema_version": "6529stream.release-artifact-manifest.v1",

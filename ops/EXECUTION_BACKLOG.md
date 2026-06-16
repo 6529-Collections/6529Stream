@@ -3395,8 +3395,8 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | `REL-001` |
-| `REL-005` | Add release artifact verifier script for third-party users | G | Active issue #460; branch `codex/release-artifact-verifier`; depends on `REL-003` |
-| `REL-006` | Add release notes generator from changelog and artifact diff | G | changelog policy |
+| `REL-005` | Add release artifact verifier script for third-party users | G | Merged in PR #461; issue #460 closed completed |
+| `REL-006` | Add release notes generator from changelog and artifact diff | G | Active issue #462; branch `codex/release-notes-generator`; depends on changelog policy |
 | `REL-007` | Add dependency provenance attestation bundle | F/G | dependency manifest |
 | `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | live evidence templates |
 

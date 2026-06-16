@@ -205,6 +205,8 @@ jobs:
             scripts/test_warning_dispositions.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
+            scripts/generate_release_notes.py \
+            scripts/test_release_notes.py \
             scripts/generate_release_manifest.py \
             scripts/test_release_manifest.py \
             scripts/generate_bytecode_release_proof.py \
@@ -582,6 +584,8 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs
+          python3 scripts/test_release_notes.py 2>&1 | tee ci-logs/release-notes-tests.log
+          python3 scripts/generate_release_notes.py --check 2>&1 | tee ci-logs/release-notes-check.log
           python3 scripts/test_release_manifest.py 2>&1 | tee ci-logs/release-manifest-tests.log
           python3 scripts/generate_release_manifest.py --check 2>&1 | tee ci-logs/release-manifest-check.log
 

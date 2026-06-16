@@ -41,6 +41,8 @@ DOWNSTREAM_RELEASE_FILES = {
     "release-evidence-live-audit-report-archive.md",
     "release-evidence-packet-index.json",
     "release-evidence-packet-index.md",
+    "release-notes.json",
+    "release-notes.md",
     "SHA256SUMS",
     "release-checksums.json",
     "release-manifest.json",

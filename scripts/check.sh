@@ -160,6 +160,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/generate_one_of_one_permanence_manifest.py --check
 "$python_bin" scripts/test_release_readiness.py
 "$python_bin" scripts/check_release_readiness.py
+"$python_bin" scripts/test_release_notes.py
+"$python_bin" scripts/generate_release_notes.py --check
 "$python_bin" scripts/test_release_manifest.py
 "$python_bin" scripts/generate_release_manifest.py --check
 "$python_bin" scripts/test_bytecode_release_proof.py

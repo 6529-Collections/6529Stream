@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-artifact-verifier` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/459` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/460` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/461` |
-| Next issue | TBD after REL-005 release artifact verifier lands. |
+| Active PR branch | `codex/release-notes-generator` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/461` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/462` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/463` |
+| Next issue | TBD after REL-006 release notes generator lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 15:58 UTC` |
+| Last updated | `2026-06-16 16:58 UTC` |
 
 ## Packaging Notes
 
@@ -16097,6 +16097,9 @@ Outcome:
 | 2026-06-16 15:53 | Validate REL-005 Windows wrapper | Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` passed after the verifier wiring, with the same existing Solidity warnings and Foundry trace warnings as the Unix-style gate. Next action is to commit, push, open the REL-005 PR, wait for CI/bot feedback, and merge only when clean. |
 | 2026-06-16 15:54 | Open PR #461 for REL-005 | PR #461 is open at `https://github.com/6529-Collections/6529Stream/pull/461`, closes issue #460, and packages the offline third-party release artifact verifier, focused failure-mode tests, gate wiring, checksum coverage, docs, and regenerated release evidence. Next action is to request CodeRabbit, wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 | 2026-06-16 15:58 | Address PR #461 verifier nice-to-haves | 6529bot reported `Good to merge` and no security findings, plus non-blocking verifier hardening suggestions. The follow-up commit makes malformed `path`/`sha256` records fail unless they use the explicit self-referential marker, documents the LF-pinned checksum parsing assumption, adds a CLI failure test for nonzero exit/stderr, refreshes the checksum bundle, and passes verifier tests/CLI plus release-checksum tests/check. Next action is to push, wait for CI/bot follow-up, and merge only when clean. |
+| 2026-06-16 16:12 | Merge PR #461 and start REL-006 | PR #461 merged as `e5ec12e0df1ee8a172838383c084f11b4420ca60` after Foundry smoke, Windows wrapper, CodeRabbit, and 6529bot follow-up were clean; issue #460 closed completed. Issue #462 is open for REL-006 release notes generation, and branch `codex/release-notes-generator` starts from updated `main`. The local draft adds `scripts/generate_release_notes.py`, focused release-note tests, JSON/Markdown release-note outputs, manifest/checksum coverage, gate wiring, docs, changelog, and run-state/backlog updates. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, wait for CI/bot feedback, and merge only when clean. |
+| 2026-06-16 16:43 | Validate REL-006 local draft | Full local `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` passed after adding deterministic release notes and release-artifact wiring. Focused checks also passed: release notes, release manifest, release checksums, third-party release artifact verifier, and `git diff --check` with only the existing PowerShell line-ending warning. PR #455 was also rechecked per user prompt and is already merged with CI/CodeRabbit clean, so the active lane remains REL-006. Next action is to commit, push, open the REL-006 PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-16 16:58 | Open PR #463 for REL-006 | PR #463 is open at `https://github.com/6529-Collections/6529Stream/pull/463`, closes issue #462, and packages deterministic release notes, JSON/Markdown outputs, wrapped-changelog preservation tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, third-party verifier coverage, docs, changelog, and regenerated release evidence. CodeRabbit review was requested in comment `4721139723`. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
