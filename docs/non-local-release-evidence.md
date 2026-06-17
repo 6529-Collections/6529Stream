@@ -405,6 +405,17 @@ remain open and the shared release evidence rows remain `missing` until
 reviewed retained marketplace/indexer evidence is linked from the shared
 public-beta evidence manifest.
 
+Do not replace the reusable template files when retaining reviewed evidence.
+Instead, add a reviewed evidence envelope and link that envelope from the
+complete row in `release-artifacts/latest/public-beta-evidence.json`.
+`python scripts/check_marketplace_indexer_evidence.py` validates the template
+baseline and, for any completed marketplace/indexer row, follows the manifest
+reference to the reviewed envelope, verifies the retained Markdown hash, and
+then checks the retained Markdown coverage fields. A template envelope,
+wrong-environment envelope, stale retained-artifact hash, or retained Markdown
+artifact that still fails the marketplace/indexer coverage rules cannot
+complete #423 or #424.
+
 ### Ceremony Evidence
 
 Retain:

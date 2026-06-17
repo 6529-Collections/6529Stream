@@ -55,6 +55,16 @@ JSON, template Markdown, local metadata fixtures, local browser sandbox checks,
 and local event/indexer docs are preparation material, not release readiness
 proof.
 
+When either row moves to `complete`, keep the reusable template files in place
+and add a reviewed non-local evidence envelope from
+[`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json).
+`scripts/check_marketplace_indexer_evidence.py` follows complete marketplace /
+indexer rows from the shared evidence manifest to the reviewed envelope, checks
+that the envelope is not template-only, verifies the retained Markdown hash, and
+then validates the retained Markdown with the same coverage and no-secret rules
+as the standalone checker. This lets #423 and #424 be completed by supplemental
+reviewed artifacts without weakening the template baseline.
+
 ## Required Coverage
 
 Reviewed retained marketplace/indexer evidence must identify:
@@ -99,7 +109,10 @@ For public-beta evidence:
    [`release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json`](../../release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json).
 5. Link the generated evidence from
    [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json).
-6. Keep issue #423 open until the row is `complete` or explicitly
+6. Run `python scripts/check_marketplace_indexer_evidence.py` so the shared
+   manifest row, reviewed envelope, retained Markdown hash, and retained
+   Markdown coverage are checked together.
+7. Keep issue #423 open until the row is `complete` or explicitly
    risk-accepted.
 
 For production evidence:
@@ -112,7 +125,10 @@ For production evidence:
    [`release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json`](../../release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json).
 5. Link the generated evidence from
    [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json).
-6. Keep issue #424 open until the row is `complete` or explicitly
+6. Run `python scripts/check_marketplace_indexer_evidence.py` so the shared
+   manifest row, reviewed envelope, retained Markdown hash, and retained
+   Markdown coverage are checked together.
+7. Keep issue #424 open until the row is `complete` or explicitly
    risk-accepted.
 
 ## Redaction

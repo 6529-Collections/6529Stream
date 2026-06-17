@@ -66,6 +66,105 @@ def envelope_template(
     }
 
 
+def reviewed_envelope(
+    retained_path: Path,
+    retained_relative_path: str,
+    *,
+    requirement_id: str = checker.PUBLIC_BETA_REQUIREMENT_ID,
+    environment: str = "fork",
+    chain_id: int = 1,
+    record_type: str = "evidence",
+    review_status: str = "reviewed",
+    reviewer: str = "release-reviewer",
+    retained_sha256: str | None = None,
+) -> dict[str, object]:
+    """Return reviewed non-local evidence metadata for a retained artifact."""
+    return {
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": f"reviewed-{requirement_id}",
+        "record_type": record_type,
+        "review_status": review_status,
+        "environment": environment,
+        "chain_id": chain_id,
+        "block_or_reference": "fork block 25316366 / marketplace-indexer transcript",
+        "command_or_source_system": "reviewed marketplace/indexer transcript",
+        "retained_path": retained_relative_path,
+        "sha256": retained_sha256 or checker.file_sha256(retained_path),
+        "redaction_statement": "Secrets were never present.",
+        "owner": "release-operator",
+        "reviewer": reviewer,
+        "public_beta_requirement_id": requirement_id,
+        "operator_notes": "Reviewed marketplace/indexer retained evidence.",
+    }
+
+
+def manifest_with_marketplace_row(
+    requirement_id: str,
+    *,
+    status: str = "complete",
+    evidence: list[dict[str, str]] | None = None,
+) -> dict[str, object]:
+    """Return a minimal manifest containing one marketplace/indexer row."""
+    phase = (
+        "production_release"
+        if requirement_id == checker.PRODUCTION_REQUIREMENT_ID
+        else "public_beta"
+    )
+    return {
+        "requirements": [
+            {
+                "id": requirement_id,
+                "phase": phase,
+                "status": status,
+                "owner": "release-operator",
+                "evidence": [] if evidence is None else evidence,
+                "risk_acceptance": None,
+                "notes": f"{requirement_id} fixture row.",
+            }
+        ]
+    }
+
+
+def write_manifest_bundle(
+    root: Path,
+    *,
+    requirement_id: str = checker.PUBLIC_BETA_REQUIREMENT_ID,
+    artifact_text: str | None = None,
+    envelope: dict[str, object] | None = None,
+    envelope_updates: dict[str, object] | None = None,
+) -> tuple[Path, Path, Path]:
+    """Write retained Markdown, envelope JSON, and manifest JSON fixtures."""
+    retained_relative = "release-artifacts/evidence/marketplace-indexer/reviewed.md"
+    envelope_relative = "release-artifacts/evidence/marketplace-indexer/reviewed.json"
+    manifest_relative = "release-artifacts/latest/public-beta-evidence.json"
+    retained_path = root / retained_relative
+    envelope_path = root / envelope_relative
+    manifest_path = root / manifest_relative
+
+    write_text(retained_path, artifact_text or reviewed_artifact(requirement_id=requirement_id))
+    envelope_data = envelope or reviewed_envelope(
+        retained_path,
+        retained_relative,
+        requirement_id=requirement_id,
+    )
+    if envelope_updates is not None:
+        envelope_data = {**envelope_data, **envelope_updates}
+    write_json(envelope_path, envelope_data)
+    write_json(
+        manifest_path,
+        manifest_with_marketplace_row(
+            requirement_id,
+            evidence=[
+                {
+                    "path": envelope_relative,
+                    "sha256": checker.file_sha256(envelope_path),
+                }
+            ],
+        ),
+    )
+    return retained_path, envelope_path, manifest_path
+
+
 def valid_template(
     *,
     requirement_id: str = checker.PUBLIC_BETA_REQUIREMENT_ID,
@@ -224,7 +323,7 @@ class MarketplaceIndexerEvidenceTests(unittest.TestCase):
     """Checker behavior for marketplace/indexer evidence."""
 
     def test_committed_templates_pass(self) -> None:
-        """The committed templates satisfy the checker."""
+        """The committed templates and blocked manifest satisfy the checker."""
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
             result = checker.main([])
 
@@ -288,6 +387,159 @@ class MarketplaceIndexerEvidenceTests(unittest.TestCase):
             )
 
             checker.validate_artifact(path)
+
+    def test_manifest_complete_public_beta_row_validates_reviewed_artifact(self) -> None:
+        """Complete public-beta rows must resolve reviewed retained Markdown."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(root)
+
+            checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_production_row_validates_live_artifact(self) -> None:
+        """Complete production rows require live marketplace/indexer evidence."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            artifact = reviewed_artifact(
+                requirement_id=checker.PRODUCTION_REQUIREMENT_ID,
+                environment="live",
+                chain_id="1",
+            )
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                requirement_id=checker.PRODUCTION_REQUIREMENT_ID,
+                artifact_text=artifact,
+                envelope_updates={"environment": "live"},
+            )
+
+            checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_rejects_template_envelope(self) -> None:
+        """Completed manifest rows cannot point at template-only envelopes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            retained_path = root / "release-artifacts/evidence/marketplace-indexer/reviewed.md"
+            write_text(retained_path, reviewed_artifact())
+            template_envelope = envelope_template(retained_path)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope=template_envelope,
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "record_type",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_requires_evidence_reference(self) -> None:
+        """Completed manifest rows need at least one reviewed envelope reference."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manifest = root / "release-artifacts/latest/public-beta-evidence.json"
+            write_json(manifest, manifest_with_marketplace_row(checker.PUBLIC_BETA_REQUIREMENT_ID))
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "must contain reviewed evidence",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_rejects_wrong_envelope_requirement(self) -> None:
+        """Reviewed envelopes must match the completed manifest requirement."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={
+                    "public_beta_requirement_id": checker.PRODUCTION_REQUIREMENT_ID,
+                },
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "public_beta_requirement_id",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_rejects_retained_hash_drift(self) -> None:
+        """Envelope retained-artifact hashes must match the Markdown artifact."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={"sha256": f"sha256:{'0' * 64}"},
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "retained artifact",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_public_beta_row_rejects_wrong_environment(self) -> None:
+        """Public-beta marketplace/indexer evidence cannot use live-only envelopes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={"environment": "live"},
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "environment",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_public_beta_row_rejects_non_positive_chain_id(self) -> None:
+        """Public-beta marketplace/indexer evidence needs a real chain ID."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={"chain_id": 0},
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "positive number",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_rejects_tbd_reviewer_envelope(self) -> None:
+        """Completed marketplace/indexer evidence requires a named reviewer."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={"reviewer": "tBd"},
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "reviewer",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_rejects_invalid_retained_markdown(self) -> None:
+        """Reviewed envelopes must point at Markdown that passes the artifact checker."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            invalid_artifact = reviewed_artifact().replace(
+                "- Cache invalidation: `yes`",
+                "- Cache invalidation: `no`",
+            )
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                artifact_text=invalid_artifact,
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "Cache invalidation",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
 
     def test_wrong_requirement_environment_pair_fails(self) -> None:
         """Live requirement rows cannot use fork/testnet evidence."""

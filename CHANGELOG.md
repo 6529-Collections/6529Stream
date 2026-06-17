@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added manifest-aware marketplace/indexer evidence validation so complete
+  public-beta or production marketplace/indexer rows must reference reviewed
+  non-local envelopes whose retained Markdown artifacts pass the detailed
+  coverage, hash, environment, and no-secret checks while templates remain
+  reusable preparation material.
 - Added `ADV-013` randomizer request-binding parity tests covering VRF and
   arRNG wrong-collection pending-state preservation, plus nested stale-mark and
   retry reentry during the external core write without production bytecode

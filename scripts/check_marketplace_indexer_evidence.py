@@ -9,12 +9,14 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 
 PUBLIC_BETA_REQUIREMENT_ID = "fork_testnet_marketplace_indexer_evidence"
 PRODUCTION_REQUIREMENT_ID = "live_marketplace_indexer_evidence"
 PUBLIC_BETA_ENVIRONMENTS = {"fork", "testnet"}
 PRODUCTION_ENVIRONMENTS = {"live"}
+DEFAULT_EVIDENCE_MANIFEST = Path("release-artifacts/latest/public-beta-evidence.json")
 DEFAULT_EVIDENCE = [
     Path(
         "release-artifacts/evidence/marketplace-indexer/"
@@ -25,6 +27,13 @@ DEFAULT_EVIDENCE = [
         "live-marketplace-indexer-retained-artifact-template.md"
     ),
 ]
+MANIFEST_REQUIREMENTS = {
+    PUBLIC_BETA_REQUIREMENT_ID: PUBLIC_BETA_ENVIRONMENTS,
+    PRODUCTION_REQUIREMENT_ID: PRODUCTION_ENVIRONMENTS,
+}
+COMPLETE_STATUS = "complete"
+REVIEWED_RECORD_TYPE = "evidence"
+REVIEWED_STATUS = "reviewed"
 DEFAULT_ENVELOPE_TEMPLATES = [
     (
         Path(
@@ -447,6 +456,182 @@ def require_json_string(data: dict[str, object], path: Path, key: str) -> str:
     return value
 
 
+def resolve_repo_file(repo_root: Path, relative_path: str, path: str) -> Path:
+    """Resolve a repository-relative path while rejecting traversal."""
+    if "\\" in relative_path:
+        raise MarketplaceIndexerEvidenceError(f"{path} must use forward slashes")
+    candidate = Path(relative_path)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise MarketplaceIndexerEvidenceError(f"{path} must stay inside the repository")
+    resolved = (repo_root / candidate).resolve()
+    try:
+        resolved.relative_to(repo_root.resolve())
+    except ValueError as exc:
+        raise MarketplaceIndexerEvidenceError(
+            f"{path} must stay inside the repository"
+        ) from exc
+    if not resolved.is_file():
+        raise MarketplaceIndexerEvidenceError(
+            f"{path} references missing file: {relative_path}"
+        )
+    return resolved
+
+
+def require_dict(value: Any, path: str) -> dict[str, Any]:
+    """Require a JSON object."""
+    if not isinstance(value, dict):
+        raise MarketplaceIndexerEvidenceError(f"{path} must be a JSON object")
+    return value
+
+
+def require_json_text(value: Any, path: str) -> str:
+    """Require a non-empty JSON string."""
+    if not isinstance(value, str) or value == "":
+        raise MarketplaceIndexerEvidenceError(f"{path} must be a non-empty string")
+    return value
+
+
+def require_reviewed_evidence_field(
+    data: dict[str, Any],
+    envelope_path: Path,
+    key: str,
+    expected: str,
+) -> None:
+    """Require one reviewed evidence envelope string field."""
+    actual = require_json_text(data.get(key), f"{envelope_path}.{key}")
+    if actual != expected:
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} field {key!r} must be {expected!r}, got {actual!r}"
+        )
+
+
+def validate_reviewed_evidence_envelope(
+    envelope_path: Path,
+    repo_root: Path,
+    requirement_id: str,
+    environments: set[str],
+) -> None:
+    """Validate a completed manifest row's reviewed evidence envelope."""
+    data = require_dict(load_json(envelope_path), str(envelope_path))
+
+    require_reviewed_evidence_field(
+        data,
+        envelope_path,
+        "record_type",
+        REVIEWED_RECORD_TYPE,
+    )
+    require_reviewed_evidence_field(
+        data,
+        envelope_path,
+        "review_status",
+        REVIEWED_STATUS,
+    )
+    require_reviewed_evidence_field(
+        data,
+        envelope_path,
+        "public_beta_requirement_id",
+        requirement_id,
+    )
+
+    environment = require_json_text(data.get("environment"), f"{envelope_path}.environment")
+    if environment not in environments:
+        expected = ", ".join(sorted(environments))
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path} environment must be one of {expected}, got {environment!r}"
+        )
+
+    chain_id = data.get("chain_id")
+    if requirement_id == PRODUCTION_REQUIREMENT_ID:
+        if chain_id != 1:
+            raise MarketplaceIndexerEvidenceError(
+                f"{envelope_path}.chain_id must be 1 for live marketplace/indexer evidence"
+            )
+    elif not isinstance(chain_id, int) or chain_id <= 0:
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path}.chain_id must be a positive number for public-beta marketplace/indexer evidence"
+        )
+
+    reviewer = require_json_text(data.get("reviewer"), f"{envelope_path}.reviewer")
+    if reviewer.upper() == "TBD":
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path}.reviewer must be set before completion"
+        )
+    require_json_text(data.get("owner"), f"{envelope_path}.owner")
+
+    retained_path = require_json_text(
+        data.get("retained_path"),
+        f"{envelope_path}.retained_path",
+    )
+    retained_file = resolve_repo_file(
+        repo_root,
+        retained_path,
+        f"{envelope_path}.retained_path",
+    )
+    expected_sha256 = file_sha256(retained_file)
+    actual_sha256 = require_json_text(data.get("sha256"), f"{envelope_path}.sha256")
+    if actual_sha256 != expected_sha256:
+        raise MarketplaceIndexerEvidenceError(
+            f"{envelope_path}.sha256 mismatch for retained artifact {retained_path}: "
+            f"expected {expected_sha256}, got {actual_sha256}"
+        )
+
+    validate_artifact(retained_file)
+
+
+def validate_manifest_marketplace_rows(manifest_path: Path, repo_root: Path) -> None:
+    """Validate completed marketplace/indexer rows in the release evidence manifest."""
+    resolved_manifest = (
+        manifest_path if manifest_path.is_absolute() else repo_root / manifest_path
+    )
+    data = require_dict(load_json(resolved_manifest), str(resolved_manifest))
+    requirements = data.get("requirements")
+    if not isinstance(requirements, list):
+        raise MarketplaceIndexerEvidenceError(
+            f"{resolved_manifest}.requirements must be a JSON array"
+        )
+
+    for index, requirement in enumerate(requirements):
+        row_path = f"{resolved_manifest}.requirements[{index}]"
+        row = require_dict(requirement, row_path)
+        requirement_id = row.get("id")
+        if requirement_id not in MANIFEST_REQUIREMENTS:
+            continue
+        status = require_json_text(row.get("status"), f"{row_path}.status")
+        if status != COMPLETE_STATUS:
+            continue
+
+        evidence_refs = row.get("evidence")
+        if not isinstance(evidence_refs, list) or not evidence_refs:
+            raise MarketplaceIndexerEvidenceError(
+                f"{row_path}.evidence must contain reviewed evidence when status is complete"
+            )
+        for evidence_index, evidence_ref in enumerate(evidence_refs):
+            ref_path = f"{row_path}.evidence[{evidence_index}]"
+            ref = require_dict(evidence_ref, ref_path)
+            evidence_path = require_json_text(ref.get("path"), f"{ref_path}.path")
+            envelope_file = resolve_repo_file(
+                repo_root,
+                evidence_path,
+                f"{ref_path}.path",
+            )
+            expected_envelope_sha256 = file_sha256(envelope_file)
+            actual_envelope_sha256 = require_json_text(
+                ref.get("sha256"),
+                f"{ref_path}.sha256",
+            )
+            if actual_envelope_sha256 != expected_envelope_sha256:
+                raise MarketplaceIndexerEvidenceError(
+                    f"{ref_path}.sha256 mismatch for {evidence_path}: "
+                    f"expected {expected_envelope_sha256}, got {actual_envelope_sha256}"
+                )
+            validate_reviewed_evidence_envelope(
+                envelope_file,
+                repo_root,
+                str(requirement_id),
+                MANIFEST_REQUIREMENTS[str(requirement_id)],
+            )
+
+
 def validate_envelope_template(
     envelope_path: Path,
     retained_path: Path,
@@ -506,13 +691,28 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="append",
         help="Evidence Markdown path to validate; may be repeated.",
     )
+    parser.add_argument(
+        "--evidence-manifest",
+        type=Path,
+        help=(
+            "Release evidence manifest whose complete marketplace/indexer rows "
+            "must reference reviewed evidence envelopes and retained Markdown."
+        ),
+    )
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run the checker."""
     args = parse_args(sys.argv[1:] if argv is None else argv)
+    repo_root = args.repo_root.resolve()
     paths = args.evidence or DEFAULT_EVIDENCE
+    manifest_path = args.evidence_manifest
+    # Standalone --evidence checks intentionally validate only the supplied
+    # Markdown artifact unless the caller explicitly supplies --evidence-manifest.
+    if args.evidence is None and manifest_path is None:
+        manifest_path = DEFAULT_EVIDENCE_MANIFEST
     try:
         for path in paths:
             validate_artifact(path)
@@ -529,6 +729,8 @@ def main(argv: list[str] | None = None) -> int:
                     requirement_id,
                     environments,
                 )
+        if manifest_path is not None:
+            validate_manifest_marketplace_rows(manifest_path, repo_root)
     except MarketplaceIndexerEvidenceError as exc:
         print(f"marketplace/indexer evidence check failed: {exc}", file=sys.stderr)
         return 1

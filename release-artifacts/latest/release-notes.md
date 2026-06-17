@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added manifest-aware marketplace/indexer evidence validation so complete public-beta or production marketplace/indexer rows must reference reviewed non-local envelopes whose retained Markdown artifacts pass the detailed coverage, hash, environment, and no-secret checks while templates remain reusable preparation material.
 - Added `ADV-013` randomizer request-binding parity tests covering VRF and arRNG wrong-collection pending-state preservation, plus nested stale-mark and retry reentry during the external core write without production bytecode changes.
 - Added `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations, with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and release-artifact coverage.
 - Added a checked `AUD-003` external audit finding workflow covering public-safe intake, severity/status triage, audited scope, remediation PRs, required tests, retest, accepted-risk decisions, closure gates, release evidence handoff, no-secret redaction, and local/CI/Windows gate wiring.

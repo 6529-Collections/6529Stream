@@ -3088,8 +3088,9 @@ Dependencies: dependency artifact manifest, metadata browser sandbox,
 
 ### ONE-005: Retain Marketplace And Indexer Integration Evidence
 
-Status: Merged in PR #425; issue #422 closed completed. Tracker issues #423
-and #424 remain open for future reviewed public-beta and production
+Status: Merged in PR #425; issue #422 closed completed. MAP-003 issue #528 is
+in progress to harden manifest-aware reviewed evidence validation. Tracker
+issues #423 and #424 remain open for future reviewed public-beta and production
 marketplace/indexer evidence.
 
 Gate: G/E.
@@ -3133,11 +3134,17 @@ Implementation steps:
 4. Link the evidence row to public-beta/production blocker reports without
    marking it complete until real reviewed evidence exists.
 5. Document frontend/indexer expectations and known marketplace caveats.
+6. Require complete marketplace/indexer rows to resolve from the shared release
+   evidence manifest to reviewed non-local envelopes, then to retained
+   Markdown artifacts whose hashes and coverage fields pass the dedicated
+   marketplace/indexer checker.
 
 Required tests/checks:
 
 - Evidence checker unit tests
 - Evidence checker committed-template validation
+- Evidence checker manifest-row validation for reviewed envelope and retained
+  Markdown evidence
 - `python scripts/check_public_beta_evidence.py`
 - `python scripts/generate_release_evidence_packet_index.py --check`
 - `python scripts/generate_release_manifest.py --check`
@@ -3151,6 +3158,9 @@ Acceptance criteria:
 - Evidence distinguishes metadata refresh, contract metadata, royalty display,
   event replay, transfer/listing/sale, and animation rendering.
 - Local templates are clearly not completed evidence.
+- Complete marketplace/indexer rows cannot point at template envelopes, wrong
+  environments, stale retained-artifact hashes, or retained Markdown that fails
+  coverage validation.
 - Public beta or production readiness stays blocked until reviewed external
   evidence exists.
 
