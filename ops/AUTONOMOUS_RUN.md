@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 22:02 UTC` |
+| Last updated | `2026-06-17 22:22 UTC` |
 
 ## Packaging Notes
 
@@ -16200,6 +16200,7 @@ Outcome:
 | 2026-06-17 21:17 | Start ADV-013 randomizer request-binding parity | Issue #524 and branch `codex/randomizer-request-binding-parity` now track VRF/arRNG wrong-collection pending-state parity plus nested stale-mark and retry reentry during the external core write. Initial focused validation passed for `forge fmt --check test\StreamRandomizerLifecycle.t.sol test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`, and `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`; next action is to finish docs/artifact updates, run full required gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 21:32 | Finish ADV-013 local validation | ADV-013 is ready to publish: focused lifecycle/adversarial/retry randomizer tests passed, randomizer operation evidence scripts passed, release manifest/checksum/lockfile checks passed, full `make check` passed with output captured during the run, Windows `scripts\check.ps1` passed, and `codex-diff-check` passed. Next action is to commit, push, open the issue-linked PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 22:02 | Open PR #525 for ADV-013 | PR #525 is open at `https://github.com/6529-Collections/6529Stream/pull/525`, closes issue #524, and packages randomizer request-binding parity plus core-write stale/retry reentry tests with regenerated release evidence. CodeRabbit was requested in comment `4735920164`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 22:22 | Address PR #525 bot harness note | 6529bot marked PR #525 good to merge and left one non-blocking harness note: make the `ArrngRetry` branch explicit instead of using a trailing fallback `else`. Updated the test adversary to fail loudly on unknown reentry modes, regenerated affected randomizer/release evidence, and reran `forge fmt --check test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`, `make release-checksums-check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to commit/push the review-response head, wait for current CI/CodeRabbit/6529bot feedback, and merge only when clean. |
 
 ## Resume Instructions
 

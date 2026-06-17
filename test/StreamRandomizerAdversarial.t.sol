@@ -459,6 +459,7 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
 
 contract AdversarialRandomizerCore {
     error AdversarialTokenHashRejected();
+    error AdversarialUnexpectedReentryMode();
 
     enum ReentryMode {
         None,
@@ -626,12 +627,14 @@ contract AdversarialRandomizerCore {
             } catch (bytes memory failureData) {
                 lastReentrySelector = _selectorOf(failureData);
             }
-        } else {
+        } else if (reentryMode == ReentryMode.ArrngRetry) {
             try reentrantRng.retryRandomnessPostProcessing(reentrantRequestId) {
                 reentrySucceeded = true;
             } catch (bytes memory failureData) {
                 lastReentrySelector = _selectorOf(failureData);
             }
+        } else {
+            revert AdversarialUnexpectedReentryMode();
         }
     }
 
