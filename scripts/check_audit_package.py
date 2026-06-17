@@ -43,6 +43,7 @@ REQUIRED_COMMANDS = [
     "python scripts/test_audit_package.py",
     "python scripts/check_audit_package.py",
     "python scripts/test_warning_dispositions.py",
+    "python scripts/run_forge_size_log.py --log cache/forge-size.log",
     "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log",
     "python scripts/test_natspec_coverage.py",
     "python scripts/check_natspec_coverage.py",

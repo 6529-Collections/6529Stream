@@ -214,7 +214,7 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 SOLC_WARNING_RE = re.compile(r"Warning \((?P<code>[0-9]+)\):")
 SOLC_SOURCE_RE = re.compile(
-    r"-->\s+(?P<path>[^:\r\n]+):(?P<line>[0-9]+):(?P<column>[0-9]+)"
+    r"-->\s+(?P<path>.+):(?P<line>[0-9]+):(?P<column>[0-9]+):?\s*$"
 )
 SOLC_SOURCE_EXCERPT_RE = re.compile(r"^\s*[0-9]+\s+\|\s+(?P<source>.+?)\s*$")
 

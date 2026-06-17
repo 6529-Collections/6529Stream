@@ -298,6 +298,29 @@ class WarningDispositionTests(unittest.TestCase):
 
         self.assertEqual(actual, checker.EXPECTED_SOLC_WARNINGS)
 
+    def test_parses_windows_absolute_source_path(self) -> None:
+        """Source locations with drive-letter paths still parse correctly."""
+        log_text = "\n".join(
+            [
+                "Warning (2018): Function state mutability can be restricted to pure",
+                "   --> C:\\repo\\6529Stream\\smart-contracts\\StreamMinter.sol:298:5:",
+                "    |",
+                "298 |     function isMinterContract() external view returns (bool) {",
+                "    |     ^ (Relevant source part starts here and spans across multiple lines).",
+            ]
+        )
+
+        self.assertEqual(
+            checker.parse_solc_warnings(log_text),
+            {
+                (
+                    "2018",
+                    "C:/repo/6529Stream/smart-contracts/StreamMinter.sol",
+                    "function isMinterContract() external view returns (bool) {",
+                )
+            },
+        )
+
     def test_rejects_incomplete_solc_warning_log(self) -> None:
         """A warning excerpt without the successful forge markers is not enough."""
         with tempfile.TemporaryDirectory() as temp_dir:

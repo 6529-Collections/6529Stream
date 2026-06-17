@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3d7b04340747689120657f21d8b3631b7eb1bd064bc1fde6e5424cf05a3e2f3f",
-      "size_bytes": 49785
+      "sha256": "sha256:2f734c8cd152fa3aae1d7736be6c967999b9e914102288ae7a13b953d31be8fc",
+      "size_bytes": 49867
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,8 +17,8 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:0e4d345a50772d2d65de6bfed8f7eb4ee07125803d4e55c465249a3cdf492013",
-      "size_bytes": 22928
+      "sha256": "sha256:291e690ccc6ee341d19ef9c51fbb88199c00aade785d1653037028398719735e",
+      "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
     "markdown_output": "release-artifacts/latest/release-notes.md"
@@ -44,7 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
-      "Added live solc warning baseline enforcement for the warning-disposition gate: production-size forge output is retained in local/CI logs and checked against the reviewed warning rows so new or resolved compiler warnings require an explicit code or disposition update.",
+      "Added live solc warning baseline enforcement for the warning-disposition gate: production-size forge output is retained in local/CI logs and checked against the reviewed warning rows so new or resolved compiler warnings require an explicit code or disposition update, and removed or relocated accepted warnings require a reviewed baseline refresh.",
       "Added a checked incident drill retained-artifact template and validation gate for mint pause, bid pause, settlement pause, withdrawal policy, failed randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer compromise drills without claiming completed fork, testnet, or live drill evidence.",
       "Added a checked `StreamCore` bytecode-spend policy gate that pins the current 22,184-byte approved production runtime baseline, fails unreviewed Core runtime increases even when the EIP-170 floor still passes, records rejected no-gain/negative-gain headroom experiments, and wires focused tests into local, CI, Windows, release-manifest, and checksum paths.",
       "Added a no-secret live randomizer operations retained-artifact template and checker for future `live_randomizer_operations_evidence`, with provider configuration, provider funding, reserve, request health, lifecycle control, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live randomizer operations evidence is retained.",

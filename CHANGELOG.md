@@ -10,7 +10,8 @@ the release policy in `docs/release-policy.md`.
 - Added live solc warning baseline enforcement for the warning-disposition gate:
   production-size forge output is retained in local/CI logs and checked against
   the reviewed warning rows so new or resolved compiler warnings require an
-  explicit code or disposition update.
+  explicit code or disposition update, and removed or relocated accepted
+  warnings require a reviewed baseline refresh.
 - Added a checked incident drill retained-artifact template and validation gate
   for mint pause, bid pause, settlement pause, withdrawal policy, failed
   randomness, stuck auction, bad metadata/dependency, bad Merkle root, and

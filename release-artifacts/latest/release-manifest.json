@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:8c1e5336df697c766f93bc7f3a3d4b4e01de4980747bd2e10e6b5f4c93e7c6c2",
-        "size_bytes": 52100,
+        "sha256": "sha256:48b08bf762b4bfd9abe511d2c54b83c7d2ff5d7e8107a914e431e889bc2c29f0",
+        "size_bytes": 52180,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:4bd31ab2c5d82a7533121ace6337e51fc72e5ba5f328e8b5c734d680c1c76872",
-        "size_bytes": 49580
+        "sha256": "sha256:b5af46fd28eb2822661d688184b9124dddf349d0ae6a0d31cc82b65400c11139",
+        "size_bytes": 49660
       }
     },
     "artifact_manifest": {
@@ -147,8 +147,8 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:0e4d345a50772d2d65de6bfed8f7eb4ee07125803d4e55c465249a3cdf492013",
-      "size_bytes": 22928,
+      "sha256": "sha256:291e690ccc6ee341d19ef9c51fbb88199c00aade785d1653037028398719735e",
+      "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
       "risk_count": 11,
@@ -2006,8 +2006,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3d7b04340747689120657f21d8b3631b7eb1bd064bc1fde6e5424cf05a3e2f3f",
-      "size_bytes": 49785
+      "sha256": "sha256:2f734c8cd152fa3aae1d7736be6c967999b9e914102288ae7a13b953d31be8fc",
+      "size_bytes": 49867
     },
     "governance_docs": [
       {
@@ -2057,8 +2057,8 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223",
-        "size_bytes": 27111
+        "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5",
+        "size_bytes": 27239
       },
       {
         "path": "docs/incident-response.md",
@@ -2102,8 +2102,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e",
-        "size_bytes": 52633
+        "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe",
+        "size_bytes": 52767
       },
       {
         "path": "docs/protocol-surface.md",
@@ -2182,13 +2182,13 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:0eeb38e7fa5447168101744a3fc647139cc1855a1b28d62ecb364538cf15a6e5",
-        "size_bytes": 53408
+        "sha256": "sha256:4d613580189e5611f0b4166a55724ec059b5864d2c16241d87e6002f7c523656",
+        "size_bytes": 53536
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:9d5593344dc650fe657132347cd510087384719dadaef2ba519b37e154f14859",
-        "size_bytes": 23524
+        "sha256": "sha256:18318acaaa8c2a246fb7cfeaab8bb651e1fd59ed35d900838be4abdebff4efbf",
+        "size_bytes": 23594
       }
     ]
   },

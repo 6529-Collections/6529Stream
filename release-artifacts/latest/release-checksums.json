@@ -42,7 +42,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:d4a27f1e91b7b45a6a3d43ceaa2da93ff786e694ba183e5ad11fe4fdc82a2386"
+    "sha256": "sha256:cb974352fe793445269bbe4883fe1eb0f6cee8e54e8cae26e4e489287b28804d"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -501,7 +501,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:962da69c65d8018e1ed4dbc53983bfeb9d4ea49a1872858b89dd2f2193f8784c",
+      "sha256": "sha256:e11c1e1b46921d1652b4597f7c31ee50674243418243705221b24a6efe011176",
       "size_bytes": 79962
     },
     {
@@ -611,23 +611,23 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:7559dcec5338ba33eb19b1dcbed9beb88c13e4d5fe772f4fd36fa6ebc0b48911",
+      "sha256": "sha256:7defc5077c71c93d2512b3e7295c0ab735d6a110d974ae5144186e06ed9c08f8",
       "size_bytes": 110303
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:8c1e5336df697c766f93bc7f3a3d4b4e01de4980747bd2e10e6b5f4c93e7c6c2",
-      "size_bytes": 52100
+      "sha256": "sha256:48b08bf762b4bfd9abe511d2c54b83c7d2ff5d7e8107a914e431e889bc2c29f0",
+      "size_bytes": 52180
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:4bd31ab2c5d82a7533121ace6337e51fc72e5ba5f328e8b5c734d680c1c76872",
-      "size_bytes": 49580
+      "sha256": "sha256:b5af46fd28eb2822661d688184b9124dddf349d0ae6a0d31cc82b65400c11139",
+      "size_bytes": 49660
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:0e4d345a50772d2d65de6bfed8f7eb4ee07125803d4e55c465249a3cdf492013",
-      "size_bytes": 22928
+      "sha256": "sha256:291e690ccc6ee341d19ef9c51fbb88199c00aade785d1653037028398719735e",
+      "size_bytes": 22929
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -741,8 +741,8 @@
     },
     {
       "path": "scripts/check_warning_dispositions.py",
-      "sha256": "sha256:006edca16cc939b85e49c9bbd8c236ce3e86d9a2eef1f80fbbd935030041f186",
-      "size_bytes": 18415
+      "sha256": "sha256:a006a00198b0d1bdf7db27dfd217bdd441169345586fb1f3d089a3ba415eb96a",
+      "size_bytes": 18414
     },
     {
       "path": "scripts/generate_dependency_provenance_attestation.py",
@@ -761,8 +761,8 @@
     },
     {
       "path": "scripts/test_warning_dispositions.py",
-      "sha256": "sha256:f45e2da2e7e65ce82903d444b108a4a1ae1277ed429e842097a34631fe70c39d",
-      "size_bytes": 14458
+      "sha256": "sha256:22924836a5ac725a5034badc2965b1694133a85f20f43e27d83a84279fc9e13e",
+      "size_bytes": 15395
     },
     {
       "path": "scripts/verify_release_artifacts.py",

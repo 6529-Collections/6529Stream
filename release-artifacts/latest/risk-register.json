@@ -18,11 +18,11 @@
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223"
+      "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5"
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e"
+      "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -91,7 +91,7 @@
       "evidence": [
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223"
+          "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -134,7 +134,7 @@
         },
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223"
+          "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -167,7 +167,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e"
+          "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -252,7 +252,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e"
+          "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -416,7 +416,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:9d5593344dc650fe657132347cd510087384719dadaef2ba519b37e154f14859"
+          "sha256": "sha256:18318acaaa8c2a246fb7cfeaab8bb651e1fd59ed35d900838be4abdebff4efbf"
         }
       ],
       "risk_acceptance": null
@@ -468,7 +468,7 @@
       "residual_risk": "Accepted local-baseline warnings remain audit inputs and should be rechecked before public beta or production release.",
       "checks": [
         "forge build",
-        "forge build --sizes --via-ir --skip test --skip script --force",
+        "python scripts/run_forge_size_log.py --log cache/forge-size.log",
         "forge doc --build",
         "python scripts/test_warning_dispositions.py",
         "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log"
@@ -487,7 +487,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:0eeb38e7fa5447168101744a3fc647139cc1855a1b28d62ecb364538cf15a6e5"
+          "sha256": "sha256:4d613580189e5611f0b4166a55724ec059b5864d2c16241d87e6002f7c523656"
         },
         {
           "path": "docs/warning-dispositions.md",
