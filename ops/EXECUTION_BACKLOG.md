@@ -3296,8 +3296,7 @@ Dependencies: formatting/static-analysis gates, `CON-005`.
 
 ### OSS-001: Refresh README And Docs Navigation Around True Maturity
 
-Status: In progress on issue #484 and branch
-`codex/readme-maturity-navigation`.
+Status: Merged in PR #485; issue #484 closed completed.
 
 Gate: A/G.
 
@@ -3426,7 +3425,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `INT-011` | Add curator rewards frontend flow spec | G | `INT-001` |
+| `INT-011` | Add curator rewards frontend flow spec | G | In progress on issue #486 and branch `codex/curator-rewards-flow-spec` |
 | `INT-012` | Add withdrawal/credit UX flow spec | G | `INT-002`, `INT-003` |
 | `INT-013` | Add TypeScript snippets for artifact loading and chain config | G | `INT-001` |
 | `INT-014` | Add TypeScript snippets for EIP-712 payload construction | G | `INT-004` |

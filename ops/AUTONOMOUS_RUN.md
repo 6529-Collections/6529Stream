@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/readme-maturity-navigation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/483` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/484` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/485` |
-| Next issue | OSS-001 README and docs navigation refresh. |
+| Active PR branch | `codex/curator-rewards-flow-spec` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/485` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/486` |
+| Active PR | TBD |
+| Next issue | INT-011 curator rewards frontend flow spec. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 04:04 UTC` |
+| Last updated | `2026-06-17 04:22 UTC` |
 
 ## Packaging Notes
 
@@ -16131,6 +16131,8 @@ Outcome:
 | 2026-06-17 02:23 | Start ONE-007 live solc warning baseline | PR #481 merged as `8d818785fc8d7a3aace1b5ece52fe7336e2b2358`, issue #480 closed completed, CI and CodeRabbit passed, and 6529bot follow-up reported no new findings. Issue #482 and branch `codex/live-solc-warning-baseline` now track the next warning-hygiene slice: retaining the production-size forge output and checking live solc warnings against the reviewed disposition baseline so new warnings fail CI unless fixed or dispositioned. |
 | 2026-06-17 02:43 | Validate ONE-007 live warning baseline | Added cross-platform `scripts/run_forge_size_log.py`, live solc warning parsing in `scripts/check_warning_dispositions.py`, regression tests for expected/missing/unexpected warning rows, local/CI/Windows wiring, docs/readiness/audit updates, checksum coverage, and regenerated release artifacts. Focused warning, audit, readiness, risk, notes, manifest, bytecode-proof, checksum, changelog, Python compile, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` also passed with only the existing warning-disposition noise. Next action is to commit, push, open PR #482, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 04:02 | Validate and open OSS-001 README maturity navigation PR | PR #483 merged as `18822c3` and issue #482 closed completed; issue #484 and branch `codex/readme-maturity-navigation` now track OSS-001. The draft refreshes the root README into current-maturity, first-30-minutes, role-based navigation, quickstart, tooling, layout, docs, and security sections; adds `scripts/check_readme.py` plus focused regression tests; wires `readme-check` through Makefile, Bash, PowerShell, CI, release-manifest dependencies, and checksum coverage; and regenerates release notes, risk register, release manifest, bytecode proof, and checksum artifacts. Focused README, release-notes, release-manifest, bytecode-proof, checksum, verifier, changelog, Python compile, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed with only existing compiler/Foundry warning noise. PR #485 is open, CodeRabbit was requested in comment `4725784665`, and the next action is to wait for CI/bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 04:15 | Merge OSS-001 and start INT-011 curator rewards flow | PR #485 merged as `8ee5900a88b520c4f61052ca85f1a41672af62ab` after CI run `27664952104`, CodeRabbit status, and 6529bot follow-up were clean; issue #484 closed completed. Issue #486 and branch `codex/curator-rewards-flow-spec` now track INT-011. The draft adds a checked `docs/integrations/curator-rewards.md` guide for reward root publication, domain-separated Merkle leaf encoding, direct/delegated claims, pull-payment credits, withdrawal/failure UX, events, indexer reconstruction, and operator boundaries. Next action is to finish gate wiring, refresh release artifacts, run focused/full checks, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 04:35 | Validate INT-011 curator rewards flow | Added the checked curator rewards frontend/indexer flow spec plus `scripts/check_curator_rewards_flow.py`, focused checker tests, integrations README coverage, Makefile/Bash/PowerShell/CI gate wiring, tooling docs, changelog, release-manifest/checksum coverage, regenerated release artifacts, and backlog/run-state updates. Focused curator rewards, integrations README, release-notes, release-manifest, bytecode-proof, release-checksum, release verifier, changelog, Python compile, and whitespace checks passed. Full `make check` and standalone Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` both passed with existing compiler/Foundry warning noise only; an earlier parallel Windows run failed on a temporary forge-size log lock caused by concurrent local gates and was rerun successfully by itself. Next action is to commit, push, open the INT-011 PR, request CodeRabbit, and wait for CI/bot feedback. |
 
 ## Resume Instructions
 

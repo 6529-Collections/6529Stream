@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked curator rewards integration flow spec covering reward root
+  publication, domain-separated Merkle leaf encoding, direct and delegated
+  claims, pull-payment curator credits, withdrawal/failure UX, events,
+  indexer reconstruction, and release artifact coverage for frontend teams.
 - Added a checked root README maturity/navigation gate that keeps the public
   repo front door aligned with current pre-audit status, role-specific docs
   paths, local/Windows validation commands, release-readiness blockers, and

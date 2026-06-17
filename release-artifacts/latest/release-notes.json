@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:84aac1dd7b07ea971181b0d1f3b21f190770b8835ff51ca8f3fa0a816bfb4ed9",
-      "size_bytes": 50134
+      "sha256": "sha256:c77543848c7840a6d8d920c1781f903cd191fcd16cdb49ce4785fb8ce46ae010",
+      "size_bytes": 50433
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:a7b2871c1bf4b97a230f1ae76b6e495bf5c231e23d9e3863b41a50b446017119",
+      "sha256": "sha256:db1b31d00c5598f34ae2116210b0368f2a7002e016144834d9a10a7a87af7433",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked curator rewards integration flow spec covering reward root publication, domain-separated Merkle leaf encoding, direct and delegated claims, pull-payment curator credits, withdrawal/failure UX, events, indexer reconstruction, and release artifact coverage for frontend teams.",
       "Added a checked root README maturity/navigation gate that keeps the public repo front door aligned with current pre-audit status, role-specific docs paths, local/Windows validation commands, release-readiness blockers, and release-manifest/checksum coverage.",
       "Added live solc warning baseline enforcement for the warning-disposition gate: production-size forge output is retained in local/CI logs and checked against the reviewed warning rows so new or resolved compiler warnings require an explicit code or disposition update, and removed or relocated accepted warnings require a reviewed baseline refresh.",
       "Added a checked incident drill retained-artifact template and validation gate for mint pause, bid pause, settlement pause, withdrawal policy, failed randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer compromise drills without claiming completed fork, testnet, or live drill evidence.",

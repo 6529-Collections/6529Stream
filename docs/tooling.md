@@ -115,6 +115,8 @@ python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_readme.py
 python scripts/check_readme.py
+python scripts/test_curator_rewards_flow.py
+python scripts/check_curator_rewards_flow.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py
