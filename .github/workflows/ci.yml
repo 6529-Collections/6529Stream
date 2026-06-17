@@ -94,6 +94,8 @@ jobs:
             scripts/test_natspec_coverage.py \
             scripts/check_contract_size_budget.py \
             scripts/test_contract_size_budget.py \
+            scripts/check_core_bytecode_spend_policy.py \
+            scripts/test_core_bytecode_spend_policy.py \
             scripts/check_metadata_fixtures.py \
             scripts/test_metadata_fixtures.py \
             scripts/check_metadata_browser_sandbox.py \
@@ -315,6 +317,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-tests.log
           python3 scripts/check_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-check.log
+          python3 scripts/test_core_bytecode_spend_policy.py 2>&1 | tee ci-logs/core-bytecode-spend-policy-tests.log
+          python3 scripts/check_core_bytecode_spend_policy.py 2>&1 | tee ci-logs/core-bytecode-spend-policy-check.log
 
       - name: Solidity formatting
         shell: bash

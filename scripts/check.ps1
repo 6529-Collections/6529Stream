@@ -77,6 +77,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_contract_size_budget.py"
 & $pythonPath @pythonArgs "scripts\check_contract_size_budget.py"
+& $pythonPath @pythonArgs "scripts\test_core_bytecode_spend_policy.py"
+& $pythonPath @pythonArgs "scripts\check_core_bytecode_spend_policy.py"
 & $pythonPath @pythonArgs "scripts\test_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\check_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\test_windows_check_wrapper.py"

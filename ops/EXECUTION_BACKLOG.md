@@ -3354,7 +3354,7 @@ unless an external dependency changes.
 | `EXT-013` | Add production verified-addresses evidence checker | F/G | Merged in PR #471; issue #470 closed completed |
 | `EXT-014` | Add live metadata browser evidence checker | F/G | Merged in PR #474; issue #472 closed completed; tracker issue #473 remains open for future reviewed live evidence |
 | `EXT-015` | Add live ceremony evidence checker | F/G | Merged in PR #476; issue #228 remains open for future reviewed live ceremony evidence |
-| `EXT-016` | Add live randomizer operations evidence checker | F/G | Active branch `codex/live-randomizer-operations-evidence-checker`; issue #229; randomizer operations pattern |
+| `EXT-016` | Add live randomizer operations evidence checker | F/G | Merged in PR #477; issue #229 remains open for future reviewed live randomizer operations evidence |
 
 ### Adversarial Testing
 
@@ -3374,7 +3374,7 @@ unless an external dependency changes.
 | --- | --- | --- | --- |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | `INT-002` to `INT-005` |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
-| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | issues #430 and #432 size reports |
+| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Active issue #478; current PR enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts; prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
 | `CON-007` | Add interface/version views for frontend compatibility | G | Merged in PR #459; issue #458 closed completed |
 
