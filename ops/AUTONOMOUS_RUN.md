@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/typescript-artifact-chain-config` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/489` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/490` |
-| Active PR | TBD |
-| Next issue | Finish INT-013 TypeScript artifact loading and chain config snippet guide, run focused/full checks, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/491` |
+| Next issue | Wait for PR #491 CI, CodeRabbit, and 6529bot feedback; resolve actionable comments, merge when clean, then continue the next backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 05:35 UTC` |
+| Last updated | `2026-06-17 05:52 UTC` |
 
 ## Packaging Notes
 
@@ -16140,6 +16140,7 @@ Outcome:
 | 2026-06-17 05:14 | Address PR #489 checker nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with low-risk checker hardening suggestions. Accepted the useful source-drift coverage by requiring documented fixed-price total helpers, aggregate poster/protocol/curator reserve helpers, and the curator `Reward` event to exist in Solidity sources. Focused withdrawals/credits tests and checker passed, and release checksums were regenerated. Next action is to run final focused checksum/whitespace checks, commit, push, wait for latest CI/bot status, and merge if clean. |
 | 2026-06-17 05:35 | Merge PR #489 and start INT-013 | PR #489 merged as `4ce8c10` after CodeRabbit, Foundry smoke, Windows wrapper, 6529bot security, general, and follow-up review were clean; issue #488 closed completed. Issue #490 and branch `codex/typescript-artifact-chain-config` now track INT-013. The local draft adds checked TypeScript artifact loading and chain config snippets for release manifest loading, address book loading, deployment manifest cross-checks, release manifest hash validation, ABI checksum awareness, no-secret public env parsing, and fail-closed wrong-chain guards. Focused TypeScript artifact, React/Next reference, and integrations README checks are passing; next action is to regenerate release artifacts, run focused/full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 05:51 | Validate INT-013 local draft | Added `docs/integrations/examples/typescript-artifacts-and-chain-config.md`, checker/tests, React/Next and integrations README links, local/CI/Windows gate wiring, release-manifest/checksum coverage, changelog, and regenerated release artifacts. Focused TypeScript artifact, React/Next, integrations README, risk/register, blocker report, release notes, release manifest, bytecode proof, release checksum, release verifier, changelog, Python compile, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` both passed with existing compiler/Foundry warning noise only. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 05:52 | Open PR #491 for INT-013 | PR #491 is open at `https://github.com/6529-Collections/6529Stream/pull/491`, closes issue #490, and packages the TypeScript artifact loading and chain config snippet guide plus checker/tests, local/CI/Windows gate wiring, integration docs links, release-manifest/checksum coverage, and regenerated release evidence. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
