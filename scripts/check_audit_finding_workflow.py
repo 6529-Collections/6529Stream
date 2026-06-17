@@ -242,20 +242,35 @@ def missing_commands(text: str, commands: list[str]) -> list[str]:
     return [command for command in commands if command not in command_lines]
 
 
+def has_yaml_list_item(text: str, value: str) -> bool:
+    """Return whether text contains an exact YAML list item value."""
+    return bool(re.search(rf"^\s*-\s+{re.escape(value)}\s*$", text, re.MULTILINE))
+
+
 def validate_issue_template(template_path: Path) -> None:
     """Validate the workflow's source issue template still exposes required fields."""
     if not template_path.is_file():
-        raise AuditFindingWorkflowError(f"missing audit finding issue template: {template_path}")
+        raise AuditFindingWorkflowError(
+            f"missing audit finding issue template: {template_path}"
+        )
 
     text = template_path.read_text(encoding="utf-8")
-    missing_ids = [f"id: {field_id}" for field_id in REQUIRED_TEMPLATE_IDS if f"id: {field_id}" not in text]
+    missing_ids = [
+        f"id: {field_id}"
+        for field_id in REQUIRED_TEMPLATE_IDS
+        if f"id: {field_id}" not in text
+    ]
     if missing_ids:
         raise AuditFindingWorkflowError(
             "audit finding issue template is missing required fields: "
             + ", ".join(missing_ids)
         )
 
-    missing_options = [option for option in REQUIRED_TEMPLATE_OPTIONS if f"- {option}" not in text]
+    missing_options = [
+        option
+        for option in REQUIRED_TEMPLATE_OPTIONS
+        if not has_yaml_list_item(text, option)
+    ]
     if missing_options:
         raise AuditFindingWorkflowError(
             "audit finding issue template is missing required options: "

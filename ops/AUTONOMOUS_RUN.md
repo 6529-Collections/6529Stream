@@ -36,11 +36,11 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/519` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/520` |
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/521` |
-| Next issue | Request CodeRabbit for PR #521, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| Next issue | Push the PR #521 review-response hardening commit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 18:52 UTC` |
+| Last updated | `2026-06-17 19:00 UTC` |
 
 ## Packaging Notes
 
@@ -16189,6 +16189,7 @@ Outcome:
 | 2026-06-17 17:35 | Merge REL-004 and start AUD-003 | PR #519 merged as `da8fd204e7b2e6105ff8eb325faa755bb5c3f2e2` after CI, CodeRabbit status, and 6529bot latest-head follow-up were clean; issue #518 closed completed. Issue #520 and branch `codex/audit-finding-workflow` now track AUD-003 for a checked external audit finding workflow covering public-safe intake, severity/status triage, remediation PRs, required tests, retest, accepted-risk decisions, closure gates, release evidence handoff, no-secret redaction, local/CI/Windows wiring, and release-manifest/checksum coverage. Next action is to finish generated artifacts, run focused/full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 18:50 | Validate AUD-003 local draft | Added `docs/audit-finding-workflow.md`, `scripts/check_audit_finding_workflow.py`, focused checker tests, audit finding issue-template alignment, local/CI/Windows gate wiring, audit-package/readiness/tooling/README docs, release-manifest/checksum coverage, changelog, backlog/run-state updates, and regenerated release evidence. Focused audit-finding, audit-package, issue-template, README, release-readiness, release-note, risk-register, blocker-report, release-manifest, bytecode-proof, lockfile, checksum, verifier, changelog, Markdown link, Python compile, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed on the final diff with only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning. Next action is to commit, push, open PR for issue #520, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 18:52 | Open PR #521 for AUD-003 | PR #521 is open at `https://github.com/6529-Collections/6529Stream/pull/521`, closes issue #520, and packages the checked external audit finding workflow, checker/tests, audit finding issue-template alignment, local/CI/Windows gate wiring, audit/readiness/tooling docs, release-manifest/checksum coverage, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 19:00 | Address PR #521 checker hardening nice-to-haves | 6529bot security reported no findings and general review marked PR #521 good to merge with low-risk checker hardening suggestions. Accepted the useful items by adding an anchor/query local-link regression, adding `make check` to the canonical workflow validation command block, and requiring exact YAML list-item matches for audit issue-template dropdown options with a prefix-drift regression. Focused audit-finding tests/check, Python compile, release risk/register/blocker/manifest/lockfile/checksum checks, release artifact verification, and diff hygiene passed. Next action is to commit and push the review-response head, wait for CI/CodeRabbit/6529bot latest-head feedback, and merge only when clean. |
 
 ## Resume Instructions
 

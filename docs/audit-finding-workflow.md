@@ -194,6 +194,7 @@ Each accepted audit finding must be considered against:
 Run these commands after editing this workflow:
 
 ```sh
+make check
 python scripts/test_audit_finding_workflow.py
 python scripts/check_audit_finding_workflow.py
 python scripts/test_issue_templates.py

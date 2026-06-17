@@ -162,6 +162,25 @@ class AuditFindingWorkflowTests(unittest.TestCase):
             ):
                 checker.validate_workflow(root, workflow, template)
 
+    def test_accepts_anchor_and_query_local_links(self) -> None:
+        """Local links may include anchors or query strings without path drift."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            workflow = root / checker.DEFAULT_WORKFLOW
+            template = root / checker.DEFAULT_ISSUE_TEMPLATE
+            write(
+                workflow,
+                read_workflow().replace(
+                    "](audit-package.md)",
+                    "](audit-package.md?view=review#scope)",
+                    1,
+                ),
+            )
+            write(template, read_issue_template())
+
+            checker.validate_workflow(root, workflow, template)
+
     def test_rejects_issue_template_status_drift(self) -> None:
         """Issue-template status options remain aligned with the workflow."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -171,6 +190,21 @@ class AuditFindingWorkflowTests(unittest.TestCase):
             template = root / checker.DEFAULT_ISSUE_TEMPLATE
             write(workflow, read_workflow())
             write(template, read_issue_template().replace("Ready for retest", "Ready"))
+
+            with self.assertRaisesRegex(
+                checker.AuditFindingWorkflowError, "missing required options"
+            ):
+                checker.validate_workflow(root, workflow, template)
+
+    def test_rejects_issue_template_option_prefix_drift(self) -> None:
+        """Required options must match exact YAML list items."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            workflow = root / checker.DEFAULT_WORKFLOW
+            template = root / checker.DEFAULT_ISSUE_TEMPLATE
+            write(workflow, read_workflow())
+            write(template, read_issue_template().replace("- Low", "- Low severity"))
 
             with self.assertRaisesRegex(
                 checker.AuditFindingWorkflowError, "missing required options"
