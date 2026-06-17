@@ -492,6 +492,36 @@ class MarketplaceIndexerEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_manifest_marketplace_rows(manifest, root)
 
+    def test_manifest_complete_public_beta_row_rejects_non_positive_chain_id(self) -> None:
+        """Public-beta marketplace/indexer evidence needs a real chain ID."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={"chain_id": 0},
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "positive number",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    def test_manifest_complete_row_rejects_tbd_reviewer_envelope(self) -> None:
+        """Completed marketplace/indexer evidence requires a named reviewer."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={"reviewer": "tBd"},
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "reviewer",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
     def test_manifest_complete_row_rejects_invalid_retained_markdown(self) -> None:
         """Reviewed envelopes must point at Markdown that passes the artifact checker."""
         with tempfile.TemporaryDirectory() as temp_dir:

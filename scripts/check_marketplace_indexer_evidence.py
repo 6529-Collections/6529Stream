@@ -546,9 +546,9 @@ def validate_reviewed_evidence_envelope(
             raise MarketplaceIndexerEvidenceError(
                 f"{envelope_path}.chain_id must be 1 for live marketplace/indexer evidence"
             )
-    elif not isinstance(chain_id, int):
+    elif not isinstance(chain_id, int) or chain_id <= 0:
         raise MarketplaceIndexerEvidenceError(
-            f"{envelope_path}.chain_id must be a number for public-beta marketplace/indexer evidence"
+            f"{envelope_path}.chain_id must be a positive number for public-beta marketplace/indexer evidence"
         )
 
     reviewer = require_json_text(data.get("reviewer"), f"{envelope_path}.reviewer")
@@ -709,6 +709,8 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     paths = args.evidence or DEFAULT_EVIDENCE
     manifest_path = args.evidence_manifest
+    # Standalone --evidence checks intentionally validate only the supplied
+    # Markdown artifact unless the caller explicitly supplies --evidence-manifest.
     if args.evidence is None and manifest_path is None:
         manifest_path = DEFAULT_EVIDENCE_MANIFEST
     try:
