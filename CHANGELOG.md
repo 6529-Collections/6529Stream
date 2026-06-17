@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `GOV-005` signer-compromise drill retained-artifact template,
+  source-aware checker, and regression tests covering drop-execution pause,
+  signer rotation or revocation, epoch invalidation, per-drop cancellation,
+  stale/cancelled/wrong-domain payload rejection, recovered fixed-price and
+  auction payloads, monitoring handoff, review, redaction, and
+  local/CI/Windows gate wiring.
 - Added a checked `GOV-010` operator dashboard query model covering
   environment/release, admin, signer, fixed-price, auction, randomizer,
   payment/credit, metadata/dependency, release blocker, and incident drill

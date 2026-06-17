@@ -160,6 +160,11 @@ rotation, and signer compromise response.
 Required monitors:
 
 - alert on signer rotation without matching signer custody readiness evidence;
+- alert on signer compromise drill evidence that is missing pause,
+  rotation/revocation, epoch invalidation, cancellation, stale-payload
+  rejection, recovered payload, monitoring handoff, reviewer, or redaction
+  proof from
+  `release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md`;
 - alert on signer epoch increments, drop cancellations, or signer lifecycle
   target changes outside approved incident or ceremony windows;
 - alert on any accepted drop authorization whose chain ID, verifying contract,

@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:09392fa610f7224d6dfe6243dd83a4b760867a409edf03dcc7a375124a9347d6",
-        "size_bytes": 56423,
+        "sha256": "sha256:a0d421c99adf7f8b9c140180f4c8162f83f9e58925ca9d90c06740139ca58b1d",
+        "size_bytes": 56823,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:fbf830534d081058b2b341fdc4e5894d7b897141e19be052f9a87c7383c9b641",
-        "size_bytes": 53812
+        "sha256": "sha256:d892a385690d01ec31e397a07d1897743ae774d0f8b9754abf8160a467dd78f2",
+        "size_bytes": 54205
       }
     },
     "artifact_manifest": {
@@ -147,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:fbb26dad9eb597b6693645003bb4a8b408999bc12e3bfbf1ece3d112f3993a67",
+      "sha256": "sha256:035c3874157a01cb2e0d49a5e12436eaf4456574362658a07d3c20455ea72e8d",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1530,7 +1530,7 @@
     "signer_custody_readiness": [
       {
         "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-        "sha256": "sha256:4b85d93bc20c9819ffa503b239801f9f762fbdbdcdc356616eabb291303b9702",
+        "sha256": "sha256:92b852a0589bfbecdfec644cd0b8f5e5716ac83a0a1b7d7e8511f08257a08ba8",
         "size_bytes": 3470,
         "schema_version": "6529stream.signer-custody-readiness.v1",
         "evidence_id": "signer-custody-readiness-template",
@@ -1624,7 +1624,7 @@
             "alerting_reference": "TBD",
             "incident_response_runbook": {
               "path": "docs/incident-response.md",
-              "sha256": "sha256:d88fc6d48489655c73eec5694b31b749d0f2283e461cb161516ff29dd769e540"
+              "sha256": "sha256:ce2371167fa91f49ac8008c9b939673c83e4149698666ccf55bb75ede738de1b"
             },
             "signer_service_integration_status": "not_available_local"
           },
@@ -2006,8 +2006,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:5357fcac589608c62df0e2320cb1afc185316e6c4579f35245141ae93e3a8651",
-      "size_bytes": 54119
+      "sha256": "sha256:33f6fe3f902745d523c5320ea9b0b2fa2d22e720fc70c8c4b56625de3a092175",
+      "size_bytes": 54522
     },
     "governance_docs": [
       {
@@ -2107,8 +2107,8 @@
       },
       {
         "path": "docs/incident-response.md",
-        "sha256": "sha256:d88fc6d48489655c73eec5694b31b749d0f2283e461cb161516ff29dd769e540",
-        "size_bytes": 21791
+        "sha256": "sha256:ce2371167fa91f49ac8008c9b939673c83e4149698666ccf55bb75ede738de1b",
+        "size_bytes": 22992
       },
       {
         "path": "docs/drop-authorization-signing.md",
@@ -2147,8 +2147,8 @@
       },
       {
         "path": "docs/monitoring.md",
-        "sha256": "sha256:a0b8da14b3c6f3aa9003ac130c58f768fa749ca1e6547a85fd89261eeda0ac63",
-        "size_bytes": 19763
+        "sha256": "sha256:31cf22365a490cc930be22abb689142d4e465f5612f3de8ac0db9f55899fa3ca",
+        "size_bytes": 20091
       },
       {
         "path": "docs/operator-dashboard-query-model.md",
@@ -2157,8 +2157,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:3d5f43a28517f051ef1a248e739a12acd53d5d1f22926dd074cdcebadae25e03",
-        "size_bytes": 53923
+        "sha256": "sha256:b382c7683d6e7f7576d33f48012bdc2a7b1ebaeb659a3bc55d4d7a774cfcaab2",
+        "size_bytes": 54636
       },
       {
         "path": "docs/protocol-surface.md",
@@ -2273,8 +2273,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:9b94fc12a2488269ddd5ab445178ab6116bfbb075138afdd6e60be555b0add9d",
-        "size_bytes": 55635
+        "sha256": "sha256:9bdf97d9c0bf6b31e28d89311ded08ab17989c2d0bc5f81d0c2ab48015286371",
+        "size_bytes": 56355
       },
       {
         "path": "docs/status.md",

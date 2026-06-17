@@ -51,7 +51,7 @@
     "alerting_reference": "TBD",
     "incident_response_runbook": {
       "path": "docs/incident-response.md",
-      "sha256": "sha256:d88fc6d48489655c73eec5694b31b749d0f2283e461cb161516ff29dd769e540"
+      "sha256": "sha256:ce2371167fa91f49ac8008c9b939673c83e4149698666ccf55bb75ede738de1b"
     },
     "signer_service_integration_status": "not_available_local"
   },

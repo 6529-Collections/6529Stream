@@ -328,6 +328,15 @@ artifact template under
 for mint pause, bid pause, settlement pause, withdrawal policy, failed
 randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer
 compromise drill evidence.
+The signer compromise drill evidence step validates the narrower checked
+retained artifact template under
+[`release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md)
+for drop-execution pause, signer rotation or revocation, signer epoch
+invalidation, per-drop cancellation, stale/cancelled/wrong-domain payload
+rejection, recovered fixed-price and auction payloads, monitoring handoff,
+review, and redaction. It is source-aware and checks that the documented
+response controls still exist in `StreamDrops`, `StreamPauseDomains`, and the
+signer compromise/pause regression tests.
 
 The drop-authorization fixture step validates
 [`drop-authorization-signing.md`](drop-authorization-signing.md) and the
