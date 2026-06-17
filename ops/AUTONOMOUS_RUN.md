@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/integration-conformance-fixtures` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/495` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/496` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/497` |
-| Next issue | Wait for PR #497 CI, CodeRabbit, and 6529bot feedback; resolve actionable comments, merge when clean, then continue the next substantive Integration Readiness item. |
+| Active PR branch | `codex/first-30-minutes-contributor-guide` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/497` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/498` |
+| Active PR | `TBD` |
+| Next issue | Implement OSS-002 first-30-minutes contributor guide, checker/tests, local/CI/Windows/release wiring, validate, open PR, request CodeRabbit, resolve CI/bot feedback, merge when clean, then continue the next unblocked substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 08:26 UTC` |
+| Last updated | `2026-06-17 09:16 UTC` |
 
 ## Packaging Notes
 
@@ -16151,6 +16151,8 @@ Outcome:
 | 2026-06-17 07:24 | Open PR #495 for INT-015 | PR #495 is open at `https://github.com/6529-Collections/6529Stream/pull/495`, closes issue #494, and packages checked TypeScript event decoding/indexer ingestion snippets plus checker/tests, local/CI/Windows gate wiring, integration docs links, release-manifest/checksum coverage, and regenerated release evidence. CodeRabbit review was requested at `https://github.com/6529-Collections/6529Stream/pull/495#issuecomment-4727175707`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 08:25 | Validate INT-016 local draft | Added checked integration conformance fixtures and guide for artifact loading, fail-closed chain config, EIP-712 domain expectations, event topic dispatch, normalized log identity, read-after-event queues, duplicate log idempotency, unknown emitter/topic rejection, confirmation depth, reorg rollback, and no-secret redaction diagnostics. Wired checker/tests into Make, Unix/Windows wrappers, CI, integration docs, release manifest/checksum coverage, release notes, bytecode proof, and risk-register hashes. Focused integration fixture, integrations README, event/indexer, React/Next, TypeScript event decoding, risk-register, release-notes, release-manifest, bytecode proof, release-checksum, changelog, Python compile, Windows `scripts\check.ps1`, full `make check`, and `git diff --check` validation passed. Known warning noise remains the existing solc/Foundry warnings and the existing PowerShell LF-to-CRLF `git diff --check` warning. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 08:26 | Open PR #497 for INT-016 | PR #497 is open at `https://github.com/6529-Collections/6529Stream/pull/497`, closes issue #496, and packages checked integration conformance fixtures plus guide, checker/tests, local/CI/Windows gate wiring, integration docs links, release-manifest/checksum coverage, release notes, bytecode proof, and regenerated release evidence. CodeRabbit review was requested at `https://github.com/6529-Collections/6529Stream/pull/497#issuecomment-4727672860`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 08:43 | Merge PR #497 and start OSS-002 | Integration conformance fixtures merged as `41f2b6a` after CI passed, CodeRabbit was requested, and 6529bot latest-head follow-up reported no new findings. Issue #496 closed completed. `INT-017` remains blocked by stable testnet addresses, so issue #498 and branch `codex/first-30-minutes-contributor-guide` now track OSS-002 for a checked first-30-minutes contributor guide covering fresh setup, Foundry/Python/Windows prerequisites, validation commands, known warning noise, generated artifact drift, docs-only and Solidity contributor paths, local/CI/Windows/release wiring, and no-secret/pre-audit boundaries. |
+| 2026-06-17 09:16 | Validate OSS-002 local draft | Added `docs/first-30-minutes.md`, `scripts/check_first_30_minutes.py`, and focused tests; linked the guide from README, CONTRIBUTING, tooling, and status docs; wired `first-30-minutes-check` through Make, Unix/PowerShell wrappers, CI, release-manifest dependencies, checksum coverage, release notes, risk register, and durable backlog state. Regenerated risk register, blocker reports, release-evidence issue backlog, release notes, release manifest, bytecode release proof, and checksum bundle. Focused first-30-minutes, README, release-notes, release-manifest, bytecode-proof, checksum, risk-register, blocker-report, issue-backlog, changelog, and Python compile checks passed. `make release-manifest-check`, `make release-checksums-check`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `git diff --check` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #498, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 
 ## Resume Instructions
 

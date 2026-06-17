@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the repository README front door."""
+"""Validate the first-30-minutes contributor guide."""
 
 from __future__ import annotations
 
@@ -9,116 +9,108 @@ import sys
 from pathlib import Path
 
 
-DEFAULT_README = Path("README.md")
+DEFAULT_GUIDE = Path("docs/first-30-minutes.md")
 
 REQUIRED_HEADINGS = [
-    (1, "6529Stream"),
-    (2, "Current Maturity"),
-    (2, "First 30 Minutes"),
-    (2, "Find Your Path"),
-    (2, "Drop Flow"),
-    (2, "Quickstart"),
-    (2, "Tooling"),
-    (2, "Repository Layout"),
-    (2, "Important Docs"),
-    (2, "Security"),
+    (1, "First 30 Minutes"),
+    (2, "What This Guide Proves"),
+    (2, "Prerequisites"),
+    (2, "Clone And Verify Tools"),
+    (2, "Run The Local Gate"),
+    (2, "Choose A Contribution Path"),
+    (2, "Generated Artifact Drift"),
+    (2, "Known Warning Noise"),
+    (2, "Troubleshooting"),
+    (2, "No Secrets And Maturity Boundaries"),
 ]
 
 REQUIRED_PHRASES = [
-    "pre-audit local baseline",
+    "fresh-contributor path",
+    "pre-audit",
     "not production-ready",
-    "not a security claim",
     "does not prove protocol correctness",
-    "does not replace public beta or production release evidence",
-    "reviewed fork/testnet or live deployment rehearsal",
-    "signed release artifacts",
-    "verified addresses",
-    "explorer verification",
-    "signer custody readiness",
-    "production signing",
-    "live metadata/indexer/marketplace evidence",
-    "external audit",
-    "post-audit remediation",
-    "signed tag ceremony",
-    "accepted release-mode evidence",
-    "Foundry",
-    "Solidity compiler",
-    "Slither",
-    "Auditor or security reviewer",
-    "Integrator, frontend, mobile, Electron, or indexer engineer",
-    "Operator or deployer",
-    "Contributor",
-    "Protocol maintainer",
-    "EIP-712",
-    "ERC-1271",
-    "deploy-and-wire ceremony",
     "without production secrets",
-    "root README itself is part of the gate",
-    "release-impacting PRs",
-    "Do not use these contracts for production drops",
+    "Foundry `v1.7.1`",
+    "Solidity compiler `0.8.19`",
+    "Python 3.8 or newer",
+    "Slither `0.11.5`",
+    "Windows PowerShell",
+    "PowerShell wrapper",
+    "`forge` is not on `PATH`",
+    "docs-only changes",
+    "Solidity or Foundry test changes",
+    "release-artifact or generated-evidence changes",
+    "generated artifact drift",
+    "release manifest",
+    "checksum bundle",
+    "known and reviewed warning noise",
+    "Do not commit private keys",
+    "WalletConnect project secrets",
+    "public beta remains blocked",
+    "production release remains blocked",
 ]
 
 REQUIRED_COMMANDS = [
-    "make check",
-    "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check.ps1",
     "bash scripts/bootstrap-ec2.sh",
     "powershell -ExecutionPolicy Bypass -File scripts\\bootstrap-windows.ps1",
-    "python scripts/test_readme.py",
-    "python scripts/check_readme.py",
+    "git clone https://github.com/6529-Collections/6529Stream.git",
+    "cd 6529Stream",
+    "forge --version",
+    "python --version",
+    "python3 --version",
+    "curl -L https://foundry.paradigm.xyz | bash",
+    "foundryup --version v1.7.1",
+    "$env:USERPROFILE + \"\\.foundry\\bin\"",
+    "forge build",
+    "forge test -vvv",
+    "make check",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check.ps1",
     "python scripts/test_first_30_minutes.py",
     "python scripts/check_first_30_minutes.py",
+    "python scripts/test_readme.py",
+    "python scripts/check_readme.py",
+    "python scripts/test_release_manifest.py",
+    "python scripts/generate_release_manifest.py --check",
+    "python scripts/test_release_checksums.py",
+    "python scripts/generate_release_checksums.py --check",
+    "python scripts/check_changelog.py",
+    "forge test -vvv --match-path test/StreamCoreBurn.t.sol",
+    "forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
+    "python scripts/run_forge_size_log.py --log cache/forge-size.log",
+    "python scripts/check_contract_size_budget.py",
+    "python scripts/check_core_bytecode_spend_policy.py",
+    "python scripts/generate_risk_register.py",
+    "python scripts/generate_public_beta_blocker_report.py",
+    "python scripts/generate_production_release_blocker_report.py",
+    "python scripts/generate_release_notes.py",
+    "python scripts/generate_release_manifest.py",
+    "python scripts/generate_bytecode_release_proof.py",
+    "python scripts/generate_release_checksums.py",
+    "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log",
 ]
 
 COMMAND_VARIANTS = {
-    "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check.ps1": [
-        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1",
-    ],
     "powershell -ExecutionPolicy Bypass -File scripts\\bootstrap-windows.ps1": [
         "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
+    ],
+    "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check.ps1": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1",
     ],
 }
 
 REQUIRED_LINK_TARGETS = [
+    "README.md",
     "CONTRIBUTING.md",
-    "SECURITY.md",
     "CHANGELOG.md",
-    "ops/ROADMAP.md",
-    "ops/EXECUTION_BACKLOG.md",
-    "ops/SLITHER_BASELINE.md",
-    "ops/AUTONOMOUS_RUN.md",
     "docs/status.md",
-    "docs/first-30-minutes.md",
+    "docs/release-readiness.md",
     "docs/known-blockers.md",
     "docs/tooling.md",
-    "docs/architecture.md",
-    "docs/threat-model.md",
-    "docs/audit-package.md",
-    "docs/adr/README.md",
-    "docs/slither.md",
-    "docs/deployment.md",
-    "docs/randomizer-operations.md",
-    "docs/release-policy.md",
-    "docs/release-signatures.md",
-    "docs/release-readiness.md",
-    "docs/public-beta-evidence.md",
-    "docs/incident-response.md",
-    "docs/integrations/README.md",
-    "docs/integrations/contract-flows.md",
-    "docs/integrations/auction-flows.md",
-    "docs/integrations/wallets-and-signatures.md",
-    "docs/integrations/events-and-indexing.md",
-    "docs/integrations/metadata-rendering.md",
-    "docs/integrations/frontend-reference-architecture.md",
-    "docs/integrations/mobile-walletconnect.md",
-    "docs/integrations/electron-security-wallets.md",
-    "docs/integrations/operator-admin-ui.md",
-    "deployments/README.md",
-    "release-artifacts/README.md",
-    "release-artifacts/latest/release-manifest.json",
-    "release-artifacts/latest/SHA256SUMS",
-    "release-artifacts/latest/release-checksums.json",
-    "release-artifacts/latest/public-beta-blockers.md",
-    "release-artifacts/latest/production-release-blockers.md",
+    "docs/warning-dispositions.md",
+    "ops/ROADMAP.md",
+    "ops/EXECUTION_BACKLOG.md",
+    "scripts/check.sh",
+    "scripts/check.ps1",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
@@ -126,8 +118,8 @@ LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 FENCED_CODE_RE = re.compile(r"^```[^\n]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
 
 
-class ReadmeError(ValueError):
-    """Raised when the root README is missing required content."""
+class First30MinutesError(ValueError):
+    """Raised when the first-30-minutes guide is missing required content."""
 
 
 def normalize_repo_path(path: Path, repo_root: Path) -> str:
@@ -135,7 +127,7 @@ def normalize_repo_path(path: Path, repo_root: Path) -> str:
     try:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except ValueError as exc:
-        raise ReadmeError(f"linked path escapes repository: {path}") from exc
+        raise First30MinutesError(f"linked path escapes repository: {path}") from exc
 
 
 def markdown_headings(text: str) -> set[tuple[int, str]]:
@@ -183,7 +175,7 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
         links.add(relative)
 
     if missing:
-        raise ReadmeError(
+        raise First30MinutesError(
             "linked targets are missing: " + ", ".join(sorted(set(missing)))
         )
     return links
@@ -217,11 +209,11 @@ def missing_commands(text: str, commands: list[str]) -> list[str]:
     return missing
 
 
-def validate_readme(repo_root: Path, document_path: Path) -> None:
-    """Validate the root README against required maturity and navigation content."""
+def validate_guide(repo_root: Path, document_path: Path) -> None:
+    """Validate the contributor guide against setup and maturity requirements."""
     if not document_path.is_file():
         relative = normalize_repo_path(document_path, repo_root)
-        raise ReadmeError(f"missing README: {relative}")
+        raise First30MinutesError(f"missing guide: {relative}")
 
     text = document_path.read_text(encoding="utf-8")
 
@@ -233,56 +225,57 @@ def validate_readme(repo_root: Path, document_path: Path) -> None:
     ]
     if missing_headings:
         relative = normalize_repo_path(document_path, repo_root)
-        raise ReadmeError(
+        raise First30MinutesError(
             f"{relative} is missing required headings: "
             + ", ".join(missing_headings)
         )
 
     missing_required_phrases = missing_phrases(text, REQUIRED_PHRASES)
     if missing_required_phrases:
-        raise ReadmeError(
-            "README is missing required content: "
+        raise First30MinutesError(
+            "first-30-minutes guide is missing required content: "
             + ", ".join(missing_required_phrases)
         )
 
     missing_required_commands = missing_commands(text, REQUIRED_COMMANDS)
     if missing_required_commands:
-        raise ReadmeError(
-            "README is missing required commands: "
+        raise First30MinutesError(
+            "first-30-minutes guide is missing required commands: "
             + ", ".join(missing_required_commands)
         )
 
     links = linked_repo_paths(repo_root, document_path, text)
     missing_targets = [target for target in REQUIRED_LINK_TARGETS if target not in links]
     if missing_targets:
-        raise ReadmeError(
-            "README is missing required links: " + ", ".join(missing_targets)
+        raise First30MinutesError(
+            "first-30-minutes guide is missing required links: "
+            + ", ".join(missing_targets)
         )
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    """Parse README checker options."""
+    """Parse first-30-minutes checker options."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
-    parser.add_argument("--readme", type=Path, default=DEFAULT_README)
+    parser.add_argument("--guide", type=Path, default=DEFAULT_GUIDE)
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the README checker CLI."""
+    """Run the first-30-minutes checker CLI."""
     args = parse_args(argv or [])
     repo_root = args.repo_root.resolve()
-    readme_path = args.readme
-    if not readme_path.is_absolute():
-        readme_path = repo_root / readme_path
+    guide_path = args.guide
+    if not guide_path.is_absolute():
+        guide_path = repo_root / guide_path
 
     try:
-        validate_readme(repo_root, readme_path.resolve())
-    except ReadmeError as exc:
-        print(f"README check failed: {exc}", file=sys.stderr)
+        validate_guide(repo_root, guide_path.resolve())
+    except First30MinutesError as exc:
+        print(f"first-30-minutes check failed: {exc}", file=sys.stderr)
         return 1
 
-    print("README is current")
+    print("first-30-minutes guide is current")
     return 0
 
 

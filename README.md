@@ -27,6 +27,7 @@ accepted release-mode evidence.
 
 Start with:
 
+- [docs/first-30-minutes.md](docs/first-30-minutes.md)
 - [docs/status.md](docs/status.md)
 - [docs/release-readiness.md](docs/release-readiness.md)
 - [docs/public-beta-evidence.md](docs/public-beta-evidence.md)
@@ -62,9 +63,10 @@ bash scripts/bootstrap-ec2.sh
 powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
 ```
 
-5. Read [docs/tooling.md](docs/tooling.md) for the full command inventory and
-   [docs/release-readiness.md](docs/release-readiness.md) for what the local
-   gate does and does not prove.
+5. Read [docs/first-30-minutes.md](docs/first-30-minutes.md) for the checked
+   fresh-contributor path, [docs/tooling.md](docs/tooling.md) for the full
+   command inventory, and [docs/release-readiness.md](docs/release-readiness.md)
+   for what the local gate does and does not prove.
 
 ## Find Your Path
 
@@ -73,7 +75,7 @@ powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
 | Auditor or security reviewer | [docs/audit-package.md](docs/audit-package.md), [docs/architecture.md](docs/architecture.md), [docs/threat-model.md](docs/threat-model.md), [docs/adr/README.md](docs/adr/README.md), [docs/slither.md](docs/slither.md), [ops/SLITHER_BASELINE.md](ops/SLITHER_BASELINE.md), [SECURITY.md](SECURITY.md) | Scope, trust boundaries, accepted ADRs, known blockers, Slither dispositions, risk register, and reporting path |
 | Integrator, frontend, mobile, Electron, or indexer engineer | [docs/integrations/README.md](docs/integrations/README.md), [docs/integrations/contract-flows.md](docs/integrations/contract-flows.md), [docs/integrations/auction-flows.md](docs/integrations/auction-flows.md), [docs/integrations/wallets-and-signatures.md](docs/integrations/wallets-and-signatures.md), [docs/integrations/events-and-indexing.md](docs/integrations/events-and-indexing.md), [docs/integrations/metadata-rendering.md](docs/integrations/metadata-rendering.md), [docs/integrations/frontend-reference-architecture.md](docs/integrations/frontend-reference-architecture.md), [docs/integrations/mobile-walletconnect.md](docs/integrations/mobile-walletconnect.md), [docs/integrations/electron-security-wallets.md](docs/integrations/electron-security-wallets.md), [docs/integrations/operator-admin-ui.md](docs/integrations/operator-admin-ui.md) | ABIs, address books, deployment manifests, EIP-712 and ERC-1271 rules, event reconstruction, metadata rendering, and app security boundaries |
 | Operator or deployer | [docs/deployment.md](docs/deployment.md), [deployments/README.md](deployments/README.md), [release-artifacts/README.md](release-artifacts/README.md), [docs/release-signatures.md](docs/release-signatures.md), [docs/incident-response.md](docs/incident-response.md), [docs/randomizer-operations.md](docs/randomizer-operations.md) | Admin ceremony, Safe/multisig handoff, signer setup, verification, dry-run mint, dry-run auction, and incident evidence |
-| Contributor | [CONTRIBUTING.md](CONTRIBUTING.md), [docs/tooling.md](docs/tooling.md), [docs/status.md](docs/status.md), [docs/known-blockers.md](docs/known-blockers.md), [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md) | Local checks, maturity boundaries, issue-ready backlog entries, and changelog policy |
+| Contributor | [docs/first-30-minutes.md](docs/first-30-minutes.md), [CONTRIBUTING.md](CONTRIBUTING.md), [docs/tooling.md](docs/tooling.md), [docs/status.md](docs/status.md), [docs/known-blockers.md](docs/known-blockers.md), [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md) | Fresh setup, local checks, maturity boundaries, issue-ready backlog entries, and changelog policy |
 | Protocol maintainer | [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md), [docs/release-policy.md](docs/release-policy.md), [docs/release-readiness.md](docs/release-readiness.md), [release-artifacts/latest/release-manifest.json](release-artifacts/latest/release-manifest.json), [release-artifacts/latest/SHA256SUMS](release-artifacts/latest/SHA256SUMS), [release-artifacts/latest/release-checksums.json](release-artifacts/latest/release-checksums.json) | Gate order, release-impacting changes, generated evidence, checksum coverage, and blocker status |
 
 ## Drop Flow
@@ -104,6 +106,13 @@ The root README itself is part of the gate:
 ```bash
 python scripts/test_readme.py
 python scripts/check_readme.py
+```
+
+The checked fresh-contributor guide is also part of the gate:
+
+```bash
+python scripts/test_first_30_minutes.py
+python scripts/check_first_30_minutes.py
 ```
 
 The changelog gate requires release-impacting PRs to update
@@ -142,6 +151,7 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [ops/SLITHER_BASELINE.md](ops/SLITHER_BASELINE.md)
 - [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md)
 - [docs/status.md](docs/status.md)
+- [docs/first-30-minutes.md](docs/first-30-minutes.md)
 - [docs/known-blockers.md](docs/known-blockers.md)
 - [docs/tooling.md](docs/tooling.md)
 - [docs/architecture.md](docs/architecture.md)

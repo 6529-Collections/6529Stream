@@ -18,6 +18,12 @@ and honest maturity labels over speed.
 
 ## Local Setup
 
+For a fresh checkout, start with the checked
+[first-30-minutes guide](docs/first-30-minutes.md). It covers prerequisites,
+`forge` not being on `PATH`, Windows wrapper usage, known warning noise,
+generated artifact drift, docs-only paths, Solidity/test paths, no-secret
+boundaries, and the commands below.
+
 Install or bootstrap the pinned toolchain:
 
 ```bash
@@ -115,6 +121,7 @@ Update docs in the same PR when behavior changes. At minimum, check whether the
 change affects:
 
 - [README.md](README.md)
+- [docs/first-30-minutes.md](docs/first-30-minutes.md)
 - [docs/status.md](docs/status.md)
 - [docs/tooling.md](docs/tooling.md)
 - [docs/known-blockers.md](docs/known-blockers.md)

@@ -199,6 +199,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_incident_response.py"
 & $pythonPath @pythonArgs "scripts\test_readme.py"
 & $pythonPath @pythonArgs "scripts\check_readme.py"
+& $pythonPath @pythonArgs "scripts\test_first_30_minutes.py"
+& $pythonPath @pythonArgs "scripts\check_first_30_minutes.py"
 & $pythonPath @pythonArgs "scripts\test_integrations_readme.py"
 & $pythonPath @pythonArgs "scripts\check_integrations_readme.py"
 & $pythonPath @pythonArgs "scripts\test_contract_flows.py"

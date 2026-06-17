@@ -153,6 +153,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     changelog = root / "CHANGELOG.md"
     docs = [
         root / "docs" / "release-policy.md",
+        root / "docs" / "first-30-minutes.md",
         root / "docs" / "deployment.md",
         root / "docs" / "tooling.md",
         root / "docs" / "status.md",

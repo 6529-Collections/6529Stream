@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked first-30-minutes contributor guide covering fresh checkout
+  setup, Foundry/Python/Windows prerequisites, `forge` not being on `PATH`,
+  canonical local gates, docs-only and Solidity/test validation paths, known
+  warning noise, generated artifact drift, no-secret maturity boundaries,
+  local/CI/Windows gate wiring, and release-manifest/checksum coverage.
 - Added checked INT-016 integration conformance fixtures for frontend, mobile,
   Electron, indexer, operator UI, and signing-service teams, covering artifact
   loading, fail-closed chain config, EIP-712 domain expectations, event topic

@@ -14,6 +14,12 @@
 
 ## Local Checks
 
+Fresh contributors should start with
+[`first-30-minutes.md`](first-30-minutes.md). That checked guide explains the
+minimal setup path, `forge` not being on `PATH`, Windows wrapper usage, known
+warning noise, generated artifact drift, docs-only validation, Solidity/test
+validation, and no-secret maturity boundaries.
+
 Run the canonical Gate A smoke check:
 
 ```bash
@@ -115,6 +121,8 @@ python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_readme.py
 python scripts/check_readme.py
+python scripts/test_first_30_minutes.py
+python scripts/check_first_30_minutes.py
 python scripts/test_curator_rewards_flow.py
 python scripts/check_curator_rewards_flow.py
 python scripts/test_withdrawals_credits_flow.py
