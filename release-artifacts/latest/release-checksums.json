@@ -92,7 +92,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:f1b1a6bad15298a2eaffe5c8fa7e2ec614cafb76c93ca9138485a62daca94f09"
+    "sha256": "sha256:97cc683d39f119b1b2e03a1edcf955ded3266a69919e4dd0c403c3d64e384fd6"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -631,7 +631,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a1a5f329eddcb1264cd774040ee862b6d6579a223712d83b324697be7ee249c2",
+      "sha256": "sha256:16220a694e7cdd40467079542fd79b8eee48c20cdd7d9ca59616dc842db9df36",
       "size_bytes": 79962
     },
     {
@@ -696,7 +696,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:d8b46ac946d1f901e63aa12ee4efa36f6ace5809e173a9b7aa444917293a237e",
+      "sha256": "sha256:b20dbdf2a7143c8a63da598caf2025cbde4c2d123af72a8adedc56c638d9f574",
       "size_bytes": 9038
     },
     {
@@ -746,18 +746,18 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:472e491ba61ddecda495bce699d8c5628bf42f14fb5ca0530223e43486379811",
+      "sha256": "sha256:d57c50ef6cf01aa63080914af80db09123d8b17dd5da3282884881b0a6c48936",
       "size_bytes": 114640
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:da94784c23875b8e285649818643575e8e95f9022a1ca66a6d785e5827fd1dc0",
-      "size_bytes": 59211
+      "sha256": "sha256:32055865f7fd8908762112967e70af34abba8ec79f7b0763b7ea8595c506581a",
+      "size_bytes": 59438
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:d23e0b488a3823302cb2c25e5886959bf542451526f11b5b4c08134fd6f0aa78",
-      "size_bytes": 56544
+      "sha256": "sha256:c92cbe7578485ffebad4e0aa5ae68f1757e18a37dd2f3ae2a19136e5e6c4e649",
+      "size_bytes": 56764
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
