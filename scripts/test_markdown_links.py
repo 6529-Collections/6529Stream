@@ -81,6 +81,44 @@ class MarkdownLinkTests(unittest.TestCase):
 
             checker.validate_markdown_links(root, [Path("README.md")])
 
+    def test_ignores_indented_tilde_fenced_code_blocks(self) -> None:
+        """Indented tilde fences are stripped before link scanning."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write(
+                root / "README.md",
+                "# Home\n\n  ~~~md\n  [Broken](missing.md)\n  ~~~\n",
+            )
+
+            checker.validate_markdown_links(root, [Path("README.md")])
+
+    def test_accepts_parentheses_inside_inline_link_target(self) -> None:
+        """Inline targets may contain balanced parentheses."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write(root / "README.md", "# Home\n\n[Guide](docs/guide-(draft).md)\n")
+            write(root / "docs" / "guide-(draft).md", "# Guide\n")
+
+            checker.validate_markdown_links(root, [Path("README.md")])
+
+    def test_accepts_reference_style_local_link_definition(self) -> None:
+        """Reference-style link definitions are validated."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write(root / "README.md", "# Home\n\nSee [Guide][guide].\n\n[guide]: docs/guide.md\n")
+            write(root / "docs" / "guide.md", "# Guide\n")
+
+            checker.validate_markdown_links(root, [Path("README.md")])
+
+    def test_rejects_missing_reference_style_target(self) -> None:
+        """Broken reference-style local targets fail."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write(root / "README.md", "# Home\n\nSee [Guide][guide].\n\n[guide]: docs/missing.md\n")
+
+            with self.assertRaisesRegex(checker.MarkdownLinkError, "target is missing"):
+                checker.validate_markdown_links(root, [Path("README.md")])
+
     def test_rejects_missing_local_file(self) -> None:
         """Broken local file links fail with document context."""
         with tempfile.TemporaryDirectory() as temp_dir:

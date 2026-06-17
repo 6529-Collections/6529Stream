@@ -75,7 +75,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:f42e0cea3de37d0a4367217389c3c826b3bf6f9e21743431df59826403d5771e"
+    "sha256": "sha256:16122dbc837a6d5019fb104c7bb1bbfa1424f512e0118fe8aa8b5656e83caccf"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -824,8 +824,8 @@
     },
     {
       "path": "scripts/check_markdown_links.py",
-      "sha256": "sha256:fad0d562be427fd966b07947eb06212ca90bf4946d2e0e4da3ffcef9985aa826",
-      "size_bytes": 8869
+      "sha256": "sha256:9a9a4c8650db2c1d34049e3e7b9a41763dd51e8781448d446671736421a76046",
+      "size_bytes": 9948
     },
     {
       "path": "scripts/check_pr_template.py",
@@ -919,8 +919,8 @@
     },
     {
       "path": "scripts/test_markdown_links.py",
-      "sha256": "sha256:08bb017fd0f0d04c0744397810ce9ae25905161f6a363bf23f01859b495d9230",
-      "size_bytes": 5936
+      "sha256": "sha256:e78e152a40757e7a0f74248f1a1e5e39bdc5b903b2c7d6bf551633c33434e993",
+      "size_bytes": 7768
     },
     {
       "path": "scripts/test_pr_template.py",

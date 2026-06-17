@@ -37,8 +37,14 @@ EXCLUDED_MARKDOWN_SUFFIXES = {
     ".generated.md",
 }
 
-LINK_RE = re.compile(r"!?\[[^\]\n]*\]\(([^)\n]+)\)")
-FENCED_CODE_RE = re.compile(r"^```.*?$.*?^```", re.MULTILINE | re.DOTALL)
+FENCED_CODE_RE = re.compile(
+    r"^[ \t]*(?P<fence>`{3,}|~{3,})[^\n]*\n.*?^[ \t]*(?P=fence)[ \t]*$",
+    re.MULTILINE | re.DOTALL,
+)
+REFERENCE_LINK_RE = re.compile(
+    r"^[ \t]{0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]+>|\S+)",
+    re.MULTILINE,
+)
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 HTML_ANCHOR_RE = re.compile(r"<a\s+[^>]*\bname=[\"']([^\"']+)[\"']", re.IGNORECASE)
 LINE_ANCHOR_RE = re.compile(r"^L[1-9][0-9]*(?:-L[1-9][0-9]*)?$")
@@ -99,9 +105,43 @@ def strip_fenced_code(text: str) -> str:
     return FENCED_CODE_RE.sub("", text)
 
 
+def markdown_link_targets(text: str) -> list[str]:
+    """Return inline and reference-definition link targets from Markdown text."""
+    targets: list[str] = []
+    position = 0
+    while True:
+        opener = text.find("](", position)
+        if opener == -1:
+            break
+
+        start = opener + 2
+        depth = 1
+        index = start
+        while index < len(text):
+            char = text[index]
+            if char == "\\":
+                index += 2
+                continue
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    targets.append(text[start:index])
+                    break
+            index += 1
+
+        position = index + 1 if depth == 0 else start
+
+    targets.extend(match.group(1) for match in REFERENCE_LINK_RE.finditer(text))
+    return targets
+
+
 def split_link_target(raw_target: str) -> tuple[str, str]:
     """Split a Markdown link target into path and fragment components."""
     target = raw_target.strip()
+    if target.startswith("<") and ">" in target:
+        target = target[1 : target.find(">")]
     if " " in target:
         target = target.split(" ", 1)[0]
     path_part, separator, fragment = target.partition("#")
@@ -187,8 +227,7 @@ def validate_document(repo_root: Path, document: Path) -> list[LinkFailure]:
     text = strip_fenced_code(document.read_text(encoding="utf-8"))
     failures: list[LinkFailure] = []
 
-    for match in LINK_RE.finditer(text):
-        raw_target = match.group(1)
+    for raw_target in markdown_link_targets(text):
         path_part, fragment = split_link_target(raw_target)
 
         if path_part == "":
