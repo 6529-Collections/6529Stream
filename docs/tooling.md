@@ -301,6 +301,12 @@ The incident-response step validates
 for stuck auctions, failed randomness, bad Merkle roots, bad metadata or
 dependency configuration, signer compromise, and release artifact/evidence
 mistakes.
+The incident drill evidence step validates the checked no-secret retained
+artifact template under
+[`release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md)
+for mint pause, bid pause, settlement pause, withdrawal policy, failed
+randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer
+compromise drill evidence.
 
 The drop-authorization fixture step validates
 [`drop-authorization-signing.md`](drop-authorization-signing.md) and the

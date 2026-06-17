@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked incident drill retained-artifact template and validation gate
+  for mint pause, bid pause, settlement pause, withdrawal policy, failed
+  randomness, stuck auction, bad metadata/dependency, bad Merkle root, and
+  signer compromise drills without claiming completed fork, testnet, or live
+  drill evidence.
 - Added a checked `StreamCore` bytecode-spend policy gate that pins the current
   22,184-byte approved production runtime baseline, fails unreviewed Core
   runtime increases even when the EIP-170 floor still passes, records rejected

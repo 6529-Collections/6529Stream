@@ -56,6 +56,8 @@ REQUIRED_INCIDENT_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_incident_response.py",
     "python scripts/check_incident_response.py",
+    "python scripts/test_incident_drill_evidence.py",
+    "python scripts/check_incident_drill_evidence.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -104,6 +106,7 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/schema/signer-custody-readiness.schema.json",
     "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
     "release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt",
+    "release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

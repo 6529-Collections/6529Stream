@@ -544,6 +544,14 @@ is the checked no-secret retained-artifact template for future
 a non-local evidence envelope. The committed template is not live provider
 operations proof and does not change production-release readiness.
 
+`evidence/incident-drills/incident-drill-retained-artifact-template.md` is the
+checked no-secret retained-artifact template for future
+`incident_drill_evidence`. Validate it with
+`python scripts/test_incident_drill_evidence.py` and
+`python scripts/check_incident_drill_evidence.py` before treating any drill
+bundle as reviewed release evidence. The committed template is not incident
+drill completion proof and does not change production-release readiness.
+
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility
@@ -551,7 +559,7 @@ baseline, the third-party release verifier script, deployment manifest
 config/examples, address books, ceremony evidence
 bundles, randomizer operations evidence, release signature evidence, drop
 authorization signing evidence, signer custody readiness evidence, artifact
-schemas, non-local release evidence metadata and templates, public-beta
+schemas, incident drill evidence, non-local release evidence metadata and templates, public-beta
 evidence status, release evidence packet index, release evidence issue backlog,
 and release manifest. Treat
 `SHA256SUMS` as the signable checksum file for a release; the committed local

@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:de4f9c11bcf9ec13759d8c96b840f276d4905f01fae9edc83639871aa1ecd8fd",
-      "size_bytes": 49186
+      "sha256": "sha256:791f6544c637a64442ec5494476af7451784d4ecd2a3d03dbccf59f358a87745",
+      "size_bytes": 49509
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:44901fc39122eee10fdb8a7da792619d6258bb39c038a38b6c6b50f7b4f74625",
+      "sha256": "sha256:5e1368b81f941f9b01a731b7b9b07fa027fb03632a49611107fce6f7e64f22d2",
       "size_bytes": 22887
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked incident drill retained-artifact template and validation gate for mint pause, bid pause, settlement pause, withdrawal policy, failed randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer compromise drills without claiming completed fork, testnet, or live drill evidence.",
       "Added a checked `StreamCore` bytecode-spend policy gate that pins the current 22,184-byte approved production runtime baseline, fails unreviewed Core runtime increases even when the EIP-170 floor still passes, records rejected no-gain/negative-gain headroom experiments, and wires focused tests into local, CI, Windows, release-manifest, and checksum paths.",
       "Added a no-secret live randomizer operations retained-artifact template and checker for future `live_randomizer_operations_evidence`, with provider configuration, provider funding, reserve, request health, lifecycle control, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live randomizer operations evidence is retained.",
       "Added a no-secret live ceremony retained-artifact template and checker for future `live_ceremony_evidence`, with governance participant, ownership/role, signer, metadata/freeze, auction, emergency-control, dry-run, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live ceremony evidence is retained.",
