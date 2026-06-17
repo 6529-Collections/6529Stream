@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added checked INT-014 TypeScript EIP-712 payload construction snippets
+  covering domain construction, `DropAuthorization` message shape, drop ID
+  derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe
+  boundaries, submission preflight, no-secret logging, local/CI/Windows gate
+  wiring, and release-manifest/checksum coverage for frontend and signing
+  service teams.
 - Added checked INT-013 TypeScript artifact loading and chain config snippets
   covering release manifest loading, address book loading, deployment manifest
   cross-checks, release manifest hash validation, ABI checksum awareness,

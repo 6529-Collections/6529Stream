@@ -13,7 +13,9 @@ signer custody readiness model in
 fixed-price flow in [`docs/integrations/contract-flows.md`](contract-flows.md),
 the auction flow in [`docs/integrations/auction-flows.md`](auction-flows.md),
 and the release-readiness dashboard in
-[`docs/release-readiness.md`](../release-readiness.md).
+[`docs/release-readiness.md`](../release-readiness.md). For concrete INT-014
+TypeScript EIP-712 payload construction snippets, use
+[`docs/integrations/examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md).
 
 ## Maturity And Scope
 
@@ -48,6 +50,7 @@ Use tracked committed sources before wiring a wallet or signing service.
 | Need | Source of truth | Integration note |
 | --- | --- | --- |
 | Integration entrypoint | [`docs/integrations/README.md`](README.md) | Starts frontend, mobile, Electron, indexer, operator UI, and signing-service discovery |
+| TypeScript EIP-712 payload snippets | [`docs/integrations/examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md) | Current `INT-014` domain construction, DropAuthorization message shape, drop ID derivation, token data hashing, sale-mode validation, submission preflight, EOA/ERC-1271/Safe boundaries, and no-secret logging snippets |
 | Raw signing guide | [`docs/drop-authorization-signing.md`](../drop-authorization-signing.md) | Canonical schema, fixtures, evidence template, and operator flow |
 | Drop authorization ADR | [`docs/adr/0001-drop-authorization.md`](../adr/0001-drop-authorization.md) | Accepted design decision for typed authorization, replay, cancellation, ERC-1271, and signer epoch |
 | Signer custody evidence | [`docs/signer-custody-readiness.md`](../signer-custody-readiness.md) | Production signer custody evidence model |
@@ -142,6 +145,13 @@ current `signerEpoch`, signer rotation policy, and the on-chain consumed-state
 write before mint or auction execution. There is no separate on-chain monotonic
 nonce map; uniqueness is a signer-service obligation and is
 enforced on chain through the derived `dropId` plus consumed/cancelled storage.
+
+The TypeScript EIP-712 payload construction snippets in
+[`docs/integrations/examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md)
+show a framework-light sequence for building the domain, preserving the
+DropAuthorization message shape, deriving the drop ID, token data hashing,
+sale-mode validation, signer boundary checks, and submission preflight before
+wallet prompts or transaction submission.
 
 ## Replay And Revocation Controls
 
@@ -389,6 +399,8 @@ Run these when editing this guide:
 ```sh
 python scripts/test_wallet_signature_flows.py
 python scripts/check_wallet_signature_flows.py
+python scripts/test_typescript_eip712_drop_authorization.py
+python scripts/check_typescript_eip712_drop_authorization.py
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
 python scripts/test_release_readiness.py

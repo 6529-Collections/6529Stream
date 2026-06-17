@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added checked INT-014 TypeScript EIP-712 payload construction snippets covering domain construction, `DropAuthorization` message shape, drop ID derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe boundaries, submission preflight, no-secret logging, local/CI/Windows gate wiring, and release-manifest/checksum coverage for frontend and signing service teams.
 - Added checked INT-013 TypeScript artifact loading and chain config snippets covering release manifest loading, address book loading, deployment manifest cross-checks, release manifest hash validation, ABI checksum awareness, no-secret public environment parsing, and fail-closed wrong-chain guards for frontend teams.
 - Added a checked withdrawal and credit UX integration flow spec covering fixed-price, auction, curator reward, surplus, mobile, Electron, and indexer handling with source-aware checker coverage for contract credit surfaces.
 - Added a checked curator rewards integration flow spec covering reward root publication, domain-separated Merkle leaf encoding, direct and delegated claims, pull-payment curator credits, withdrawal/failure UX, events, indexer reconstruction, and release artifact coverage for frontend teams.

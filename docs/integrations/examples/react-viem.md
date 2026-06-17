@@ -12,6 +12,11 @@ address book loading, release manifest hash validation, ABI checksum awareness,
 deployment manifest checks, wrong-chain guards, and fail-closed chain config,
 use
 [docs/integrations/examples/typescript-artifacts-and-chain-config.md](typescript-artifacts-and-chain-config.md).
+For concrete INT-014 TypeScript EIP-712 payload construction snippets covering
+domain construction, `DropAuthorization` message shape, drop ID derivation,
+token data hashing, sale-mode validation, signer boundaries, and submission
+preflight, use
+[docs/integrations/examples/typescript-eip712-drop-authorization.md](typescript-eip712-drop-authorization.md).
 
 ## Artifact Loader
 
