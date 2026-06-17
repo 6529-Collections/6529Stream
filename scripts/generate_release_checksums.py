@@ -33,6 +33,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/check_production_verified_addresses.py"),
     Path("scripts/check_live_metadata_browser_evidence.py"),
     Path("scripts/check_incident_drill_evidence.py"),
+    Path("scripts/check_readme.py"),
+    Path("scripts/test_readme.py"),
     Path("scripts/check_warning_dispositions.py"),
     Path("scripts/test_warning_dispositions.py"),
     Path("scripts/run_forge_size_log.py"),

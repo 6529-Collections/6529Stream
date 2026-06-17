@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked root README maturity/navigation gate that keeps the public
+  repo front door aligned with current pre-audit status, role-specific docs
+  paths, local/Windows validation commands, release-readiness blockers, and
+  release-manifest/checksum coverage.
 - Added live solc warning baseline enforcement for the warning-disposition gate:
   production-size forge output is retained in local/CI logs and checked against
   the reviewed warning rows so new or resolved compiler warnings require an

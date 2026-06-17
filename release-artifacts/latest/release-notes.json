@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:2f734c8cd152fa3aae1d7736be6c967999b9e914102288ae7a13b953d31be8fc",
-      "size_bytes": 49867
+      "sha256": "sha256:84aac1dd7b07ea971181b0d1f3b21f190770b8835ff51ca8f3fa0a816bfb4ed9",
+      "size_bytes": 50134
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:291e690ccc6ee341d19ef9c51fbb88199c00aade785d1653037028398719735e",
+      "sha256": "sha256:a7b2871c1bf4b97a230f1ae76b6e495bf5c231e23d9e3863b41a50b446017119",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked root README maturity/navigation gate that keeps the public repo front door aligned with current pre-audit status, role-specific docs paths, local/Windows validation commands, release-readiness blockers, and release-manifest/checksum coverage.",
       "Added live solc warning baseline enforcement for the warning-disposition gate: production-size forge output is retained in local/CI logs and checked against the reviewed warning rows so new or resolved compiler warnings require an explicit code or disposition update, and removed or relocated accepted warnings require a reviewed baseline refresh.",
       "Added a checked incident drill retained-artifact template and validation gate for mint pause, bid pause, settlement pause, withdrawal policy, failed randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer compromise drills without claiming completed fork, testnet, or live drill evidence.",
       "Added a checked `StreamCore` bytecode-spend policy gate that pins the current 22,184-byte approved production runtime baseline, fails unreviewed Core runtime increases even when the EIP-170 floor still passes, records rejected no-gain/negative-gain headroom experiments, and wires focused tests into local, CI, Windows, release-manifest, and checksum paths.",
