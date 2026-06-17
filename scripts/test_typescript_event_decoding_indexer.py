@@ -27,7 +27,13 @@ def write_text(path: Path, value: str) -> None:
 
 def seed_required_targets(root: Path) -> None:
     for relative in checker.REQUIRED_LINK_TARGETS:
-        write_text(root / relative, f"seed for {relative}\n")
+        if relative == checker.DEFAULT_EVENT_TOPIC_CATALOG.as_posix():
+            write_text(
+                root / relative,
+                '{"generated_by":"scripts/generate_release_artifacts.py:1"}\n',
+            )
+        else:
+            write_text(root / relative, f"seed for {relative}\n")
 
 
 def target_links() -> str:
@@ -101,7 +107,9 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "missing required headings",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
     def test_rejects_missing_required_phrase(self) -> None:
@@ -114,7 +122,9 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "missing required content",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
     def test_rejects_missing_required_snippet(self) -> None:
@@ -130,7 +140,9 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "missing required snippets",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
     def test_rejects_missing_required_command(self) -> None:
@@ -149,7 +161,9 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "missing required commands",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
     def test_rejects_missing_required_link(self) -> None:
@@ -168,7 +182,9 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "missing required links",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
     def test_rejects_missing_linked_file(self) -> None:
@@ -182,7 +198,28 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "linked targets are missing",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
+                )
+
+    def test_rejects_committed_catalog_generator_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            write_text(
+                root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
+                '{"generated_by":"scripts/other_generator.py:1"}\n',
+            )
+            write_text(root / checker.DEFAULT_DOC, minimal_doc())
+            with self.assertRaisesRegex(
+                checker.TypeScriptEventDecodingIndexerError,
+                "missing the committed event topic catalog generator",
+            ):
+                checker.validate_typescript_event_decoding_indexer(
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
     def test_rejects_path_label_drift(self) -> None:
@@ -201,7 +238,9 @@ class TypeScriptEventDecodingIndexerTests(unittest.TestCase):
                 "resolves to",
             ):
                 checker.validate_typescript_event_decoding_indexer(
-                    root, root / checker.DEFAULT_DOC
+                    root,
+                    root / checker.DEFAULT_DOC,
+                    root / checker.DEFAULT_EVENT_TOPIC_CATALOG,
                 )
 
 

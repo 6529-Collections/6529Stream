@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ from pathlib import Path
 DEFAULT_DOC = Path(
     "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md"
 )
+DEFAULT_EVENT_TOPIC_CATALOG = Path("release-artifacts/latest/event-topic-catalog.json")
 
 REQUIRED_HEADINGS = [
     (1, "TypeScript Event Decoding And Indexer Ingestion Snippets"),
@@ -224,8 +226,32 @@ def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     ]
 
 
+def event_topic_catalog_generator(repo_root: Path, catalog_path: Path) -> str:
+    if not catalog_path.is_file():
+        relative = normalize_repo_path(catalog_path, repo_root)
+        raise TypeScriptEventDecodingIndexerError(
+            f"missing event topic catalog: {relative}"
+        )
+
+    try:
+        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        relative = normalize_repo_path(catalog_path, repo_root)
+        raise TypeScriptEventDecodingIndexerError(
+            f"event topic catalog is not valid JSON: {relative}"
+        ) from exc
+
+    generated_by = catalog.get("generated_by")
+    if not isinstance(generated_by, str) or not generated_by:
+        relative = normalize_repo_path(catalog_path, repo_root)
+        raise TypeScriptEventDecodingIndexerError(
+            f"event topic catalog is missing generated_by: {relative}"
+        )
+    return generated_by
+
+
 def validate_typescript_event_decoding_indexer(
-    repo_root: Path, document_path: Path
+    repo_root: Path, document_path: Path, event_topic_catalog_path: Path
 ) -> None:
     if not document_path.is_file():
         relative = normalize_repo_path(document_path, repo_root)
@@ -275,11 +301,25 @@ def validate_typescript_event_decoding_indexer(
             + ", ".join(missing_targets)
         )
 
+    catalog_generator = event_topic_catalog_generator(
+        repo_root, event_topic_catalog_path
+    )
+    if catalog_generator not in text:
+        raise TypeScriptEventDecodingIndexerError(
+            "TypeScript event decoding guide is missing the committed event "
+            f"topic catalog generator: {catalog_generator}"
+        )
+
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--doc", type=Path, default=DEFAULT_DOC)
+    parser.add_argument(
+        "--event-topic-catalog",
+        type=Path,
+        default=DEFAULT_EVENT_TOPIC_CATALOG,
+    )
     return parser.parse_args(argv)
 
 
@@ -289,9 +329,14 @@ def main(argv: list[str] | None = None) -> int:
     document_path = args.doc
     if not document_path.is_absolute():
         document_path = repo_root / document_path
+    event_topic_catalog_path = args.event_topic_catalog
+    if not event_topic_catalog_path.is_absolute():
+        event_topic_catalog_path = repo_root / event_topic_catalog_path
 
     try:
-        validate_typescript_event_decoding_indexer(repo_root, document_path.resolve())
+        validate_typescript_event_decoding_indexer(
+            repo_root, document_path.resolve(), event_topic_catalog_path.resolve()
+        )
     except TypeScriptEventDecodingIndexerError as exc:
         print(f"TypeScript event decoding indexer check failed: {exc}", file=sys.stderr)
         return 1
