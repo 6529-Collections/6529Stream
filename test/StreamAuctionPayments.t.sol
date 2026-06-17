@@ -96,6 +96,33 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
             .assertEq(highMinimum, "high increment bid");
     }
 
+    function testMinimumNextBidPreservesIntegerFloorOutbidRule() public {
+        AuctionSetup memory setup = _createAuctionForPosterAndReserve(POSTER, 1 wei);
+        vm.deal(FIRST_BIDDER, 1 ether);
+        vm.deal(SECOND_BIDDER, 1 ether);
+
+        setup.auctions.minimumNextBid(setup.tokenId).assertEq(1 wei, "reserve minimum");
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: 1 wei }(setup.tokenId);
+
+        setup.auctions.minimumNextBid(setup.tokenId).assertEq(1 wei, "floored outbid minimum");
+
+        vm.prank(SECOND_BIDDER);
+        (bool underbidSuccess,) = address(setup.auctions).call{ value: 0 }(
+            abi.encodeWithSelector(setup.auctions.participateToAuction.selector, setup.tokenId)
+        );
+        underbidSuccess.assertFalse("zero underbid succeeded");
+
+        uint256 flooredMinimum = setup.auctions.minimumNextBid(setup.tokenId);
+        vm.prank(SECOND_BIDDER);
+        setup.auctions.participateToAuction{ value: flooredMinimum }(setup.tokenId);
+
+        setup.auctions.auctionHighestBid(setup.tokenId).assertEq(1 wei, "floored outbid");
+        setup.auctions.auctionHighestBidder(setup.tokenId).assertEq(SECOND_BIDDER, "bidder");
+        setup.auctions.auctionBidderCredits(FIRST_BIDDER).assertEq(1 wei, "previous bidder credit");
+    }
+
     function testMinimumNextBidFailsClosedWhenAuctionIsNotActive() public {
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
@@ -111,16 +138,37 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         vm.expectRevert(bytes("No auction"));
         auctions.minimumNextBid(10_000_000_000);
 
-        AuctionSetup memory endedSetup = _createAuction();
-        vm.warp(endedSetup.auctionEndTime + 1);
+        AuctionSetup memory endedNoBidSetup = _createAuction();
+        vm.warp(endedNoBidSetup.auctionEndTime + 1);
         vm.expectRevert(bytes("Not active"));
-        endedSetup.auctions.minimumNextBid(endedSetup.tokenId);
+        endedNoBidSetup.auctions.minimumNextBid(endedNoBidSetup.tokenId);
 
-        AuctionSetup memory settledSetup = _createAuction();
-        vm.warp(settledSetup.auctionEndTime + 1);
-        settledSetup.auctions.claimAuction(settledSetup.tokenId);
+        AuctionSetup memory endedWithBidSetup = _createAuction();
+        vm.deal(FIRST_BIDDER, 10 ether);
+        vm.prank(FIRST_BIDDER);
+        endedWithBidSetup.auctions.participateToAuction{ value: RESERVE_PRICE }(
+            endedWithBidSetup.tokenId
+        );
+        vm.warp(endedWithBidSetup.auctionEndTime + 1);
         vm.expectRevert(bytes("Not active"));
-        settledSetup.auctions.minimumNextBid(settledSetup.tokenId);
+        endedWithBidSetup.auctions.minimumNextBid(endedWithBidSetup.tokenId);
+
+        AuctionSetup memory settledNoBidSetup = _createAuction();
+        vm.warp(settledNoBidSetup.auctionEndTime + 1);
+        settledNoBidSetup.auctions.claimAuction(settledNoBidSetup.tokenId);
+        vm.expectRevert(bytes("Not active"));
+        settledNoBidSetup.auctions.minimumNextBid(settledNoBidSetup.tokenId);
+
+        AuctionSetup memory settledWithBidSetup = _createAuction();
+        vm.deal(FIRST_BIDDER, 10 ether);
+        vm.prank(FIRST_BIDDER);
+        settledWithBidSetup.auctions.participateToAuction{ value: RESERVE_PRICE }(
+            settledWithBidSetup.tokenId
+        );
+        vm.warp(settledWithBidSetup.auctionEndTime + 1);
+        settledWithBidSetup.auctions.claimAuction(settledWithBidSetup.tokenId);
+        vm.expectRevert(bytes("Not active"));
+        settledWithBidSetup.auctions.minimumNextBid(settledWithBidSetup.tokenId);
 
         AuctionSetup memory cancelledSetup = _createAuction();
         vm.prank(POSTER);

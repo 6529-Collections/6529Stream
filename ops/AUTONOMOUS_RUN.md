@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 20:32 UTC` |
+| Last updated | `2026-06-17 20:37 UTC` |
 
 ## Packaging Notes
 
@@ -16194,6 +16194,7 @@ Outcome:
 | 2026-06-17 19:50 | Start CON-003 auction read views | Issue #522 and branch `codex/auction-integration-read-views` now track the next substantive PR. Scope is additive `StreamAuctions` integration reads for `minimumNextBid(tokenId)` and the no-bid claimant alias, focused auction tests/invariants, integration docs, regenerated ABI/release artifacts, CodeRabbit review, CI, and merge before moving to the randomizer request-binding follow-up. |
 | 2026-06-17 20:11 | Validate CON-003 local draft | Added additive `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` integration read views, focused auction payment/custody tests, invariant cross-checks, integration/operator docs, changelog coverage, and regenerated release evidence. Local validation passed: `make release-checksums-check`, `make abi-compatibility-check`, `forge fmt --check smart-contracts\AuctionContract.sol test\StreamAuctionPayments.t.sol test\StreamAuctionCustody.t.sol test\StreamAuctionInvariant.t.sol test\StreamPaymentsInvariant.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `forge test --match-path test\StreamAuctionCustody.t.sol -vvv`, `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv`, `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`, `python scripts\check_changelog.py`, `python scripts\verify_release_artifacts.py`, stale pinned-hash scan, and `codex-diff-check`. `StreamCore` remains 22,184 bytes with 2,392 bytes of EIP-170 margin; `StreamAuctions` is 10,938 bytes with 13,638 bytes margin. Next action is to commit, push, open the PR for issue #522, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 20:32 | Open PR #523 for CON-003 | PR #523 is open at `https://github.com/6529-Collections/6529Stream/pull/523`, closes issue #522, and packages additive auction read views, focused tests/invariants, integration/operator docs, changelog coverage, and regenerated release evidence. CodeRabbit was requested in comment `4735054006`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 20:37 | Address PR #523 test-coverage nice-to-haves | 6529bot security reported no findings and general review marked PR #523 good to merge with two useful coverage nice-to-haves. Added explicit `minimumNextBid` coverage for the 1-wei integer-floor outbid case where the increment floors to zero, and expanded fail-closed revert assertions across no auction, ended no bid, ended with bid, settled no bid, settled with bid, and cancelled states. `forge fmt --check test\StreamAuctionPayments.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `make release-checksums-check`, and `codex-diff-check` passed. Next action is to commit/push the review-response head, wait for latest CI/bot feedback, and merge only when clean. |
 
 ## Resume Instructions
 
