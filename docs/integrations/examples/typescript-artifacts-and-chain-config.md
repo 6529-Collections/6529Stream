@@ -336,6 +336,10 @@ function optionalAddress(addressBook: AddressBook, name: string): HexAddress | u
 Do not paste ABI arrays into application source without a documented generation
 or checksum process.
 
+`optionalAddress` only treats an absent contract as optional. A present but
+malformed optional address still throws through `requiredAddress`, which is the
+intended fail-closed behavior for reviewed address books.
+
 ## Fail-Closed Preflight
 
 Run preflight before any wallet prompt, Safe proposal, typed-data signature,

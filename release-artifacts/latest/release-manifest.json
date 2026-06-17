@@ -2177,8 +2177,8 @@
       },
       {
         "path": "docs/integrations/examples/typescript-artifacts-and-chain-config.md",
-        "sha256": "sha256:cfe0c0cf3be6a69515b7ef3565f2469ebcd4df2b98b876d8ea5ac62fdea6be48",
-        "size_bytes": 16657
+        "sha256": "sha256:5f5ab2d61ebd67186afae987dce7f92ab655c798a5be9fb19bec9e61608a94c2",
+        "size_bytes": 16872
       },
       {
         "path": "docs/integrations/mobile-walletconnect.md",

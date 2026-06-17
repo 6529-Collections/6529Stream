@@ -37,10 +37,12 @@ def target_links() -> str:
 
 
 def minimal_doc() -> str:
-    headings = "\n\n".join(
-        f"{'#' * level} {title}\n\nPlaceholder."
-        for level, title in checker.REQUIRED_HEADINGS[1:]
-    )
+    sections = []
+    for level, title in checker.REQUIRED_HEADINGS[1:]:
+        if title in {"Maturity And Scope", "Source Of Truth", "Validation Commands"}:
+            continue
+        sections.append(f"{'#' * level} {title}\n\nPlaceholder.")
+    headings = "\n\n".join(sections)
     phrases = "\n".join(checker.REQUIRED_PHRASES)
     code = "\n".join(checker.REQUIRED_CODE_TOKENS)
     commands = "\n".join(checker.REQUIRED_COMMANDS)
@@ -56,7 +58,7 @@ Placeholder.
 
 {target_links()}
 
-{headings.replace("## Maturity And Scope\n\nPlaceholder.\n\n", "").replace("## Source Of Truth\n\nPlaceholder.\n\n", "")}
+{headings}
 
 ```ts
 {code}

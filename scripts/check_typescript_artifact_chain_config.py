@@ -162,6 +162,8 @@ def normalized_link_target(raw_target: str) -> str | None:
 
 def label_looks_like_repo_path(label: str) -> bool:
     normalized = label.strip().strip("`")
+    if any(character.isspace() for character in normalized):
+        return False
     return "/" in normalized or "\\" in normalized or normalized.endswith((
         ".md",
         ".json",
