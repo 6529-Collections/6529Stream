@@ -44,7 +44,7 @@ def minimal_monitoring_spec() -> str:
     return f"""# Protocol Monitoring Specification
 
 This GOV-009 pre-audit local baseline is not production-ready and not a
-security claim. It does not replace fork/testnet/live evidence, public beta, or
+security claim. It does not replace fork/testnet/live evidence, public beta or
 production review. It is not a maintained monitoring service. no secrets,
 private keys, mnemonics, RPC URLs, API keys, signer-service credentials, and
 unreleased drop payloads are forbidden.
@@ -267,6 +267,21 @@ class MonitoringSpecTests(unittest.TestCase):
                     root, root / checker.DEFAULT_MONITORING_SPEC
                 )
 
+    def test_rejects_escaped_link_target(self) -> None:
+        """Links that escape the repository root are rejected."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_monitoring_spec() + "\n[escape](../../outside.md)\n"
+            write_text(root / checker.DEFAULT_MONITORING_SPEC, text)
+
+            with self.assertRaisesRegex(
+                checker.MonitoringSpecError, "linked path escapes repository"
+            ):
+                checker.validate_monitoring_spec(
+                    root, root / checker.DEFAULT_MONITORING_SPEC
+                )
+
     def test_rejects_missing_linked_file(self) -> None:
         """Local links must resolve to existing repository files."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -290,6 +305,25 @@ class MonitoringSpecTests(unittest.TestCase):
             text = minimal_monitoring_spec().replace(
                 "python scripts/check_monitoring_spec.py\n", ""
             )
+            write_text(root / checker.DEFAULT_MONITORING_SPEC, text)
+
+            with self.assertRaisesRegex(
+                checker.MonitoringSpecError, "missing required commands"
+            ):
+                checker.validate_monitoring_spec(
+                    root, root / checker.DEFAULT_MONITORING_SPEC
+                )
+
+    def test_rejects_required_command_outside_validation_code_fence(self) -> None:
+        """Required commands must appear in fenced validation command blocks."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_monitoring_spec().replace(
+                "```sh\npython scripts/test_monitoring_spec.py\n",
+                "```sh\n",
+            )
+            text += "\npython scripts/test_monitoring_spec.py\n"
             write_text(root / checker.DEFAULT_MONITORING_SPEC, text)
 
             with self.assertRaisesRegex(

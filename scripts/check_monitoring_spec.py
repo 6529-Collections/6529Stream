@@ -39,7 +39,7 @@ REQUIRED_PHRASES = [
     "does not replace fork/testnet/live evidence",
     "maintained monitoring service",
     "public beta",
-    "production",
+    "public beta or production",
     "no secrets",
     "private keys",
     "mnemonics",
@@ -84,14 +84,13 @@ REQUIRED_PHRASES = [
     "DependencyVersionDeprecated",
     "DependencyVersionPinned",
     "DROP_EXECUTION",
-    "MINT",
     "AUCTION_BID",
     "AUCTION_SETTLEMENT",
     "METADATA_MUTATION",
     "RANDOMNESS_REQUEST",
     "EIP-712",
     "ERC-1271",
-    "Safe",
+    "approved Safe or multisig ceremony",
     "EOA",
     "Replay protection",
     "consumed-state storage",
@@ -241,6 +240,7 @@ REQUIRED_LINK_TARGETS = [
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+FENCED_CODE_RE = re.compile(r"^```[^\n]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
 
 
 class MonitoringSpecError(ValueError):
@@ -327,6 +327,17 @@ def markdown_section(text: str, heading: str) -> str:
     return "" if match is None else match.group(1)
 
 
+def fenced_command_lines(text: str) -> set[str]:
+    """Return non-empty lines presented inside fenced Markdown code blocks."""
+    command_lines = set()
+    for match in FENCED_CODE_RE.finditer(text):
+        for line in match.group(1).splitlines():
+            stripped = line.strip()
+            if stripped:
+                command_lines.add(stripped)
+    return command_lines
+
+
 def validate_monitoring_spec(repo_root: Path, document_path: Path) -> None:
     """Validate the monitoring specification."""
     if not document_path.is_file():
@@ -364,7 +375,7 @@ def validate_monitoring_spec(repo_root: Path, document_path: Path) -> None:
             + ", ".join(missing_section_content)
         )
 
-    command_lines = {line.strip() for line in text.splitlines()}
+    command_lines = fenced_command_lines(markdown_section(text, "Validation Commands"))
     missing_commands = [
         command for command in REQUIRED_COMMANDS if command not in command_lines
     ]
