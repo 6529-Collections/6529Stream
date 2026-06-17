@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `ADV-013` randomizer request-binding parity tests covering VRF and
+  arRNG wrong-collection pending-state preservation, plus nested stale-mark and
+  retry reentry during the external core write without production bytecode
+  changes.
 - Added `StreamAuctions.minimumNextBid(tokenId)` and
   `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations,
   with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and

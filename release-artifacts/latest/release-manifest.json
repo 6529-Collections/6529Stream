@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:0997bfde6ee00fec734ad06f7d58d772d3e742cff94c439fd5b73137e6fd5dc7",
-        "size_bytes": 58969,
+        "sha256": "sha256:f138af5148508997220ce9aecc30301f1924d9bd9b73381e11f09fc451e2c9cf",
+        "size_bytes": 59211,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:0e06da30a4c271f32544215935af299c1b06facc56fcb8fa8c3caf8c1d0e5c26",
-        "size_bytes": 56309
+        "sha256": "sha256:d23e0b488a3823302cb2c25e5886959bf542451526f11b5b4c08134fd6f0aa78",
+        "size_bytes": 56544
       }
     },
     "release_candidate_lockfile": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f6171e7339419fb3203656a999001148bb455e01238f2d1b1e7dd3d313f91a12",
+      "sha256": "sha256:6a8ebdb813a6492c30f809b638ecbfe394e9b6ed3d21ab3fb1f49304c776259b",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -1978,8 +1978,8 @@
     "randomizer_operations": [
       {
         "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:70f3c8e95d8ccb6a0b313b220c0be1565cc08db9d02b10f1c5e43267b462b411",
-        "size_bytes": 9540,
+        "sha256": "sha256:6b7a3a0ccb8b43c81996e1403b3c6d8b83bb381efd8fff835e221dbdce2056c8",
+        "size_bytes": 10245,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
         "protocol_version": "0.1.0",
@@ -2013,8 +2013,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:763fc47281fd49fd5a87c5d137c56262dea688bae1f279ff4bfbd0e7b522ceb4",
-      "size_bytes": 56674
+      "sha256": "sha256:77ee124344d30c628026e55dc923c32525cd3fec2704cba40d6fdaa3a77af874",
+      "size_bytes": 56915
     },
     "governance_docs": [
       {

@@ -729,6 +729,35 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             )
         );
         coordinator.fulfill(vrf, 1, _words(777));
+
+        _assertWrongCollectionFulfillmentPreservedPending(core, vrf);
+    }
+
+    function testArrngWrongCollectionBindingFailsClosed() public {
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        MockRandomizerCore core = new MockRandomizerCore();
+        MockArrngLifecycleController controller = new MockArrngLifecycleController();
+        NextGenRandomizerRNG rng =
+            new NextGenRandomizerRNG(address(core), address(deployed.admins), address(controller));
+
+        core.setRandomizer(COLLECTION_ID, address(rng), 1);
+        core.setTokenCollection(TOKEN_ID, COLLECTION_ID + 1);
+
+        vm.prank(address(core));
+        rng.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.WrongRandomnessTokenCollection.selector,
+                uint256(1),
+                TOKEN_ID,
+                COLLECTION_ID,
+                COLLECTION_ID + 1
+            )
+        );
+        controller.fulfill(rng, 1, _words(888));
+
+        _assertWrongCollectionFulfillmentPreservedPending(core, rng);
     }
 
     function _deployVrfRandomizer()
@@ -914,6 +943,29 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
             }
         }
         found.assertTrue("failed event");
+    }
+
+    function _assertWrongCollectionFulfillmentPreservedPending(
+        MockRandomizerCore core,
+        StreamRandomizerLifecycle randomizer
+    ) private view {
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            randomizer.retrieveRandomnessRequest(1);
+        request.collectionId.assertEq(COLLECTION_ID, "request collection");
+        request.tokenId.assertEq(TOKEN_ID, "request token");
+        request.provider.assertEq(address(randomizer), "request provider");
+        request.providerRequestId.assertEq(1, "provider request");
+        request.randomizerEpoch.assertEq(1, "request epoch");
+        uint256(request.state)
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Pending), "state");
+        request.derivedSeed.assertEq(bytes32(0), "seed");
+        request.rawOutputHash.assertEq(bytes32(0), "raw output");
+        request.failureDataHash.assertEq(bytes32(0), "failure hash");
+        request.fulfilledBlock.assertEq(0, "fulfilled block");
+        request.fulfilledTimestamp.assertEq(0, "fulfilled timestamp");
+        randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending collection");
+        randomizer.totalPendingRandomnessRequests().assertEq(1, "pending total");
+        core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "token hash");
     }
 }
 

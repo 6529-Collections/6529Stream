@@ -27,8 +27,8 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
         (
             AdversarialRandomizerCore core,
             AdversarialVrfCoordinator coordinator,
-            NextGenRandomizerVRF vrf
-        ) = _deployVrfAdversary();
+            NextGenRandomizerVRF vrf,
+        ) = _deployVrfAdversaryWithAdmins();
         uint256[] memory outerWords = _words(777);
         uint256[] memory reentrantWords = _words(999);
 
@@ -62,8 +62,8 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
         (
             AdversarialRandomizerCore core,
             AdversarialArrngController controller,
-            NextGenRandomizerRNG rng
-        ) = _deployArrngAdversary();
+            NextGenRandomizerRNG rng,
+        ) = _deployArrngAdversaryWithAdmins();
         uint256[] memory outerWords = _words(888);
         uint256[] memory reentrantWords = _words(444);
 
@@ -89,6 +89,136 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
         request.rawOutputHash.assertEq(_rawOutputHash(outerWords), "raw output");
         rng.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
         rng.totalPendingRandomnessRequests().assertEq(0, "pending total");
+    }
+
+    function testVrfStaleMarkReentryDuringCoreWriteFailsClosedAndOuterFulfillmentWins() public {
+        (
+            AdversarialRandomizerCore core,
+            AdversarialVrfCoordinator coordinator,
+            NextGenRandomizerVRF vrf,
+            StreamAdmins admins
+        ) = _deployVrfAdversaryWithAdmins();
+        uint256[] memory words = _words(31337);
+
+        admins.registerFunctionAdmin(
+            address(core), address(vrf), vrf.markStaleRequest.selector, true
+        );
+        vm.prank(address(core));
+        vrf.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+        core.configureVrfStaleReentry(vrf, 1);
+
+        coordinator.fulfill(vrf, 1, words);
+
+        core.reentryAttempted().assertTrue("stale reentry not attempted");
+        core.reentrySucceeded().assertFalse("stale reentry succeeded");
+        _assertSelector(
+            core.lastReentrySelector(),
+            StreamRandomizerLifecycle.RandomnessRequestNotPending.selector
+        );
+        _assertAdversarialFulfilled(core, vrf, 1, 1, words);
+    }
+
+    function testArrngStaleMarkReentryDuringCoreWriteFailsClosedAndOuterFulfillmentWins() public {
+        (
+            AdversarialRandomizerCore core,
+            AdversarialArrngController controller,
+            NextGenRandomizerRNG rng,
+            StreamAdmins admins
+        ) = _deployArrngAdversaryWithAdmins();
+        uint256[] memory words = _words(424242);
+
+        admins.registerFunctionAdmin(
+            address(core), address(rng), rng.markStaleRequest.selector, true
+        );
+        vm.prank(address(core));
+        rng.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+        core.configureArrngStaleReentry(rng, 1);
+
+        controller.fulfill(rng, 1, words);
+
+        core.reentryAttempted().assertTrue("stale reentry not attempted");
+        core.reentrySucceeded().assertFalse("stale reentry succeeded");
+        _assertSelector(
+            core.lastReentrySelector(),
+            StreamRandomizerLifecycle.RandomnessRequestNotPending.selector
+        );
+        _assertAdversarialFulfilled(core, rng, 1, 1, words);
+    }
+
+    function testVrfRetryReentryDuringCoreWriteFailsClosedAndOuterRetryWins() public {
+        (
+            AdversarialRandomizerCore core,
+            AdversarialVrfCoordinator coordinator,
+            NextGenRandomizerVRF vrf,
+            StreamAdmins admins
+        ) = _deployVrfAdversaryWithAdmins();
+        uint256[] memory words = _words(515151);
+
+        admins.registerFunctionAdmin(
+            address(this), address(vrf), vrf.retryRandomnessPostProcessing.selector, true
+        );
+        admins.registerFunctionAdmin(
+            address(core), address(vrf), vrf.retryRandomnessPostProcessing.selector, true
+        );
+        vm.prank(address(core));
+        vrf.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+        core.setRejectTokenHash(true);
+        coordinator.fulfill(vrf, 1, words);
+        _assertAdversarialFailedPostProcessing(core, vrf, 1, 1, words);
+
+        core.setRejectTokenHash(false);
+        core.configureVrfRetryReentry(vrf, 1);
+        vrf.retryRandomnessPostProcessing(1);
+
+        core.reentryAttempted().assertTrue("retry reentry not attempted");
+        core.reentrySucceeded().assertFalse("retry reentry succeeded");
+        _assertSelector(
+            core.lastReentrySelector(),
+            StreamRandomizerLifecycle.RandomnessRequestNotFailedPostProcessing.selector
+        );
+        _assertAdversarialFulfilled(core, vrf, 1, 1, words);
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            vrf.retrieveRandomnessRequest(1);
+        request.postProcessingRetryCount.assertEq(1, "retry count");
+        coordinator.nextRequestId().assertEq(2, "new provider request");
+    }
+
+    function testArrngRetryReentryDuringCoreWriteFailsClosedAndOuterRetryWins() public {
+        (
+            AdversarialRandomizerCore core,
+            AdversarialArrngController controller,
+            NextGenRandomizerRNG rng,
+            StreamAdmins admins
+        ) = _deployArrngAdversaryWithAdmins();
+        uint256[] memory words = _words(626262);
+
+        admins.registerFunctionAdmin(
+            address(this), address(rng), rng.retryRandomnessPostProcessing.selector, true
+        );
+        admins.registerFunctionAdmin(
+            address(core), address(rng), rng.retryRandomnessPostProcessing.selector, true
+        );
+        vm.prank(address(core));
+        rng.calculateTokenHash(COLLECTION_ID, TOKEN_ID, 123);
+        core.setRejectTokenHash(true);
+        controller.fulfill(rng, 1, words);
+        _assertAdversarialFailedPostProcessing(core, rng, 1, 1, words);
+
+        core.setRejectTokenHash(false);
+        core.configureArrngRetryReentry(rng, 1);
+        rng.retryRandomnessPostProcessing(1);
+
+        core.reentryAttempted().assertTrue("retry reentry not attempted");
+        core.reentrySucceeded().assertFalse("retry reentry succeeded");
+        _assertSelector(
+            core.lastReentrySelector(),
+            StreamRandomizerLifecycle.RandomnessRequestNotFailedPostProcessing.selector
+        );
+        _assertAdversarialFulfilled(core, rng, 1, 1, words);
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            rng.retrieveRandomnessRequest(1);
+        request.postProcessingRetryCount.assertEq(1, "retry count");
+        controller.nextRequestId().assertEq(2, "new provider request");
     }
 
     function testVrfStaleProviderFulfillmentPreservesPendingRequestUntilExplicitStaleMark() public {
@@ -169,15 +299,16 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
         rng.totalPendingRandomnessRequests().assertEq(0, "pending total");
     }
 
-    function _deployVrfAdversary()
+    function _deployVrfAdversaryWithAdmins()
         private
         returns (
             AdversarialRandomizerCore core,
             AdversarialVrfCoordinator coordinator,
-            NextGenRandomizerVRF vrf
+            NextGenRandomizerVRF vrf,
+            StreamAdmins admins
         )
     {
-        StreamAdmins admins = new StreamAdmins(address(this));
+        admins = new StreamAdmins(address(this));
         core = new AdversarialRandomizerCore();
         coordinator = new AdversarialVrfCoordinator();
         vrf = new NextGenRandomizerVRF(1, address(coordinator), address(core), address(admins));
@@ -185,15 +316,16 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
         core.setTokenCollection(TOKEN_ID, COLLECTION_ID);
     }
 
-    function _deployArrngAdversary()
+    function _deployArrngAdversaryWithAdmins()
         private
         returns (
             AdversarialRandomizerCore core,
             AdversarialArrngController controller,
-            NextGenRandomizerRNG rng
+            NextGenRandomizerRNG rng,
+            StreamAdmins admins
         )
     {
-        StreamAdmins admins = new StreamAdmins(address(this));
+        admins = new StreamAdmins(address(this));
         core = new AdversarialRandomizerCore();
         controller = new AdversarialArrngController();
         rng = new NextGenRandomizerRNG(address(core), address(admins), address(controller));
@@ -246,6 +378,52 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
         randomizer.totalPendingRandomnessRequests().assertEq(1, "pending total");
     }
 
+    function _assertAdversarialFulfilled(
+        AdversarialRandomizerCore core,
+        StreamRandomizerLifecycle randomizer,
+        uint256 requestId,
+        uint256 randomizerEpoch,
+        uint256[] memory words
+    ) private view {
+        bytes32 expectedSeed = _expectedSeed(address(randomizer), requestId, randomizerEpoch, words);
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            randomizer.retrieveRandomnessRequest(requestId);
+        uint256(request.state)
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Fulfilled), "state");
+        request.derivedSeed.assertEq(expectedSeed, "stored seed");
+        request.rawOutputHash.assertEq(_rawOutputHash(words), "raw output");
+        request.failureDataHash.assertEq(bytes32(0), "failure hash");
+        (request.fulfilledBlock > 0).assertTrue("fulfilled block");
+        (request.fulfilledTimestamp > 0).assertTrue("fulfilled timestamp");
+        core.retrieveTokenHash(TOKEN_ID).assertEq(expectedSeed, "core hash");
+        randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
+        randomizer.totalPendingRandomnessRequests().assertEq(0, "pending total");
+    }
+
+    function _assertAdversarialFailedPostProcessing(
+        AdversarialRandomizerCore core,
+        StreamRandomizerLifecycle randomizer,
+        uint256 requestId,
+        uint256 randomizerEpoch,
+        uint256[] memory words
+    ) private view {
+        bytes32 expectedSeed = _expectedSeed(address(randomizer), requestId, randomizerEpoch, words);
+        StreamRandomizerLifecycle.RandomnessRequest memory request =
+            randomizer.retrieveRandomnessRequest(requestId);
+        uint256(request.state)
+            .assertEq(
+                uint256(StreamRandomizerLifecycle.RandomnessRequestState.FailedPostProcessing),
+                "state"
+            );
+        request.derivedSeed.assertEq(expectedSeed, "failed seed");
+        request.rawOutputHash.assertEq(_rawOutputHash(words), "raw output");
+        (request.failureDataHash != bytes32(0)).assertTrue("failure hash");
+        request.postProcessingRetryCount.assertEq(0, "retry count");
+        core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "core hash");
+        randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending collection");
+        randomizer.totalPendingRandomnessRequests().assertEq(0, "pending total");
+    }
+
     function _assertSelector(bytes4 actual, bytes4 expected) private pure {
         require(actual == expected, "reentry selector");
     }
@@ -280,10 +458,16 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
 }
 
 contract AdversarialRandomizerCore {
+    error AdversarialTokenHashRejected();
+
     enum ReentryMode {
         None,
         VrfCallback,
-        ArrngCallback
+        ArrngCallback,
+        VrfMarkStale,
+        ArrngMarkStale,
+        VrfRetry,
+        ArrngRetry
     }
 
     mapping(uint256 => uint256) private randomizerEpochs;
@@ -298,6 +482,7 @@ contract AdversarialRandomizerCore {
     NextGenRandomizerRNG private reentrantRng;
     uint256 private reentrantRequestId;
     uint256[] private reentrantWords;
+    bool private rejectTokenHash;
 
     bool public reentryAttempted;
     bool public reentrySucceeded;
@@ -310,6 +495,10 @@ contract AdversarialRandomizerCore {
 
     function setTokenCollection(uint256 tokenId, uint256 collectionId) external {
         tokenCollections[tokenId] = collectionId;
+    }
+
+    function setRejectTokenHash(bool status) external {
+        rejectTokenHash = status;
     }
 
     function configureVrfReentry(
@@ -338,8 +527,39 @@ contract AdversarialRandomizerCore {
         _setReentrantWords(words);
     }
 
+    function configureVrfStaleReentry(NextGenRandomizerVRF randomizer, uint256 requestId) external {
+        reentryMode = ReentryMode.VrfMarkStale;
+        reentrantVrf = randomizer;
+        reentrantRequestId = requestId;
+    }
+
+    function configureArrngStaleReentry(NextGenRandomizerRNG randomizer, uint256 requestId)
+        external
+    {
+        reentryMode = ReentryMode.ArrngMarkStale;
+        reentrantRng = randomizer;
+        reentrantRequestId = requestId;
+    }
+
+    function configureVrfRetryReentry(NextGenRandomizerVRF randomizer, uint256 requestId) external {
+        reentryMode = ReentryMode.VrfRetry;
+        reentrantVrf = randomizer;
+        reentrantRequestId = requestId;
+    }
+
+    function configureArrngRetryReentry(NextGenRandomizerRNG randomizer, uint256 requestId)
+        external
+    {
+        reentryMode = ReentryMode.ArrngRetry;
+        reentrantRng = randomizer;
+        reentrantRequestId = requestId;
+    }
+
     function setTokenHash(uint256 collectionId, uint256 tokenId, bytes32 tokenHash) external {
         require(msg.sender == randomizerContracts[collectionId], "wrong randomizer");
+        if (rejectTokenHash) {
+            revert AdversarialTokenHashRejected();
+        }
         require(tokenHashes[tokenId] == bytes32(0), "hash already set");
         _attemptReentry();
         tokenHashes[tokenId] = tokenHash;
@@ -382,8 +602,32 @@ contract AdversarialRandomizerCore {
             } catch (bytes memory failureData) {
                 lastReentrySelector = _selectorOf(failureData);
             }
-        } else {
+        } else if (reentryMode == ReentryMode.ArrngCallback) {
             try arrngController.fulfill(reentrantRng, reentrantRequestId, reentrantWords) {
+                reentrySucceeded = true;
+            } catch (bytes memory failureData) {
+                lastReentrySelector = _selectorOf(failureData);
+            }
+        } else if (reentryMode == ReentryMode.VrfMarkStale) {
+            try reentrantVrf.markStaleRequest(reentrantRequestId) {
+                reentrySucceeded = true;
+            } catch (bytes memory failureData) {
+                lastReentrySelector = _selectorOf(failureData);
+            }
+        } else if (reentryMode == ReentryMode.ArrngMarkStale) {
+            try reentrantRng.markStaleRequest(reentrantRequestId) {
+                reentrySucceeded = true;
+            } catch (bytes memory failureData) {
+                lastReentrySelector = _selectorOf(failureData);
+            }
+        } else if (reentryMode == ReentryMode.VrfRetry) {
+            try reentrantVrf.retryRandomnessPostProcessing(reentrantRequestId) {
+                reentrySucceeded = true;
+            } catch (bytes memory failureData) {
+                lastReentrySelector = _selectorOf(failureData);
+            }
+        } else {
+            try reentrantRng.retryRandomnessPostProcessing(reentrantRequestId) {
                 reentrySucceeded = true;
             } catch (bytes memory failureData) {
                 lastReentrySelector = _selectorOf(failureData);

@@ -228,6 +228,11 @@ post-processing write fails closed while the outer fulfillment stores the
 canonical seed, and stale-provider fulfillment attempts preserve pending state,
 zero token hash, and pending counters until an authorized stale mark clears the
 request.
+ADV-013 extends that request-binding surface: VRF and arRNG wrong-collection
+fulfillment attempts now preserve pending state, zero token hash, zero derived
+seed, zero raw-output hash, and pending counters, and nested stale-mark or retry
+attempts during the external core write fail closed while the outer fulfillment
+or retry stores the canonical seed without creating a new provider request.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be
