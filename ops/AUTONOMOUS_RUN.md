@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/reconcile-backlog-merged-status` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/525` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/526` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/527` |
-| Next issue | Wait for PR #527 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge when clean; then select the next local-verifiable substantive backlog item. |
+| Active PR branch | `codex/marketplace-indexer-manifest-validation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/527` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/528` |
+| Active PR | `TBD` |
+| Next issue | Finish MAP-003 local validation, open the PR, request CodeRabbit, wait for CI/bot feedback, merge when clean, then continue with the next substantive release-evidence candidate. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 22:45 UTC` |
+| Last updated | `2026-06-17 23:40 UTC` |
 
 ## Packaging Notes
 
@@ -16203,6 +16203,8 @@ Outcome:
 | 2026-06-17 22:22 | Address PR #525 bot harness note | 6529bot marked PR #525 good to merge and left one non-blocking harness note: make the `ArrngRetry` branch explicit instead of using a trailing fallback `else`. Updated the test adversary to fail loudly on unknown reentry modes, regenerated affected randomizer/release evidence, and reran `forge fmt --check test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`, `make release-checksums-check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to commit/push the review-response head, wait for current CI/CodeRabbit/6529bot feedback, and merge only when clean. |
 | 2026-06-17 22:34 | Merge PR #525 and start MAP-002 reconciliation | PR #525 merged as `09063da55a64c6ec0970fd608b19b0e6ee51a7fb` after CodeRabbit, Foundry smoke, Windows wrapper, and latest 6529bot follow-up were clean; issue #524 closed completed. Issue #526 and branch `codex/reconcile-backlog-merged-status` now track stale merged-status reconciliation for ADV-013, CON-005, and the INT-007 through INT-009 integration slices so the manager loop does not reselect completed work. |
 | 2026-06-17 22:45 | Open PR #527 for MAP-002 | PR #527 is open at `https://github.com/6529-Collections/6529Stream/pull/527`, closes issue #526, and reconciles stale merged-status rows for previously shipped integration, 1/1, contract-size, and ADV-013 work. CodeRabbit was requested in comment `4736172273`. Local validation passed: `python scripts\test_risk_register.py`, `python scripts\check_risk_register.py`, `make release-checksums`, `make release-checksums-check`, and `codex-diff-check`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 23:14 | Start MAP-003 marketplace/indexer manifest validation | PR #527 merged as `dc0ca391651a2f6e106d93a574efbd30871172a3` after CI and CodeRabbit were clean; issue #526 closed completed. Issue #528 and branch `codex/marketplace-indexer-manifest-validation` now track a substantive release-evidence guardrail: complete marketplace/indexer rows must reference reviewed non-local envelopes whose retained Markdown artifacts pass the detailed coverage, environment, hash, and no-secret checker. This intentionally does not close #423 or #424 because actual fork/testnet/live marketplace/indexer evidence is still missing. Focused marketplace/indexer tests and checker passed locally; next action is to finish docs/artifact regeneration, run required gates, commit, push, open PR, request CodeRabbit, and merge only when clean. |
+| 2026-06-17 23:40 | Validate MAP-003 local draft | Added manifest-aware marketplace/indexer evidence validation, focused reviewed-manifest fixture tests, docs/backlog/run-state updates, changelog coverage, and regenerated release evidence artifacts. Local validation passed: `python scripts\test_marketplace_indexer_evidence.py`, `python scripts\check_marketplace_indexer_evidence.py`, packet-index/backlog/body-sync tests and generators, public-beta/non-local evidence checks, release manifest/checksum checks, Python compile, `make release-checksums`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `codex-diff-check`. Known compiler/Foundry warning noise remains unchanged. Next action is to commit, push, open PR for issue #528, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 
 ## Resume Instructions
 

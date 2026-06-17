@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:22127841e217de657cb4622811766814a10c74991c1e6848f405ce8ac594a9ea"
+      "sha256": "sha256:0aedad63e3fd76a2fc5ee427664ba1b54075c8936072dc82177dcc11f78415ae"
     },
     {
       "path": "docs/audit-package.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:22127841e217de657cb4622811766814a10c74991c1e6848f405ce8ac594a9ea"
+          "sha256": "sha256:0aedad63e3fd76a2fc5ee427664ba1b54075c8936072dc82177dcc11f78415ae"
         }
       ],
       "risk_acceptance": null
@@ -248,7 +248,7 @@
         },
         {
           "path": "docs/integrations/marketplace-indexer-evidence.md",
-          "sha256": "sha256:3cfea3d0270faa6c5d3be57a61c6b259d61158dbdb7564f6978e8674948ed2df"
+          "sha256": "sha256:c094d4261f62a4d0287053790d2f531b5071555f1fa7e2ff9b452c54cb40c9a2"
         },
         {
           "path": "docs/release-readiness.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:22127841e217de657cb4622811766814a10c74991c1e6848f405ce8ac594a9ea"
+          "sha256": "sha256:0aedad63e3fd76a2fc5ee427664ba1b54075c8936072dc82177dcc11f78415ae"
         },
         {
           "path": "docs/metadata.md",
@@ -483,7 +483,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:22127841e217de657cb4622811766814a10c74991c1e6848f405ce8ac594a9ea"
+          "sha256": "sha256:0aedad63e3fd76a2fc5ee427664ba1b54075c8936072dc82177dcc11f78415ae"
         },
         {
           "path": "docs/tooling.md",

@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:32055865f7fd8908762112967e70af34abba8ec79f7b0763b7ea8595c506581a",
-        "size_bytes": 59438,
+        "sha256": "sha256:7117725faac1a7aa67c142419268ac3b99f15f48fb0aee40ebb3308439987be3",
+        "size_bytes": 59771,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:c92cbe7578485ffebad4e0aa5ae68f1757e18a37dd2f3ae2a19136e5e6c4e649",
-        "size_bytes": 56764
+        "sha256": "sha256:1672850406e4d79baa02d8f05007be279cbba2a3e5130b298bab028edce35a30",
+        "size_bytes": 57090
       }
     },
     "release_candidate_lockfile": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:17b308bb57c1ac9252144af8d09321cfd65481ab972f2e2310deec1b5853409d",
+      "sha256": "sha256:22aa8eae8c4dbcfb95cba40d912e0684407e541b67b48bc95039926d870cdf64",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -189,7 +189,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:475712febff4c952666876b9886a6334568282169a4590e92dfd44e529f13d8a",
+        "sha256": "sha256:94ccbb25dd7b8a776b73189f062c59dbe113cb5b3db3424fc50b93af0c77e5a9",
         "size_bytes": 65528,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -215,7 +215,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:bef4c627fe61b8e7ab048b0946508ce8dfe758c305d67ffb3ba4c64efc048ffe",
+        "sha256": "sha256:8baa9546a68eed43697f865a46661377f2feb2252ad0aec7016f277dbb14992b",
         "size_bytes": 126246,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -234,13 +234,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:82a5bae3847cfea2b3e144605e2a320727025cc2d68239801b91fd2f6daac343",
+        "sha256": "sha256:bb88ff51cfc5598e85fe725a9387f29c313bf04470c2e88667168736bf3e0769",
         "size_bytes": 87309,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:c3a2b24a6bd9f9a3d31da16acab7625384e2e14742de916f826582b12388f4ea",
+        "sha256": "sha256:cf63506e61d4a7e8c259ebfa0e22cb0c878d8904a7844a6cecfac2364d9c170c",
         "size_bytes": 77353
       }
     },
@@ -2013,8 +2013,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:40c5d20fdd71acbb33fb44cc2fe23f115fee36715d4bf838ade004d0934e0e97",
-      "size_bytes": 57139
+      "sha256": "sha256:080cf7076a73c19a7c113e99b3b0cd57901c34d555fa73ddb121491f4208cf0e",
+      "size_bytes": 57473
     },
     "governance_docs": [
       {
@@ -2094,8 +2094,8 @@
       },
       {
         "path": "docs/non-local-release-evidence.md",
-        "sha256": "sha256:833e90d20761065d0d5b81d8fa947f22f1c1f65b1f9bf3afe1e4638ac4274c2c",
-        "size_bytes": 28496
+        "sha256": "sha256:adf8c18b3679e2692082aa605fc3558395a4af8e3c41c244ae7774afed7c5efc",
+        "size_bytes": 29197
       },
       {
         "path": "docs/architecture.md",
@@ -2224,8 +2224,8 @@
       },
       {
         "path": "docs/integrations/marketplace-indexer-evidence.md",
-        "sha256": "sha256:3cfea3d0270faa6c5d3be57a61c6b259d61158dbdb7564f6978e8674948ed2df",
-        "size_bytes": 9183
+        "sha256": "sha256:c094d4261f62a4d0287053790d2f531b5071555f1fa7e2ff9b452c54cb40c9a2",
+        "size_bytes": 10273
       },
       {
         "path": "docs/integrations/interface-versioning.md",
