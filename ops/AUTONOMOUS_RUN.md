@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/randomizer-request-binding-parity` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/523` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/524` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/525` |
-| Next issue | Wait for PR #525 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge when clean; then select the next local-verifiable substantive backlog item. |
+| Active PR branch | `codex/reconcile-backlog-merged-status` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/525` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/526` |
+| Active PR | `TBD` |
+| Next issue | Reconcile stale merged-status rows after PR #525, refresh generated artifacts if checksum-covered inputs changed, open PR, request CodeRabbit, and merge only when CI/bots are clean. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 22:22 UTC` |
+| Last updated | `2026-06-17 22:34 UTC` |
 
 ## Packaging Notes
 
@@ -16201,6 +16201,7 @@ Outcome:
 | 2026-06-17 21:32 | Finish ADV-013 local validation | ADV-013 is ready to publish: focused lifecycle/adversarial/retry randomizer tests passed, randomizer operation evidence scripts passed, release manifest/checksum/lockfile checks passed, full `make check` passed with output captured during the run, Windows `scripts\check.ps1` passed, and `codex-diff-check` passed. Next action is to commit, push, open the issue-linked PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 22:02 | Open PR #525 for ADV-013 | PR #525 is open at `https://github.com/6529-Collections/6529Stream/pull/525`, closes issue #524, and packages randomizer request-binding parity plus core-write stale/retry reentry tests with regenerated release evidence. CodeRabbit was requested in comment `4735920164`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 22:22 | Address PR #525 bot harness note | 6529bot marked PR #525 good to merge and left one non-blocking harness note: make the `ArrngRetry` branch explicit instead of using a trailing fallback `else`. Updated the test adversary to fail loudly on unknown reentry modes, regenerated affected randomizer/release evidence, and reran `forge fmt --check test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`, `make release-checksums-check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to commit/push the review-response head, wait for current CI/CodeRabbit/6529bot feedback, and merge only when clean. |
+| 2026-06-17 22:34 | Merge PR #525 and start MAP-002 reconciliation | PR #525 merged as `09063da55a64c6ec0970fd608b19b0e6ee51a7fb` after CodeRabbit, Foundry smoke, Windows wrapper, and latest 6529bot follow-up were clean; issue #524 closed completed. Issue #526 and branch `codex/reconcile-backlog-merged-status` now track stale merged-status reconciliation for ADV-013, CON-005, and the INT-007 through INT-009 integration slices so the manager loop does not reselect completed work. |
 
 ## Resume Instructions
 
