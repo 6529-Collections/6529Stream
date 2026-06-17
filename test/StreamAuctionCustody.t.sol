@@ -102,6 +102,8 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
             .assertEq(address(setup.auctions), "token left escrow");
         setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
             .assertEq(address(poster), "pending claimant");
+        setup.auctions.retrieveNoBidAuctionClaimant(setup.tokenId)
+            .assertEq(address(poster), "claimant alias");
         uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId))
             .assertEq(uint256(StreamAuctions.AuctionStatus.EndedNoBid), "status");
 
@@ -116,6 +118,10 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
         poster.claim(setup.auctions, setup.tokenId, RECIPIENT);
 
         setup.deployed.core.ownerOf(setup.tokenId).assertEq(RECIPIENT, "recipient owner");
+        setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
+            .assertEq(address(0), "pending claimant cleared");
+        setup.auctions.retrieveNoBidAuctionClaimant(setup.tokenId)
+            .assertEq(address(0), "claimant alias cleared");
         uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId))
             .assertEq(uint256(StreamAuctions.AuctionStatus.SettledNoBid), "settled status");
     }
@@ -142,6 +148,8 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
             .assertEq(address(setup.auctions), "token left escrow");
         setup.auctions.pendingNoBidNftClaimant(setup.tokenId)
             .assertEq(address(poster), "pending claim cleared");
+        setup.auctions.retrieveNoBidAuctionClaimant(setup.tokenId)
+            .assertEq(address(poster), "claim alias preserved");
         uint256(setup.auctions.retrieveAuctionStatus(setup.tokenId))
             .assertEq(uint256(StreamAuctions.AuctionStatus.EndedNoBid), "status advanced");
     }

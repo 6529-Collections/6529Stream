@@ -525,6 +525,7 @@ contract AuctionConsistencyInvariantHandler is DropAuthTestHelper, StreamFixture
             status.assertEq(uint256(StreamAuctions.AuctionStatus.EndedWithBid), "ended with-bid");
         } else {
             status.assertEq(uint256(StreamAuctions.AuctionStatus.Active), "active status");
+            _minimumBid(model);
         }
     }
 
@@ -566,6 +567,14 @@ contract AuctionConsistencyInvariantHandler is DropAuthTestHelper, StreamFixture
     }
 
     function _minimumBid(AuctionModel storage model) private view returns (uint256) {
+        uint256 modeledMinimum = _modeledMinimumBid(model);
+        if (auctions.retrieveAuctionStatus(model.tokenId) == StreamAuctions.AuctionStatus.Active) {
+            auctions.minimumNextBid(model.tokenId).assertEq(modeledMinimum, "minimum next bid");
+        }
+        return modeledMinimum;
+    }
+
+    function _modeledMinimumBid(AuctionModel storage model) private view returns (uint256) {
         if (model.highestBid == 0) {
             return model.reservePrice;
         }

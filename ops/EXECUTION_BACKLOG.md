@@ -2037,9 +2037,9 @@ Acceptance criteria:
   claimant state, cancellation state, pause domains, and failed-withdrawal
   credit preservation.
 - The doc distinguishes fixed-price and auction split math.
-- The doc requires frontend/indexer handling for missing `minimumNextBid`,
-  compact `AuctionStatusChanged`, compact `ClaimAuction`, and direct no-bid
-  recipient inference.
+- The doc requires frontend/indexer handling for `minimumNextBid`, compact
+  `AuctionStatusChanged`, compact `ClaimAuction`, and direct no-bid recipient
+  inference.
 - Missing event/read gaps are explicit follow-up backlog items.
 - Local/CI gates fail if the flow spec drops required maturity language,
   headings, source links, validation commands, or flow-critical terms.
@@ -3381,7 +3381,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | `INT-002` to `INT-005` |
+| `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Active issue #522; branch `codex/auction-integration-read-views` adds auction minimum-next-bid and no-bid claimant read views |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Active issue #478; current PR enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts; prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
@@ -3437,7 +3437,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `AUD-003` | Add external audit finding intake template and remediation workflow | F | PR #521 open; closes issue #520 |
+| `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |

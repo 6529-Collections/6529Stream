@@ -300,8 +300,9 @@ Contract views and event sources:
   `NoBidSettlementPending`, `NoBidTokenClaimed`, `OutbidCreditCreated`,
   `BidderCreditWithdrawn`, `AuctionProceedsCreditCreated`, and
   `ProceedsCreditWithdrawn`;
-- reads for auction record, highest bid, highest bidder, end time, auction
-  status, token owner/custody, no-bid claimant, bidder credits, poster
+- reads for auction record, highest bid, highest bidder, minimum next bid when
+  active, end time, auction status, token owner/custody, no-bid claimant,
+  bidder credits, poster
   proceeds, protocol proceeds, curator proceeds, total owed, surplus, and
   `AUCTION_BID` / `AUCTION_SETTLEMENT` pause domains.
 

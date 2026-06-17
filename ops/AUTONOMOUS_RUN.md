@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/audit-finding-workflow` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/519` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/520` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/521` |
-| Next issue | Push the PR #521 review-response hardening commit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| Active PR branch | `codex/auction-integration-read-views` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/521` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/522` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/523` |
+| Next issue | Wait for PR #523 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge only when clean; then return to the ADV randomizer request-binding follow-up. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 19:00 UTC` |
+| Last updated | `2026-06-17 20:59 UTC` |
 
 ## Packaging Notes
 
@@ -1137,8 +1137,8 @@ Notes:
 - The end condition is strict `block.timestamp > endTime`; a bid exactly at
   `endTime` is still active.
 - Known event/read gaps are documented for follow-up under `CON-003` and
-  `INT-005`: no `minimumNextBid` view, compact `AuctionStatusChanged`, compact
-  `ClaimAuction`, and no dedicated direct no-bid recipient event.
+  `INT-005`: minimum-next-bid exposure, compact `AuctionStatusChanged`,
+  compact `ClaimAuction`, and no dedicated direct no-bid recipient event.
 - Bot verification notes were addressed by confirming required link targets
   exist on `main`, relying on the checker path-resolution guard, and adding an
   explicit doc line that no current path emits `AuctionStatusChanged` with
@@ -16190,6 +16190,12 @@ Outcome:
 | 2026-06-17 18:50 | Validate AUD-003 local draft | Added `docs/audit-finding-workflow.md`, `scripts/check_audit_finding_workflow.py`, focused checker tests, audit finding issue-template alignment, local/CI/Windows gate wiring, audit-package/readiness/tooling/README docs, release-manifest/checksum coverage, changelog, backlog/run-state updates, and regenerated release evidence. Focused audit-finding, audit-package, issue-template, README, release-readiness, release-note, risk-register, blocker-report, release-manifest, bytecode-proof, lockfile, checksum, verifier, changelog, Markdown link, Python compile, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed on the final diff with only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning. Next action is to commit, push, open PR for issue #520, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 18:52 | Open PR #521 for AUD-003 | PR #521 is open at `https://github.com/6529-Collections/6529Stream/pull/521`, closes issue #520, and packages the checked external audit finding workflow, checker/tests, audit finding issue-template alignment, local/CI/Windows gate wiring, audit/readiness/tooling docs, release-manifest/checksum coverage, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 19:00 | Address PR #521 checker hardening nice-to-haves | 6529bot security reported no findings and general review marked PR #521 good to merge with low-risk checker hardening suggestions. Accepted the useful items by adding an anchor/query local-link regression, adding `make check` to the canonical workflow validation command block, and requiring exact YAML list-item matches for audit issue-template dropdown options with a prefix-drift regression. Focused audit-finding tests/check, Python compile, release risk/register/blocker/manifest/lockfile/checksum checks, release artifact verification, and diff hygiene passed. Next action is to commit and push the review-response head, wait for CI/CodeRabbit/6529bot latest-head feedback, and merge only when clean. |
+| 2026-06-17 19:31 | Merge AUD-003 and select next substantive item | PR #521 merged as `cfcd7ba9aa0cd41a81ce4bbf9db9b3a037776da7` after CI run #1204, CodeRabbit status, and latest-head 6529bot follow-up were clean. Issue #520 closed completed. Local `main` is fast-forwarded to the merge commit. Next action is to choose and start a substantive local-verifiable backlog item, with CON-003 read-view hardening and ADV adversarial/invariant coverage under review. |
+| 2026-06-17 19:50 | Start CON-003 auction read views | Issue #522 and branch `codex/auction-integration-read-views` now track the next substantive PR. Scope is additive `StreamAuctions` integration reads for `minimumNextBid(tokenId)` and the no-bid claimant alias, focused auction tests/invariants, integration docs, regenerated ABI/release artifacts, CodeRabbit review, CI, and merge before moving to the randomizer request-binding follow-up. |
+| 2026-06-17 20:11 | Validate CON-003 local draft | Added additive `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` integration read views, focused auction payment/custody tests, invariant cross-checks, integration/operator docs, changelog coverage, and regenerated release evidence. Local validation passed: `make release-checksums-check`, `make abi-compatibility-check`, `forge fmt --check smart-contracts\AuctionContract.sol test\StreamAuctionPayments.t.sol test\StreamAuctionCustody.t.sol test\StreamAuctionInvariant.t.sol test\StreamPaymentsInvariant.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `forge test --match-path test\StreamAuctionCustody.t.sol -vvv`, `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv`, `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`, `python scripts\check_changelog.py`, `python scripts\verify_release_artifacts.py`, stale pinned-hash scan, and `codex-diff-check`. `StreamCore` remains 22,184 bytes with 2,392 bytes of EIP-170 margin; `StreamAuctions` is 10,938 bytes with 13,638 bytes margin. Next action is to commit, push, open the PR for issue #522, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 20:32 | Open PR #523 for CON-003 | PR #523 is open at `https://github.com/6529-Collections/6529Stream/pull/523`, closes issue #522, and packages additive auction read views, focused tests/invariants, integration/operator docs, changelog coverage, and regenerated release evidence. CodeRabbit was requested in comment `4735054006`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 20:37 | Address PR #523 test-coverage nice-to-haves | 6529bot security reported no findings and general review marked PR #523 good to merge with two useful coverage nice-to-haves. Added explicit `minimumNextBid` coverage for the 1-wei integer-floor outbid case where the increment floors to zero, and expanded fail-closed revert assertions across no auction, ended no bid, ended with bid, settled no bid, settled with bid, and cancelled states. `forge fmt --check test\StreamAuctionPayments.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `make release-checksums-check`, and `codex-diff-check` passed. Next action is to commit/push the review-response head, wait for latest CI/bot feedback, and merge only when clean. |
+| 2026-06-17 20:59 | Fix PR #523 Foundry smoke gas snapshot | GitHub CI failed only on `Foundry smoke` gas snapshot drift: five auction gas baselines shifted after adding the read views, while all gas tests passed. Updated `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and regenerated release checksum/manifest hashes. Local validation passed: `make gas-snapshot-check`, `make release-checksums-check` with UTF-8 output, and `codex-diff-check`. Next action is to commit/push the CI-fix head, wait for latest checks and bot feedback, and merge only when clean. |
 
 ## Resume Instructions
 

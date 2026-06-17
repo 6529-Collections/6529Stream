@@ -641,6 +641,12 @@ contract PaymentsInvariantHandler is DropAuthTestHelper, StreamFixture {
     }
 
     function _minimumBid(uint256 tokenId) private view returns (uint256) {
+        uint256 modeledMinimum = _modeledMinimumBid(tokenId);
+        auctions.minimumNextBid(tokenId).assertEq(modeledMinimum, "auction min bid");
+        return modeledMinimum;
+    }
+
+    function _modeledMinimumBid(uint256 tokenId) private view returns (uint256) {
         uint256 previousBid = auctions.auctionHighestBid(tokenId);
         if (previousBid > 0) {
             return previousBid + (previousBid * auctions.incPercent() / 100);

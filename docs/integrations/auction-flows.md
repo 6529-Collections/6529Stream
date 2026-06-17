@@ -149,6 +149,7 @@ should read or derive:
 - `StreamAuctions.auctionRecords(tokenId)`;
 - `StreamAuctions.retrieveAuctionStatus(tokenId)`;
 - `StreamAuctions.retrieveAuctionEndTime(tokenId)`;
+- `StreamAuctions.minimumNextBid(tokenId)` while the auction is `Active`;
 - `StreamAuctions.retrieveNoBidAuctionClaimant(tokenId)`;
 - `StreamAuctions.auctionHighestBid(tokenId)`;
 - `StreamAuctions.auctionHighestBidder(tokenId)`;
@@ -298,10 +299,17 @@ Current bid rules:
 - `OutbidCreditCreated` is emitted when previous bidder credit is created; and
 - `AuctionExtended` is emitted when a late bid extends the end time.
 
-There is no dedicated `minimumNextBid(tokenId)` view in the current ABI.
-Frontends must compute the next minimum bid from the current reserve/highest
-bid rules until a future `CON-003` integration-read-view issue adds a
-contract-level helper.
+Use `StreamAuctions.minimumNextBid(tokenId)` to render the exact next accepted
+bid while `retrieveAuctionStatus(tokenId)` is `Active`. It returns the reserve
+price before the first bid, then returns
+`auctionHighestBid(tokenId) + (auctionHighestBid(tokenId) * incPercent() / 100)`
+after a leading bid. The helper intentionally preserves the current
+integer-floor behavior used by `participateToAuction`. It fails closed for
+unregistered, ended, settled, or cancelled auctions, so clients should hide or
+disable bid entry unless the current status is `Active`.
+
+This closes the `CON-003` minimum-next-bid read gap for auction bidding
+integrations.
 
 ## Settlement
 
@@ -481,8 +489,9 @@ Indexer notes:
 - The view-derived `EndedNoBid` and `EndedWithBid` states do not emit events
   when time crosses the boundary.
 
-These event/read gaps are tracked for follow-up under the integration read-view
-backlog, including `CON-003` and `INT-005`.
+Remaining event/read gaps are tracked for follow-up under the integration
+read-view backlog, including compact status-transition event payloads and
+additional retained indexer replay evidence.
 
 ## Pause And Emergency Boundaries
 
@@ -562,6 +571,8 @@ Countdowns should use `retrieveAuctionEndTime`, not the stale minter end-time
 view. The end-state transition should wait for `block.timestamp > endTime`.
 Buttons should keep bid, settlement, and withdrawal states independent because
 the pause domains are independent.
+Bid entry should read `minimumNextBid(tokenId)` after confirming `Active`
+status and should reject local user input below that value before simulation.
 
 ## Indexer Reconstruction
 
@@ -575,6 +586,7 @@ Minimum persisted auction projection fields:
 - `reservePrice`;
 - `auctionEndTime`;
 - `status`;
+- `minimumNextBid` when active;
 - `highestBid`;
 - `highestBidder`;
 - `pendingNoBidNftClaimant`;
