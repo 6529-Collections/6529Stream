@@ -188,11 +188,14 @@ def template_ids(text: str) -> set[str]:
     return set(ID_RE.findall(text))
 
 
-def template_labels(text: str) -> set[str]:
+def template_labels(text: str, path: Path) -> set[str]:
     """Return labels from the top-level labels block."""
     match = LABEL_BLOCK_RE.search(text)
     if match is None:
+        if re.search(r"^labels:\s*$", text, re.MULTILINE):
+            raise IssueTemplateError(f"{path} has a malformed labels block")
         return set()
+
     labels = set()
     for line in match.group("body").splitlines():
         _, value = line.split("-", 1)
@@ -216,7 +219,7 @@ def validate_template(template_dir: Path, filename: str, requirements: dict[str,
     require_line(text, f"name: {requirements['name']}", path)
     require_line(text, f"title: {requirements['title']}", path)
 
-    labels = template_labels(text)
+    labels = template_labels(text, path)
     missing_labels = [
         label
         for label in requirements["labels"]  # type: ignore[index]

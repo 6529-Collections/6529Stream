@@ -77,6 +77,24 @@ class IssueTemplateTests(unittest.TestCase):
             ):
                 checker.validate_issue_templates(template_dir)
 
+    def test_rejects_malformed_labels_block(self) -> None:
+        """Malformed labels blocks fail before being treated as absent labels."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            template_dir = copy_templates(Path(temp_dir))
+            path = template_dir / "integration_report.yml"
+            write(
+                path,
+                read(path).replace(
+                    "labels:\n  - integration\n  - documentation\n",
+                    "labels:\n  integration\n  documentation\n",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.IssueTemplateError, "malformed labels block"
+            ):
+                checker.validate_issue_templates(template_dir)
+
     def test_rejects_missing_field_id(self) -> None:
         """Required issue-form IDs cannot be silently dropped."""
         with tempfile.TemporaryDirectory() as temp_dir:
