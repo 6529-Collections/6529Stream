@@ -69,6 +69,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_first_30_minutes.py",
     "python scripts/test_issue_templates.py",
     "python scripts/check_issue_templates.py",
+    "python scripts/test_pr_template.py",
+    "python scripts/check_pr_template.py",
 ]
 
 COMMAND_VARIANTS = {
@@ -124,6 +126,7 @@ REQUIRED_LINK_TARGETS = [
     ".github/ISSUE_TEMPLATE/integration_report.yml",
     ".github/ISSUE_TEMPLATE/audit_finding.yml",
     ".github/ISSUE_TEMPLATE/release_evidence.yml",
+    ".github/PULL_REQUEST_TEMPLATE.md",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

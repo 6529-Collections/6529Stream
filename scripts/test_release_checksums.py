@@ -59,8 +59,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path(".github/ISSUE_TEMPLATE/release_evidence.yml"),
             generator.DEFAULT_COVERED_PATHS,
         )
+        self.assertIn(Path(".github/PULL_REQUEST_TEMPLATE.md"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/check_issue_templates.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/test_issue_templates.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/check_pr_template.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/test_pr_template.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(
             Path("scripts/check_typescript_artifact_chain_config.py"),
             generator.DEFAULT_COVERED_PATHS,

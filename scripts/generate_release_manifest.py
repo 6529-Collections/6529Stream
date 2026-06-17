@@ -75,6 +75,7 @@ DEFAULT_SIGNER_CUSTODY_READINESS_DIR = Path(
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("README.md"),
+    Path(".github/PULL_REQUEST_TEMPLATE.md"),
     Path(".github/ISSUE_TEMPLATE/audit_finding.yml"),
     Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
     Path(".github/ISSUE_TEMPLATE/config.yml"),

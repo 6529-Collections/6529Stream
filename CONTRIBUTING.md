@@ -118,6 +118,13 @@ Use the specialized checked issue forms when they fit:
 Do not use public issue forms for exploitable vulnerability reports; follow
 [SECURITY.md](SECURITY.md).
 
+Pull requests should use the checked
+[PR template](.github/PULL_REQUEST_TEMPLATE.md). Keep the roadmap/gate linkage,
+validation evidence, release-impact classification, generated-artifact impact,
+and breaking-change approval fields complete. The template is validated by
+`python scripts/check_pr_template.py`, so changes to release-impact intake must
+update the checker and tests in the same PR.
+
 ## Style
 
 - Solidity compiler target is `0.8.19` until the roadmap changes it.
@@ -142,5 +149,6 @@ change affects:
 - [.github/ISSUE_TEMPLATE/integration_report.yml](.github/ISSUE_TEMPLATE/integration_report.yml)
 - [.github/ISSUE_TEMPLATE/audit_finding.yml](.github/ISSUE_TEMPLATE/audit_finding.yml)
 - [.github/ISSUE_TEMPLATE/release_evidence.yml](.github/ISSUE_TEMPLATE/release_evidence.yml)
+- [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md)
 - [ops/ROADMAP.md](ops/ROADMAP.md)
 - [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md)

@@ -82,7 +82,10 @@ GitHub issue intake uses checked issue forms for [integration reports](.github/I
 [audit findings](.github/ISSUE_TEMPLATE/audit_finding.yml), and
 [release evidence](.github/ISSUE_TEMPLATE/release_evidence.yml). Use
 [SECURITY.md](SECURITY.md) instead of public issues for exploitable
-vulnerabilities.
+vulnerabilities. Pull request intake uses a checked
+[PR template](.github/PULL_REQUEST_TEMPLATE.md) for roadmap linkage, validation
+evidence, release-impact classification, generated-artifact impact, and
+breaking-change approval references.
 
 ## Drop Flow
 
@@ -126,6 +129,13 @@ The checked issue-template surface is part of the gate:
 ```bash
 python scripts/test_issue_templates.py
 python scripts/check_issue_templates.py
+```
+
+The checked PR-template surface is part of the gate:
+
+```bash
+python scripts/test_pr_template.py
+python scripts/check_pr_template.py
 ```
 
 The changelog gate requires release-impacting PRs to update
@@ -184,6 +194,7 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [.github/ISSUE_TEMPLATE/integration_report.yml](.github/ISSUE_TEMPLATE/integration_report.yml)
 - [.github/ISSUE_TEMPLATE/audit_finding.yml](.github/ISSUE_TEMPLATE/audit_finding.yml)
 - [.github/ISSUE_TEMPLATE/release_evidence.yml](.github/ISSUE_TEMPLATE/release_evidence.yml)
+- [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md)
 
 ## Security
 
