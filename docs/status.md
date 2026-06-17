@@ -13,6 +13,9 @@ The current Gate A smoke baseline proves:
   public-safe audit finding intake, and release evidence requests while
   preserving pre-audit, not-production-ready, no-secret, and private security
   reporting boundaries.
+- The checked PR-template surface requires roadmap/gate linkage, validation
+  evidence, release-impact classification, generated-artifact impact, and
+  breaking-change approval references before review.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production

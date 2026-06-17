@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/issue-templates` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/499` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/500` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/501` |
-| Next issue | Implement OSS-003 GitHub issue templates for integration, audit finding, and release evidence, with checker/tests, local/CI/Windows/release wiring, validate, open PR, request CodeRabbit, resolve CI/bot feedback, merge when clean, then continue the next unblocked substantive backlog item. |
+| Active PR branch | `codex/pr-template-release-impact` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/501` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/502` |
+| Active PR | `TBD` |
+| Next issue | Commit and open OSS-004 checked PR template release-impact checklist PR for issue #502, request CodeRabbit, resolve CI/bot feedback, merge when clean, then continue the next unblocked substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 10:05 UTC` |
+| Last updated | `2026-06-17 10:44 UTC` |
 
 ## Packaging Notes
 
@@ -16158,6 +16158,8 @@ Outcome:
 | 2026-06-17 09:57 | Validate OSS-003 local draft | Added checked GitHub issue templates for integration reports, public-safe audit finding intake, and release evidence requests; added `scripts/check_issue_templates.py` and `scripts/test_issue_templates.py`; wired `issue-templates-check` through Make, Unix/PowerShell wrappers, CI, README, CONTRIBUTING, tooling/status docs, release-manifest/checksum coverage, release notes, and durable backlog state. Regenerated release notes, risk register, release-evidence issue backlog, release manifest, bytecode release proof, and checksum bundle. Focused issue-template, README, first-30-minutes, release-evidence backlog, blocker-report, release-notes, release-manifest, bytecode-proof, checksum, risk-register, changelog, and Python compile checks passed. `make issue-templates-check`, `make release-manifest-check`, `make release-checksums-check`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `git diff --check` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #500, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 09:59 | Open PR #501 for OSS-003 | PR #501 is open at `https://github.com/6529-Collections/6529Stream/pull/501`, closes issue #500, and packages checked GitHub issue templates for integration reports, audit finding intake, and release evidence requests plus checker/tests, local/CI/Windows gate wiring, docs links, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 10:05 | Address 6529bot OSS-003 nice-to-have | 6529bot general review reported PR #501 good to merge and suggested clearer malformed-label handling in `scripts/check_issue_templates.py`. Added an explicit malformed `labels:` block error and a regression test, regenerated release checksum evidence, and validated with `python scripts/test_issue_templates.py`, `python scripts/check_issue_templates.py`, Python compile, release-manifest/proof checks, `make issue-templates-check`, `make release-checksums-check`, and `git diff --check`. Next action is to commit/push the review fix, retry CodeRabbit after rate-limit refill, wait for latest CI/bot feedback, and merge only when clean. |
+| 2026-06-17 10:15 | Merge PR #501 and start OSS-004 | Checked issue templates merged as `6214f49` after latest-head Foundry smoke and Windows wrapper passed, CodeRabbit status was success after retry, 6529bot latest-head follow-up reported no new findings, and the prior malformed-label nice-to-have was resolved. Issue #500 closed completed. Issue #502 and branch `codex/pr-template-release-impact` now track OSS-004 for a checked PR template release-impact checklist covering roadmap/gate linkage, release-impact and generated-artifact scope, breaking-change approval references, validation evidence, maturity/no-secret boundaries, checker/tests, local/CI/Windows/release wiring, and regenerated evidence. |
+| 2026-06-17 10:44 | Validate OSS-004 local draft | Added the checked PR template release-impact checklist, `scripts/check_pr_template.py`, focused checker tests, local/CI/Windows gate wiring, README/CONTRIBUTING/tooling/status navigation, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and durable backlog state. Focused PR-template, README, first-30-minutes, release-evidence backlog, risk-register, release-notes, release-manifest, bytecode-proof, checksum, changelog, Python compile, and whitespace checks passed. `make pr-template-check`, `make release-manifest-check`, `make release-checksums-check`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #502, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, and merge only when clean. |
 
 ## Resume Instructions
 

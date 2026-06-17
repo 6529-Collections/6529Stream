@@ -32,8 +32,11 @@
       ".github/ISSUE_TEMPLATE/integration_report.yml",
       ".github/ISSUE_TEMPLATE/release_evidence.yml",
       ".github/ISSUE_TEMPLATE/roadmap_item.yml",
+      ".github/PULL_REQUEST_TEMPLATE.md",
       "scripts/check_issue_templates.py",
       "scripts/test_issue_templates.py",
+      "scripts/check_pr_template.py",
+      "scripts/test_pr_template.py",
       "scripts/check_curator_rewards_flow.py",
       "scripts/test_curator_rewards_flow.py",
       "scripts/check_withdrawals_credits_flow.py",
@@ -70,7 +73,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:4e3e52971dfd52a449723f5662f733632d77a94a60b5defef3b57c99a4917652"
+    "sha256": "sha256:350e105359a66c979e6aa40daf0d59cf8155ece3b197b18fac0c8b72f2e74359"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -106,6 +109,11 @@
       "path": ".github/ISSUE_TEMPLATE/roadmap_item.yml",
       "sha256": "sha256:0283893e1c7b786ff07f1b1fe44976389ca9d7c3f46ec97300616554a200aea0",
       "size_bytes": 3587
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "sha256:7f29738958afca4d6c74efe78dc8bcbc428b1f217330c64fe25263642b72e350",
+      "size_bytes": 2402
     },
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -219,8 +227,8 @@
     },
     {
       "path": "docs/first-30-minutes.md",
-      "sha256": "sha256:2b2bbe76428173f40d6ae2adabbab2c247394787036b4e0dceb5efa92ea09fd5",
-      "size_bytes": 9894
+      "sha256": "sha256:c820339bdcc3356438ae48ce8e3d35c1f881113fe05cead8263481b27337add3",
+      "size_bytes": 10151
     },
     {
       "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
@@ -569,7 +577,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a3def3c8c35de9e7943ff05d5752aaa82ea9255cc5e6a861b423bf3e52121396",
+      "sha256": "sha256:6fe1b8181dafe6766f4a19a822fcced07985668ec61b1327693976e8f81af6b4",
       "size_bytes": 79962
     },
     {
@@ -679,22 +687,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:44e9856caa188d8b9ca4a0b1e0fc4a4da0072b86d490db026b50b67bd9903e65",
-      "size_bytes": 113416
+      "sha256": "sha256:1c0b1f1aa6274bc7e354631610fd82beb23494c00eb8d4e93e18f2888c4a5daf",
+      "size_bytes": 113606
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:184c33d7831706c9383f62e0c0fa2b5f3639acc9e47debfb82ec3ae96fc899b2",
-      "size_bytes": 55222
+      "sha256": "sha256:dffa79866f068475717b865f495a4fa9d16e3fbc9dce9e9ff3b625d7ad7fcf39",
+      "size_bytes": 55445
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:45bd0acaeb49d1353ea4710e92eaf7331c53d75056f5f41d8f02ce54f44d7387",
-      "size_bytes": 52639
+      "sha256": "sha256:fa6a7501fb7b42b52b11c5908a89a7c25a0f9f33e9575bae3e62ba123e7729d3",
+      "size_bytes": 52855
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:432169134d828e7aecbf76817fd614a93e320021aeaf822d97ed8303d02b9cb0",
+      "sha256": "sha256:e84693d16063e1dd8da4ea857cd4c2e2a3dbb3b54399d315d940441c7e902ca2",
       "size_bytes": 22929
     },
     {
@@ -813,6 +821,11 @@
       "size_bytes": 20187
     },
     {
+      "path": "scripts/check_pr_template.py",
+      "sha256": "sha256:5a502a8184ffd6bf0dbfca69ed3546d39650542edc2791316b3b62a8d4571ef9",
+      "size_bytes": 7123
+    },
+    {
       "path": "scripts/check_production_broadcast_retention.py",
       "sha256": "sha256:7b88301cc7542b8d060bb0597d66d9449def83efbdfc595067879b9617905a3d",
       "size_bytes": 12466
@@ -829,8 +842,8 @@
     },
     {
       "path": "scripts/check_readme.py",
-      "sha256": "sha256:50d5a5249eb995ac71ee3bbe8b890608be2881e6a84c7f3d3dd99e57c46e9e36",
-      "size_bytes": 9850
+      "sha256": "sha256:ee343b817b22ed6e537e728361cdd40f727bcd02404d4f52fcb8f1f593b896d6",
+      "size_bytes": 9975
     },
     {
       "path": "scripts/check_release_mode.py",
@@ -896,6 +909,11 @@
       "path": "scripts/test_issue_templates.py",
       "sha256": "sha256:cb8acbb3b89161c1d20a7650b5a366e22d95f1a0a14aa0fd43c1274e81106f95",
       "size_bytes": 7071
+    },
+    {
+      "path": "scripts/test_pr_template.py",
+      "sha256": "sha256:fe9591a02ca5388aa4e3fc4bd4401e88219f9125958361be35e92777c333fa31",
+      "size_bytes": 5257
     },
     {
       "path": "scripts/test_react_next_reference.py",

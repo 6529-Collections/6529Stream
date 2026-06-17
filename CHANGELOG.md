@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked pull request template release-impact checklist covering
+  roadmap linkage, validation evidence, generated-artifact impact,
+  breaking-change approval references, and release-manifest/checksum coverage.
 - Added checked GitHub issue templates for integration reports, public-safe
   audit finding intake, and release evidence requests, with no-secret and
   pre-audit maturity language, local/CI/Windows gate wiring, and

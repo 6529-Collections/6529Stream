@@ -181,6 +181,11 @@ If you are opening an issue instead of a PR, use the checked GitHub forms for
 [release evidence](../.github/ISSUE_TEMPLATE/release_evidence.yml) when one of
 those scopes fits.
 
+If you are opening a PR, keep the checked
+[PR template](../.github/PULL_REQUEST_TEMPLATE.md) complete, especially the
+roadmap/gate linkage, validation evidence, release-impact classification,
+generated-artifact impact, and breaking-change approval fields.
+
 ## Generated Artifact Drift
 
 Many repository files are deterministic release evidence, not hand-written

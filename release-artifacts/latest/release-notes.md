@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added a checked pull request template release-impact checklist covering roadmap linkage, validation evidence, generated-artifact impact, breaking-change approval references, and release-manifest/checksum coverage.
 - Added checked GitHub issue templates for integration reports, public-safe audit finding intake, and release evidence requests, with no-secret and pre-audit maturity language, local/CI/Windows gate wiring, and release-manifest/checksum coverage.
 - Added a checked first-30-minutes contributor guide covering fresh checkout setup, Foundry/Python/Windows prerequisites, `forge` not being on `PATH`, canonical local gates, docs-only and Solidity/test validation paths, known warning noise, generated artifact drift, no-secret maturity boundaries, local/CI/Windows gate wiring, and release-manifest/checksum coverage.
 - Added checked INT-016 integration conformance fixtures for frontend, mobile, Electron, indexer, operator UI, and signing-service teams, covering artifact loading, fail-closed chain config, EIP-712 domain expectations, event topic dispatch, normalized log identity, read-after-event queues, duplicate log idempotency, unknown emitter/topic rejection, confirmation depth, reorg rollback, no-secret redaction diagnostics, local/CI/Windows gate wiring, and release-manifest/checksum coverage.

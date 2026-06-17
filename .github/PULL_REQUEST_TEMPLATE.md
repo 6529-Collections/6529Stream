@@ -6,7 +6,8 @@
 
 - Gate:
 - Roadmap issue or ADR:
-- Scope type: docs / tooling / tests / contracts / deployment
+- Non-roadmap rationale:
+- Scope type: docs / tooling / tests / contracts / deployment / release artifacts
 - Scope intentionally excluded:
 
 ## Security And Maturity
@@ -36,11 +37,14 @@ Local commands run:
 - [ ] CI is green.
 - [ ] Bot and human review comments are resolved or explicitly accepted with rationale.
 
-## Impact
+## Release Impact
 
 - Test impact:
 - Docs impact:
-- Release impact:
+- Release-impacting paths changed: yes / no
+- External behavior impact: none / ABI / events / metadata schema / authorization schema / role or admin semantics / deployment artifacts / release evidence
+- Generated artifact impact: none / regenerated / intentionally unchanged with rationale
+- Release evidence impact: none / public-beta evidence / production-release evidence / blocker reports / manifest or checksum coverage
 - Version impact: none / patch / minor / major / operational
 - Breaking-change approval issue or ADR:
 - Known limitations or follow-up issues:
@@ -49,6 +53,8 @@ Local commands run:
 
 - [ ] `CHANGELOG.md` has a `## Unreleased` section with at least one non-placeholder bullet, or this PR has no release-impacting paths.
 - [ ] Release-impacting ABI, metadata schema, authorization, role, deployment, or artifact changes are documented in `CHANGELOG.md`.
+- [ ] Generated release artifacts, manifests, checksums, blocker reports, or evidence packets were regenerated and checked, or this PR explains why they are intentionally unchanged.
+- [ ] Breaking changes are explicitly approved by a linked issue or ADR, or this PR has no breaking changes.
 
 ## Reviewer Notes
 
