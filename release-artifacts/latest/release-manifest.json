@@ -2187,8 +2187,8 @@
       },
       {
         "path": "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
-        "sha256": "sha256:1de4cd0853c61c82ab24f9713558bfd8cad3d85e9ad6bde562ad3030ad5e4aa5",
-        "size_bytes": 18343
+        "sha256": "sha256:a2670b0086a33d3050048e54fbfff64dcf26d6fa0ba3b6f8b3151e70cd1b1910",
+        "size_bytes": 18672
       },
       {
         "path": "docs/integrations/mobile-walletconnect.md",

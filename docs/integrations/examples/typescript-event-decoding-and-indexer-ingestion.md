@@ -89,6 +89,8 @@ type EventTopicCatalog = {
   topics: EventTopicCatalogEntry[];
 };
 
+const EXPECTED_EVENT_TOPIC_CATALOG_GENERATOR = "scripts/generate_release_artifacts.py:1";
+
 type StreamChainConfig = {
   chainId: number;
   deploymentVersion: string;
@@ -119,7 +121,7 @@ function assertEventArtifactPreflight(input: {
   if (input.catalog.schema_version !== "6529stream.event-topic-catalog.v1") {
     throw new Error("unsupported event topic catalog schema");
   }
-  if (!input.catalog.generated_by.includes("generate_release_artifacts.py")) {
+  if (input.catalog.generated_by !== EXPECTED_EVENT_TOPIC_CATALOG_GENERATOR) {
     throw new Error("unexpected event topic catalog generator");
   }
   if (!input.chainConfig.eventTopicCatalogHash.startsWith("sha256:")) {
@@ -330,6 +332,11 @@ function handleDropAuthorizationConsumed(
 Read-after-event actions should carry the triggering block number so archive
 RPC clients can read historical state. If historical reads are unavailable,
 record the repair task instead of filling the entity with current-state guesses.
+
+The snippet-level `requireHex`, `requireAddress`, and assertion helpers are
+assumed to live in the consuming application's validation layer. They should
+fail closed and should not coerce malformed decoded fields into usable entity
+keys.
 
 ## Confirmation And Reorg Handling
 
