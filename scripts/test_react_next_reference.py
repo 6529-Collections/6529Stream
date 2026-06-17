@@ -51,7 +51,9 @@ says no package dependency is introduced. INT-013 TypeScript artifact loading
 and chain config snippets cover release artifact loading, address book loading,
 release manifest hash validation, deployment manifest cross-checks, ABI
 checksum awareness, fail-closed wrong-chain guards, and chain config
-construction.
+construction. INT-015 TypeScript event decoding and indexer ingestion snippets
+cover event topic catalog loading, topic0 dispatch, normalized log identity,
+reorg rollback, and idempotent ingestion.
 
 ## Maturity And Scope
 

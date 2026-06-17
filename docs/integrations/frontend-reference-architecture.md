@@ -49,6 +49,7 @@ code:
 - [docs/integrations/metadata-rendering.md](metadata-rendering.md)
 - [docs/integrations/examples/react-viem.md](examples/react-viem.md)
 - [docs/integrations/examples/typescript-eip712-drop-authorization.md](examples/typescript-eip712-drop-authorization.md)
+- [docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md](examples/typescript-event-decoding-and-indexer-ingestion.md)
 - [docs/architecture.md](../architecture.md)
 - [docs/threat-model.md](../threat-model.md)
 - [docs/deployment.md](../deployment.md)
@@ -162,6 +163,12 @@ show the next level of detail for release artifact loading, address book
 loading, release manifest hash validation, deployment manifest cross-checks,
 ABI checksum awareness, fail-closed wrong-chain guards, no-secret
 `NEXT_PUBLIC_*` parsing, and chain config construction.
+
+The INT-015 TypeScript event decoding and indexer ingestion snippets in
+[docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md](examples/typescript-event-decoding-and-indexer-ingestion.md)
+show the next level of detail for event topic catalog loading, topic0
+dispatch, normalized log identity, idempotent ingestion, read-after-event
+queue construction, confirmation depth handling, and reorg rollback.
 
 ## Environment And Network Selection
 
@@ -479,6 +486,14 @@ for INT-014 TypeScript snippets focused on EIP-712 domain construction,
 sale-mode validation, EOA/ERC-1271/Safe boundaries, signer separation,
 submission preflight, and no-secret logging.
 
+Use
+[docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md](examples/typescript-event-decoding-and-indexer-ingestion.md)
+for INT-015 TypeScript snippets focused on event topic catalog loading,
+topic0 dispatch, ABI/topic drift checks, normalized log identity,
+idempotent ingestion, read-after-event queues, confirmation depth, reorg
+rollback, unknown emitter handling, unknown topic handling, and no-secret
+diagnostics.
+
 The examples are illustrative architecture shapes only. They are not a
 generated SDK, not a dependency recommendation, and not a maintained app.
 
@@ -491,6 +506,8 @@ python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
 python scripts/test_typescript_artifact_chain_config.py
 python scripts/check_typescript_artifact_chain_config.py
+python scripts/test_typescript_event_decoding_indexer.py
+python scripts/check_typescript_event_decoding_indexer.py
 python scripts/test_typescript_eip712_drop_authorization.py
 python scripts/check_typescript_eip712_drop_authorization.py
 python scripts/test_integrations_readme.py

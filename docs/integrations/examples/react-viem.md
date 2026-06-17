@@ -17,6 +17,11 @@ domain construction, `DropAuthorization` message shape, drop ID derivation,
 token data hashing, sale-mode validation, signer boundaries, and submission
 preflight, use
 [docs/integrations/examples/typescript-eip712-drop-authorization.md](typescript-eip712-drop-authorization.md).
+For concrete INT-015 TypeScript event decoding and indexer ingestion snippets
+covering event topic catalog loading, `topic0` dispatch, normalized log
+identity, confirmation depth, reorg rollback, read-after-event queue
+construction, idempotent ingestion, and no-secret diagnostics, use
+[docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md](typescript-event-decoding-and-indexer-ingestion.md).
 
 ## Artifact Loader
 

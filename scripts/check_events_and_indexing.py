@@ -175,11 +175,20 @@ REQUIRED_PHRASES = [
     "retained marketplace/indexer evidence",
     "fork_testnet_marketplace_indexer_evidence",
     "live_marketplace_indexer_evidence",
+    "INT-015",
+    "TypeScript event decoding and indexer ingestion snippets",
+    "event topic catalog loading",
+    "topic0 dispatch",
+    "normalized log identity",
+    "idempotent ingestion",
+    "read-after-event queue",
 ]
 
 REQUIRED_COMMANDS = [
     "python scripts/test_events_and_indexing.py",
     "python scripts/check_events_and_indexing.py",
+    "python scripts/test_typescript_event_decoding_indexer.py",
+    "python scripts/check_typescript_event_decoding_indexer.py",
     "python scripts/test_one_of_one_provenance_manifest.py",
     "python scripts/check_one_of_one_provenance_manifest.py",
     "python scripts/generate_one_of_one_provenance_manifest.py --check",
@@ -206,6 +215,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/auction-flows.md",
     "docs/integrations/wallets-and-signatures.md",
     "docs/integrations/marketplace-indexer-evidence.md",
+    "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
     "docs/metadata.md",
     "docs/provenance-manifests.md",
     "docs/release-policy.md",

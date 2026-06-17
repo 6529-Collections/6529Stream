@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:fd6fa5af983f849c89c3111747673596a979466e26395eb472b74b952016447a",
-        "size_bytes": 53694,
+        "sha256": "sha256:db59ba30ea1b436fdf4ffb0ec6bdcc8ea8a9be1cf8125124dff9d2a72ba48f85",
+        "size_bytes": 54095,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:5a14c455295e2944f7c4775002530dc98fbfd13c7ae59a5afc362e4b1f4d3d95",
-        "size_bytes": 51139
+        "sha256": "sha256:e291cef756bcbe572ace46ad66d8407397eb63d2b9cbd34ba4ce9119f47967b8",
+        "size_bytes": 51533
       }
     },
     "artifact_manifest": {
@@ -147,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:38d8590e405a32836066f4189467016fbda216c31d1b60cba2a3892d64bbdf08",
+      "sha256": "sha256:06f8d9440419f54b31a556d427efdbd12ce2e5a11ad1754d4210fbe3e6e77622",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2006,8 +2006,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:eb705bb2bb9961f59fd6e9e11f6ead64030933c228abc8d2666bedfa73bbed90",
-      "size_bytes": 51382
+      "sha256": "sha256:a88544c08219dd1748a1969cff3041aa33ecc18130509efc0d745277af6b0063",
+      "size_bytes": 51786
     },
     "governance_docs": [
       {
@@ -2122,8 +2122,8 @@
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:fad455d45ae482ea379f6f862233d4e0a26344f36ed4d5075516d5801c3bfc05",
-        "size_bytes": 32468
+        "sha256": "sha256:6008843abc8f0f8a2d7642ef31462af085171623051cccb7ea1d9a06b4be822c",
+        "size_bytes": 33794
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -2152,8 +2152,8 @@
       },
       {
         "path": "docs/integrations/events-and-indexing.md",
-        "sha256": "sha256:3b1e3be2604f7483de0631e6446dbfad6f0247f29f10ed4a191906f8fa8b8938",
-        "size_bytes": 34372
+        "sha256": "sha256:ffbb7d992595b53b3438500d9f3c18e1cc0e44240074631436c311e1105bf9ef",
+        "size_bytes": 35268
       },
       {
         "path": "docs/integrations/metadata-rendering.md",
@@ -2172,8 +2172,8 @@
       },
       {
         "path": "docs/integrations/frontend-reference-architecture.md",
-        "sha256": "sha256:8a013a2b193530a6eb69efc03bce5e699b3e8776dbb0cbac4608bed857bdcca4",
-        "size_bytes": 26381
+        "sha256": "sha256:3315af45bcf8e616aa092522ac1f3930dc7f30d62a976702b286118000053936",
+        "size_bytes": 27510
       },
       {
         "path": "docs/integrations/examples/typescript-artifacts-and-chain-config.md",
@@ -2184,6 +2184,11 @@
         "path": "docs/integrations/examples/typescript-eip712-drop-authorization.md",
         "sha256": "sha256:b2963c7cbbb98fae88e222b2294be63a2438814a076858ccbcba0d64e0c8b31e",
         "size_bytes": 15427
+      },
+      {
+        "path": "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
+        "sha256": "sha256:1de4cd0853c61c82ab24f9713558bfd8cad3d85e9ad6bde562ad3030ad5e4aa5",
+        "size_bytes": 18343
       },
       {
         "path": "docs/integrations/mobile-walletconnect.md",
@@ -2202,8 +2207,8 @@
       },
       {
         "path": "docs/integrations/examples/react-viem.md",
-        "sha256": "sha256:3fd16c4da588a6400092b492451a16c8e3193ce91b21226827f5819fbb14e447",
-        "size_bytes": 5899
+        "sha256": "sha256:756b75d3eb25dd079eb560680a3f2e0143676664ce2f734c213784b33bae771a",
+        "size_bytes": 6318
       },
       {
         "path": "docs/tooling.md",

@@ -35,7 +35,7 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), [`frontend-reference-architecture.md`](frontend-reference-architecture.md), [`examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md), and [`examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md) | Fixed-price, auction, curator rewards, withdrawal and credit UX, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, React/Next reference architecture, INT-013 TypeScript artifact loading and chain config snippets, and INT-014 TypeScript EIP-712 payload construction snippets are documented for the local baseline |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), [`frontend-reference-architecture.md`](frontend-reference-architecture.md), [`examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md), [`examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md), and [`examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md) | Fixed-price, auction, curator rewards, withdrawal and credit UX, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, React/Next reference architecture, INT-013 TypeScript artifact loading and chain config snippets, INT-014 TypeScript EIP-712 payload construction snippets, and INT-015 TypeScript event decoding and indexer ingestion snippets are documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
 | Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Auction lifecycle, curator reward claims, withdrawal and credit reconstruction, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, cache invalidation, and retained marketplace/indexer evidence requirements are documented for the local baseline |
@@ -80,6 +80,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Withdrawals and credits flow | [`docs/integrations/withdrawals-and-credits.md`](withdrawals-and-credits.md) | Current `INT-012` fixed-price, auction, curator, pull-payment, withdrawal, failure-state, surplus, mobile, Electron, and indexer guide |
 | Wallet and signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Current `INT-004` EIP-712, ERC-1271, Safe, WalletConnect, backend signer, and failure-state guide |
 | TypeScript EIP-712 payload snippets | [`docs/integrations/examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md) | Current `INT-014` domain construction, `DropAuthorization` message shape, drop ID derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe boundaries, submission preflight, and no-secret logging snippets |
+| TypeScript event decoding snippets | [`docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md) | Current `INT-015` event topic catalog loading, topic0 dispatch, normalized log identity, confirmation depth, reorg rollback, read-after-event queue, idempotent ingestion, unknown emitter, unknown topic, and no-secret diagnostics snippets |
 | Event and indexer guide | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Current `INT-005` event subscriptions, indexed entities, read-after-event calls, reorg policy, and known event/read gaps |
 | Metadata rendering guide | [`docs/integrations/metadata-rendering.md`](metadata-rendering.md) | Current `INT-006` metadata state, tokenURI, ERC-4906 cache invalidation, animation sandbox, cache key, and marketplace evidence-boundary guide |
 | Marketplace/indexer evidence guide | [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Current `ONE-005` retained marketplace/indexer evidence requirements for OpenSea, Reservoir, Blur, Manifold, equivalent collector/indexer tooling, contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale paths, event replay, and cache invalidation |
@@ -124,6 +125,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md)
 - [`docs/integrations/examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md)
 - [`docs/integrations/examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md)
+- [`docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md)
 - [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md)
 - [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md)
 - [`docs/integrations/operator-admin-ui.md`](operator-admin-ui.md)
@@ -193,6 +195,13 @@ to understand what is still intentionally future work:
   covering domain construction, DropAuthorization message shape, drop ID
   derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe
   boundaries, submission preflight, and no-secret logging.
+- `INT-015`: the TypeScript event decoding and indexer ingestion snippets are
+  now
+  [`examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md),
+  covering event topic catalog loading, topic0 dispatch, normalized log
+  identity, confirmation depth, reorg rollback, read-after-event queue,
+  idempotent ingestion, unknown emitter, unknown topic handling, and no-secret
+  diagnostics.
 - `INT-008`: the mobile and WalletConnect integration guide is now
   [`mobile-walletconnect.md`](mobile-walletconnect.md).
 - `INT-009`: the Electron security and wallet integration guide is now
@@ -304,6 +313,8 @@ python scripts/test_typescript_artifact_chain_config.py
 python scripts/check_typescript_artifact_chain_config.py
 python scripts/test_typescript_eip712_drop_authorization.py
 python scripts/check_typescript_eip712_drop_authorization.py
+python scripts/test_typescript_event_decoding_indexer.py
+python scripts/check_typescript_event_decoding_indexer.py
 python scripts/test_mobile_walletconnect.py
 python scripts/check_mobile_walletconnect.py
 python scripts/test_electron_security_wallets.py
