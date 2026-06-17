@@ -94,6 +94,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/architecture.md"),
     Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),
+    Path("docs/audit-finding-workflow.md"),
     Path("docs/incident-response.md"),
     Path("docs/drop-authorization-signing.md"),
     Path("docs/signer-custody-readiness.md"),

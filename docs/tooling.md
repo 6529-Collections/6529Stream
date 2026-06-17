@@ -117,6 +117,8 @@ python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_audit_finding_workflow.py
+python scripts/check_audit_finding_workflow.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_readme.py
@@ -332,6 +334,12 @@ The audit-package step validates [`audit-package.md`](audit-package.md), the
 single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
 deployment/release evidence, known blockers, accepted local-baseline
 dispositions, and security reporting.
+
+The audit-finding-workflow step validates
+[`audit-finding-workflow.md`](audit-finding-workflow.md), the public-safe
+external audit finding intake, triage, remediation, retest, accepted-risk, and
+closure workflow that stays aligned with the checked audit finding issue form
+and post-audit remediation evidence handoff.
 
 The incident-response step validates
 [`incident-response.md`](incident-response.md), the no-secret operator runbook

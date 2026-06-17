@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `AUD-003` external audit finding workflow covering
+  public-safe intake, severity/status triage, audited scope, remediation PRs,
+  required tests, retest, accepted-risk decisions, closure gates, release
+  evidence handoff, no-secret redaction, and local/CI/Windows gate wiring.
 - Added a generated release-candidate lockfile that ties the release manifest,
   bytecode release proof, public-beta evidence, risk register, release notes,
   blocker reports, release evidence issue outputs, release-signature evidence,

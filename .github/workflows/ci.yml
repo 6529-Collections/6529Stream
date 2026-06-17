@@ -201,6 +201,8 @@ jobs:
             scripts/test_architecture_threat_model.py \
             scripts/check_audit_package.py \
             scripts/test_audit_package.py \
+            scripts/check_audit_finding_workflow.py \
+            scripts/test_audit_finding_workflow.py \
             scripts/check_incident_response.py \
             scripts/test_incident_response.py \
             scripts/check_readme.py \
@@ -609,6 +611,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_audit_package.py 2>&1 | tee ci-logs/audit-package-tests.log
           python3 scripts/check_audit_package.py 2>&1 | tee ci-logs/audit-package-check.log
+
+      - name: Audit finding workflow
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_audit_finding_workflow.py 2>&1 | tee ci-logs/audit-finding-workflow-tests.log
+          python3 scripts/check_audit_finding_workflow.py 2>&1 | tee ci-logs/audit-finding-workflow-check.log
 
       - name: Incident response
         shell: bash

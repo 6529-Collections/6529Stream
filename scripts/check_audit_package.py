@@ -42,6 +42,8 @@ REQUIRED_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_audit_package.py",
     "python scripts/check_audit_package.py",
+    "python scripts/test_audit_finding_workflow.py",
+    "python scripts/check_audit_finding_workflow.py",
     "python scripts/test_warning_dispositions.py",
     "python scripts/run_forge_size_log.py --log cache/forge-size.log",
     "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log",
@@ -95,6 +97,7 @@ REQUIRED_LINK_TARGETS = [
     "ops/SLITHER_BASELINE.md",
     "docs/architecture.md",
     "docs/threat-model.md",
+    "docs/audit-finding-workflow.md",
     "docs/incident-response.md",
     "docs/release-readiness.md",
     "docs/status.md",

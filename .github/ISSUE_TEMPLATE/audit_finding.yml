@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Do not disclose exploitable vulnerabilities publicly before coordinated handling. Use private reporting from SECURITY.md unless this finding is already cleared for public tracking. 6529Stream is pre-audit and not production-ready.
+        Do not disclose exploitable vulnerabilities publicly before coordinated handling. Use private reporting from SECURITY.md unless this finding is already cleared for public tracking. Follow docs/audit-finding-workflow.md for intake, triage, remediation, retest, accepted-risk, and closure rules. 6529Stream is pre-audit and not production-ready.
   - type: dropdown
     id: severity
     attributes:
