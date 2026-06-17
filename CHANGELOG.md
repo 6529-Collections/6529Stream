@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added checked INT-015 TypeScript event decoding and indexer ingestion
+  snippets covering event topic catalog loading, `topic0` dispatch, normalized
+  log identity, ABI/topic drift checks, idempotent ingestion, confirmation
+  depth, reorg rollback, read-after-event queues, no-secret diagnostics,
+  local/CI/Windows gate wiring, and release-manifest/checksum coverage for
+  frontend and indexer teams.
 - Added checked INT-014 TypeScript EIP-712 payload construction snippets
   covering domain construction, `DropAuthorization` message shape, drop ID
   derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe

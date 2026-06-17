@@ -173,6 +173,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_typescript_artifact_chain_config.py
 "$python_bin" scripts/test_typescript_eip712_drop_authorization.py
 "$python_bin" scripts/check_typescript_eip712_drop_authorization.py
+"$python_bin" scripts/test_typescript_event_decoding_indexer.py
+"$python_bin" scripts/check_typescript_event_decoding_indexer.py
 "$python_bin" scripts/test_mobile_walletconnect.py
 "$python_bin" scripts/check_mobile_walletconnect.py
 "$python_bin" scripts/test_electron_security_wallets.py

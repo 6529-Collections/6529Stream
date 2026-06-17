@@ -23,6 +23,12 @@ for the `ONE-005` retained marketplace/indexer evidence model covering
 OpenSea, Reservoir, Blur, Manifold, equivalent collector/indexer tooling,
 contract metadata, token metadata refresh, animation rendering, royalty
 display, transfer/listing/sale paths, event replay, and cache invalidation.
+Use
+[`docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md)
+for INT-015 TypeScript event decoding and indexer ingestion snippets covering
+event topic catalog loading, topic0 dispatch, normalized log identity,
+idempotent ingestion, read-after-event queue construction, confirmation depth,
+and reorg rollback.
 
 ## Maturity And Scope
 
@@ -82,6 +88,7 @@ copies.
 | ABI review surface | [`release-artifacts/baselines/v0.1.0/abi-surface.json`](../../release-artifacts/baselines/v0.1.0/abi-surface.json) | External function/event/error baseline |
 | ABI checksums | [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI and bytecode checksum source |
 | Event topic catalog | [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json) | Canonical committed topic/signature list |
+| TypeScript event decoding snippets | [`docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md) | `INT-015` checked event topic catalog loading, topic0 dispatch, normalized log identity, decode boundary, idempotent ingestion, read-after-event queue, confirmation depth, and reorg rollback examples |
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | Interface lookup source |
 | Local address book | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json) | Local development addresses |
 | Fork-mainnet address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork rehearsal addresses |
@@ -480,6 +487,8 @@ Run these when editing this guide:
 ```sh
 python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
+python scripts/test_typescript_event_decoding_indexer.py
+python scripts/check_typescript_event_decoding_indexer.py
 python scripts/test_one_of_one_provenance_manifest.py
 python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check

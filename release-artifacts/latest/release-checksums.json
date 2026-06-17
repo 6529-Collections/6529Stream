@@ -33,6 +33,8 @@
       "scripts/test_typescript_artifact_chain_config.py",
       "scripts/check_typescript_eip712_drop_authorization.py",
       "scripts/test_typescript_eip712_drop_authorization.py",
+      "scripts/check_typescript_event_decoding_indexer.py",
+      "scripts/test_typescript_event_decoding_indexer.py",
       "scripts/check_warning_dispositions.py",
       "scripts/test_warning_dispositions.py",
       "scripts/run_forge_size_log.py",
@@ -54,7 +56,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:84514b841fb4b012a0aa3b563fbe6e29e121f536e15b6bbe6e673f88579904fd"
+    "sha256": "sha256:90502540a2c7b9a67432b9c7bf7a84d287904fe70d68f79d143fc0ea6235d5a5"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -513,7 +515,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:cd2ba9be5432db62653e300d931c5967c4f686c78678a6f1f092142f9d4d4bc3",
+      "sha256": "sha256:3c3739708dc7a8cef2afeda4fb1f4310ffddb41806d75d865378511ebcd6ddce",
       "size_bytes": 79962
     },
     {
@@ -623,22 +625,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9c84ce81b293bd780c4ec4da618b813efdccfc6ce03eaecda07549e34bd46324",
-      "size_bytes": 111314
+      "sha256": "sha256:7b9392d49b2c1f7d6aa41f4f23c5401e889bd0216550f3824ea37e4cb23ff177",
+      "size_bytes": 111549
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:fd6fa5af983f849c89c3111747673596a979466e26395eb472b74b952016447a",
-      "size_bytes": 53694
+      "sha256": "sha256:db59ba30ea1b436fdf4ffb0ec6bdcc8ea8a9be1cf8125124dff9d2a72ba48f85",
+      "size_bytes": 54095
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:5a14c455295e2944f7c4775002530dc98fbfd13c7ae59a5afc362e4b1f4d3d95",
-      "size_bytes": 51139
+      "sha256": "sha256:e291cef756bcbe572ace46ad66d8407397eb63d2b9cbd34ba4ce9119f47967b8",
+      "size_bytes": 51533
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:38d8590e405a32836066f4189467016fbda216c31d1b60cba2a3892d64bbdf08",
+      "sha256": "sha256:06f8d9440419f54b31a556d427efdbd12ce2e5a11ad1754d4210fbe3e6e77622",
       "size_bytes": 22929
     },
     {
@@ -753,8 +755,8 @@
     },
     {
       "path": "scripts/check_react_next_reference.py",
-      "sha256": "sha256:702625017f0499ccf90660f932b17ef559667484425eead9c943ac70ecb879d4",
-      "size_bytes": 11671
+      "sha256": "sha256:c72b0c2a68e40dbfbcbf64ece1ee38a9f0acf821d72d62c4916a8b5ebab439ac",
+      "size_bytes": 12103
     },
     {
       "path": "scripts/check_readme.py",
@@ -775,6 +777,11 @@
       "path": "scripts/check_typescript_eip712_drop_authorization.py",
       "sha256": "sha256:a97aad2314a267b4946f61aa90ea6bcb6e896721df9f4f7fb5dfc04e6b080ec7",
       "size_bytes": 9422
+    },
+    {
+      "path": "scripts/check_typescript_event_decoding_indexer.py",
+      "sha256": "sha256:a6e678b0d3cfd88754700fb09b932b21845904dde7418310456e6aced963edfa",
+      "size_bytes": 12036
     },
     {
       "path": "scripts/check_warning_dispositions.py",
@@ -808,8 +815,8 @@
     },
     {
       "path": "scripts/test_react_next_reference.py",
-      "sha256": "sha256:ec38c2a1967da894da37094cd39e12c114d3137a76b20a89b8ce5a48dc2a7107",
-      "size_bytes": 11367
+      "sha256": "sha256:2f2f0113756919dba24f22879bf8b083550b727b99b6b263ec6ba66c775725c8",
+      "size_bytes": 11551
     },
     {
       "path": "scripts/test_readme.py",
@@ -825,6 +832,11 @@
       "path": "scripts/test_typescript_eip712_drop_authorization.py",
       "sha256": "sha256:aad06c2f0a7e48f53496f1a804a4758f2ece0f9f94705704c4f17f95d9f6d427",
       "size_bytes": 6713
+    },
+    {
+      "path": "scripts/test_typescript_event_decoding_indexer.py",
+      "sha256": "sha256:2ea83a907ff7ec1755acfe3298376ab9f5b5b21b0eff4d79077fd0c95b93bf1e",
+      "size_bytes": 9182
     },
     {
       "path": "scripts/test_warning_dispositions.py",

@@ -154,6 +154,10 @@ Full rescan and recovery are named.
 
 Event and read gaps are named.
 
+INT-015 TypeScript event decoding and indexer ingestion snippets cover event
+topic catalog loading, topic0 dispatch, normalized log identity, idempotent
+ingestion, and read-after-event queue behavior.
+
 ## Validation Commands
 
 ```sh

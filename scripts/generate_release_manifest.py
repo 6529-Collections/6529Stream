@@ -109,6 +109,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/integrations/frontend-reference-architecture.md"),
     Path("docs/integrations/examples/typescript-artifacts-and-chain-config.md"),
     Path("docs/integrations/examples/typescript-eip712-drop-authorization.md"),
+    Path("docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md"),
     Path("docs/integrations/mobile-walletconnect.md"),
     Path("docs/integrations/electron-security-wallets.md"),
     Path("docs/integrations/operator-admin-ui.md"),

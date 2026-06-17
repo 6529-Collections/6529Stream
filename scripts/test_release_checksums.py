@@ -57,7 +57,15 @@ class ReleaseChecksumTests(unittest.TestCase):
             generator.DEFAULT_COVERED_PATHS,
         )
         self.assertIn(
+            Path("scripts/check_typescript_event_decoding_indexer.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
             Path("scripts/test_typescript_eip712_drop_authorization.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("scripts/test_typescript_event_decoding_indexer.py"),
             generator.DEFAULT_COVERED_PATHS,
         )
         self.assertIn(Path("deployments/admin-ceremony"), generator.DEFAULT_COVERED_PATHS)

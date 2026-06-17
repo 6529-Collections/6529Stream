@@ -3428,8 +3428,8 @@ unless an external dependency changes.
 | `INT-011` | Add curator rewards frontend flow spec | G | Merged in PR #487; issue #486 closed completed |
 | `INT-012` | Add withdrawal/credit UX flow spec | G | Merged in PR #489; issue #488 closed completed |
 | `INT-013` | Add TypeScript snippets for artifact loading and chain config | G | Merged in PR #491; issue #490 closed completed |
-| `INT-014` | Add TypeScript snippets for EIP-712 payload construction | G | In progress on issue #492 and branch `codex/typescript-eip712-payload-snippets` |
-| `INT-015` | Add TypeScript snippets for event decoding/indexer ingestion | G | `INT-005` |
+| `INT-014` | Add TypeScript snippets for EIP-712 payload construction | G | Merged in PR #493; issue #492 closed completed |
+| `INT-015` | Add TypeScript snippets for event decoding/indexer ingestion | G | In progress on issue #494 and branch `codex/typescript-event-decoding-snippets`; depends on `INT-005` |
 | `INT-016` | Add integration conformance fixtures for frontend teams | G | `INT-013` to `INT-015` |
 | `INT-017` | Add minimal read-only reference UI, if still useful after docs | G | stable testnet addresses |
 | `INT-018` | Add transaction-flow reference UI, if maintainers want app code in repo | G | `INT-017` |
