@@ -140,6 +140,8 @@ jobs:
             scripts/test_external_audit_report_evidence.py \
             scripts/check_post_audit_remediation_evidence.py \
             scripts/test_post_audit_remediation_evidence.py \
+            scripts/check_live_ceremony_evidence.py \
+            scripts/test_live_ceremony_evidence.py \
             scripts/check_fork_deployment_rehearsal_evidence.py \
             scripts/test_fork_deployment_rehearsal_evidence.py \
             scripts/check_testnet_deployment_rehearsal_evidence.py \
@@ -483,6 +485,8 @@ jobs:
           python3 scripts/check_external_audit_report_evidence.py 2>&1 | tee ci-logs/external-audit-report-evidence-check.log
           python3 scripts/test_post_audit_remediation_evidence.py 2>&1 | tee ci-logs/post-audit-remediation-evidence-tests.log
           python3 scripts/check_post_audit_remediation_evidence.py 2>&1 | tee ci-logs/post-audit-remediation-evidence-check.log
+          python3 scripts/test_live_ceremony_evidence.py 2>&1 | tee ci-logs/live-ceremony-evidence-tests.log
+          python3 scripts/check_live_ceremony_evidence.py 2>&1 | tee ci-logs/live-ceremony-evidence-check.log
           python3 scripts/test_fork_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/fork-deployment-rehearsal-evidence-tests.log
           python3 scripts/check_fork_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/fork-deployment-rehearsal-evidence-check.log
           python3 scripts/test_testnet_deployment_rehearsal_evidence.py 2>&1 | tee ci-logs/testnet-deployment-rehearsal-evidence-tests.log

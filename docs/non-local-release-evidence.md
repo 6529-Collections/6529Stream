@@ -330,6 +330,40 @@ The checker validates retained no-secret browser proof only. It does not fetch
 live metadata, call a private RPC endpoint, or execute production browser work
 from CI.
 
+### Live Ceremony Evidence
+
+Retain:
+
+- release commit, deployment version, chain ID, and live block or transcript
+  reference;
+- deployer, Safe or multisig, pause guardian, emergency recipient, drop signer,
+  and signer-manager identities as public addresses or role classes, never
+  private keys;
+- ownership transfer, role grant/revoke, signer setup, metadata/freeze, auction,
+  and emergency-control transaction references;
+- dry-run mint and auction outcomes;
+- monitoring handoff owner, reviewer, and decision;
+- generated live deployment manifest, live address book, Safe/multisig export,
+  explorer transaction bundle, post-state views, release manifest digest, and
+  checksum digest references; and
+- explicit redaction confirmations for private keys, private RPC URLs,
+  signer-service secrets, and unreleased drop payloads.
+
+Map production ceremony proof to `live_ceremony_evidence`.
+
+The live ceremony row has a dedicated retained-artifact template at
+`release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`.
+Before generating the non-local metadata envelope, run:
+
+```sh
+python scripts/test_live_ceremony_evidence.py
+python scripts/check_live_ceremony_evidence.py
+```
+
+The checker validates retained no-secret ceremony proof only. It does not
+execute live transactions, contact a Safe, call private RPC endpoints, or
+approve a production release by itself.
+
 ### Marketplace And Indexer Evidence
 
 Retain:

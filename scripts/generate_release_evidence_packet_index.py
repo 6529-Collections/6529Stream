@@ -93,6 +93,11 @@ LIVE_METADATA_BROWSER_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/live-metadata-browser/"
     "live-metadata-browser-retained-artifact-template.md"
 )
+LIVE_CEREMONY_REQUIREMENT_ID = "live_ceremony_evidence"
+LIVE_CEREMONY_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/live-ceremony/"
+    "live-ceremony-retained-artifact-template.md"
+)
 EXTERNAL_AUDIT_REQUIREMENT_ID = "external_audit_report"
 EXTERNAL_AUDIT_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/external-audit-report/"
@@ -137,6 +142,10 @@ ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PRODUCTION_PHASE, LIVE_METADATA_BROWSER_REQUIREMENT_ID): (
         "python scripts/test_live_metadata_browser_evidence.py",
         "python scripts/check_live_metadata_browser_evidence.py",
+    ),
+    (PRODUCTION_PHASE, LIVE_CEREMONY_REQUIREMENT_ID): (
+        "python scripts/test_live_ceremony_evidence.py",
+        "python scripts/check_live_ceremony_evidence.py",
     ),
     (PRODUCTION_PHASE, PRODUCTION_ADDRESS_BOOKS_REQUIREMENT_ID): (
         "python scripts/test_production_verified_addresses.py",
@@ -378,6 +387,13 @@ def retained_artifact_expectation(
                 repo_root,
                 POST_AUDIT_REMEDIATION_RETAINED_ARTIFACT_TEMPLATE,
             ),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif phase == PRODUCTION_PHASE and requirement_id == LIVE_CEREMONY_REQUIREMENT_ID:
+        record = file_record(
+            resolve_repo_path(repo_root, LIVE_CEREMONY_RETAINED_ARTIFACT_TEMPLATE),
             repo_root,
         )
         retained_path = record["path"]
