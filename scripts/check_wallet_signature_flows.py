@@ -43,6 +43,15 @@ REQUIRED_PHRASES = [
     "operator UI",
     "indexer",
     "backend signing service",
+    "TypeScript EIP-712 payload construction snippets",
+    "INT-014",
+    "domain construction",
+    "DropAuthorization message shape",
+    "drop ID derivation",
+    "token data hashing",
+    "sale-mode validation",
+    "submission preflight",
+    "no-secret logging",
     "WalletConnect",
     "Safe",
     "fork-aware Safe/ERC-1271 smoke",
@@ -115,6 +124,8 @@ REQUIRED_PHRASES = [
 REQUIRED_COMMANDS = [
     "python scripts/test_wallet_signature_flows.py",
     "python scripts/check_wallet_signature_flows.py",
+    "python scripts/test_typescript_eip712_drop_authorization.py",
+    "python scripts/check_typescript_eip712_drop_authorization.py",
     "python scripts/test_integrations_readme.py",
     "python scripts/check_integrations_readme.py",
     "python scripts/test_release_readiness.py",
@@ -136,6 +147,7 @@ REQUIRED_COMMANDS = [
 
 REQUIRED_LINK_TARGETS = [
     "docs/integrations/README.md",
+    "docs/integrations/examples/typescript-eip712-drop-authorization.md",
     "docs/drop-authorization-signing.md",
     "docs/adr/0001-drop-authorization.md",
     "docs/signer-custody-readiness.md",

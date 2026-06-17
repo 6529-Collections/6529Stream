@@ -48,6 +48,7 @@ code:
 - [docs/integrations/events-and-indexing.md](events-and-indexing.md)
 - [docs/integrations/metadata-rendering.md](metadata-rendering.md)
 - [docs/integrations/examples/react-viem.md](examples/react-viem.md)
+- [docs/integrations/examples/typescript-eip712-drop-authorization.md](examples/typescript-eip712-drop-authorization.md)
 - [docs/architecture.md](../architecture.md)
 - [docs/threat-model.md](../threat-model.md)
 - [docs/deployment.md](../deployment.md)
@@ -471,6 +472,13 @@ book loading, deployment manifest validation, release manifest hash pinning,
 ABI checksum validation, unsupported-chain handling, and fail-closed chain
 config construction before wallet prompts or transaction submission.
 
+Use
+[docs/integrations/examples/typescript-eip712-drop-authorization.md](examples/typescript-eip712-drop-authorization.md)
+for INT-014 TypeScript snippets focused on EIP-712 domain construction,
+`DropAuthorization` message shape, drop ID derivation, token data hashing,
+sale-mode validation, EOA/ERC-1271/Safe boundaries, signer separation,
+submission preflight, and no-secret logging.
+
 The examples are illustrative architecture shapes only. They are not a
 generated SDK, not a dependency recommendation, and not a maintained app.
 
@@ -483,6 +491,8 @@ python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
 python scripts/test_typescript_artifact_chain_config.py
 python scripts/check_typescript_artifact_chain_config.py
+python scripts/test_typescript_eip712_drop_authorization.py
+python scripts/check_typescript_eip712_drop_authorization.py
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
 python scripts/test_release_readiness.py

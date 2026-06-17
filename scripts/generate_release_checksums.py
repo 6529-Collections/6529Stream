@@ -43,6 +43,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_react_next_reference.py"),
     Path("scripts/check_typescript_artifact_chain_config.py"),
     Path("scripts/test_typescript_artifact_chain_config.py"),
+    Path("scripts/check_typescript_eip712_drop_authorization.py"),
+    Path("scripts/test_typescript_eip712_drop_authorization.py"),
     Path("scripts/check_warning_dispositions.py"),
     Path("scripts/test_warning_dispositions.py"),
     Path("scripts/run_forge_size_log.py"),

@@ -49,7 +49,10 @@ It does not replace fork/testnet/live evidence for public beta or production.
 ## Maturity And Scope
 
 React, mobile, Electron, operator UI, indexer, backend signing service,
-WalletConnect, and Safe teams are named. Fork-aware Safe/ERC-1271 smoke,
+WalletConnect, and Safe teams are named. INT-014 TypeScript EIP-712 payload
+construction snippets, domain construction, DropAuthorization message shape,
+drop ID derivation, token data hashing, sale-mode validation, submission
+preflight, and no-secret logging are named. Fork-aware Safe/ERC-1271 smoke,
 StreamSafeERC1271ForkSmoke, MockSafeERC1271Signer, `vm.chainId`, no live RPC,
 no private keys, and no-secret policy are named.
 
