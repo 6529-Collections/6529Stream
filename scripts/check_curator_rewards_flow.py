@@ -120,6 +120,68 @@ REQUIRED_LINK_TARGETS = [
     "test/StreamPaymentsInvariant.t.sol",
 ]
 
+SOLIDITY_EXPECTATIONS = [
+    (
+        "curator reward leaf domain v2",
+        re.compile(
+            r"CURATOR_REWARD_LEAF_DOMAIN\s*=\s*"
+            r'keccak256\("6529Stream\.StreamCuratorsPool\.curatorRewardLeaf\.v2"\)',
+            re.DOTALL,
+        ),
+    ),
+    (
+        "delegation collection constant",
+        re.compile(
+            r"DELEGATION_COLLECTION\s*=\s*"
+            r"0x8888888888888888888888888888888888888888",
+            re.DOTALL,
+        ),
+    ),
+    (
+        "curator reward use case constant",
+        re.compile(r"CURATOR_REWARD_USE_CASE\s*=\s*1\s*;", re.DOTALL),
+    ),
+    (
+        "delegation status lookup bindings",
+        re.compile(
+            r"retrieveGlobalStatusOfDelegation\(\s*"
+            r"_delegator,\s*DELEGATION_COLLECTION,\s*msg\.sender,\s*"
+            r"CURATOR_REWARD_USE_CASE\s*\)",
+            re.DOTALL,
+        ),
+    ),
+    (
+        "single root update increments epoch",
+        re.compile(
+            r"function\s+setMerkleRoot[\s\S]*?"
+            r"collectionMerkleRootEpoch\[_collectionID\]\s*\+=\s*1\s*;",
+            re.DOTALL,
+        ),
+    ),
+    (
+        "batch root update increments epoch",
+        re.compile(
+            r"function\s+setMultipleMerkleRoots[\s\S]*?"
+            r"collectionMerkleRootEpoch\[_collectionIDs\[i\]\]\s*\+=\s*1\s*;",
+            re.DOTALL,
+        ),
+    ),
+    (
+        "leaf abi.encode field order",
+        re.compile(
+            r"abi\.encode\(\s*"
+            r"CURATOR_REWARD_LEAF_DOMAIN,\s*"
+            r"block\.chainid,\s*"
+            r"address\(this\),\s*"
+            r"_collectionID,\s*"
+            r"_rewardAddress,\s*"
+            r"_amount,\s*"
+            r"_rootEpoch\s*\)",
+            re.DOTALL,
+        ),
+    ),
+]
+
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 
@@ -187,6 +249,24 @@ def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     ]
 
 
+def validate_solidity_source(repo_root: Path) -> None:
+    source_path = repo_root / "smart-contracts/StreamCuratorsPool.sol"
+    if not source_path.is_file():
+        raise CuratorRewardsFlowError("missing Solidity source: smart-contracts/StreamCuratorsPool.sol")
+
+    source = source_path.read_text(encoding="utf-8")
+    missing = [
+        description
+        for description, pattern in SOLIDITY_EXPECTATIONS
+        if pattern.search(source) is None
+    ]
+    if missing:
+        raise CuratorRewardsFlowError(
+            "StreamCuratorsPool source no longer matches curator rewards guide: "
+            + ", ".join(missing)
+        )
+
+
 def validate_curator_rewards_flow(repo_root: Path, document_path: Path) -> None:
     if not document_path.is_file():
         relative = normalize_repo_path(document_path, repo_root)
@@ -214,7 +294,7 @@ def validate_curator_rewards_flow(repo_root: Path, document_path: Path) -> None:
             + ", ".join(missing_required_phrases)
         )
 
-    missing_commands = [command for command in REQUIRED_COMMANDS if command not in text]
+    missing_commands = missing_phrases(text, REQUIRED_COMMANDS)
     if missing_commands:
         raise CuratorRewardsFlowError(
             "curator rewards doc is missing required commands: "
@@ -228,6 +308,8 @@ def validate_curator_rewards_flow(repo_root: Path, document_path: Path) -> None:
             "curator rewards doc is missing required links: "
             + ", ".join(missing_targets)
         )
+
+    validate_solidity_source(repo_root)
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:

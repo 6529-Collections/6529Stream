@@ -46,7 +46,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:e2fd807ee77b9686c2030da001b340ba9fc9cc14531feb43feaa72d067558061"
+    "sha256": "sha256:270e1866dd9a66ea4992514ce07d989b1db52d5b7fdf03ef48d830842855210b"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -720,8 +720,8 @@
     },
     {
       "path": "scripts/check_curator_rewards_flow.py",
-      "sha256": "sha256:9aa043d8a3b757d61a02253d9d118edea5c63c903b42a541da8565ef60e676c8",
-      "size_bytes": 8460
+      "sha256": "sha256:77159f07226aeb664dee31c659b33271f3281aca5e320753e6991aa06142da13",
+      "size_bytes": 10873
     },
     {
       "path": "scripts/check_incident_drill_evidence.py",
@@ -775,8 +775,8 @@
     },
     {
       "path": "scripts/test_curator_rewards_flow.py",
-      "sha256": "sha256:a439da5348f4638b07a71b8511997bb80ca14164da4f406b65dca893da81ded5",
-      "size_bytes": 7652
+      "sha256": "sha256:74b6441bde1577bc76710998feb35706899992c988cf3373bc18ce751252dc15",
+      "size_bytes": 10558
     },
     {
       "path": "scripts/test_readme.py",

@@ -26,6 +26,54 @@ def write_text(path: Path, value: str) -> None:
 def seed_required_targets(root: Path) -> None:
     for relative in checker.REQUIRED_LINK_TARGETS:
         write_text(root / relative, f"seed for {relative}\n")
+    write_text(
+        root / "smart-contracts/StreamCuratorsPool.sol",
+        """
+contract StreamCuratorsPool {
+    address private constant DELEGATION_COLLECTION = 0x8888888888888888888888888888888888888888;
+    uint256 private constant CURATOR_REWARD_USE_CASE = 1;
+    bytes32 public constant CURATOR_REWARD_LEAF_DOMAIN =
+        keccak256("6529Stream.StreamCuratorsPool.curatorRewardLeaf.v2");
+
+    mapping(uint256 => uint256) public collectionMerkleRootEpoch;
+
+    function setMerkleRoot(uint256 _collectionID, bytes32) public {
+        collectionMerkleRootEpoch[_collectionID] += 1;
+    }
+
+    function setMultipleMerkleRoots(uint256[] memory _collectionIDs, bytes32[] memory) public {
+        for (uint256 i = 0; i < _collectionIDs.length; i++) {
+            collectionMerkleRootEpoch[_collectionIDs[i]] += 1;
+        }
+    }
+
+    function claimRewards(address dmc, address _delegator) public {
+        dmc.retrieveGlobalStatusOfDelegation(
+            _delegator, DELEGATION_COLLECTION, msg.sender, CURATOR_REWARD_USE_CASE
+        );
+    }
+
+    function hashRewardLeaf(
+        address _rewardAddress,
+        uint256 _collectionID,
+        uint256 _amount,
+        uint256 _rootEpoch
+    ) public view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                CURATOR_REWARD_LEAF_DOMAIN,
+                block.chainid,
+                address(this),
+                _collectionID,
+                _rewardAddress,
+                _amount,
+                _rootEpoch
+            )
+        );
+    }
+}
+""",
+    )
 
 
 def target_links() -> str:
@@ -210,6 +258,35 @@ class CuratorRewardsFlowTests(unittest.TestCase):
             write_text(root / checker.DEFAULT_DOC, text)
             with self.assertRaisesRegex(
                 checker.CuratorRewardsFlowError, "missing required commands"
+            ):
+                checker.validate_curator_rewards_flow(root, root / checker.DEFAULT_DOC)
+
+    def test_required_commands_tolerate_markdown_wrapping(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_doc().replace(
+                "python scripts/generate_release_manifest.py --check",
+                "python scripts/generate_release_manifest.py\n--check",
+            )
+            write_text(root / checker.DEFAULT_DOC, text)
+            checker.validate_curator_rewards_flow(root, root / checker.DEFAULT_DOC)
+
+    def test_rejects_solidity_source_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            source_path = root / "smart-contracts/StreamCuratorsPool.sol"
+            source_path.write_text(
+                source_path.read_text(encoding="utf-8").replace(
+                    "curatorRewardLeaf.v2", "curatorRewardLeaf.v1"
+                ),
+                encoding="utf-8",
+                newline="\n",
+            )
+            write_text(root / checker.DEFAULT_DOC, minimal_doc())
+            with self.assertRaisesRegex(
+                checker.CuratorRewardsFlowError, "source no longer matches"
             ):
                 checker.validate_curator_rewards_flow(root, root / checker.DEFAULT_DOC)
 
