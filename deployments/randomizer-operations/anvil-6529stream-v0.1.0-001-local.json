@@ -83,17 +83,21 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+          "sha256": "sha256:0fae7e4ebfd945bd5e06af9bcaf39c27a687763a52062f39a3e88346e3407d84"
         }
       ]
     },
     "callback_validation": {
       "status": "passed",
-      "notes": "Local tests cover request ID, token, collection, provider, and randomizer epoch validation before callbacks can write final randomness.",
+      "notes": "Local tests cover request ID, token, collection, provider, and randomizer epoch validation before callbacks can write final randomness, plus duplicate callback and core-write reentry defenses.",
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+          "sha256": "sha256:0fae7e4ebfd945bd5e06af9bcaf39c27a687763a52062f39a3e88346e3407d84"
+        },
+        {
+          "path": "test/StreamRandomizerAdversarial.t.sol",
+          "sha256": "sha256:58f662005d959e2b73e6d7784885fb4e6b74c48f7496e9cd45808115b0f76495"
         }
       ]
     },
@@ -103,7 +107,7 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+          "sha256": "sha256:0fae7e4ebfd945bd5e06af9bcaf39c27a687763a52062f39a3e88346e3407d84"
         }
       ]
     },
@@ -113,17 +117,21 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+          "sha256": "sha256:0fae7e4ebfd945bd5e06af9bcaf39c27a687763a52062f39a3e88346e3407d84"
         }
       ]
     },
     "stale_request_policy": {
       "status": "passed",
-      "notes": "Local tests cover stale request marking, terminal state exposure, and migration unblocking after stale marking.",
+      "notes": "Local tests cover stale request marking, terminal state exposure, migration unblocking after stale marking, and nested stale-mark reentry rejection during core writes.",
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+          "sha256": "sha256:0fae7e4ebfd945bd5e06af9bcaf39c27a687763a52062f39a3e88346e3407d84"
+        },
+        {
+          "path": "test/StreamRandomizerAdversarial.t.sol",
+          "sha256": "sha256:58f662005d959e2b73e6d7784885fb4e6b74c48f7496e9cd45808115b0f76495"
         }
       ]
     },
@@ -133,17 +141,21 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:dd20b5aa721765bb174343a2d197261e431dfde1707f41131f5de599985a926e"
+          "sha256": "sha256:0fae7e4ebfd945bd5e06af9bcaf39c27a687763a52062f39a3e88346e3407d84"
         }
       ]
     },
     "retry_policy": {
       "status": "passed",
-      "notes": "Local tests cover bounded deterministic retry after failed post-processing for VRF and arRNG requests.",
+      "notes": "Local tests cover bounded deterministic retry after failed post-processing for VRF and arRNG requests, including nested retry reentry rejection during retry core writes.",
       "evidence": [
         {
           "path": "test/StreamRandomizerRetry.t.sol",
           "sha256": "sha256:c9ad1a5c49b54bdafb46e2cc912459546bf93bbea1388bd8c83b5b0921114aa5"
+        },
+        {
+          "path": "test/StreamRandomizerAdversarial.t.sol",
+          "sha256": "sha256:58f662005d959e2b73e6d7784885fb4e6b74c48f7496e9cd45808115b0f76495"
         }
       ]
     },

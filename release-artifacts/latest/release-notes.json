@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:763fc47281fd49fd5a87c5d137c56262dea688bae1f279ff4bfbd0e7b522ceb4",
-      "size_bytes": 56674
+      "sha256": "sha256:77ee124344d30c628026e55dc923c32525cd3fec2704cba40d6fdaa3a77af874",
+      "size_bytes": 56915
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f6171e7339419fb3203656a999001148bb455e01238f2d1b1e7dd3d313f91a12",
+      "sha256": "sha256:590edea5bc86b1fc41381198e7986300d359d0715c05d5f70acc2c068bee9a00",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added `ADV-013` randomizer request-binding parity tests covering VRF and arRNG wrong-collection pending-state preservation, plus nested stale-mark and retry reentry during the external core write without production bytecode changes.",
       "Added `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations, with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and release-artifact coverage.",
       "Added a checked `AUD-003` external audit finding workflow covering public-safe intake, severity/status triage, audited scope, remediation PRs, required tests, retest, accepted-risk decisions, closure gates, release evidence handoff, no-secret redaction, and local/CI/Windows gate wiring.",
       "Added a generated release-candidate lockfile that ties the release manifest, bytecode release proof, public-beta evidence, risk register, release notes, blocker reports, release evidence issue outputs, release-signature evidence, and non-release commit/tag/signature status into a checksum-covered local baseline, with focused tests and local/CI/Windows gate wiring.",

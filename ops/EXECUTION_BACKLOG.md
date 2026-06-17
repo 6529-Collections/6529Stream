@@ -3376,12 +3376,13 @@ unless an external dependency changes.
 | `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Merged in PR #445; issue #444 closed completed |
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | Merged in PR #447; issue #446 closed completed |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
+| `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Active issue #524; branch `codex/randomizer-request-binding-parity` |
 
 ### Contract/API Hardening
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Active issue #522; branch `codex/auction-integration-read-views` adds auction minimum-next-bid and no-bid claimant read views |
+| `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Active issue #478; current PR enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts; prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |

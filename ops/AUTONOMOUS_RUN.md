@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/auction-integration-read-views` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/521` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/522` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/523` |
-| Next issue | Wait for PR #523 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge only when clean; then return to the ADV randomizer request-binding follow-up. |
+| Active PR branch | `codex/randomizer-request-binding-parity` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/523` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/524` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/525` |
+| Next issue | Wait for PR #525 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge when clean; then select the next local-verifiable substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 20:59 UTC` |
+| Last updated | `2026-06-17 22:22 UTC` |
 
 ## Packaging Notes
 
@@ -16196,6 +16196,11 @@ Outcome:
 | 2026-06-17 20:32 | Open PR #523 for CON-003 | PR #523 is open at `https://github.com/6529-Collections/6529Stream/pull/523`, closes issue #522, and packages additive auction read views, focused tests/invariants, integration/operator docs, changelog coverage, and regenerated release evidence. CodeRabbit was requested in comment `4735054006`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 20:37 | Address PR #523 test-coverage nice-to-haves | 6529bot security reported no findings and general review marked PR #523 good to merge with two useful coverage nice-to-haves. Added explicit `minimumNextBid` coverage for the 1-wei integer-floor outbid case where the increment floors to zero, and expanded fail-closed revert assertions across no auction, ended no bid, ended with bid, settled no bid, settled with bid, and cancelled states. `forge fmt --check test\StreamAuctionPayments.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `make release-checksums-check`, and `codex-diff-check` passed. Next action is to commit/push the review-response head, wait for latest CI/bot feedback, and merge only when clean. |
 | 2026-06-17 20:59 | Fix PR #523 Foundry smoke gas snapshot | GitHub CI failed only on `Foundry smoke` gas snapshot drift: five auction gas baselines shifted after adding the read views, while all gas tests passed. Updated `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and regenerated release checksum/manifest hashes. Local validation passed: `make gas-snapshot-check`, `make release-checksums-check` with UTF-8 output, and `codex-diff-check`. Next action is to commit/push the CI-fix head, wait for latest checks and bot feedback, and merge only when clean. |
+| 2026-06-17 21:09 | Merge PR #523 and select next item | PR #523 merged as `dd91c546b66a8827ae4525dd5938925ae2b69397` after Foundry smoke, Windows wrapper, CodeRabbit status, and latest 6529bot follow-up were clean; issue #522 closed completed. Local `main` is fast-forwarded to the merge commit. Next action is to create the next local-verifiable substantive issue and branch, with ADV/randomizer request-binding coverage preferred unless backlog/open-issue review identifies a higher-value unblocked item. |
+| 2026-06-17 21:17 | Start ADV-013 randomizer request-binding parity | Issue #524 and branch `codex/randomizer-request-binding-parity` now track VRF/arRNG wrong-collection pending-state parity plus nested stale-mark and retry reentry during the external core write. Initial focused validation passed for `forge fmt --check test\StreamRandomizerLifecycle.t.sol test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`, and `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`; next action is to finish docs/artifact updates, run full required gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 21:32 | Finish ADV-013 local validation | ADV-013 is ready to publish: focused lifecycle/adversarial/retry randomizer tests passed, randomizer operation evidence scripts passed, release manifest/checksum/lockfile checks passed, full `make check` passed with output captured during the run, Windows `scripts\check.ps1` passed, and `codex-diff-check` passed. Next action is to commit, push, open the issue-linked PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 22:02 | Open PR #525 for ADV-013 | PR #525 is open at `https://github.com/6529-Collections/6529Stream/pull/525`, closes issue #524, and packages randomizer request-binding parity plus core-write stale/retry reentry tests with regenerated release evidence. CodeRabbit was requested in comment `4735920164`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 22:22 | Address PR #525 bot harness note | 6529bot marked PR #525 good to merge and left one non-blocking harness note: make the `ArrngRetry` branch explicit instead of using a trailing fallback `else`. Updated the test adversary to fail loudly on unknown reentry modes, regenerated affected randomizer/release evidence, and reran `forge fmt --check test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`, `make release-checksums-check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to commit/push the review-response head, wait for current CI/CodeRabbit/6529bot feedback, and merge only when clean. |
 
 ## Resume Instructions
 
