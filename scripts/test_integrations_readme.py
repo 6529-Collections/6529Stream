@@ -75,7 +75,7 @@ for OpenSea, Reservoir, Blur, and Manifold is named.
 
 ## Integration Flows
 
-Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, INT-010, INT-011, INT-012, INT-013, INT-014, and INT-015.
+Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, INT-010, INT-011, INT-012, INT-013, INT-014, INT-015, and INT-016.
 The fixed-price mint flow is listed.
 Interface and version views for frontend compatibility are listed.
 The auction frontend and indexer flow spec is listed.
@@ -100,6 +100,9 @@ The TypeScript event decoding and indexer ingestion snippets are listed with
 event topic catalog loading, topic0 dispatch, normalized log identity,
 confirmation depth, reorg rollback, read-after-event queue, idempotent
 ingestion, unknown emitter, and unknown topic handling.
+The integration conformance fixtures are listed with fail-closed chain config,
+EIP-712 domain expectations, duplicate log idempotency, and no-secret
+redaction diagnostics.
 The mobile and WalletConnect integration guide is listed.
 The Electron security and wallet integration guide is listed.
 The operator admin UI specification is listed.

@@ -47,6 +47,8 @@ code:
 - [docs/integrations/wallets-and-signatures.md](wallets-and-signatures.md)
 - [docs/integrations/events-and-indexing.md](events-and-indexing.md)
 - [docs/integrations/metadata-rendering.md](metadata-rendering.md)
+- [docs/integrations/integration-conformance-fixtures.md](integration-conformance-fixtures.md)
+- [docs/integrations/fixtures/integration-conformance-fixtures.json](fixtures/integration-conformance-fixtures.json)
 - [docs/integrations/examples/react-viem.md](examples/react-viem.md)
 - [docs/integrations/examples/typescript-eip712-drop-authorization.md](examples/typescript-eip712-drop-authorization.md)
 - [docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md](examples/typescript-event-decoding-and-indexer-ingestion.md)
@@ -459,6 +461,11 @@ A future reference frontend should be tested in layers:
   policy.
 - Indexer reconciliation tests for lag, reorg, duplicate log, and rescan
   behavior.
+- INT-016 integration conformance fixtures for artifact loading, fail-closed
+  chain config, EIP-712 domain expectations, event topic dispatch, normalized
+  log identity, read-after-event queues, duplicate log idempotency, unknown
+  emitter, unknown topic, reorg rollback, confirmation depth, and no-secret
+  redaction diagnostics.
 - End-to-end smoke tests against local Anvil deployment evidence before any
   public beta claim.
 
@@ -508,6 +515,8 @@ python scripts/test_typescript_artifact_chain_config.py
 python scripts/check_typescript_artifact_chain_config.py
 python scripts/test_typescript_event_decoding_indexer.py
 python scripts/check_typescript_event_decoding_indexer.py
+python scripts/test_integration_conformance_fixtures.py
+python scripts/check_integration_conformance_fixtures.py
 python scripts/test_typescript_eip712_drop_authorization.py
 python scripts/check_typescript_eip712_drop_authorization.py
 python scripts/test_integrations_readme.py

@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:db59ba30ea1b436fdf4ffb0ec6bdcc8ea8a9be1cf8125124dff9d2a72ba48f85",
-        "size_bytes": 54095,
+        "sha256": "sha256:ba498a38d4d092cd9e6f158af6d43c5cc7b3e53495e5961b4975ac278a50138e",
+        "size_bytes": 54593,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:e291cef756bcbe572ace46ad66d8407397eb63d2b9cbd34ba4ce9119f47967b8",
-        "size_bytes": 51533
+        "sha256": "sha256:cf31529e60dca79586b3046e02ed91232e4cdda3e6576b444e006e823bbe91d4",
+        "size_bytes": 52024
       }
     },
     "artifact_manifest": {
@@ -147,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:06f8d9440419f54b31a556d427efdbd12ce2e5a11ad1754d4210fbe3e6e77622",
+      "sha256": "sha256:9082c082dd69dce7fe0ac33d100a52a5a3b765c363ac1b4b76727e922e66c47d",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2006,8 +2006,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:a88544c08219dd1748a1969cff3041aa33ecc18130509efc0d745277af6b0063",
-      "size_bytes": 51786
+      "sha256": "sha256:7940d038d4d55ab491fc54864982140970b56d59fb7d7a039a31dd4bd9d1be8b",
+      "size_bytes": 52289
     },
     "governance_docs": [
       {
@@ -2122,8 +2122,8 @@
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:6008843abc8f0f8a2d7642ef31462af085171623051cccb7ea1d9a06b4be822c",
-        "size_bytes": 33794
+        "sha256": "sha256:3c29fe0fcf41ecf6ae121cf804e0c9b5ebe0927bc6357c67657964a0b50a8299",
+        "size_bytes": 35685
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -2152,8 +2152,8 @@
       },
       {
         "path": "docs/integrations/events-and-indexing.md",
-        "sha256": "sha256:ffbb7d992595b53b3438500d9f3c18e1cc0e44240074631436c311e1105bf9ef",
-        "size_bytes": 35268
+        "sha256": "sha256:3806fe73f2d81622b9a4b2e14a2d91ead816c1b258b96f53596617640f27cb8c",
+        "size_bytes": 35881
       },
       {
         "path": "docs/integrations/metadata-rendering.md",
@@ -2172,8 +2172,19 @@
       },
       {
         "path": "docs/integrations/frontend-reference-architecture.md",
-        "sha256": "sha256:3315af45bcf8e616aa092522ac1f3930dc7f30d62a976702b286118000053936",
-        "size_bytes": 27510
+        "sha256": "sha256:ac1fa8b9a94a651a80cae30935cc839725e4d742cb94cd66c6645ff1db826af5",
+        "size_bytes": 28167
+      },
+      {
+        "path": "docs/integrations/integration-conformance-fixtures.md",
+        "sha256": "sha256:7253f0ada3ad07e1771287a2309eace8a288b4dab21f5ed270f3497f273544fb",
+        "size_bytes": 8794
+      },
+      {
+        "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
+        "sha256": "sha256:2f43d4b428795974c15158385a83955dce0ba3bba1e6b0877caf1df911541ba9",
+        "size_bytes": 8392,
+        "schema_version": "6529stream.integration-conformance-fixtures.v1"
       },
       {
         "path": "docs/integrations/examples/typescript-artifacts-and-chain-config.md",
@@ -2187,8 +2198,8 @@
       },
       {
         "path": "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
-        "sha256": "sha256:a2670b0086a33d3050048e54fbfff64dcf26d6fa0ba3b6f8b3151e70cd1b1910",
-        "size_bytes": 18672
+        "sha256": "sha256:6efed93c2407d313f5aa32119e0d69e05adf93b05847f8f011368046af21efe4",
+        "size_bytes": 19297
       },
       {
         "path": "docs/integrations/mobile-walletconnect.md",

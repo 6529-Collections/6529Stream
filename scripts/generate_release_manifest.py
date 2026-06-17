@@ -107,6 +107,8 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/integrations/marketplace-indexer-evidence.md"),
     Path("docs/integrations/interface-versioning.md"),
     Path("docs/integrations/frontend-reference-architecture.md"),
+    Path("docs/integrations/integration-conformance-fixtures.md"),
+    Path("docs/integrations/fixtures/integration-conformance-fixtures.json"),
     Path("docs/integrations/examples/typescript-artifacts-and-chain-config.md"),
     Path("docs/integrations/examples/typescript-eip712-drop-authorization.md"),
     Path("docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md"),

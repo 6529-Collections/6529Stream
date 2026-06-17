@@ -89,6 +89,7 @@ copies.
 | ABI checksums | [`release-artifacts/latest/abi-checksums.json`](../../release-artifacts/latest/abi-checksums.json) | ABI and bytecode checksum source |
 | Event topic catalog | [`release-artifacts/latest/event-topic-catalog.json`](../../release-artifacts/latest/event-topic-catalog.json) | Canonical committed topic/signature list |
 | TypeScript event decoding snippets | [`docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md`](examples/typescript-event-decoding-and-indexer-ingestion.md) | `INT-015` checked event topic catalog loading, topic0 dispatch, normalized log identity, decode boundary, idempotent ingestion, read-after-event queue, confirmation depth, and reorg rollback examples |
+| Integration conformance fixtures | [`docs/integrations/integration-conformance-fixtures.md`](integration-conformance-fixtures.md), [`docs/integrations/fixtures/integration-conformance-fixtures.json`](fixtures/integration-conformance-fixtures.json) | `INT-016` checked local fixture bundle for event topic dispatch, normalized log identity, read-after-event queues, duplicate log idempotency, unknown emitter, unknown topic, confirmation depth, reorg rollback, and no-secret redaction diagnostics |
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | Interface lookup source |
 | Local address book | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json) | Local development addresses |
 | Fork-mainnet address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork rehearsal addresses |
@@ -489,6 +490,8 @@ python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
 python scripts/test_typescript_event_decoding_indexer.py
 python scripts/check_typescript_event_decoding_indexer.py
+python scripts/test_integration_conformance_fixtures.py
+python scripts/check_integration_conformance_fixtures.py
 python scripts/test_one_of_one_provenance_manifest.py
 python scripts/check_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_provenance_manifest.py --check

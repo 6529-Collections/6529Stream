@@ -54,6 +54,9 @@ checksum awareness, fail-closed wrong-chain guards, and chain config
 construction. INT-015 TypeScript event decoding and indexer ingestion snippets
 cover event topic catalog loading, topic0 dispatch, normalized log identity,
 reorg rollback, and idempotent ingestion.
+INT-016 integration conformance fixtures cover fail-closed chain config,
+EIP-712 domain expectations, duplicate log idempotency, and no-secret
+redaction diagnostics.
 
 ## Maturity And Scope
 

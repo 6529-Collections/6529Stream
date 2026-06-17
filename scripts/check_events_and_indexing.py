@@ -182,6 +182,12 @@ REQUIRED_PHRASES = [
     "normalized log identity",
     "idempotent ingestion",
     "read-after-event queue",
+    "INT-016",
+    "integration conformance fixtures",
+    "duplicate log idempotency",
+    "unknown emitter",
+    "unknown topic",
+    "no-secret redaction diagnostics",
 ]
 
 REQUIRED_COMMANDS = [
@@ -189,6 +195,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_events_and_indexing.py",
     "python scripts/test_typescript_event_decoding_indexer.py",
     "python scripts/check_typescript_event_decoding_indexer.py",
+    "python scripts/test_integration_conformance_fixtures.py",
+    "python scripts/check_integration_conformance_fixtures.py",
     "python scripts/test_one_of_one_provenance_manifest.py",
     "python scripts/check_one_of_one_provenance_manifest.py",
     "python scripts/generate_one_of_one_provenance_manifest.py --check",
@@ -216,6 +224,8 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/wallets-and-signatures.md",
     "docs/integrations/marketplace-indexer-evidence.md",
     "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
+    "docs/integrations/integration-conformance-fixtures.md",
+    "docs/integrations/fixtures/integration-conformance-fixtures.json",
     "docs/metadata.md",
     "docs/provenance-manifests.md",
     "docs/release-policy.md",
