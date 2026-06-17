@@ -78,6 +78,12 @@ powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
 | Contributor | [docs/first-30-minutes.md](docs/first-30-minutes.md), [CONTRIBUTING.md](CONTRIBUTING.md), [docs/tooling.md](docs/tooling.md), [docs/status.md](docs/status.md), [docs/known-blockers.md](docs/known-blockers.md), [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md) | Fresh setup, local checks, maturity boundaries, issue-ready backlog entries, and changelog policy |
 | Protocol maintainer | [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md), [docs/release-policy.md](docs/release-policy.md), [docs/release-readiness.md](docs/release-readiness.md), [release-artifacts/latest/release-manifest.json](release-artifacts/latest/release-manifest.json), [release-artifacts/latest/SHA256SUMS](release-artifacts/latest/SHA256SUMS), [release-artifacts/latest/release-checksums.json](release-artifacts/latest/release-checksums.json) | Gate order, release-impacting changes, generated evidence, checksum coverage, and blocker status |
 
+GitHub issue intake uses checked issue forms for [integration reports](.github/ISSUE_TEMPLATE/integration_report.yml),
+[audit findings](.github/ISSUE_TEMPLATE/audit_finding.yml), and
+[release evidence](.github/ISSUE_TEMPLATE/release_evidence.yml). Use
+[SECURITY.md](SECURITY.md) instead of public issues for exploitable
+vulnerabilities.
+
 ## Drop Flow
 
 1. TDH holders provide reputation to drops.
@@ -113,6 +119,13 @@ The checked fresh-contributor guide is also part of the gate:
 ```bash
 python scripts/test_first_30_minutes.py
 python scripts/check_first_30_minutes.py
+```
+
+The checked issue-template surface is part of the gate:
+
+```bash
+python scripts/test_issue_templates.py
+python scripts/check_issue_templates.py
 ```
 
 The changelog gate requires release-impacting PRs to update
@@ -168,6 +181,9 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [release-artifacts/README.md](release-artifacts/README.md)
 - [release-artifacts/latest/release-manifest.json](release-artifacts/latest/release-manifest.json)
 - [release-artifacts/latest/release-checksums.json](release-artifacts/latest/release-checksums.json)
+- [.github/ISSUE_TEMPLATE/integration_report.yml](.github/ISSUE_TEMPLATE/integration_report.yml)
+- [.github/ISSUE_TEMPLATE/audit_finding.yml](.github/ISSUE_TEMPLATE/audit_finding.yml)
+- [.github/ISSUE_TEMPLATE/release_evidence.yml](.github/ISSUE_TEMPLATE/release_evidence.yml)
 
 ## Security
 

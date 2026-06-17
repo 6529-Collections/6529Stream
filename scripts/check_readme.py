@@ -67,6 +67,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_readme.py",
     "python scripts/test_first_30_minutes.py",
     "python scripts/check_first_30_minutes.py",
+    "python scripts/test_issue_templates.py",
+    "python scripts/check_issue_templates.py",
 ]
 
 COMMAND_VARIANTS = {
@@ -119,6 +121,9 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/release-checksums.json",
     "release-artifacts/latest/public-beta-blockers.md",
     "release-artifacts/latest/production-release-blockers.md",
+    ".github/ISSUE_TEMPLATE/integration_report.yml",
+    ".github/ISSUE_TEMPLATE/audit_finding.yml",
+    ".github/ISSUE_TEMPLATE/release_evidence.yml",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

@@ -1,0 +1,103 @@
+name: Release evidence
+description: Request, track, or review public-beta or production release evidence.
+title: "[Evidence]: "
+labels:
+  - evidence
+  - release
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Release evidence must be retained, reviewable, and no-secret. Do not include private keys, seed phrases, RPC credentials, signer material, production deployment secrets, unredacted broadcasts, or private marketplace credentials. Local templates do not prove public-beta or production readiness.
+  - type: dropdown
+    id: release_phase
+    attributes:
+      label: Release phase
+      options:
+        - Public beta
+        - Production release
+        - Both public beta and production release
+        - Local template only
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: requirement_id
+    attributes:
+      label: Requirement ID
+      description: Public-beta or production requirement ID from release-artifacts/latest/public-beta-evidence.json or the generated blocker reports.
+      placeholder: e.g. fork_deployment_rehearsal, live_explorer_verification, external_audit_report
+    validations:
+      required: true
+  - type: dropdown
+    id: evidence_type
+    attributes:
+      label: Evidence type
+      options:
+        - Deployment rehearsal
+        - Verified addresses or explorer verification
+        - Signer custody or production signing
+        - External audit or post-audit remediation
+        - Metadata, marketplace, or indexer evidence
+        - Incident drill or operations evidence
+        - Release signature or signed tag evidence
+        - Other retained artifact
+    validations:
+      required: true
+  - type: textarea
+    id: retained_artifact
+    attributes:
+      label: Retained artifact path or planned path
+      description: Repository path, evidence bundle path, manifest path, address-book path, or planned retained artifact location.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_summary
+    attributes:
+      label: Evidence summary
+      description: What the evidence proves, what it does not prove, and whether it is local, fork, testnet, live, template, reviewed, or pending.
+    validations:
+      required: true
+  - type: textarea
+    id: reviewer_status
+    attributes:
+      label: Reviewer status
+      description: Reviewer, review status, approval status, retest status, or why review is still pending.
+    validations:
+      required: true
+  - type: textarea
+    id: redaction
+    attributes:
+      label: Redaction and no-secret confirmation
+      description: Confirm which secrets or sensitive operational details were checked and redacted.
+    validations:
+      required: true
+  - type: textarea
+    id: blocker_impact
+    attributes:
+      label: Blocker and report impact
+      description: Which public-beta or production blocker rows, release manifest records, packet-index rows, or issue-body sync outputs should change?
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Generator and checker commands
+      description: Commands expected to validate or regenerate this evidence and dependent release artifacts.
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Evidence checks
+      options:
+        - label: I confirmed this evidence is no-secret or described the redaction needed.
+          required: true
+        - label: I identified the public-beta or production requirement ID affected.
+          required: true
+        - label: I considered release manifest, blocker reports, packet index, issue-body sync, and checksum impact.
+          required: true
+        - label: I am not claiming public-beta or production readiness without reviewed evidence and accepted release-mode gates.
+          required: true

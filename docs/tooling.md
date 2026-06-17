@@ -123,6 +123,8 @@ python scripts/test_readme.py
 python scripts/check_readme.py
 python scripts/test_first_30_minutes.py
 python scripts/check_first_30_minutes.py
+python scripts/test_issue_templates.py
+python scripts/check_issue_templates.py
 python scripts/test_curator_rewards_flow.py
 python scripts/check_curator_rewards_flow.py
 python scripts/test_withdrawals_credits_flow.py

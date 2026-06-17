@@ -152,6 +152,12 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     output = latest / "release-manifest.json"
     changelog = root / "CHANGELOG.md"
     docs = [
+        root / ".github" / "ISSUE_TEMPLATE" / "audit_finding.yml",
+        root / ".github" / "ISSUE_TEMPLATE" / "bug_report.yml",
+        root / ".github" / "ISSUE_TEMPLATE" / "config.yml",
+        root / ".github" / "ISSUE_TEMPLATE" / "integration_report.yml",
+        root / ".github" / "ISSUE_TEMPLATE" / "release_evidence.yml",
+        root / ".github" / "ISSUE_TEMPLATE" / "roadmap_item.yml",
         root / "docs" / "release-policy.md",
         root / "docs" / "first-30-minutes.md",
         root / "docs" / "deployment.md",

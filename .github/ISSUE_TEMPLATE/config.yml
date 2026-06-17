@@ -6,3 +6,9 @@ contact_links:
   - name: Roadmap
     url: https://github.com/6529-Collections/6529Stream/blob/main/ops/ROADMAP.md
     about: Review the gated roadmap and known blockers before opening an issue.
+  - name: Integration documentation
+    url: https://github.com/6529-Collections/6529Stream/blob/main/docs/integrations/README.md
+    about: Start here for frontend, mobile, Electron, indexer, wallet, and signing-service integration questions.
+  - name: Release evidence status
+    url: https://github.com/6529-Collections/6529Stream/blob/main/docs/public-beta-evidence.md
+    about: Review public-beta and production evidence status before opening a release-evidence issue.

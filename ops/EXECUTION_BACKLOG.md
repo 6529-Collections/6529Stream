@@ -3441,8 +3441,8 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | `AUD-001` |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `OSS-002` | Add first-30-minutes contributor guide | A/G | In progress on issue #498 and branch `codex/first-30-minutes-contributor-guide`; depends on README refresh |
-| `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | backlog labels |
+| `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
+| `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | In progress on issue #500 and branch `codex/issue-templates`; depends on backlog labels |
 | `OSS-004` | Add PR template release-impact checklist | G | changelog policy |
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | docs stabilization |
 

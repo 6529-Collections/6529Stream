@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added checked GitHub issue templates for integration reports, public-safe
+  audit finding intake, and release evidence requests, with no-secret and
+  pre-audit maturity language, local/CI/Windows gate wiring, and
+  release-manifest/checksum coverage.
 - Added a checked first-30-minutes contributor guide covering fresh checkout
   setup, Foundry/Python/Windows prerequisites, `forge` not being on `PATH`,
   canonical local gates, docs-only and Solidity/test validation paths, known

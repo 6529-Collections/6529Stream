@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:4e17daf667c2d9d406b078ef80b654c4d982a72a853206c65e449e6cf75bda02",
-        "size_bytes": 54968,
+        "sha256": "sha256:184c33d7831706c9383f62e0c0fa2b5f3639acc9e47debfb82ec3ae96fc899b2",
+        "size_bytes": 55222,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:6f95d8c07108c196017c748c9b74e0228db4fd15510570aaff05e62646880432",
-        "size_bytes": 52392
+        "sha256": "sha256:45bd0acaeb49d1353ea4710e92eaf7331c53d75056f5f41d8f02ce54f44d7387",
+        "size_bytes": 52639
       }
     },
     "artifact_manifest": {
@@ -147,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c68f7bc29e59f38b2e5aa6ffbcec266ec924f5ade76d5e32ae1e3131e5694e28",
+      "sha256": "sha256:432169134d828e7aecbf76817fd614a93e320021aeaf822d97ed8303d02b9cb0",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2006,19 +2006,49 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b180f22d8ace36411f4aa8ee7617d45b9e37506bd5b3d2d91ba62120821d3e9c",
-      "size_bytes": 52665
+      "sha256": "sha256:d06b7577f9c7c00f75600c649c7cab4b791d0add1efb478a0170d35ef322a701",
+      "size_bytes": 52918
     },
     "governance_docs": [
       {
         "path": "README.md",
-        "sha256": "sha256:38b5550613a2bacac04daeaa6e76660ccd85543ee04e8c915143752af71556bf",
-        "size_bytes": 9686
+        "sha256": "sha256:fd55fa83b848cbf16891cff03b47c6cab7753e12d540e9ed98e5372d94bef2d0",
+        "size_bytes": 10450
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/audit_finding.yml",
+        "sha256": "sha256:fe91d259a19c5d207add13f8f6f56819b020cc4147e6a261290dd914d59d0443",
+        "size_bytes": 3506
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+        "sha256": "sha256:e6efdea08fdddae1f33c91c9a9ab00776cff128a5a5f81963d75edec1cbf60f7",
+        "size_bytes": 1737
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/config.yml",
+        "sha256": "sha256:11fd405bcb81ac7e379d772687134e1818420d64f4a4e1af19d2376bdbf90c8f",
+        "size_bytes": 922
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/integration_report.yml",
+        "sha256": "sha256:9eba205f3a12b4708100d4bff753ed9791d328689f47e255e87a8579c7923dd5",
+        "size_bytes": 3623
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/release_evidence.yml",
+        "sha256": "sha256:2c73b9194e0d7ba8db335625b814beb549f4b87fb0a6953ee358d09b2c01fe3b",
+        "size_bytes": 3906
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/roadmap_item.yml",
+        "sha256": "sha256:0283893e1c7b786ff07f1b1fe44976389ca9d7c3f46ec97300616554a200aea0",
+        "size_bytes": 3587
       },
       {
         "path": "docs/first-30-minutes.md",
-        "sha256": "sha256:4e3d915153d3515f6bcbb4102c64768c496173acae968970d0e4e06894dc9871",
-        "size_bytes": 9578
+        "sha256": "sha256:2b2bbe76428173f40d6ae2adabbab2c247394787036b4e0dceb5efa92ea09fd5",
+        "size_bytes": 9894
       },
       {
         "path": "docs/release-policy.md",
@@ -2228,13 +2258,13 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:a68fe6797950f00f9fd2fd268433e05c4e09d16535d85668b04085643698ad5c",
-        "size_bytes": 54182
+        "sha256": "sha256:3caccf9490dfd80a0649aa1e33cfce17049f36549ad675027a1317b8a03c2cd9",
+        "size_bytes": 54261
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:15f8a74076001e83ab4c053f692f2b5807bf543133d69dda58331d3e14391a61",
-        "size_bytes": 23908
+        "sha256": "sha256:5b1f2828211d20c2b8758cb02c6e3c221754a3acd16e9ee67518ddbde42636cc",
+        "size_bytes": 24156
       }
     ]
   },

@@ -1,0 +1,104 @@
+name: Integration report
+description: Report frontend, mobile, Electron, indexer, wallet, or signing-service integration work.
+title: "[Integration]: "
+labels:
+  - integration
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        6529Stream is pre-audit and not production-ready. Do not include private keys, seed phrases, RPC credentials, signer material, WalletConnect project secrets, or production deployment secrets.
+  - type: dropdown
+    id: consumer_surface
+    attributes:
+      label: Consumer surface
+      options:
+        - React or web frontend
+        - Mobile or WalletConnect
+        - Electron or desktop
+        - Indexer or data pipeline
+        - Operator admin UI
+        - Backend signing service
+        - Marketplace or metadata consumer
+        - Other integration
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Chain or environment
+      options:
+        - Local Anvil
+        - Fork rehearsal
+        - Testnet
+        - Mainnet
+        - Documentation-only
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: source_version
+    attributes:
+      label: Source, artifact, or release version
+      description: Commit SHA, release manifest hash, address-book version, ABI checksum, package version, or docs path.
+      placeholder: commit SHA, release-artifacts/latest/release-manifest.json hash, or docs path
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or question
+      description: What integration behavior is unclear, broken, or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      description: What happens today in the app, indexer, wallet, signing service, or docs?
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction or integration trace
+      description: Commands, transaction hash, log sample, event sequence, payload, screenshot description, or minimal integration steps. Redact secrets.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: affected_surfaces
+    attributes:
+      label: Affected contract or artifact surfaces
+      description: ABIs, event topic catalog, address books, deployment manifests, EIP-712 payloads, ERC-1271/Safe path, metadata rendering, release manifest, or docs.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation already run
+      description: Local commands, app/indexer checks, release artifact checks, CI links, or why validation is not yet available.
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I checked docs/integrations/README.md and linked integration docs first.
+          required: true
+        - label: I included chain/environment and source/artifact version details.
+          required: true
+        - label: I did not include private keys, signer material, RPC secrets, WalletConnect project secrets, or production deployment secrets.
+          required: true
+        - label: This is not an exploitable vulnerability report; security issues go through SECURITY.md.
+          required: true

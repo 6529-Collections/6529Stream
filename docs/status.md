@@ -9,6 +9,10 @@ The current Gate A smoke baseline proves:
   expectations, `forge` not being on `PATH`, Windows PowerShell wrapper usage,
   known warning noise, generated artifact drift, docs-only paths, Solidity/test
   paths, and no-secret maturity boundaries.
+- The checked GitHub issue-template surface captures integration reports,
+  public-safe audit finding intake, and release evidence requests while
+  preserving pre-audit, not-production-ready, no-secret, and private security
+  reporting boundaries.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production

@@ -1,0 +1,102 @@
+name: Audit finding
+description: Track an external audit finding, remediation, retest, or accepted-risk decision.
+title: "[Audit]: "
+labels:
+  - audit
+  - security
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not disclose exploitable vulnerabilities publicly before coordinated handling. Use private reporting from SECURITY.md unless this finding is already cleared for public tracking. 6529Stream is pre-audit and not production-ready.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - Informational
+        - Undetermined
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Finding status
+      options:
+        - New finding
+        - Remediation planned
+        - Remediation in progress
+        - Ready for retest
+        - Retest passed
+        - Accepted risk proposed
+        - Accepted risk approved
+        - Duplicate or out of scope
+    validations:
+      required: true
+  - type: textarea
+    id: affected_component
+    attributes:
+      label: Affected component
+      description: Contract, function, script, deployment artifact, release evidence, docs path, or operational process.
+    validations:
+      required: true
+  - type: textarea
+    id: finding_summary
+    attributes:
+      label: Finding summary
+      description: Public-safe summary of the issue and affected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: threat_model
+    attributes:
+      label: Threat model and exploit preconditions
+      description: Actor, required permissions, chain state, timing, signatures, custody, payment, randomness, metadata, or deployment assumptions.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Funds, custody, authorization, replay, randomness, metadata, governance, release integrity, or availability impact.
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Expected remediation or accepted-risk rationale
+      description: Required code, test, docs, deployment, evidence, or risk-acceptance changes.
+    validations:
+      required: true
+  - type: textarea
+    id: required_tests
+    attributes:
+      label: Required tests and evidence
+      description: Regression, negative, invariant, fork/rehearsal, retained artifact, retest evidence, or reviewer signoff required before closure.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Audit report section, private advisory, PR, commit, ADR, test, artifact, or retained evidence path. Do not include embargoed exploit details.
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Disclosure and closure checks
+      options:
+        - label: This issue is safe for public tracking, or sensitive details are withheld.
+          required: true
+        - label: Required remediation includes tests or explicit accepted-risk rationale.
+          required: true
+        - label: Release notes, risk register, and post-audit remediation evidence impact were considered.
+          required: true
+        - label: No private keys, RPC credentials, signer material, or non-redacted exploit artifacts are included.
+          required: true
