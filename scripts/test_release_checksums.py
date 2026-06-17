@@ -64,6 +64,8 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("scripts/test_issue_templates.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/check_pr_template.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/test_pr_template.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/check_markdown_links.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/test_markdown_links.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(
             Path("scripts/check_typescript_artifact_chain_config.py"),
             generator.DEFAULT_COVERED_PATHS,

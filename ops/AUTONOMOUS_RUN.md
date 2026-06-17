@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/pr-template-release-impact` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/501` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/502` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/503` |
-| Next issue | Wait for PR #503 CI, 6529bot, and CodeRabbit feedback; resolve anything actionable, merge when clean, then continue the next unblocked substantive backlog item. |
+| Active PR branch | `codex/markdown-link-gate` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/503` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/504` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/505` |
+| Next issue | Push the PR #505 review-response commit, wait for latest-head CI, 6529bot, and CodeRabbit feedback; resolve anything actionable, merge when clean, then continue the next unblocked substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 10:54 UTC` |
+| Last updated | `2026-06-17 11:35 UTC` |
 
 ## Packaging Notes
 
@@ -16162,6 +16162,10 @@ Outcome:
 | 2026-06-17 10:44 | Validate OSS-004 local draft | Added the checked PR template release-impact checklist, `scripts/check_pr_template.py`, focused checker tests, local/CI/Windows gate wiring, README/CONTRIBUTING/tooling/status navigation, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and durable backlog state. Focused PR-template, README, first-30-minutes, release-evidence backlog, risk-register, release-notes, release-manifest, bytecode-proof, checksum, changelog, Python compile, and whitespace checks passed. `make pr-template-check`, `make release-manifest-check`, `make release-checksums-check`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #502, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 10:45 | Open PR #503 for OSS-004 | PR #503 is open at `https://github.com/6529-Collections/6529Stream/pull/503`, closes issue #502, and packages the checked PR template release-impact checklist plus checker/tests, local/CI/Windows gate wiring, docs links, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and regenerated release evidence. CodeRabbit review was requested in comment `4729012205`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 10:54 | Address PR #503 checker nice-to-haves | 6529bot general review reported PR #503 good to merge and suggested three low-risk checker hardening improvements. Accepted them by removing redundant loose phrase checks, making required heading validation ordered and duplicate-aware, and adding regressions for demoted, duplicated, and reordered headings. Focused PR-template tests/check, Python compile, release-checksum check, release artifact verifier, and `git diff --check` passed. Next action is to push the review-response commit, wait for latest CI/6529bot/CodeRabbit status, and merge if clean. |
+| 2026-06-17 11:18 | Merge PR #503 and start OSS-005 | PR #503 merged as `f5dea01c84db1f80886d03fd3bd852685d25d7f2` after Foundry smoke and Windows wrapper passed, CodeRabbit status was success, 6529bot latest-head follow-up reported no new findings, and the earlier checker nice-to-haves were resolved. Issue #502 closed completed. Issue #504 and branch `codex/markdown-link-gate` now track OSS-005 for a checked Markdown link gate covering local files, heading anchors, duplicate GitHub-style anchors, line anchors, repository escapes, local/CI/Windows wiring, release-manifest/checksum coverage, docs, changelog, and regenerated evidence. |
+| 2026-06-17 11:22 | Validate OSS-005 local draft | Added `scripts/check_markdown_links.py` and `scripts/test_markdown_links.py` for repository Markdown local file, heading-anchor, duplicate-anchor, line-anchor, fenced-code, and repository-escape validation. Wired `markdown-links-check` through Makefile, Bash, PowerShell, CI, README, CONTRIBUTING, tooling/status docs, release-manifest/checksum coverage, changelog, and durable backlog state; regenerated risk register, blocker reports, release notes, release manifest, bytecode proof, and checksum bundle. Focused Markdown, README, release-notes, release-manifest, bytecode-proof, checksum, changelog, Python compile, Make wrapper, release-manifest/checksum wrapper, full `make check`, Windows `scripts\check.ps1`, manifest/proof/checksum drift checks, and `git diff --check` passed. Known warning noise remains the existing solc/Foundry warnings and the existing `scripts/check.ps1` LF-to-CRLF warning. Next action is to commit, push, open PR for issue #504, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
+| 2026-06-17 11:24 | Open PR #505 for OSS-005 | PR #505 is open at `https://github.com/6529-Collections/6529Stream/pull/505`, closes issue #504, and packages the checked Markdown link gate plus checker/tests, local/CI/Windows gate wiring, docs links, release-manifest/checksum coverage, release notes, bytecode proof, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 11:35 | Address PR #505 checker nice-to-haves | 6529bot general review reported PR #505 good to merge and suggested low-risk parser hardening. Accepted the highest-signal items by supporting indented backtick/tilde fenced code blocks, balanced parentheses in inline link targets, and reference-style local link definitions, with focused regressions increasing the Markdown checker suite from 11 to 15 tests. Focused Markdown tests/check and Python compile passed. Next action is to refresh checksum evidence, run focused release checks, commit/push, and wait for latest-head CI/bot feedback. |
 
 ## Resume Instructions
 

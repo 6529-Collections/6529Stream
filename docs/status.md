@@ -279,6 +279,10 @@ The current Gate A smoke baseline proves:
   release artifact, dependency artifact source, broadcast fixture, deployment
   manifest, address-book, config, schema, public-beta evidence status, and
   release-manifest files.
+- `scripts/test_markdown_links.py` and `scripts/check_markdown_links.py` prove
+  the contributor, docs, ops, GitHub template, and release-artifact Markdown
+  surfaces do not contain stale local file links, missing heading anchors,
+  duplicate-anchor drift, repository escapes, or invalid line anchors.
 - `scripts/test_release_signatures.py` and
   `scripts/check_release_signatures.py` prove the committed no-secret local
   release signature evidence follows

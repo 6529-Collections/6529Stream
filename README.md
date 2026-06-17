@@ -138,6 +138,13 @@ python scripts/test_pr_template.py
 python scripts/check_pr_template.py
 ```
 
+The repository Markdown link surface is part of the gate:
+
+```bash
+python scripts/test_markdown_links.py
+python scripts/check_markdown_links.py
+```
+
 The changelog gate requires release-impacting PRs to update
 [CHANGELOG.md](CHANGELOG.md) under `Unreleased`; see
 [docs/release-policy.md](docs/release-policy.md).

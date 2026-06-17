@@ -49,6 +49,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_issue_templates.py"),
     Path("scripts/check_pr_template.py"),
     Path("scripts/test_pr_template.py"),
+    Path("scripts/check_markdown_links.py"),
+    Path("scripts/test_markdown_links.py"),
     Path("scripts/check_curator_rewards_flow.py"),
     Path("scripts/test_curator_rewards_flow.py"),
     Path("scripts/check_withdrawals_credits_flow.py"),
