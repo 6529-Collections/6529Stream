@@ -35,8 +35,8 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/stuck-auction-drill-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/511` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/512` |
-| Active PR | TBD |
-| Next issue | Build GOV-006 stuck-auction drill retained evidence checker/template, wire gates, validate locally, open PR, request CodeRabbit, wait for CI and bot feedback, then merge only when clean. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/513` |
+| Next issue | Wait for PR #513 CI, CodeRabbit, and 6529bot feedback; resolve anything actionable, merge when clean, then continue with the next substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -16173,6 +16173,7 @@ Outcome:
 | 2026-06-17 13:16 | Merge PR #509 and start GOV-005 | PR #509 merged as `ec56202046705f7db2564257ddca269db4edd60e` after CodeRabbit status, GitHub CI, 6529bot security, general, and latest-head follow-up reviews were clean; issue #508 closed completed. Issue #510 and branch `codex/signer-compromise-drill-evidence` now track GOV-005 for checked signer-compromise drill retained evidence covering pause, signer rotation/revocation, epoch invalidation, per-drop cancellation, stale payload rejection, recovered payload success, monitoring confirmation, review, redaction, and release-gate wiring. |
 | 2026-06-17 13:43 | Open PR #511 for GOV-005 | PR #511 is open at `https://github.com/6529-Collections/6529Stream/pull/511`, closes issue #510, and packages the checked signer-compromise drill retained artifact template, source-aware checker/tests, local/CI/Windows gate wiring, incident-response/release-readiness/tooling/monitoring docs, changelog, release-manifest/checksum coverage, signer-custody retained hash refresh, and regenerated release evidence. CodeRabbit still needs to be requested; next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 14:05 | Merge PR #511 and start GOV-006 | PR #511 merged as `3f38c2e` after Windows wrapper, Foundry smoke, CodeRabbit, 6529bot security/general/follow-up reviews, and reviewer nice-to-have hardening were clean. Issue #510 closed completed. Issue #512 and branch `codex/stuck-auction-drill-evidence` now track GOV-006 for checked stuck-auction drill retained evidence covering auction identity, stuck condition, pause/recovery path, bidder/poster credit safety, withdrawal availability, monitoring handoff, review, redaction, and release-gate wiring. |
+| 2026-06-17 14:46 | Open PR #513 for GOV-006 | PR #513 is open at `https://github.com/6529-Collections/6529Stream/pull/513`, closes issue #512, and packages the checked stuck-auction drill retained artifact template, source-aware checker/tests, local/CI/Windows gate wiring, incident-response/release-readiness/tooling/monitoring docs, release-artifacts README, changelog, release-manifest/checksum coverage, signer-custody retained hash refresh, and regenerated release evidence. Full `make check`, Windows `scripts\check.ps1`, focused release checks, and diff hygiene passed locally. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
