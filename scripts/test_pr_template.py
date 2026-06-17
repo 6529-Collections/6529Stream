@@ -68,6 +68,45 @@ class PullRequestTemplateTests(unittest.TestCase):
             ):
                 checker.validate_pr_template(path)
 
+    def test_rejects_release_impact_heading_at_wrong_level(self) -> None:
+        """Required headings must remain at the expected level."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "PULL_REQUEST_TEMPLATE.md"
+            write(path, read_template().replace("## Release Impact", "### Release Impact"))
+
+            with self.assertRaisesRegex(
+                checker.PullRequestTemplateError, "missing required headings"
+            ):
+                checker.validate_pr_template(path)
+
+    def test_rejects_duplicate_required_heading(self) -> None:
+        """Required template sections cannot be duplicated silently."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "PULL_REQUEST_TEMPLATE.md"
+            write(path, read_template().replace("## Summary", "## Summary\n\n## Summary", 1))
+
+            with self.assertRaisesRegex(
+                checker.PullRequestTemplateError, "duplicate required headings"
+            ):
+                checker.validate_pr_template(path)
+
+    def test_rejects_reordered_required_heading(self) -> None:
+        """Required template sections stay in a stable reviewer order."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "PULL_REQUEST_TEMPLATE.md"
+            reordered = (
+                read_template()
+                .replace("## Security And Maturity", "## TEMP SECURITY", 1)
+                .replace("## Review Routing", "## Security And Maturity", 1)
+                .replace("## TEMP SECURITY", "## Review Routing", 1)
+            )
+            write(path, reordered)
+
+            with self.assertRaisesRegex(
+                checker.PullRequestTemplateError, "out of order"
+            ):
+                checker.validate_pr_template(path)
+
     def test_rejects_missing_generated_artifact_field(self) -> None:
         """Generated-artifact impact cannot be silently dropped."""
         with tempfile.TemporaryDirectory() as temp_dir:

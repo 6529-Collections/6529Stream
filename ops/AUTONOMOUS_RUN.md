@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 10:45 UTC` |
+| Last updated | `2026-06-17 10:54 UTC` |
 
 ## Packaging Notes
 
@@ -16161,6 +16161,7 @@ Outcome:
 | 2026-06-17 10:15 | Merge PR #501 and start OSS-004 | Checked issue templates merged as `6214f49` after latest-head Foundry smoke and Windows wrapper passed, CodeRabbit status was success after retry, 6529bot latest-head follow-up reported no new findings, and the prior malformed-label nice-to-have was resolved. Issue #500 closed completed. Issue #502 and branch `codex/pr-template-release-impact` now track OSS-004 for a checked PR template release-impact checklist covering roadmap/gate linkage, release-impact and generated-artifact scope, breaking-change approval references, validation evidence, maturity/no-secret boundaries, checker/tests, local/CI/Windows/release wiring, and regenerated evidence. |
 | 2026-06-17 10:44 | Validate OSS-004 local draft | Added the checked PR template release-impact checklist, `scripts/check_pr_template.py`, focused checker tests, local/CI/Windows gate wiring, README/CONTRIBUTING/tooling/status navigation, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and durable backlog state. Focused PR-template, README, first-30-minutes, release-evidence backlog, risk-register, release-notes, release-manifest, bytecode-proof, checksum, changelog, Python compile, and whitespace checks passed. `make pr-template-check`, `make release-manifest-check`, `make release-checksums-check`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #502, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 10:45 | Open PR #503 for OSS-004 | PR #503 is open at `https://github.com/6529-Collections/6529Stream/pull/503`, closes issue #502, and packages the checked PR template release-impact checklist plus checker/tests, local/CI/Windows gate wiring, docs links, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and regenerated release evidence. CodeRabbit review was requested in comment `4729012205`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 10:54 | Address PR #503 checker nice-to-haves | 6529bot general review reported PR #503 good to merge and suggested three low-risk checker hardening improvements. Accepted them by removing redundant loose phrase checks, making required heading validation ordered and duplicate-aware, and adding regressions for demoted, duplicated, and reordered headings. Focused PR-template tests/check, Python compile, release-checksum check, release artifact verifier, and `git diff --check` passed. Next action is to push the review-response commit, wait for latest CI/6529bot/CodeRabbit status, and merge if clean. |
 
 ## Resume Instructions
 

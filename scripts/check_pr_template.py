@@ -59,22 +59,6 @@ REQUIRED_CHECKBOXES = [
     "Breaking changes are explicitly approved by a linked issue or ADR, or this PR has no breaking changes.",
 ]
 
-REQUIRED_PHRASES = [
-    "production readiness",
-    "launch gate evidence",
-    "private keys",
-    "signer material",
-    "RPC secrets",
-    "production deployment secrets",
-    "release-impacting paths",
-    "generated release artifacts",
-    "manifests",
-    "checksums",
-    "blocker reports",
-    "evidence packets",
-    "breaking changes",
-]
-
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 CHECKBOX_RE = re.compile(r"^- \[ \]\s+(.+?)\s*$", re.MULTILINE)
 FENCED_CODE_RE = re.compile(r"^```[^\n]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
@@ -84,19 +68,14 @@ class PullRequestTemplateError(ValueError):
     """Raised when the pull request template misses required structure."""
 
 
-def markdown_headings(text: str) -> set[tuple[int, str]]:
+def markdown_headings(text: str) -> list[tuple[int, str]]:
     """Extract Markdown headings as level/title pairs."""
-    headings = set()
+    headings = []
     for match in HEADING_RE.finditer(text):
         level = len(match.group(1))
         title = match.group(2).strip().rstrip("#").strip()
-        headings.add((level, title))
+        headings.append((level, title))
     return headings
-
-
-def normalize_text(text: str) -> str:
-    """Collapse whitespace for case-insensitive phrase checks."""
-    return " ".join(text.lower().split())
 
 
 def checkbox_labels(text: str) -> set[str]:
@@ -114,20 +93,8 @@ def missing_items(text: str, items: list[str]) -> list[str]:
     return [item for item in items if item not in text]
 
 
-def missing_phrases(text: str, phrases: list[str]) -> list[str]:
-    """Return required phrases absent from the template."""
-    normalized = normalize_text(text)
-    return [phrase for phrase in phrases if phrase.lower() not in normalized]
-
-
-def validate_pr_template(path: Path) -> None:
-    """Validate pull request template structure and release-impact prompts."""
-    if not path.is_file():
-        raise PullRequestTemplateError(f"missing pull request template: {path}")
-
-    text = path.read_text(encoding="utf-8")
-
-    headings = markdown_headings(text)
+def validate_required_headings(headings: list[tuple[int, str]]) -> None:
+    """Validate required heading presence, order, and uniqueness."""
     missing_headings = [
         f"{'#' * level} {title}"
         for level, title in REQUIRED_HEADINGS
@@ -138,6 +105,35 @@ def validate_pr_template(path: Path) -> None:
             "PR template is missing required headings: "
             + ", ".join(missing_headings)
         )
+
+    duplicate_headings = [
+        f"{'#' * level} {title}"
+        for level, title in REQUIRED_HEADINGS
+        if headings.count((level, title)) > 1
+    ]
+    if duplicate_headings:
+        raise PullRequestTemplateError(
+            "PR template has duplicate required headings: "
+            + ", ".join(duplicate_headings)
+        )
+
+    positions = [headings.index(heading) for heading in REQUIRED_HEADINGS]
+    if positions != sorted(positions):
+        expected = ", ".join(f"{'#' * level} {title}" for level, title in REQUIRED_HEADINGS)
+        raise PullRequestTemplateError(
+            "PR template required headings are out of order; expected: " + expected
+        )
+
+
+def validate_pr_template(path: Path) -> None:
+    """Validate pull request template structure and release-impact prompts."""
+    if not path.is_file():
+        raise PullRequestTemplateError(f"missing pull request template: {path}")
+
+    text = path.read_text(encoding="utf-8")
+
+    headings = markdown_headings(text)
+    validate_required_headings(headings)
 
     missing_required_fields = missing_items(text, REQUIRED_FIELDS)
     if missing_required_fields:
@@ -154,13 +150,6 @@ def validate_pr_template(path: Path) -> None:
         raise PullRequestTemplateError(
             "PR template is missing required checkboxes: "
             + ", ".join(missing_required_checkboxes)
-        )
-
-    missing_required_phrases = missing_phrases(text, REQUIRED_PHRASES)
-    if missing_required_phrases:
-        raise PullRequestTemplateError(
-            "PR template is missing required content: "
-            + ", ".join(missing_required_phrases)
         )
 
     code_blocks = fenced_code_blocks(text)
