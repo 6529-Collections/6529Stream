@@ -35,8 +35,8 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/signer-compromise-drill-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/509` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/510` |
-| Active PR | TBD |
-| Next issue | Implement GOV-005 signer-compromise drill retained evidence, validate focused/full gates, open PR, request CodeRabbit, wait for CI and 6529bot feedback, resolve anything actionable, then merge when clean. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/511` |
+| Next issue | Wait for PR #511 CI, CodeRabbit, and 6529bot feedback; resolve anything actionable, merge when clean, then continue with the next substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -16171,6 +16171,7 @@ Outcome:
 | 2026-06-17 12:41 | Merge PR #507 and start GOV-010 | PR #507 merged as `db37777102a536ea9fcbbf70465b565864c9ea10` after CodeRabbit passed, GitHub CI passed, and 6529bot confirmed the latest-head checker hardening resolved its nice-to-haves with no new findings. Issue #506 closed completed. Issue #508 and branch `codex/operator-dashboard-query-model` now track GOV-010 for a checked operator dashboard query model covering environment/release, admin, signer, fixed-price, auction, randomizer, payment, metadata/dependency, release blocker, and incident drill panels. |
 | 2026-06-17 13:07 | Open PR #509 for GOV-010 | PR #509 is open at `https://github.com/6529-Collections/6529Stream/pull/509`, closes issue #508, and packages the checked operator dashboard query model plus checker/tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, docs navigation, changelog, and regenerated release evidence. Next action is to request CodeRabbit, wait for CI and 6529bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 13:16 | Merge PR #509 and start GOV-005 | PR #509 merged as `ec56202046705f7db2564257ddca269db4edd60e` after CodeRabbit status, GitHub CI, 6529bot security, general, and latest-head follow-up reviews were clean; issue #508 closed completed. Issue #510 and branch `codex/signer-compromise-drill-evidence` now track GOV-005 for checked signer-compromise drill retained evidence covering pause, signer rotation/revocation, epoch invalidation, per-drop cancellation, stale payload rejection, recovered payload success, monitoring confirmation, review, redaction, and release-gate wiring. |
+| 2026-06-17 13:43 | Open PR #511 for GOV-005 | PR #511 is open at `https://github.com/6529-Collections/6529Stream/pull/511`, closes issue #510, and packages the checked signer-compromise drill retained artifact template, source-aware checker/tests, local/CI/Windows gate wiring, incident-response/release-readiness/tooling/monitoring docs, changelog, release-manifest/checksum coverage, signer-custody retained hash refresh, and regenerated release evidence. CodeRabbit still needs to be requested; next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
