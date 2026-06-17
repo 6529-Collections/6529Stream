@@ -164,6 +164,8 @@ jobs:
             scripts/test_stuck_auction_drill_evidence.py \
             scripts/check_failed_randomness_drill_evidence.py \
             scripts/test_failed_randomness_drill_evidence.py \
+            scripts/check_bad_metadata_dependency_drill_evidence.py \
+            scripts/test_bad_metadata_dependency_drill_evidence.py \
             scripts/check_public_beta_evidence.py \
             scripts/test_public_beta_evidence.py \
             scripts/check_risk_register.py \
@@ -550,6 +552,8 @@ jobs:
           python3 scripts/check_stuck_auction_drill_evidence.py 2>&1 | tee ci-logs/stuck-auction-drill-evidence-check.log
           python3 scripts/test_failed_randomness_drill_evidence.py 2>&1 | tee ci-logs/failed-randomness-drill-evidence-tests.log
           python3 scripts/check_failed_randomness_drill_evidence.py 2>&1 | tee ci-logs/failed-randomness-drill-evidence-check.log
+          python3 scripts/test_bad_metadata_dependency_drill_evidence.py 2>&1 | tee ci-logs/bad-metadata-dependency-drill-evidence-tests.log
+          python3 scripts/check_bad_metadata_dependency_drill_evidence.py 2>&1 | tee ci-logs/bad-metadata-dependency-drill-evidence-check.log
 
       - name: Public beta evidence
         shell: bash

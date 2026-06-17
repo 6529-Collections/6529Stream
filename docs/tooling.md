@@ -356,6 +356,16 @@ marking, provider migration boundaries, monitoring handoff, review, and
 redaction. It is source-aware and checks that randomizer lifecycle events,
 stale marking, retry, failed post-processing, provider-specific fulfillment,
 metadata-state docs, and randomizer operations docs still exist.
+The bad metadata/dependency drill evidence step validates the narrower checked
+retained artifact template under
+[`release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md)
+for metadata schema/state, token URI snapshots, URI/UTF-8/raw-attribute or
+browser-sandbox failure, dependency key/version/content hash, freeze manifest,
+repin boundaries, ERC-4906/cache invalidation, marketplace/indexer handoff,
+review, and redaction. It is source-aware and checks that `StreamCore`,
+`DependencyRegistry`, `StreamMetadataRenderer`, metadata/freeze/dependency
+tests, incident-response docs, dependency operations docs, and metadata docs
+still expose the controls the retained artifact references.
 
 The drop-authorization fixture step validates
 [`drop-authorization-signing.md`](drop-authorization-signing.md) and the

@@ -262,6 +262,9 @@ Required monitors:
   cache-invalidation signal;
 - alert on dependency deprecation or pin changes that do not have retained
   dependency operation evidence;
+- public beta and production release monitors should alert if no reviewed bad
+  metadata/dependency drill retained artifact exists at
+  `release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`;
 - link collector-facing 1/1 provenance and permanence claims to reviewed
   artifacts before production display.
 

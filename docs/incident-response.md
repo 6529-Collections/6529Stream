@@ -271,8 +271,25 @@ Recovery:
   update and retain source, descriptor, manifest, checksum, and review evidence.
 - For frozen collections, document the immutable proof and decide whether ADR
   0007 redeployment or a new collection path is required.
+- Classify the failure with the checked taxonomy used by the retained artifact:
+  `unsafe_uri`, `invalid_utf8`, `raw_attributes_invalid`,
+  `animation_sandbox_failure`, `dependency_source_drift`,
+  `dependency_provenance_bad`, `dependency_version_bad`, `dependency_pin_bad`,
+  `frozen_repin_attempt`, `frozen_output_mismatch`, and
+  `marketplace_cache_stale`.
+- Classify the recovery decision with the checked taxonomy used by the retained
+  artifact: `fix_forward_metadata`, `fix_forward_dependency`,
+  `deprecate_dependency`, `marketplace_cache_refresh`,
+  `document_immutable_proof`, `redeploy_or_new_collection`, or
+  `no_contract_change`.
 - Regenerate release manifest and checksum evidence after changing dependency
   source, metadata docs, or governance docs.
+- Retain the bad metadata/dependency drill bundle with the checked template at
+  [`release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md)
+  and validate it with
+  `python scripts/check_bad_metadata_dependency_drill_evidence.py`. This
+  template is not completion evidence until the environment-specific artifact
+  is reviewed and all placeholders are replaced.
 
 Reopen only after the corrected metadata/dependency state is retained, checked,
 and communicated to affected integrators.
@@ -420,6 +437,13 @@ Failed-randomness drills also have a narrower retained artifact template at
 for request ID, token, collection, provider, epoch, pending/stale/failed/final
 state, invalid callback handling, retry or stale marking, metadata state,
 provider migration boundary, monitoring, review, and redaction evidence.
+Bad metadata/dependency drills also have a narrower retained artifact template
+at
+[`release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md)
+for collection and token identity, metadata schema/state, URI or renderer
+failure, dependency key/version/content hash, freeze manifest, repin boundary,
+ERC-4906/cache invalidation, marketplace/browser evidence, recovery decision,
+monitoring, review, and redaction evidence.
 
 ## Local Verification Commands
 
@@ -436,6 +460,8 @@ python scripts/test_stuck_auction_drill_evidence.py
 python scripts/check_stuck_auction_drill_evidence.py
 python scripts/test_failed_randomness_drill_evidence.py
 python scripts/check_failed_randomness_drill_evidence.py
+python scripts/test_bad_metadata_dependency_drill_evidence.py
+python scripts/check_bad_metadata_dependency_drill_evidence.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check

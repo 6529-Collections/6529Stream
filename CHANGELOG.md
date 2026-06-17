@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `GOV-008` bad metadata/dependency drill retained-artifact
+  template, source-aware checker, and regression tests covering metadata
+  schema/state, token URI snapshots, URI/UTF-8/raw-attributes and browser
+  sandbox evidence, dependency key/version/content hash, freeze manifest,
+  repin boundaries, ERC-4906/cache invalidation, marketplace/indexer handoff,
+  recovery decisions, review, redaction, and local/CI/Windows gate wiring.
 - Added a checked `GOV-007` failed-randomness drill retained-artifact template,
   source-aware checker, and regression tests covering request identity, provider
   type, provider epoch, pending/stale/failed/final lifecycle state, invalid

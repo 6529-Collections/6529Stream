@@ -166,6 +166,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_stuck_auction_drill_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_failed_randomness_drill_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_failed_randomness_drill_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_bad_metadata_dependency_drill_evidence.py"
+& $pythonPath @pythonArgs "scripts\check_bad_metadata_dependency_drill_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_public_beta_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_public_beta_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_risk_register.py"

@@ -27,6 +27,8 @@
       "scripts/test_stuck_auction_drill_evidence.py",
       "scripts/check_failed_randomness_drill_evidence.py",
       "scripts/test_failed_randomness_drill_evidence.py",
+      "scripts/check_bad_metadata_dependency_drill_evidence.py",
+      "scripts/test_bad_metadata_dependency_drill_evidence.py",
       "scripts/check_readme.py",
       "scripts/test_readme.py",
       "scripts/check_first_30_minutes.py",
@@ -87,7 +89,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:a0417fcde2c991334c38b0ef77798e1083fac0200985edb8e548e5aea674a494"
+    "sha256": "sha256:004c0cb67bebac1fb621b803e8875f4dc2c85bfc6b3e862d381982277163026a"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -251,8 +253,8 @@
     },
     {
       "path": "docs/monitoring.md",
-      "sha256": "sha256:78063d9d53a6334a540a6ebc199668d8d0808b52d7f4b68603ef53960b9b37e7",
-      "size_bytes": 20731
+      "sha256": "sha256:0e9309d614033b9dd63e43e283b64c8c52971abd18664e99884d7e4c023989d8",
+      "size_bytes": 20973
     },
     {
       "path": "docs/operator-dashboard-query-model.md",
@@ -323,6 +325,11 @@
       "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
       "sha256": "sha256:4bb92e1979a4b77c19085606efee7717c9f45dfac6f59ec2333bf4ee3c3c6b48",
       "size_bytes": 5011
+    },
+    {
+      "path": "release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md",
+      "sha256": "sha256:923ad2306c607f7534eb579315c0e14e9180d2e96036c770853256985f21c206",
+      "size_bytes": 4600
     },
     {
       "path": "release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md",
@@ -616,7 +623,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:061db800280c0495602e15f093bcb187ee2031e268a8a11a3ee74ec54617a558",
+      "sha256": "sha256:83289afa8752dc801e37ef742a338cf3d60822516167a97532fb5ec86bbfbb9b",
       "size_bytes": 79962
     },
     {
@@ -726,22 +733,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:c926d68e70d1a93a259ccea1ccc2160319cbf1d2bbc768df268e3d1569a13eee",
+      "sha256": "sha256:02e889f73c4ffce894ce5091e8509dd9575654f2378f5b113bdf56a6f487ed5c",
       "size_bytes": 113978
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:da6e4f547be90fdf8c548e50b20e285399cc6df60072ea636a042ccfa7adf9c9",
-      "size_bytes": 57608
+      "sha256": "sha256:31eac5ff2e490cf1ded7941b9f74ce245a5d13dd3db87660a4567681c464a55d",
+      "size_bytes": 58055
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:2516f52ac629f2c4346957edeb0cb2716332f128b1f3cfce6f83f701d9f713c2",
-      "size_bytes": 54976
+      "sha256": "sha256:b0feb39d841a0835425f2e44d9b278858f5791d71e4dfad49b1583b8aec559c3",
+      "size_bytes": 55416
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c4d8f8b4029c3e894b9b1301508ecfb24edc7aca1736c6fc0f8f2777e0219202",
+      "sha256": "sha256:0266e7506570aeff297ef84bac22c504afc146e456adbcad857cc11cf56248df",
       "size_bytes": 22929
     },
     {
@@ -826,8 +833,13 @@
     },
     {
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-      "sha256": "sha256:12e519a3eae01d59fa8ce4ccdefaf367823ba00cc68dea19e5ca2994ef81b093",
+      "sha256": "sha256:95b1f8ecee2f17f0c544c1536dc023123b6c649fdfe9e3ff3909bd0ec9e5b21c",
       "size_bytes": 3470
+    },
+    {
+      "path": "scripts/check_bad_metadata_dependency_drill_evidence.py",
+      "sha256": "sha256:8e68e8ad696087a0c2e39d307bf0ea19eb157e3af20128f995c9843a4d23d45f",
+      "size_bytes": 25775
     },
     {
       "path": "scripts/check_curator_rewards_flow.py",
@@ -958,6 +970,11 @@
       "path": "scripts/run_forge_size_log.py",
       "sha256": "sha256:785cd95ec2fde98c249cea68fdaa4d2287cfec473ff65d4b7f7e14f092984a26",
       "size_bytes": 2056
+    },
+    {
+      "path": "scripts/test_bad_metadata_dependency_drill_evidence.py",
+      "sha256": "sha256:8fbd34e66209074e903c862f8203b842e2cef221fbd3aa8155658adc3b43d698",
+      "size_bytes": 23295
     },
     {
       "path": "scripts/test_curator_rewards_flow.py",
