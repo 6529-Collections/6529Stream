@@ -104,6 +104,20 @@ Roadmap issues should be implementation-ready. Use the issue forms and include:
 If the issue touches a protocol decision, create or reference the corresponding
 ADR before implementation begins.
 
+Use the specialized checked issue forms when they fit:
+
+- [integration report](.github/ISSUE_TEMPLATE/integration_report.yml) for
+  frontend, mobile, Electron, indexer, wallet, operator UI, marketplace, or
+  signing-service integration work.
+- [audit finding](.github/ISSUE_TEMPLATE/audit_finding.yml) for public-safe
+  external audit finding, remediation, retest, or accepted-risk tracking.
+- [release evidence](.github/ISSUE_TEMPLATE/release_evidence.yml) for
+  public-beta, production-release, retained-artifact, blocker, or evidence
+  review work.
+
+Do not use public issue forms for exploitable vulnerability reports; follow
+[SECURITY.md](SECURITY.md).
+
 ## Style
 
 - Solidity compiler target is `0.8.19` until the roadmap changes it.
@@ -125,5 +139,8 @@ change affects:
 - [docs/status.md](docs/status.md)
 - [docs/tooling.md](docs/tooling.md)
 - [docs/known-blockers.md](docs/known-blockers.md)
+- [.github/ISSUE_TEMPLATE/integration_report.yml](.github/ISSUE_TEMPLATE/integration_report.yml)
+- [.github/ISSUE_TEMPLATE/audit_finding.yml](.github/ISSUE_TEMPLATE/audit_finding.yml)
+- [.github/ISSUE_TEMPLATE/release_evidence.yml](.github/ISSUE_TEMPLATE/release_evidence.yml)
 - [ops/ROADMAP.md](ops/ROADMAP.md)
 - [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md)

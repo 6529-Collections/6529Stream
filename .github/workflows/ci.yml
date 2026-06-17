@@ -199,6 +199,8 @@ jobs:
             scripts/test_readme.py \
             scripts/check_first_30_minutes.py \
             scripts/test_first_30_minutes.py \
+            scripts/check_issue_templates.py \
+            scripts/test_issue_templates.py \
             scripts/check_integrations_readme.py \
             scripts/test_integrations_readme.py \
             scripts/check_contract_flows.py \
@@ -599,6 +601,8 @@ jobs:
           python3 scripts/check_readme.py 2>&1 | tee ci-logs/readme-check.log
           python3 scripts/test_first_30_minutes.py 2>&1 | tee ci-logs/first-30-minutes-tests.log
           python3 scripts/check_first_30_minutes.py 2>&1 | tee ci-logs/first-30-minutes-check.log
+          python3 scripts/test_issue_templates.py 2>&1 | tee ci-logs/issue-template-tests.log
+          python3 scripts/check_issue_templates.py 2>&1 | tee ci-logs/issue-template-check.log
 
       - name: Integrations README
         shell: bash

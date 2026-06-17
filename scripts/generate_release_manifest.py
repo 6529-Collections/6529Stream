@@ -75,6 +75,12 @@ DEFAULT_SIGNER_CUSTODY_READINESS_DIR = Path(
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("README.md"),
+    Path(".github/ISSUE_TEMPLATE/audit_finding.yml"),
+    Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
+    Path(".github/ISSUE_TEMPLATE/config.yml"),
+    Path(".github/ISSUE_TEMPLATE/integration_report.yml"),
+    Path(".github/ISSUE_TEMPLATE/release_evidence.yml"),
+    Path(".github/ISSUE_TEMPLATE/roadmap_item.yml"),
     Path("docs/first-30-minutes.md"),
     Path("docs/release-policy.md"),
     Path("docs/deployment.md"),

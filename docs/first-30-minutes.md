@@ -175,6 +175,12 @@ release impact, setup impact, public docs impact, generated-artifact impact, or
 integration impact. The full contribution policy is in
 [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+If you are opening an issue instead of a PR, use the checked GitHub forms for
+[integration reports](../.github/ISSUE_TEMPLATE/integration_report.yml),
+[audit findings](../.github/ISSUE_TEMPLATE/audit_finding.yml), or
+[release evidence](../.github/ISSUE_TEMPLATE/release_evidence.yml) when one of
+those scopes fits.
+
 ## Generated Artifact Drift
 
 Many repository files are deterministic release evidence, not hand-written

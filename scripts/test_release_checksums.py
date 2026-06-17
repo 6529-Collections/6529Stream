@@ -48,6 +48,20 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("scripts/check_first_30_minutes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/test_first_30_minutes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(
+            Path(".github/ISSUE_TEMPLATE/integration_report.yml"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path(".github/ISSUE_TEMPLATE/audit_finding.yml"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path(".github/ISSUE_TEMPLATE/release_evidence.yml"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(Path("scripts/check_issue_templates.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/test_issue_templates.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(
             Path("scripts/check_typescript_artifact_chain_config.py"),
             generator.DEFAULT_COVERED_PATHS,
         )
