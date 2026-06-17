@@ -38,8 +38,10 @@ risk row for this work is retained in
 The current committed release gate still runs `forge build`,
 `forge build --sizes --via-ir --skip test --skip script --force`,
 `forge doc --build`, the scoped Solidity formatting checker, the release
-manifest/checksum checks, and the warning disposition checker. As of this
-baseline:
+manifest/checksum checks, and the warning disposition checker. The
+warning-disposition checker also compares the retained `forge-size.log` output
+against the accepted solc warning rows so new compiler warnings cannot silently
+enter CI. As of this baseline:
 
 | Category | Current disposition | Owner | Evidence |
 | --- | --- | --- | --- |
@@ -142,8 +144,8 @@ Run the warning disposition checks directly:
 
 ```sh
 python scripts/test_warning_dispositions.py
-python scripts/check_warning_dispositions.py
-forge build --sizes --via-ir --skip test --skip script --force
+python scripts/run_forge_size_log.py --log cache/forge-size.log
+python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 forge doc --build
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check

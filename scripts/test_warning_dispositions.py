@@ -94,6 +94,26 @@ Keep warning dispositions current.
 """
 
 
+def solc_warning_log(
+    warnings: set[tuple[str, str, int]] | None = None,
+) -> str:
+    """Render a compact forge-style solc warning log."""
+    selected = warnings if warnings is not None else checker.EXPECTED_SOLC_WARNINGS
+    blocks = []
+    for code, path, line in sorted(selected):
+        blocks.append(
+            "\n".join(
+                [
+                    f"Warning ({code}): retained warning",
+                    f"  --> {path}:{line}:1:",
+                    "   |",
+                    f"{line} | retained warning source",
+                ]
+            )
+        )
+    return "\n\n".join(blocks) + "\n"
+
+
 class WarningDispositionTests(unittest.TestCase):
     def test_accepts_committed_doc(self) -> None:
         """The committed warning-disposition document satisfies the checker."""
@@ -172,7 +192,8 @@ class WarningDispositionTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_required_targets(root)
             text = minimal_warning_doc().replace(
-                "python scripts/check_warning_dispositions.py\n", ""
+                "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log\n",
+                "",
             )
             write_text(root / checker.DEFAULT_WARNING_DISPOSITIONS, text)
 
@@ -256,6 +277,61 @@ class WarningDispositionTests(unittest.TestCase):
                 checker.validate_warning_dispositions(
                     root, root / checker.DEFAULT_WARNING_DISPOSITIONS
                 )
+
+    def test_accepts_expected_solc_warning_log(self) -> None:
+        """The live solc-warning baseline accepts exactly documented warnings."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            write_text(path, solc_warning_log())
+
+            checker.validate_solc_warning_log(path)
+
+    def test_rejects_unexpected_solc_warning(self) -> None:
+        """New solc warnings must be fixed or added to the disposition."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            warnings = set(checker.EXPECTED_SOLC_WARNINGS)
+            warnings.add(("2018", "smart-contracts/NewWarning.sol", 10))
+            write_text(path, solc_warning_log(warnings))
+
+            with self.assertRaisesRegex(
+                checker.WarningDispositionError, "unexpected warning"
+            ):
+                checker.validate_solc_warning_log(path)
+
+    def test_rejects_missing_solc_warning(self) -> None:
+        """Resolved solc warnings must update the checked baseline."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            warnings = set(checker.EXPECTED_SOLC_WARNINGS)
+            warnings.remove(("2018", "smart-contracts/StreamMinter.sol", 298))
+            write_text(path, solc_warning_log(warnings))
+
+            with self.assertRaisesRegex(
+                checker.WarningDispositionError, "missing expected warning"
+            ):
+                checker.validate_solc_warning_log(path)
+
+    def test_cli_accepts_solc_warning_log(self) -> None:
+        """The CLI can validate docs and a live solc warning log together."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            write_text(root / checker.DEFAULT_WARNING_DISPOSITIONS, minimal_warning_doc())
+            log_path = root / "cache" / "forge-size.log"
+            write_text(log_path, solc_warning_log())
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--solc-warnings-log",
+                        str(log_path.relative_to(root)),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
 
 
 if __name__ == "__main__":

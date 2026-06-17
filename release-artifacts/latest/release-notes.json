@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:791f6544c637a64442ec5494476af7451784d4ecd2a3d03dbccf59f358a87745",
-      "size_bytes": 49509
+      "sha256": "sha256:3d7b04340747689120657f21d8b3631b7eb1bd064bc1fde6e5424cf05a3e2f3f",
+      "size_bytes": 49785
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,8 +17,8 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:5e1368b81f941f9b01a731b7b9b07fa027fb03632a49611107fce6f7e64f22d2",
-      "size_bytes": 22887
+      "sha256": "sha256:3f2ec3cc016e3f8b42ed3f8b7b9a55f6aa5c0b8c62359323bf36b95a1741c722",
+      "size_bytes": 22928
     },
     "json_output": "release-artifacts/latest/release-notes.json",
     "markdown_output": "release-artifacts/latest/release-notes.md"
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added live solc warning baseline enforcement for the warning-disposition gate: production-size forge output is retained in local/CI logs and checked against the reviewed warning rows so new or resolved compiler warnings require an explicit code or disposition update.",
       "Added a checked incident drill retained-artifact template and validation gate for mint pause, bid pause, settlement pause, withdrawal policy, failed randomness, stuck auction, bad metadata/dependency, bad Merkle root, and signer compromise drills without claiming completed fork, testnet, or live drill evidence.",
       "Added a checked `StreamCore` bytecode-spend policy gate that pins the current 22,184-byte approved production runtime baseline, fails unreviewed Core runtime increases even when the EIP-170 floor still passes, records rejected no-gain/negative-gain headroom experiments, and wires focused tests into local, CI, Windows, release-manifest, and checksum paths.",
       "Added a no-secret live randomizer operations retained-artifact template and checker for future `live_randomizer_operations_evidence`, with provider configuration, provider funding, reserve, request health, lifecycle control, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live randomizer operations evidence is retained.",

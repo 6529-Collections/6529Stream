@@ -911,8 +911,7 @@ Dependencies: Signer owner/operator decision outside repo.
 
 ### GOV-004: Add Pause And Incident Drill Evidence
 
-Status: In progress on issue #480 and branch
-`codex/incident-drill-evidence-model`.
+Status: Merged in PR #481; issue #480 closed completed.
 
 Gate: F.
 
@@ -2488,7 +2487,8 @@ Dependencies: `INT-001` through `INT-006` preferred.
 
 ### INT-008: Add Mobile And WalletConnect Integration Guide
 
-Status: Planned.
+Status: In progress on issue #482 and branch
+`codex/live-solc-warning-baseline`.
 
 Gate: G.
 
@@ -3270,7 +3270,7 @@ Required tests/checks:
 - `forge build --sizes --via-ir --skip test --skip script --force`
 - `forge doc --build`
 - `python scripts/test_warning_dispositions.py`
-- `python scripts/check_warning_dispositions.py`
+- `python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log`
 - `python scripts/generate_release_manifest.py --check`
 - `python scripts/generate_release_checksums.py --check`
 - `python scripts/generate_risk_register.py --check`

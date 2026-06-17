@@ -21,6 +21,9 @@
       "scripts/check_production_verified_addresses.py",
       "scripts/check_live_metadata_browser_evidence.py",
       "scripts/check_incident_drill_evidence.py",
+      "scripts/check_warning_dispositions.py",
+      "scripts/test_warning_dispositions.py",
+      "scripts/run_forge_size_log.py",
       "scripts/generate_release_notes.py",
       "scripts/verify_release_artifacts.py",
       "deployments/broadcasts",
@@ -38,7 +41,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:1f316ba869206f4e2b5c78b1d76a46702b5ee6a5c36d43e16d050fae93339202"
+    "sha256": "sha256:5d2d0fde828bbb9db5430ab8456666cc7b6d2986d94b12ad07c37ade7109f1a6"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -497,7 +500,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:97bea0755133d2047e77546f7ba8d5ab8f6f4530132953a926e7eb76397cff69",
+      "sha256": "sha256:71f34bf0db9b76e22f111289d5c255aa7fb0645e54137f59781ac3f745e9281b",
       "size_bytes": 79962
     },
     {
@@ -607,23 +610,23 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:135eae5e392eed8f40d0b7af8f90ec0315875e1fb1d4ade5abbc5208c7943d74",
+      "sha256": "sha256:08c4df28771cc1255fa27b648649f2c601edb8302a49bb616029b2cbeb6e1a37",
       "size_bytes": 110303
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:26640fc59d9c06f438eff87d8d408eb92f0ba665a7a6b74e762b7f2ec2add5f5",
-      "size_bytes": 51823
+      "sha256": "sha256:6fbe24a56d061f1301ee9f51d6e57a807f9193adcda581ca1ec0d17e5c63997e",
+      "size_bytes": 52100
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:6ed05a8222f33efa5e44ac27021007ac2bcff675598827741dc1c5db8a0e6a28",
-      "size_bytes": 49310
+      "sha256": "sha256:4bd31ab2c5d82a7533121ace6337e51fc72e5ba5f328e8b5c734d680c1c76872",
+      "size_bytes": 49580
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:5e1368b81f941f9b01a731b7b9b07fa027fb03632a49611107fce6f7e64f22d2",
-      "size_bytes": 22887
+      "sha256": "sha256:3f2ec3cc016e3f8b42ed3f8b7b9a55f6aa5c0b8c62359323bf36b95a1741c722",
+      "size_bytes": 22928
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -736,6 +739,11 @@
       "size_bytes": 4666
     },
     {
+      "path": "scripts/check_warning_dispositions.py",
+      "sha256": "sha256:6afdae88d29787cade10c401957fede1e562704f5ac634a5cea86f3266b7b196",
+      "size_bytes": 16438
+    },
+    {
       "path": "scripts/generate_dependency_provenance_attestation.py",
       "sha256": "sha256:6a7d21765cca4b494268ead6f93ef69fdddbcd9231283685c085ef61e1ba9a84",
       "size_bytes": 16880
@@ -744,6 +752,16 @@
       "path": "scripts/generate_release_notes.py",
       "sha256": "sha256:3193affa4f0293d1109d279aa23a0070183e8320e6ee42667241ee0004db2456",
       "size_bytes": 16623
+    },
+    {
+      "path": "scripts/run_forge_size_log.py",
+      "sha256": "sha256:00f27f3587af1e905fbc86876a3889e2c5b7c3e803cf744b6b241ad164dfcf2b",
+      "size_bytes": 1694
+    },
+    {
+      "path": "scripts/test_warning_dispositions.py",
+      "sha256": "sha256:708d67b7c7e03d10b0bbeb923d77c560ecb634c2e39b5532398cf659cb78661d",
+      "size_bytes": 12996
     },
     {
       "path": "scripts/verify_release_artifacts.py",

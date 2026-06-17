@@ -29,7 +29,7 @@ The current Gate A smoke baseline proves:
   `forge fmt --check`, and the raw all-files diagnostic is allowed to fail
   only for the 17 documented vendored/provenance formatting exemptions.
 - `python scripts/test_warning_dispositions.py` and
-  `python scripts/check_warning_dispositions.py` enforce the checked warning
+  `python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log` enforce the checked warning
   disposition baseline in
   [`docs/warning-dispositions.md`](warning-dispositions.md). That baseline
   records fixed NatSpec warning cleanup and accepted solc, documentation,

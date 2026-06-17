@@ -29,7 +29,7 @@ forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 "$python_bin" scripts/test_gas_envelopes.py
 "$python_bin" scripts/check_gas_envelopes.py
-forge build --sizes --via-ir --skip test --skip script --force
+"$python_bin" scripts/run_forge_size_log.py --log cache/forge-size.log
 "$python_bin" scripts/test_contract_size_budget.py
 "$python_bin" scripts/check_contract_size_budget.py
 "$python_bin" scripts/test_core_bytecode_spend_policy.py
@@ -172,7 +172,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/test_royalty_policy.py
 "$python_bin" scripts/check_royalty_policy.py
 "$python_bin" scripts/test_warning_dispositions.py
-"$python_bin" scripts/check_warning_dispositions.py
+"$python_bin" scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 "$python_bin" scripts/test_one_of_one_permanence_package.py
 "$python_bin" scripts/check_one_of_one_permanence_package.py
 "$python_bin" scripts/generate_one_of_one_permanence_manifest.py --check

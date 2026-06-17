@@ -11,6 +11,18 @@ from pathlib import Path
 
 DEFAULT_WARNING_DISPOSITIONS = Path("docs/warning-dispositions.md")
 
+EXPECTED_SOLC_WARNINGS = {
+    ("5667", "smart-contracts/RandomizerNXT.sol", 70),
+    ("5667", "smart-contracts/RandomizerRNG.sol", 96),
+    ("5667", "smart-contracts/RandomizerVRF.sol", 97),
+    ("5667", "smart-contracts/StreamCore.sol", 745),
+    ("2018", "smart-contracts/RandomizerNXT.sol", 90),
+    ("2018", "smart-contracts/RandomizerRNG.sol", 195),
+    ("2018", "smart-contracts/RandomizerVRF.sol", 181),
+    ("2018", "smart-contracts/StreamCore.sol", 745),
+    ("2018", "smart-contracts/StreamMinter.sol", 298),
+}
+
 REQUIRED_HEADINGS = [
     (1, "Warning Dispositions"),
     (2, "Maturity And Scope"),
@@ -65,8 +77,8 @@ REQUIRED_PHRASES = [
 
 REQUIRED_COMMANDS = [
     "python scripts/test_warning_dispositions.py",
-    "python scripts/check_warning_dispositions.py",
-    "forge build --sizes --via-ir --skip test --skip script --force",
+    "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log",
+    "python scripts/run_forge_size_log.py --log cache/forge-size.log",
     "forge doc --build",
     "python scripts/test_release_manifest.py",
     "python scripts/generate_release_manifest.py --check",
@@ -159,6 +171,10 @@ SOURCE_MARKERS = {
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+SOLC_WARNING_RE = re.compile(r"Warning \((?P<code>[0-9]+)\):")
+SOLC_SOURCE_RE = re.compile(
+    r"-->\s+(?P<path>[^:\r\n]+):(?P<line>[0-9]+):(?P<column>[0-9]+)"
+)
 
 
 class WarningDispositionError(ValueError):
@@ -288,6 +304,65 @@ def validate_source_markers(repo_root: Path) -> None:
         )
 
 
+def normalize_solidity_warning_path(raw_path: str) -> str:
+    """Normalize a Solidity warning source path to repository POSIX form."""
+    return raw_path.strip().replace("\\", "/")
+
+
+def parse_solc_warnings(log_text: str) -> set[tuple[str, str, int]]:
+    """Extract solc warning code, source path, and source line from forge output."""
+    warnings = set()
+    pending_code: str | None = None
+    for line in log_text.splitlines():
+        warning_match = SOLC_WARNING_RE.search(line)
+        if warning_match:
+            pending_code = warning_match.group("code")
+            continue
+        if pending_code is None:
+            continue
+        source_match = SOLC_SOURCE_RE.search(line)
+        if not source_match:
+            continue
+        warnings.add(
+            (
+                pending_code,
+                normalize_solidity_warning_path(source_match.group("path")),
+                int(source_match.group("line")),
+            )
+        )
+        pending_code = None
+    return warnings
+
+
+def format_solc_warning(warning: tuple[str, str, int]) -> str:
+    """Render a compact solc warning identifier."""
+    code, path, line = warning
+    return f"Warning({code}) {path}:{line}"
+
+
+def validate_solc_warning_log(log_path: Path) -> None:
+    """Validate live forge output against the reviewed solc warning baseline."""
+    if not log_path.is_file():
+        raise WarningDispositionError(f"missing solc warning log: {log_path}")
+
+    actual = parse_solc_warnings(log_path.read_text(encoding="utf-8"))
+    missing = sorted(EXPECTED_SOLC_WARNINGS - actual)
+    unexpected = sorted(actual - EXPECTED_SOLC_WARNINGS)
+    if missing or unexpected:
+        parts = []
+        if missing:
+            parts.append(
+                "missing expected warning(s): "
+                + ", ".join(format_solc_warning(warning) for warning in missing)
+            )
+        if unexpected:
+            parts.append(
+                "unexpected warning(s): "
+                + ", ".join(format_solc_warning(warning) for warning in unexpected)
+            )
+        raise WarningDispositionError("solc warning baseline drifted; " + "; ".join(parts))
+
+
 def validate_warning_dispositions(repo_root: Path, document_path: Path) -> None:
     """Validate the warning-disposition document and source anchors."""
     if not document_path.is_file():
@@ -347,6 +422,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_WARNING_DISPOSITIONS,
     )
+    parser.add_argument(
+        "--solc-warnings-log",
+        type=Path,
+        help="Optional forge build output log to compare with the accepted warning baseline.",
+    )
     return parser.parse_args(argv)
 
 
@@ -357,9 +437,14 @@ def main(argv: list[str] | None = None) -> int:
     document_path = args.warning_dispositions
     if not document_path.is_absolute():
         document_path = repo_root / document_path
+    solc_warnings_log = args.solc_warnings_log
+    if solc_warnings_log is not None and not solc_warnings_log.is_absolute():
+        solc_warnings_log = repo_root / solc_warnings_log
 
     try:
         validate_warning_dispositions(repo_root, document_path.resolve())
+        if solc_warnings_log is not None:
+            validate_solc_warning_log(solc_warnings_log.resolve())
     except WarningDispositionError as exc:
         print(f"warning disposition check failed: {exc}", file=sys.stderr)
         return 1

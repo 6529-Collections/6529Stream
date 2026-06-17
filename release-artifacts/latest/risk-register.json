@@ -14,15 +14,15 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+      "sha256": "sha256:d74e604e14a813745bcd40edd2e469954d9eacba7bf213dd299447bb0040315d"
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:bdb4015d075a6264e3ff2188c8cbcbd2ec2b387ff96f4d80882b06f3b4d6eb67"
+      "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223"
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:564cb140444da32255265c21446446a29cb8552bb2d1852e70adf0ea2833af91"
+      "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -34,7 +34,7 @@
     },
     {
       "path": "docs/warning-dispositions.md",
-      "sha256": "sha256:32dd20cd1483b32816e590e9a8a557f6f045fb5df80b322face21956d5a11d9f"
+      "sha256": "sha256:3686ab9bcbaeb6e13bca21701c8060d7a81ce619750c8aa82c2ba2867466505c"
     },
     {
       "path": "docs/known-blockers.md",
@@ -91,7 +91,7 @@
       "evidence": [
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:bdb4015d075a6264e3ff2188c8cbcbd2ec2b387ff96f4d80882b06f3b4d6eb67"
+          "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -134,11 +134,11 @@
         },
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:bdb4015d075a6264e3ff2188c8cbcbd2ec2b387ff96f4d80882b06f3b4d6eb67"
+          "sha256": "sha256:6ba7805609a5179dc070b20b5a8c63a86d6f82f937e60dfcf1c04c6510568223"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+          "sha256": "sha256:d74e604e14a813745bcd40edd2e469954d9eacba7bf213dd299447bb0040315d"
         }
       ],
       "risk_acceptance": null
@@ -167,7 +167,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:564cb140444da32255265c21446446a29cb8552bb2d1852e70adf0ea2833af91"
+          "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -252,7 +252,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:564cb140444da32255265c21446446a29cb8552bb2d1852e70adf0ea2833af91"
+          "sha256": "sha256:55e9345f38362b077938968fb68883184b86ca9ffd9d88830a81d50ffd22c36e"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+          "sha256": "sha256:d74e604e14a813745bcd40edd2e469954d9eacba7bf213dd299447bb0040315d"
         },
         {
           "path": "docs/metadata.md",
@@ -416,7 +416,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:3792880eb026092f53aa9dc9588b27c1941bb8cf09f295b4f16c0fc5eba60dea"
+          "sha256": "sha256:9d5593344dc650fe657132347cd510087384719dadaef2ba519b37e154f14859"
         }
       ],
       "risk_acceptance": null
@@ -471,7 +471,7 @@
         "forge build --sizes --via-ir --skip test --skip script --force",
         "forge doc --build",
         "python scripts/test_warning_dispositions.py",
-        "python scripts/check_warning_dispositions.py"
+        "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/428"
@@ -483,15 +483,15 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+          "sha256": "sha256:d74e604e14a813745bcd40edd2e469954d9eacba7bf213dd299447bb0040315d"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:0a71ffe5a8c125dba5d59ff254d6702fee7fe6f5b9573e5d4061c081f10e85be"
+          "sha256": "sha256:a1ab4669b876f8c7e5b62090313007f8f59900dcba0f8a9f7cdf95b5008d6c44"
         },
         {
           "path": "docs/warning-dispositions.md",
-          "sha256": "sha256:32dd20cd1483b32816e590e9a8a557f6f045fb5df80b322face21956d5a11d9f"
+          "sha256": "sha256:3686ab9bcbaeb6e13bca21701c8060d7a81ce619750c8aa82c2ba2867466505c"
         }
       ],
       "risk_acceptance": null

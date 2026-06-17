@@ -32,7 +32,7 @@ python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
 python scripts/check_solidity_formatting.py
 python scripts/test_warning_dispositions.py
-python scripts/check_warning_dispositions.py
+python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
@@ -724,7 +724,7 @@ It runs:
 
 ```bash
 python scripts/test_warning_dispositions.py
-python scripts/check_warning_dispositions.py
+python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 ```
 
 [`warning-dispositions.md`](warning-dispositions.md) is the checked `ONE-007`
