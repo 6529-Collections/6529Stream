@@ -70,7 +70,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:e6e49a81994c80042d4e77a65efcafb5318a9c2969630925725502083d2a226a",
+        "sha256": "sha256:3550910c385386deed413912ec619fb3ebc5ecf074b0e881aaea568f2f35f33a",
         "size_bytes": 51501,
         "schema_version": "6529stream.release-notes.v1"
       },
