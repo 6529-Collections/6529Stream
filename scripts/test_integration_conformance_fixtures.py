@@ -122,6 +122,7 @@ def minimal_fixture() -> dict[str, object]:
                     "chainId": 31337,
                     "verifyingContract": "0x0000000000000000000000000000000000000006",
                 },
+                "expected_sale_mode": "fixed_price",
                 "negative_cases": [
                     "wrong-domain",
                     "stale-signer-epoch",
@@ -141,6 +142,7 @@ def minimal_fixture() -> dict[str, object]:
                     "chainId": 31337,
                     "verifyingContract": "0x0000000000000000000000000000000000000006",
                 },
+                "expected_sale_mode": "auction",
                 "negative_cases": [
                     "wrong-domain",
                     "stale-signer-epoch",
@@ -349,6 +351,19 @@ class IntegrationConformanceFixtureTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.IntegrationConformanceFixtureError,
                 "missing negative cases",
+            ):
+                checker.validate_fixture(root, root / checker.DEFAULT_FIXTURE)
+
+    def test_rejects_sale_mode_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            fixture = minimal_fixture()
+            fixture["drop_authorization_cases"][0]["expected_sale_mode"] = "auction"
+            seed_required_files(root, fixture)
+            write_json(root / checker.DEFAULT_FIXTURE, fixture)
+            with self.assertRaisesRegex(
+                checker.IntegrationConformanceFixtureError,
+                "expected_sale_mode drift",
             ):
                 checker.validate_fixture(root, root / checker.DEFAULT_FIXTURE)
 

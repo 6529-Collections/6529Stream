@@ -180,10 +180,13 @@ PRIVATE_KEY_VALUE_RE = re.compile(r"^0x[0-9a-fA-F]{64}$")
 ALLOWED_SECRET_KEY_FRAGMENTS = {
     "tokenDataHash",
     "tokenId",
-    "unreleased token data",
     "No-Secret Policy",
     "no_secret_redaction_cases",
     "no_secret_policy",
+}
+VALID_SALE_MODES_BY_CASE = {
+    "fixed-price-eoa": "fixed_price",
+    "auction-eoa": "auction",
 }
 
 
@@ -352,7 +355,7 @@ def contains_secret_shape(key: str, value: Any) -> bool:
         return True
     if isinstance(value, str):
         lowered = value.lower()
-        if any(fragment.lower() in lowered for fragment in ALLOWED_SECRET_KEY_FRAGMENTS):
+        if lowered in {fragment.lower() for fragment in ALLOWED_SECRET_KEY_FRAGMENTS}:
             return False
         if SECRET_KEY_RE.search(value):
             return True
@@ -511,6 +514,15 @@ def validate_drop_authorization_cases(
         if case.get("expected_primary_type") != "DropAuthorization":
             raise IntegrationConformanceFixtureError(
                 f"drop_authorization_cases[{index}].expected_primary_type must be DropAuthorization"
+            )
+        expected_sale_mode = require_string(
+            case.get("expected_sale_mode"),
+            f"drop_authorization_cases[{index}].expected_sale_mode",
+        )
+        case_name = require_string(case.get("name"), f"drop_authorization_cases[{index}].name")
+        if expected_sale_mode != VALID_SALE_MODES_BY_CASE[case_name]:
+            raise IntegrationConformanceFixtureError(
+                f"drop_authorization_cases[{index}].expected_sale_mode drift"
             )
         negatives = set(require_list(case.get("negative_cases"), f"drop_authorization_cases[{index}].negative_cases"))
         missing_negatives = REQUIRED_DROP_NEGATIVES - negatives
