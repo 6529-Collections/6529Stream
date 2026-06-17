@@ -45,6 +45,8 @@ The intended boundary is:
 - [docs/integrations/wallets-and-signatures.md](../wallets-and-signatures.md)
 - [docs/integrations/metadata-rendering.md](../metadata-rendering.md)
 - [docs/integrations/marketplace-indexer-evidence.md](../marketplace-indexer-evidence.md)
+- [docs/integrations/integration-conformance-fixtures.md](../integration-conformance-fixtures.md)
+- [docs/integrations/fixtures/integration-conformance-fixtures.json](../fixtures/integration-conformance-fixtures.json)
 - [docs/release-readiness.md](../../release-readiness.md)
 - [docs/public-beta-evidence.md](../../public-beta-evidence.md)
 - [docs/non-local-release-evidence.md](../../non-local-release-evidence.md)
@@ -59,6 +61,11 @@ The intended boundary is:
 - [test/StreamEventReconstructability.t.sol](../../../test/StreamEventReconstructability.t.sol)
 - [test/StreamMinterEvents.t.sol](../../../test/StreamMinterEvents.t.sol)
 - [test/StreamMetadataEvents.t.sol](../../../test/StreamMetadataEvents.t.sol)
+
+The INT-016 integration conformance fixtures bind these snippets to checked
+examples for event topic dispatch, normalized log identity, read-after-event
+queues, duplicate log idempotency, unknown emitter, unknown topic, confirmation
+depth, reorg rollback, and no-secret redaction diagnostics.
 
 Raw ABIs under ignored `out/` are local build products. A product team may
 generate viem or ethers clients from those ABIs, but release review should
@@ -479,6 +486,8 @@ Consuming applications and indexers should test at least:
 ```sh
 python scripts/test_typescript_event_decoding_indexer.py
 python scripts/check_typescript_event_decoding_indexer.py
+python scripts/test_integration_conformance_fixtures.py
+python scripts/check_integration_conformance_fixtures.py
 python scripts/test_events_and_indexing.py
 python scripts/check_events_and_indexing.py
 python scripts/test_integrations_readme.py

@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added checked INT-016 integration conformance fixtures for frontend, mobile,
+  Electron, indexer, operator UI, and signing-service teams, covering artifact
+  loading, fail-closed chain config, EIP-712 domain expectations, event topic
+  dispatch, normalized log identity, read-after-event queues, duplicate log
+  idempotency, unknown emitter/topic rejection, confirmation depth, reorg
+  rollback, no-secret redaction diagnostics, local/CI/Windows gate wiring, and
+  release-manifest/checksum coverage.
 - Added checked INT-015 TypeScript event decoding and indexer ingestion
   snippets covering event topic catalog loading, `topic0` dispatch, normalized
   log identity, ABI/topic drift checks, idempotent ingestion, confirmation

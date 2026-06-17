@@ -182,6 +182,8 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "integrations" / "marketplace-indexer-evidence.md",
         root / "docs" / "integrations" / "interface-versioning.md",
         root / "docs" / "integrations" / "frontend-reference-architecture.md",
+        root / "docs" / "integrations" / "integration-conformance-fixtures.md",
+        root / "docs" / "integrations" / "fixtures" / "integration-conformance-fixtures.json",
         root / "docs" / "integrations" / "mobile-walletconnect.md",
         root / "docs" / "integrations" / "electron-security-wallets.md",
         root / "docs" / "integrations" / "operator-admin-ui.md",
@@ -1086,7 +1088,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
     for doc in docs:
-        write_text(doc, f"# {doc.stem}\n")
+        if doc.suffix == ".json":
+            write_json(doc, {"schema_version": "test.fixture.v1"})
+        else:
+            write_text(doc, f"# {doc.stem}\n")
     write_json(
         latest / "risk-register.json",
         minimal_risk_register(root, risk_register_schema, docs[0]),

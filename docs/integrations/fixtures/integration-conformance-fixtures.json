@@ -1,0 +1,244 @@
+{
+  "schema_version": "6529stream.integration-conformance-fixtures.v1",
+  "generated_by": "manual:INT-016",
+  "maturity": {
+    "status": "pre-audit local conformance fixtures",
+    "not_production_ready": true,
+    "not_generated_sdk": true,
+    "not_external_evidence": true,
+    "notes": "These fixtures exercise artifact loading, chain config, EIP-712, event dispatch, idempotency, and reorg handling examples for local frontend and indexer conformance only."
+  },
+  "source_artifacts": {
+    "address_book": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+    "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+    "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json",
+    "abi_checksums": "release-artifacts/latest/abi-checksums.json",
+    "release_manifest": "release-artifacts/latest/release-manifest.json",
+    "release_checksums": "release-artifacts/latest/release-checksums.json",
+    "drop_authorization_fixed_price": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+    "drop_authorization_auction": "test/fixtures/drop-authorization/payload-generator/auction-output.json"
+  },
+  "artifact_chain_config_case": {
+    "name": "anvil-local-happy-path",
+    "chain_id": 31337,
+    "deployment_version": "anvil-6529stream-v0.1.0-001",
+    "required_contracts": {
+      "StreamAdmins": "0x0000000000000000000000000000000000000001",
+      "StreamCore": "0x0000000000000000000000000000000000000003",
+      "StreamCuratorsPool": "0x0000000000000000000000000000000000000004",
+      "StreamDrops": "0x0000000000000000000000000000000000000006",
+      "StreamAuctions": "0x0000000000000000000000000000000000000007",
+      "NextGenRandomizerVRF": "0x0000000000000000000000000000000000000008",
+      "NextGenRandomizerRNG": "0x0000000000000000000000000000000000000009",
+      "StreamContractMetadata": "0x000000000000000000000000000000000000000a"
+    },
+    "negative_cases": [
+      {
+        "name": "wrong-chain-id",
+        "expected_error": "wrong chain ID"
+      },
+      {
+        "name": "wrong-deployment-version",
+        "expected_error": "deployment version mismatch"
+      },
+      {
+        "name": "missing-contract",
+        "expected_error": "missing or invalid contract address"
+      }
+    ]
+  },
+  "drop_authorization_cases": [
+    {
+      "name": "fixed-price-eoa",
+      "fixture": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
+      "expected_primary_type": "DropAuthorization",
+      "expected_domain": {
+        "name": "6529StreamDrops",
+        "version": "1",
+        "chainId": 31337,
+        "verifyingContract": "0x0000000000000000000000000000000000000006"
+      },
+      "expected_payload_domain": {
+        "name": "6529StreamDrops",
+        "version": "1",
+        "chainId": 31337,
+        "verifyingContract": "0x100000000000000000000000000000000000dead"
+      },
+      "expected_sale_mode": "fixed_price",
+      "negative_cases": [
+        "wrong-domain",
+        "stale-signer-epoch",
+        "expired-deadline",
+        "token-data-substitution",
+        "zero-address-signer",
+        "replayed-drop-id"
+      ]
+    },
+    {
+      "name": "auction-eoa",
+      "fixture": "test/fixtures/drop-authorization/payload-generator/auction-output.json",
+      "expected_primary_type": "DropAuthorization",
+      "expected_domain": {
+        "name": "6529StreamDrops",
+        "version": "1",
+        "chainId": 31337,
+        "verifyingContract": "0x0000000000000000000000000000000000000006"
+      },
+      "expected_payload_domain": {
+        "name": "6529StreamDrops",
+        "version": "1",
+        "chainId": 31337,
+        "verifyingContract": "0x100000000000000000000000000000000000dead"
+      },
+      "expected_sale_mode": "auction",
+      "negative_cases": [
+        "wrong-domain",
+        "stale-signer-epoch",
+        "expired-deadline",
+        "auction-custody-mismatch",
+        "zero-address-signer",
+        "replayed-drop-id"
+      ]
+    }
+  ],
+  "event_decoding_cases": [
+    {
+      "name": "stream-core-transfer-mint",
+      "contract": "StreamCore",
+      "emitter": "0x0000000000000000000000000000000000000003",
+      "event": "Transfer",
+      "signature": "Transfer(address,address,uint256)",
+      "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "sample_log": {
+        "chain_id": 31337,
+        "block_number": 120,
+        "block_hash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "transaction_hash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "log_index": 0
+      },
+      "expected_dispatch_key": "0x0000000000000000000000000000000000000003:0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "expected_entity": "Token",
+      "expected_read_after_event": [
+        {
+          "contract": "StreamCore",
+          "function": "ownerOf",
+          "args": {
+            "tokenId": "1"
+          },
+          "block_number": 120
+        }
+      ],
+      "negative_cases": [
+        "wrong-emitter",
+        "unknown-topic",
+        "duplicate-log-idempotent",
+        "reorg-rollback"
+      ]
+    },
+    {
+      "name": "drop-authorization-consumed",
+      "contract": "StreamDrops",
+      "emitter": "0x0000000000000000000000000000000000000006",
+      "event": "DropAuthorizationConsumed",
+      "signature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+      "topic0": "0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab",
+      "sample_log": {
+        "chain_id": 31337,
+        "block_number": 121,
+        "block_hash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+        "transaction_hash": "0x4444444444444444444444444444444444444444444444444444444444444444",
+        "log_index": 2
+      },
+      "expected_dispatch_key": "0x0000000000000000000000000000000000000006:0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab",
+      "expected_entity": "DropExecution",
+      "expected_read_after_event": [
+        {
+          "contract": "StreamDrops",
+          "function": "isDropConsumed",
+          "args": {
+            "dropId": "fixture-drop-id"
+          },
+          "block_number": 121
+        }
+      ],
+      "negative_cases": [
+        "wrong-emitter",
+        "unknown-topic",
+        "duplicate-log-idempotent",
+        "reorg-rollback"
+      ]
+    },
+    {
+      "name": "auction-registered",
+      "contract": "StreamAuctions",
+      "emitter": "0x0000000000000000000000000000000000000007",
+      "event": "AuctionRegistered",
+      "signature": "AuctionRegistered(bytes32,uint256,uint256,address,address,uint256,uint256)",
+      "topic0": "0xd2775dd7621cecc5f3799d293e90e8ccde35a11535a788c55d57da0b52f625f8",
+      "sample_log": {
+        "chain_id": 31337,
+        "block_number": 122,
+        "block_hash": "0x5555555555555555555555555555555555555555555555555555555555555555",
+        "transaction_hash": "0x6666666666666666666666666666666666666666666666666666666666666666",
+        "log_index": 1
+      },
+      "expected_dispatch_key": "0x0000000000000000000000000000000000000007:0xd2775dd7621cecc5f3799d293e90e8ccde35a11535a788c55d57da0b52f625f8",
+      "expected_entity": "Auction",
+      "expected_read_after_event": [
+        {
+          "contract": "StreamAuctions",
+          "function": "getAuctionStatus",
+          "args": {
+            "tokenId": "1"
+          },
+          "block_number": 122
+        }
+      ],
+      "negative_cases": [
+        "wrong-emitter",
+        "unknown-topic",
+        "duplicate-log-idempotent",
+        "reorg-rollback"
+      ]
+    }
+  ],
+  "indexer_behaviour_cases": {
+    "log_identity": {
+      "optimistic_key_fields": [
+        "chain_id",
+        "transaction_hash",
+        "log_index"
+      ],
+      "confirmed_key_fields": [
+        "chain_id",
+        "block_hash",
+        "transaction_hash",
+        "log_index"
+      ],
+      "duplicate_policy": "replaying the same confirmed key must be idempotent"
+    },
+    "confirmation_policy": {
+      "minimum_confirmations": 12,
+      "pre_confirmation_state": "optimistic",
+      "post_confirmation_state": "confirmed",
+      "reorg_policy": "rollback logs at or after the replaced block hash, then replay canonical logs"
+    },
+    "unknown_log_policy": {
+      "unknown_emitter": "reject",
+      "unknown_topic0": "reject",
+      "known_topic_wrong_emitter": "reject"
+    },
+    "no_secret_redaction_cases": [
+      {
+        "name": "secret-shaped-diagnostic",
+        "input_keys": [
+          "privateKey",
+          "mnemonic",
+          "apiToken",
+          "rpcUrl"
+        ],
+        "expected_output": "redacted"
+      }
+    ]
+  }
+}

@@ -68,6 +68,18 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("scripts/test_typescript_event_decoding_indexer.py"),
             generator.DEFAULT_COVERED_PATHS,
         )
+        self.assertIn(
+            Path("scripts/check_integration_conformance_fixtures.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("scripts/test_integration_conformance_fixtures.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("docs/integrations/fixtures/integration-conformance-fixtures.json"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("deployments/admin-ceremony"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)

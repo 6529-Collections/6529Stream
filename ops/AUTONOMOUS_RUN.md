@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/typescript-event-decoding-snippets` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/493` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/494` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/495` |
-| Next issue | Wait for PR #495 CI, CodeRabbit, and 6529bot feedback; resolve actionable comments, merge when clean, then continue INT-016 integration conformance fixtures or the next higher-priority substantive backlog item. |
+| Active PR branch | `codex/integration-conformance-fixtures` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/495` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/496` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/497` |
+| Next issue | Wait for PR #497 CI, CodeRabbit, and 6529bot feedback; resolve actionable comments, merge when clean, then continue the next substantive Integration Readiness item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 07:24 UTC` |
+| Last updated | `2026-06-17 08:26 UTC` |
 
 ## Packaging Notes
 
@@ -16149,6 +16149,8 @@ Outcome:
 | 2026-06-17 06:52 | Merge PR #493 and start INT-015 | TypeScript EIP-712 drop authorization snippets merged as `30beb76d7dff1cd438006d10cb42ef652a1fbe6f` after CI, CodeRabbit, and 6529bot latest-head feedback were clean; issue #492 closed completed. Issue #494 and branch `codex/typescript-event-decoding-snippets` now track INT-015 for checked TypeScript event decoding and indexer ingestion snippets covering event topic catalog loading, ABI/topic drift checks, `topic0` dispatch, decoded log normalization, confirmation depth, reorg rollback, idempotent ingestion, read-after-event queues, and no-secret logging. |
 | 2026-06-17 07:23 | Validate INT-015 local draft | Added `docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md`, checker/tests, integrations README, event/indexer, React/Next, React/viem links, local/CI/Windows gate wiring, release-manifest/checksum coverage, changelog, and regenerated release artifacts. Focused TypeScript event decoding, integrations README, event/indexer, React/Next, TypeScript artifact, TypeScript EIP-712, release manifest, bytecode proof, release checksum, release artifact verifier, changelog, Python compile, shell syntax, PowerShell parser, full `make check`, Windows `scripts\check.ps1`, and `git diff --check` validation passed. Known warning noise remains the existing solc/Foundry warnings and the existing PowerShell LF-to-CRLF `git diff --check` warning. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 07:24 | Open PR #495 for INT-015 | PR #495 is open at `https://github.com/6529-Collections/6529Stream/pull/495`, closes issue #494, and packages checked TypeScript event decoding/indexer ingestion snippets plus checker/tests, local/CI/Windows gate wiring, integration docs links, release-manifest/checksum coverage, and regenerated release evidence. CodeRabbit review was requested at `https://github.com/6529-Collections/6529Stream/pull/495#issuecomment-4727175707`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 08:25 | Validate INT-016 local draft | Added checked integration conformance fixtures and guide for artifact loading, fail-closed chain config, EIP-712 domain expectations, event topic dispatch, normalized log identity, read-after-event queues, duplicate log idempotency, unknown emitter/topic rejection, confirmation depth, reorg rollback, and no-secret redaction diagnostics. Wired checker/tests into Make, Unix/Windows wrappers, CI, integration docs, release manifest/checksum coverage, release notes, bytecode proof, and risk-register hashes. Focused integration fixture, integrations README, event/indexer, React/Next, TypeScript event decoding, risk-register, release-notes, release-manifest, bytecode proof, release-checksum, changelog, Python compile, Windows `scripts\check.ps1`, full `make check`, and `git diff --check` validation passed. Known warning noise remains the existing solc/Foundry warnings and the existing PowerShell LF-to-CRLF `git diff --check` warning. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 08:26 | Open PR #497 for INT-016 | PR #497 is open at `https://github.com/6529-Collections/6529Stream/pull/497`, closes issue #496, and packages checked integration conformance fixtures plus guide, checker/tests, local/CI/Windows gate wiring, integration docs links, release-manifest/checksum coverage, release notes, bytecode proof, and regenerated release evidence. CodeRabbit review was requested at `https://github.com/6529-Collections/6529Stream/pull/497#issuecomment-4727672860`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 

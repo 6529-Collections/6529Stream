@@ -157,6 +157,8 @@ Event and read gaps are named.
 INT-015 TypeScript event decoding and indexer ingestion snippets cover event
 topic catalog loading, topic0 dispatch, normalized log identity, idempotent
 ingestion, and read-after-event queue behavior.
+INT-016 integration conformance fixtures cover duplicate log idempotency,
+unknown emitter, unknown topic, and no-secret redaction diagnostics.
 
 ## Validation Commands
 
