@@ -7,6 +7,11 @@ production-ready, and not a security claim.
 
 Use the main guide first:
 [docs/integrations/frontend-reference-architecture.md](../frontend-reference-architecture.md).
+For more concrete INT-013 TypeScript snippets around release artifact loading,
+address book loading, release manifest hash validation, ABI checksum awareness,
+deployment manifest checks, wrong-chain guards, and fail-closed chain config,
+use
+[docs/integrations/examples/typescript-artifacts-and-chain-config.md](typescript-artifacts-and-chain-config.md).
 
 ## Artifact Loader
 

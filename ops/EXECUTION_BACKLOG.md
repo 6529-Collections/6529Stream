@@ -3426,8 +3426,8 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `INT-011` | Add curator rewards frontend flow spec | G | Merged in PR #487; issue #486 closed completed |
-| `INT-012` | Add withdrawal/credit UX flow spec | G | In progress on issue #488 and branch `codex/withdrawals-credits-flow-spec` |
-| `INT-013` | Add TypeScript snippets for artifact loading and chain config | G | `INT-001` |
+| `INT-012` | Add withdrawal/credit UX flow spec | G | Merged in PR #489; issue #488 closed completed |
+| `INT-013` | Add TypeScript snippets for artifact loading and chain config | G | In progress on issue #490 and branch `codex/typescript-artifact-chain-config` |
 | `INT-014` | Add TypeScript snippets for EIP-712 payload construction | G | `INT-004` |
 | `INT-015` | Add TypeScript snippets for event decoding/indexer ingestion | G | `INT-005` |
 | `INT-016` | Add integration conformance fixtures for frontend teams | G | `INT-013` to `INT-015` |

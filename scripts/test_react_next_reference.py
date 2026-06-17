@@ -47,7 +47,11 @@ This pre-audit local baseline is not production-ready and not a security claim.
 It does not replace fork/testnet/live evidence for public beta or production.
 The 6529.io, React, Next, viem, wagmi, TanStack Query, generated types,
 environment separation, chain config, transaction state, and INT-007 guide
-says no package dependency is introduced.
+says no package dependency is introduced. INT-013 TypeScript artifact loading
+and chain config snippets cover release artifact loading, address book loading,
+release manifest hash validation, deployment manifest cross-checks, ABI
+checksum awareness, fail-closed wrong-chain guards, and chain config
+construction.
 
 ## Maturity And Scope
 

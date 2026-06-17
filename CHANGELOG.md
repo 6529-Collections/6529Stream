@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added checked INT-013 TypeScript artifact loading and chain config snippets
+  covering release manifest loading, address book loading, deployment manifest
+  cross-checks, release manifest hash validation, ABI checksum awareness,
+  no-secret public environment parsing, and fail-closed wrong-chain guards for
+  frontend teams.
 - Added a checked withdrawal and credit UX integration flow spec covering
   fixed-price, auction, curator reward, surplus, mobile, Electron, and
   indexer handling with source-aware checker coverage for contract credit

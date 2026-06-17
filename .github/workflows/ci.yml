@@ -215,6 +215,8 @@ jobs:
             scripts/test_metadata_rendering.py \
             scripts/check_react_next_reference.py \
             scripts/test_react_next_reference.py \
+            scripts/check_typescript_artifact_chain_config.py \
+            scripts/test_typescript_artifact_chain_config.py \
             scripts/check_mobile_walletconnect.py \
             scripts/test_mobile_walletconnect.py \
             scripts/check_electron_security_wallets.py \
@@ -617,6 +619,8 @@ jobs:
           python3 scripts/check_metadata_rendering.py 2>&1 | tee ci-logs/metadata-rendering-check.log
           python3 scripts/test_react_next_reference.py 2>&1 | tee ci-logs/react-next-reference-tests.log
           python3 scripts/check_react_next_reference.py 2>&1 | tee ci-logs/react-next-reference-check.log
+          python3 scripts/test_typescript_artifact_chain_config.py 2>&1 | tee ci-logs/typescript-artifact-chain-config-tests.log
+          python3 scripts/check_typescript_artifact_chain_config.py 2>&1 | tee ci-logs/typescript-artifact-chain-config-check.log
           python3 scripts/test_mobile_walletconnect.py 2>&1 | tee ci-logs/mobile-walletconnect-tests.log
           python3 scripts/check_mobile_walletconnect.py 2>&1 | tee ci-logs/mobile-walletconnect-check.log
           python3 scripts/test_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-tests.log

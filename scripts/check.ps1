@@ -217,6 +217,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_metadata_rendering.py"
 & $pythonPath @pythonArgs "scripts\test_react_next_reference.py"
 & $pythonPath @pythonArgs "scripts\check_react_next_reference.py"
+& $pythonPath @pythonArgs "scripts\test_typescript_artifact_chain_config.py"
+& $pythonPath @pythonArgs "scripts\check_typescript_artifact_chain_config.py"
 & $pythonPath @pythonArgs "scripts\test_mobile_walletconnect.py"
 & $pythonPath @pythonArgs "scripts\check_mobile_walletconnect.py"
 & $pythonPath @pythonArgs "scripts\test_electron_security_wallets.py"
