@@ -3413,13 +3413,12 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `GOV-005` | Add signer compromise drill retained evidence | F | `GOV-004` |
-| `GOV-006` | Add stuck auction drill retained evidence | F | `GOV-004` |
+| `GOV-005` | Add signer compromise drill retained evidence | F | Merged in PR #511; issue #510 closed completed |
+| `GOV-006` | Add stuck auction drill retained evidence | F | In progress on issue #512 and branch `codex/stuck-auction-drill-evidence`; depends on merged `GOV-004` and follows merged `GOV-005` |
 | `GOV-007` | Add failed randomness drill retained evidence | F | `GOV-004` |
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | `GOV-004` |
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
-| `GOV-005` | Add signer compromise drill retained evidence | F | In progress on issue #510 and branch `codex/signer-compromise-drill-evidence`; depends on merged `GOV-004` |
 
 ### Integration Readiness
 

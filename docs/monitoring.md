@@ -190,6 +190,12 @@ Required monitors:
 - settlement is idempotent and does not double-send token or ETH value;
 - stuck auctions are flagged when state, end time, token custody, and owed
   balances disagree;
+- alert on stuck auction drill evidence that is missing auction identity,
+  stuck condition, custody snapshot, pause/unpause proof, terminal settlement
+  or cancellation, bidder/proceeds credit proof, withdrawal availability,
+  emergency-surplus boundary, monitoring handoff, reviewer, or redaction proof
+  from
+  `release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md`;
 - bid pause and settlement pause domains are monitored separately;
 - failed settlement, failed refund, and failed withdrawal paths preserve
   credits rather than erasing balances;

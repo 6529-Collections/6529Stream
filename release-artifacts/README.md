@@ -552,6 +552,15 @@ checked no-secret retained-artifact template for future
 bundle as reviewed release evidence. The committed template is not incident
 drill completion proof and does not change production-release readiness.
 
+`evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md` is
+the checked no-secret retained-artifact template for future
+`stuck_auction_drill_evidence`. Validate it with
+`python scripts/test_stuck_auction_drill_evidence.py` and
+`python scripts/check_stuck_auction_drill_evidence.py` before treating a
+stuck-auction drill bundle as reviewed release evidence. The committed template
+is not incident drill completion proof and does not change production-release
+readiness.
+
 `latest/SHA256SUMS` and `latest/release-checksums.json` are also generated
 outputs. They cover the committed release artifact config, generated release
 artifacts, dependency artifact descriptors/source files, ABI compatibility

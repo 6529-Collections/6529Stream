@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `GOV-006` stuck-auction drill retained-artifact template,
+  source-aware checker, and regression tests covering auction identity, stuck
+  condition, custody, pause/unpause, terminal settlement or cancellation,
+  bidder/proceeds credits, withdrawal availability, emergency-surplus boundary,
+  monitoring handoff, review, redaction, and local/CI/Windows gate wiring.
 - Added a checked `GOV-005` signer-compromise drill retained-artifact template,
   source-aware checker, and regression tests covering drop-execution pause,
   signer rotation or revocation, epoch invalidation, per-drop cancellation,

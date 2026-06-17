@@ -114,6 +114,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_incident_drill_evidence.py
 "$python_bin" scripts/test_signer_compromise_drill_evidence.py
 "$python_bin" scripts/check_signer_compromise_drill_evidence.py
+"$python_bin" scripts/test_stuck_auction_drill_evidence.py
+"$python_bin" scripts/check_stuck_auction_drill_evidence.py
 "$python_bin" scripts/test_public_beta_evidence.py
 "$python_bin" scripts/check_public_beta_evidence.py
 "$python_bin" scripts/test_risk_register.py
