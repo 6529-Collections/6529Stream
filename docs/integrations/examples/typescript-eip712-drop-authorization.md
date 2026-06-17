@@ -174,6 +174,14 @@ function deriveDropId(input: {
 }
 ```
 
+This exact field order mirrors
+[`StreamDrops.deriveDropId`](../../../smart-contracts/StreamDrops.sol) and the
+fixture-backed helper in
+[`test/helpers/DropAuthTestHelper.sol`](../../../test/helpers/DropAuthTestHelper.sol).
+If a client copies the snippet into a real SDK or signing service, compare the
+derived value against the committed fixed-price and auction payload-generator
+fixtures before enabling signing.
+
 The signing service must allocate unique `(signer, signerEpoch, nonce, salt)`
 tuples. The contract enforces uniqueness through derived `dropId`,
 `consumedDropIds`, and `cancelledDropIds`, not through a separate monotonic
@@ -301,6 +309,9 @@ function assertDropAuthorizationPreflight(input: {
 }
 ```
 
+The contract deadline comparison is inclusive: `deadline == block.timestamp`
+is still valid, while any deadline less than the current timestamp is expired.
+
 Wrong signer, wrong domain, wrong chain, expired, replayed, cancelled, stale
 signer epoch, malformed signature, high-s malleable signature, zero recovered
 signer, token-data substitution, and bad sale-mode fields must all fail closed.
@@ -348,12 +359,20 @@ async function assertSubmissionMatchesAuthorization(input: {
   value: bigint;
   message: DropAuthorizationMessage;
   tokenData: string;
+  currentSignerEpoch: bigint;
+  now: bigint;
 }): Promise<void> {
   assertStringEquals(
     input.message.tokenDataHash,
     await tokenDataHash(input.tokenData),
     "token data hash",
   );
+  assertBigIntEquals(
+    input.message.signerEpoch,
+    input.currentSignerEpoch,
+    "signer epoch",
+  );
+  if (input.message.deadline < input.now) throw new Error("expired deadline");
   if (input.message.saleMode === 1 && input.message.price > 0n) {
     assertAddressEquals(input.sender, input.message.payer, "paid fixed-price payer");
     assertBigIntEquals(input.value, input.message.price, "fixed-price value");

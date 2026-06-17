@@ -2182,8 +2182,8 @@
       },
       {
         "path": "docs/integrations/examples/typescript-eip712-drop-authorization.md",
-        "sha256": "sha256:3d393f73c377800a40d1ebdbf72183c6839dbd4ade036de7b1ff91687b4bfdac",
-        "size_bytes": 14624
+        "sha256": "sha256:b2963c7cbbb98fae88e222b2294be63a2438814a076858ccbcba0d64e0c8b31e",
+        "size_bytes": 15427
       },
       {
         "path": "docs/integrations/mobile-walletconnect.md",
