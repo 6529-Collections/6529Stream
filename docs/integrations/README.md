@@ -35,10 +35,10 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, curator rewards, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, and React/Next reference architecture guidance is documented for the local baseline |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, curator rewards, withdrawal and credit UX, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, and React/Next reference architecture guidance is documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
-| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Auction lifecycle, curator reward claims, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, cache invalidation, and retained marketplace/indexer evidence requirements are documented for the local baseline |
+| Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Auction lifecycle, curator reward claims, withdrawal and credit reconstruction, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, cache invalidation, and retained marketplace/indexer evidence requirements are documented for the local baseline |
 | Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, release-readiness dashboard, and [`operator-admin-ui.md`](operator-admin-ui.md) | Current `INT-010` operator personas, Safe/multisig ceremony, role, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and evidence-boundary guidance is documented |
 | Backend signing service | Use EIP-712, ERC-1271, Safe, signer custody, drop authorization signing docs, and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Local templates and integration guidance only; production signing evidence remains blocked |
 
@@ -77,6 +77,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Fixed-price mint flow | [`docs/integrations/contract-flows.md`](contract-flows.md) | Current `INT-002` transaction, event, credit, and failure-state guide |
 | Auction flow | [`docs/integrations/auction-flows.md`](auction-flows.md) | Current `INT-003` auction submit, bid, settlement, credit, pause, and indexer guide |
 | Curator rewards flow | [`docs/integrations/curator-rewards.md`](curator-rewards.md) | Current `INT-011` reward root, Merkle proof, delegated claim, pull-payment credit, withdrawal, failure-state, and indexer guide |
+| Withdrawals and credits flow | [`docs/integrations/withdrawals-and-credits.md`](withdrawals-and-credits.md) | Current `INT-012` fixed-price, auction, curator, pull-payment, withdrawal, failure-state, surplus, mobile, Electron, and indexer guide |
 | Wallet and signature guide | [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md) | Current `INT-004` EIP-712, ERC-1271, Safe, WalletConnect, backend signer, and failure-state guide |
 | Event and indexer guide | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Current `INT-005` event subscriptions, indexed entities, read-after-event calls, reorg policy, and known event/read gaps |
 | Metadata rendering guide | [`docs/integrations/metadata-rendering.md`](metadata-rendering.md) | Current `INT-006` metadata state, tokenURI, ERC-4906 cache invalidation, animation sandbox, cache key, and marketplace evidence-boundary guide |
@@ -112,6 +113,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/contract-flows.md`](contract-flows.md)
 - [`docs/integrations/auction-flows.md`](auction-flows.md)
 - [`docs/integrations/curator-rewards.md`](curator-rewards.md)
+- [`docs/integrations/withdrawals-and-credits.md`](withdrawals-and-credits.md)
 - [`docs/integrations/wallets-and-signatures.md`](wallets-and-signatures.md)
 - [`docs/integrations/events-and-indexing.md`](events-and-indexing.md)
 - [`docs/integrations/metadata-rendering.md`](metadata-rendering.md)
@@ -183,6 +185,8 @@ to understand what is still intentionally future work:
   [`operator-admin-ui.md`](operator-admin-ui.md).
 - `INT-011`: the curator rewards frontend flow spec is now
   [`curator-rewards.md`](curator-rewards.md).
+- `INT-012`: the withdrawal and credit UX flow spec is now
+  [`withdrawals-and-credits.md`](withdrawals-and-credits.md).
 - `ONE-003`: the royalty policy is now
   [`docs/royalty-policy.md`](../royalty-policy.md), recording the current
   ERC-2981 royalty disclosure, not payment enforcement boundary.
@@ -260,6 +264,8 @@ python scripts/test_auction_flows.py
 python scripts/check_auction_flows.py
 python scripts/test_curator_rewards_flow.py
 python scripts/check_curator_rewards_flow.py
+python scripts/test_withdrawals_credits_flow.py
+python scripts/check_withdrawals_credits_flow.py
 python scripts/test_wallet_signature_flows.py
 python scripts/check_wallet_signature_flows.py
 python scripts/test_events_and_indexing.py

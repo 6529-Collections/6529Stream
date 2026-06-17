@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:58f720abfc3d21a6c76f007394e8996c2e3a4212d2376939848e0f7fbd176146",
-        "size_bytes": 52748,
+        "sha256": "sha256:5248bb50f5fd73248be281d11c2abe5bc6648a630e321a8f76cb68e600948430",
+        "size_bytes": 52980,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:8065f0d12dc366d371f117e97c8b38abcaaa185127272e6bf989320b31391ebb",
-        "size_bytes": 50214
+        "sha256": "sha256:2906707b790cff106e6e08462ac77f0676f2217831f4a774dc5575183c33404e",
+        "size_bytes": 50439
       }
     },
     "artifact_manifest": {
@@ -147,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:db1b31d00c5598f34ae2116210b0368f2a7002e016144834d9a10a7a87af7433",
+      "sha256": "sha256:4bdd6ae0afb39dbf4ffa56c6197723e0915aa6cc7a61982af7d665f0f58863a0",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2006,8 +2006,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c77543848c7840a6d8d920c1781f903cd191fcd16cdb49ce4785fb8ce46ae010",
-      "size_bytes": 50433
+      "sha256": "sha256:4eff63af0304b303a2419885e79874c6319b7d223ceff99bc48e53e139381131",
+      "size_bytes": 50664
     },
     "governance_docs": [
       {
@@ -2122,8 +2122,8 @@
       },
       {
         "path": "docs/integrations/README.md",
-        "sha256": "sha256:9e94780800e78edc1ff7f4e06d05bef5cbcc2724c2dcc0ebba3b7f58fde50f12",
-        "size_bytes": 29336
+        "sha256": "sha256:27d2063d7a226698fcae75d3130e7191074ea8fa8bfa6a8edafec6efe5ef3b6d",
+        "size_bytes": 30066
       },
       {
         "path": "docs/integrations/contract-flows.md",
@@ -2139,6 +2139,11 @@
         "path": "docs/integrations/curator-rewards.md",
         "sha256": "sha256:b33835bf706c1c072ff96684d3117e273b9767b0d7f86d2d09452e2bdac02922",
         "size_bytes": 17660
+      },
+      {
+        "path": "docs/integrations/withdrawals-and-credits.md",
+        "sha256": "sha256:742ed9d7415170845265cec2c2d646d44d609b7b8593ca9b415abc0276f1276d",
+        "size_bytes": 16484
       },
       {
         "path": "docs/integrations/wallets-and-signatures.md",
@@ -2192,8 +2197,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:2184ff0caafbd8b20439277f0ca81f51925cdbe2a50e482587d6c1c8516ca0bf",
-        "size_bytes": 53686
+        "sha256": "sha256:c1d99c67295b30adcfdb2a839a9eab3687c46145b940ea65cb440df23628cb58",
+        "size_bytes": 53783
       },
       {
         "path": "docs/status.md",
