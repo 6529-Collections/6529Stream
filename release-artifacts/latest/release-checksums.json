@@ -25,6 +25,8 @@
       "scripts/test_signer_compromise_drill_evidence.py",
       "scripts/check_stuck_auction_drill_evidence.py",
       "scripts/test_stuck_auction_drill_evidence.py",
+      "scripts/check_failed_randomness_drill_evidence.py",
+      "scripts/test_failed_randomness_drill_evidence.py",
       "scripts/check_readme.py",
       "scripts/test_readme.py",
       "scripts/check_first_30_minutes.py",
@@ -85,7 +87,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:ee8d5b0f4811ae278a9a920d9332053e014aa11e27425f96d96f4db88bff59c8"
+    "sha256": "sha256:328cad37112065e71fe8a2fea104b938fe016933ca6e1814eb8cc4c6371848ac"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -249,8 +251,8 @@
     },
     {
       "path": "docs/monitoring.md",
-      "sha256": "sha256:b7637daecd86a16070faf5e8460194dfd4647037f0c2c85f5e601dc2a5a96179",
-      "size_bytes": 20501
+      "sha256": "sha256:78063d9d53a6334a540a6ebc199668d8d0808b52d7f4b68603ef53960b9b37e7",
+      "size_bytes": 20731
     },
     {
       "path": "docs/operator-dashboard-query-model.md",
@@ -321,6 +323,11 @@
       "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
       "sha256": "sha256:4bb92e1979a4b77c19085606efee7717c9f45dfac6f59ec2333bf4ee3c3c6b48",
       "size_bytes": 5011
+    },
+    {
+      "path": "release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md",
+      "sha256": "sha256:ee94280cea53ac3e2c648959b8ee1fcfa5f4aa2a890fae3e7a96ed4a4830f77c",
+      "size_bytes": 3975
     },
     {
       "path": "release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md",
@@ -609,7 +616,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:c289c9f37bc421ff925e1504f6a775a02d42d1819876cbd30efdf4aa839e8ae3",
+      "sha256": "sha256:061db800280c0495602e15f093bcb187ee2031e268a8a11a3ee74ec54617a558",
       "size_bytes": 79962
     },
     {
@@ -719,22 +726,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:bae4242a86bd8e531d9853fe4429814e4087010bb876bd856d5baa212b1bddcc",
+      "sha256": "sha256:c926d68e70d1a93a259ccea1ccc2160319cbf1d2bbc768df268e3d1569a13eee",
       "size_bytes": 113978
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:e1b9fe5d7288d5791dd2a0291fc30568f530236fa66451764a42d5ad3a144015",
-      "size_bytes": 57205
+      "sha256": "sha256:da6e4f547be90fdf8c548e50b20e285399cc6df60072ea636a042ccfa7adf9c9",
+      "size_bytes": 57608
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:b54add313b72569070d13a275280598aa4462c94e99b7d4bf02f1199939420aa",
-      "size_bytes": 54580
+      "sha256": "sha256:2516f52ac629f2c4346957edeb0cb2716332f128b1f3cfce6f83f701d9f713c2",
+      "size_bytes": 54976
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d1951e8631f3ccc588403157603633ebf5e00af97554b3748b5a0bb137bb3f50",
+      "sha256": "sha256:c4d8f8b4029c3e894b9b1301508ecfb24edc7aca1736c6fc0f8f2777e0219202",
       "size_bytes": 22929
     },
     {
@@ -819,13 +826,18 @@
     },
     {
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-      "sha256": "sha256:ecff5def7f42fa7ae19af0e67b0375b5103807db3db9d0d66bc17a160e5d780f",
+      "sha256": "sha256:12e519a3eae01d59fa8ce4ccdefaf367823ba00cc68dea19e5ca2994ef81b093",
       "size_bytes": 3470
     },
     {
       "path": "scripts/check_curator_rewards_flow.py",
       "sha256": "sha256:77159f07226aeb664dee31c659b33271f3281aca5e320753e6991aa06142da13",
       "size_bytes": 10873
+    },
+    {
+      "path": "scripts/check_failed_randomness_drill_evidence.py",
+      "sha256": "sha256:55841d2a58ccd88bf94fb6d43d2819734a7534c1fbbcea6ed606ddf5d2ed3b38",
+      "size_bytes": 19995
     },
     {
       "path": "scripts/check_first_30_minutes.py",
@@ -951,6 +963,11 @@
       "path": "scripts/test_curator_rewards_flow.py",
       "sha256": "sha256:74b6441bde1577bc76710998feb35706899992c988cf3373bc18ce751252dc15",
       "size_bytes": 10558
+    },
+    {
+      "path": "scripts/test_failed_randomness_drill_evidence.py",
+      "sha256": "sha256:7647bdc6f0aab20da29ccdc1a34a0096f9c56f81d57ef7f886de9df6de0237ed",
+      "size_bytes": 16713
     },
     {
       "path": "scripts/test_first_30_minutes.py",

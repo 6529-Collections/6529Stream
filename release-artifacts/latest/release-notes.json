@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:badfbd9ff9324f88db9942cc769341918c133fd1d96b9336edf42ec8bdda67f3",
-      "size_bytes": 54905
+      "sha256": "sha256:3e2936f8d5dd8f9752480b5aeefbd8f9ceebf81bc3b6900b06ccad0b58f12fb6",
+      "size_bytes": 55311
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d1951e8631f3ccc588403157603633ebf5e00af97554b3748b5a0bb137bb3f50",
+      "sha256": "sha256:c4d8f8b4029c3e894b9b1301508ecfb24edc7aca1736c6fc0f8f2777e0219202",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked `GOV-007` failed-randomness drill retained-artifact template, source-aware checker, and regression tests covering request identity, provider type, provider epoch, pending/stale/failed/final lifecycle state, invalid callback handling, retry or stale marking, metadata state, provider migration boundaries, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-006` stuck-auction drill retained-artifact template, source-aware checker, and regression tests covering auction identity, stuck condition, custody, pause/unpause, terminal settlement or cancellation, bidder/proceeds credits, withdrawal availability, emergency-surplus boundary, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-005` signer-compromise drill retained-artifact template, source-aware checker, and regression tests covering drop-execution pause, signer rotation or revocation, epoch invalidation, per-drop cancellation, stale/cancelled/wrong-domain payload rejection, recovered fixed-price and auction payloads, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-010` operator dashboard query model covering environment/release, admin, signer, fixed-price, auction, randomizer, payment/credit, metadata/dependency, release blocker, and incident drill panels, with query inputs, source artifacts, freshness, severity, no-secret telemetry, local/CI/Windows gate wiring, release-readiness and integration navigation, release-manifest coverage, and release-checksum coverage.",

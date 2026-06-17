@@ -221,6 +221,9 @@ Required monitors:
   depend on randomness;
 - failed randomness and pending request age thresholds trigger the incident
   response runbook;
+- public beta and production release monitors should alert if no reviewed
+  failed-randomness drill retained artifact exists at
+  `release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`;
 - randomizer changes are tied to deployment manifests, address books, and
   reviewed randomizer operations evidence before public beta or production.
 

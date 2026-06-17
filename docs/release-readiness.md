@@ -392,6 +392,12 @@ The current local baseline includes:
   validated offline with
   `python scripts/test_stuck_auction_drill_evidence.py` and
   `python scripts/check_stuck_auction_drill_evidence.py`,
+  plus failed randomness drill evidence for `failed_randomness_drill_evidence`
+  under
+  [`release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md),
+  validated offline with
+  `python scripts/test_failed_randomness_drill_evidence.py` and
+  `python scripts/check_failed_randomness_drill_evidence.py`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with
@@ -609,6 +615,8 @@ python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_stuck_auction_drill_evidence.py
 python scripts/check_stuck_auction_drill_evidence.py
+python scripts/test_failed_randomness_drill_evidence.py
+python scripts/check_failed_randomness_drill_evidence.py
 python scripts/test_contract_flows.py
 python scripts/check_contract_flows.py
 python scripts/test_auction_flows.py

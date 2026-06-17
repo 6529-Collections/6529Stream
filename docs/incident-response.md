@@ -198,6 +198,12 @@ Recovery:
 - For invalid callbacks, retain the callback transaction, request ID, token,
   collection, provider, and epoch evidence.
 - Update randomizer operations evidence after fork, testnet, or live recovery.
+- Retain the failed-randomness drill bundle with the checked template at
+  [`release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md)
+  and validate it with
+  `python scripts/check_failed_randomness_drill_evidence.py`. This template is
+  not completion evidence until the environment-specific artifact is reviewed
+  and all placeholders are replaced.
 
 Reopen only after request lifecycle views, metadata state, provider epoch, and
 retry or stale status are coherent.
@@ -409,6 +415,11 @@ Stuck-auction drills also have a narrower retained artifact template at
 for auction identity, stuck condition, custody, pause, settlement, cancellation,
 credit, withdrawal, surplus-boundary, monitoring, review, and redaction
 evidence.
+Failed-randomness drills also have a narrower retained artifact template at
+[`release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md)
+for request ID, token, collection, provider, epoch, pending/stale/failed/final
+state, invalid callback handling, retry or stale marking, metadata state,
+provider migration boundary, monitoring, review, and redaction evidence.
 
 ## Local Verification Commands
 
@@ -423,6 +434,8 @@ python scripts/test_signer_compromise_drill_evidence.py
 python scripts/check_signer_compromise_drill_evidence.py
 python scripts/test_stuck_auction_drill_evidence.py
 python scripts/check_stuck_auction_drill_evidence.py
+python scripts/test_failed_randomness_drill_evidence.py
+python scripts/check_failed_randomness_drill_evidence.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
