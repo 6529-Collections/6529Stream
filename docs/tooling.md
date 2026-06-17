@@ -117,6 +117,8 @@ python scripts/test_readme.py
 python scripts/check_readme.py
 python scripts/test_curator_rewards_flow.py
 python scripts/check_curator_rewards_flow.py
+python scripts/test_withdrawals_credits_flow.py
+python scripts/check_withdrawals_credits_flow.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py

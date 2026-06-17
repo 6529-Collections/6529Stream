@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked withdrawal and credit UX integration flow spec covering
+  fixed-price, auction, curator reward, surplus, mobile, Electron, and
+  indexer handling with source-aware checker coverage for contract credit
+  surfaces.
 - Added a checked curator rewards integration flow spec covering reward root
   publication, domain-separated Merkle leaf encoding, direct and delegated
   claims, pull-payment curator credits, withdrawal/failure UX, events,

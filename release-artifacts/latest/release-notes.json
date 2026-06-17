@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c77543848c7840a6d8d920c1781f903cd191fcd16cdb49ce4785fb8ce46ae010",
-      "size_bytes": 50433
+      "sha256": "sha256:4eff63af0304b303a2419885e79874c6319b7d223ceff99bc48e53e139381131",
+      "size_bytes": 50664
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:db1b31d00c5598f34ae2116210b0368f2a7002e016144834d9a10a7a87af7433",
+      "sha256": "sha256:4bdd6ae0afb39dbf4ffa56c6197723e0915aa6cc7a61982af7d665f0f58863a0",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked withdrawal and credit UX integration flow spec covering fixed-price, auction, curator reward, surplus, mobile, Electron, and indexer handling with source-aware checker coverage for contract credit surfaces.",
       "Added a checked curator rewards integration flow spec covering reward root publication, domain-separated Merkle leaf encoding, direct and delegated claims, pull-payment curator credits, withdrawal/failure UX, events, indexer reconstruction, and release artifact coverage for frontend teams.",
       "Added a checked root README maturity/navigation gate that keeps the public repo front door aligned with current pre-audit status, role-specific docs paths, local/Windows validation commands, release-readiness blockers, and release-manifest/checksum coverage.",
       "Added live solc warning baseline enforcement for the warning-disposition gate: production-size forge output is retained in local/CI logs and checked against the reviewed warning rows so new or resolved compiler warnings require an explicit code or disposition update, and removed or relocated accepted warnings require a reviewed baseline refresh.",

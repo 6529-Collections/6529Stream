@@ -25,6 +25,8 @@
       "scripts/test_readme.py",
       "scripts/check_curator_rewards_flow.py",
       "scripts/test_curator_rewards_flow.py",
+      "scripts/check_withdrawals_credits_flow.py",
+      "scripts/test_withdrawals_credits_flow.py",
       "scripts/check_warning_dispositions.py",
       "scripts/test_warning_dispositions.py",
       "scripts/run_forge_size_log.py",
@@ -46,7 +48,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:270e1866dd9a66ea4992514ce07d989b1db52d5b7fdf03ef48d830842855210b"
+    "sha256": "sha256:2046dcd2666fe3718472a8fc4ff99c3a05b5caa26acfecf4d6359303bd9cf48f"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -505,7 +507,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:e8736ceee678801a67b0fc61975ad7ec11341119607b6d2c180cd388c71cf33e",
+      "sha256": "sha256:4725881b8f9933ba9bfdd85b6addc86e2e73bb27baf6ae69a9e581e4b1682d28",
       "size_bytes": 79962
     },
     {
@@ -615,22 +617,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9a2f08047f5c93ea242744f838a83625638a88e6e83e229d3898ed1888b7c423",
-      "size_bytes": 110663
+      "sha256": "sha256:4be8fe381fc1848e20e956934fb0b3705fd4b09f2f951e58e827e0fe23f0392d",
+      "size_bytes": 110865
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:58f720abfc3d21a6c76f007394e8996c2e3a4212d2376939848e0f7fbd176146",
-      "size_bytes": 52748
+      "sha256": "sha256:5248bb50f5fd73248be281d11c2abe5bc6648a630e321a8f76cb68e600948430",
+      "size_bytes": 52980
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:8065f0d12dc366d371f117e97c8b38abcaaa185127272e6bf989320b31391ebb",
-      "size_bytes": 50214
+      "sha256": "sha256:2906707b790cff106e6e08462ac77f0676f2217831f4a774dc5575183c33404e",
+      "size_bytes": 50439
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:db1b31d00c5598f34ae2116210b0368f2a7002e016144834d9a10a7a87af7433",
+      "sha256": "sha256:4bdd6ae0afb39dbf4ffa56c6197723e0915aa6cc7a61982af7d665f0f58863a0",
       "size_bytes": 22929
     },
     {
@@ -759,6 +761,11 @@
       "size_bytes": 18414
     },
     {
+      "path": "scripts/check_withdrawals_credits_flow.py",
+      "sha256": "sha256:c98a66fc223a8682422223dc42443be9dccf0578619846c9e8212cf14673e354",
+      "size_bytes": 11008
+    },
+    {
       "path": "scripts/generate_dependency_provenance_attestation.py",
       "sha256": "sha256:6a7d21765cca4b494268ead6f93ef69fdddbcd9231283685c085ef61e1ba9a84",
       "size_bytes": 16880
@@ -787,6 +794,11 @@
       "path": "scripts/test_warning_dispositions.py",
       "sha256": "sha256:22924836a5ac725a5034badc2965b1694133a85f20f43e27d83a84279fc9e13e",
       "size_bytes": 15395
+    },
+    {
+      "path": "scripts/test_withdrawals_credits_flow.py",
+      "sha256": "sha256:2885c12ff49efcc2c7d82bf46cc3173fdf9f0440e8991b31a40743545528bfa8",
+      "size_bytes": 6680
     },
     {
       "path": "scripts/verify_release_artifacts.py",

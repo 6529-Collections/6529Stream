@@ -205,6 +205,8 @@ jobs:
             scripts/test_auction_flows.py \
             scripts/check_curator_rewards_flow.py \
             scripts/test_curator_rewards_flow.py \
+            scripts/check_withdrawals_credits_flow.py \
+            scripts/test_withdrawals_credits_flow.py \
             scripts/check_wallet_signature_flows.py \
             scripts/test_wallet_signature_flows.py \
             scripts/check_events_and_indexing.py \
@@ -605,6 +607,8 @@ jobs:
           python3 scripts/check_auction_flows.py 2>&1 | tee ci-logs/auction-flows-check.log
           python3 scripts/test_curator_rewards_flow.py 2>&1 | tee ci-logs/curator-rewards-flow-tests.log
           python3 scripts/check_curator_rewards_flow.py 2>&1 | tee ci-logs/curator-rewards-flow-check.log
+          python3 scripts/test_withdrawals_credits_flow.py 2>&1 | tee ci-logs/withdrawals-credits-flow-tests.log
+          python3 scripts/check_withdrawals_credits_flow.py 2>&1 | tee ci-logs/withdrawals-credits-flow-check.log
           python3 scripts/test_wallet_signature_flows.py 2>&1 | tee ci-logs/wallet-signature-flows-tests.log
           python3 scripts/check_wallet_signature_flows.py 2>&1 | tee ci-logs/wallet-signature-flows-check.log
           python3 scripts/test_events_and_indexing.py 2>&1 | tee ci-logs/events-and-indexing-tests.log

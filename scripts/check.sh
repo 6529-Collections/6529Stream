@@ -159,6 +159,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_auction_flows.py
 "$python_bin" scripts/test_curator_rewards_flow.py
 "$python_bin" scripts/check_curator_rewards_flow.py
+"$python_bin" scripts/test_withdrawals_credits_flow.py
+"$python_bin" scripts/check_withdrawals_credits_flow.py
 "$python_bin" scripts/test_wallet_signature_flows.py
 "$python_bin" scripts/check_wallet_signature_flows.py
 "$python_bin" scripts/test_events_and_indexing.py
