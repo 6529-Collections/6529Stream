@@ -76,8 +76,20 @@ def minimal_event_catalog() -> dict[str, object]:
     }
 
 
-def payload_fixture() -> dict[str, object]:
-    return {"signing_status": "unsigned"}
+def payload_fixture(sale_mode: int = 1) -> dict[str, object]:
+    return {
+        "signing_status": "unsigned",
+        "typed_data": {
+            "primaryType": "DropAuthorization",
+            "domain": {
+                "name": "6529StreamDrops",
+                "version": "1",
+                "chainId": 31337,
+                "verifyingContract": "0x100000000000000000000000000000000000dead",
+            },
+            "message": {"saleMode": sale_mode},
+        },
+    }
 
 
 def minimal_fixture() -> dict[str, object]:
@@ -122,6 +134,12 @@ def minimal_fixture() -> dict[str, object]:
                     "chainId": 31337,
                     "verifyingContract": "0x0000000000000000000000000000000000000006",
                 },
+                "expected_payload_domain": {
+                    "name": "6529StreamDrops",
+                    "version": "1",
+                    "chainId": 31337,
+                    "verifyingContract": "0x100000000000000000000000000000000000dead",
+                },
                 "expected_sale_mode": "fixed_price",
                 "negative_cases": [
                     "wrong-domain",
@@ -141,6 +159,12 @@ def minimal_fixture() -> dict[str, object]:
                     "version": "1",
                     "chainId": 31337,
                     "verifyingContract": "0x0000000000000000000000000000000000000006",
+                },
+                "expected_payload_domain": {
+                    "name": "6529StreamDrops",
+                    "version": "1",
+                    "chainId": 31337,
+                    "verifyingContract": "0x100000000000000000000000000000000000dead",
                 },
                 "expected_sale_mode": "auction",
                 "negative_cases": [
@@ -278,8 +302,8 @@ def seed_required_files(root: Path, fixture: dict[str, object]) -> None:
     write_text(root / str(source_artifacts["abi_checksums"]), "{}\n")
     write_text(root / str(source_artifacts["release_manifest"]), "{}\n")
     write_text(root / str(source_artifacts["release_checksums"]), "{}\n")
-    write_json(root / str(source_artifacts["drop_authorization_fixed_price"]), payload_fixture())
-    write_json(root / str(source_artifacts["drop_authorization_auction"]), payload_fixture())
+    write_json(root / str(source_artifacts["drop_authorization_fixed_price"]), payload_fixture(1))
+    write_json(root / str(source_artifacts["drop_authorization_auction"]), payload_fixture(2))
 
 
 class IntegrationConformanceFixtureTests(unittest.TestCase):
@@ -364,6 +388,36 @@ class IntegrationConformanceFixtureTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.IntegrationConformanceFixtureError,
                 "expected_sale_mode drift",
+            ):
+                checker.validate_fixture(root, root / checker.DEFAULT_FIXTURE)
+
+    def test_rejects_payload_domain_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            fixture = minimal_fixture()
+            fixture["drop_authorization_cases"][0]["expected_payload_domain"][
+                "verifyingContract"
+            ] = "0x100000000000000000000000000000000000beef"
+            seed_required_files(root, fixture)
+            write_json(root / checker.DEFAULT_FIXTURE, fixture)
+            with self.assertRaisesRegex(
+                checker.IntegrationConformanceFixtureError,
+                "expected_payload_domain.verifyingContract drift",
+            ):
+                checker.validate_fixture(root, root / checker.DEFAULT_FIXTURE)
+
+    def test_rejects_payload_sale_mode_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            fixture = minimal_fixture()
+            seed_required_files(root, fixture)
+            source = fixture["source_artifacts"]
+            assert isinstance(source, dict)
+            write_json(root / str(source["drop_authorization_fixed_price"]), payload_fixture(2))
+            write_json(root / checker.DEFAULT_FIXTURE, fixture)
+            with self.assertRaisesRegex(
+                checker.IntegrationConformanceFixtureError,
+                "fixture saleMode drift",
             ):
                 checker.validate_fixture(root, root / checker.DEFAULT_FIXTURE)
 

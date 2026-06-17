@@ -53,10 +53,10 @@ It contains:
   addresses plus wrong-chain, wrong-deployment, and missing-contract negative
   cases.
 - `drop_authorization_cases`: fixed-price and auction EIP-712 expectations,
-  including domain name, version, chain ID, verifying contract, sale mode, and
-  negative cases for wrong domain, stale signer epoch, expired deadline,
-  token-data substitution, auction custody mismatch, zero-address signer, and
-  replayed drop ID.
+  including runtime domain name, version, chain ID, verifying contract, payload
+  template domain, sale mode, and negative cases for wrong domain, stale signer
+  epoch, expired deadline, token-data substitution, auction custody mismatch,
+  zero-address signer, and replayed drop ID.
 - `event_decoding_cases`: event topic dispatch cases for `Transfer`,
   `DropAuthorizationConsumed`, and `AuctionRegistered`; each case binds
   `topic0`, event signature, emitter address, log identity fields, read-after-event
@@ -93,6 +93,11 @@ The expected domain is:
   "verifyingContract": "0x0000000000000000000000000000000000000006"
 }
 ```
+
+The unsigned payload generator fixtures retain their own local template
+verifying contract, `0x100000000000000000000000000000000000dead`; the checker
+asserts that payload template domain separately from the Anvil runtime domain
+above.
 
 EIP-712 is encoding/signing only. Integration code must still account for
 replay protection through drop ID, signer epoch, deadline, chain ID, verifying

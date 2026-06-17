@@ -59,7 +59,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:1fd25b9d623b9c646bb6d81fda82617ce544b726c1460b34395154636dee14ba"
+    "sha256": "sha256:ee5a32ccdc456e5b5fdb156447a079d18df49a9d87bdc7334c59c21286baaa90"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -178,8 +178,8 @@
     },
     {
       "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
-      "sha256": "sha256:2f43d4b428795974c15158385a83955dce0ba3bba1e6b0877caf1df911541ba9",
-      "size_bytes": 8392
+      "sha256": "sha256:a71b4a5e1d271b86ee625d6976674cab4832880bafc8876d7ba84b53671eb919",
+      "size_bytes": 8798
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -523,7 +523,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:edb5f900b1143b2ac8b84a0ba3275b2314bfa56a03572ca1fe5424f74c2b48c8",
+      "sha256": "sha256:43a2355ebce7f93c09052aee1bc3f364e78897d68eaf2dc567a0feb31d9e4dea",
       "size_bytes": 79962
     },
     {
@@ -633,7 +633,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:6891584aa2f6326d04c8c2bd6f3bef4087988ebd56a5bf9404c2aed1c09bfae9",
+      "sha256": "sha256:a377328e9f9f7065fe310b337862955abcbe5a586796617381416d2fe58eed5e",
       "size_bytes": 112056
     },
     {
@@ -748,8 +748,8 @@
     },
     {
       "path": "scripts/check_integration_conformance_fixtures.py",
-      "sha256": "sha256:8d874f9463d9844b3065ad9d16d9a1f4b8d53ba819d03c44062476c71e5ed9a5",
-      "size_bytes": 30653
+      "sha256": "sha256:d94f9fdfeeea0adb46d38275bff7d7612744e06d888725257fe6d19865ce21b7",
+      "size_bytes": 33141
     },
     {
       "path": "scripts/check_live_metadata_browser_evidence.py",
@@ -828,8 +828,8 @@
     },
     {
       "path": "scripts/test_integration_conformance_fixtures.py",
-      "sha256": "sha256:642889ef25cc9b0d162f4bd341e46d061e02e54acb4077336fcf4c0c2713b9d3",
-      "size_bytes": 19631
+      "sha256": "sha256:38827be58942e878667e4cf6df1960e1f192e94b4706b9b7844c87f652296694",
+      "size_bytes": 22758
     },
     {
       "path": "scripts/test_react_next_reference.py",

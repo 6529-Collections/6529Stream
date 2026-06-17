@@ -2177,13 +2177,13 @@
       },
       {
         "path": "docs/integrations/integration-conformance-fixtures.md",
-        "sha256": "sha256:7253f0ada3ad07e1771287a2309eace8a288b4dab21f5ed270f3497f273544fb",
-        "size_bytes": 8794
+        "sha256": "sha256:95182a1bc11532ccc8efd96a70dc73167759b460e503b53f5e26d9b4f751ef22",
+        "size_bytes": 9063
       },
       {
         "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
-        "sha256": "sha256:2f43d4b428795974c15158385a83955dce0ba3bba1e6b0877caf1df911541ba9",
-        "size_bytes": 8392,
+        "sha256": "sha256:a71b4a5e1d271b86ee625d6976674cab4832880bafc8876d7ba84b53671eb919",
+        "size_bytes": 8798,
         "schema_version": "6529stream.integration-conformance-fixtures.v1"
       },
       {

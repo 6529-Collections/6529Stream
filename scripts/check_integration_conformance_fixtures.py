@@ -188,6 +188,10 @@ VALID_SALE_MODES_BY_CASE = {
     "fixed-price-eoa": "fixed_price",
     "auction-eoa": "auction",
 }
+PAYLOAD_SALE_MODE_BY_CASE = {
+    "fixed-price-eoa": 1,
+    "auction-eoa": 2,
+}
 
 
 class IntegrationConformanceFixtureError(ValueError):
@@ -491,6 +495,13 @@ def validate_drop_authorization_cases(
             raise IntegrationConformanceFixtureError(
                 f"drop_authorization_cases[{index}].fixture must remain unsigned"
             )
+        typed_data = require_dict(payload.get("typed_data"), f"drop_authorization_cases[{index}].fixture.typed_data")
+        payload_domain = require_dict(typed_data.get("domain"), f"drop_authorization_cases[{index}].fixture.typed_data.domain")
+        payload_message = require_dict(typed_data.get("message"), f"drop_authorization_cases[{index}].fixture.typed_data.message")
+        if typed_data.get("primaryType") != "DropAuthorization":
+            raise IntegrationConformanceFixtureError(
+                f"drop_authorization_cases[{index}].fixture primaryType drift"
+            )
         expected_domain = require_dict(case.get("expected_domain"), f"drop_authorization_cases[{index}].expected_domain")
         if expected_domain.get("name") != "6529StreamDrops":
             raise IntegrationConformanceFixtureError(
@@ -515,6 +526,25 @@ def validate_drop_authorization_cases(
             raise IntegrationConformanceFixtureError(
                 f"drop_authorization_cases[{index}].expected_primary_type must be DropAuthorization"
             )
+        expected_payload_domain = require_dict(
+            case.get("expected_payload_domain"),
+            f"drop_authorization_cases[{index}].expected_payload_domain",
+        )
+        for domain_key in ["name", "version", "chainId"]:
+            if payload_domain.get(domain_key) != expected_payload_domain.get(domain_key):
+                raise IntegrationConformanceFixtureError(
+                    f"drop_authorization_cases[{index}].expected_payload_domain.{domain_key} drift"
+                )
+        if require_address(
+            payload_domain.get("verifyingContract"),
+            f"drop_authorization_cases[{index}].fixture.typed_data.domain.verifyingContract",
+        ) != require_address(
+            expected_payload_domain.get("verifyingContract"),
+            f"drop_authorization_cases[{index}].expected_payload_domain.verifyingContract",
+        ):
+            raise IntegrationConformanceFixtureError(
+                f"drop_authorization_cases[{index}].expected_payload_domain.verifyingContract drift"
+            )
         expected_sale_mode = require_string(
             case.get("expected_sale_mode"),
             f"drop_authorization_cases[{index}].expected_sale_mode",
@@ -523,6 +553,10 @@ def validate_drop_authorization_cases(
         if expected_sale_mode != VALID_SALE_MODES_BY_CASE[case_name]:
             raise IntegrationConformanceFixtureError(
                 f"drop_authorization_cases[{index}].expected_sale_mode drift"
+            )
+        if payload_message.get("saleMode") != PAYLOAD_SALE_MODE_BY_CASE[case_name]:
+            raise IntegrationConformanceFixtureError(
+                f"drop_authorization_cases[{index}].fixture saleMode drift"
             )
         negatives = set(require_list(case.get("negative_cases"), f"drop_authorization_cases[{index}].negative_cases"))
         missing_negatives = REQUIRED_DROP_NEGATIVES - negatives

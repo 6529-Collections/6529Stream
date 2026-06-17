@@ -58,6 +58,12 @@
         "chainId": 31337,
         "verifyingContract": "0x0000000000000000000000000000000000000006"
       },
+      "expected_payload_domain": {
+        "name": "6529StreamDrops",
+        "version": "1",
+        "chainId": 31337,
+        "verifyingContract": "0x100000000000000000000000000000000000dead"
+      },
       "expected_sale_mode": "fixed_price",
       "negative_cases": [
         "wrong-domain",
@@ -77,6 +83,12 @@
         "version": "1",
         "chainId": 31337,
         "verifyingContract": "0x0000000000000000000000000000000000000006"
+      },
+      "expected_payload_domain": {
+        "name": "6529StreamDrops",
+        "version": "1",
+        "chainId": 31337,
+        "verifyingContract": "0x100000000000000000000000000000000000dead"
       },
       "expected_sale_mode": "auction",
       "negative_cases": [
