@@ -89,7 +89,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:3ae45360b30562e146e09c02880356283a2af41f18b2d066436c46c85980517c"
+    "sha256": "sha256:004c0cb67bebac1fb621b803e8875f4dc2c85bfc6b3e862d381982277163026a"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -623,7 +623,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:3b3fb4edcd08c6679211313d115d12735ce5545780b057cd1fe2c9bd2f7e8911",
+      "sha256": "sha256:83289afa8752dc801e37ef742a338cf3d60822516167a97532fb5ec86bbfbb9b",
       "size_bytes": 79962
     },
     {
@@ -733,7 +733,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:6fcd981526e267eecb99b37243d6b16ca5b8d549ce64dfaeb798c2b32fc955f9",
+      "sha256": "sha256:02e889f73c4ffce894ce5091e8509dd9575654f2378f5b113bdf56a6f487ed5c",
       "size_bytes": 113978
     },
     {
@@ -833,13 +833,13 @@
     },
     {
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
-      "sha256": "sha256:7b56eae35bc802ddbfd7bfdcaa8bd0df7759d8d28a9919956f50de99a6571df0",
+      "sha256": "sha256:95b1f8ecee2f17f0c544c1536dc023123b6c649fdfe9e3ff3909bd0ec9e5b21c",
       "size_bytes": 3470
     },
     {
       "path": "scripts/check_bad_metadata_dependency_drill_evidence.py",
-      "sha256": "sha256:4e701e59ccb583cc162c15fbcf574d980667450ce4083886c713ec0f1416725d",
-      "size_bytes": 25136
+      "sha256": "sha256:8e68e8ad696087a0c2e39d307bf0ea19eb157e3af20128f995c9843a4d23d45f",
+      "size_bytes": 25775
     },
     {
       "path": "scripts/check_curator_rewards_flow.py",
@@ -973,8 +973,8 @@
     },
     {
       "path": "scripts/test_bad_metadata_dependency_drill_evidence.py",
-      "sha256": "sha256:f14b8e1e482e5f5340d89d8d0655fad27af3aa0eb82410bcfc321caa1a9f48fc",
-      "size_bytes": 21845
+      "sha256": "sha256:8fbd34e66209074e903c862f8203b842e2cef221fbd3aa8155658adc3b43d698",
+      "size_bytes": 23295
     },
     {
       "path": "scripts/test_curator_rewards_flow.py",

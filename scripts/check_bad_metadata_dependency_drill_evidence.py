@@ -312,6 +312,11 @@ SOURCE_REQUIREMENTS = {
     Path("docs/incident-response.md"): [
         "Runbook: Bad Metadata Or Dependency Configuration",
         "For frozen collections, do not imply that frozen output can be mutated",
+        "unsafe_uri",
+        "dependency_pin_bad",
+        "frozen_repin_attempt",
+        "fix_forward_dependency",
+        "document_immutable_proof",
     ],
     Path("docs/dependency-operations.md"): [
         "Source Of Truth",
@@ -569,6 +574,14 @@ def validate_context_fields(path: Path, fields: dict[str, str]) -> None:
     require_value(path, fields, "Ending metadata state", METADATA_STATES)
     recovery_decision = require_value(path, fields, "Recovery decision", RECOVERY_DECISIONS)
 
+    if recovery_decision == "fix_forward_dependency" and surface not in DEPENDENCY_SURFACES:
+        raise BadMetadataDependencyDrillEvidenceError(
+            f"{path} fix_forward_dependency recovery requires a dependency surface"
+        )
+    if recovery_decision == "fix_forward_metadata" and surface in DEPENDENCY_SURFACES:
+        raise BadMetadataDependencyDrillEvidenceError(
+            f"{path} fix_forward_metadata recovery cannot be used for dependency surfaces"
+        )
     if failure_mode == "frozen_repin_attempt" and collection_frozen != "yes":
         raise BadMetadataDependencyDrillEvidenceError(
             f"{path} frozen_repin_attempt evidence must have Collection frozen yes"

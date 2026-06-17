@@ -273,6 +273,41 @@ class BadMetadataDependencyDrillEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path)
 
+    def test_fix_forward_dependency_requires_dependency_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "bad-metadata-dependency.md"
+            text = reviewed_text()
+            replacements = {
+                "Metadata surface: `dependency_pin`": "Metadata surface: `token_image`",
+                "Failure mode: `dependency_pin_bad`": "Failure mode: `unsafe_uri`",
+            }
+            for old, new in replacements.items():
+                text = text.replace(old, new)
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.BadMetadataDependencyDrillEvidenceError,
+                "dependency surface",
+            ):
+                checker.validate_evidence(path)
+
+    def test_fix_forward_metadata_rejects_dependency_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "bad-metadata-dependency.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Recovery decision: `fix_forward_dependency`",
+                    "Recovery decision: `fix_forward_metadata`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.BadMetadataDependencyDrillEvidenceError,
+                "dependency surfaces",
+            ):
+                checker.validate_evidence(path)
+
     def test_frozen_collection_cannot_change_dependency_version(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "bad-metadata-dependency.md"

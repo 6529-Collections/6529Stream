@@ -271,6 +271,17 @@ Recovery:
   update and retain source, descriptor, manifest, checksum, and review evidence.
 - For frozen collections, document the immutable proof and decide whether ADR
   0007 redeployment or a new collection path is required.
+- Classify the failure with the checked taxonomy used by the retained artifact:
+  `unsafe_uri`, `invalid_utf8`, `raw_attributes_invalid`,
+  `animation_sandbox_failure`, `dependency_source_drift`,
+  `dependency_provenance_bad`, `dependency_version_bad`, `dependency_pin_bad`,
+  `frozen_repin_attempt`, `frozen_output_mismatch`, and
+  `marketplace_cache_stale`.
+- Classify the recovery decision with the checked taxonomy used by the retained
+  artifact: `fix_forward_metadata`, `fix_forward_dependency`,
+  `deprecate_dependency`, `marketplace_cache_refresh`,
+  `document_immutable_proof`, `redeploy_or_new_collection`, or
+  `no_contract_change`.
 - Regenerate release manifest and checksum evidence after changing dependency
   source, metadata docs, or governance docs.
 - Retain the bad metadata/dependency drill bundle with the checked template at
