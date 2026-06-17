@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/withdrawals-credits-flow-spec` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/487` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/488` |
-| Active PR | TBD |
-| Next issue | INT-012 withdrawal and credit UX flow spec. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/489` |
+| Next issue | Wait for PR #489 CI, CodeRabbit, and 6529bot feedback; resolve actionable comments, merge when clean, then continue the next backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 04:55 UTC` |
+| Last updated | `2026-06-17 05:12 UTC` |
 
 ## Packaging Notes
 
@@ -16136,6 +16136,7 @@ Outcome:
 | 2026-06-17 04:36 | Open PR #487 for INT-011 | PR #487 is open at `https://github.com/6529-Collections/6529Stream/pull/487`, closes issue #486, and packages the curator rewards integration guide, checker/tests, local/CI/Windows gate wiring, integration index coverage, tooling docs, generated release artifacts, and backlog/run-state traceability. CodeRabbit review was requested in comment `4725989010`. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 | 2026-06-17 04:40 | Address PR #487 review nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with doc-maintainability nice-to-haves. Accepted the useful low-risk suggestions by normalizing required command matching and making `scripts/check_curator_rewards_flow.py` cross-check the documented domain constant, delegation collection, use-case constant, root-epoch increments, delegation lookup bindings, and `abi.encode` leaf field order against `smart-contracts/StreamCuratorsPool.sol`; focused tests now cover command wrapping and Solidity source drift. Focused curator rewards tests/check, release checksum tests/check, release artifact verifier, and `git diff --check` passed. Next action is to push the review-response commit, wait for CI/CodeRabbit/6529bot follow-up, then merge if clean. |
 | 2026-06-17 04:55 | Merge PR #487 and start INT-012 | PR #487 merged as `ce832d8` after CodeRabbit, Foundry smoke, Windows wrapper, 6529bot security, general, and follow-up review were clean; issue #486 closed completed. Issue #488 and branch `codex/withdrawals-credits-flow-spec` now track INT-012. The local draft adds a checked `docs/integrations/withdrawals-and-credits.md` guide plus source-aware checker/tests covering fixed-price, auction, curator, surplus, mobile, Electron, and indexer credit/withdrawal UX. Next action is to finish gate wiring, regenerate release artifacts, run focused/full checks, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 05:12 | Open PR #489 for INT-012 | PR #489 is open at `https://github.com/6529-Collections/6529Stream/pull/489`, closes issue #488, and packages the withdrawal and credit UX guide, source-aware checker/tests, local/CI/Windows gate wiring, integrations index coverage, tooling docs, generated release artifacts, and backlog/run-state traceability. CodeRabbit review was requested in comment `4726283760`. Local `make check` and Windows `scripts\check.ps1` passed with existing compiler/Foundry warning noise only. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
