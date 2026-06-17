@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:489abf8abdd2e3410517b3d8047243abc6ca148a150bbb30e2f48c33e0823231",
-      "size_bytes": 27871
+      "sha256": "sha256:833e90d20761065d0d5b81d8fa947f22f1c1f65b1f9bf3afe1e4638ac4274c2c",
+      "size_bytes": 28496
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -860,8 +860,8 @@
         "review_status": "template"
       },
       "retained_artifact_expectation": {
-        "path": "release-artifacts/evidence/production-release-templates/retained-artifact-template.txt",
-        "sha256": "sha256:14c52bd76a54d453a9cf33b70f0db1cc60545e3dfa224eb7b386ea988d3fbadf",
+        "path": "release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md",
+        "sha256": "sha256:42f4a4eb6e09db4356faeb9c95b200697651d7d26acdf8b6e5e4ad7dc26ce102",
         "block_or_reference": "template-only live provider epoch, request health reference, or deployment version",
         "command_or_source_system": "template-only randomizer provider source, operations transcript, monitoring source, or reviewer source",
         "operator_notes": "Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation."
@@ -870,6 +870,8 @@
         "python scripts/test_release_evidence_packet_index.py",
         "python scripts/test_public_beta_evidence.py",
         "python scripts/test_non_local_release_evidence.py",
+        "python scripts/test_live_randomizer_operations_evidence.py",
+        "python scripts/check_live_randomizer_operations_evidence.py",
         "python scripts/test_public_beta_blocker_report.py",
         "python scripts/test_production_release_blocker_report.py",
         "python scripts/generate_production_release_blocker_report.py --check",
@@ -1093,6 +1095,7 @@
     "python scripts/check_fork_deployment_rehearsal_evidence.py",
     "python scripts/check_live_ceremony_evidence.py",
     "python scripts/check_live_metadata_browser_evidence.py",
+    "python scripts/check_live_randomizer_operations_evidence.py",
     "python scripts/check_marketplace_indexer_evidence.py",
     "python scripts/check_non_local_release_evidence.py",
     "python scripts/check_post_audit_remediation_evidence.py",
@@ -1108,6 +1111,7 @@
     "python scripts/test_fork_deployment_rehearsal_evidence.py",
     "python scripts/test_live_ceremony_evidence.py",
     "python scripts/test_live_metadata_browser_evidence.py",
+    "python scripts/test_live_randomizer_operations_evidence.py",
     "python scripts/test_marketplace_indexer_evidence.py",
     "python scripts/test_non_local_release_evidence.py",
     "python scripts/test_post_audit_remediation_evidence.py",

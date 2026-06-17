@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-ceremony-evidence-checker` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/475` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/228` |
-| Active PR | [#476](https://github.com/6529-Collections/6529Stream/pull/476) |
-| Next issue | TBD after EXT-015 live ceremony evidence checker lands. |
+| Active PR branch | `codex/live-randomizer-operations-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/476` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/229` |
+| Active PR | TBD |
+| Next issue | TBD after EXT-016 live randomizer operations evidence checker lands. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-16 23:58 UTC` |
+| Last updated | `2026-06-17 00:09 UTC` |
 
 ## Packaging Notes
 
@@ -275,6 +275,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ## Current PR Worklog
 
+| 2026-06-17 00:09 | Start EXT-016 live randomizer operations evidence checker | PR #476 merged as `34ad041344b473fd8328f4b00edb2f83f4c47a39` after CI, CodeRabbit status, and 6529bot follow-up were clean; issue #228 remains open for future reviewed live ceremony evidence. Branch `codex/live-randomizer-operations-evidence-checker` adds a no-secret retained-artifact template and checker for future `live_randomizer_operations_evidence` on issue #229 without changing production-release readiness claims. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 00:30 | Validate EXT-016 local draft | Added `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`, `scripts/check_live_randomizer_operations_evidence.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, non-local evidence/tooling/release-readiness/release-artifact docs, packet-index command coverage, release-manifest/checksum coverage, and backlog/run-state traceability. Focused live-randomizer, packet-index, issue-body, release-notes, release-manifest, bytecode-proof, checksum, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` both passed with existing compiler/Foundry warning noise only. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:38 | Start EXT-015 live ceremony evidence checker | PR #475 merged as `9631bf97470f45e3da67bbd06f8c7d8be1761d02` after CI and 6529bot follow-up were clean; issue #231 remains open for future completed post-audit remediation evidence. Branch `codex/live-ceremony-evidence-checker` adds a no-secret retained-artifact template and checker for future `live_ceremony_evidence` without changing production-release readiness claims. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:58 | Validate EXT-015 local draft | Added `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`, `scripts/check_live_ceremony_evidence.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, non-local evidence/tooling/release-readiness/release-artifact docs, packet-index command coverage, release-manifest/checksum coverage, and backlog/run-state traceability. Focused live-ceremony, packet-index, issue-body, release-notes, release-manifest, bytecode-proof, checksum, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` both passed with existing compiler/Foundry warning noise only. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:58 | Open PR #476 for EXT-015 | PR #476 is open at `https://github.com/6529-Collections/6529Stream/pull/476`, tracks issue #228 without closing it, and packages the live ceremony evidence checker, dedicated retained-artifact template, local/CI/Windows gate wiring, docs, regenerated release evidence, and state updates. CodeRabbit review was requested in comment `4724666547`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |

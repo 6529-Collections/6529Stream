@@ -989,7 +989,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows |
 | Template | `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`; Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`; Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -1007,12 +1007,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_randomizer_operations_evidence`
 - Evidence template: `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -1020,6 +1020,8 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_live_randomizer_operations_evidence.py`
+- `python scripts/check_live_randomizer_operations_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`
@@ -1326,6 +1328,7 @@ Suggested issue body:
 | `python scripts/check_external_audit_report_evidence.py` |
 | `python scripts/check_live_ceremony_evidence.py` |
 | `python scripts/check_live_metadata_browser_evidence.py` |
+| `python scripts/check_live_randomizer_operations_evidence.py` |
 | `python scripts/check_marketplace_indexer_evidence.py` |
 | `python scripts/check_non_local_release_evidence.py` |
 | `python scripts/check_post_audit_remediation_evidence.py` |
@@ -1341,6 +1344,7 @@ Suggested issue body:
 | `python scripts/test_external_audit_report_evidence.py` |
 | `python scripts/test_live_ceremony_evidence.py` |
 | `python scripts/test_live_metadata_browser_evidence.py` |
+| `python scripts/test_live_randomizer_operations_evidence.py` |
 | `python scripts/test_marketplace_indexer_evidence.py` |
 | `python scripts/test_non_local_release_evidence.py` |
 | `python scripts/test_post_audit_remediation_evidence.py` |

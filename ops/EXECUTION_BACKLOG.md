@@ -3353,8 +3353,8 @@ unless an external dependency changes.
 | `EXT-012` | Add production broadcast retention checker | F/G | Merged in PR #469; issue #468 closed completed |
 | `EXT-013` | Add production verified-addresses evidence checker | F/G | Merged in PR #471; issue #470 closed completed |
 | `EXT-014` | Add live metadata browser evidence checker | F/G | Merged in PR #474; issue #472 closed completed; tracker issue #473 remains open for future reviewed live evidence |
-| `EXT-015` | Add live ceremony evidence checker | F/G | Active branch `codex/live-ceremony-evidence-checker`; issue #228; governance ceremony checker |
-| `EXT-016` | Add live randomizer operations evidence checker | F/G | randomizer operations pattern |
+| `EXT-015` | Add live ceremony evidence checker | F/G | Merged in PR #476; issue #228 remains open for future reviewed live ceremony evidence |
+| `EXT-016` | Add live randomizer operations evidence checker | F/G | Active branch `codex/live-randomizer-operations-evidence-checker`; issue #229; randomizer operations pattern |
 
 ### Adversarial Testing
 

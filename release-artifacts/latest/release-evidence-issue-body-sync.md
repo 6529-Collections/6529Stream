@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:889de61828f3d8c2a6e7c2a87b36ca58b9546295802c61d7a72330204ff6dce4` |
+| Backlog SHA-256 | `sha256:bef4c627fe61b8e7ab048b0946508ce8dfe758c305d67ffb3ba4c64efc048ffe` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50` |
 
@@ -41,7 +41,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | [#226](https://github.com/6529-Collections/6529Stream/issues/226) | `production-release-production-broadcast-retention` | `missing` | `sha256:99e825429e152fa065b78eae8511755389d69f7bcfbd04d64932d1a72093ec9b` | 53 |
 | [#227](https://github.com/6529-Collections/6529Stream/issues/227) | `production-release-live-deployment-manifest` | `missing` | `sha256:4a82682d40aa8b498be8caa99ed69f7db4b19b518dbeeb500e63b29d5efd3c3b` | 53 |
 | [#228](https://github.com/6529-Collections/6529Stream/issues/228) | `production-release-live-ceremony-evidence` | `missing` | `sha256:5110e04dfe41aa083097f8d4f02348f4aa315ba130f411ac6289201ae3e0ff66` | 55 |
-| [#229](https://github.com/6529-Collections/6529Stream/issues/229) | `production-release-live-randomizer-operations-evidence` | `missing` | `sha256:63f0c2051c705c122f090ec56ddc057d340268e796fb5b024dd7df3b5173e8d7` | 53 |
+| [#229](https://github.com/6529-Collections/6529Stream/issues/229) | `production-release-live-randomizer-operations-evidence` | `missing` | `sha256:64ac1a694a3933ea563e63c06d1353bdce9c016c40171024607961023164b920` | 55 |
 | [#473](https://github.com/6529-Collections/6529Stream/issues/473) | `production-release-live-metadata-browser-evidence` | `missing` | `sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37` | 55 |
 | [#424](https://github.com/6529-Collections/6529Stream/issues/424) | `production-release-live-marketplace-indexer-evidence` | `missing` | `sha256:14590dddc45694c02f9ca3aae0b46517fb5ffbc5255693d9a6e15c86579b02bd` | 55 |
 | [#230](https://github.com/6529-Collections/6529Stream/issues/230) | `production-release-live-explorer-verification` | `missing` | `sha256:e96af7de5bfef51fbd630a22ee560d9c2eeaa04e149f1e16706c7023e6150829` | 55 |
@@ -928,8 +928,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #229 production-release-live-randomizer-operations-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/229
-- Body SHA-256: `sha256:63f0c2051c705c122f090ec56ddc057d340268e796fb5b024dd7df3b5173e8d7`
-- Source body SHA-256: `sha256:a57c7964a86f882e8aa03b7a17e1d942d71bfd1118fde4caabcf7147c63ea2cb`
+- Body SHA-256: `sha256:64ac1a694a3933ea563e63c06d1353bdce9c016c40171024607961023164b920`
+- Source body SHA-256: `sha256:716b337f0e534fee9377d0addebae01393c3e90b36ecc0ec5f97fe9d64c60320`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-randomizer-operations-evidence issue_number=229 -->
@@ -951,12 +951,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `live_randomizer_operations_evidence`
 - Evidence template: `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -964,6 +964,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_live_randomizer_operations_evidence.py`
+- `python scripts/check_live_randomizer_operations_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`

@@ -94,6 +94,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 "$python_bin" scripts/check_post_audit_remediation_evidence.py
 "$python_bin" scripts/test_live_ceremony_evidence.py
 "$python_bin" scripts/check_live_ceremony_evidence.py
+"$python_bin" scripts/test_live_randomizer_operations_evidence.py
+"$python_bin" scripts/check_live_randomizer_operations_evidence.py
 "$python_bin" scripts/test_fork_deployment_rehearsal_evidence.py
 "$python_bin" scripts/check_fork_deployment_rehearsal_evidence.py
 "$python_bin" scripts/test_testnet_deployment_rehearsal_evidence.py
