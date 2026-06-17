@@ -41,7 +41,11 @@ The current committed release gate still runs `forge build`,
 manifest/checksum checks, and the warning disposition checker. The
 warning-disposition checker also compares the retained `forge-size.log` output
 against the accepted solc warning rows so new compiler warnings cannot silently
-enter CI. As of this baseline:
+enter CI. The parser is tested against a captured
+`forge build --sizes --via-ir --skip test --skip script --force` fixture from
+Foundry v1.7.1 and Solidity 0.8.19, and it keys the accepted solc rows by
+warning code, source file, and source excerpt instead of raw line number. As of
+this baseline:
 
 | Category | Current disposition | Owner | Evidence |
 | --- | --- | --- | --- |

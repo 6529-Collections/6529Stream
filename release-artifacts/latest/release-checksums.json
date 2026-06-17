@@ -34,14 +34,15 @@
       "deployments/ceremony-evidence",
       "deployments/admin-ceremony",
       "deployments/randomizer-operations",
-      "test/fixtures/drop-authorization"
+      "test/fixtures/drop-authorization",
+      "test/fixtures/warning-dispositions"
     ],
     "output_dir": "release-artifacts/latest"
   },
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:eff1f0ffba0ecd136eb224a5bbcb4c6a08e4de9fca7cfa8d7f006a5655149a42"
+    "sha256": "sha256:d4a27f1e91b7b45a6a3d43ceaa2da93ff786e694ba183e5ad11fe4fdc82a2386"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -500,7 +501,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:164c4cf2499dfab6c295b13b5202d07e671e74f0fd2e4995564c0e3f895eb458",
+      "sha256": "sha256:962da69c65d8018e1ed4dbc53983bfeb9d4ea49a1872858b89dd2f2193f8784c",
       "size_bytes": 79962
     },
     {
@@ -610,12 +611,12 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:68331ae5bb139b74bfc99e7f8d0636e029fa2050f18afa0cb6f3bcafd292bb82",
+      "sha256": "sha256:7559dcec5338ba33eb19b1dcbed9beb88c13e4d5fe772f4fd36fa6ebc0b48911",
       "size_bytes": 110303
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:b769e23bce77f3b1e0351684000203617339026749b142daf4338f5817ce9fa3",
+      "sha256": "sha256:8c1e5336df697c766f93bc7f3a3d4b4e01de4980747bd2e10e6b5f4c93e7c6c2",
       "size_bytes": 52100
     },
     {
@@ -625,7 +626,7 @@
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:b41748e026b225cb29e4898fb5e3e553ce9a76c0e3b857b8c126f5fc3181c60a",
+      "sha256": "sha256:0e4d345a50772d2d65de6bfed8f7eb4ee07125803d4e55c465249a3cdf492013",
       "size_bytes": 22928
     },
     {
@@ -740,8 +741,8 @@
     },
     {
       "path": "scripts/check_warning_dispositions.py",
-      "sha256": "sha256:6afdae88d29787cade10c401957fede1e562704f5ac634a5cea86f3266b7b196",
-      "size_bytes": 16438
+      "sha256": "sha256:006edca16cc939b85e49c9bbd8c236ce3e86d9a2eef1f80fbbd935030041f186",
+      "size_bytes": 18415
     },
     {
       "path": "scripts/generate_dependency_provenance_attestation.py",
@@ -755,13 +756,13 @@
     },
     {
       "path": "scripts/run_forge_size_log.py",
-      "sha256": "sha256:00f27f3587af1e905fbc86876a3889e2c5b7c3e803cf744b6b241ad164dfcf2b",
-      "size_bytes": 1694
+      "sha256": "sha256:785cd95ec2fde98c249cea68fdaa4d2287cfec473ff65d4b7f7e14f092984a26",
+      "size_bytes": 2056
     },
     {
       "path": "scripts/test_warning_dispositions.py",
-      "sha256": "sha256:708d67b7c7e03d10b0bbeb923d77c560ecb634c2e39b5532398cf659cb78661d",
-      "size_bytes": 12996
+      "sha256": "sha256:f45e2da2e7e65ce82903d444b108a4a1ae1277ed429e842097a34631fe70c39d",
+      "size_bytes": 14458
     },
     {
       "path": "scripts/verify_release_artifacts.py",
@@ -802,6 +803,11 @@
       "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
       "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe",
       "size_bytes": 4052
+    },
+    {
+      "path": "test/fixtures/warning-dispositions/forge-size-output.txt",
+      "sha256": "sha256:21872fc455b1472e5b784cf5b430a47e8279ac01e481aec944e37374842b8ab1",
+      "size_bytes": 2960
     }
   ]
 }

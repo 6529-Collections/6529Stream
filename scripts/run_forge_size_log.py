@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -35,7 +36,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def run_with_log(log_path: Path) -> int:
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    with log_path.open("w", encoding="utf-8", newline="") as log_file:
+    temp_log_path = log_path.with_name(f"{log_path.name}.tmp")
+    for stale_path in (log_path, temp_log_path):
+        stale_path.unlink(missing_ok=True)
+
+    with temp_log_path.open("w", encoding="utf-8", newline="") as log_file:
         process = subprocess.Popen(
             FORGE_SIZE_COMMAND,
             stdout=subprocess.PIPE,
@@ -53,7 +58,14 @@ def run_with_log(log_path: Path) -> int:
             )
             print(safe_line, end="")
             log_file.write(line)
-        return process.wait()
+        exit_code = process.wait()
+
+    if exit_code == 0:
+        os.replace(temp_log_path, log_path)
+    else:
+        temp_log_path.unlink(missing_ok=True)
+        log_path.unlink(missing_ok=True)
+    return exit_code
 
 
 def main(argv: list[str] | None = None) -> int:

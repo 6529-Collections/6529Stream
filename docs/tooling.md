@@ -733,6 +733,10 @@ ABI-compatibility, and `StreamCore` size-tradeoff warning decisions. The
 checker verifies that invalid first-party NatSpec header tags are gone, that
 accepted solc warnings remain anchored to the exact current source signatures,
 and that retained warning rows name an owner, disposition class, and follow-up.
+The live warning parser is pinned to the current Foundry v1.7.1 / Solidity
+0.8.19 output shape with a captured forge-size fixture, and the checked solc
+identity is warning code plus source file plus source excerpt rather than raw
+line number.
 
 Do not change external ABI names, function `stateMutability`, or Core bytecode
 shape only to quiet cosmetic warning suggestions. Any such change needs the

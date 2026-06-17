@@ -12,16 +12,57 @@ from pathlib import Path
 DEFAULT_WARNING_DISPOSITIONS = Path("docs/warning-dispositions.md")
 
 EXPECTED_SOLC_WARNINGS = {
-    ("5667", "smart-contracts/RandomizerNXT.sol", 70),
-    ("5667", "smart-contracts/RandomizerRNG.sol", 96),
-    ("5667", "smart-contracts/RandomizerVRF.sol", 97),
-    ("5667", "smart-contracts/StreamCore.sol", 745),
-    ("2018", "smart-contracts/RandomizerNXT.sol", 90),
-    ("2018", "smart-contracts/RandomizerRNG.sol", 195),
-    ("2018", "smart-contracts/RandomizerVRF.sol", 181),
-    ("2018", "smart-contracts/StreamCore.sol", 745),
-    ("2018", "smart-contracts/StreamMinter.sol", 298),
+    (
+        "5667",
+        "smart-contracts/RandomizerNXT.sol",
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+    ),
+    (
+        "5667",
+        "smart-contracts/RandomizerRNG.sol",
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+    ),
+    (
+        "5667",
+        "smart-contracts/RandomizerVRF.sol",
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+    ),
+    (
+        "5667",
+        "smart-contracts/StreamCore.sol",
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
+    ),
+    (
+        "2018",
+        "smart-contracts/RandomizerNXT.sol",
+        "function isRandomizerContract() external view returns (bool) {",
+    ),
+    (
+        "2018",
+        "smart-contracts/RandomizerRNG.sol",
+        "function isRandomizerContract() external view returns (bool) {",
+    ),
+    (
+        "2018",
+        "smart-contracts/RandomizerVRF.sol",
+        "function isRandomizerContract() external view returns (bool) {",
+    ),
+    (
+        "2018",
+        "smart-contracts/StreamCore.sol",
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
+    ),
+    (
+        "2018",
+        "smart-contracts/StreamMinter.sol",
+        "function isMinterContract() external view returns (bool) {",
+    ),
 }
+
+REQUIRED_SOLC_LOG_MARKERS = (
+    "Compiler run successful",
+    "Solc 0.8.19 finished",
+)
 
 REQUIRED_HEADINGS = [
     (1, "Warning Dispositions"),
@@ -175,6 +216,7 @@ SOLC_WARNING_RE = re.compile(r"Warning \((?P<code>[0-9]+)\):")
 SOLC_SOURCE_RE = re.compile(
     r"-->\s+(?P<path>[^:\r\n]+):(?P<line>[0-9]+):(?P<column>[0-9]+)"
 )
+SOLC_SOURCE_EXCERPT_RE = re.compile(r"^\s*[0-9]+\s+\|\s+(?P<source>.+?)\s*$")
 
 
 class WarningDispositionError(ValueError):
@@ -309,43 +351,67 @@ def normalize_solidity_warning_path(raw_path: str) -> str:
     return raw_path.strip().replace("\\", "/")
 
 
-def parse_solc_warnings(log_text: str) -> set[tuple[str, str, int]]:
-    """Extract solc warning code, source path, and source line from forge output."""
+def parse_solc_warnings(log_text: str) -> set[tuple[str, str, str]]:
+    """Extract solc warning code, source path, and source excerpt from forge output."""
     warnings = set()
     pending_code: str | None = None
+    pending_path: str | None = None
     for line in log_text.splitlines():
         warning_match = SOLC_WARNING_RE.search(line)
         if warning_match:
             pending_code = warning_match.group("code")
+            pending_path = None
             continue
         if pending_code is None:
             continue
-        source_match = SOLC_SOURCE_RE.search(line)
-        if not source_match:
+        if pending_path is None:
+            source_match = SOLC_SOURCE_RE.search(line)
+            if not source_match:
+                continue
+            pending_path = normalize_solidity_warning_path(source_match.group("path"))
+            continue
+
+        source_excerpt_match = SOLC_SOURCE_EXCERPT_RE.match(line)
+        if not source_excerpt_match:
             continue
         warnings.add(
             (
                 pending_code,
-                normalize_solidity_warning_path(source_match.group("path")),
-                int(source_match.group("line")),
+                pending_path,
+                normalize_whitespace(source_excerpt_match.group("source")).strip(),
             )
         )
         pending_code = None
+        pending_path = None
     return warnings
 
 
-def format_solc_warning(warning: tuple[str, str, int]) -> str:
+def format_solc_warning(warning: tuple[str, str, str]) -> str:
     """Render a compact solc warning identifier."""
-    code, path, line = warning
-    return f"Warning({code}) {path}:{line}"
+    code, path, source_excerpt = warning
+    return f"Warning({code}) {path} :: {source_excerpt}"
 
 
 def validate_solc_warning_log(log_path: Path) -> None:
     """Validate live forge output against the reviewed solc warning baseline."""
     if not log_path.is_file():
-        raise WarningDispositionError(f"missing solc warning log: {log_path}")
+        raise WarningDispositionError(
+            "missing solc warning log: "
+            f"{log_path}; run python scripts/run_forge_size_log.py --log {log_path} first"
+        )
 
-    actual = parse_solc_warnings(log_path.read_text(encoding="utf-8"))
+    log_text = log_path.read_text(encoding="utf-8")
+    missing_markers = [
+        marker for marker in REQUIRED_SOLC_LOG_MARKERS if marker not in log_text
+    ]
+    if missing_markers:
+        raise WarningDispositionError(
+            "solc warning log is incomplete or not successful; missing marker(s): "
+            + ", ".join(missing_markers)
+            + f"; run python scripts/run_forge_size_log.py --log {log_path} first"
+        )
+
+    actual = parse_solc_warnings(log_text)
     missing = sorted(EXPECTED_SOLC_WARNINGS - actual)
     unexpected = sorted(actual - EXPECTED_SOLC_WARNINGS)
     if missing or unexpected:

@@ -47,6 +47,7 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/admin-ceremony"),
     Path("deployments/randomizer-operations"),
     Path("test/fixtures/drop-authorization"),
+    Path("test/fixtures/warning-dispositions"),
 ]
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
 CHECKSUM_FILE_NAME = "SHA256SUMS"

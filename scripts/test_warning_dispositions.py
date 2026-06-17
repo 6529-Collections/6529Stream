@@ -12,6 +12,8 @@ from pathlib import Path
 
 
 SCRIPT_PATH = Path(__file__).with_name("check_warning_dispositions.py")
+FIXTURE_DIR = Path(__file__).resolve().parents[1] / "test" / "fixtures" / "warning-dispositions"
+FORGE_SIZE_FIXTURE = FIXTURE_DIR / "forge-size-output.txt"
 SPEC = importlib.util.spec_from_file_location("check_warning_dispositions", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 checker = importlib.util.module_from_spec(SPEC)
@@ -95,19 +97,23 @@ Keep warning dispositions current.
 
 
 def solc_warning_log(
-    warnings: set[tuple[str, str, int]] | None = None,
+    warnings: set[tuple[str, str, str]] | None = None,
 ) -> str:
     """Render a compact forge-style solc warning log."""
     selected = warnings if warnings is not None else checker.EXPECTED_SOLC_WARNINGS
-    blocks = []
-    for code, path, line in sorted(selected):
+    blocks = [
+        "Compiling 66 files with Solc 0.8.19",
+        "Solc 0.8.19 finished in 38.56s",
+        "Compiler run successful with warnings:",
+    ]
+    for code, path, source_excerpt in sorted(selected):
         blocks.append(
             "\n".join(
                 [
                     f"Warning ({code}): retained warning",
-                    f"  --> {path}:{line}:1:",
+                    f"  --> {path}:1:1:",
                     "   |",
-                    f"{line} | retained warning source",
+                    f"1 | {source_excerpt}",
                 ]
             )
         )
@@ -286,12 +292,35 @@ class WarningDispositionTests(unittest.TestCase):
 
             checker.validate_solc_warning_log(path)
 
+    def test_parses_real_forge_size_output_fixture(self) -> None:
+        """The parser accepts a captured forge size output warning block."""
+        actual = checker.parse_solc_warnings(FORGE_SIZE_FIXTURE.read_text(encoding="utf-8"))
+
+        self.assertEqual(actual, checker.EXPECTED_SOLC_WARNINGS)
+
+    def test_rejects_incomplete_solc_warning_log(self) -> None:
+        """A warning excerpt without the successful forge markers is not enough."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            write_text(path, solc_warning_log().replace("Compiler run successful", ""))
+
+            with self.assertRaisesRegex(
+                checker.WarningDispositionError, "incomplete or not successful"
+            ):
+                checker.validate_solc_warning_log(path)
+
     def test_rejects_unexpected_solc_warning(self) -> None:
         """New solc warnings must be fixed or added to the disposition."""
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "forge-size.log"
             warnings = set(checker.EXPECTED_SOLC_WARNINGS)
-            warnings.add(("2018", "smart-contracts/NewWarning.sol", 10))
+            warnings.add(
+                (
+                    "2018",
+                    "smart-contracts/NewWarning.sol",
+                    "function newWarning() external view returns (bool) {",
+                )
+            )
             write_text(path, solc_warning_log(warnings))
 
             with self.assertRaisesRegex(
@@ -304,7 +333,13 @@ class WarningDispositionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "forge-size.log"
             warnings = set(checker.EXPECTED_SOLC_WARNINGS)
-            warnings.remove(("2018", "smart-contracts/StreamMinter.sol", 298))
+            warnings.remove(
+                (
+                    "2018",
+                    "smart-contracts/StreamMinter.sol",
+                    "function isMinterContract() external view returns (bool) {",
+                )
+            )
             write_text(path, solc_warning_log(warnings))
 
             with self.assertRaisesRegex(

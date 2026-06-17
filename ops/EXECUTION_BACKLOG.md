@@ -2544,8 +2544,7 @@ Dependencies: `INT-004`, `INT-005`.
 
 ### INT-009: Add Electron Security And Wallet Integration Guide
 
-Status: In progress on issue #482 and branch
-`codex/live-solc-warning-baseline`.
+Status: Planned.
 
 Gate: G.
 
@@ -3224,7 +3223,8 @@ Dependencies: `CON-005`, production size gate.
 
 ### ONE-007: Burn Down Or Disposition Release-Grade Warning Noise
 
-Status: Planned.
+Status: In progress on issue #482 and branch
+`codex/live-solc-warning-baseline`.
 
 Gate: G/F.
 
