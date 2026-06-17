@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/issue-templates` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/499` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/500` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/501` |
 | Next issue | Implement OSS-003 GitHub issue templates for integration, audit finding, and release evidence, with checker/tests, local/CI/Windows/release wiring, validate, open PR, request CodeRabbit, resolve CI/bot feedback, merge when clean, then continue the next unblocked substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 09:57 UTC` |
+| Last updated | `2026-06-17 09:59 UTC` |
 
 ## Packaging Notes
 
@@ -16156,6 +16156,7 @@ Outcome:
 | 2026-06-17 09:16 | Open PR #499 for OSS-002 | PR #499 is open at `https://github.com/6529-Collections/6529Stream/pull/499`, closes issue #498, and packages the checked first-30-minutes contributor guide plus checker/tests, local/CI/Windows gate wiring, README/CONTRIBUTING/tooling/status navigation, release-manifest/checksum coverage, release notes, bytecode proof, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 09:30 | Merge PR #499 and start OSS-003 | First-30-minutes contributor guide merged as `a2a2144` after latest-head CI passed, CodeRabbit was requested twice with no actionable comments, and 6529bot latest-head follow-up reported no new findings. Issue #498 closed completed. Issue #500 and branch `codex/issue-templates` now track OSS-003 for checked GitHub issue templates covering integration/frontend/indexer reports, audit finding intake, release evidence requests, no-secret/pre-audit boundaries, checker/tests, local/CI/Windows/release wiring, and regenerated evidence. |
 | 2026-06-17 09:57 | Validate OSS-003 local draft | Added checked GitHub issue templates for integration reports, public-safe audit finding intake, and release evidence requests; added `scripts/check_issue_templates.py` and `scripts/test_issue_templates.py`; wired `issue-templates-check` through Make, Unix/PowerShell wrappers, CI, README, CONTRIBUTING, tooling/status docs, release-manifest/checksum coverage, release notes, and durable backlog state. Regenerated release notes, risk register, release-evidence issue backlog, release manifest, bytecode release proof, and checksum bundle. Focused issue-template, README, first-30-minutes, release-evidence backlog, blocker-report, release-notes, release-manifest, bytecode-proof, checksum, risk-register, changelog, and Python compile checks passed. `make issue-templates-check`, `make release-manifest-check`, `make release-checksums-check`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `git diff --check` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #500, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
+| 2026-06-17 09:59 | Open PR #501 for OSS-003 | PR #501 is open at `https://github.com/6529-Collections/6529Stream/pull/501`, closes issue #500, and packages checked GitHub issue templates for integration reports, audit finding intake, and release evidence requests plus checker/tests, local/CI/Windows gate wiring, docs links, release-manifest/checksum coverage, release notes, bytecode proof, risk-register hashes, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
