@@ -2487,8 +2487,7 @@ Dependencies: `INT-001` through `INT-006` preferred.
 
 ### INT-008: Add Mobile And WalletConnect Integration Guide
 
-Status: In progress on issue #482 and branch
-`codex/live-solc-warning-baseline`.
+Status: Planned.
 
 Gate: G.
 
@@ -2545,7 +2544,8 @@ Dependencies: `INT-004`, `INT-005`.
 
 ### INT-009: Add Electron Security And Wallet Integration Guide
 
-Status: Planned.
+Status: In progress on issue #482 and branch
+`codex/live-solc-warning-baseline`.
 
 Gate: G.
 
