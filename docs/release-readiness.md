@@ -232,8 +232,9 @@ The current local baseline includes:
   marketplaces honoring royalties;
 - warning disposition guidance in
   [`docs/warning-dispositions.md`](warning-dispositions.md), covered by
-  `python scripts/test_warning_dispositions.py` and
-  `python scripts/check_warning_dispositions.py`, which documents fixed NatSpec
+  `python scripts/test_warning_dispositions.py`,
+  `python scripts/run_forge_size_log.py --log cache/forge-size.log`, and
+  `python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log`, which documents fixed NatSpec
   warning noise and accepted solc, documentation, linter, vendored, test-only,
   ABI-compatibility, and `StreamCore` size-tradeoff warning decisions without
   treating warning quietness as protocol correctness proof;
@@ -610,7 +611,8 @@ python scripts/generate_one_of_one_permanence_manifest.py --check
 python scripts/test_royalty_policy.py
 python scripts/check_royalty_policy.py
 python scripts/test_warning_dispositions.py
-python scripts/check_warning_dispositions.py
+python scripts/run_forge_size_log.py --log cache/forge-size.log
+python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 python scripts/test_natspec_coverage.py
 python scripts/check_natspec_coverage.py
 python scripts/test_gas_envelopes.py

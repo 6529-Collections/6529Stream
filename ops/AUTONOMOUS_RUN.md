@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/incident-drill-evidence-model` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/479` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/480` |
-| Active PR | TBD |
-| Next issue | GOV-004 incident drill retained evidence model. |
+| Active PR branch | `codex/live-solc-warning-baseline` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/481` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/482` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/483` |
+| Next issue | ONE-007 live solc warning baseline enforcement. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 01:44 UTC` |
+| Last updated | `2026-06-17 03:08 UTC` |
 
 ## Packaging Notes
 
@@ -16128,6 +16128,8 @@ Outcome:
 | 2026-06-16 21:12 | Start EXT-013 production verified-addresses checker | PR #469 merged as `1b8bf43d9e7989c10cd6cadda923fb5aca5d4ec4` after CI, CodeRabbit, and 6529bot follow-up were clean; issue #468 closed completed. Issue #470 is open for EXT-013, and branch `codex/production-verified-addresses-checker` adds a no-secret retained-artifact template and checker for future `production_address_books` and `live_explorer_verification` evidence without changing readiness claims. Local draft work includes address-book/deployment-manifest agreement checks, verified explorer row validation, focused tests, gate wiring, release-readiness/tooling/release-artifact docs, changelog, packet-index coverage, and backlog/run-state traceability. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 21:28 | Open PR #471 for EXT-013 | PR #471 is open at `https://github.com/6529-Collections/6529Stream/pull/471`, closes issue #470, and packages the production verified-addresses checker, dedicated retained-artifact template, production address-book/live explorer template handoff, local/CI/Windows gate wiring, docs, regenerated release evidence, and state updates. Local full `make check` and Windows `scripts\check.ps1` passed with existing compiler/Foundry warning noise only. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-16 21:31 | Address PR #471 checker review nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with nice-to-haves. Accepted the bytecode-proof strengthening and explicit review-state test suggestions by requiring retained bytecode proof rows to match the address-book contract names, addresses, and runtime hashes, adding a root-selection code comment, and expanding the focused checker suite from 15 to 18 tests. Focused production-verified-addresses tests/check, release-manifest/proof/checksum checks, release artifact verifier, and `git diff --check` passed locally. Next action is to push the response commit, wait for latest CI/bot follow-up, then merge if clean. |
+| 2026-06-17 02:23 | Start ONE-007 live solc warning baseline | PR #481 merged as `8d818785fc8d7a3aace1b5ece52fe7336e2b2358`, issue #480 closed completed, CI and CodeRabbit passed, and 6529bot follow-up reported no new findings. Issue #482 and branch `codex/live-solc-warning-baseline` now track the next warning-hygiene slice: retaining the production-size forge output and checking live solc warnings against the reviewed disposition baseline so new warnings fail CI unless fixed or dispositioned. |
+| 2026-06-17 02:43 | Validate ONE-007 live warning baseline | Added cross-platform `scripts/run_forge_size_log.py`, live solc warning parsing in `scripts/check_warning_dispositions.py`, regression tests for expected/missing/unexpected warning rows, local/CI/Windows wiring, docs/readiness/audit updates, checksum coverage, and regenerated release artifacts. Focused warning, audit, readiness, risk, notes, manifest, bytecode-proof, checksum, changelog, Python compile, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` also passed with only the existing warning-disposition noise. Next action is to commit, push, open PR #482, request CodeRabbit, and wait for CI/bot feedback. |
 
 ## Resume Instructions
 

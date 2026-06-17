@@ -47,7 +47,7 @@ gas-envelopes-check:
 	$(PYTHON) scripts/check_gas_envelopes.py
 
 size:
-	forge build --sizes --via-ir --skip test --skip script --force
+	$(PYTHON) scripts/run_forge_size_log.py --log cache/forge-size.log
 
 contract-size-budget-check: size
 	$(PYTHON) scripts/test_contract_size_budget.py
@@ -397,9 +397,9 @@ royalty-policy-check:
 	$(PYTHON) scripts/test_royalty_policy.py
 	$(PYTHON) scripts/check_royalty_policy.py
 
-warning-dispositions-check:
+warning-dispositions-check: size
 	$(PYTHON) scripts/test_warning_dispositions.py
-	$(PYTHON) scripts/check_warning_dispositions.py
+	$(PYTHON) scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 
 release-readiness-check:
 	$(PYTHON) scripts/test_release_readiness.py

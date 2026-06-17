@@ -219,6 +219,7 @@ jobs:
             scripts/test_royalty_policy.py \
             scripts/check_warning_dispositions.py \
             scripts/test_warning_dispositions.py \
+            scripts/run_forge_size_log.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
             scripts/check_release_mode.py \
@@ -310,7 +311,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          forge build --sizes --via-ir --skip test --skip script --force 2>&1 | tee ci-logs/forge-size.log
+          python3 scripts/run_forge_size_log.py --log ci-logs/forge-size.log
 
       - name: Contract size budget
         shell: bash
@@ -607,7 +608,7 @@ jobs:
           python3 scripts/test_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-tests.log
           python3 scripts/check_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-check.log
           python3 scripts/test_warning_dispositions.py 2>&1 | tee ci-logs/warning-disposition-tests.log
-          python3 scripts/check_warning_dispositions.py 2>&1 | tee ci-logs/warning-disposition-check.log
+          python3 scripts/check_warning_dispositions.py --solc-warnings-log ci-logs/forge-size.log 2>&1 | tee ci-logs/warning-disposition-check.log
 
       - name: Release readiness
         shell: bash

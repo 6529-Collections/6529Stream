@@ -14,15 +14,15 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+      "sha256": "sha256:dcedd1a899c1a3f130aca98998638afc79111ed2f5688351e53db9dbaae69862"
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:bdb4015d075a6264e3ff2188c8cbcbd2ec2b387ff96f4d80882b06f3b4d6eb67"
+      "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5"
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:564cb140444da32255265c21446446a29cb8552bb2d1852e70adf0ea2833af91"
+      "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -34,7 +34,7 @@
     },
     {
       "path": "docs/warning-dispositions.md",
-      "sha256": "sha256:32dd20cd1483b32816e590e9a8a557f6f045fb5df80b322face21956d5a11d9f"
+      "sha256": "sha256:b28b3bf8356bdb64b340ec037d9f0248fb26c4db86eb535be64faa5695ae64cd"
     },
     {
       "path": "docs/known-blockers.md",
@@ -91,7 +91,7 @@
       "evidence": [
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:bdb4015d075a6264e3ff2188c8cbcbd2ec2b387ff96f4d80882b06f3b4d6eb67"
+          "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -134,11 +134,11 @@
         },
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:bdb4015d075a6264e3ff2188c8cbcbd2ec2b387ff96f4d80882b06f3b4d6eb67"
+          "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+          "sha256": "sha256:dcedd1a899c1a3f130aca98998638afc79111ed2f5688351e53db9dbaae69862"
         }
       ],
       "risk_acceptance": null
@@ -167,7 +167,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:564cb140444da32255265c21446446a29cb8552bb2d1852e70adf0ea2833af91"
+          "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -252,7 +252,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:564cb140444da32255265c21446446a29cb8552bb2d1852e70adf0ea2833af91"
+          "sha256": "sha256:29f6bd9e02db081acfad7a68ff3db9b9a54a7f8c54fb449f328a36c84f22a9fe"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+          "sha256": "sha256:dcedd1a899c1a3f130aca98998638afc79111ed2f5688351e53db9dbaae69862"
         },
         {
           "path": "docs/metadata.md",
@@ -416,7 +416,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:3792880eb026092f53aa9dc9588b27c1941bb8cf09f295b4f16c0fc5eba60dea"
+          "sha256": "sha256:18318acaaa8c2a246fb7cfeaab8bb651e1fd59ed35d900838be4abdebff4efbf"
         }
       ],
       "risk_acceptance": null
@@ -468,10 +468,10 @@
       "residual_risk": "Accepted local-baseline warnings remain audit inputs and should be rechecked before public beta or production release.",
       "checks": [
         "forge build",
-        "forge build --sizes --via-ir --skip test --skip script --force",
+        "python scripts/run_forge_size_log.py --log cache/forge-size.log",
         "forge doc --build",
         "python scripts/test_warning_dispositions.py",
-        "python scripts/check_warning_dispositions.py"
+        "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/428"
@@ -483,15 +483,15 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3daa61ebabff752ccab067ecb8dcec9e6560359323efd37c1a2dca3b5bc08045"
+          "sha256": "sha256:dcedd1a899c1a3f130aca98998638afc79111ed2f5688351e53db9dbaae69862"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:0a71ffe5a8c125dba5d59ff254d6702fee7fe6f5b9573e5d4061c081f10e85be"
+          "sha256": "sha256:4d613580189e5611f0b4166a55724ec059b5864d2c16241d87e6002f7c523656"
         },
         {
           "path": "docs/warning-dispositions.md",
-          "sha256": "sha256:32dd20cd1483b32816e590e9a8a557f6f045fb5df80b322face21956d5a11d9f"
+          "sha256": "sha256:b28b3bf8356bdb64b340ec037d9f0248fb26c4db86eb535be64faa5695ae64cd"
         }
       ],
       "risk_acceptance": null

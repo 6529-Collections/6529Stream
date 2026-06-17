@@ -383,10 +383,10 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ],
         "checks": [
             "forge build",
-            "forge build --sizes --via-ir --skip test --skip script --force",
+            "python scripts/run_forge_size_log.py --log cache/forge-size.log",
             "forge doc --build",
             "python scripts/test_warning_dispositions.py",
-            "python scripts/check_warning_dispositions.py",
+            "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log",
         ],
         "tracking": ["https://github.com/6529-Collections/6529Stream/issues/428"],
     },

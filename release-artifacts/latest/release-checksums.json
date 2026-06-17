@@ -21,6 +21,9 @@
       "scripts/check_production_verified_addresses.py",
       "scripts/check_live_metadata_browser_evidence.py",
       "scripts/check_incident_drill_evidence.py",
+      "scripts/check_warning_dispositions.py",
+      "scripts/test_warning_dispositions.py",
+      "scripts/run_forge_size_log.py",
       "scripts/generate_release_notes.py",
       "scripts/verify_release_artifacts.py",
       "deployments/broadcasts",
@@ -31,14 +34,15 @@
       "deployments/ceremony-evidence",
       "deployments/admin-ceremony",
       "deployments/randomizer-operations",
-      "test/fixtures/drop-authorization"
+      "test/fixtures/drop-authorization",
+      "test/fixtures/warning-dispositions"
     ],
     "output_dir": "release-artifacts/latest"
   },
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:1f316ba869206f4e2b5c78b1d76a46702b5ee6a5c36d43e16d050fae93339202"
+    "sha256": "sha256:cb974352fe793445269bbe4883fe1eb0f6cee8e54e8cae26e4e489287b28804d"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -497,7 +501,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:97bea0755133d2047e77546f7ba8d5ab8f6f4530132953a926e7eb76397cff69",
+      "sha256": "sha256:e11c1e1b46921d1652b4597f7c31ee50674243418243705221b24a6efe011176",
       "size_bytes": 79962
     },
     {
@@ -607,23 +611,23 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:135eae5e392eed8f40d0b7af8f90ec0315875e1fb1d4ade5abbc5208c7943d74",
+      "sha256": "sha256:7defc5077c71c93d2512b3e7295c0ab735d6a110d974ae5144186e06ed9c08f8",
       "size_bytes": 110303
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:26640fc59d9c06f438eff87d8d408eb92f0ba665a7a6b74e762b7f2ec2add5f5",
-      "size_bytes": 51823
+      "sha256": "sha256:48b08bf762b4bfd9abe511d2c54b83c7d2ff5d7e8107a914e431e889bc2c29f0",
+      "size_bytes": 52180
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:6ed05a8222f33efa5e44ac27021007ac2bcff675598827741dc1c5db8a0e6a28",
-      "size_bytes": 49310
+      "sha256": "sha256:b5af46fd28eb2822661d688184b9124dddf349d0ae6a0d31cc82b65400c11139",
+      "size_bytes": 49660
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:5e1368b81f941f9b01a731b7b9b07fa027fb03632a49611107fce6f7e64f22d2",
-      "size_bytes": 22887
+      "sha256": "sha256:291e690ccc6ee341d19ef9c51fbb88199c00aade785d1653037028398719735e",
+      "size_bytes": 22929
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -736,6 +740,11 @@
       "size_bytes": 4666
     },
     {
+      "path": "scripts/check_warning_dispositions.py",
+      "sha256": "sha256:a006a00198b0d1bdf7db27dfd217bdd441169345586fb1f3d089a3ba415eb96a",
+      "size_bytes": 18414
+    },
+    {
       "path": "scripts/generate_dependency_provenance_attestation.py",
       "sha256": "sha256:6a7d21765cca4b494268ead6f93ef69fdddbcd9231283685c085ef61e1ba9a84",
       "size_bytes": 16880
@@ -744,6 +753,16 @@
       "path": "scripts/generate_release_notes.py",
       "sha256": "sha256:3193affa4f0293d1109d279aa23a0070183e8320e6ee42667241ee0004db2456",
       "size_bytes": 16623
+    },
+    {
+      "path": "scripts/run_forge_size_log.py",
+      "sha256": "sha256:785cd95ec2fde98c249cea68fdaa4d2287cfec473ff65d4b7f7e14f092984a26",
+      "size_bytes": 2056
+    },
+    {
+      "path": "scripts/test_warning_dispositions.py",
+      "sha256": "sha256:22924836a5ac725a5034badc2965b1694133a85f20f43e27d83a84279fc9e13e",
+      "size_bytes": 15395
     },
     {
       "path": "scripts/verify_release_artifacts.py",
@@ -784,6 +803,11 @@
       "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
       "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe",
       "size_bytes": 4052
+    },
+    {
+      "path": "test/fixtures/warning-dispositions/forge-size-output.txt",
+      "sha256": "sha256:21872fc455b1472e5b784cf5b430a47e8279ac01e481aec944e37374842b8ab1",
+      "size_bytes": 2960
     }
   ]
 }

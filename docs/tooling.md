@@ -32,7 +32,8 @@ python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
 python scripts/check_solidity_formatting.py
 python scripts/test_warning_dispositions.py
-python scripts/check_warning_dispositions.py
+python scripts/run_forge_size_log.py --log cache/forge-size.log
+python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
@@ -724,7 +725,8 @@ It runs:
 
 ```bash
 python scripts/test_warning_dispositions.py
-python scripts/check_warning_dispositions.py
+python scripts/run_forge_size_log.py --log cache/forge-size.log
+python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
 ```
 
 [`warning-dispositions.md`](warning-dispositions.md) is the checked `ONE-007`
@@ -733,6 +735,10 @@ ABI-compatibility, and `StreamCore` size-tradeoff warning decisions. The
 checker verifies that invalid first-party NatSpec header tags are gone, that
 accepted solc warnings remain anchored to the exact current source signatures,
 and that retained warning rows name an owner, disposition class, and follow-up.
+The live warning parser is pinned to the current Foundry v1.7.1 / Solidity
+0.8.19 output shape with a captured forge-size fixture, and the checked solc
+identity is warning code plus source file plus source excerpt rather than raw
+line number.
 
 Do not change external ABI names, function `stateMutability`, or Core bytecode
 shape only to quiet cosmetic warning suggestions. Any such change needs the

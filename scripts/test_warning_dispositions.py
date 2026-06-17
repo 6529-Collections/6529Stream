@@ -12,6 +12,8 @@ from pathlib import Path
 
 
 SCRIPT_PATH = Path(__file__).with_name("check_warning_dispositions.py")
+FIXTURE_DIR = Path(__file__).resolve().parents[1] / "test" / "fixtures" / "warning-dispositions"
+FORGE_SIZE_FIXTURE = FIXTURE_DIR / "forge-size-output.txt"
 SPEC = importlib.util.spec_from_file_location("check_warning_dispositions", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 checker = importlib.util.module_from_spec(SPEC)
@@ -94,6 +96,30 @@ Keep warning dispositions current.
 """
 
 
+def solc_warning_log(
+    warnings: set[tuple[str, str, str]] | None = None,
+) -> str:
+    """Render a compact forge-style solc warning log."""
+    selected = warnings if warnings is not None else checker.EXPECTED_SOLC_WARNINGS
+    blocks = [
+        "Compiling 66 files with Solc 0.8.19",
+        "Solc 0.8.19 finished in 38.56s",
+        "Compiler run successful with warnings:",
+    ]
+    for code, path, source_excerpt in sorted(selected):
+        blocks.append(
+            "\n".join(
+                [
+                    f"Warning ({code}): retained warning",
+                    f"  --> {path}:1:1:",
+                    "   |",
+                    f"1 | {source_excerpt}",
+                ]
+            )
+        )
+    return "\n\n".join(blocks) + "\n"
+
+
 class WarningDispositionTests(unittest.TestCase):
     def test_accepts_committed_doc(self) -> None:
         """The committed warning-disposition document satisfies the checker."""
@@ -172,7 +198,8 @@ class WarningDispositionTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_required_targets(root)
             text = minimal_warning_doc().replace(
-                "python scripts/check_warning_dispositions.py\n", ""
+                "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log\n",
+                "",
             )
             write_text(root / checker.DEFAULT_WARNING_DISPOSITIONS, text)
 
@@ -256,6 +283,113 @@ class WarningDispositionTests(unittest.TestCase):
                 checker.validate_warning_dispositions(
                     root, root / checker.DEFAULT_WARNING_DISPOSITIONS
                 )
+
+    def test_accepts_expected_solc_warning_log(self) -> None:
+        """The live solc-warning baseline accepts exactly documented warnings."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            write_text(path, solc_warning_log())
+
+            checker.validate_solc_warning_log(path)
+
+    def test_parses_real_forge_size_output_fixture(self) -> None:
+        """The parser accepts a captured forge size output warning block."""
+        actual = checker.parse_solc_warnings(FORGE_SIZE_FIXTURE.read_text(encoding="utf-8"))
+
+        self.assertEqual(actual, checker.EXPECTED_SOLC_WARNINGS)
+
+    def test_parses_windows_absolute_source_path(self) -> None:
+        """Source locations with drive-letter paths still parse correctly."""
+        log_text = "\n".join(
+            [
+                "Warning (2018): Function state mutability can be restricted to pure",
+                "   --> C:\\repo\\6529Stream\\smart-contracts\\StreamMinter.sol:298:5:",
+                "    |",
+                "298 |     function isMinterContract() external view returns (bool) {",
+                "    |     ^ (Relevant source part starts here and spans across multiple lines).",
+            ]
+        )
+
+        self.assertEqual(
+            checker.parse_solc_warnings(log_text),
+            {
+                (
+                    "2018",
+                    "C:/repo/6529Stream/smart-contracts/StreamMinter.sol",
+                    "function isMinterContract() external view returns (bool) {",
+                )
+            },
+        )
+
+    def test_rejects_incomplete_solc_warning_log(self) -> None:
+        """A warning excerpt without the successful forge markers is not enough."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            write_text(path, solc_warning_log().replace("Compiler run successful", ""))
+
+            with self.assertRaisesRegex(
+                checker.WarningDispositionError, "incomplete or not successful"
+            ):
+                checker.validate_solc_warning_log(path)
+
+    def test_rejects_unexpected_solc_warning(self) -> None:
+        """New solc warnings must be fixed or added to the disposition."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            warnings = set(checker.EXPECTED_SOLC_WARNINGS)
+            warnings.add(
+                (
+                    "2018",
+                    "smart-contracts/NewWarning.sol",
+                    "function newWarning() external view returns (bool) {",
+                )
+            )
+            write_text(path, solc_warning_log(warnings))
+
+            with self.assertRaisesRegex(
+                checker.WarningDispositionError, "unexpected warning"
+            ):
+                checker.validate_solc_warning_log(path)
+
+    def test_rejects_missing_solc_warning(self) -> None:
+        """Resolved solc warnings must update the checked baseline."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            warnings = set(checker.EXPECTED_SOLC_WARNINGS)
+            warnings.remove(
+                (
+                    "2018",
+                    "smart-contracts/StreamMinter.sol",
+                    "function isMinterContract() external view returns (bool) {",
+                )
+            )
+            write_text(path, solc_warning_log(warnings))
+
+            with self.assertRaisesRegex(
+                checker.WarningDispositionError, "missing expected warning"
+            ):
+                checker.validate_solc_warning_log(path)
+
+    def test_cli_accepts_solc_warning_log(self) -> None:
+        """The CLI can validate docs and a live solc warning log together."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            write_text(root / checker.DEFAULT_WARNING_DISPOSITIONS, minimal_warning_doc())
+            log_path = root / "cache" / "forge-size.log"
+            write_text(log_path, solc_warning_log())
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--solc-warnings-log",
+                        str(log_path.relative_to(root)),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
 
 
 if __name__ == "__main__":

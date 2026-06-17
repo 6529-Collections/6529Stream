@@ -74,7 +74,7 @@ forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 & $pythonPath @pythonArgs "scripts\test_gas_envelopes.py"
 & $pythonPath @pythonArgs "scripts\check_gas_envelopes.py"
-forge build --sizes --via-ir --skip test --skip script --force
+& $pythonPath @pythonArgs "scripts\run_forge_size_log.py" "--log" "cache\forge-size.log"
 & $pythonPath @pythonArgs "scripts\test_contract_size_budget.py"
 & $pythonPath @pythonArgs "scripts\check_contract_size_budget.py"
 & $pythonPath @pythonArgs "scripts\test_core_bytecode_spend_policy.py"
@@ -220,7 +220,7 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\test_royalty_policy.py"
 & $pythonPath @pythonArgs "scripts\check_royalty_policy.py"
 & $pythonPath @pythonArgs "scripts\test_warning_dispositions.py"
-& $pythonPath @pythonArgs "scripts\check_warning_dispositions.py"
+& $pythonPath @pythonArgs "scripts\check_warning_dispositions.py" "--solc-warnings-log" "cache\forge-size.log"
 & $pythonPath @pythonArgs "scripts\test_one_of_one_permanence_package.py"
 & $pythonPath @pythonArgs "scripts\check_one_of_one_permanence_package.py"
 & $pythonPath @pythonArgs "scripts\generate_one_of_one_permanence_manifest.py" "--check"

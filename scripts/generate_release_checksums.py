@@ -33,6 +33,9 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/check_production_verified_addresses.py"),
     Path("scripts/check_live_metadata_browser_evidence.py"),
     Path("scripts/check_incident_drill_evidence.py"),
+    Path("scripts/check_warning_dispositions.py"),
+    Path("scripts/test_warning_dispositions.py"),
+    Path("scripts/run_forge_size_log.py"),
     Path("scripts/generate_release_notes.py"),
     Path("scripts/verify_release_artifacts.py"),
     Path("deployments/broadcasts"),
@@ -44,6 +47,7 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/admin-ceremony"),
     Path("deployments/randomizer-operations"),
     Path("test/fixtures/drop-authorization"),
+    Path("test/fixtures/warning-dispositions"),
 ]
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
 CHECKSUM_FILE_NAME = "SHA256SUMS"
