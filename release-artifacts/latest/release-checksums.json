@@ -48,7 +48,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:834969fb5b37520d42f5b62b361b040bdae0df6082f641867ea2c5081212a2fd"
+    "sha256": "sha256:2046dcd2666fe3718472a8fc4ff99c3a05b5caa26acfecf4d6359303bd9cf48f"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -762,8 +762,8 @@
     },
     {
       "path": "scripts/check_withdrawals_credits_flow.py",
-      "sha256": "sha256:c203d05910106ca0b2950a4b1dc63335d13fbd9e777894e1852f05bb5764ea88",
-      "size_bytes": 10781
+      "sha256": "sha256:c98a66fc223a8682422223dc42443be9dccf0578619846c9e8212cf14673e354",
+      "size_bytes": 11008
     },
     {
       "path": "scripts/generate_dependency_provenance_attestation.py",
