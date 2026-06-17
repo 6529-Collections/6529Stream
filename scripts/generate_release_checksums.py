@@ -37,6 +37,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_signer_compromise_drill_evidence.py"),
     Path("scripts/check_stuck_auction_drill_evidence.py"),
     Path("scripts/test_stuck_auction_drill_evidence.py"),
+    Path("scripts/check_failed_randomness_drill_evidence.py"),
+    Path("scripts/test_failed_randomness_drill_evidence.py"),
     Path("scripts/check_readme.py"),
     Path("scripts/test_readme.py"),
     Path("scripts/check_first_30_minutes.py"),

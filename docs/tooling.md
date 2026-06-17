@@ -347,6 +347,15 @@ source-aware and checks that auction settlement, no-bid recovery, cancellation,
 pause, credit withdrawal, and surplus-boundary controls still exist in the
 auction contract, pause domains, auction/pause tests, protocol state-machine
 tests, and auction-flow integration docs.
+The failed randomness drill evidence step validates the narrower checked
+retained artifact template under
+[`release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md)
+for request identity, provider type, provider epoch, pending/stale/failed/final
+request state, metadata state, invalid callback handling, retry or stale
+marking, provider migration boundaries, monitoring handoff, review, and
+redaction. It is source-aware and checks that randomizer lifecycle events,
+stale marking, retry, failed post-processing, provider-specific fulfillment,
+metadata-state docs, and randomizer operations docs still exist.
 
 The drop-authorization fixture step validates
 [`drop-authorization-signing.md`](drop-authorization-signing.md) and the

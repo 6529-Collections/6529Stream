@@ -62,6 +62,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_signer_compromise_drill_evidence.py",
     "python scripts/test_stuck_auction_drill_evidence.py",
     "python scripts/check_stuck_auction_drill_evidence.py",
+    "python scripts/test_failed_randomness_drill_evidence.py",
+    "python scripts/check_failed_randomness_drill_evidence.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -113,6 +115,7 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md",
     "release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md",
     "release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md",
+    "release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

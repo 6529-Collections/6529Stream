@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `GOV-007` failed-randomness drill retained-artifact template,
+  source-aware checker, and regression tests covering request identity, provider
+  type, provider epoch, pending/stale/failed/final lifecycle state, invalid
+  callback handling, retry or stale marking, metadata state, provider migration
+  boundaries, monitoring handoff, review, redaction, and local/CI/Windows gate
+  wiring.
 - Added a checked `GOV-006` stuck-auction drill retained-artifact template,
   source-aware checker, and regression tests covering auction identity, stuck
   condition, custody, pause/unpause, terminal settlement or cancellation,
