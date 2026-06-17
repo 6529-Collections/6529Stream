@@ -144,6 +144,39 @@ class IncidentDrillEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path)
 
+    def test_reviewed_non_trivial_placeholder_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "incident-drill.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Incident decision log: `decision-log.md`",
+                    "Incident decision log: `n/a`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.IncidentDrillEvidenceError, "must be replaced"
+            ):
+                checker.validate_evidence(path)
+
+    def test_pending_review_complete_readiness_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "incident-drill.md"
+            text = reviewed_text()
+            text = text.replace(
+                "Review status: `reviewed`", "Review status: `pending_review`"
+            )
+            text = text.replace(
+                "Review decision: `reviewed`", "Review decision: `pending_review`"
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.IncidentDrillEvidenceError, "Readiness claim"
+            ):
+                checker.validate_evidence(path)
+
     def test_reviewed_non_passed_recovery_status_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "incident-drill.md"

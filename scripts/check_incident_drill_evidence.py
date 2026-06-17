@@ -236,7 +236,14 @@ def require_field_value(
 
 def is_placeholder(value: str) -> bool:
     lowered = value.lower()
-    return lowered in {"tbd", "template", "template-only"} or bool(
+    return lowered in {
+        "tbd",
+        "template",
+        "template-only",
+        "n/a",
+        "na",
+        "none",
+    } or bool(
         ANGLE_PLACEHOLDER_RE.fullmatch(value)
     )
 
@@ -304,6 +311,8 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
         raise IncidentDrillEvidenceError(
             f"{path} non-template evidence must advance the review decision"
         )
+    if review_status == "pending_review":
+        require_field_value(path, fields, "Readiness claim", "blocked")
     if review_status == "reviewed":
         require_field_value(path, fields, "Review decision", "reviewed")
         require_field_value(path, fields, "Readiness claim", "complete")
