@@ -23,6 +23,9 @@
       "scripts/check_incident_drill_evidence.py",
       "scripts/check_readme.py",
       "scripts/test_readme.py",
+      "scripts/check_first_30_minutes.py",
+      "scripts/test_first_30_minutes.py",
+      "docs/first-30-minutes.md",
       "scripts/check_curator_rewards_flow.py",
       "scripts/test_curator_rewards_flow.py",
       "scripts/check_withdrawals_credits_flow.py",
@@ -59,7 +62,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:ee5a32ccdc456e5b5fdb156447a079d18df49a9d87bdc7334c59c21286baaa90"
+    "sha256": "sha256:bbe94cdc8259129b8a203a8d0f9d51942b95652c6a13c750c1c23f41204b2093"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -175,6 +178,11 @@
       "path": "deployments/schema/randomizer-operations-evidence.schema.json",
       "sha256": "sha256:b7d89e436872ef9bd8072d8a21badd8f4c691e053b6a829e9dc676b22872bf44",
       "size_bytes": 7882
+    },
+    {
+      "path": "docs/first-30-minutes.md",
+      "sha256": "sha256:4e3d915153d3515f6bcbb4102c64768c496173acae968970d0e4e06894dc9871",
+      "size_bytes": 9578
     },
     {
       "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
@@ -523,7 +531,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:43a2355ebce7f93c09052aee1bc3f364e78897d68eaf2dc567a0feb31d9e4dea",
+      "sha256": "sha256:0e432f86e039e0622a78092e98d5e79be50371f4663c7b900146807510d72e88",
       "size_bytes": 79962
     },
     {
@@ -633,22 +641,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:a377328e9f9f7065fe310b337862955abcbe5a586796617381416d2fe58eed5e",
-      "size_bytes": 112056
+      "sha256": "sha256:5455c281ed7aeecd5b8b51cb689438e64ba6c38a1df8a91adc190f6ad62aabc8",
+      "size_bytes": 112237
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:ba498a38d4d092cd9e6f158af6d43c5cc7b3e53495e5961b4975ac278a50138e",
-      "size_bytes": 54593
+      "sha256": "sha256:4e17daf667c2d9d406b078ef80b654c4d982a72a853206c65e449e6cf75bda02",
+      "size_bytes": 54968
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:cf31529e60dca79586b3046e02ed91232e4cdda3e6576b444e006e823bbe91d4",
-      "size_bytes": 52024
+      "sha256": "sha256:6f95d8c07108c196017c748c9b74e0228db4fd15510570aaff05e62646880432",
+      "size_bytes": 52392
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:9082c082dd69dce7fe0ac33d100a52a5a3b765c363ac1b4b76727e922e66c47d",
+      "sha256": "sha256:c68f7bc29e59f38b2e5aa6ffbcec266ec924f5ade76d5e32ae1e3131e5694e28",
       "size_bytes": 22929
     },
     {
@@ -742,6 +750,11 @@
       "size_bytes": 10873
     },
     {
+      "path": "scripts/check_first_30_minutes.py",
+      "sha256": "sha256:33d863088f28a366da549b3cde784683c83b29c9eddd67350ca81f9bbbbb6f80",
+      "size_bytes": 9878
+    },
+    {
       "path": "scripts/check_incident_drill_evidence.py",
       "sha256": "sha256:6bdbc45aef92fb1944fa5867a79308a579e68dbf3ac086b0034d265541ac608e",
       "size_bytes": 12027
@@ -773,8 +786,8 @@
     },
     {
       "path": "scripts/check_readme.py",
-      "sha256": "sha256:a3d6ec556ad3ec868b1e799fd3965e98dc209f2b6900ba73480ed12508099360",
-      "size_bytes": 9478
+      "sha256": "sha256:bf0a7a3e1acd715a74fa8711b08b13386e1df4f769626225e782a1d6dcd97a92",
+      "size_bytes": 9605
     },
     {
       "path": "scripts/check_release_mode.py",
@@ -825,6 +838,11 @@
       "path": "scripts/test_curator_rewards_flow.py",
       "sha256": "sha256:74b6441bde1577bc76710998feb35706899992c988cf3373bc18ce751252dc15",
       "size_bytes": 10558
+    },
+    {
+      "path": "scripts/test_first_30_minutes.py",
+      "sha256": "sha256:0acf52cb96e12c3e542fbd431bb3d8ae63858ab9a6bc4ff663ee92a163e8b01b",
+      "size_bytes": 9314
     },
     {
       "path": "scripts/test_integration_conformance_fixtures.py",

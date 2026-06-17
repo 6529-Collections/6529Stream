@@ -197,6 +197,8 @@ jobs:
             scripts/test_incident_response.py \
             scripts/check_readme.py \
             scripts/test_readme.py \
+            scripts/check_first_30_minutes.py \
+            scripts/test_first_30_minutes.py \
             scripts/check_integrations_readme.py \
             scripts/test_integrations_readme.py \
             scripts/check_contract_flows.py \
@@ -595,6 +597,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_readme.py 2>&1 | tee ci-logs/readme-tests.log
           python3 scripts/check_readme.py 2>&1 | tee ci-logs/readme-check.log
+          python3 scripts/test_first_30_minutes.py 2>&1 | tee ci-logs/first-30-minutes-tests.log
+          python3 scripts/check_first_30_minutes.py 2>&1 | tee ci-logs/first-30-minutes-check.log
 
       - name: Integrations README
         shell: bash

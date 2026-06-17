@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:7940d038d4d55ab491fc54864982140970b56d59fb7d7a039a31dd4bd9d1be8b",
-      "size_bytes": 52289
+      "sha256": "sha256:b180f22d8ace36411f4aa8ee7617d45b9e37506bd5b3d2d91ba62120821d3e9c",
+      "size_bytes": 52665
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:9082c082dd69dce7fe0ac33d100a52a5a3b765c363ac1b4b76727e922e66c47d",
+      "sha256": "sha256:c68f7bc29e59f38b2e5aa6ffbcec266ec924f5ade76d5e32ae1e3131e5694e28",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked first-30-minutes contributor guide covering fresh checkout setup, Foundry/Python/Windows prerequisites, `forge` not being on `PATH`, canonical local gates, docs-only and Solidity/test validation paths, known warning noise, generated artifact drift, no-secret maturity boundaries, local/CI/Windows gate wiring, and release-manifest/checksum coverage.",
       "Added checked INT-016 integration conformance fixtures for frontend, mobile, Electron, indexer, operator UI, and signing-service teams, covering artifact loading, fail-closed chain config, EIP-712 domain expectations, event topic dispatch, normalized log identity, read-after-event queues, duplicate log idempotency, unknown emitter/topic rejection, confirmation depth, reorg rollback, no-secret redaction diagnostics, local/CI/Windows gate wiring, and release-manifest/checksum coverage.",
       "Added checked INT-015 TypeScript event decoding and indexer ingestion snippets covering event topic catalog loading, `topic0` dispatch, normalized log identity, ABI/topic drift checks, idempotent ingestion, confirmation depth, reorg rollback, read-after-event queues, no-secret diagnostics, local/CI/Windows gate wiring, and release-manifest/checksum coverage for frontend and indexer teams.",
       "Added checked INT-014 TypeScript EIP-712 payload construction snippets covering domain construction, `DropAuthorization` message shape, drop ID derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe boundaries, submission preflight, no-secret logging, local/CI/Windows gate wiring, and release-manifest/checksum coverage for frontend and signing service teams.",

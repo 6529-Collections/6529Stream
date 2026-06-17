@@ -3430,8 +3430,8 @@ unless an external dependency changes.
 | `INT-013` | Add TypeScript snippets for artifact loading and chain config | G | Merged in PR #491; issue #490 closed completed |
 | `INT-014` | Add TypeScript snippets for EIP-712 payload construction | G | Merged in PR #493; issue #492 closed completed |
 | `INT-015` | Add TypeScript snippets for event decoding/indexer ingestion | G | Merged in PR #495; issue #494 closed completed |
-| `INT-016` | Add integration conformance fixtures for frontend teams | G | In progress on issue #496 and branch `codex/integration-conformance-fixtures`; depends on `INT-013` to `INT-015` |
-| `INT-017` | Add minimal read-only reference UI, if still useful after docs | G | stable testnet addresses |
+| `INT-016` | Add integration conformance fixtures for frontend teams | G | Merged in PR #497; issue #496 closed completed |
+| `INT-017` | Add minimal read-only reference UI, if still useful after docs | G | Blocked/deferred until stable testnet addresses exist |
 | `INT-018` | Add transaction-flow reference UI, if maintainers want app code in repo | G | `INT-017` |
 
 ### Audit And Open Source
@@ -3441,7 +3441,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | `AUD-001` |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `OSS-002` | Add first-30-minutes contributor guide | A/G | README refresh |
+| `OSS-002` | Add first-30-minutes contributor guide | A/G | In progress on issue #498 and branch `codex/first-30-minutes-contributor-guide`; depends on README refresh |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | backlog labels |
 | `OSS-004` | Add PR template release-impact checklist | G | changelog policy |
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | docs stabilization |

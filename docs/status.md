@@ -4,6 +4,11 @@
 
 The current Gate A smoke baseline proves:
 
+- The checked fresh-contributor path in
+  [`docs/first-30-minutes.md`](first-30-minutes.md) covers pinned tool
+  expectations, `forge` not being on `PATH`, Windows PowerShell wrapper usage,
+  known warning noise, generated artifact drift, docs-only paths, Solidity/test
+  paths, and no-secret maturity boundaries.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
