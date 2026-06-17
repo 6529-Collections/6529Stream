@@ -39,7 +39,7 @@ Supported consumer categories for this entrypoint:
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
 | Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`events-and-indexing.md`](events-and-indexing.md), [`integration-conformance-fixtures.md`](integration-conformance-fixtures.md), [`fixtures/integration-conformance-fixtures.json`](fixtures/integration-conformance-fixtures.json), [`metadata-rendering.md`](metadata-rendering.md), and [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Auction lifecycle, curator reward claims, withdrawal and credit reconstruction, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, cache invalidation, INT-016 integration conformance fixtures, and retained marketplace/indexer evidence requirements are documented for the local baseline |
-| Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, release-readiness dashboard, [`operator-admin-ui.md`](operator-admin-ui.md), and [`docs/monitoring.md`](../monitoring.md) | Current `INT-010` operator personas, Safe/multisig ceremony, role, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and evidence-boundary guidance is documented; the current `GOV-009` protocol monitoring specification covers admin, signer, auction, randomness, credits, metadata, dependency, and release evidence monitoring |
+| Operator UI | Use deployment docs, ceremony evidence, randomizer operations docs, risk register, release-readiness dashboard, [`operator-admin-ui.md`](operator-admin-ui.md), [`docs/monitoring.md`](../monitoring.md), and [`docs/operator-dashboard-query-model.md`](../operator-dashboard-query-model.md) | Current `INT-010` operator personas, Safe/multisig ceremony, role, signer, pause, metadata, dependency, randomizer, emergency, monitoring, and evidence-boundary guidance is documented; the current `GOV-009` protocol monitoring specification covers admin, signer, auction, randomness, credits, metadata, dependency, and release evidence monitoring; the current `GOV-010` operator dashboard query model maps those monitors into concrete panels, query inputs, source artifacts, freshness, severity, and no-secret telemetry boundaries |
 | Backend signing service | Use EIP-712, ERC-1271, Safe, signer custody, drop authorization signing docs, and [`wallets-and-signatures.md`](wallets-and-signatures.md) | Local templates and integration guidance only; production signing evidence remains blocked |
 
 ## Source Of Truth
@@ -93,6 +93,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Electron security and wallet guide | [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md) | Current `INT-009` Electron main/renderer/preload, context isolation, IPC allowlist, wallet-provider, metadata sandbox, signed-update, and no-secret guide |
 | Operator admin UI guide | [`docs/integrations/operator-admin-ui.md`](operator-admin-ui.md) | Current `INT-010` operator personas, Safe/multisig ceremony, roles, signer lifecycle, pause domains, metadata freeze, dependency, randomizer, emergency, monitoring, and no-secret evidence guidance |
 | Protocol monitoring specification | [`docs/monitoring.md`](../monitoring.md) | Current `GOV-009` protocol monitoring specification for admin, signer, auction, randomness, credits, metadata, dependency, release evidence, alert severity, dashboard queries, and incident handoff |
+| Operator dashboard query model | [`docs/operator-dashboard-query-model.md`](../operator-dashboard-query-model.md) | Current `GOV-010` dashboard query model for environment/release, admin, signer, fixed-price, auction, randomizer, payments, metadata/dependency, release blocker, and incident drill panels |
 | Release signatures | [`docs/release-signatures.md`](../release-signatures.md) | No production signatures are committed |
 
 ## Canonical Artifacts
@@ -134,6 +135,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md)
 - [`docs/integrations/operator-admin-ui.md`](operator-admin-ui.md)
 - [`docs/monitoring.md`](../monitoring.md)
+- [`docs/operator-dashboard-query-model.md`](../operator-dashboard-query-model.md)
 - [`docs/integrations/examples/react-viem.md`](examples/react-viem.md)
 - [`release-artifacts/README.md`](../../release-artifacts/README.md)
 - [`release-artifacts/contracts.json`](../../release-artifacts/contracts.json)
@@ -224,6 +226,8 @@ to understand what is still intentionally future work:
   [`operator-admin-ui.md`](operator-admin-ui.md).
 - `GOV-009`: the protocol monitoring specification is now
   [`docs/monitoring.md`](../monitoring.md).
+- `GOV-010`: the operator dashboard query model is now
+  [`docs/operator-dashboard-query-model.md`](../operator-dashboard-query-model.md).
 - `INT-011`: the curator rewards frontend flow spec is now
   [`curator-rewards.md`](curator-rewards.md).
 - `INT-012`: the withdrawal and credit UX flow spec is now
@@ -343,6 +347,8 @@ python scripts/test_electron_security_wallets.py
 python scripts/check_electron_security_wallets.py
 python scripts/test_operator_admin_ui.py
 python scripts/check_operator_admin_ui.py
+python scripts/test_operator_dashboard_query_model.py
+python scripts/check_operator_dashboard_query_model.py
 python scripts/test_monitoring_spec.py
 python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py

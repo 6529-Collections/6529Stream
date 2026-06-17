@@ -112,6 +112,14 @@ dependency, release evidence, alert severity, dashboard queries, and incident
 handoff without adding a maintained monitoring service, hosted dashboard, alert
 provider integration, or production indexer.
 Use
+[`docs/operator-dashboard-query-model.md`](operator-dashboard-query-model.md)
+as the `GOV-010` operator dashboard query model, mapping environment/release,
+admin, signer, fixed-price, auction, randomizer, payment, metadata/dependency,
+release blocker, and incident drill panels to query inputs, source artifacts,
+freshness, severity, and no-secret telemetry boundaries without adding a
+maintained dashboard, hosted monitoring service, alert provider, RPC provider,
+or production indexer.
+Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
 [`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md)
@@ -505,6 +513,7 @@ Audit and protocol evidence:
 - [docs/integrations/electron-security-wallets.md](integrations/electron-security-wallets.md)
 - [docs/integrations/operator-admin-ui.md](integrations/operator-admin-ui.md)
 - [docs/monitoring.md](monitoring.md)
+- [docs/operator-dashboard-query-model.md](operator-dashboard-query-model.md)
 - [docs/integrations/examples/react-viem.md](integrations/examples/react-viem.md)
 
 Release artifacts:
@@ -599,6 +608,8 @@ python scripts/test_electron_security_wallets.py
 python scripts/check_electron_security_wallets.py
 python scripts/test_operator_admin_ui.py
 python scripts/check_operator_admin_ui.py
+python scripts/test_operator_dashboard_query_model.py
+python scripts/check_operator_dashboard_query_model.py
 python scripts/test_monitoring_spec.py
 python scripts/check_monitoring_spec.py
 python scripts/test_drop_authorization_payload_generator.py

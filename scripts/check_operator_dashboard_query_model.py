@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the protocol monitoring specification."""
+"""Validate the operator dashboard query model."""
 
 from __future__ import annotations
 
@@ -9,29 +9,33 @@ import sys
 from pathlib import Path
 
 
-DEFAULT_MONITORING_SPEC = Path("docs/monitoring.md")
+DEFAULT_DASHBOARD_MODEL = Path("docs/operator-dashboard-query-model.md")
 
 REQUIRED_HEADINGS = [
-    (1, "Protocol Monitoring Specification"),
+    (1, "Operator Dashboard Query Model"),
     (2, "Maturity And Scope"),
     (2, "Source Of Truth"),
-    (2, "Data Sources"),
-    (2, "Event Coverage"),
-    (2, "Admin And Role Monitoring"),
-    (2, "Signer And Drop Authorization Monitoring"),
-    (2, "Auction Monitoring"),
-    (2, "Randomizer Monitoring"),
-    (2, "Payment And Credit Monitoring"),
-    (2, "Metadata And Dependency Monitoring"),
-    (2, "Release Evidence Monitoring"),
-    (2, "Alert Severity Model"),
-    (2, "Dashboard And Query Model"),
-    (2, "Incident Handoff"),
+    (2, "Dashboard Data Contract"),
+    (2, "Common Query Inputs"),
+    (2, "Panel Catalog"),
+    (2, "Environment And Release Snapshot Panel"),
+    (2, "Admin And Governance Panel"),
+    (2, "Signer And Drop Authorization Panel"),
+    (2, "Fixed-Price Drop Execution Panel"),
+    (2, "Auction Health Panel"),
+    (2, "Randomizer Lifecycle Panel"),
+    (2, "Payment And Credit Solvency Panel"),
+    (2, "Metadata And Dependency State Panel"),
+    (2, "Release Evidence And Blocker Panel"),
+    (2, "Incident Drill And Handoff Panel"),
+    (2, "Freshness And Reorg Model"),
+    (2, "No-Secret Telemetry"),
     (2, "Validation Commands"),
     (2, "Maintenance"),
 ]
 
 REQUIRED_PHRASES = [
+    "GOV-010",
     "GOV-009",
     "pre-audit local baseline",
     "not production-ready",
@@ -39,29 +43,37 @@ REQUIRED_PHRASES = [
     "does not replace fork/testnet/live evidence",
     "maintained monitoring service",
     "public beta",
-    "public beta or production",
-    "no secrets",
+    "production",
+    "No secrets",
     "private keys",
     "mnemonics",
     "RPC URLs",
     "API keys",
     "signer-service credentials",
+    "raw signatures",
+    "Safe signing secrets",
     "unreleased drop payloads",
-    "chain ID",
-    "deployment version",
-    "contract address",
-    "block number",
-    "block hash",
-    "transaction hash",
-    "log index",
-    "event signature",
-    "normalized log identity",
+    "chainId",
+    "deploymentVersion",
+    "releaseManifestHash",
+    "addressBookHash",
+    "contractAddress",
+    "blockNumber",
+    "blockHash",
+    "transactionHash",
+    "logIndex",
+    "eventSignature",
+    "normalizedLogIdentity",
+    "freshnessStatus",
+    "operatorActionBoundary",
     "confirmation depth",
     "reorg rollback",
+    "read-after-event",
     "event topic catalog",
+    "ABI checksum",
+    "interface IDs",
     "release manifest",
     "checksum bundle",
-    "address book",
     "bytecode proof",
     "risk register",
     "public-beta evidence",
@@ -71,73 +83,70 @@ REQUIRED_PHRASES = [
     "UnpauseAdminUpdated",
     "SignerManagerUpdated",
     "SignerLifecycleTargetUpdated",
+    "PauseUpdated",
     "EmergencyRecipientUpdated",
     "DropSignerChanged",
     "SignerEpochChanged",
     "DropAuthorizationCancelled",
-    "PauseUpdated",
-    "EmergencyWithdrawal",
+    "DropAuthorizationConsumed",
+    "EIP-712",
+    "ERC-1271",
+    "consumed-state storage",
+    "FixedPriceCreditCreated",
+    "AuctionRegistered",
+    "Participate",
+    "OutbidCreditCreated",
+    "AuctionProceedsCreditCreated",
+    "RandomnessRequested",
+    "RandomnessFulfilled",
+    "RandomnessRequestMarkedStale",
+    "RandomnessPostProcessingFailed",
     "CollectionFrozen",
     "PermanentURI",
     "ERC-4906",
     "DependencyVersionCreated",
     "DependencyVersionDeprecated",
     "DependencyVersionPinned",
-    "DROP_EXECUTION",
-    "AUCTION_BID",
-    "AUCTION_SETTLEMENT",
-    "METADATA_MUTATION",
-    "RANDOMNESS_REQUEST",
-    "EIP-712",
-    "ERC-1271",
-    "approved Safe or multisig ceremony",
-    "EOA",
-    "Replay protection",
-    "consumed-state storage",
-    "token custody is known at all times",
-    "previous bidder refund becomes withdrawable credit",
-    "settlement is idempotent",
+    "ContractURIUpdated",
     "poster credits",
     "bidder credits",
     "curator credits",
     "protocol surplus",
     "total owed",
-    "emergency withdrawable",
+    "emergencyWithdrawable",
     "failed withdrawal does not erase credit",
     "emergency withdrawal cannot withdraw owed funds",
-    "fulfillment validates request ID, token, collection, randomizer address, and randomizer epoch",
-    "provider funding",
-    "stale requests",
-    "critical alert",
-    "incident-response handoff",
+    "incident handoff",
 ]
 
 REQUIRED_SECTION_PHRASES = {
-    "Event Coverage": [
-        "Admin and roles",
-        "Signer and drop authorization",
-        "Pause and emergency",
-        "Auction",
-        "Payments and credits",
-        "Randomizer",
-        "Metadata and dependency",
-        "Release evidence",
+    "Panel Catalog": [
+        "Environment And Release Snapshot",
+        "Admin And Governance",
+        "Signer And Drop Authorization",
+        "Fixed-Price Drop Execution",
+        "Auction Health",
+        "Randomizer Lifecycle",
+        "Payment And Credit Solvency",
+        "Metadata And Dependency State",
+        "Release Evidence And Blockers",
+        "Incident Drill And Handoff",
     ],
-    "Admin And Role Monitoring": [
-        "role change",
-        "approved Safe or multisig ceremony",
-        "selector coverage drift",
-        "two-person review",
-        "post-state read",
+    "Admin And Governance Panel": [
+        "retrieveGlobalAdmin",
+        "retrieveFunctionAdmin",
+        "isPaused(domain)",
+        "Critical",
+        "prepare Safe or multisig ceremony",
     ],
-    "Signer And Drop Authorization Monitoring": [
-        "signer rotation",
-        "signer custody readiness evidence",
-        "signer epoch increments",
-        "drop cancellations",
-        "accepted drop authorization",
+    "Signer And Drop Authorization Panel": [
+        "tdhSigner()",
+        "signerEpoch()",
+        "EIP-712 domain",
+        "ERC-1271 support status",
+        "consumed-state storage",
     ],
-    "Auction Monitoring": [
+    "Auction Health Panel": [
         "None",
         "Created",
         "Active",
@@ -146,39 +155,36 @@ REQUIRED_SECTION_PHRASES = {
         "SettledNoBid",
         "SettledWithBid",
         "Cancelled",
-        "stuck auctions",
+        "unknown token custody",
     ],
-    "Randomizer Monitoring": [
+    "Randomizer Lifecycle Panel": [
         "request ID",
+        "collection ID",
+        "token ID",
         "randomizer epoch",
-        "unexpected provider",
         "duplicate callback",
-        "pending request age",
     ],
-    "Payment And Credit Monitoring": [
+    "Payment And Credit Solvency Panel": [
         "poster credits",
         "bidder credits",
         "curator credits",
         "protocol surplus",
         "contract balance covers owed balances",
     ],
-    "Dashboard And Query Model": [
-        "deployment selector",
-        "admin activity",
-        "signer activity",
-        "auction health",
-        "randomizer health",
-        "payments and credits",
-        "metadata and dependency state",
-        "release evidence",
+    "Release Evidence And Blocker Panel": [
+        "public-beta evidence",
+        "risk-register",
+        "release evidence issue",
+        "signed tag",
+        "explorer verification",
     ],
 }
 
 REQUIRED_COMMANDS = [
-    "python scripts/test_monitoring_spec.py",
-    "python scripts/check_monitoring_spec.py",
     "python scripts/test_operator_dashboard_query_model.py",
     "python scripts/check_operator_dashboard_query_model.py",
+    "python scripts/test_monitoring_spec.py",
+    "python scripts/check_monitoring_spec.py",
     "python scripts/test_integrations_readme.py",
     "python scripts/check_integrations_readme.py",
     "python scripts/test_release_readiness.py",
@@ -187,33 +193,41 @@ REQUIRED_COMMANDS = [
     "python scripts/check_readme.py",
     "python scripts/test_markdown_links.py",
     "python scripts/check_markdown_links.py",
+    "python scripts/test_release_manifest.py",
+    "python scripts/generate_release_manifest.py --check",
+    "python scripts/test_release_checksums.py",
+    "python scripts/generate_release_checksums.py --check",
     "python scripts/check_changelog.py",
-    "make monitoring-spec-check",
+    "make operator-dashboard-query-model-check",
     "make check",
     "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check.ps1",
 ]
 
 REQUIRED_LINK_TARGETS = [
     "README.md",
+    "docs/monitoring.md",
     "docs/release-readiness.md",
-    "docs/non-local-release-evidence.md",
     "docs/incident-response.md",
+    "docs/non-local-release-evidence.md",
     "docs/integrations/README.md",
-    "docs/integrations/events-and-indexing.md",
     "docs/integrations/operator-admin-ui.md",
-    "docs/operator-dashboard-query-model.md",
+    "docs/integrations/events-and-indexing.md",
+    "docs/integrations/contract-flows.md",
     "docs/integrations/auction-flows.md",
     "docs/integrations/withdrawals-and-credits.md",
+    "docs/integrations/wallets-and-signatures.md",
+    "docs/integrations/metadata-rendering.md",
     "docs/drop-authorization-signing.md",
     "docs/signer-custody-readiness.md",
     "docs/randomizer-operations.md",
     "docs/dependency-operations.md",
-    "docs/metadata.md",
     "docs/deployment.md",
-    "docs/protocol-surface.md",
-    "docs/custom-errors.md",
     "docs/release-policy.md",
+    "docs/public-beta-evidence.md",
     "release-artifacts/latest/release-manifest.json",
+    "release-artifacts/latest/SHA256SUMS",
+    "release-artifacts/latest/release-checksums.json",
+    "release-artifacts/latest/bytecode-release-proof.json",
     "release-artifacts/latest/event-topic-catalog.json",
     "release-artifacts/latest/interface-ids.json",
     "release-artifacts/latest/protocol-surface-report.json",
@@ -229,16 +243,16 @@ REQUIRED_LINK_TARGETS = [
     "smart-contracts/StreamDrops.sol",
     "smart-contracts/AuctionContract.sol",
     "smart-contracts/StreamMinter.sol",
+    "smart-contracts/StreamCuratorsPool.sol",
     "smart-contracts/StreamRandomizerLifecycle.sol",
-    "smart-contracts/RandomizerRNG.sol",
-    "smart-contracts/RandomizerVRF.sol",
     "smart-contracts/StreamCore.sol",
+    "smart-contracts/DependencyRegistry.sol",
     "test/StreamEventReconstructability.t.sol",
     "test/StreamPauseControls.t.sol",
+    "test/StreamSignerAdmin.t.sol",
     "test/StreamAuctionPayments.t.sol",
     "test/StreamRandomizerLifecycle.t.sol",
-    "test/StreamRandomizerPayments.t.sol",
-    "test/StreamSignerAdmin.t.sol",
+    "test/StreamPaymentsInvariant.t.sol",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
@@ -246,8 +260,8 @@ LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 FENCED_CODE_RE = re.compile(r"^```[^\n]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
 
 
-class MonitoringSpecError(ValueError):
-    """Raised when the monitoring specification is incomplete."""
+class DashboardQueryModelError(ValueError):
+    """Raised when the operator dashboard query model is incomplete."""
 
 
 def normalize_repo_path(path: Path, repo_root: Path) -> str:
@@ -255,7 +269,9 @@ def normalize_repo_path(path: Path, repo_root: Path) -> str:
     try:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except ValueError as exc:
-        raise MonitoringSpecError(f"linked path escapes repository: {path}") from exc
+        raise DashboardQueryModelError(
+            f"linked path escapes repository: {path}"
+        ) from exc
 
 
 def markdown_headings(text: str) -> set[tuple[int, str]]:
@@ -303,8 +319,8 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
         links.add(relative)
 
     if missing:
-        raise MonitoringSpecError(
-            "monitoring specification links to missing files: "
+        raise DashboardQueryModelError(
+            "operator dashboard query model links to missing files: "
             + ", ".join(sorted(set(missing)))
         )
     return links
@@ -312,11 +328,11 @@ def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[st
 
 def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     """Return required phrases not found after whitespace normalization."""
-    normalized_text = re.sub(r"\s+", " ", text)
+    normalized_text = re.sub(r"\s+", " ", text).lower()
     return [
         phrase
         for phrase in phrases
-        if re.sub(r"\s+", " ", phrase) not in normalized_text
+        if re.sub(r"\s+", " ", phrase).lower() not in normalized_text
     ]
 
 
@@ -341,11 +357,13 @@ def fenced_command_lines(text: str) -> set[str]:
     return command_lines
 
 
-def validate_monitoring_spec(repo_root: Path, document_path: Path) -> None:
-    """Validate the monitoring specification."""
+def validate_dashboard_query_model(repo_root: Path, document_path: Path) -> None:
+    """Validate the operator dashboard query model."""
     if not document_path.is_file():
         relative = normalize_repo_path(document_path, repo_root)
-        raise MonitoringSpecError(f"missing monitoring specification: {relative}")
+        raise DashboardQueryModelError(
+            f"missing operator dashboard query model: {relative}"
+        )
 
     text = document_path.read_text(encoding="utf-8")
     headings = markdown_headings(text)
@@ -355,15 +373,15 @@ def validate_monitoring_spec(repo_root: Path, document_path: Path) -> None:
         if (level, title) not in headings
     ]
     if missing_required_headings:
-        raise MonitoringSpecError(
-            "monitoring specification is missing required headings: "
+        raise DashboardQueryModelError(
+            "operator dashboard query model is missing required headings: "
             + ", ".join(missing_required_headings)
         )
 
     missing_required_phrases = missing_phrases(text, REQUIRED_PHRASES)
     if missing_required_phrases:
-        raise MonitoringSpecError(
-            "monitoring specification is missing required content: "
+        raise DashboardQueryModelError(
+            "operator dashboard query model is missing required content: "
             + ", ".join(missing_required_phrases)
         )
 
@@ -373,8 +391,8 @@ def validate_monitoring_spec(repo_root: Path, document_path: Path) -> None:
         for phrase in missing_phrases(section, phrases):
             missing_section_content.append(f"{heading}: {phrase}")
     if missing_section_content:
-        raise MonitoringSpecError(
-            "monitoring specification has incomplete sections: "
+        raise DashboardQueryModelError(
+            "operator dashboard query model has incomplete sections: "
             + ", ".join(missing_section_content)
         )
 
@@ -383,45 +401,43 @@ def validate_monitoring_spec(repo_root: Path, document_path: Path) -> None:
         command for command in REQUIRED_COMMANDS if command not in command_lines
     ]
     if missing_commands:
-        raise MonitoringSpecError(
-            "monitoring specification is missing required commands: "
+        raise DashboardQueryModelError(
+            "operator dashboard query model is missing required commands: "
             + ", ".join(missing_commands)
         )
 
     links = linked_repo_paths(repo_root, document_path, text)
-    missing_links = [
-        target for target in REQUIRED_LINK_TARGETS if target not in links
-    ]
+    missing_links = [target for target in REQUIRED_LINK_TARGETS if target not in links]
     if missing_links:
-        raise MonitoringSpecError(
-            "monitoring specification is missing required links: "
+        raise DashboardQueryModelError(
+            "operator dashboard query model is missing required links: "
             + ", ".join(missing_links)
         )
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    """Parse monitoring checker options."""
+    """Parse dashboard query model checker options."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
-    parser.add_argument("--monitoring-spec", type=Path, default=DEFAULT_MONITORING_SPEC)
+    parser.add_argument("--dashboard-model", type=Path, default=DEFAULT_DASHBOARD_MODEL)
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the monitoring specification checker CLI."""
+    """Run the dashboard query model checker CLI."""
     args = parse_args(sys.argv[1:] if argv is None else argv)
     repo_root = args.repo_root.resolve()
-    document_path = args.monitoring_spec
+    document_path = args.dashboard_model
     if not document_path.is_absolute():
         document_path = repo_root / document_path
 
     try:
-        validate_monitoring_spec(repo_root, document_path.resolve())
-    except MonitoringSpecError as exc:
-        print(f"monitoring specification check failed: {exc}", file=sys.stderr)
+        validate_dashboard_query_model(repo_root, document_path.resolve())
+    except DashboardQueryModelError as exc:
+        print(f"operator dashboard query model check failed: {exc}", file=sys.stderr)
         return 1
 
-    print("monitoring specification is current")
+    print("operator dashboard query model is current")
     return 0
 
 

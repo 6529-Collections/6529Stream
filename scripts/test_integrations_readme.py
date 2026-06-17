@@ -75,7 +75,7 @@ for OpenSea, Reservoir, Blur, and Manifold is named.
 
 ## Integration Flows
 
-Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, INT-010, INT-011, INT-012, INT-013, INT-014, INT-015, INT-016, and GOV-009.
+Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, INT-010, INT-011, INT-012, INT-013, INT-014, INT-015, INT-016, GOV-009, and GOV-010.
 The fixed-price mint flow is listed.
 Interface and version views for frontend compatibility are listed.
 The auction frontend and indexer flow spec is listed.
@@ -107,6 +107,8 @@ The mobile and WalletConnect integration guide is listed.
 The Electron security and wallet integration guide is listed.
 The operator admin UI specification is listed.
 The protocol monitoring specification is listed.
+The operator dashboard query model and dashboard query model are listed with
+query inputs, source artifacts, freshness, severity, and no-secret telemetry.
 The maintained frontend package, generated SDK, maintained mobile SDK,
 React Native app, WalletConnect dependency recommendation, maintained Electron app,
 native desktop app, desktop SDK, code-signing implementation, and
