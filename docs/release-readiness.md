@@ -398,6 +398,12 @@ The current local baseline includes:
   validated offline with
   `python scripts/test_failed_randomness_drill_evidence.py` and
   `python scripts/check_failed_randomness_drill_evidence.py`,
+  plus bad metadata/dependency drill evidence for
+  `bad_metadata_dependency_drill_evidence` under
+  [`release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md),
+  validated offline with
+  `python scripts/test_bad_metadata_dependency_drill_evidence.py` and
+  `python scripts/check_bad_metadata_dependency_drill_evidence.py`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with
@@ -457,6 +463,10 @@ for:
   custody, pause/unpause, settlement or cancellation outcome, bidder and
   proceeds credits, withdrawal availability, emergency-surplus boundary,
   monitoring handoff, reviewer approval, and redaction;
+- reviewed bad metadata/dependency drill evidence for metadata schema/state,
+  token URI snapshots, URI/UTF-8/raw-attributes or browser-sandbox failure,
+  dependency key/version/content hash, freeze and repin boundary, ERC-4906/cache
+  invalidation, marketplace/indexer handoff, reviewer approval, and redaction;
 - reviewed signer custody readiness evidence with custody owner, signer
   manager, signer epoch source, signer-service integration, ERC-1271 status,
   rotation/revocation drills, monitoring, and incident-response references;
@@ -617,6 +627,8 @@ python scripts/test_stuck_auction_drill_evidence.py
 python scripts/check_stuck_auction_drill_evidence.py
 python scripts/test_failed_randomness_drill_evidence.py
 python scripts/check_failed_randomness_drill_evidence.py
+python scripts/test_bad_metadata_dependency_drill_evidence.py
+python scripts/check_bad_metadata_dependency_drill_evidence.py
 python scripts/test_contract_flows.py
 python scripts/check_contract_flows.py
 python scripts/test_auction_flows.py

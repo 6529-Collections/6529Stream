@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3e2936f8d5dd8f9752480b5aeefbd8f9ceebf81bc3b6900b06ccad0b58f12fb6",
-      "size_bytes": 55311
+      "sha256": "sha256:d372d14ebdbd5108fe6c09ef7c711ead32f942d488fe7e0a3cb40a8d6643d719",
+      "size_bytes": 55761
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c4d8f8b4029c3e894b9b1301508ecfb24edc7aca1736c6fc0f8f2777e0219202",
+      "sha256": "sha256:0266e7506570aeff297ef84bac22c504afc146e456adbcad857cc11cf56248df",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked `GOV-008` bad metadata/dependency drill retained-artifact template, source-aware checker, and regression tests covering metadata schema/state, token URI snapshots, URI/UTF-8/raw-attributes and browser sandbox evidence, dependency key/version/content hash, freeze manifest, repin boundaries, ERC-4906/cache invalidation, marketplace/indexer handoff, recovery decisions, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-007` failed-randomness drill retained-artifact template, source-aware checker, and regression tests covering request identity, provider type, provider epoch, pending/stale/failed/final lifecycle state, invalid callback handling, retry or stale marking, metadata state, provider migration boundaries, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-006` stuck-auction drill retained-artifact template, source-aware checker, and regression tests covering auction identity, stuck condition, custody, pause/unpause, terminal settlement or cancellation, bidder/proceeds credits, withdrawal availability, emergency-surplus boundary, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-005` signer-compromise drill retained-artifact template, source-aware checker, and regression tests covering drop-execution pause, signer rotation or revocation, epoch invalidation, per-drop cancellation, stale/cancelled/wrong-domain payload rejection, recovered fixed-price and auction payloads, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",
