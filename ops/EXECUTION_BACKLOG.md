@@ -911,7 +911,8 @@ Dependencies: Signer owner/operator decision outside repo.
 
 ### GOV-004: Add Pause And Incident Drill Evidence
 
-Status: Planned.
+Status: In progress on issue #480 and branch
+`codex/incident-drill-evidence-model`.
 
 Gate: F.
 

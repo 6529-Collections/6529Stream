@@ -32,6 +32,7 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/check_production_broadcast_retention.py"),
     Path("scripts/check_production_verified_addresses.py"),
     Path("scripts/check_live_metadata_browser_evidence.py"),
+    Path("scripts/check_incident_drill_evidence.py"),
     Path("scripts/generate_release_notes.py"),
     Path("scripts/verify_release_artifacts.py"),
     Path("deployments/broadcasts"),

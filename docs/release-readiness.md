@@ -363,6 +363,10 @@ The current local baseline includes:
   validated offline with
   `python scripts/test_live_randomizer_operations_evidence.py` and
   `python scripts/check_live_randomizer_operations_evidence.py`,
+  plus incident drill evidence for `incident_drill_evidence` under
+  [`release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md),
+  validated offline with `python scripts/test_incident_drill_evidence.py` and
+  `python scripts/check_incident_drill_evidence.py`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with
@@ -411,6 +415,9 @@ for:
 - production address books generated from retained broadcast artifacts;
 - verified deployed addresses and explorer verification status;
 - production signer and admin ceremony evidence with secrets redacted;
+- reviewed incident drill evidence for mint pause, bid pause, settlement pause,
+  withdrawal policy, failed randomness, stuck auction, bad metadata or
+  dependency configuration, bad Merkle root, and signer compromise drills;
 - reviewed signer custody readiness evidence with custody owner, signer
   manager, signer epoch source, signer-service integration, ERC-1271 status,
   rotation/revocation drills, monitoring, and incident-response references;

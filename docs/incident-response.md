@@ -380,6 +380,14 @@ The post-incident review should capture root cause, affected users or drops,
 timeline, detection gap, recovery actions, tests added, docs changed, remaining
 risk, and follow-up issue links.
 
+Retain planned drill evidence with the checked template at
+[`release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md).
+That artifact covers mint pause, bid pause, settlement pause, withdrawal
+policy, failed randomness, stuck auction, bad metadata or dependency
+configuration, bad Merkle root, and signer compromise drills. The template is
+not completion evidence until every `TBD` value is replaced, reviewed, and
+validated without secrets.
+
 ## Local Verification Commands
 
 Run the incident-response checker directly:
@@ -387,6 +395,8 @@ Run the incident-response checker directly:
 ```sh
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_incident_drill_evidence.py
+python scripts/check_incident_drill_evidence.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
@@ -429,6 +439,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_incident_drill_evidence.py
+python scripts/check_incident_drill_evidence.py
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py

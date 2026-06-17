@@ -156,6 +156,8 @@ jobs:
             scripts/test_production_verified_addresses.py \
             scripts/check_live_metadata_browser_evidence.py \
             scripts/test_live_metadata_browser_evidence.py \
+            scripts/check_incident_drill_evidence.py \
+            scripts/test_incident_drill_evidence.py \
             scripts/check_public_beta_evidence.py \
             scripts/test_public_beta_evidence.py \
             scripts/check_risk_register.py \
@@ -507,6 +509,8 @@ jobs:
           python3 scripts/check_live_metadata_browser_evidence.py 2>&1 | tee ci-logs/live-metadata-browser-evidence-check.log
           python3 scripts/test_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-tests.log
           python3 scripts/check_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-check.log
+          python3 scripts/test_incident_drill_evidence.py 2>&1 | tee ci-logs/incident-drill-evidence-tests.log
+          python3 scripts/check_incident_drill_evidence.py 2>&1 | tee ci-logs/incident-drill-evidence-check.log
 
       - name: Public beta evidence
         shell: bash

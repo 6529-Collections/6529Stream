@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/streamcore-external-view-headroom` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/477` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/478` |
-| Active PR | [#479](https://github.com/6529-Collections/6529Stream/pull/479) |
-| Next issue | TBD after the Core bytecode-spend policy gate lands. |
+| Active PR branch | `codex/incident-drill-evidence-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/479` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/480` |
+| Active PR | TBD |
+| Next issue | GOV-004 incident drill retained evidence model. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 01:15 UTC` |
+| Last updated | `2026-06-17 01:44 UTC` |
 
 ## Packaging Notes
 
@@ -282,6 +282,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 2026-06-17 01:05 | Start #478 Core bytecode-spend policy gate | Branch `codex/streamcore-external-view-headroom` measured and rejected three Core micro-refactors before choosing enforcement: externalizing unused public views had a 0-byte delta, moving freeze-manifest hashing into `StreamMetadataRenderer` increased Core by 181 bytes, and explicit metadata constant getters increased Core by 5 bytes. The local draft adds `scripts/check_core_bytecode_spend_policy.py`, focused tests, a pinned 22,184-byte approved baseline and rejected-experiment history in `release-artifacts/contracts.json`, Makefile/Bash/PowerShell/CI wiring, docs, changelog, and state updates. Next action is to run focused checks, regenerate release artifacts/checksums, run full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 01:13 | Validate #478 local draft | Focused Core bytecode-spend policy tests/check, contract-size budget tests/check, release notes, risk register, release manifest, bytecode release proof, release checksums, Python compile, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` both passed with existing compiler/Foundry warning noise only. `StreamCore` remains exactly 22,184 runtime bytes with 2,392 bytes of EIP-170 margin; the new gate fails future unreviewed increases above that approved baseline. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 01:15 | Open PR #479 for #478 | PR #479 is open at `https://github.com/6529-Collections/6529Stream/pull/479`, closes issue #478, and packages the Core bytecode-spend policy checker, baseline exception schema, rejected experiment history, local/CI/Windows gate wiring, docs, and regenerated release artifacts. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and 6529bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 01:44 | Start GOV-004 incident drill evidence model | PR #479 merged as `a09ec05d1c51ad7e8c8884f1420ff777040c239d` after CI, CodeRabbit status, and 6529bot follow-up were clean. Issue #480 and branch `codex/incident-drill-evidence-model` now track GOV-004. The local draft adds a checked incident-drill retained artifact template, `scripts/check_incident_drill_evidence.py`, focused tests, local/CI/Windows gate wiring, and incident-response/release-readiness/tooling/release-artifact docs. Focused incident-drill, incident-response, release-readiness, and Python compile checks pass. Next action is to refresh generated release artifacts/checksums, run focused/full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:38 | Start EXT-015 live ceremony evidence checker | PR #475 merged as `9631bf97470f45e3da67bbd06f8c7d8be1761d02` after CI and 6529bot follow-up were clean; issue #231 remains open for future completed post-audit remediation evidence. Branch `codex/live-ceremony-evidence-checker` adds a no-secret retained-artifact template and checker for future `live_ceremony_evidence` without changing production-release readiness claims. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:58 | Validate EXT-015 local draft | Added `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`, `scripts/check_live_ceremony_evidence.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, non-local evidence/tooling/release-readiness/release-artifact docs, packet-index command coverage, release-manifest/checksum coverage, and backlog/run-state traceability. Focused live-ceremony, packet-index, issue-body, release-notes, release-manifest, bytecode-proof, checksum, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` both passed with existing compiler/Foundry warning noise only. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-16 23:58 | Open PR #476 for EXT-015 | PR #476 is open at `https://github.com/6529-Collections/6529Stream/pull/476`, tracks issue #228 without closing it, and packages the live ceremony evidence checker, dedicated retained-artifact template, local/CI/Windows gate wiring, docs, regenerated release evidence, and state updates. CodeRabbit review was requested in comment `4724666547`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
