@@ -3167,8 +3167,7 @@ Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.
 
 ### ONE-006: Add Satellite-Extension Architecture Policy
 
-Status: In progress locally on issue #426 and branch
-`codex/satellite-extension-policy`.
+Status: Merged in PR #427; issue #426 closed completed.
 
 Gate: G.
 
@@ -3397,7 +3396,7 @@ unless an external dependency changes.
 | `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | Merged in PR #417 |
 | `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | Merged in PR #419 |
 | `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |
-| `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | `CON-005`, issues #420, #430, and #432 |
+| `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | Merged in PR #427; issue #426 closed completed |
 | `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | formatting/static-analysis gates |
 
 ### Release Engineering
@@ -3418,7 +3417,7 @@ unless an external dependency changes.
 | `GOV-006` | Add stuck auction drill retained evidence | F | `GOV-004` |
 | `GOV-007` | Add failed randomness drill retained evidence | F | `GOV-004` |
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | `GOV-004` |
-| `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | `INT-005` |
+| `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | In progress on issue #506 and branch `codex/protocol-monitoring-spec`; depends on `INT-005` |
 | `GOV-010` | Add operator dashboard query model | G | `INT-010` |
 
 ### Integration Readiness
@@ -3444,7 +3443,7 @@ unless an external dependency changes.
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
-| `OSS-005` | Add docs link checker or markdown-lint gate | G | In progress on issue #504 and branch `codex/markdown-link-gate`; depends on docs stabilization |
+| `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
 
 ## 6. Dependency Map
 

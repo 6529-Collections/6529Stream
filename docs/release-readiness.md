@@ -106,6 +106,11 @@ operations, emergency-withdrawable surplus, monitoring, incident links, and
 no-secret evidence boundaries without adding a maintained operator dashboard,
 Safe app, multisig transaction builder, monitoring service, or production
 signer custody implementation.
+Use [`docs/monitoring.md`](monitoring.md) as the `GOV-009` protocol monitoring
+specification covering admin, signer, auction, randomness, credits, metadata,
+dependency, release evidence, alert severity, dashboard queries, and incident
+handoff without adding a maintained monitoring service, hosted dashboard, alert
+provider integration, or production indexer.
 Use
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md)
 and
@@ -499,6 +504,7 @@ Audit and protocol evidence:
 - [docs/integrations/mobile-walletconnect.md](integrations/mobile-walletconnect.md)
 - [docs/integrations/electron-security-wallets.md](integrations/electron-security-wallets.md)
 - [docs/integrations/operator-admin-ui.md](integrations/operator-admin-ui.md)
+- [docs/monitoring.md](monitoring.md)
 - [docs/integrations/examples/react-viem.md](integrations/examples/react-viem.md)
 
 Release artifacts:
@@ -593,6 +599,8 @@ python scripts/test_electron_security_wallets.py
 python scripts/check_electron_security_wallets.py
 python scripts/test_operator_admin_ui.py
 python scripts/check_operator_admin_ui.py
+python scripts/test_monitoring_spec.py
+python scripts/check_monitoring_spec.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check

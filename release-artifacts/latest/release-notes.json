@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:13ffa45320e2606e7249c3775b6005c80007e40d8a328de1636aba98788c67bf",
-      "size_bytes": 53329
+      "sha256": "sha256:6902037a03c2afb0fc8cd0494a82a6cfa2abeb2a0cce01fd8a1025c7f4fba645",
+      "size_bytes": 53675
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:386484dc8cc63411be616b3a2abe65000577408478ca24a641856b6c9be649aa",
+      "sha256": "sha256:c341cba0b3caafe7b4c43105e5debf12de06384ff493a770238f5145c1f1e177",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked `GOV-009` protocol monitoring specification covering admin, signer, auction, randomness, credits, metadata/dependency, release evidence, alert severity, dashboard queries, incident handoff, local/CI/Windows gate wiring, release-readiness/integration navigation, release-manifest coverage, and release-checksum coverage.",
       "Added a checked Markdown link gate covering local files, heading anchors, duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and release-manifest/checksum coverage.",
       "Added a checked pull request template release-impact checklist covering roadmap linkage, validation evidence, generated-artifact impact, breaking-change approval references, and release-manifest/checksum coverage.",
       "Added checked GitHub issue templates for integration reports, public-safe audit finding intake, and release evidence requests, with no-secret and pre-audit maturity language, local/CI/Windows gate wiring, and release-manifest/checksum coverage.",

@@ -111,6 +111,8 @@ REQUIRED_READINESS_PHRASES = [
     "code-signing implementation",
     "signed-update implementation",
     "operator admin UI specification",
+    "GOV-009",
+    "protocol monitoring specification",
     "maintained operator dashboard",
     "Safe app",
     "multisig transaction builder",
@@ -183,6 +185,8 @@ REQUIRED_COMMANDS = [
     "python scripts/check_electron_security_wallets.py",
     "python scripts/test_operator_admin_ui.py",
     "python scripts/check_operator_admin_ui.py",
+    "python scripts/test_monitoring_spec.py",
+    "python scripts/check_monitoring_spec.py",
     "python scripts/test_drop_authorization_payload_generator.py",
     (
         "python scripts/generate_drop_authorization_payload.py --input "
@@ -315,6 +319,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/mobile-walletconnect.md",
     "docs/integrations/electron-security-wallets.md",
     "docs/integrations/operator-admin-ui.md",
+    "docs/monitoring.md",
     "docs/integrations/examples/react-viem.md",
     "docs/architecture.md",
     "docs/threat-model.md",

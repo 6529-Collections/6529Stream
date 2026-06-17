@@ -191,6 +191,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_electron_security_wallets.py
 "$python_bin" scripts/test_operator_admin_ui.py
 "$python_bin" scripts/check_operator_admin_ui.py
+"$python_bin" scripts/test_monitoring_spec.py
+"$python_bin" scripts/check_monitoring_spec.py
 "$python_bin" scripts/test_royalty_policy.py
 "$python_bin" scripts/check_royalty_policy.py
 "$python_bin" scripts/test_warning_dispositions.py

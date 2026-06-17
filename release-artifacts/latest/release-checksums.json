@@ -39,6 +39,9 @@
       "scripts/test_pr_template.py",
       "scripts/check_markdown_links.py",
       "scripts/test_markdown_links.py",
+      "scripts/check_monitoring_spec.py",
+      "scripts/test_monitoring_spec.py",
+      "docs/monitoring.md",
       "scripts/check_curator_rewards_flow.py",
       "scripts/test_curator_rewards_flow.py",
       "scripts/check_withdrawals_credits_flow.py",
@@ -75,7 +78,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:16122dbc837a6d5019fb104c7bb1bbfa1424f512e0118fe8aa8b5656e83caccf"
+    "sha256": "sha256:438809b4724bc3f9b7c0f4cff9aa45e4c4b93585fda2a41723ba68add7497b8e"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -236,6 +239,11 @@
       "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
       "sha256": "sha256:a71b4a5e1d271b86ee625d6976674cab4832880bafc8876d7ba84b53671eb919",
       "size_bytes": 8798
+    },
+    {
+      "path": "docs/monitoring.md",
+      "sha256": "sha256:45a87207880820011163bee2d39cc03ff56c330dbacd4bd0eaff106be377af0b",
+      "size_bytes": 19322
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -579,7 +587,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:279e364c2ca9be56db0ab12526555526b1a039ffa25e525a5faa364a82a10830",
+      "sha256": "sha256:2305c623202787519becfe64b5ddf586def77643ccef5957fa2d47f29e5b752d",
       "size_bytes": 79962
     },
     {
@@ -689,22 +697,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9334f9ccd50ad5ddcc5e7837c3a89c3f50bfd2b465e0c0584614f7c5668243f3",
-      "size_bytes": 113606
+      "sha256": "sha256:bba250caa7cb96a392d42b243c1fe4a3034357e7c9fd16a2e6d9b56e0067da53",
+      "size_bytes": 113782
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:8dbd4ee49bef76378e293540cd2dab837b7c065ddc6fbaf74a0aa720bd8c4538",
-      "size_bytes": 55639
+      "sha256": "sha256:e632a5c975e91104abeb03ecc099f64cdece7a01effd7a8792c361b8757e2e66",
+      "size_bytes": 55984
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:3e13b4749e6ab6cf666c41e79381fb6d1d489272de5f3b0595c6c968d2b7f8b4",
-      "size_bytes": 53042
+      "sha256": "sha256:caf950bf6359ecf4a344087695d7fb7d6ab080d0edc052474132713945f55d20",
+      "size_bytes": 53380
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:386484dc8cc63411be616b3a2abe65000577408478ca24a641856b6c9be649aa",
+      "sha256": "sha256:c341cba0b3caafe7b4c43105e5debf12de06384ff493a770238f5145c1f1e177",
       "size_bytes": 22929
     },
     {
@@ -828,6 +836,11 @@
       "size_bytes": 9948
     },
     {
+      "path": "scripts/check_monitoring_spec.py",
+      "sha256": "sha256:b9b8cf8478827a722059e1b48efc9cd642b6503415e60a24593ddbccddafbdd5",
+      "size_bytes": 13846
+    },
+    {
       "path": "scripts/check_pr_template.py",
       "sha256": "sha256:7cef9cb782d30c08ca1f80bf9cbfcf845a818bf885b1897347328e45664b1572",
       "size_bytes": 6989
@@ -849,8 +862,8 @@
     },
     {
       "path": "scripts/check_readme.py",
-      "sha256": "sha256:d30c39547069c6ca79f07c375647845d89f8faf7ed99991cd2bfe40d8058b2b0",
-      "size_bytes": 10066
+      "sha256": "sha256:06c343a2928be2cea5887a9b1d77ebc50cdda63399a0b2c4e69057add40ce936",
+      "size_bytes": 10092
     },
     {
       "path": "scripts/check_release_mode.py",
@@ -921,6 +934,11 @@
       "path": "scripts/test_markdown_links.py",
       "sha256": "sha256:e78e152a40757e7a0f74248f1a1e5e39bdc5b903b2c7d6bf551633c33434e993",
       "size_bytes": 7768
+    },
+    {
+      "path": "scripts/test_monitoring_spec.py",
+      "sha256": "sha256:eb62ed986d8a87aa08b6a785205f9360772cb2544f2b346dcc0fe276aa05ffd6",
+      "size_bytes": 13616
     },
     {
       "path": "scripts/test_pr_template.py",

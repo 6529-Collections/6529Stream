@@ -237,6 +237,8 @@ jobs:
             scripts/test_electron_security_wallets.py \
             scripts/check_operator_admin_ui.py \
             scripts/test_operator_admin_ui.py \
+            scripts/check_monitoring_spec.py \
+            scripts/test_monitoring_spec.py \
             scripts/check_royalty_policy.py \
             scripts/test_royalty_policy.py \
             scripts/check_warning_dispositions.py \
@@ -655,6 +657,8 @@ jobs:
           python3 scripts/check_electron_security_wallets.py 2>&1 | tee ci-logs/electron-security-wallets-check.log
           python3 scripts/test_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-tests.log
           python3 scripts/check_operator_admin_ui.py 2>&1 | tee ci-logs/operator-admin-ui-check.log
+          python3 scripts/test_monitoring_spec.py 2>&1 | tee ci-logs/monitoring-spec-tests.log
+          python3 scripts/check_monitoring_spec.py 2>&1 | tee ci-logs/monitoring-spec-check.log
           python3 scripts/test_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-tests.log
           python3 scripts/check_royalty_policy.py 2>&1 | tee ci-logs/royalty-policy-check.log
           python3 scripts/test_warning_dispositions.py 2>&1 | tee ci-logs/warning-disposition-tests.log
