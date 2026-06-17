@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/randomizer-request-binding-parity` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/523` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/524` |
-| Active PR | `TBD` |
-| Next issue | Finish ADV-013 randomizer request-binding parity tests, open PR, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, merge when clean, then select the next local-verifiable substantive backlog item. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/525` |
+| Next issue | Wait for PR #525 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge when clean; then select the next local-verifiable substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 21:32 UTC` |
+| Last updated | `2026-06-17 22:02 UTC` |
 
 ## Packaging Notes
 
@@ -16199,6 +16199,7 @@ Outcome:
 | 2026-06-17 21:09 | Merge PR #523 and select next item | PR #523 merged as `dd91c546b66a8827ae4525dd5938925ae2b69397` after Foundry smoke, Windows wrapper, CodeRabbit status, and latest 6529bot follow-up were clean; issue #522 closed completed. Local `main` is fast-forwarded to the merge commit. Next action is to create the next local-verifiable substantive issue and branch, with ADV/randomizer request-binding coverage preferred unless backlog/open-issue review identifies a higher-value unblocked item. |
 | 2026-06-17 21:17 | Start ADV-013 randomizer request-binding parity | Issue #524 and branch `codex/randomizer-request-binding-parity` now track VRF/arRNG wrong-collection pending-state parity plus nested stale-mark and retry reentry during the external core write. Initial focused validation passed for `forge fmt --check test\StreamRandomizerLifecycle.t.sol test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv`, and `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`; next action is to finish docs/artifact updates, run full required gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 21:32 | Finish ADV-013 local validation | ADV-013 is ready to publish: focused lifecycle/adversarial/retry randomizer tests passed, randomizer operation evidence scripts passed, release manifest/checksum/lockfile checks passed, full `make check` passed with output captured during the run, Windows `scripts\check.ps1` passed, and `codex-diff-check` passed. Next action is to commit, push, open the issue-linked PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 22:02 | Open PR #525 for ADV-013 | PR #525 is open at `https://github.com/6529-Collections/6529Stream/pull/525`, closes issue #524, and packages randomizer request-binding parity plus core-write stale/retry reentry tests with regenerated release evidence. CodeRabbit was requested in comment `4735920164`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
