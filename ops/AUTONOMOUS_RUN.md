@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/typescript-eip712-payload-snippets` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/491` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/492` |
-| Active PR | TBD |
-| Next issue | Build INT-014 TypeScript EIP-712 payload construction snippets, run checks, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/493` |
+| Next issue | Wait for PR #493 CI, CodeRabbit, and 6529bot feedback; resolve actionable comments, merge when clean, then continue INT-015 TypeScript event decoding/indexer ingestion snippets. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 06:36 UTC` |
+| Last updated | `2026-06-17 06:38 UTC` |
 
 ## Packaging Notes
 
@@ -16145,6 +16145,7 @@ Outcome:
 | 2026-06-17 06:04 | Merge PR #491 and start INT-014 | PR #491 merged as `8801ef4` after CodeRabbit, Foundry smoke, Windows wrapper, 6529bot security, general, and latest-head follow-up review were clean; issue #490 closed completed. Issue #492 and branch `codex/typescript-eip712-payload-snippets` now track INT-014 for checked TypeScript EIP-712 payload construction snippets covering domain construction, `DropAuthorization` message shape, drop ID derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe boundaries, and no-secret logging rules. |
 | 2026-06-17 06:21 | Validate INT-014 local draft | Added `docs/integrations/examples/typescript-eip712-drop-authorization.md`, checker/tests, integrations README, wallet/signature, React/Next links, local/CI/Windows gate wiring, release-manifest/checksum coverage, changelog, and regenerated release artifacts. Focused TypeScript EIP-712, integrations README, wallet/signature, React/Next, release notes, release manifest, bytecode proof, release checksum, release artifact verifier, changelog, and Python compile checks passed. Next action is to run full `make check`, Windows `scripts\check.ps1`, whitespace checks, then commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 06:36 | Finish INT-014 local validation | Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed with known compiler and Foundry trace-source warning noise only. `git diff --check` passed with the known PowerShell LF-to-CRLF warning for `scripts/check.ps1`. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 06:38 | Open PR #493 for INT-014 | PR #493 is open at `https://github.com/6529-Collections/6529Stream/pull/493`, closes issue #492, and packages checked TypeScript EIP-712 drop authorization snippets plus checker/tests, local/CI/Windows gate wiring, integration docs links, release-manifest/checksum coverage, and regenerated release evidence. CodeRabbit review was requested at `https://github.com/6529-Collections/6529Stream/pull/493#issuecomment-4726777105`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
