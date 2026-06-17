@@ -106,7 +106,8 @@ compatible migration path:
 - Randomness provider, request lifecycle, retry, or stale callback behavior
   change.
 - Deployment manifest, address book, release manifest, release checksum,
-  protocol surface report, ABI compatibility, or artifact schema change.
+  release-candidate lockfile, protocol surface report, ABI compatibility, or
+  artifact schema change.
 
 Breaking changes require:
 
@@ -168,8 +169,8 @@ Before a public release tag:
 - Deployment rehearsal passes.
 - ABI, bytecode, interface ID, event topic, protocol surface report,
   broadcast-derived manifest input, deployment manifest, address book, source
-  verification input, release manifest, bytecode-to-release proof, and checksum
-  artifacts are generated and checked.
+  verification input, release manifest, bytecode-to-release proof,
+  release-candidate lockfile, and checksum artifacts are generated and checked.
 - Dependency source packages, migration plans, source-retention evidence,
   deprecation decisions, and unfrozen collection repins follow
   `docs/dependency-operations.md` when the release uses dependency registry

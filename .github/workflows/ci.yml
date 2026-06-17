@@ -266,6 +266,8 @@ jobs:
             scripts/test_release_manifest.py \
             scripts/generate_bytecode_release_proof.py \
             scripts/test_bytecode_release_proof.py \
+            scripts/generate_release_candidate_lockfile.py \
+            scripts/test_release_candidate_lockfile.py \
             scripts/generate_release_checksums.py \
             scripts/test_release_checksums.py \
             scripts/verify_release_artifacts.py \
@@ -710,6 +712,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_bytecode_release_proof.py 2>&1 | tee ci-logs/bytecode-release-proof-tests.log
           python3 scripts/generate_bytecode_release_proof.py --check 2>&1 | tee ci-logs/bytecode-release-proof-check.log
+
+      - name: Release candidate lockfile
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_release_candidate_lockfile.py 2>&1 | tee ci-logs/release-candidate-lockfile-tests.log
+          python3 scripts/generate_release_candidate_lockfile.py --check 2>&1 | tee ci-logs/release-candidate-lockfile-check.log
 
       - name: Release checksums
         shell: bash

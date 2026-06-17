@@ -3403,7 +3403,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | `REL-001` |
+| `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | Issue #518; branch `codex/release-candidate-lockfile` in progress |
 | `REL-005` | Add release artifact verifier script for third-party users | G | Merged in PR #461; issue #460 closed completed |
 | `REL-006` | Add release notes generator from changelog and artifact diff | G | Merged in PR #463; issue #462 closed completed |
 | `REL-007` | Add dependency provenance attestation bundle | F/G | Merged in PR #465; issue #464 closed completed |

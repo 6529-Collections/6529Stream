@@ -288,6 +288,22 @@ the current release manifest hash. It is checksum-covered and no-secret, but it
 does not query live chain bytecode; live production bytecode proof remains a
 reviewed non-local evidence requirement.
 
+The release-candidate lockfile step writes
+`release-artifacts/latest/release-candidate-lockfile.json` after the bytecode
+release proof and before the checksum bundle:
+
+```sh
+python scripts/test_release_candidate_lockfile.py
+python scripts/generate_release_candidate_lockfile.py --check
+```
+
+The lockfile ties the release manifest, bytecode release proof, public-beta
+evidence, risk register, release notes, blocker reports, release evidence issue
+outputs, and release-signature evidence into one deterministic review artifact.
+The committed local baseline explicitly keeps the final commit/tag/signature
+lock in `not_locked_until_signed_release_tag` status until a real release
+ceremony supplies production signatures and a signed tag.
+
 The ceremony-evidence step validates retained no-secret deployment evidence
 bundles under `deployments/ceremony-evidence/`. The committed Anvil bundle ties
 local deployment/admin/signer, metadata-browser, auction, emergency
@@ -708,7 +724,8 @@ The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, public-beta evidence, release evidence issue backlog, release
 evidence issue-link map, release evidence issue body sync, deployment manifest,
-address-book, schema, ceremony evidence, and release-manifest outputs. This
+address-book, schema, ceremony evidence, release-manifest, bytecode proof, and
+release-candidate lockfile outputs. This
 gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers

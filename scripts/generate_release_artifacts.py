@@ -24,6 +24,7 @@ GENERATOR_VERSION = "1"
 DEFAULT_EIP_170_RUNTIME_LIMIT_BYTES = 24_576
 DOWNSTREAM_RELEASE_FILES = {
     "bytecode-release-proof.json",
+    "release-candidate-lockfile.json",
     "custom-error-catalog.json",
     "dependency-artifact-manifest.json",
     "dependency-provenance-attestation.json",
