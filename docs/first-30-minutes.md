@@ -86,6 +86,9 @@ curl -L https://foundry.paradigm.xyz | bash
 foundryup --version v1.7.1
 ```
 
+Review the upstream installer before piping it into a shell, or use the
+installation method already approved by your development environment.
+
 On Windows, also check the normal Foundry user-bin directory if the shell cannot
 find `forge`:
 
