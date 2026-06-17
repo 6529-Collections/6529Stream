@@ -184,6 +184,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Added lifecycle-aware stale and failed randomness metadata states for minted tokens whose hash is still unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures, token state view coverage, fallback-to-pending coverage, and final-hash override coverage.
 - Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.
+- Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.
 - Retired provider and integration files from the prior Solidity formatting exception baseline, so arRNG, VRF, delegation, and randomizer integration interfaces are now enforced by `make fmt-check`.
 - Retired first-party interface files from the prior Solidity formatting exception baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are now enforced by `make fmt-check`.
 - Converted the remaining Solidity formatter baseline from generic baseline language into an explicit 17-file vendored/provenance exemption policy.

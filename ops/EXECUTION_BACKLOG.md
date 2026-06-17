@@ -2383,9 +2383,7 @@ Dependencies: `INT-001`.
 
 ### INT-007: Add React/Next Reference Architecture
 
-Status: In progress on issue
-[`#402`](https://github.com/6529-Collections/6529Stream/issues/402) and branch
-`codex/react-next-reference-architecture`.
+Status: Merged in PR #403; issue #402 closed completed.
 
 Gate: G.
 
@@ -2487,7 +2485,7 @@ Dependencies: `INT-001` through `INT-006` preferred.
 
 ### INT-008: Add Mobile And WalletConnect Integration Guide
 
-Status: Planned.
+Status: Merged in PR #405; issue #404 closed completed.
 
 Gate: G.
 
@@ -2544,7 +2542,7 @@ Dependencies: `INT-004`, `INT-005`.
 
 ### INT-009: Add Electron Security And Wallet Integration Guide
 
-Status: Planned.
+Status: Merged in PR #407; issue #406 closed completed.
 
 Gate: G.
 
@@ -2805,8 +2803,7 @@ Dependencies: `INT-001`, `INT-006`, `CON-005`.
 
 ### ONE-002: Add 1/1 Provenance Manifest Model
 
-Status: In progress on issue #412 and branch
-`codex/provenance-manifest-model`.
+Status: Merged in PR #413; issue #412 closed completed.
 
 Gate: G/F.
 
@@ -3091,8 +3088,9 @@ Dependencies: dependency artifact manifest, metadata browser sandbox,
 
 ### ONE-005: Retain Marketplace And Indexer Integration Evidence
 
-Status: In progress locally on issue #422 and branch
-`codex/marketplace-indexer-evidence-model`.
+Status: Merged in PR #425; issue #422 closed completed. Tracker issues #423
+and #424 remain open for future reviewed public-beta and production
+marketplace/indexer evidence.
 
 Gate: G/E.
 
@@ -3376,7 +3374,7 @@ unless an external dependency changes.
 | `ADV-010` | Add MEV/timing attack model and bounded simulations | F/D | Merged in PR #445; issue #444 closed completed |
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | Merged in PR #447; issue #446 closed completed |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
-| `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Active issue #524; branch `codex/randomizer-request-binding-parity` |
+| `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Merged in PR #525; issue #524 closed completed |
 
 ### Contract/API Hardening
 
@@ -3384,7 +3382,7 @@ unless an external dependency changes.
 | --- | --- | --- | --- |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
-| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Active issue #478; current PR enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts; prior size reports in issues #430 and #432 |
+| `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
 | `CON-007` | Add interface/version views for frontend compatibility | G | Merged in PR #459; issue #458 closed completed |
 
@@ -3396,9 +3394,9 @@ unless an external dependency changes.
 | `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | Merged in PR #413 |
 | `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | Merged in PR #417 |
 | `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | Merged in PR #419 |
-| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | testnet addresses, `INT-005` |
+| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | Merged in PR #425; issue #422 closed completed; tracker issues #423 and #424 remain open for future reviewed marketplace/indexer evidence |
 | `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | Merged in PR #427; issue #426 closed completed |
-| `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | formatting/static-analysis gates |
+| `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | Merged in PR #483; issue #482 closed completed |
 
 ### Release Engineering
 

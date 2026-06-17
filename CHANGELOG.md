@@ -730,6 +730,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Reconciled stale autonomous backlog status rows for previously merged
+  integration, 1/1 product-readiness, contract-size, and randomizer test work,
+  and refreshed the dependent risk-register and release-artifact hashes.
 - Retired provider and integration files from the prior Solidity formatting
   exception baseline, so arRNG, VRF, delegation, and randomizer integration
   interfaces are now enforced by `make fmt-check`.
