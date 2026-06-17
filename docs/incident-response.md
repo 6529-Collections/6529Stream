@@ -323,6 +323,12 @@ Recovery:
   output, monitoring evidence, and signature verification evidence using the
   drop authorization signing evidence schema plus signer custody readiness
   schema.
+- Retain the signer-compromise drill bundle with the checked template at
+  [`release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md)
+  and validate it with
+  `python scripts/check_signer_compromise_drill_evidence.py`. This template is
+  not completion evidence until the environment-specific artifact is reviewed
+  and all placeholders are replaced.
 - Update public communications with the new active signer state and any
   affected drop status.
 
@@ -387,6 +393,11 @@ policy, failed randomness, stuck auction, bad metadata or dependency
 configuration, bad Merkle root, and signer compromise drills. The template is
 not completion evidence until every `TBD` value is replaced, reviewed, and
 validated without secrets.
+Signer-compromise drills also have a narrower retained artifact template at
+[`release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md)
+for pause, signer rotation or revocation, signer epoch invalidation, per-drop
+cancellation, stale payload rejection, recovered payload execution, monitoring
+confirmation, review, and redaction evidence.
 
 ## Local Verification Commands
 
@@ -397,6 +408,8 @@ python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_incident_drill_evidence.py
 python scripts/check_incident_drill_evidence.py
+python scripts/test_signer_compromise_drill_evidence.py
+python scripts/check_signer_compromise_drill_evidence.py
 python scripts/test_drop_authorization_payload_generator.py
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
 python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
@@ -441,6 +454,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_incident_drill_evidence.py
 python scripts/check_incident_drill_evidence.py
+python scripts/test_signer_compromise_drill_evidence.py
+python scripts/check_signer_compromise_drill_evidence.py
 python scripts/test_drop_authorization_fixtures.py
 python scripts/check_drop_authorization_fixtures.py
 python scripts/test_drop_authorization_signing_evidence.py
