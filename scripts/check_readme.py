@@ -67,6 +67,15 @@ REQUIRED_COMMANDS = [
     "python scripts/check_readme.py",
 ]
 
+COMMAND_VARIANTS = {
+    "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check.ps1": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1",
+    ],
+    "powershell -ExecutionPolicy Bypass -File scripts\\bootstrap-windows.ps1": [
+        "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
+    ],
+}
+
 REQUIRED_LINK_TARGETS = [
     "CONTRIBUTING.md",
     "SECURITY.md",
@@ -111,6 +120,7 @@ REQUIRED_LINK_TARGETS = [
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+FENCED_CODE_RE = re.compile(r"^```[^\n]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
 
 
 class ReadmeError(ValueError):
@@ -182,6 +192,28 @@ def missing_phrases(text: str, phrases: list[str]) -> list[str]:
     return [phrase for phrase in phrases if phrase.lower() not in normalized_text]
 
 
+def fenced_command_lines(text: str) -> set[str]:
+    """Return non-empty lines presented inside fenced Markdown code blocks."""
+    command_lines = set()
+    for match in FENCED_CODE_RE.finditer(text):
+        for line in match.group(1).splitlines():
+            stripped = line.strip()
+            if stripped:
+                command_lines.add(stripped)
+    return command_lines
+
+
+def missing_commands(text: str, commands: list[str]) -> list[str]:
+    """Return required commands absent from fenced code blocks."""
+    command_lines = fenced_command_lines(text)
+    missing = []
+    for command in commands:
+        variants = [command, *COMMAND_VARIANTS.get(command, [])]
+        if not any(variant in command_lines for variant in variants):
+            missing.append(command)
+    return missing
+
+
 def validate_readme(repo_root: Path, document_path: Path) -> None:
     """Validate the root README against required maturity and navigation content."""
     if not document_path.is_file():
@@ -210,10 +242,11 @@ def validate_readme(repo_root: Path, document_path: Path) -> None:
             + ", ".join(missing_required_phrases)
         )
 
-    missing_commands = [command for command in REQUIRED_COMMANDS if command not in text]
-    if missing_commands:
+    missing_required_commands = missing_commands(text, REQUIRED_COMMANDS)
+    if missing_required_commands:
         raise ReadmeError(
-            "README is missing required commands: " + ", ".join(missing_commands)
+            "README is missing required commands: "
+            + ", ".join(missing_required_commands)
         )
 
     links = linked_repo_paths(repo_root, document_path, text)

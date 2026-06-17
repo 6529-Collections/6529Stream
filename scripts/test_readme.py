@@ -207,6 +207,40 @@ class ReadmeTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.ReadmeError, "missing required commands"):
                 checker.validate_readme(root, root / checker.DEFAULT_README)
 
+    def test_rejects_required_command_outside_code_fence(self) -> None:
+        """Validation commands must be presented as runnable code lines."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_readme().replace(
+                "```sh\nmake check\n",
+                "```sh\n",
+            )
+            text = text.replace(
+                "## Tooling\n",
+                "Required command mention: make check.\n\n## Tooling\n",
+            )
+            write_text(root / checker.DEFAULT_README, text)
+
+            with self.assertRaisesRegex(checker.ReadmeError, "missing required commands"):
+                checker.validate_readme(root, root / checker.DEFAULT_README)
+
+    def test_accepts_forward_slash_windows_command_variants(self) -> None:
+        """Windows helper paths may use slash variants in fenced code blocks."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            text = minimal_readme().replace(
+                "scripts\\check.ps1",
+                "scripts/check.ps1",
+            ).replace(
+                "scripts\\bootstrap-windows.ps1",
+                "scripts/bootstrap-windows.ps1",
+            )
+            write_text(root / checker.DEFAULT_README, text)
+
+            checker.validate_readme(root, root / checker.DEFAULT_README)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
