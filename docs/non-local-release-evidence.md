@@ -437,6 +437,20 @@ Retain:
 Map fork/testnet evidence to `fork_testnet_randomizer_operations_evidence` and
 live evidence to `live_randomizer_operations_evidence`.
 
+The live randomizer operations row has a dedicated retained-artifact template at
+`release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`.
+Before generating the non-local metadata envelope, run:
+
+```sh
+python scripts/test_live_randomizer_operations_evidence.py
+python scripts/check_live_randomizer_operations_evidence.py
+python scripts/check_randomizer_operations.py
+```
+
+The checker validates retained no-secret operations proof only. It does not
+fetch provider dashboards, call private RPC endpoints, query billing systems,
+or execute randomizer migrations from CI.
+
 ### Gas And Invariant Evidence
 
 Retain:

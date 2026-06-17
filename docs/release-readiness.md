@@ -357,6 +357,12 @@ The current local baseline includes:
   [`release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`](../release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md),
   validated offline with `python scripts/test_live_ceremony_evidence.py` and
   `python scripts/check_live_ceremony_evidence.py`,
+  plus live randomizer operations evidence for
+  `live_randomizer_operations_evidence` under
+  [`release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`](../release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md),
+  validated offline with
+  `python scripts/test_live_randomizer_operations_evidence.py` and
+  `python scripts/check_live_randomizer_operations_evidence.py`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with

@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b10e1692740f346a708e8b5736dd60414d74738626da0a7316166511606d88f7",
-      "size_bytes": 48329
+      "sha256": "sha256:e95dce2af442120fb7898c95aebd05884003a069501a360d199a7752ed59d155",
+      "size_bytes": 48818
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:68dee8b704c394d53521cac9f9fd073d318e55f1dd7c0a9b2cd09e8e602f1463",
+      "sha256": "sha256:053fd3e3fdab6b028b8035bcb2a7ed7fe455efed85966baf78651bab944e0662",
       "size_bytes": 22887
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a no-secret live randomizer operations retained-artifact template and checker for future `live_randomizer_operations_evidence`, with provider configuration, provider funding, reserve, request health, lifecycle control, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live randomizer operations evidence is retained.",
       "Added a no-secret live ceremony retained-artifact template and checker for future `live_ceremony_evidence`, with governance participant, ownership/role, signer, metadata/freeze, auction, emergency-control, dry-run, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live ceremony evidence is retained.",
       "Added a no-secret post-audit remediation retained-artifact template and checker for future `post_audit_remediation` evidence, with finding-by-finding remediation, retest, accepted-risk, release-note, reviewer-signoff, local/CI/ Windows gate, packet-index command, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed post-audit remediation evidence is retained.",
       "Added `live_metadata_browser_evidence` as a production-release evidence row with a no-secret retained-artifact template, offline checker, focused tests, local/CI/Windows gate wiring, release-evidence tracker issue #473, and packet index/checksum coverage while preserving the blocked production-release baseline until reviewed live metadata browser evidence is retained.",

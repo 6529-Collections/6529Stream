@@ -142,6 +142,8 @@ forge build --sizes --via-ir --skip test --skip script --force
 & $pythonPath @pythonArgs "scripts\check_post_audit_remediation_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_live_ceremony_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_live_ceremony_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_live_randomizer_operations_evidence.py"
+& $pythonPath @pythonArgs "scripts\check_live_randomizer_operations_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_fork_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_fork_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_testnet_deployment_rehearsal_evidence.py"
