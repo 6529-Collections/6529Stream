@@ -95,11 +95,20 @@ def write_tree(
             "schema_version": checker.POLICY_SCHEMA,
             "contract": "StreamCore",
             "approved_runtime_size_bytes": approved_size,
+            "approved_runtime_margin_bytes": 24_576 - approved_size,
             "tracking": "https://example.test/core-bytecode-policy",
             "exceptions": exceptions or [],
             "rejected_experiments": [],
         }
     write_json(root / "release-artifacts/contracts.json", config)
+    (root / "docs").mkdir(parents=True, exist_ok=True)
+    for doc_name in ("architecture.md", "tooling.md"):
+        (root / "docs" / doc_name).write_text(
+            f"StreamCore runtime {approved_size:,} bytes and margin "
+            f"{24_576 - approved_size:,} bytes.\n",
+            encoding="utf-8",
+            newline="\n",
+        )
     write_json(
         root / "out/StreamCore.sol/StreamCore.json",
         {
@@ -212,6 +221,53 @@ class CoreBytecodeSpendPolicyTests(unittest.TestCase):
             )
 
             with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "mitigation"):
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_typoed_exception_status_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                runtime_size=22_220,
+                exceptions=[
+                    {
+                        "id": "CORE-SPEND-001",
+                        "status": "accpeted",
+                        "issue": "https://example.test/issues/1",
+                        "max_runtime_size_bytes": 22_220,
+                        "measured_delta_bytes": 36,
+                        "rationale": "Critical consensus safety fix.",
+                        "mitigation": "No satellite-compatible alternative exists.",
+                    }
+                ],
+            )
+
+            with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "status"):
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_approved_margin_must_match_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root)
+            config_path = root / "release-artifacts/contracts.json"
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            config["core_bytecode_spend_policy"]["approved_runtime_margin_bytes"] = 1
+            write_json(config_path, config)
+
+            with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "approved_runtime_margin"):
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_docs_must_match_approved_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root)
+            (root / "docs" / "tooling.md").write_text(
+                "StreamCore runtime 22,184 bytes.\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+
+            with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "margin"):
                 checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
 
     def test_missing_policy_fails(self) -> None:

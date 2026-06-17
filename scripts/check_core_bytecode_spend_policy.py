@@ -16,6 +16,8 @@ POLICY_SCHEMA = "6529stream.core-bytecode-spend-policy.v1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out")
 DEFAULT_CONTRACT = "StreamCore"
+DOC_BASELINE_PATHS = (Path("docs/architecture.md"), Path("docs/tooling.md"))
+EXCEPTION_STATUSES = {"accepted", "rejected", "superseded"}
 
 
 class CoreBytecodePolicyError(RuntimeError):
@@ -89,6 +91,11 @@ def accepted_exception_maximum(exception: Any, index: int) -> int | None:
     status = require_string(
         record.get("status"), f"core_bytecode_spend_policy.exceptions[{index}].status"
     )
+    if status not in EXCEPTION_STATUSES:
+        raise CoreBytecodePolicyError(
+            f"core_bytecode_spend_policy.exceptions[{index}].status must be one of "
+            f"{', '.join(sorted(EXCEPTION_STATUSES))}"
+        )
     if status != "accepted":
         return None
     for key in ("id", "issue", "rationale", "mitigation"):
@@ -114,6 +121,48 @@ def accepted_exception_maximum(exception: Any, index: int) -> int | None:
     return maximum
 
 
+def assert_margin_consistency(config: dict[str, Any], policy: dict[str, Any]) -> None:
+    budget = require_dict(config.get("runtime_size_budget"), "runtime_size_budget")
+    runtime_limit = require_int(
+        budget.get("eip_170_runtime_limit_bytes"),
+        "runtime_size_budget.eip_170_runtime_limit_bytes",
+    )
+    baseline = require_int(
+        policy.get("approved_runtime_size_bytes"),
+        "core_bytecode_spend_policy.approved_runtime_size_bytes",
+    )
+    approved_margin = require_int(
+        policy.get("approved_runtime_margin_bytes"),
+        "core_bytecode_spend_policy.approved_runtime_margin_bytes",
+    )
+    expected_margin = runtime_limit - baseline
+    if approved_margin != expected_margin:
+        raise CoreBytecodePolicyError(
+            "core_bytecode_spend_policy.approved_runtime_margin_bytes must equal "
+            f"runtime limit {runtime_limit} minus approved runtime {baseline}; "
+            f"expected {expected_margin}, got {approved_margin}"
+        )
+
+
+def assert_docs_match_baseline(repo_root: Path, baseline: int, margin: int) -> None:
+    baseline_text = f"{baseline:,}"
+    margin_text = f"{margin:,}"
+    for path in DOC_BASELINE_PATHS:
+        doc_path = repo_root / path
+        try:
+            text = doc_path.read_text(encoding="utf-8")
+        except FileNotFoundError as exc:
+            raise CoreBytecodePolicyError(f"missing required baseline doc: {path}") from exc
+        if baseline_text not in text:
+            raise CoreBytecodePolicyError(
+                f"{path} must mention approved StreamCore runtime {baseline_text} bytes"
+            )
+        if margin_text not in text:
+            raise CoreBytecodePolicyError(
+                f"{path} must mention approved StreamCore margin {margin_text} bytes"
+            )
+
+
 def current_core_size(repo_root: Path, config_path: Path, foundry_out: Path) -> int:
     report = check_contract_size_budget.build_report(repo_root, config_path, foundry_out)
     for row in report:
@@ -126,10 +175,16 @@ def check_policy(repo_root: Path, config_path: Path, foundry_out: Path) -> int:
     config_abs = config_path if config_path.is_absolute() else repo_root / config_path
     config = require_dict(load_json(config_abs), str(config_abs))
     policy = core_policy(config)
+    assert_margin_consistency(config, policy)
     baseline = require_int(
         policy.get("approved_runtime_size_bytes"),
         "core_bytecode_spend_policy.approved_runtime_size_bytes",
     )
+    margin = require_int(
+        policy.get("approved_runtime_margin_bytes"),
+        "core_bytecode_spend_policy.approved_runtime_margin_bytes",
+    )
+    assert_docs_match_baseline(repo_root, baseline, margin)
     runtime_size = current_core_size(repo_root, config_path, foundry_out)
     if runtime_size <= baseline:
         print(
