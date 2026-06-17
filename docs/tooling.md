@@ -337,6 +337,16 @@ rejection, recovered fixed-price and auction payloads, monitoring handoff,
 review, and redaction. It is source-aware and checks that the documented
 response controls still exist in `StreamDrops`, `StreamPauseDomains`, and the
 signer compromise/pause regression tests.
+The stuck auction drill evidence step validates the narrower checked retained
+artifact template under
+[`release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md)
+for auction identity, stuck condition, custody, pause/unpause, terminal
+settlement or cancellation, bidder/proceeds credits, withdrawal availability,
+surplus boundaries, monitoring handoff, review, and redaction. It is
+source-aware and checks that auction settlement, no-bid recovery, cancellation,
+pause, credit withdrawal, and surplus-boundary controls still exist in the
+auction contract, pause domains, auction/pause tests, protocol state-machine
+tests, and auction-flow integration docs.
 
 The drop-authorization fixture step validates
 [`drop-authorization-signing.md`](drop-authorization-signing.md) and the

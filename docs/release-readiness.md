@@ -387,6 +387,11 @@ The current local baseline includes:
   validated offline with
   `python scripts/test_signer_compromise_drill_evidence.py` and
   `python scripts/check_signer_compromise_drill_evidence.py`,
+  plus stuck auction drill evidence for `stuck_auction_drill_evidence` under
+  [`release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md),
+  validated offline with
+  `python scripts/test_stuck_auction_drill_evidence.py` and
+  `python scripts/check_stuck_auction_drill_evidence.py`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with
@@ -442,6 +447,10 @@ for:
   rotation or revocation, signer epoch invalidation, per-drop cancellation,
   stale payload rejection, recovered payload execution, monitoring
   confirmation, reviewer approval, and redaction;
+- reviewed stuck auction drill evidence for auction identity, stuck condition,
+  custody, pause/unpause, settlement or cancellation outcome, bidder and
+  proceeds credits, withdrawal availability, emergency-surplus boundary,
+  monitoring handoff, reviewer approval, and redaction;
 - reviewed signer custody readiness evidence with custody owner, signer
   manager, signer epoch source, signer-service integration, ERC-1271 status,
   rotation/revocation drills, monitoring, and incident-response references;
@@ -598,6 +607,8 @@ python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_stuck_auction_drill_evidence.py
+python scripts/check_stuck_auction_drill_evidence.py
 python scripts/test_contract_flows.py
 python scripts/check_contract_flows.py
 python scripts/test_auction_flows.py
