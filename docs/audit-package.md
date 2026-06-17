@@ -61,6 +61,7 @@ deferrals are appropriate for launch.
 | Project overview | [`README.md`](../README.md) |
 | Architecture map | [`docs/architecture.md`](architecture.md) |
 | Threat model | [`docs/threat-model.md`](threat-model.md) |
+| Audit finding workflow | [`docs/audit-finding-workflow.md`](audit-finding-workflow.md) |
 | Current maturity and evidence | [`docs/status.md`](status.md) |
 | Known unresolved blockers | [`docs/known-blockers.md`](known-blockers.md) |
 | Warning disposition baseline | [`docs/warning-dispositions.md`](warning-dispositions.md) |
@@ -240,17 +241,19 @@ Local deployment and release evidence:
   defines the retained status format.
 
 The release manifest includes this audit package as a governance document. The
-release manifest also includes the architecture map, threat model, incident
-response runbook, drop authorization signing guide, and signer custody
-readiness guide as governance documents, summarizes the public-beta evidence
-status, and records the generated risk register. The bytecode-to-release proof records the release-manifest
+release manifest also includes the architecture map, threat model, audit
+finding workflow, incident response runbook, drop authorization signing guide,
+and signer custody readiness guide as governance documents, summarizes the
+public-beta evidence status, and records the generated risk register. The
+bytecode-to-release proof records the release-manifest
 hash and is covered by the checksum bundle; it is deliberately not embedded
 back into the release manifest. The checksum bundle covers the release
 manifest, proof, risk register, address books, retained evidence, and release artifacts, so
 changes to the audit package, architecture map, threat model,
-incident-response runbook, drop authorization signing guide, signer custody
-readiness guide, public-beta evidence status, or release-proof artifacts must
-refresh release evidence before a release-oriented PR can pass.
+audit finding workflow, incident-response runbook, drop authorization signing
+guide, signer custody readiness guide, public-beta evidence status, or
+release-proof artifacts must refresh release evidence before a release-oriented
+PR can pass.
 
 ## Known Blockers And Accepted Risks
 
@@ -305,6 +308,8 @@ Run the audit-package checks directly:
 ```sh
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
+python scripts/test_audit_finding_workflow.py
+python scripts/check_audit_finding_workflow.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
 python scripts/test_warning_dispositions.py

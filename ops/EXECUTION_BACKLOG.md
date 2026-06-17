@@ -3403,7 +3403,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | Issue #518; branch `codex/release-candidate-lockfile` in progress |
+| `REL-004` | Add release-candidate lockfile tying commit, artifacts, evidence, and tag | F/G | Merged in PR #519; issue #518 closed completed |
 | `REL-005` | Add release artifact verifier script for third-party users | G | Merged in PR #461; issue #460 closed completed |
 | `REL-006` | Add release notes generator from changelog and artifact diff | G | Merged in PR #463; issue #462 closed completed |
 | `REL-007` | Add dependency provenance attestation bundle | F/G | Merged in PR #465; issue #464 closed completed |
@@ -3416,7 +3416,7 @@ unless an external dependency changes.
 | `GOV-005` | Add signer compromise drill retained evidence | F | Merged in PR #511; issue #510 closed completed |
 | `GOV-006` | Add stuck auction drill retained evidence | F | Merged in PR #513; issue #512 closed completed |
 | `GOV-007` | Add failed randomness drill retained evidence | F | Merged in PR #515; issue #514 closed completed |
-| `GOV-008` | Add bad metadata/dependency drill retained evidence | F | In progress on issue #516 and branch `codex/bad-metadata-dependency-drill-evidence`; depends on merged `GOV-004` and follows merged `GOV-007` |
+| `GOV-008` | Add bad metadata/dependency drill retained evidence | F | Merged in PR #517; issue #516 closed completed |
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
 
@@ -3437,7 +3437,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `AUD-003` | Add external audit finding intake template and remediation workflow | F | `AUD-001` |
+| `AUD-003` | Add external audit finding intake template and remediation workflow | F | PR #521 open; closes issue #520 |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |

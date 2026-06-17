@@ -110,6 +110,7 @@ REQUIRED_TEMPLATES = {
             "SECURITY.md",
             "pre-audit",
             "not production-ready",
+            "docs/audit-finding-workflow.md",
             "Critical",
             "Accepted risk approved",
             "Threat model and exploit preconditions",

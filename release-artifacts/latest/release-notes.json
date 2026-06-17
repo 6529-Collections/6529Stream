@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c26b7db54eea340ab332d30df3c1e5b2467573d1197b3bbf33e629ad85d8f4e0",
-      "size_bytes": 56138
+      "sha256": "sha256:7aecca820992d4e04cd94f4c3317ab13829dde38c1fd76fcb392aaa9445373dd",
+      "size_bytes": 56434
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:378743e3506948ae091d5f67c8acea09630f1596a03cf7c009bcf000e35af73e",
+      "sha256": "sha256:3523df29df5b90f957a87d7f3fa2c3ee5353eebfd69b976ea42ff08d8fae2762",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked `AUD-003` external audit finding workflow covering public-safe intake, severity/status triage, audited scope, remediation PRs, required tests, retest, accepted-risk decisions, closure gates, release evidence handoff, no-secret redaction, and local/CI/Windows gate wiring.",
       "Added a generated release-candidate lockfile that ties the release manifest, bytecode release proof, public-beta evidence, risk register, release notes, blocker reports, release evidence issue outputs, release-signature evidence, and non-release commit/tag/signature status into a checksum-covered local baseline, with focused tests and local/CI/Windows gate wiring.",
       "Added a checked `GOV-008` bad metadata/dependency drill retained-artifact template, source-aware checker, and regression tests covering metadata schema/state, token URI snapshots, URI/UTF-8/raw-attributes and browser sandbox evidence, dependency key/version/content hash, freeze manifest, repin boundaries, ERC-4906/cache invalidation, marketplace/indexer handoff, recovery decisions, review, redaction, and local/CI/Windows gate wiring.",
       "Added a checked `GOV-007` failed-randomness drill retained-artifact template, source-aware checker, and regression tests covering request identity, provider type, provider epoch, pending/stale/failed/final lifecycle state, invalid callback handling, retry or stale marking, metadata state, provider migration boundaries, monitoring handoff, review, redaction, and local/CI/Windows gate wiring.",

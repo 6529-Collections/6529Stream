@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:7905e89a8ed4f18abe99c3820b1319f550eee7df3edd4865bb8e75115dd88aaa",
-        "size_bytes": 58431,
+        "sha256": "sha256:d1832815141151ccfe105e3d105a0f31f9b2d5032a8571f839fdc7ac79b14f71",
+        "size_bytes": 58728,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:bcca8d3d2354e76fbad8557105750d0e0e6422b649dc688cc2b65399ee13a551",
-        "size_bytes": 55785
+        "sha256": "sha256:eb427fe92feeae14d38e6bd55eb2b2e240b70cf4e631d7bd0d7bf94aef110831",
+        "size_bytes": 56075
       }
     },
     "release_candidate_lockfile": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:378743e3506948ae091d5f67c8acea09630f1596a03cf7c009bcf000e35af73e",
+      "sha256": "sha256:3523df29df5b90f957a87d7f3fa2c3ee5353eebfd69b976ea42ff08d8fae2762",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2013,14 +2013,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c26b7db54eea340ab332d30df3c1e5b2467573d1197b3bbf33e629ad85d8f4e0",
-      "size_bytes": 56138
+      "sha256": "sha256:7aecca820992d4e04cd94f4c3317ab13829dde38c1fd76fcb392aaa9445373dd",
+      "size_bytes": 56434
     },
     "governance_docs": [
       {
         "path": "README.md",
-        "sha256": "sha256:8c9254269942e9bc70640a414d0820b6c9d431b44f283988c884f1d8abd2cbe5",
-        "size_bytes": 11327
+        "sha256": "sha256:34b21c2dee535ecc640d2b0c19a191da67e617c2a37689a075c3d1e6b1a65b8f",
+        "size_bytes": 11601
       },
       {
         "path": ".github/PULL_REQUEST_TEMPLATE.md",
@@ -2029,8 +2029,8 @@
       },
       {
         "path": ".github/ISSUE_TEMPLATE/audit_finding.yml",
-        "sha256": "sha256:fe91d259a19c5d207add13f8f6f56819b020cc4147e6a261290dd914d59d0443",
-        "size_bytes": 3506
+        "sha256": "sha256:8525fe4350971ac497eb6823068f60f251f797df84aa1baf448c304c659b8679",
+        "size_bytes": 3619
       },
       {
         "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -2109,8 +2109,13 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:991fa12bce5e5f1922935239a69257143ed45eb8e47199055956aa72af65f0a5",
-        "size_bytes": 27239
+        "sha256": "sha256:3fa8b8bea6fe880d659b6ecf9f95401b5c2b3c4f487e0bfee9744d45306b46a8",
+        "size_bytes": 27471
+      },
+      {
+        "path": "docs/audit-finding-workflow.md",
+        "sha256": "sha256:55bf7cb6d4f0771d2860528b4ea2e94cf7139d559e41fad8cd145cd57693e77c",
+        "size_bytes": 9524
       },
       {
         "path": "docs/incident-response.md",
@@ -2164,8 +2169,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:f553d39edef8403888d5813422639c24b4da545107e065136879b9b9c9e0a2b1",
-        "size_bytes": 57529
+        "sha256": "sha256:c1d1ccaea4bcd6b5664b6898afe9de9399125c8f95272174467abb81f7109209",
+        "size_bytes": 57776
       },
       {
         "path": "docs/protocol-surface.md",
@@ -2280,8 +2285,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:7d1399005d99921221213179d4e2a629f0c3905c8cb0f6c9b3892b1bbe83dec8",
-        "size_bytes": 59515
+        "sha256": "sha256:56efd7b1a6a152e97694fa5d046bce4b49b0d2d117e2cd30c2b7cc49ca0872db",
+        "size_bytes": 59927
       },
       {
         "path": "docs/status.md",

@@ -155,6 +155,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_architecture_threat_model.py
 "$python_bin" scripts/test_audit_package.py
 "$python_bin" scripts/check_audit_package.py
+"$python_bin" scripts/test_audit_finding_workflow.py
+"$python_bin" scripts/check_audit_finding_workflow.py
 "$python_bin" scripts/test_incident_response.py
 "$python_bin" scripts/check_incident_response.py
 "$python_bin" scripts/test_readme.py

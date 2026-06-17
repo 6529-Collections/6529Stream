@@ -14,6 +14,10 @@ verification, or signing evidence that updates the public-beta evidence status.
 Use [`docs/incident-response.md`](incident-response.md) for no-secret triage,
 containment, recovery, evidence retention, and reopening procedures when an
 operational incident affects release readiness.
+Use [`docs/audit-finding-workflow.md`](audit-finding-workflow.md) for
+public-safe external audit finding intake, severity/status triage, remediation
+PR requirements, retest, accepted-risk decisions, closure gates, and
+post-audit evidence handoff.
 Use [`docs/drop-authorization-signing.md`](drop-authorization-signing.md) for
 the local no-secret drop authorization signing fixtures, unsigned payload
 generator templates, drop authorization signing evidence template, and the
