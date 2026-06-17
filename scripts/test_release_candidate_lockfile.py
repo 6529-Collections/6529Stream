@@ -349,6 +349,51 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
                     paths["signatures"],
                 )
 
+    def test_generator_rejects_invalid_utf8_json_without_traceback(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            (paths["latest"] / "risk-register.json").write_bytes(b"\xff\xfe\x00")
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "invalid UTF-8",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
+    def test_release_signature_records_are_path_sorted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            source = paths["signatures"] / "anvil-local.json"
+            evidence = json.loads(source.read_text(encoding="utf-8"))
+
+            alpha = dict(evidence)
+            alpha["evidence_id"] = "alpha-release-signature-local"
+            write_json(paths["signatures"] / "alpha-local.json", alpha)
+
+            zeta = dict(evidence)
+            zeta["evidence_id"] = "zeta-release-signature-local"
+            write_json(paths["signatures"] / "zeta-local.json", zeta)
+
+            records = generator.release_signature_records(paths["signatures"], root)
+
+            self.assertEqual(
+                [record["evidence_id"] for record in records],
+                [
+                    "alpha-release-signature-local",
+                    "anvil-release-signature-local",
+                    "zeta-release-signature-local",
+                ],
+            )
+
     def test_generator_rejects_invalid_release_signature_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

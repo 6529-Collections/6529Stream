@@ -65,6 +65,10 @@ def load_json(path: Path) -> Any:
         raise ReleaseCandidateLockfileError(f"missing required file: {path}") from exc
     except json.JSONDecodeError as exc:
         raise ReleaseCandidateLockfileError(f"invalid JSON in {path}: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise ReleaseCandidateLockfileError(f"invalid UTF-8 in {path}: {exc}") from exc
+    except OSError as exc:
+        raise ReleaseCandidateLockfileError(f"unable to read required file {path}: {exc}") from exc
 
 
 def write_json(path: Path, value: Any) -> None:
