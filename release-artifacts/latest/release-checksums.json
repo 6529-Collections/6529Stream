@@ -85,7 +85,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9907b63b31dc4ce0e93bfe85987d473389ed341b8dee8e2daad4d91a824a65b8"
+    "sha256": "sha256:ee8d5b0f4811ae278a9a920d9332053e014aa11e27425f96d96f4db88bff59c8"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -904,8 +904,8 @@
     },
     {
       "path": "scripts/check_stuck_auction_drill_evidence.py",
-      "sha256": "sha256:e82b1f0019bf9e2d017191de0926e9d9c37b6b7034eb8b9ed38a69149d053caa",
-      "size_bytes": 17453
+      "sha256": "sha256:27bce80e805d478e1319b02be8e54b797dc444f36d036a7c43a05231515f192b",
+      "size_bytes": 18404
     },
     {
       "path": "scripts/check_typescript_artifact_chain_config.py",
@@ -1004,8 +1004,8 @@
     },
     {
       "path": "scripts/test_stuck_auction_drill_evidence.py",
-      "sha256": "sha256:1829c1b6fd27eedb146d9ad70de6927bc77970d382b14de8e04cfdd4f0155ed3",
-      "size_bytes": 15902
+      "sha256": "sha256:2f4dd7f152df20814c8d01d77c00da3707ad6e1dd2e5535a905ea736888b8e61",
+      "size_bytes": 17099
     },
     {
       "path": "scripts/test_typescript_artifact_chain_config.py",

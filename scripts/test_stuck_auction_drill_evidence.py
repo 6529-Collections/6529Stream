@@ -178,6 +178,38 @@ class StuckAuctionDrillEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path)
 
+    def test_git_sha256_release_commit_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "stuck-auction.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Release commit: `0123456789abcdef0123456789abcdef01234567`",
+                    (
+                        "Release commit: "
+                        "`0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef`"
+                    ),
+                ),
+            )
+
+            checker.validate_evidence(path)
+
+    def test_stuck_condition_must_match_auction_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "stuck-auction.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Stuck condition: `settlement_paused`",
+                    "Stuck condition: `no_bid_pending`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.StuckAuctionDrillEvidenceError, "Stuck condition"
+            ):
+                checker.validate_evidence(path)
+
     def test_auction_path_controls_terminal_status(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "stuck-auction.md"

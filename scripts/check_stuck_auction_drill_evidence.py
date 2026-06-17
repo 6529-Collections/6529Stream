@@ -129,6 +129,25 @@ STUCK_CONDITIONS = {
     "withdrawal_receiver_blocked",
     "indexer_stale",
 }
+STUCK_CONDITIONS_BY_PATH = {
+    "with_bid": {
+        "bid_paused",
+        "settlement_paused",
+        "withdrawal_receiver_blocked",
+        "indexer_stale",
+    },
+    "no_bid": {
+        "settlement_paused",
+        "no_bid_pending",
+        "poster_receiver_blocked",
+        "indexer_stale",
+    },
+    "cancelled_no_bid": {
+        "bid_paused",
+        "settlement_paused",
+        "indexer_stale",
+    },
+}
 AUCTION_STATUSES = {
     "Created",
     "Active",
@@ -159,6 +178,9 @@ REQUIRED_COMMANDS = [
 ]
 
 SOURCE_REQUIREMENTS = {
+    # These are intentionally brittle substring guards. If core auction,
+    # pause, or payment recovery semantics move, the retained-evidence gate
+    # should fail until this schema is reviewed with the new source anchors.
     Path("smart-contracts/AuctionContract.sol"): [
         "event AuctionCancelled",
         "event NoBidSettlementPending",
@@ -204,7 +226,7 @@ ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 UINT_RE = re.compile(r"^(0|[1-9][0-9]*)$")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
 BYTES32_RE = re.compile(r"^0x[0-9a-fA-F]{64}$")
-GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+GIT_COMMIT_RE = re.compile(r"^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$")
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
@@ -331,6 +353,11 @@ def validate_auction_shape(path: Path, fields: dict[str, str]) -> None:
         expected = ", ".join(sorted(STUCK_CONDITIONS))
         raise StuckAuctionDrillEvidenceError(
             f"{path} Stuck condition must be one of {expected}"
+        )
+    if fields["Stuck condition"] not in STUCK_CONDITIONS_BY_PATH[auction_path]:
+        expected = ", ".join(sorted(STUCK_CONDITIONS_BY_PATH[auction_path]))
+        raise StuckAuctionDrillEvidenceError(
+            f"{path} Stuck condition must match Auction path: {expected}"
         )
     for label in ("Starting auction status", "Ending auction status"):
         if fields[label] not in AUCTION_STATUSES:
