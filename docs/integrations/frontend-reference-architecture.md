@@ -155,6 +155,13 @@ private keys, mnemonics, Safe signing secrets, signer-service credentials,
 bearer tokens, admin secrets, unreleased signed drop payloads, or privileged
 RPC credentials.
 
+The INT-013 TypeScript artifact loading and chain config snippets in
+[docs/integrations/examples/typescript-artifacts-and-chain-config.md](examples/typescript-artifacts-and-chain-config.md)
+show the next level of detail for release artifact loading, address book
+loading, release manifest hash validation, deployment manifest cross-checks,
+ABI checksum awareness, fail-closed wrong-chain guards, no-secret
+`NEXT_PUBLIC_*` parsing, and chain config construction.
+
 ## Environment And Network Selection
 
 Split public browser configuration from server-only configuration.
@@ -457,6 +464,13 @@ small non-runnable pseudocode showing artifact loading, chain guards,
 contract-client construction, query keys, transaction orchestration, and
 secret-free environment handling.
 
+Use
+[docs/integrations/examples/typescript-artifacts-and-chain-config.md](examples/typescript-artifacts-and-chain-config.md)
+for INT-013 TypeScript snippets focused on release artifact loading, address
+book loading, deployment manifest validation, release manifest hash pinning,
+ABI checksum validation, unsupported-chain handling, and fail-closed chain
+config construction before wallet prompts or transaction submission.
+
 The examples are illustrative architecture shapes only. They are not a
 generated SDK, not a dependency recommendation, and not a maintained app.
 
@@ -467,6 +481,8 @@ Run the focused checks after editing this guide:
 ```sh
 python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
+python scripts/test_typescript_artifact_chain_config.py
+python scripts/check_typescript_artifact_chain_config.py
 python scripts/test_integrations_readme.py
 python scripts/check_integrations_readme.py
 python scripts/test_release_readiness.py

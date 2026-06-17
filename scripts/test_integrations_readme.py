@@ -75,7 +75,7 @@ for OpenSea, Reservoir, Blur, and Manifold is named.
 
 ## Integration Flows
 
-Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, INT-010, INT-011, and INT-012.
+Future work: INT-002, INT-003, INT-004, INT-005, INT-006, INT-007, INT-008, INT-009, INT-010, INT-011, INT-012, and INT-013.
 The fixed-price mint flow is listed.
 Interface and version views for frontend compatibility are listed.
 The auction frontend and indexer flow spec is listed.
@@ -88,6 +88,10 @@ The wallet, EIP-712, ERC-1271, and Safe signing guide is listed.
 The event and indexer reconstruction spec is listed.
 The metadata rendering, cache, animation sandbox, and marketplace integration guide is listed.
 The React/Next frontend reference architecture is listed.
+The TypeScript artifact loading and chain config snippets are listed with
+release artifact loading, address book loading, deployment manifest
+cross-checks, release manifest hash validation, ABI checksum awareness,
+fail-closed chain config, and no-secret public environment snippets.
 The mobile and WalletConnect integration guide is listed.
 The Electron security and wallet integration guide is listed.
 The operator admin UI specification is listed.

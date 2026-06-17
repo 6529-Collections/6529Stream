@@ -107,6 +107,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/integrations/marketplace-indexer-evidence.md"),
     Path("docs/integrations/interface-versioning.md"),
     Path("docs/integrations/frontend-reference-architecture.md"),
+    Path("docs/integrations/examples/typescript-artifacts-and-chain-config.md"),
     Path("docs/integrations/mobile-walletconnect.md"),
     Path("docs/integrations/electron-security-wallets.md"),
     Path("docs/integrations/operator-admin-ui.md"),

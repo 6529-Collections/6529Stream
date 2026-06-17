@@ -44,6 +44,14 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         self.assertIn(Path("scripts/generate_release_notes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/verify_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(
+            Path("scripts/check_typescript_artifact_chain_config.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("scripts/test_typescript_artifact_chain_config.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("deployments/admin-ceremony"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)

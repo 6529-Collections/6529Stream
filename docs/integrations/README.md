@@ -35,7 +35,7 @@ Supported consumer categories for this entrypoint:
 
 | Consumer | Current entrypoint | Status |
 | --- | --- | --- |
-| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), and [`frontend-reference-architecture.md`](frontend-reference-architecture.md) | Fixed-price, auction, curator rewards, withdrawal and credit UX, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, and React/Next reference architecture guidance is documented for the local baseline |
+| React web app | Use the generated address books, ABI surface/checksum artifacts, signing docs, metadata docs, provenance docs, permanence package docs, royalty policy, release-readiness dashboard, [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`wallets-and-signatures.md`](wallets-and-signatures.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md), [`frontend-reference-architecture.md`](frontend-reference-architecture.md), and [`examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md) | Fixed-price, auction, curator rewards, withdrawal and credit UX, wallet/signature, event/indexer, metadata rendering, 1/1 provenance manifest, collector-verifiable permanence package, ERC-2981 royalty disclosure, cache, animation sandbox, retained marketplace/indexer evidence, React/Next reference architecture, and INT-013 TypeScript artifact loading and chain config snippets are documented for the local baseline |
 | Mobile app | Use the same contract surface artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`contract-flows.md`](contract-flows.md), [`auction-flows.md`](auction-flows.md), [`metadata-rendering.md`](metadata-rendering.md), and [`mobile-walletconnect.md`](mobile-walletconnect.md) | Fixed-price, auction, WalletConnect, mobile handoff signatures, mobile foreground wallet action, deep links, reconnect, offline/background limits, and mobile metadata/cache caveats are documented |
 | Electron app | Use web-app artifacts plus [`wallets-and-signatures.md`](wallets-and-signatures.md), [`metadata-rendering.md`](metadata-rendering.md), and [`electron-security-wallets.md`](electron-security-wallets.md) | Signature, wallet, renderer/process isolation, preload/IPC, metadata animation sandbox, local cache, signed-update, and no-secret desktop boundaries are documented |
 | Indexer | Use event topic catalog, interface IDs, deployment manifests, address books, release manifest, one-of-one provenance manifest, one-of-one permanence manifest, royalty policy, [`auction-flows.md`](auction-flows.md), [`curator-rewards.md`](curator-rewards.md), [`withdrawals-and-credits.md`](withdrawals-and-credits.md), [`events-and-indexing.md`](events-and-indexing.md), [`metadata-rendering.md`](metadata-rendering.md), and [`marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md) | Auction lifecycle, curator reward claims, withdrawal and credit reconstruction, full event replay, read-after-event reconstruction, metadata state, 1/1 provenance artifact discovery, collector-verifiable permanence package discovery, ERC-2981 royalty display boundary, cache invalidation, and retained marketplace/indexer evidence requirements are documented for the local baseline |
@@ -85,6 +85,7 @@ Use tracked generated artifacts rather than hand-maintained copies.
 | Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | Release-tracked ERC-7572-style `contractURI()` adapter with `ContractURIUpdated` and URI hash views |
 | Interface/version compatibility | [`docs/integrations/interface-versioning.md`](interface-versioning.md), [`smart-contracts/IStreamCompatibility.sol`](../../smart-contracts/IStreamCompatibility.sol), [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | Current `CON-007` adapter-based protocol name, protocol version, metadata schema version, release tag/hash, and interface-probe guidance for fail-closed frontend compatibility checks |
 | React/Next reference architecture | [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md) | Current `INT-007` artifact import, client layering, query/cache, transaction, wallet, metadata, indexer, environment, and testing guide |
+| TypeScript artifact and chain config snippets | [`docs/integrations/examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md) | Current `INT-013` release artifact loading, address book loading, deployment manifest cross-checks, release manifest hash validation, ABI checksum awareness, fail-closed chain config, and no-secret public environment snippets |
 | Mobile and WalletConnect guide | [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md) | Current `INT-008` mobile browser, native shell, WalletConnect session, foreground handoff, deep-link, reconnect, offline/background, telemetry, and no-secret guide |
 | Electron security and wallet guide | [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md) | Current `INT-009` Electron main/renderer/preload, context isolation, IPC allowlist, wallet-provider, metadata sandbox, signed-update, and no-secret guide |
 | Operator admin UI guide | [`docs/integrations/operator-admin-ui.md`](operator-admin-ui.md) | Current `INT-010` operator personas, Safe/multisig ceremony, roles, signer lifecycle, pause domains, metadata freeze, dependency, randomizer, emergency, monitoring, and no-secret evidence guidance |
@@ -120,6 +121,7 @@ can prove the entrypoint keeps all required local targets reachable:
 - [`docs/integrations/marketplace-indexer-evidence.md`](marketplace-indexer-evidence.md)
 - [`docs/integrations/interface-versioning.md`](interface-versioning.md)
 - [`docs/integrations/frontend-reference-architecture.md`](frontend-reference-architecture.md)
+- [`docs/integrations/examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md)
 - [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md)
 - [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md)
 - [`docs/integrations/operator-admin-ui.md`](operator-admin-ui.md)
@@ -177,6 +179,13 @@ to understand what is still intentionally future work:
   [`frontend-reference-architecture.md`](frontend-reference-architecture.md),
   with pseudocode examples in
   [`examples/react-viem.md`](examples/react-viem.md).
+- `INT-013`: the TypeScript snippets for artifact loading and chain config are
+  now
+  [`examples/typescript-artifacts-and-chain-config.md`](examples/typescript-artifacts-and-chain-config.md),
+  covering release artifact loading, address book loading, deployment manifest
+  checks, release manifest hash validation, ABI checksum awareness,
+  fail-closed chain config, wrong-chain guards, and no-secret public env
+  parsing.
 - `INT-008`: the mobile and WalletConnect integration guide is now
   [`mobile-walletconnect.md`](mobile-walletconnect.md).
 - `INT-009`: the Electron security and wallet integration guide is now
@@ -284,6 +293,8 @@ python scripts/test_royalty_policy.py
 python scripts/check_royalty_policy.py
 python scripts/test_react_next_reference.py
 python scripts/check_react_next_reference.py
+python scripts/test_typescript_artifact_chain_config.py
+python scripts/check_typescript_artifact_chain_config.py
 python scripts/test_mobile_walletconnect.py
 python scripts/check_mobile_walletconnect.py
 python scripts/test_electron_security_wallets.py
