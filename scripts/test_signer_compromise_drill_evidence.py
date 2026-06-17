@@ -46,7 +46,7 @@ def reviewed_text() -> str:
         "Signer manager: `TBD`": "Signer manager: `0x0000000000000000000000000000000000001003`",
         "Starting signer epoch: `TBD`": "Starting signer epoch: `1`",
         "Ending signer epoch: `TBD`": "Ending signer epoch: `2`",
-        "Affected drop IDs: `TBD`": "Affected drop IDs: `0x1234,0xabcd`",
+        "Affected drop IDs: `TBD`": "Affected drop IDs: `0x1111111111111111111111111111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222222222222222222222222222`",
         "Affected EIP-712 domain: `TBD`": "Affected EIP-712 domain: `chain=11155111 verifyingContract=0x0000000000000000000000000000000000002001`",
         "Drop execution pause evidence: `TBD`": "Drop execution pause evidence: `pause tx and isPaused read retained`",
         "Signer rotation evidence: `TBD`": "Signer rotation evidence: `DropSignerChanged event retained`",
@@ -172,6 +172,58 @@ class SignerCompromiseDrillEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path)
 
+    def test_affected_drop_ids_must_be_bytes32(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "signer-compromise.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    (
+                        "Affected drop IDs: "
+                        "`0x1111111111111111111111111111111111111111111111111111111111111111,"
+                        "0x2222222222222222222222222222222222222222222222222222222222222222`"
+                    ),
+                    "Affected drop IDs: `0x1234`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.SignerCompromiseDrillEvidenceError, "Affected drop IDs"
+            ):
+                checker.validate_evidence(path)
+
+    def test_domain_chain_must_match_chain_id(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "signer-compromise.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Affected EIP-712 domain: `chain=11155111",
+                    "Affected EIP-712 domain: `chain=1",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.SignerCompromiseDrillEvidenceError, "domain chain"
+            ):
+                checker.validate_evidence(path)
+
+    def test_domain_requires_verifying_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "signer-compromise.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    " verifyingContract=0x0000000000000000000000000000000000002001",
+                    "",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.SignerCompromiseDrillEvidenceError, "verifyingContract"
+            ):
+                checker.validate_evidence(path)
+
     def test_replacement_signer_must_change(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "signer-compromise.md"
@@ -247,6 +299,35 @@ class SignerCompromiseDrillEvidenceTests(unittest.TestCase):
                 checker.SignerCompromiseDrillEvidenceError, "secret-like"
             ):
                 checker.validate_evidence(path)
+
+    def test_credentialed_urls_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "signer-compromise.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Operator dashboard confirmation: `dashboard panel screenshot hash retained`",
+                    "Operator dashboard confirmation: `https://operator:password@example.invalid/panel`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.SignerCompromiseDrillEvidenceError, "credentialed URL"
+            ):
+                checker.validate_evidence(path)
+
+    def test_redacted_urls_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "signer-compromise.md"
+            write_text(
+                path,
+                reviewed_text().replace(
+                    "Operator dashboard confirmation: `dashboard panel screenshot hash retained`",
+                    "Operator dashboard confirmation: `https://<redacted>@example.invalid/panel`",
+                ),
+            )
+
+            checker.validate_evidence(path)
 
     def test_source_requirement_missing_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

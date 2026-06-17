@@ -164,6 +164,7 @@ FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 UINT_RE = re.compile(r"^(0|[1-9][0-9]*)$")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
+BYTES32_RE = re.compile(r"^0x[0-9a-fA-F]{64}$")
 GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 SECRET_VALUE_RE = re.compile(
     r"\b("
@@ -175,6 +176,10 @@ SECRET_VALUE_RE = re.compile(
     re.IGNORECASE,
 )
 CREDENTIAL_URL_RE = re.compile(r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+", re.IGNORECASE)
+DOMAIN_CHAIN_RE = re.compile(r"(?:^|\s)chain=(?P<chain_id>0|[1-9][0-9]*)(?:\s|$)")
+DOMAIN_VERIFYING_CONTRACT_RE = re.compile(
+    r"(?:^|\s)verifyingContract=(?P<address>0x[0-9a-fA-F]{40})(?:\s|$)"
+)
 
 
 class SignerCompromiseDrillEvidenceError(RuntimeError):
@@ -264,6 +269,36 @@ def is_placeholder(value: str) -> bool:
     } or bool(ANGLE_PLACEHOLDER_RE.fullmatch(value))
 
 
+def validate_drop_ids(path: Path, value: str) -> None:
+    drop_ids = [part.strip() for part in value.split(",")]
+    if not drop_ids or any(not drop_id for drop_id in drop_ids):
+        raise SignerCompromiseDrillEvidenceError(
+            f"{path} Affected drop IDs must be comma-separated bytes32 values"
+        )
+    for drop_id in drop_ids:
+        if not BYTES32_RE.fullmatch(drop_id):
+            raise SignerCompromiseDrillEvidenceError(
+                f"{path} Affected drop IDs must be comma-separated bytes32 values"
+            )
+
+
+def validate_eip712_domain(path: Path, fields: dict[str, str]) -> None:
+    domain = fields["Affected EIP-712 domain"]
+    chain_match = DOMAIN_CHAIN_RE.search(domain)
+    if not chain_match:
+        raise SignerCompromiseDrillEvidenceError(
+            f"{path} Affected EIP-712 domain must include chain=<uint>"
+        )
+    if chain_match.group("chain_id") != fields["Chain ID"]:
+        raise SignerCompromiseDrillEvidenceError(
+            f"{path} Affected EIP-712 domain chain must match Chain ID"
+        )
+    if not DOMAIN_VERIFYING_CONTRACT_RE.search(domain):
+        raise SignerCompromiseDrillEvidenceError(
+            f"{path} Affected EIP-712 domain must include verifyingContract=<address>"
+        )
+
+
 def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None:
     review_status = fields["Review status"]
     if review_status not in REVIEW_STATUSES:
@@ -341,6 +376,8 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
         raise SignerCompromiseDrillEvidenceError(
             f"{path} Ending signer epoch must increase"
         )
+    validate_drop_ids(path, fields["Affected drop IDs"])
+    validate_eip712_domain(path, fields)
     for label in REDACTION_FIELDS:
         require_field_value(path, fields, label, "yes")
 
