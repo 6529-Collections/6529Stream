@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `GOV-009` protocol monitoring specification covering admin,
+  signer, auction, randomness, credits, metadata/dependency, release evidence,
+  alert severity, dashboard queries, incident handoff, local/CI/Windows gate
+  wiring, release-readiness/integration navigation, release-manifest coverage,
+  and release-checksum coverage.
 - Added a checked Markdown link gate covering local files, heading anchors,
   duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and
   release-manifest/checksum coverage.

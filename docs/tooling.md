@@ -352,6 +352,13 @@ separates passing local evidence and reviewed fork evidence from missing
 testnet/live evidence, production signatures, signed Git tags, verified
 deployed addresses, explorer verification, external audit, and post-audit
 remediation blockers.
+The monitoring specification step validates
+[`monitoring.md`](monitoring.md), the checked `GOV-009` operations reference
+for admin, signer, auction, randomizer, payment/credit, metadata/dependency,
+release-evidence, alert-severity, dashboard-query, and incident-handoff
+monitoring. It is not a maintained monitoring service, hosted dashboard, alert
+provider integration, production indexer, public beta implementation, or
+production readiness claim.
 The release-mode CI profile is intentionally separate from `make check`: run
 `python scripts/test_release_mode.py` in the default baseline, then use
 `make release-mode-public-beta-check`,
@@ -838,6 +845,8 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_admin_ceremony_evidence.py
 python scripts/check_admin_ceremony_evidence.py
+python scripts/test_monitoring_spec.py
+python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
@@ -906,6 +915,8 @@ python scripts/test_signer_custody_readiness.py
 python scripts/check_signer_custody_readiness.py
 python scripts/test_admin_ceremony_evidence.py
 python scripts/check_admin_ceremony_evidence.py
+python scripts/test_monitoring_spec.py
+python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check

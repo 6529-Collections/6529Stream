@@ -101,6 +101,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/royalty-policy.md"),
     Path("docs/warning-dispositions.md"),
     Path("docs/natspec-coverage.md"),
+    Path("docs/monitoring.md"),
     Path("docs/release-readiness.md"),
     Path("docs/protocol-surface.md"),
     Path("docs/custom-errors.md"),

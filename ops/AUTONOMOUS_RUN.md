@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/markdown-link-gate` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/503` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/504` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/505` |
-| Next issue | Push the PR #505 review-response commit, wait for latest-head CI, 6529bot, and CodeRabbit feedback; resolve anything actionable, merge when clean, then continue the next unblocked substantive backlog item. |
+| Active PR branch | `codex/protocol-monitoring-spec` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/505` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/506` |
+| Active PR | `TBD` |
+| Next issue | Finish the GOV-009 monitoring specification gate, regenerate release evidence, run focused and full local/Windows gates, commit, push, open the PR, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge when clean. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 11:35 UTC` |
+| Last updated | `2026-06-17 12:05 UTC` |
 
 ## Packaging Notes
 
@@ -16166,6 +16166,7 @@ Outcome:
 | 2026-06-17 11:22 | Validate OSS-005 local draft | Added `scripts/check_markdown_links.py` and `scripts/test_markdown_links.py` for repository Markdown local file, heading-anchor, duplicate-anchor, line-anchor, fenced-code, and repository-escape validation. Wired `markdown-links-check` through Makefile, Bash, PowerShell, CI, README, CONTRIBUTING, tooling/status docs, release-manifest/checksum coverage, changelog, and durable backlog state; regenerated risk register, blocker reports, release notes, release manifest, bytecode proof, and checksum bundle. Focused Markdown, README, release-notes, release-manifest, bytecode-proof, checksum, changelog, Python compile, Make wrapper, release-manifest/checksum wrapper, full `make check`, Windows `scripts\check.ps1`, manifest/proof/checksum drift checks, and `git diff --check` passed. Known warning noise remains the existing solc/Foundry warnings and the existing `scripts/check.ps1` LF-to-CRLF warning. Next action is to commit, push, open PR for issue #504, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 11:24 | Open PR #505 for OSS-005 | PR #505 is open at `https://github.com/6529-Collections/6529Stream/pull/505`, closes issue #504, and packages the checked Markdown link gate plus checker/tests, local/CI/Windows gate wiring, docs links, release-manifest/checksum coverage, release notes, bytecode proof, and regenerated release evidence. Next action is to push this state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 11:35 | Address PR #505 checker nice-to-haves | 6529bot general review reported PR #505 good to merge and suggested low-risk parser hardening. Accepted the highest-signal items by supporting indented backtick/tilde fenced code blocks, balanced parentheses in inline link targets, and reference-style local link definitions, with focused regressions increasing the Markdown checker suite from 11 to 15 tests. Focused Markdown tests/check and Python compile passed. Next action is to refresh checksum evidence, run focused release checks, commit/push, and wait for latest-head CI/bot feedback. |
+| 2026-06-17 12:05 | Merge PR #505 and start GOV-009 | PR #505 merged as `9b00bd58eba383b80999dab773e85190b8d7b399` after latest-head CI passed, CodeRabbit review completed without actionable findings, and 6529bot confirmed no new findings after the parser hardening. Issue #504 closed completed. Issue #506 and branch `codex/protocol-monitoring-spec` now track GOV-009 for a checked protocol monitoring specification covering admin, signer, auction, randomness, credits, metadata/dependency, release evidence, alert severity, dashboard queries, incident handoff, local/CI/Windows wiring, release-manifest/checksum coverage, docs, changelog, and regenerated evidence. |
 
 ## Resume Instructions
 

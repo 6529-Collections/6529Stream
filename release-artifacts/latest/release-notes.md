@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added a checked `GOV-009` protocol monitoring specification covering admin, signer, auction, randomness, credits, metadata/dependency, release evidence, alert severity, dashboard queries, incident handoff, local/CI/Windows gate wiring, release-readiness/integration navigation, release-manifest coverage, and release-checksum coverage.
 - Added a checked Markdown link gate covering local files, heading anchors, duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and release-manifest/checksum coverage.
 - Added a checked pull request template release-impact checklist covering roadmap linkage, validation evidence, generated-artifact impact, breaking-change approval references, and release-manifest/checksum coverage.
 - Added checked GitHub issue templates for integration reports, public-safe audit finding intake, and release evidence requests, with no-secret and pre-audit maturity language, local/CI/Windows gate wiring, and release-manifest/checksum coverage.
