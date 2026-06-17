@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:6902037a03c2afb0fc8cd0494a82a6cfa2abeb2a0cce01fd8a1025c7f4fba645",
-      "size_bytes": 53675
+      "sha256": "sha256:5357fcac589608c62df0e2320cb1afc185316e6c4579f35245141ae93e3a8651",
+      "size_bytes": 54119
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c341cba0b3caafe7b4c43105e5debf12de06384ff493a770238f5145c1f1e177",
+      "sha256": "sha256:fbb26dad9eb597b6693645003bb4a8b408999bc12e3bfbf1ece3d112f3993a67",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked `GOV-010` operator dashboard query model covering environment/release, admin, signer, fixed-price, auction, randomizer, payment/credit, metadata/dependency, release blocker, and incident drill panels, with query inputs, source artifacts, freshness, severity, no-secret telemetry, local/CI/Windows gate wiring, release-readiness and integration navigation, release-manifest coverage, and release-checksum coverage.",
       "Added a checked `GOV-009` protocol monitoring specification covering admin, signer, auction, randomness, credits, metadata/dependency, release evidence, alert severity, dashboard queries, incident handoff, local/CI/Windows gate wiring, release-readiness/integration navigation, release-manifest coverage, and release-checksum coverage.",
       "Added a checked Markdown link gate covering local files, heading anchors, duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and release-manifest/checksum coverage.",
       "Added a checked pull request template release-impact checklist covering roadmap linkage, validation evidence, generated-artifact impact, breaking-change approval references, and release-manifest/checksum coverage.",

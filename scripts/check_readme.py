@@ -107,6 +107,7 @@ REQUIRED_LINK_TARGETS = [
     "docs/release-signatures.md",
     "docs/release-readiness.md",
     "docs/monitoring.md",
+    "docs/operator-dashboard-query-model.md",
     "docs/public-beta-evidence.md",
     "docs/incident-response.md",
     "docs/integrations/README.md",

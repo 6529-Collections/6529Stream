@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/protocol-monitoring-spec` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/505` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/506` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/507` |
-| Next issue | Wait for PR #507 CI, 6529bot, and CodeRabbit feedback; resolve anything actionable, merge when clean, then continue the next unblocked substantive backlog item. |
+| Active PR branch | `codex/operator-dashboard-query-model` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/507` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/508` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/509` |
+| Next issue | Wait for PR #509 CI, CodeRabbit, and 6529bot feedback; resolve anything actionable, merge when clean, then continue with the next substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 12:25 UTC` |
+| Last updated | `2026-06-17 12:41 UTC` |
 
 ## Packaging Notes
 
@@ -16168,6 +16168,8 @@ Outcome:
 | 2026-06-17 11:35 | Address PR #505 checker nice-to-haves | 6529bot general review reported PR #505 good to merge and suggested low-risk parser hardening. Accepted the highest-signal items by supporting indented backtick/tilde fenced code blocks, balanced parentheses in inline link targets, and reference-style local link definitions, with focused regressions increasing the Markdown checker suite from 11 to 15 tests. Focused Markdown tests/check and Python compile passed. Next action is to refresh checksum evidence, run focused release checks, commit/push, and wait for latest-head CI/bot feedback. |
 | 2026-06-17 12:05 | Merge PR #505 and start GOV-009 | PR #505 merged as `9b00bd58eba383b80999dab773e85190b8d7b399` after latest-head CI passed, CodeRabbit review completed without actionable findings, and 6529bot confirmed no new findings after the parser hardening. Issue #504 closed completed. Issue #506 and branch `codex/protocol-monitoring-spec` now track GOV-009 for a checked protocol monitoring specification covering admin, signer, auction, randomness, credits, metadata/dependency, release evidence, alert severity, dashboard queries, incident handoff, local/CI/Windows wiring, release-manifest/checksum coverage, docs, changelog, and regenerated evidence. |
 | 2026-06-17 12:25 | Open PR #507 for GOV-009 | PR #507 is open at `https://github.com/6529-Collections/6529Stream/pull/507`, closes issue #506, and packages the checked protocol monitoring specification plus checker/tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, docs navigation, changelog, and regenerated evidence. CodeRabbit review was requested in comment `4730017823`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 12:41 | Merge PR #507 and start GOV-010 | PR #507 merged as `db37777102a536ea9fcbbf70465b565864c9ea10` after CodeRabbit passed, GitHub CI passed, and 6529bot confirmed the latest-head checker hardening resolved its nice-to-haves with no new findings. Issue #506 closed completed. Issue #508 and branch `codex/operator-dashboard-query-model` now track GOV-010 for a checked operator dashboard query model covering environment/release, admin, signer, fixed-price, auction, randomizer, payment, metadata/dependency, release blocker, and incident drill panels. |
+| 2026-06-17 13:07 | Open PR #509 for GOV-010 | PR #509 is open at `https://github.com/6529-Collections/6529Stream/pull/509`, closes issue #508, and packages the checked operator dashboard query model plus checker/tests, local/CI/Windows gate wiring, release-manifest/checksum coverage, docs navigation, changelog, and regenerated release evidence. Next action is to request CodeRabbit, wait for CI and 6529bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 

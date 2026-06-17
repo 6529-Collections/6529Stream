@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `GOV-010` operator dashboard query model covering
+  environment/release, admin, signer, fixed-price, auction, randomizer,
+  payment/credit, metadata/dependency, release blocker, and incident drill
+  panels, with query inputs, source artifacts, freshness, severity,
+  no-secret telemetry, local/CI/Windows gate wiring, release-readiness and
+  integration navigation, release-manifest coverage, and release-checksum
+  coverage.
 - Added a checked `GOV-009` protocol monitoring specification covering admin,
   signer, auction, randomness, credits, metadata/dependency, release evidence,
   alert severity, dashboard queries, incident handoff, local/CI/Windows gate

@@ -359,6 +359,13 @@ release-evidence, alert-severity, dashboard-query, and incident-handoff
 monitoring. It is not a maintained monitoring service, hosted dashboard, alert
 provider integration, production indexer, public beta implementation, or
 production readiness claim.
+The operator dashboard query model step validates
+[`operator-dashboard-query-model.md`](operator-dashboard-query-model.md), the
+checked `GOV-010` operations reference that turns monitoring categories into
+dashboard panels, query inputs, source artifacts, freshness states, severity
+mapping, and no-secret telemetry boundaries. It is not a maintained dashboard,
+hosted monitoring service, alert-provider integration, RPC provider, production
+indexer, public beta implementation, or production readiness claim.
 The release-mode CI profile is intentionally separate from `make check`: run
 `python scripts/test_release_mode.py` in the default baseline, then use
 `make release-mode-public-beta-check`,
@@ -847,6 +854,8 @@ python scripts/test_admin_ceremony_evidence.py
 python scripts/check_admin_ceremony_evidence.py
 python scripts/test_monitoring_spec.py
 python scripts/check_monitoring_spec.py
+python scripts/test_operator_dashboard_query_model.py
+python scripts/check_operator_dashboard_query_model.py
 python scripts/check_release_readiness.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py

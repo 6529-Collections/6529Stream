@@ -239,6 +239,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_electron_security_wallets.py"
 & $pythonPath @pythonArgs "scripts\test_operator_admin_ui.py"
 & $pythonPath @pythonArgs "scripts\check_operator_admin_ui.py"
+& $pythonPath @pythonArgs "scripts\test_operator_dashboard_query_model.py"
+& $pythonPath @pythonArgs "scripts\check_operator_dashboard_query_model.py"
 & $pythonPath @pythonArgs "scripts\test_monitoring_spec.py"
 & $pythonPath @pythonArgs "scripts\check_monitoring_spec.py"
 & $pythonPath @pythonArgs "scripts\test_royalty_policy.py"

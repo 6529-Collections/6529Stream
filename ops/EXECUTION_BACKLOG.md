@@ -3417,8 +3417,8 @@ unless an external dependency changes.
 | `GOV-006` | Add stuck auction drill retained evidence | F | `GOV-004` |
 | `GOV-007` | Add failed randomness drill retained evidence | F | `GOV-004` |
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | `GOV-004` |
-| `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | In progress on issue #506 and branch `codex/protocol-monitoring-spec`; depends on `INT-005` |
-| `GOV-010` | Add operator dashboard query model | G | `INT-010` |
+| `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
+| `GOV-010` | Add operator dashboard query model | G | In progress on issue #508 and branch `codex/operator-dashboard-query-model`; depends on `INT-010` and `GOV-009` |
 
 ### Integration Readiness
 

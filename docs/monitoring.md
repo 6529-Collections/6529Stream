@@ -43,6 +43,7 @@ not hand-maintained copies:
 - [docs/integrations/README.md](integrations/README.md)
 - [docs/integrations/events-and-indexing.md](integrations/events-and-indexing.md)
 - [docs/integrations/operator-admin-ui.md](integrations/operator-admin-ui.md)
+- [docs/operator-dashboard-query-model.md](operator-dashboard-query-model.md)
 - [docs/integrations/auction-flows.md](integrations/auction-flows.md)
 - [docs/integrations/withdrawals-and-credits.md](integrations/withdrawals-and-credits.md)
 - [docs/drop-authorization-signing.md](drop-authorization-signing.md)
@@ -94,6 +95,11 @@ The monitoring source of truth is a reconciliation of:
   evidence exists;
 - incident-response and deployment runbooks for escalation and retained
   evidence.
+
+Use the checked `GOV-010` operator dashboard query model when turning these
+monitor categories into concrete environment/release, admin, signer,
+fixed-price, auction, randomizer, payment, metadata/dependency, release
+blocker, and incident drill panels.
 
 Every monitor must include chain ID, deployment version, contract address,
 block number, block hash, transaction hash, log index, event signature, and
@@ -329,6 +335,8 @@ Run the focused monitoring checks:
 ```sh
 python scripts/test_monitoring_spec.py
 python scripts/check_monitoring_spec.py
+python scripts/test_operator_dashboard_query_model.py
+python scripts/check_operator_dashboard_query_model.py
 ```
 
 Run the surrounding documentation checks:

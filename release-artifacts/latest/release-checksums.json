@@ -42,6 +42,9 @@
       "scripts/check_monitoring_spec.py",
       "scripts/test_monitoring_spec.py",
       "docs/monitoring.md",
+      "scripts/check_operator_dashboard_query_model.py",
+      "scripts/test_operator_dashboard_query_model.py",
+      "docs/operator-dashboard-query-model.md",
       "scripts/check_curator_rewards_flow.py",
       "scripts/test_curator_rewards_flow.py",
       "scripts/check_withdrawals_credits_flow.py",
@@ -78,7 +81,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:438809b4724bc3f9b7c0f4cff9aa45e4c4b93585fda2a41723ba68add7497b8e"
+    "sha256": "sha256:79d72ea53007f9453b36d6d99022b6e87bf515a93b471b60a3ac0d070eaa6ad3"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -242,8 +245,13 @@
     },
     {
       "path": "docs/monitoring.md",
-      "sha256": "sha256:45a87207880820011163bee2d39cc03ff56c330dbacd4bd0eaff106be377af0b",
-      "size_bytes": 19322
+      "sha256": "sha256:a0b8da14b3c6f3aa9003ac130c58f768fa749ca1e6547a85fd89261eeda0ac63",
+      "size_bytes": 19763
+    },
+    {
+      "path": "docs/operator-dashboard-query-model.md",
+      "sha256": "sha256:96d47fa4a36f482ba204166df1e3d0e8489be48d67d876cb1814504fb458cb46",
+      "size_bytes": 25003
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -587,7 +595,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:2305c623202787519becfe64b5ddf586def77643ccef5957fa2d47f29e5b752d",
+      "sha256": "sha256:e09b6a8bf43225b946e557b4eefd056a8903f11f9798a867d31e117e7cc93904",
       "size_bytes": 79962
     },
     {
@@ -697,22 +705,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:bba250caa7cb96a392d42b243c1fe4a3034357e7c9fd16a2e6d9b56e0067da53",
-      "size_bytes": 113782
+      "sha256": "sha256:af4afaea5c4a3875c2422db17a69295a6c9db3e4814090414155d165e051bac0",
+      "size_bytes": 113978
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:e632a5c975e91104abeb03ecc099f64cdece7a01effd7a8792c361b8757e2e66",
-      "size_bytes": 55984
+      "sha256": "sha256:09392fa610f7224d6dfe6243dd83a4b760867a409edf03dcc7a375124a9347d6",
+      "size_bytes": 56423
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:caf950bf6359ecf4a344087695d7fb7d6ab080d0edc052474132713945f55d20",
-      "size_bytes": 53380
+      "sha256": "sha256:fbf830534d081058b2b341fdc4e5894d7b897141e19be052f9a87c7383c9b641",
+      "size_bytes": 53812
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c341cba0b3caafe7b4c43105e5debf12de06384ff493a770238f5145c1f1e177",
+      "sha256": "sha256:fbb26dad9eb597b6693645003bb4a8b408999bc12e3bfbf1ece3d112f3993a67",
       "size_bytes": 22929
     },
     {
@@ -837,8 +845,13 @@
     },
     {
       "path": "scripts/check_monitoring_spec.py",
-      "sha256": "sha256:b9b8cf8478827a722059e1b48efc9cd642b6503415e60a24593ddbccddafbdd5",
-      "size_bytes": 13846
+      "sha256": "sha256:dcd999123526b520b82040b885a460499db6e15a1977f4298911392b94f1e4f3",
+      "size_bytes": 14015
+    },
+    {
+      "path": "scripts/check_operator_dashboard_query_model.py",
+      "sha256": "sha256:064fe7a4a5fe3a9a19b07bd8a8428e8a778ce294a216cb4c020fa7a49d00751e",
+      "size_bytes": 14837
     },
     {
       "path": "scripts/check_pr_template.py",
@@ -862,8 +875,8 @@
     },
     {
       "path": "scripts/check_readme.py",
-      "sha256": "sha256:06c343a2928be2cea5887a9b1d77ebc50cdda63399a0b2c4e69057add40ce936",
-      "size_bytes": 10092
+      "sha256": "sha256:bc84c4681b3f83fb5af4ba854050166792e4fddaa3832be6cb409ef77b61c81c",
+      "size_bytes": 10138
     },
     {
       "path": "scripts/check_release_mode.py",
@@ -939,6 +952,11 @@
       "path": "scripts/test_monitoring_spec.py",
       "sha256": "sha256:eb62ed986d8a87aa08b6a785205f9360772cb2544f2b346dcc0fe276aa05ffd6",
       "size_bytes": 13616
+    },
+    {
+      "path": "scripts/test_operator_dashboard_query_model.py",
+      "sha256": "sha256:3e9f246ec3f4ed555ec4420519e20c59d99a04117dff2451ec3c8cf824c17141",
+      "size_bytes": 13955
     },
     {
       "path": "scripts/test_pr_template.py",
