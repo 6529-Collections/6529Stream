@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e95dce2af442120fb7898c95aebd05884003a069501a360d199a7752ed59d155",
-      "size_bytes": 48818
+      "sha256": "sha256:de4f9c11bcf9ec13759d8c96b840f276d4905f01fae9edc83639871aa1ecd8fd",
+      "size_bytes": 49186
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:053fd3e3fdab6b028b8035bcb2a7ed7fe455efed85966baf78651bab944e0662",
+      "sha256": "sha256:713308ba7589d1682f1b71707392f9272ec3754337c85ca18502cc605f3107a8",
       "size_bytes": 22887
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked `StreamCore` bytecode-spend policy gate that pins the current 22,184-byte approved production runtime baseline, fails unreviewed Core runtime increases even when the EIP-170 floor still passes, records rejected no-gain/negative-gain headroom experiments, and wires focused tests into local, CI, Windows, release-manifest, and checksum paths.",
       "Added a no-secret live randomizer operations retained-artifact template and checker for future `live_randomizer_operations_evidence`, with provider configuration, provider funding, reserve, request health, lifecycle control, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live randomizer operations evidence is retained.",
       "Added a no-secret live ceremony retained-artifact template and checker for future `live_ceremony_evidence`, with governance participant, ownership/role, signer, metadata/freeze, auction, emergency-control, dry-run, monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed live ceremony evidence is retained.",
       "Added a no-secret post-audit remediation retained-artifact template and checker for future `post_audit_remediation` evidence, with finding-by-finding remediation, retest, accepted-risk, release-note, reviewer-signoff, local/CI/ Windows gate, packet-index command, release-manifest, and checksum coverage while preserving the blocked production-release baseline until reviewed post-audit remediation evidence is retained.",

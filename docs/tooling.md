@@ -162,6 +162,14 @@ and current-source Keccak hashes before trusting any reported runtime size, so
 stale artifacts from earlier local commands fail before they can become release
 evidence.
 
+The Core bytecode-spend policy is stricter than the EIP-170 floor. It reads the
+same production-size artifacts and pins the currently approved `StreamCore`
+runtime baseline from `release-artifacts/contracts.json`. A future PR may reduce
+Core runtime size without an exception, but any increase above the approved
+baseline must add an accepted exception record with an issue, rationale,
+measured delta, maximum approved runtime size, and mitigation before
+`python scripts/check_core_bytecode_spend_policy.py` will pass.
+
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
 minter/drops/auction/randomizer surfaces, transfers Ownable control to the Safe
@@ -749,6 +757,8 @@ build and regenerate the tracked release baseline with:
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+python scripts/test_core_bytecode_spend_policy.py
+python scripts/check_core_bytecode_spend_policy.py
 python scripts/generate_release_artifacts.py
 python scripts/generate_source_verification_inputs.py
 python scripts/check_abi_compatibility.py

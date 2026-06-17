@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked `StreamCore` bytecode-spend policy gate that pins the current
+  22,184-byte approved production runtime baseline, fails unreviewed Core
+  runtime increases even when the EIP-170 floor still passes, records rejected
+  no-gain/negative-gain headroom experiments, and wires focused tests into
+  local, CI, Windows, release-manifest, and checksum paths.
 - Added a no-secret live randomizer operations retained-artifact template and
   checker for future `live_randomizer_operations_evidence`, with provider
   configuration, provider funding, reserve, request health, lifecycle control,

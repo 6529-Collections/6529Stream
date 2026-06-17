@@ -55,6 +55,39 @@
       }
     }
   },
+  "core_bytecode_spend_policy": {
+    "schema_version": "6529stream.core-bytecode-spend-policy.v1",
+    "contract": "StreamCore",
+    "approved_runtime_size_bytes": 22184,
+    "approved_runtime_margin_bytes": 2392,
+    "baseline_command": "forge build --sizes --via-ir --skip test --skip script --force",
+    "tracking": "https://github.com/6529-Collections/6529Stream/issues/478",
+    "policy": "Core runtime bytecode may decrease freely. Any increase above the approved runtime baseline requires an accepted exception record before merge, even when the EIP-170 release floor still passes.",
+    "exceptions": [],
+    "rejected_experiments": [
+      {
+        "id": "CORE-EXPERIMENT-2026-06-17-001",
+        "summary": "Change unused public view functions to external visibility",
+        "runtime_size_bytes": 22184,
+        "measured_delta_bytes": 0,
+        "decision": "rejected-no-headroom-gain"
+      },
+      {
+        "id": "CORE-EXPERIMENT-2026-06-17-002",
+        "summary": "Move freeze-manifest hash assembly into StreamMetadataRenderer",
+        "runtime_size_bytes": 22365,
+        "measured_delta_bytes": 181,
+        "decision": "rejected-negative-headroom"
+      },
+      {
+        "id": "CORE-EXPERIMENT-2026-06-17-003",
+        "summary": "Replace public metadata constants with explicit getter functions",
+        "runtime_size_bytes": 22189,
+        "measured_delta_bytes": 5,
+        "decision": "rejected-negative-headroom"
+      }
+    ]
+  },
   "interfaces": [
     {
       "name": "IDependencyRegistry",

@@ -69,6 +69,11 @@ plus the artifact-backed checker
 [`scripts/check_contract_size_budget.py`](../scripts/check_contract_size_budget.py).
 Run `python scripts/check_contract_size_budget.py` after the production size
 build before relying on any size-budget claim.
+The stricter bytecode-spend policy is checked by
+[`scripts/check_core_bytecode_spend_policy.py`](../scripts/check_core_bytecode_spend_policy.py):
+the current approved `StreamCore` runtime may decrease without review, but any
+increase above the approved baseline requires an accepted exception record in
+[`release-artifacts/contracts.json`](../release-artifacts/contracts.json).
 The current production profile is:
 
 - command: `forge build --sizes --via-ir --skip test --skip script --force`;
@@ -92,6 +97,12 @@ Any PR that spends non-trivial `StreamCore` bytecode must include:
   or bytecode-to-release proof outputs change; and
 - tests or retained evidence proving behavior did not move across trust
   boundaries accidentally.
+
+The current rejected-experiment history in `release-artifacts/contracts.json`
+records measured attempts that did not recover headroom, including externalizing
+unused public views, moving freeze-manifest hash assembly into the renderer, and
+hand-writing metadata constant getters. Contributors should prefer new measured
+architecture changes over repeating those no-gain or negative-gain refactors.
 
 The default classification for future feature work is:
 
