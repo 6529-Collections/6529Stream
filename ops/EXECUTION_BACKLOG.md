@@ -3437,7 +3437,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `AUD-003` | Add external audit finding intake template and remediation workflow | F | Issue #520; branch `codex/audit-finding-workflow` in progress |
+| `AUD-003` | Add external audit finding intake template and remediation workflow | F | PR #521 open; closes issue #520 |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
