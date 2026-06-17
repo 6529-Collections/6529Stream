@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/live-solc-warning-baseline` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/481` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/482` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/483` |
-| Next issue | ONE-007 live solc warning baseline enforcement. |
+| Active PR branch | `codex/readme-maturity-navigation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/483` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/484` |
+| Active PR | TBD |
+| Next issue | OSS-001 README and docs navigation refresh. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 03:08 UTC` |
+| Last updated | `2026-06-17 03:30 UTC` |
 
 ## Packaging Notes
 
@@ -16130,6 +16130,7 @@ Outcome:
 | 2026-06-16 21:31 | Address PR #471 checker review nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with nice-to-haves. Accepted the bytecode-proof strengthening and explicit review-state test suggestions by requiring retained bytecode proof rows to match the address-book contract names, addresses, and runtime hashes, adding a root-selection code comment, and expanding the focused checker suite from 15 to 18 tests. Focused production-verified-addresses tests/check, release-manifest/proof/checksum checks, release artifact verifier, and `git diff --check` passed locally. Next action is to push the response commit, wait for latest CI/bot follow-up, then merge if clean. |
 | 2026-06-17 02:23 | Start ONE-007 live solc warning baseline | PR #481 merged as `8d818785fc8d7a3aace1b5ece52fe7336e2b2358`, issue #480 closed completed, CI and CodeRabbit passed, and 6529bot follow-up reported no new findings. Issue #482 and branch `codex/live-solc-warning-baseline` now track the next warning-hygiene slice: retaining the production-size forge output and checking live solc warnings against the reviewed disposition baseline so new warnings fail CI unless fixed or dispositioned. |
 | 2026-06-17 02:43 | Validate ONE-007 live warning baseline | Added cross-platform `scripts/run_forge_size_log.py`, live solc warning parsing in `scripts/check_warning_dispositions.py`, regression tests for expected/missing/unexpected warning rows, local/CI/Windows wiring, docs/readiness/audit updates, checksum coverage, and regenerated release artifacts. Focused warning, audit, readiness, risk, notes, manifest, bytecode-proof, checksum, changelog, Python compile, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` also passed with only the existing warning-disposition noise. Next action is to commit, push, open PR #482, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 04:02 | Validate OSS-001 README maturity navigation draft | PR #483 merged as `18822c3` and issue #482 closed completed; issue #484 and branch `codex/readme-maturity-navigation` now track OSS-001. The draft refreshes the root README into current-maturity, first-30-minutes, role-based navigation, quickstart, tooling, layout, docs, and security sections; adds `scripts/check_readme.py` plus focused regression tests; wires `readme-check` through Makefile, Bash, PowerShell, CI, release-manifest dependencies, and checksum coverage; and regenerates release notes, risk register, release manifest, bytecode proof, and checksum artifacts. Focused README, release-notes, release-manifest, bytecode-proof, checksum, verifier, changelog, Python compile, and whitespace checks passed. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed with only existing compiler/Foundry warning noise. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 
 ## Resume Instructions
 

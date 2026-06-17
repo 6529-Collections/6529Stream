@@ -74,6 +74,7 @@ DEFAULT_SIGNER_CUSTODY_READINESS_DIR = Path(
 )
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
+    Path("README.md"),
     Path("docs/release-policy.md"),
     Path("docs/deployment.md"),
     Path("docs/dependency-operations.md"),

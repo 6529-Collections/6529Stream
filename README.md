@@ -1,28 +1,80 @@
 # 6529Stream
 
-6529Stream is a set of Solidity smart contracts for 6529 NFT drops, including
-fixed-price minting, auction flows, curator rewards, metadata generation, and
-randomness adapters.
+6529Stream is a Solidity protocol for 6529 NFT drops. It covers fixed-price
+minting, auction flows, curator rewards, TDH-authorized execution, metadata
+generation, one-of-one provenance and permanence artifacts, royalty disclosure,
+and randomizer adapter flows.
 
-## Status
+## Current Maturity
 
-This repository is pre-audit and not production-ready.
+This repository has a serious pre-audit local baseline, but it is not
+production-ready and not a security claim.
 
-The current CI and local smoke checks prove compilation, test command execution,
-the production size gate, a local deployment rehearsal, deterministic
-release-artifact catalog checks, protocol surface report checks, ABI
-compatibility baseline checks, and deterministic local deployment
-manifest/address-book/checksum-bundle checks, plus retained source-verification
-inputs, a machine-readable release manifest,
-architecture/threat-model checks, an audit-package check, a release-readiness
-dashboard check, a public-beta evidence status check, and changelog gate for
-release-impacting changes.
-They do not prove protocol correctness or production deployment readiness.
-Known P0 blockers, the execution roadmap, the release-readiness dashboard, and
-the public-beta evidence status are tracked in
-[`ops/ROADMAP.md`](ops/ROADMAP.md),
-[`docs/release-readiness.md`](docs/release-readiness.md), and
-[`docs/public-beta-evidence.md`](docs/public-beta-evidence.md).
+`make check` currently proves compilation, Foundry test execution, production
+runtime size limits, local deployment rehearsal, deterministic release artifact
+generation, ABI compatibility checks, source-verification inputs, protocol
+surface reports, release manifests, checksum bundles, integration docs,
+security docs, and public-beta/production blocker reports. It does not prove
+protocol correctness by itself, and it does not replace public beta or
+production release evidence.
+
+Public beta remains blocked until retained evidence exists for reviewed
+fork/testnet or live deployment rehearsal, signed release artifacts, verified
+addresses, explorer verification, signer custody readiness, production signing,
+and live metadata/indexer/marketplace evidence. Production release also remains
+blocked on external audit, post-audit remediation, signed tag ceremony, and
+accepted release-mode evidence.
+
+Start with:
+
+- [docs/status.md](docs/status.md)
+- [docs/release-readiness.md](docs/release-readiness.md)
+- [docs/public-beta-evidence.md](docs/public-beta-evidence.md)
+- [release-artifacts/latest/public-beta-blockers.md](release-artifacts/latest/public-beta-blockers.md)
+- [release-artifacts/latest/production-release-blockers.md](release-artifacts/latest/production-release-blockers.md)
+- [docs/known-blockers.md](docs/known-blockers.md)
+- [ops/ROADMAP.md](ops/ROADMAP.md)
+- [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md)
+
+## First 30 Minutes
+
+1. Install Foundry `v1.7.1`, Solidity compiler `0.8.19`, Python 3.8+, and
+   Slither `0.11.5` if you need static-analysis parity.
+2. Run the canonical local gate:
+
+```bash
+make check
+```
+
+3. On Windows, run the PowerShell wrapper:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1
+```
+
+4. If dependencies are missing, use the bootstrap helpers:
+
+```bash
+bash scripts/bootstrap-ec2.sh
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
+```
+
+5. Read [docs/tooling.md](docs/tooling.md) for the full command inventory and
+   [docs/release-readiness.md](docs/release-readiness.md) for what the local
+   gate does and does not prove.
+
+## Find Your Path
+
+| Role | Start Here | What To Verify |
+| --- | --- | --- |
+| Auditor or security reviewer | [docs/audit-package.md](docs/audit-package.md), [docs/architecture.md](docs/architecture.md), [docs/threat-model.md](docs/threat-model.md), [docs/adr/README.md](docs/adr/README.md), [docs/slither.md](docs/slither.md), [ops/SLITHER_BASELINE.md](ops/SLITHER_BASELINE.md), [SECURITY.md](SECURITY.md) | Scope, trust boundaries, accepted ADRs, known blockers, Slither dispositions, risk register, and reporting path |
+| Integrator, frontend, mobile, Electron, or indexer engineer | [docs/integrations/README.md](docs/integrations/README.md), [docs/integrations/contract-flows.md](docs/integrations/contract-flows.md), [docs/integrations/auction-flows.md](docs/integrations/auction-flows.md), [docs/integrations/wallets-and-signatures.md](docs/integrations/wallets-and-signatures.md), [docs/integrations/events-and-indexing.md](docs/integrations/events-and-indexing.md), [docs/integrations/metadata-rendering.md](docs/integrations/metadata-rendering.md), [docs/integrations/frontend-reference-architecture.md](docs/integrations/frontend-reference-architecture.md), [docs/integrations/mobile-walletconnect.md](docs/integrations/mobile-walletconnect.md), [docs/integrations/electron-security-wallets.md](docs/integrations/electron-security-wallets.md), [docs/integrations/operator-admin-ui.md](docs/integrations/operator-admin-ui.md) | ABIs, address books, deployment manifests, EIP-712 and ERC-1271 rules, event reconstruction, metadata rendering, and app security boundaries |
+| Operator or deployer | [docs/deployment.md](docs/deployment.md), [deployments/README.md](deployments/README.md), [release-artifacts/README.md](release-artifacts/README.md), [docs/release-signatures.md](docs/release-signatures.md), [docs/incident-response.md](docs/incident-response.md), [docs/randomizer-operations.md](docs/randomizer-operations.md) | Admin ceremony, Safe/multisig handoff, signer setup, verification, dry-run mint, dry-run auction, and incident evidence |
+| Contributor | [CONTRIBUTING.md](CONTRIBUTING.md), [docs/tooling.md](docs/tooling.md), [docs/status.md](docs/status.md), [docs/known-blockers.md](docs/known-blockers.md), [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md) | Local checks, maturity boundaries, issue-ready backlog entries, and changelog policy |
+| Protocol maintainer | [ops/ROADMAP.md](ops/ROADMAP.md), [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md), [docs/release-policy.md](docs/release-policy.md), [docs/release-readiness.md](docs/release-readiness.md), [release-artifacts/latest/release-manifest.json](release-artifacts/latest/release-manifest.json), [release-artifacts/latest/SHA256SUMS](release-artifacts/latest/SHA256SUMS), [release-artifacts/latest/release-checksums.json](release-artifacts/latest/release-checksums.json) | Gate order, release-impacting changes, generated evidence, checksum coverage, and blocker status |
 
 ## Drop Flow
 
@@ -41,152 +93,27 @@ Install Foundry `v1.7.1`, then run:
 make check
 ```
 
-The canonical smoke check runs:
+The production-size step skips Foundry test and script contracts, compiles via
+IR, and fails if deployable contracts exceed EIP-170 or EIP-3860 limits. The
+local deployment rehearsal uses placeholder addresses; it proves the
+deploy-and-wire ceremony can execute without production secrets, not that a
+live deployment is ready.
+
+The root README itself is part of the gate:
 
 ```bash
-forge build
-forge test -vvv
-forge build --sizes --via-ir --skip test --skip script --force
-python scripts/test_release_artifacts.py
-python scripts/generate_release_artifacts.py --check
-python scripts/test_protocol_surface_report.py
-python scripts/generate_protocol_surface_report.py --check
-python scripts/test_source_verification_inputs.py
-python scripts/generate_source_verification_inputs.py --check
-python scripts/test_abi_compatibility.py
-python scripts/check_abi_compatibility.py --check
-python scripts/test_deployment_manifest.py
-python scripts/generate_deployment_manifest.py --check
-python scripts/test_address_books.py
-python scripts/generate_address_books.py --check
-python scripts/test_ceremony_evidence.py
-python scripts/check_ceremony_evidence.py
-python scripts/test_randomizer_operations.py
-python scripts/check_randomizer_operations.py
-python scripts/test_release_signatures.py
-python scripts/check_release_signatures.py
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_public_beta_blocker_report.py
-python scripts/generate_public_beta_blocker_report.py --check
-python scripts/test_production_release_blocker_report.py
-python scripts/generate_production_release_blocker_report.py --check
-python scripts/test_architecture_threat_model.py
-python scripts/check_architecture_threat_model.py
-python scripts/test_audit_package.py
-python scripts/check_audit_package.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py --check
-python scripts/test_changelog_check.py
-python scripts/check_changelog.py
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+python scripts/test_readme.py
+python scripts/check_readme.py
 ```
 
-The size step is production-only: it skips Foundry test and script contracts,
-compiles via IR, and fails if deployable contracts exceed EIP-170/EIP-3860
-limits.
-
-The deployment rehearsal step is local-only and uses placeholder addresses; it
-proves the deploy-and-wire ceremony can execute without production secrets.
-
-The release-artifact step verifies the committed ABI checksums, bytecode
-checksums, interface IDs, event topic catalog, and protocol surface report under
-`release-artifacts/latest/` against the production `via-ir` build profile.
-
-The source-verification step verifies
-`release-artifacts/latest/source-verification-inputs.json`, which retains
-production contract source hashes, compiler settings, constructor ABI,
-bytecode/linking status, and verification command templates for future live
-deployment verification.
-
-The ABI compatibility step compares the current production contract ABI surface
-against the committed baseline under `release-artifacts/baselines/` and fails on
-removed or changed ABI entries while reporting additive entries.
-
-The protocol surface report step verifies
-[`release-artifacts/latest/protocol-surface-report.json`](release-artifacts/latest/protocol-surface-report.json),
-which records the release-tracked contracts' functions, selectors, events,
-topic0 values, custom errors, bytecode hashes, and runtime sizes for
-integrators and reviewers.
-
-The deployment manifest step verifies the generated local Anvil manifest under
-`deployments/examples/` against committed manifest inputs and the current
-release-artifact hashes.
-
-The address-book step verifies compact generated address books under
-`deployments/address-books/` against the committed deployment manifests.
-
-The architecture/threat-model step verifies the auditor-facing system map and
-trust-boundary model under [`docs/architecture.md`](docs/architecture.md) and
-[`docs/threat-model.md`](docs/threat-model.md).
-
-The release-manifest step verifies a deterministic top-level release manifest
-under `release-artifacts/latest/release-manifest.json`. The manifest ties the
-release-artifact catalog, ABI compatibility baseline, deployment manifests,
-address books, governance docs including the architecture map, threat model,
-and audit package, public-beta evidence status, and release-ceremony status
-together for integrators and maintainers.
-
-The audit-package step verifies the auditor-facing index under
-[`docs/audit-package.md`](docs/audit-package.md). The package links scope,
-accepted ADRs, invariants, Slither disposition, local deployment/release
-evidence, known blockers, and security reporting in one place.
-
-The release-readiness step verifies the Gate G dashboard under
-[`docs/release-readiness.md`](docs/release-readiness.md). The dashboard
-separates passing local evidence from missing fork/testnet/live evidence,
-production signatures, signed tags, verified addresses, explorer verification,
-external audit, and post-audit remediation blockers.
-
-The public-beta evidence step verifies
-[`release-artifacts/latest/public-beta-evidence.json`](release-artifacts/latest/public-beta-evidence.json)
-against [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md), keeping
-public beta and production release blocked until retained non-local evidence or
-explicit risk acceptance exists.
-The generated blocker reports under
-[`release-artifacts/latest/public-beta-blockers.md`](release-artifacts/latest/public-beta-blockers.md)
-and
-[`release-artifacts/latest/production-release-blockers.md`](release-artifacts/latest/production-release-blockers.md)
-render the incomplete evidence rows into deterministic Markdown without
-changing readiness claims.
-
-The release-checksum step verifies the signable checksum bundle under
-`release-artifacts/latest/` against the committed release artifacts,
-deployment manifests, address books, artifact schemas, and release manifest.
-The checksum bundle covers `release-manifest.json`; the manifest therefore
-lists checksum-bundle digests as self-referentially unavailable instead of
-embedding an impossible hash cycle. Detached signatures and signed tags remain
-a release-ceremony follow-up.
-
-The changelog step requires release-impacting PRs to update `CHANGELOG.md`
-under `Unreleased`; see [`docs/release-policy.md`](docs/release-policy.md).
-
-On Windows, install Python 3.8+ or the `py` launcher, then bootstrap and verify
-with:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
-powershell -ExecutionPolicy Bypass -File scripts\check.ps1
-```
-
-On Linux or EC2, bootstrap and verify with:
-
-```bash
-bash scripts/bootstrap-ec2.sh
-make check
-```
+The changelog gate requires release-impacting PRs to update
+[CHANGELOG.md](CHANGELOG.md) under `Unreleased`; see
+[docs/release-policy.md](docs/release-policy.md).
 
 ## Tooling
 
-Tool versions and non-gating diagnostic commands are documented in
-[`docs/tooling.md`](docs/tooling.md). The current Slither high/medium baseline
-is tracked in [`ops/SLITHER_BASELINE.md`](ops/SLITHER_BASELINE.md).
-
-Current pinned versions:
+Tool versions, local checks, generated artifacts, and non-gating diagnostic
+commands are documented in [docs/tooling.md](docs/tooling.md).
 
 | Tool | Version |
 | --- | --- |
@@ -200,30 +127,43 @@ Current pinned versions:
 | --- | --- |
 | `smart-contracts/` | Solidity source |
 | `test/` | Foundry tests |
-| `script/` | Foundry scripts |
-| `deployments/` | Deployment manifest schema and examples |
-| `release-artifacts/` | ABI checksum, bytecode checksum, interface ID, event topic catalog, protocol surface report, source verification inputs, ABI compatibility baseline, public-beta evidence status, generated blocker reports, risk register, release manifest, and release checksum bundle |
-| `docs/` | Project, security, ADR, integration, and operational docs |
-| `ops/` | Roadmap and execution state |
+| `script/` | Foundry scripts and local rehearsal tooling |
+| `deployments/` | Deployment configs, schemas, example manifests, address books, ceremony evidence, and broadcast-retention templates |
+| `release-artifacts/` | ABIs, bytecode checksums, interface IDs, event topic catalog, protocol surface report, source-verification inputs, ABI compatibility baseline, risk register, evidence reports, release manifest, and checksum bundle |
+| `docs/` | Protocol, security, ADR, integration, deployment, release, and operator documentation |
+| `ops/` | Roadmap, execution backlog, autonomous run state, and Slither baseline |
 
 ## Important Docs
 
-- [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- [`SECURITY.md`](SECURITY.md)
-- [`ops/ROADMAP.md`](ops/ROADMAP.md)
-- [`ops/SLITHER_BASELINE.md`](ops/SLITHER_BASELINE.md)
-- [`ops/AUTONOMOUS_RUN.md`](ops/AUTONOMOUS_RUN.md)
-- [`docs/architecture.md`](docs/architecture.md)
-- [`docs/threat-model.md`](docs/threat-model.md)
-- [`docs/audit-package.md`](docs/audit-package.md)
-- [`docs/release-readiness.md`](docs/release-readiness.md)
-- [`docs/protocol-surface.md`](docs/protocol-surface.md)
-- [`docs/integrations/README.md`](docs/integrations/README.md)
-- [`docs/integrations/contract-flows.md`](docs/integrations/contract-flows.md)
-- [`docs/public-beta-evidence.md`](docs/public-beta-evidence.md)
-- [`docs/status.md`](docs/status.md)
-- [`docs/known-blockers.md`](docs/known-blockers.md)
-- [`docs/tooling.md`](docs/tooling.md)
-- [`docs/deployment.md`](docs/deployment.md)
-- [`docs/release-policy.md`](docs/release-policy.md)
-- [`docs/slither.md`](docs/slither.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [ops/ROADMAP.md](ops/ROADMAP.md)
+- [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md)
+- [ops/SLITHER_BASELINE.md](ops/SLITHER_BASELINE.md)
+- [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md)
+- [docs/status.md](docs/status.md)
+- [docs/known-blockers.md](docs/known-blockers.md)
+- [docs/tooling.md](docs/tooling.md)
+- [docs/architecture.md](docs/architecture.md)
+- [docs/threat-model.md](docs/threat-model.md)
+- [docs/audit-package.md](docs/audit-package.md)
+- [docs/adr/README.md](docs/adr/README.md)
+- [docs/slither.md](docs/slither.md)
+- [docs/deployment.md](docs/deployment.md)
+- [docs/release-policy.md](docs/release-policy.md)
+- [docs/release-signatures.md](docs/release-signatures.md)
+- [docs/release-readiness.md](docs/release-readiness.md)
+- [docs/public-beta-evidence.md](docs/public-beta-evidence.md)
+- [docs/integrations/README.md](docs/integrations/README.md)
+- [release-artifacts/README.md](release-artifacts/README.md)
+- [release-artifacts/latest/release-manifest.json](release-artifacts/latest/release-manifest.json)
+- [release-artifacts/latest/release-checksums.json](release-artifacts/latest/release-checksums.json)
+
+## Security
+
+Do not use these contracts for production drops until the public-beta and
+production blocker reports are cleared or explicitly risk-accepted, the external
+audit package is complete, release artifacts are signed, deployment addresses
+are verified, and signer custody is operationally ready.
+
+Report vulnerabilities through [SECURITY.md](SECURITY.md).

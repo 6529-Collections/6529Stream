@@ -113,6 +113,8 @@ python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
+python scripts/test_readme.py
+python scripts/check_readme.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_release_manifest.py

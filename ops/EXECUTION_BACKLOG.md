@@ -3223,8 +3223,7 @@ Dependencies: `CON-005`, production size gate.
 
 ### ONE-007: Burn Down Or Disposition Release-Grade Warning Noise
 
-Status: In progress on issue #482 and branch
-`codex/live-solc-warning-baseline`.
+Status: Merged in PR #483; issue #482 closed completed.
 
 Gate: G/F.
 
@@ -3297,7 +3296,8 @@ Dependencies: formatting/static-analysis gates, `CON-005`.
 
 ### OSS-001: Refresh README And Docs Navigation Around True Maturity
 
-Status: Planned.
+Status: In progress on issue #484 and branch
+`codex/readme-maturity-navigation`.
 
 Gate: A/G.
 
@@ -3314,6 +3314,12 @@ Files likely touched:
 - `docs/known-blockers.md`
 - `docs/integrations/README.md`
 - `CONTRIBUTING.md`
+- `scripts/check_readme.py`
+- `scripts/test_readme.py`
+- `Makefile`
+- `scripts/check.sh`
+- `scripts/check.ps1`
+- `.github/workflows/ci.yml`
 
 Implementation steps:
 
@@ -3326,7 +3332,10 @@ Implementation steps:
 Required tests/checks:
 
 - Markdown heading check.
+- Root README maturity/navigation checker.
 - `python scripts/check_release_readiness.py` if docs are tracked.
+- `python scripts/test_readme.py`
+- `python scripts/check_readme.py`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -3335,7 +3344,8 @@ Acceptance criteria:
 - The repo does not overstate readiness.
 - Integration docs are discoverable.
 
-Evidence artifacts: None.
+Evidence artifacts: Root README checker, CI logs, release-manifest coverage, and
+release-checksum coverage.
 
 Dependencies: `INT-001`.
 
