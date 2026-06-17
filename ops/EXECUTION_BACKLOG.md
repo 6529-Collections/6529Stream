@@ -3443,8 +3443,8 @@ unless an external dependency changes.
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
-| `OSS-004` | Add PR template release-impact checklist | G | In progress on issue #502 and branch `codex/pr-template-release-impact`; depends on changelog policy |
-| `OSS-005` | Add docs link checker or markdown-lint gate | G | docs stabilization |
+| `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
+| `OSS-005` | Add docs link checker or markdown-lint gate | G | In progress on issue #504 and branch `codex/markdown-link-gate`; depends on docs stabilization |
 
 ## 6. Dependency Map
 

@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added a checked Markdown link gate covering local files, heading anchors, duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and release-manifest/checksum coverage.
 - Added a checked pull request template release-impact checklist covering roadmap linkage, validation evidence, generated-artifact impact, breaking-change approval references, and release-manifest/checksum coverage.
 - Added checked GitHub issue templates for integration reports, public-safe audit finding intake, and release evidence requests, with no-secret and pre-audit maturity language, local/CI/Windows gate wiring, and release-manifest/checksum coverage.
 - Added a checked first-30-minutes contributor guide covering fresh checkout setup, Foundry/Python/Windows prerequisites, `forge` not being on `PATH`, canonical local gates, docs-only and Solidity/test validation paths, known warning noise, generated artifact drift, no-secret maturity boundaries, local/CI/Windows gate wiring, and release-manifest/checksum coverage.

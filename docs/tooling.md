@@ -127,6 +127,8 @@ python scripts/test_issue_templates.py
 python scripts/check_issue_templates.py
 python scripts/test_pr_template.py
 python scripts/check_pr_template.py
+python scripts/test_markdown_links.py
+python scripts/check_markdown_links.py
 python scripts/test_curator_rewards_flow.py
 python scripts/check_curator_rewards_flow.py
 python scripts/test_withdrawals_credits_flow.py

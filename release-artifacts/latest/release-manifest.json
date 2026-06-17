@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:dffa79866f068475717b865f495a4fa9d16e3fbc9dce9e9ff3b625d7ad7fcf39",
-        "size_bytes": 55445,
+        "sha256": "sha256:8dbd4ee49bef76378e293540cd2dab837b7c065ddc6fbaf74a0aa720bd8c4538",
+        "size_bytes": 55639,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:fa6a7501fb7b42b52b11c5908a89a7c25a0f9f33e9575bae3e62ba123e7729d3",
-        "size_bytes": 52855
+        "sha256": "sha256:3e13b4749e6ab6cf666c41e79381fb6d1d489272de5f3b0595c6c968d2b7f8b4",
+        "size_bytes": 53042
       }
     },
     "artifact_manifest": {
@@ -147,7 +147,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:e84693d16063e1dd8da4ea857cd4c2e2a3dbb3b54399d315d940441c7e902ca2",
+      "sha256": "sha256:386484dc8cc63411be616b3a2abe65000577408478ca24a641856b6c9be649aa",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2006,14 +2006,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f91675a27379158e0dc86fe6051d460472ecebf48fe0cbbd9c8bde952b36d89d",
-      "size_bytes": 53138
+      "sha256": "sha256:13ffa45320e2606e7249c3775b6005c80007e40d8a328de1636aba98788c67bf",
+      "size_bytes": 53329
     },
     "governance_docs": [
       {
         "path": "README.md",
-        "sha256": "sha256:74cb4c864fb68ff889eae95138c03582c5f9710eec1a5f2ccfca756de1a10ea2",
-        "size_bytes": 10883
+        "sha256": "sha256:65c45dcdee95f497061ab117c7d08a5979851c84d265ea163a9807d73b2c718f",
+        "size_bytes": 11032
       },
       {
         "path": ".github/PULL_REQUEST_TEMPLATE.md",
@@ -2263,13 +2263,13 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:09c7914b0adfabea295dffdb9463d3d4a95c8afd30884a270e3f822ff7f83816",
-        "size_bytes": 54332
+        "sha256": "sha256:83b8804a08d0dfd0b4b0b605cbff9cd89d89d1040b8ef91f9169c4416d743582",
+        "size_bytes": 54409
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:54f353a988ad16268eadf33204a0d813317e6433421ae842c24dd8e96bc264a9",
-        "size_bytes": 24359
+        "sha256": "sha256:fa0e698be0e7f91303c1aebc2c52f2146d45e20baf22e8e5a86890a289d30666",
+        "size_bytes": 24661
       }
     ]
   },

@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked Markdown link gate covering local files, heading anchors,
+  duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and
+  release-manifest/checksum coverage.
 - Added a checked pull request template release-impact checklist covering
   roadmap linkage, validation evidence, generated-artifact impact,
   breaking-change approval references, and release-manifest/checksum coverage.

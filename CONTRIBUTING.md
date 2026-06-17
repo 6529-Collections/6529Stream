@@ -125,6 +125,11 @@ and breaking-change approval fields complete. The template is validated by
 `python scripts/check_pr_template.py`, so changes to release-impact intake must
 update the checker and tests in the same PR.
 
+Local Markdown links and heading anchors in the contributor, docs, ops, GitHub
+template, and release-artifact surfaces are validated by
+`python scripts/check_markdown_links.py`. Update links, anchors, checker
+coverage, and release artifacts together when moving or renaming docs.
+
 ## Style
 
 - Solidity compiler target is `0.8.19` until the roadmap changes it.
