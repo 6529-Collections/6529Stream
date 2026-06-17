@@ -226,8 +226,32 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         return auctionRecords[_tokenid].endTime;
     }
 
+    /// @notice Returns the minimum bid that would currently be accepted for an active auction.
+    /// @dev Reverts for unregistered, ended, settled, or cancelled auctions.
+    /// @param _tokenid Token ID for the auction.
+    /// @return Minimum `msg.value` accepted by `participateToAuction`.
+    function minimumNextBid(uint256 _tokenid) public view returns (uint256) {
+        AuctionRecord storage record = auctionRecords[_tokenid];
+        require(record.dropId != bytes32(0), "No auction");
+        require(retrieveAuctionStatus(_tokenid) == AuctionStatus.Active, "Not active");
+
+        uint256 previousBid = auctionHighestBid[_tokenid];
+        if (previousBid == 0) {
+            return record.reservePrice;
+        }
+        return previousBid + (previousBid * incPercent / 100);
+    }
+
     function pendingNoBidNftClaimant(uint256 _tokenid) public view returns (address) {
         return auctionRecords[_tokenid].pendingNoBidNftClaimant;
+    }
+
+    /// @notice Returns the pending no-bid claimant for an auction token.
+    /// @dev Alias for `pendingNoBidNftClaimant` kept for integration read-model naming.
+    /// @param _tokenid Token ID for the auction.
+    /// @return Pending claimant address, or zero when no manual no-bid claim is pending.
+    function retrieveNoBidAuctionClaimant(uint256 _tokenid) public view returns (address) {
+        return pendingNoBidNftClaimant(_tokenid);
     }
 
     // participate to auction

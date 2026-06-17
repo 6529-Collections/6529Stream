@@ -29,6 +29,106 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
     uint256 private constant RESERVE_PRICE = 5 ether;
     uint256 private constant MIN_OUTBID = 21 ether / 4;
 
+    function testMinimumNextBidTracksReserveAndOutbidThreshold() public {
+        AuctionSetup memory setup = _createAuction();
+        vm.deal(FIRST_BIDDER, 10 ether);
+        vm.deal(SECOND_BIDDER, 10 ether);
+
+        setup.auctions.minimumNextBid(setup.tokenId).assertEq(RESERVE_PRICE, "reserve minimum");
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: setup.auctions.minimumNextBid(setup.tokenId) }(
+            setup.tokenId
+        );
+
+        uint256 nextBid = setup.auctions.minimumNextBid(setup.tokenId);
+        nextBid.assertEq(MIN_OUTBID, "outbid minimum");
+
+        vm.prank(SECOND_BIDDER);
+        (bool underbidSuccess,) = address(setup.auctions).call{ value: nextBid - 1 }(
+            abi.encodeWithSelector(setup.auctions.participateToAuction.selector, setup.tokenId)
+        );
+        underbidSuccess.assertFalse("below helper minimum succeeded");
+
+        vm.prank(SECOND_BIDDER);
+        setup.auctions.participateToAuction{ value: nextBid }(setup.tokenId);
+
+        setup.auctions.auctionHighestBid(setup.tokenId).assertEq(nextBid, "highest bid");
+        setup.auctions.auctionHighestBidder(setup.tokenId).assertEq(SECOND_BIDDER, "bidder");
+    }
+
+    function testMinimumNextBidPreservesZeroAndHighIncrementRules() public {
+        AuctionSetup memory zeroSetup = _createAuction();
+        vm.deal(FIRST_BIDDER, 10 ether);
+        vm.deal(SECOND_BIDDER, 10 ether);
+
+        zeroSetup.auctions.updatePercentAndExtensionTime(1, 0);
+        vm.prank(FIRST_BIDDER);
+        zeroSetup.auctions
+        .participateToAuction{ value: zeroSetup.auctions.minimumNextBid(zeroSetup.tokenId) }(
+            zeroSetup.tokenId
+        );
+        zeroSetup.auctions.minimumNextBid(zeroSetup.tokenId)
+            .assertEq(RESERVE_PRICE, "zero increment minimum");
+        vm.prank(SECOND_BIDDER);
+        zeroSetup.auctions
+        .participateToAuction{ value: zeroSetup.auctions.minimumNextBid(zeroSetup.tokenId) }(
+            zeroSetup.tokenId
+        );
+        zeroSetup.auctions.auctionHighestBid(zeroSetup.tokenId)
+            .assertEq(RESERVE_PRICE, "zero increment bid");
+
+        AuctionSetup memory highSetup = _createAuction();
+        highSetup.auctions.updatePercentAndExtensionTime(1, 200);
+        vm.deal(FIRST_BIDDER, 10 ether);
+        vm.deal(SECOND_BIDDER, 20 ether);
+        vm.prank(FIRST_BIDDER);
+        highSetup.auctions
+        .participateToAuction{ value: highSetup.auctions.minimumNextBid(highSetup.tokenId) }(
+            highSetup.tokenId
+        );
+
+        uint256 highMinimum = highSetup.auctions.minimumNextBid(highSetup.tokenId);
+        highMinimum.assertEq(15 ether, "high increment minimum");
+        vm.prank(SECOND_BIDDER);
+        highSetup.auctions.participateToAuction{ value: highMinimum }(highSetup.tokenId);
+        highSetup.auctions.auctionHighestBid(highSetup.tokenId)
+            .assertEq(highMinimum, "high increment bid");
+    }
+
+    function testMinimumNextBidFailsClosedWhenAuctionIsNotActive() public {
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        StreamAuctions auctions = new StreamAuctions(
+            address(deployed.minter),
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.drops),
+            PAYOUT,
+            CURATORS_POOL
+        );
+
+        vm.expectRevert(bytes("No auction"));
+        auctions.minimumNextBid(10_000_000_000);
+
+        AuctionSetup memory endedSetup = _createAuction();
+        vm.warp(endedSetup.auctionEndTime + 1);
+        vm.expectRevert(bytes("Not active"));
+        endedSetup.auctions.minimumNextBid(endedSetup.tokenId);
+
+        AuctionSetup memory settledSetup = _createAuction();
+        vm.warp(settledSetup.auctionEndTime + 1);
+        settledSetup.auctions.claimAuction(settledSetup.tokenId);
+        vm.expectRevert(bytes("Not active"));
+        settledSetup.auctions.minimumNextBid(settledSetup.tokenId);
+
+        AuctionSetup memory cancelledSetup = _createAuction();
+        vm.prank(POSTER);
+        cancelledSetup.auctions.cancelAuction(cancelledSetup.tokenId);
+        vm.expectRevert(bytes("Not active"));
+        cancelledSetup.auctions.minimumNextBid(cancelledSetup.tokenId);
+    }
+
     function testRejectingPreviousBidderCannotBlockHigherBid() public {
         AuctionSetup memory setup = _createAuction();
         RejectingBidder rejectingBidder = new RejectingBidder();

@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:3a33153b5bec4a0f594345487bf6ba4dfcac2951b13a097d48c53d41b25afd6e"
+      "sha256": "sha256:b8c352df26a4c6bb508ed072d172795dc41d48bbe76df7b16a4816d6c105abdb"
     },
     {
       "path": "docs/audit-package.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3a33153b5bec4a0f594345487bf6ba4dfcac2951b13a097d48c53d41b25afd6e"
+          "sha256": "sha256:b8c352df26a4c6bb508ed072d172795dc41d48bbe76df7b16a4816d6c105abdb"
         }
       ],
       "risk_acceptance": null
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3a33153b5bec4a0f594345487bf6ba4dfcac2951b13a097d48c53d41b25afd6e"
+          "sha256": "sha256:b8c352df26a4c6bb508ed072d172795dc41d48bbe76df7b16a4816d6c105abdb"
         },
         {
           "path": "docs/metadata.md",
@@ -342,7 +342,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:1564ae09a4d3a1de05c2bfaada2710be1b0db2b2086a873d9e6f2315beaea179"
+          "sha256": "sha256:70f3c8e95d8ccb6a0b313b220c0be1565cc08db9d02b10f1c5e43267b462b411"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -378,7 +378,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:1cbb4bea2247a9f4b2fd29797cfbe494f1f20a6a77e28f8191794b3d9da0fe32"
+          "sha256": "sha256:09453740dfdc45e22c9ed3ffbe6ed83d9bcf430d26c8a365641ffa959be1b10a"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -483,7 +483,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:3a33153b5bec4a0f594345487bf6ba4dfcac2951b13a097d48c53d41b25afd6e"
+          "sha256": "sha256:b8c352df26a4c6bb508ed072d172795dc41d48bbe76df7b16a4816d6c105abdb"
         },
         {
           "path": "docs/tooling.md",

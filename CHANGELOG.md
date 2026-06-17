@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added `StreamAuctions.minimumNextBid(tokenId)` and
+  `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations,
+  with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and
+  release-artifact coverage.
 - Added a checked `AUD-003` external audit finding workflow covering
   public-safe intake, severity/status triage, audited scope, remediation PRs,
   required tests, retest, accepted-risk decisions, closure gates, release
