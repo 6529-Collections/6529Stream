@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/reconcile-backlog-merged-status` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/525` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/526` |
-| Active PR | `TBD` |
-| Next issue | Reconcile stale merged-status rows after PR #525, refresh generated artifacts if checksum-covered inputs changed, open PR, request CodeRabbit, and merge only when CI/bots are clean. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/527` |
+| Next issue | Wait for PR #527 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge when clean; then select the next local-verifiable substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 22:34 UTC` |
+| Last updated | `2026-06-17 22:45 UTC` |
 
 ## Packaging Notes
 
@@ -16202,6 +16202,7 @@ Outcome:
 | 2026-06-17 22:02 | Open PR #525 for ADV-013 | PR #525 is open at `https://github.com/6529-Collections/6529Stream/pull/525`, closes issue #524, and packages randomizer request-binding parity plus core-write stale/retry reentry tests with regenerated release evidence. CodeRabbit was requested in comment `4735920164`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 22:22 | Address PR #525 bot harness note | 6529bot marked PR #525 good to merge and left one non-blocking harness note: make the `ArrngRetry` branch explicit instead of using a trailing fallback `else`. Updated the test adversary to fail loudly on unknown reentry modes, regenerated affected randomizer/release evidence, and reran `forge fmt --check test\StreamRandomizerAdversarial.t.sol`, `forge test --match-path test\StreamRandomizerAdversarial.t.sol -vvv`, `make release-checksums-check`, full `make check`, and Windows `scripts\check.ps1`. Next action is to commit/push the review-response head, wait for current CI/CodeRabbit/6529bot feedback, and merge only when clean. |
 | 2026-06-17 22:34 | Merge PR #525 and start MAP-002 reconciliation | PR #525 merged as `09063da55a64c6ec0970fd608b19b0e6ee51a7fb` after CodeRabbit, Foundry smoke, Windows wrapper, and latest 6529bot follow-up were clean; issue #524 closed completed. Issue #526 and branch `codex/reconcile-backlog-merged-status` now track stale merged-status reconciliation for ADV-013, CON-005, and the INT-007 through INT-009 integration slices so the manager loop does not reselect completed work. |
+| 2026-06-17 22:45 | Open PR #527 for MAP-002 | PR #527 is open at `https://github.com/6529-Collections/6529Stream/pull/527`, closes issue #526, and reconciles stale merged-status rows for previously shipped integration, 1/1, contract-size, and ADV-013 work. CodeRabbit was requested in comment `4736172273`. Local validation passed: `python scripts\test_risk_register.py`, `python scripts\check_risk_register.py`, `make release-checksums`, `make release-checksums-check`, and `codex-diff-check`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
