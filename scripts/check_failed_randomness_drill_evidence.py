@@ -277,12 +277,11 @@ def validate_no_secret_values(path: Path, text: str) -> None:
             f"{path} contains secret-like key/value text: {match.group(0)}"
         )
     for match in CREDENTIAL_URL_RE.finditer(text):
-        line = text.rfind("\n", 0, match.start()) + 1
-        line_text = text[line : text.find("\n", match.start())]
-        if "[REDACTED]" in line_text or "<redacted>" in line_text.lower():
+        matched_url = match.group(0)
+        if "[REDACTED]" in matched_url or "<redacted>" in matched_url.lower():
             continue
         raise FailedRandomnessDrillEvidenceError(
-            f"{path} contains credentialed URL text: {match.group(0)}"
+            f"{path} contains credentialed URL text: {matched_url}"
         )
 
 

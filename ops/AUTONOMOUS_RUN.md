@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 15:16 UTC` |
+| Last updated | `2026-06-17 15:36 UTC` |
 
 ## Packaging Notes
 
@@ -16177,6 +16177,7 @@ Outcome:
 | 2026-06-17 14:49 | Merge PR #513 and start GOV-007 | PR #513 merged as `7c9cb633d10376268ed0f1855d9ef6151eb7681d` after Windows wrapper, Foundry smoke, CodeRabbit, and 6529bot latest-head feedback were clean. Issue #512 closed completed. Issue #514 and branch `codex/failed-randomness-drill-evidence` now track GOV-007 for checked failed-randomness drill retained evidence covering pending/stale/failed request state, invalid callback handling, provider epoch/migration boundaries, retry or stale-marking recovery, metadata state, monitoring handoff, review, redaction, and release-gate wiring. |
 | 2026-06-17 15:15 | Validate GOV-007 local draft | Added the checked failed-randomness drill retained artifact template, source-aware checker/tests, local/CI/Windows gate wiring, incident-response/release-readiness/tooling/monitoring docs, release-artifacts README, changelog, release-manifest/checksum coverage, signer-custody retained hash refresh, and regenerated release evidence. Focused failed-randomness, incident-response, release-readiness, monitoring, signer-custody, release-notes, risk-register, release-manifest, bytecode-proof, release-checksum, changelog, and Python compile checks passed. Full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `git diff --check` passed; only known compiler/Foundry warning noise and the existing `scripts/check.ps1` LF-to-CRLF warning remain. Next action is to commit, push, open PR for issue #514, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 15:16 | Open PR #515 for GOV-007 | PR #515 is open at `https://github.com/6529-Collections/6529Stream/pull/515`, closes issue #514, and packages the checked failed-randomness drill retained artifact template, source-aware checker/tests, local/CI/Windows gate wiring, incident-response/release-readiness/tooling/monitoring docs, release-artifacts README, changelog, release-manifest/checksum coverage, signer-custody retained hash refresh, and regenerated release evidence. CodeRabbit review was requested in comment `4732121388`. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-17 15:36 | Address PR #515 checker hardening nice-to-have | 6529bot general and security reviews reported no findings and marked the substantive GOV-007 work good to merge with low-risk nice-to-haves. Accepted the useful security-hardening note by making credentialed URL redaction matching apply to the matched URL itself instead of the whole line, and added a regression proving an unredacted credentialed URL still fails even when a redaction marker appears later on the same line. Focused failed-randomness tests/check, Python compile, release checksum check, Make target bundle, and diff hygiene passed. Next action is to commit/push the review-response head and wait for latest CI/bot feedback. |
 
 ## Resume Instructions
 

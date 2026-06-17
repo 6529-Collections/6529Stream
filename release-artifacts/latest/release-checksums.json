@@ -87,7 +87,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:328cad37112065e71fe8a2fea104b938fe016933ca6e1814eb8cc4c6371848ac"
+    "sha256": "sha256:a0417fcde2c991334c38b0ef77798e1083fac0200985edb8e548e5aea674a494"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -836,8 +836,8 @@
     },
     {
       "path": "scripts/check_failed_randomness_drill_evidence.py",
-      "sha256": "sha256:55841d2a58ccd88bf94fb6d43d2819734a7534c1fbbcea6ed606ddf5d2ed3b38",
-      "size_bytes": 19995
+      "sha256": "sha256:05965ac801f33906220ae96b4679c21dbfca0c5900fb423efcdc0da09943043d",
+      "size_bytes": 19915
     },
     {
       "path": "scripts/check_first_30_minutes.py",
@@ -966,8 +966,8 @@
     },
     {
       "path": "scripts/test_failed_randomness_drill_evidence.py",
-      "sha256": "sha256:7647bdc6f0aab20da29ccdc1a34a0096f9c56f81d57ef7f886de9df6de0237ed",
-      "size_bytes": 16713
+      "sha256": "sha256:15fd0c71f3df77b23a20507f07a0a93a14c1174d4b5af5cac483b32abde31e4c",
+      "size_bytes": 17287
     },
     {
       "path": "scripts/test_first_30_minutes.py",

@@ -327,6 +327,20 @@ class FailedRandomnessDrillEvidenceTests(unittest.TestCase):
 
             checker.validate_evidence(path)
 
+    def test_unredacted_credentialed_url_fails_even_with_redacted_line_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "failed-randomness.md"
+            write_text(
+                path,
+                reviewed_text()
+                + "\nhttps://user:pass@example.invalid retained dashboard [REDACTED]\n",
+            )
+
+            with self.assertRaisesRegex(
+                checker.FailedRandomnessDrillEvidenceError, "credentialed URL"
+            ):
+                checker.validate_evidence(path)
+
     def test_missing_required_command_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "failed-randomness.md"
