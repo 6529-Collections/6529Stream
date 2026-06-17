@@ -188,6 +188,10 @@ class ReleaseArtifactTests(unittest.TestCase):
                 {"schema_version": "6529stream.bytecode-release-proof.v1"},
             )
             write_json(
+                output_dir / "release-candidate-lockfile.json",
+                {"schema_version": "6529stream.release-candidate-lockfile.v1"},
+            )
+            write_json(
                 output_dir / "public-beta-evidence.json",
                 {"schema_version": "6529stream.public-beta-evidence.v1"},
             )

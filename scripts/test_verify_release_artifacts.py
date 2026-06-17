@@ -131,12 +131,38 @@ def seed_release_bundle(root: Path) -> None:
             },
         },
     )
+    write_json(
+        latest / "release-candidate-lockfile.json",
+        {
+            "schema_version": verifier.RELEASE_CANDIDATE_LOCKFILE_SCHEMA,
+            "generated_by": "unit-test",
+            "locked_inputs": {
+                "release_manifest": file_record(
+                    root,
+                    "release-artifacts/latest/release-manifest.json",
+                ),
+                "bytecode_release_proof": file_record(
+                    root,
+                    "release-artifacts/latest/bytecode-release-proof.json",
+                ),
+            },
+            "checksum_bundle": {
+                "outputs": [
+                    {
+                        "path": "release-artifacts/latest/SHA256SUMS",
+                        "sha256": "not_available_self_referential",
+                    }
+                ]
+            },
+        },
+    )
     write_checksum_bundle(
         root,
         [
             "deployments/examples/anvil.json",
             "release-artifacts/latest/abi-checksums.json",
             "release-artifacts/latest/bytecode-release-proof.json",
+            "release-artifacts/latest/release-candidate-lockfile.json",
             "release-artifacts/latest/release-manifest.json",
         ],
     )
@@ -175,8 +201,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_release_bundle(root)
             summary = verifier.verify_release_artifacts(root)
-            self.assertEqual(summary.checksum_entries, 4)
-            self.assertEqual(summary.checksum_manifest_records, 4)
+            self.assertEqual(summary.checksum_entries, 5)
+            self.assertEqual(summary.checksum_manifest_records, 5)
 
     def test_checksum_parser_rejects_duplicate_paths(self) -> None:
         line = "0" * 64 + "  release-artifacts/latest/a.json\n"
@@ -238,6 +264,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                     "deployments/examples/anvil.json",
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
+                    "release-artifacts/latest/release-candidate-lockfile.json",
                     "release-artifacts/latest/release-manifest.json",
                 ],
             )
@@ -261,6 +288,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                     "deployments/examples/anvil.json",
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
+                    "release-artifacts/latest/release-candidate-lockfile.json",
                     "release-artifacts/latest/release-manifest.json",
                 ],
             )
@@ -284,6 +312,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                     "deployments/examples/anvil.json",
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
+                    "release-artifacts/latest/release-candidate-lockfile.json",
                     "release-artifacts/latest/release-manifest.json",
                 ],
             )
@@ -303,6 +332,25 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                     "deployments/examples/anvil.json",
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
+                ],
+            )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "required files are not checksum-covered",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_requires_release_candidate_lockfile_checksum_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_checksum_bundle(
+                root,
+                [
+                    "deployments/examples/anvil.json",
+                    "release-artifacts/latest/abi-checksums.json",
+                    "release-artifacts/latest/bytecode-release-proof.json",
+                    "release-artifacts/latest/release-manifest.json",
                 ],
             )
             with self.assertRaisesRegex(

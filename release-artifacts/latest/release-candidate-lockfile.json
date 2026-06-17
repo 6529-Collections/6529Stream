@@ -1,0 +1,218 @@
+{
+  "schema_version": "6529stream.release-candidate-lockfile.v1",
+  "generated_by": "scripts/generate_release_candidate_lockfile.py:1",
+  "release": {
+    "project": "6529Stream",
+    "version": "v0.1.0-local",
+    "status": "pre_audit_local_baseline",
+    "public_beta": "blocked",
+    "production_release": "blocked",
+    "requirement_counts": {
+      "production_release": {
+        "missing": 11
+      },
+      "public_beta": {
+        "complete": 1,
+        "missing": 8
+      }
+    },
+    "blocking_requirement_ids": {
+      "production_release": [
+        "live_ceremony_evidence",
+        "live_deployment_manifest",
+        "live_explorer_verification",
+        "live_marketplace_indexer_evidence",
+        "live_metadata_browser_evidence",
+        "live_randomizer_operations_evidence",
+        "post_audit_remediation",
+        "production_address_books",
+        "production_broadcast_retention",
+        "production_signatures",
+        "signed_git_tag"
+      ],
+      "public_beta": [
+        "explorer_verification_status",
+        "external_audit_report",
+        "fork_testnet_ceremony_evidence",
+        "fork_testnet_marketplace_indexer_evidence",
+        "fork_testnet_metadata_browser_evidence",
+        "fork_testnet_randomizer_operations_evidence",
+        "testnet_deployment_rehearsal",
+        "verified_deployed_addresses"
+      ]
+    },
+    "risk_count": 11
+  },
+  "source_lock": {
+    "mode": "pre_audit_local_baseline",
+    "status": "not_locked_until_signed_release_tag",
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "0000000000000000000000000000000000000000",
+    "source_dirty": false,
+    "ci_run": "local",
+    "reason": "This committed local baseline is deterministic across future commits. A public release candidate must replace this with a signed tag, release commit, CI run, and production signature evidence."
+  },
+  "locked_inputs": {
+    "release_manifest": {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "sha256": "sha256:67397b95d1f4e6dd73c2fc704fd7f1c3e46cbd8bb4fbcafac23afe1317fa3e2c",
+      "size_bytes": 114452,
+      "schema_version": "6529stream.release-manifest.v1"
+    },
+    "bytecode_release_proof": {
+      "path": "release-artifacts/latest/bytecode-release-proof.json",
+      "sha256": "sha256:b0acc57ce33577c47fd38088b13e614a72a66daaf94a07b2e5b3e9273a7de652",
+      "size_bytes": 79962,
+      "schema_version": "6529stream.bytecode-release-proof.v1"
+    },
+    "public_beta_evidence": {
+      "path": "release-artifacts/latest/public-beta-evidence.json",
+      "sha256": "sha256:5ab08cbc2cf8a68312ff31ea939d22e6dbf65a0ca5ee53cafebfa4399c226020",
+      "size_bytes": 7945,
+      "schema_version": "6529stream.public-beta-evidence.v1"
+    },
+    "risk_register": {
+      "path": "release-artifacts/latest/risk-register.json",
+      "sha256": "sha256:378743e3506948ae091d5f67c8acea09630f1596a03cf7c009bcf000e35af73e",
+      "size_bytes": 22929,
+      "schema_version": "6529stream.risk-register.v1"
+    },
+    "release_notes": {
+      "json": {
+        "path": "release-artifacts/latest/release-notes.json",
+        "sha256": "sha256:7905e89a8ed4f18abe99c3820b1319f550eee7df3edd4865bb8e75115dd88aaa",
+        "size_bytes": 58431,
+        "schema_version": "6529stream.release-notes.v1"
+      },
+      "markdown": {
+        "path": "release-artifacts/latest/release-notes.md",
+        "sha256": "sha256:bcca8d3d2354e76fbad8557105750d0e0e6422b649dc688cc2b65399ee13a551",
+        "size_bytes": 55785
+      }
+    },
+    "blocker_reports": {
+      "public_beta": {
+        "path": "release-artifacts/latest/public-beta-blockers.md",
+        "sha256": "sha256:047d221c1e1b845fb5aa7d4b5d46dbf0b9f530d05a79c8cf085581a526e3cb2c",
+        "size_bytes": 11504
+      },
+      "production_release": {
+        "path": "release-artifacts/latest/production-release-blockers.md",
+        "sha256": "sha256:b0e55746f8ec9f7857706c75682868096bd14ed9e6aa0147bf9645ff63da275a",
+        "size_bytes": 9438
+      }
+    },
+    "release_evidence_packet_index": {
+      "json": {
+        "path": "release-artifacts/latest/release-evidence-packet-index.json",
+        "sha256": "sha256:475712febff4c952666876b9886a6334568282169a4590e92dfd44e529f13d8a",
+        "size_bytes": 65528,
+        "schema_version": "6529stream.release-evidence-packet-index.v1"
+      },
+      "markdown": {
+        "path": "release-artifacts/latest/release-evidence-packet-index.md",
+        "sha256": "sha256:fa77849ceb8b46bcf51b3cbc76e6ea3040e43e393621747389d29b3069e79978",
+        "size_bytes": 31314
+      }
+    },
+    "release_evidence_issue_backlog": {
+      "json": {
+        "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
+        "sha256": "sha256:bef4c627fe61b8e7ab048b0946508ce8dfe758c305d67ffb3ba4c64efc048ffe",
+        "size_bytes": 126246,
+        "schema_version": "6529stream.release-evidence-issue-backlog.v1"
+      },
+      "markdown": {
+        "path": "release-artifacts/latest/release-evidence-issue-backlog.md",
+        "sha256": "sha256:3bf3f8579b9d215915005cf73e22e940fc5321befac8e31a92a9f83005566e8a",
+        "size_bytes": 79705
+      }
+    },
+    "release_evidence_issue_body_sync": {
+      "json": {
+        "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
+        "sha256": "sha256:82a5bae3847cfea2b3e144605e2a320727025cc2d68239801b91fd2f6daac343",
+        "size_bytes": 87309,
+        "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
+      },
+      "markdown": {
+        "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
+        "sha256": "sha256:c3a2b24a6bd9f9a3d31da16acab7625384e2e14742de916f826582b12388f4ea",
+        "size_bytes": 77353
+      }
+    }
+  },
+  "release_signature_evidence": [
+    {
+      "path": "release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json",
+      "sha256": "sha256:0a8e8632f12613fdbe980297ea39cd3e2b2365044c08ed542745df8cc626e6d8",
+      "size_bytes": 2771,
+      "schema_version": "6529stream.release-signature-evidence.v1",
+      "evidence_id": "anvil-release-signature-local",
+      "release_version": "v0.1.0-local",
+      "environment": "local",
+      "chain_id": 31337,
+      "source": {
+        "git_commit": "0000000000000000000000000000000000000000",
+        "source_dirty": false,
+        "ci_run": "local"
+      },
+      "signing_identity_status": "not_available_local",
+      "signature_statuses": {
+        "detached_checksum_signature": "not_available_local",
+        "signed_git_tag": "not_available_local"
+      },
+      "retained_artifact_categories": [
+        "release_signature_schema"
+      ]
+    }
+  ],
+  "checksum_bundle": {
+    "status": "generated_after_release_candidate_lockfile",
+    "coverage_expectation": {
+      "release_candidate_lockfile_path": "release-artifacts/latest/release-candidate-lockfile.json",
+      "covered_by_checksum_bundle": true
+    },
+    "outputs": [
+      {
+        "path": "release-artifacts/latest/SHA256SUMS",
+        "format": "sha256sum",
+        "sha256": "not_available_self_referential",
+        "digest_status": "not_available_self_referential",
+        "reason": "The checksum bundle covers release-candidate-lockfile.json. Embedding the checksum bundle digest in the lockfile would create a self-referential hash cycle."
+      },
+      {
+        "path": "release-artifacts/latest/release-checksums.json",
+        "format": "json",
+        "sha256": "not_available_self_referential",
+        "digest_status": "not_available_self_referential",
+        "reason": "The checksum bundle covers release-candidate-lockfile.json. Embedding the checksum bundle digest in the lockfile would create a self-referential hash cycle."
+      }
+    ]
+  },
+  "signed_tag_gate": {
+    "status": "not_locked_until_signed_release_tag",
+    "release_mode_command": "python scripts/check_signed_release_tag.py --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json"
+  },
+  "validation": {
+    "commands": [
+      "python scripts/test_release_candidate_lockfile.py",
+      "python scripts/generate_release_candidate_lockfile.py --check",
+      "python scripts/test_release_manifest.py",
+      "python scripts/generate_release_manifest.py --check",
+      "python scripts/test_bytecode_release_proof.py",
+      "python scripts/generate_bytecode_release_proof.py --check",
+      "python scripts/test_release_checksums.py",
+      "python scripts/generate_release_checksums.py --check",
+      "python scripts/test_verify_release_artifacts.py",
+      "python scripts/verify_release_artifacts.py",
+      "python scripts/check_release_signatures.py",
+      "python scripts/check_signed_release_tag.py"
+    ]
+  },
+  "limitations": [
+    "This local baseline is not launch approval.",
+    "Public beta remains blocked until public-beta evidence rows are complete or accepted-risk.",
+    "Production remains blocked until production signatures, signed tag, live deployment evidence, and production broadcast retention are complete."
+  ]
+}

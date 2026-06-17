@@ -41,6 +41,7 @@ CUSTOM_ERROR_CATALOG_FILENAME = "custom-error-catalog.json"
 DEPENDENCY_PROVENANCE_ATTESTATION_FILENAME = "dependency-provenance-attestation.json"
 RELEASE_NOTES_JSON_FILENAME = "release-notes.json"
 RELEASE_NOTES_MARKDOWN_FILENAME = "release-notes.md"
+RELEASE_CANDIDATE_LOCKFILE_FILENAME = "release-candidate-lockfile.json"
 RELEASE_EVIDENCE_PACKET_INDEX_JSON_FILENAME = "release-evidence-packet-index.json"
 RELEASE_EVIDENCE_PACKET_INDEX_MARKDOWN_FILENAME = "release-evidence-packet-index.md"
 RELEASE_EVIDENCE_LIVE_AUDIT_ARCHIVE_JSON_FILENAME = (
@@ -933,6 +934,26 @@ def checksum_bundle() -> dict[str, Any]:
     }
 
 
+def release_candidate_lockfile_record(
+    release_artifacts_dir: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    return {
+        "path": normalize_path(
+            release_artifacts_dir / RELEASE_CANDIDATE_LOCKFILE_FILENAME,
+            repo_root,
+        ),
+        "sha256": CHECKSUM_DIGEST_STATUS,
+        "digest_status": CHECKSUM_DIGEST_STATUS,
+        "schema_version": "6529stream.release-candidate-lockfile.v1",
+        "reason": (
+            "The release-candidate lockfile records the release manifest hash. "
+            "Embedding the lockfile digest in the release manifest would create "
+            "a self-referential hash cycle."
+        ),
+    }
+
+
 def build_manifest(
     repo_root: Path,
     output_path: Path,
@@ -1107,6 +1128,10 @@ def build_manifest(
                     repo_root,
                 ),
             },
+            "release_candidate_lockfile": release_candidate_lockfile_record(
+                release_artifacts_dir,
+                repo_root,
+            ),
             "artifact_manifest": artifact_manifest_record(release_artifacts_dir, repo_root),
             "dependency_artifact_manifest": file_record(
                 release_artifacts_dir / "dependency-artifact-manifest.json",

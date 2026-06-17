@@ -22,12 +22,14 @@ SHA256_PREFIX_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 CHECKSUM_SCHEMA = "6529stream.release-checksums.v1"
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
 BYTECODE_PROOF_SCHEMA = "6529stream.bytecode-release-proof.v1"
+RELEASE_CANDIDATE_LOCKFILE_SCHEMA = "6529stream.release-candidate-lockfile.v1"
 
 DEFAULT_RELEASE_DIR = Path("release-artifacts/latest")
 CHECKSUM_FILE_NAME = "SHA256SUMS"
 CHECKSUM_MANIFEST_NAME = "release-checksums.json"
 RELEASE_MANIFEST_NAME = "release-manifest.json"
 BYTECODE_PROOF_NAME = "bytecode-release-proof.json"
+RELEASE_CANDIDATE_LOCKFILE_NAME = "release-candidate-lockfile.json"
 SELF_REFERENTIAL_SHA256_MARKERS = {"not_available_self_referential"}
 
 
@@ -40,6 +42,7 @@ class VerificationSummary(NamedTuple):
     checksum_manifest_records: int
     release_manifest_records: int
     bytecode_proof_records: int
+    release_candidate_lockfile_records: int
 
 
 def normalize_path(path: Path, repo_root: Path) -> str:
@@ -363,11 +366,13 @@ def verify_release_artifacts(
     checksum_manifest_path = resolved_release_dir / CHECKSUM_MANIFEST_NAME
     release_manifest_path = resolved_release_dir / RELEASE_MANIFEST_NAME
     bytecode_proof_path = resolved_release_dir / BYTECODE_PROOF_NAME
+    release_candidate_lockfile_path = resolved_release_dir / RELEASE_CANDIDATE_LOCKFILE_NAME
 
     checksum_entries = verify_checksum_file(repo_root, checksum_path)
     required_paths = [
         normalize_path(release_manifest_path, repo_root),
         normalize_path(bytecode_proof_path, repo_root),
+        normalize_path(release_candidate_lockfile_path, repo_root),
     ]
     require_checksum_covered(checksum_entries, required_paths)
     checksum_manifest_records = verify_checksum_manifest(
@@ -387,6 +392,11 @@ def verify_release_artifacts(
         BYTECODE_PROOF_SCHEMA,
         BYTECODE_PROOF_NAME,
     )
+    release_candidate_lockfile = require_schema(
+        load_json(release_candidate_lockfile_path),
+        RELEASE_CANDIDATE_LOCKFILE_SCHEMA,
+        RELEASE_CANDIDATE_LOCKFILE_NAME,
+    )
 
     release_manifest_records = verify_nested_file_records(
         repo_root,
@@ -397,6 +407,11 @@ def verify_release_artifacts(
         repo_root,
         bytecode_proof,
         BYTECODE_PROOF_NAME,
+    )
+    release_candidate_lockfile_records = verify_nested_file_records(
+        repo_root,
+        release_candidate_lockfile,
+        RELEASE_CANDIDATE_LOCKFILE_NAME,
     )
     verify_bytecode_proof_release_manifest_binding(
         repo_root,
@@ -409,6 +424,7 @@ def verify_release_artifacts(
         checksum_manifest_records=checksum_manifest_records,
         release_manifest_records=release_manifest_records,
         bytecode_proof_records=bytecode_proof_records,
+        release_candidate_lockfile_records=release_candidate_lockfile_records,
     )
 
 
@@ -436,7 +452,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{summary.checksum_entries} checksum entries, "
             f"{summary.checksum_manifest_records} checksum manifest records, "
             f"{summary.release_manifest_records} release manifest file records, "
-            f"{summary.bytecode_proof_records} bytecode proof file records"
+            f"{summary.bytecode_proof_records} bytecode proof file records, "
+            f"{summary.release_candidate_lockfile_records} "
+            "release candidate lockfile file records"
         )
     return 0
 

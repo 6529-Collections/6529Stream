@@ -1469,6 +1469,17 @@ class ReleaseManifestTests(unittest.TestCase):
                 production_blockers["sha256"],
                 generator.file_sha256(paths["latest"] / "production-release-blockers.md"),
             )
+            lockfile = manifest["release_artifacts"]["release_candidate_lockfile"]
+            self.assertEqual(
+                lockfile["path"],
+                "release-artifacts/latest/release-candidate-lockfile.json",
+            )
+            self.assertEqual(lockfile["sha256"], generator.CHECKSUM_DIGEST_STATUS)
+            self.assertEqual(lockfile["digest_status"], generator.CHECKSUM_DIGEST_STATUS)
+            self.assertEqual(
+                lockfile["schema_version"],
+                "6529stream.release-candidate-lockfile.v1",
+            )
             packet_index = manifest["release_artifacts"]["release_evidence_packet_index"]
             self.assertEqual(
                 packet_index["json"]["path"],

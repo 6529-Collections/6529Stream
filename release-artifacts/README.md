@@ -275,6 +275,17 @@ production verification claim; production completion still requires reviewed
 live RPC or explorer evidence. The proof is checksum-covered, but it is not
 embedded into the release manifest to avoid a manifest/proof hash cycle.
 
+`latest/release-candidate-lockfile.json` is generated after the bytecode
+release proof and before the checksum bundle. It locks the release manifest,
+bytecode release proof, public-beta evidence, risk register, release notes,
+blocker reports, release evidence issue outputs, release-signature evidence,
+and explicit non-release source/tag/signature status into one review file. The
+committed baseline intentionally records `not_locked_until_signed_release_tag`
+for the final release commit/tag ceremony; it is deterministic local evidence,
+not a public release claim. The release manifest records the lockfile path and
+schema with a self-referential digest marker, while `SHA256SUMS` covers the
+lockfile bytes.
+
 `latest/public-beta-evidence.json` is the no-secret status manifest for
 public-beta and production-release evidence. It stays blocked in the committed
 local baseline until fork/testnet/live evidence, audit evidence, production
@@ -597,18 +608,21 @@ Third-party consumers can run `python scripts/verify_release_artifacts.py` from
 the repository root to verify the committed release bundle without regenerating
 artifacts, rebuilding Solidity, using RPC, or contacting explorers. The
 verifier checks that `latest/SHA256SUMS`, `latest/release-checksums.json`,
-`latest/release-manifest.json`, and `latest/bytecode-release-proof.json` agree
-with the files on disk; that checksum-covered files exist and match their
-hashes; that canonical manifest/proof file records match current file hashes
-and sizes; and that the bytecode release proof is bound to the current release
-manifest hash. It is an offline integrity and consistency check only. It does
-not prove live deployed bytecode, explorer verification, production signatures,
-public-beta readiness, or production-release readiness.
+`latest/release-manifest.json`, `latest/bytecode-release-proof.json`, and
+`latest/release-candidate-lockfile.json` agree with the files on disk; that
+checksum-covered files exist and match their hashes; that canonical manifest,
+proof, and lockfile records match current file hashes and sizes; and that the
+bytecode release proof is bound to the current release manifest hash. It is an
+offline integrity and consistency check only. It does not prove live deployed
+bytecode, explorer verification, production signatures, public-beta readiness,
+or production-release readiness.
 
 Because the checksum bundle covers `latest/release-manifest.json`, the release
 manifest cannot also embed the final checksum-bundle digests without creating a
 self-referential hash cycle. It therefore lists the checksum bundle outputs and
 marks their digests as `not_available_self_referential`.
+The release manifest uses the same marker for the release-candidate lockfile
+because the lockfile records the release manifest hash.
 Release signature evidence uses the same self-referential digest status for
 `latest/release-manifest.json` and `latest/SHA256SUMS` because both generated
 files cover the signature evidence file.

@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a generated release-candidate lockfile that ties the release manifest,
+  bytecode release proof, public-beta evidence, risk register, release notes,
+  blocker reports, release evidence issue outputs, release-signature evidence,
+  and non-release commit/tag/signature status into a checksum-covered local
+  baseline, with focused tests and local/CI/Windows gate wiring.
 - Added a checked `GOV-008` bad metadata/dependency drill retained-artifact
   template, source-aware checker, and regression tests covering metadata
   schema/state, token URI snapshots, URI/UTF-8/raw-attributes and browser

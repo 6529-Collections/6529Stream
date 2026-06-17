@@ -267,6 +267,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\generate_release_manifest.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_bytecode_release_proof.py"
 & $pythonPath @pythonArgs "scripts\generate_bytecode_release_proof.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_release_candidate_lockfile.py"
+& $pythonPath @pythonArgs "scripts\generate_release_candidate_lockfile.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_release_checksums.py"
 & $pythonPath @pythonArgs "scripts\generate_release_checksums.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_verify_release_artifacts.py"
