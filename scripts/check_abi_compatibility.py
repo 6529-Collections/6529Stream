@@ -282,6 +282,37 @@ def entries_by_key(entries: list[dict[str, Any]], contract: str, category: str) 
     return mapped
 
 
+def abi_change(
+    *,
+    change_type: str,
+    surface: str,
+    subject: str,
+    message: str,
+    category: str | None = None,
+    key: str | None = None,
+    baseline: dict[str, Any] | None = None,
+    current: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    change: dict[str, Any] = {
+        "type": change_type,
+        "surface": surface,
+        "subject": subject,
+        # subject is canonical; contract remains as a compatibility alias for
+        # consumers written before interface diagnostics were added.
+        "contract": subject,
+        "message": message,
+    }
+    if category is not None:
+        change["category"] = category
+    if key is not None:
+        change["key"] = key
+    if baseline is not None:
+        change["baseline"] = baseline
+    if current is not None:
+        change["current"] = current
+    return change
+
+
 def compare_surface_entries(
     *,
     baseline_entries_by_name: dict[str, Any],
@@ -298,24 +329,22 @@ def compare_surface_entries(
 
     for subject in sorted(baseline_names - current_names):
         incompatible.append(
-            {
-                "type": removed_subject_type,
-                "surface": surface,
-                "contract": subject,
-                "subject": subject,
-                "message": f"{subject_kind} {subject} is missing from current surface",
-            }
+            abi_change(
+                change_type=removed_subject_type,
+                surface=surface,
+                subject=subject,
+                message=f"{subject_kind} {subject} is missing from current surface",
+            )
         )
 
     for subject in sorted(current_names - baseline_names):
         additive.append(
-            {
-                "type": added_subject_type,
-                "surface": surface,
-                "contract": subject,
-                "subject": subject,
-                "message": f"{subject_kind} {subject} was added to current surface",
-            }
+            abi_change(
+                change_type=added_subject_type,
+                surface=surface,
+                subject=subject,
+                message=f"{subject_kind} {subject} was added to current surface",
+            )
         )
 
     for subject in sorted(baseline_names & current_names):
@@ -337,44 +366,41 @@ def compare_surface_entries(
 
             for key in sorted(baseline_keys - current_keys):
                 incompatible.append(
-                    {
-                        "type": "removed_entry",
-                        "surface": surface,
-                        "contract": subject,
-                        "subject": subject,
-                        "category": category,
-                        "key": key,
-                        "message": f"{subject} removed {category} entry {key}",
-                    }
+                    abi_change(
+                        change_type="removed_entry",
+                        surface=surface,
+                        subject=subject,
+                        category=category,
+                        key=key,
+                        message=f"{subject} removed {category} entry {key}",
+                    )
                 )
 
             for key in sorted(current_keys - baseline_keys):
                 additive.append(
-                    {
-                        "type": "added_entry",
-                        "surface": surface,
-                        "contract": subject,
-                        "subject": subject,
-                        "category": category,
-                        "key": key,
-                        "message": f"{subject} added {category} entry {key}",
-                    }
+                    abi_change(
+                        change_type="added_entry",
+                        surface=surface,
+                        subject=subject,
+                        category=category,
+                        key=key,
+                        message=f"{subject} added {category} entry {key}",
+                    )
                 )
 
             for key in sorted(baseline_keys & current_keys):
                 if baseline_map[key] != current_map[key]:
                     incompatible.append(
-                        {
-                            "type": "changed_entry",
-                            "surface": surface,
-                            "contract": subject,
-                            "subject": subject,
-                            "category": category,
-                            "key": key,
-                            "message": f"{subject} changed {category} entry {key}",
-                            "baseline": baseline_map[key],
-                            "current": current_map[key],
-                        }
+                        abi_change(
+                            change_type="changed_entry",
+                            surface=surface,
+                            subject=subject,
+                            category=category,
+                            key=key,
+                            message=f"{subject} changed {category} entry {key}",
+                            baseline=baseline_map[key],
+                            current=current_map[key],
+                        )
                     )
 
 

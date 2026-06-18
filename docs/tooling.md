@@ -248,6 +248,11 @@ changed functions, events, custom errors, constructors, fallback, or receive
 entries. Additive entries are reported as compatible for this first baseline so
 maintainers can pair them with release notes and version policy.
 
+ABI diagnostic records use `subject` as the canonical contract or interface
+identifier and retain `contract` as a deprecated compatibility alias with the
+same value. New tooling should read `subject`; existing consumers can keep
+reading `contract` until they migrate.
+
 The broadcast manifest input step parses the sanitized Foundry fixtures under
 `deployments/broadcasts/`, rejects wrong-chain, failed-receipt,
 missing-contract, unexpected-contract, duplicate, invalid-address, and
@@ -1112,6 +1117,9 @@ The ABI compatibility baseline uses the production contract and published
 interface sets from the same config file. Refresh it only when maintainers
 intentionally accept a release surface change; removed or changed entries
 should also update the breaking change documentation and release notes.
+Checker diagnostics identify the changed production contract or published
+interface with canonical `subject`; `contract` is retained as a deprecated
+compatibility alias with the same value.
 
 The gas snapshot baseline lives at
 `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`. Refresh it only when
