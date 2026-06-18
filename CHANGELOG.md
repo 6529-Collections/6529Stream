@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked fork/testnet ceremony retained-artifact template and offline
+  checker for future `fork_testnet_ceremony_evidence`, covering fork/testnet
+  environment and chain IDs, deployer/admin Safe or multisig/signer/emergency
+  participants, ownership and role ceremonies, metadata/freeze, auction,
+  emergency controls, dry-run and monitoring handoff evidence, no-secret
+  redaction, local, Windows, and CI gate wiring, release-packet mapping, and
+  checksum coverage while preserving the blocked public-beta baseline until
+  reviewed evidence is retained.
 - Added fork deployment rehearsal retained-artifact reference validation so
   reviewed and pending fork rehearsal evidence now proves retained files stay
   inside the repository, exist on disk, remain no-secret, and match declared

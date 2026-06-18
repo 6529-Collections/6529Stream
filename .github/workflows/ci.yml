@@ -156,6 +156,8 @@ jobs:
             scripts/test_production_verified_addresses.py \
             scripts/check_fork_metadata_browser_evidence.py \
             scripts/test_fork_metadata_browser_evidence.py \
+            scripts/check_fork_ceremony_evidence.py \
+            scripts/test_fork_ceremony_evidence.py \
             scripts/check_live_metadata_browser_evidence.py \
             scripts/test_live_metadata_browser_evidence.py \
             scripts/check_incident_drill_evidence.py \
@@ -548,6 +550,8 @@ jobs:
           python3 scripts/check_production_verified_addresses.py 2>&1 | tee ci-logs/production-verified-addresses-check.log
           python3 scripts/test_fork_metadata_browser_evidence.py 2>&1 | tee ci-logs/fork-metadata-browser-evidence-tests.log
           python3 scripts/check_fork_metadata_browser_evidence.py 2>&1 | tee ci-logs/fork-metadata-browser-evidence-check.log
+          python3 scripts/test_fork_ceremony_evidence.py 2>&1 | tee ci-logs/fork-ceremony-evidence-tests.log
+          python3 scripts/check_fork_ceremony_evidence.py 2>&1 | tee ci-logs/fork-ceremony-evidence-check.log
           python3 scripts/test_live_metadata_browser_evidence.py 2>&1 | tee ci-logs/live-metadata-browser-evidence-tests.log
           python3 scripts/check_live_metadata_browser_evidence.py 2>&1 | tee ci-logs/live-metadata-browser-evidence-check.log
           python3 scripts/test_marketplace_indexer_evidence.py 2>&1 | tee ci-logs/marketplace-indexer-evidence-tests.log

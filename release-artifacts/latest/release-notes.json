@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3d737d24fa27d778efafbc1c4d241e79947f1a6b001a7f91c98df743aa6039d9",
-      "size_bytes": 58409
+      "sha256": "sha256:ac1065edddb4641e49ab9046d6a4a54554598c2e1bdaba1985cbc1883c612131",
+      "size_bytes": 58975
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:69e58f5fb169c66c6aba23d4daab8242bf95d5e47e16a9a89a95224ebee60c11",
+      "sha256": "sha256:9b10b7513fc740bedbace8329411ab9f99403aea8418f4999379328e7e0d915b",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked fork/testnet ceremony retained-artifact template and offline checker for future `fork_testnet_ceremony_evidence`, covering fork/testnet environment and chain IDs, deployer/admin Safe or multisig/signer/emergency participants, ownership and role ceremonies, metadata/freeze, auction, emergency controls, dry-run and monitoring handoff evidence, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",
       "Added fork deployment rehearsal retained-artifact reference validation so reviewed and pending fork rehearsal evidence now proves retained files stay inside the repository, exist on disk, remain no-secret, and match declared `sha256:` hashes; refreshed the reviewed fork broadcast, deployment manifest, address-book, public-beta evidence, release packet, manifest, lockfile, and checksum hashes that the stricter checker surfaced as stale.",
       "Added a checked fork/testnet metadata-browser retained-artifact template and offline checker for future `fork_testnet_metadata_browser_evidence`, covering fork/testnet environment and chain IDs, deployed-contract metadata fetches, retained browser summary JSON, sandbox outcomes, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",
       "Added manifest-aware marketplace/indexer evidence validation so complete public-beta or production marketplace/indexer rows must reference reviewed non-local envelopes whose retained Markdown artifacts pass the detailed coverage, hash, environment, and no-secret checks while templates remain reusable preparation material.",

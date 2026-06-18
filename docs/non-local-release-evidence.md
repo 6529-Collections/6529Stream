@@ -340,6 +340,32 @@ The checker validates retained no-secret browser proof only. It does not fetch
 live metadata, call a private RPC endpoint, or execute production browser work
 from CI.
 
+### Ceremony Evidence
+
+Retain:
+
+- fork/testnet chain ID and block or testnet deployment reference;
+- deployer, admin Safe or multisig, pause guardian, emergency recipient, drop
+  signer, and signer-manager addresses;
+- ownership-transfer, role-grant/revoke, signer-setup, metadata/freeze,
+  auction, and emergency-control ceremony references;
+- dry-run mint and auction evidence;
+- monitoring handoff and post-state views;
+- deployment manifest, address book, Safe or multisig export, transaction
+  bundle, release manifest/checksum digests, and reviewer notes.
+
+Map fork/testnet evidence to `fork_testnet_ceremony_evidence` and live evidence
+to `live_ceremony_evidence`.
+
+The fork/testnet ceremony row has a dedicated retained-artifact template at
+`release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`.
+Before generating the non-local ceremony envelope, run:
+
+```sh
+python scripts/test_fork_ceremony_evidence.py
+python scripts/check_fork_ceremony_evidence.py
+```
+
 ### Live Ceremony Evidence
 
 Retain:
@@ -425,22 +451,6 @@ then checks the retained Markdown coverage fields. A template envelope,
 wrong-environment envelope, stale retained-artifact hash, or retained Markdown
 artifact that still fails the marketplace/indexer coverage rules cannot
 complete #423 or #424.
-
-### Ceremony Evidence
-
-Retain:
-
-- deployer identity class, not private keys;
-- Safe or multisig address;
-- ownership transfers;
-- role grants and revocations;
-- signer setup and epoch;
-- dry-run mint and auction results;
-- emergency redeployment or rollback outcome when applicable;
-- verification and address-book references.
-
-Map fork/testnet evidence to `fork_testnet_ceremony_evidence` and live evidence
-to `live_ceremony_evidence`.
 
 ### Randomizer Operations Evidence
 
