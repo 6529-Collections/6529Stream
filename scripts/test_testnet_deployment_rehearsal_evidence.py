@@ -445,6 +445,32 @@ class TestnetDeploymentRehearsalEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path, repo_root=repo_root)
 
+    def test_reviewed_retained_hash_without_separator_fails(self) -> None:
+        """Declared retained hashes need an explicit path/hash separator."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            transcript_hash = checker.file_sha256(
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md"
+            )
+            path = repo_root / "hash-no-separator-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md"
+                    f"/{transcript_hash}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "separate path and sha256 digest",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
     def test_reviewed_retained_hash_trailing_text_fails(self) -> None:
         """Declared retained hashes cannot hide trailing field text."""
         with tempfile.TemporaryDirectory() as temp_dir:

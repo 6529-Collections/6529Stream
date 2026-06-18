@@ -140,6 +140,10 @@ CLI_SECRET_RE = re.compile(
     r")",
     re.IGNORECASE,
 )
+# Retained artifact digests must use sha256:<64 lowercase hex>, and Ethereum
+# block/transaction hashes must keep their 0x prefix. Bare 64-hex strings are
+# treated as secret-shaped key material so future templates fail closed instead
+# of accidentally retaining private keys or unlabelled digests.
 BARE_HEX_KEY_RE = re.compile(
     r"(?<![0-9a-fA-FxX:])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
 )
@@ -214,14 +218,24 @@ def split_retained_file_reference(value: str) -> tuple[str, str | None]:
         )
     match = matches[0] if matches else None
     digest = match.group(0) if match else None
-    path_text = cleaned[: match.start()] if match else cleaned
-    path_text = path_text.strip().rstrip(" /,;")
     if match:
+        path_with_separator = cleaned[: match.start()]
+        if path_with_separator.endswith(" / "):
+            path_text = path_with_separator[:-3].strip()
+        elif path_with_separator.endswith(" "):
+            path_text = path_with_separator.rstrip()
+        else:
+            raise TestnetDeploymentRehearsalEvidenceError(
+                "retained artifact reference must separate path and sha256 digest "
+                f"with whitespace or ' / ': {value}"
+            )
         suffix = cleaned[match.end() :].strip()
-        if suffix.strip(" /,;"):
+        if suffix:
             raise TestnetDeploymentRehearsalEvidenceError(
                 f"retained artifact reference has trailing text after sha256 digest: {value}"
             )
+    else:
+        path_text = cleaned.strip()
     if not path_text:
         raise TestnetDeploymentRehearsalEvidenceError(
             f"retained artifact reference is missing a path: {value}"
