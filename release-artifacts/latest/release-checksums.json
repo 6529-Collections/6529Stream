@@ -91,14 +91,58 @@
       "deployments/admin-ceremony",
       "deployments/randomizer-operations",
       "test/fixtures/drop-authorization",
-      "test/fixtures/warning-dispositions"
+      "test/fixtures/warning-dispositions",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/architecture.md",
+      "docs/audit-package.md",
+      "docs/custom-errors.md",
+      "docs/dependency-operations.md",
+      "docs/deployment.md",
+      "docs/drop-authorization-signing.md",
+      "docs/incident-response.md",
+      "docs/integrations/README.md",
+      "docs/integrations/auction-flows.md",
+      "docs/integrations/contract-flows.md",
+      "docs/integrations/curator-rewards.md",
+      "docs/integrations/electron-security-wallets.md",
+      "docs/integrations/events-and-indexing.md",
+      "docs/integrations/frontend-reference-architecture.md",
+      "docs/integrations/integration-conformance-fixtures.md",
+      "docs/integrations/interface-versioning.md",
+      "docs/integrations/marketplace-indexer-evidence.md",
+      "docs/integrations/metadata-rendering.md",
+      "docs/integrations/mobile-walletconnect.md",
+      "docs/integrations/operator-admin-ui.md",
+      "docs/integrations/wallets-and-signatures.md",
+      "docs/integrations/withdrawals-and-credits.md",
+      "docs/integrations/examples/react-viem.md",
+      "docs/integrations/examples/typescript-artifacts-and-chain-config.md",
+      "docs/integrations/examples/typescript-eip712-drop-authorization.md",
+      "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
+      "docs/natspec-coverage.md",
+      "docs/non-local-release-evidence.md",
+      "docs/permanence-packages.md",
+      "docs/protocol-surface.md",
+      "docs/provenance-manifests.md",
+      "docs/public-beta-evidence.md",
+      "docs/randomizer-operations.md",
+      "docs/release-policy.md",
+      "docs/release-readiness.md",
+      "docs/release-signatures.md",
+      "docs/royalty-policy.md",
+      "docs/signer-custody-readiness.md",
+      "docs/status.md",
+      "docs/threat-model.md",
+      "docs/tooling.md",
+      "docs/warning-dispositions.md"
     ],
     "output_dir": "release-artifacts/latest"
   },
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:e151047d8de4369eec137cc3aaae00585cdfbc3847f07d85dcc08daaf6786a68"
+    "sha256": "sha256:421f5fcd907e1364fce1a64feac72abdbc0c5a4004b0148b54214caf941f523b"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -139,6 +183,16 @@
       "path": ".github/PULL_REQUEST_TEMPLATE.md",
       "sha256": "sha256:7f29738958afca4d6c74efe78dc8bcbc428b1f217330c64fe25263642b72e350",
       "size_bytes": 2402
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "sha256:b707f9c75f4d129f37ea608181b21ee22ddc05d71e3acd35e57e2d4b82d9d326",
+      "size_bytes": 65890
+    },
+    {
+      "path": "README.md",
+      "sha256": "sha256:34b21c2dee535ecc640d2b0c19a191da67e617c2a37689a075c3d1e6b1a65b8f",
+      "size_bytes": 11601
     },
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -256,9 +310,39 @@
       "size_bytes": 7882
     },
     {
+      "path": "docs/architecture.md",
+      "sha256": "sha256:d4bd8d3c6b870e463afb283237a30999459eba082e1be0a6e7334010903b2bf1",
+      "size_bytes": 16752
+    },
+    {
       "path": "docs/audit-finding-workflow.md",
       "sha256": "sha256:55bf7cb6d4f0771d2860528b4ea2e94cf7139d559e41fad8cd145cd57693e77c",
       "size_bytes": 9524
+    },
+    {
+      "path": "docs/audit-package.md",
+      "sha256": "sha256:3fa8b8bea6fe880d659b6ecf9f95401b5c2b3c4f487e0bfee9744d45306b46a8",
+      "size_bytes": 27471
+    },
+    {
+      "path": "docs/custom-errors.md",
+      "sha256": "sha256:554d353d6c4022fab3a9aef76917de91d8828f0a95a67022497c1ba046612ac5",
+      "size_bytes": 4298
+    },
+    {
+      "path": "docs/dependency-operations.md",
+      "sha256": "sha256:65a30b7f5fd3e2356bbbbe7fb1a9388eb113f3b3cf572cae03b9a3404225f0af",
+      "size_bytes": 15061
+    },
+    {
+      "path": "docs/deployment.md",
+      "sha256": "sha256:c4ce5b9a740ff9d62c5f684a3c8066d7881fecda5681c101d776795495f6c442",
+      "size_bytes": 26607
+    },
+    {
+      "path": "docs/drop-authorization-signing.md",
+      "sha256": "sha256:c6b1f8b2cb3cf0007fc2cbd1b91e4db3e9bcdd439b24b600b3d54c19b0998b85",
+      "size_bytes": 15454
     },
     {
       "path": "docs/first-30-minutes.md",
@@ -266,9 +350,109 @@
       "size_bytes": 10151
     },
     {
+      "path": "docs/incident-response.md",
+      "sha256": "sha256:6d8895aecd1585c0a1663013a4fb93f1c04fda2a61c29d8eb685b259c1ccf5b2",
+      "size_bytes": 27078
+    },
+    {
+      "path": "docs/integrations/README.md",
+      "sha256": "sha256:881eaeac053cdbe65bd7c4fd29d2005902b2ce8a32ffc8c02533dc0a717c11ce",
+      "size_bytes": 37552
+    },
+    {
+      "path": "docs/integrations/auction-flows.md",
+      "sha256": "sha256:8bcf7cbef59c3f7062d94cd8fcb4d3f7899979413b001c3c229b93e2a562f0bc",
+      "size_bytes": 32038
+    },
+    {
+      "path": "docs/integrations/contract-flows.md",
+      "sha256": "sha256:73c02b345705fc4bfe2cd676f2b8fb3c068c9ef4cc5b41e57b849fb2cf582ea5",
+      "size_bytes": 16983
+    },
+    {
+      "path": "docs/integrations/curator-rewards.md",
+      "sha256": "sha256:b33835bf706c1c072ff96684d3117e273b9767b0d7f86d2d09452e2bdac02922",
+      "size_bytes": 17660
+    },
+    {
+      "path": "docs/integrations/electron-security-wallets.md",
+      "sha256": "sha256:afe8af422eca20817b53b35b2c06a113f1a8890aab68a4e1a1e9b490a9c8b043",
+      "size_bytes": 23991
+    },
+    {
+      "path": "docs/integrations/events-and-indexing.md",
+      "sha256": "sha256:cadf82f2fa7cb7614c1d71adf709f40a7097245e8c0f01d6c1dfeba80eccf7f5",
+      "size_bytes": 35920
+    },
+    {
+      "path": "docs/integrations/examples/react-viem.md",
+      "sha256": "sha256:756b75d3eb25dd079eb560680a3f2e0143676664ce2f734c213784b33bae771a",
+      "size_bytes": 6318
+    },
+    {
+      "path": "docs/integrations/examples/typescript-artifacts-and-chain-config.md",
+      "sha256": "sha256:5f5ab2d61ebd67186afae987dce7f92ab655c798a5be9fb19bec9e61608a94c2",
+      "size_bytes": 16872
+    },
+    {
+      "path": "docs/integrations/examples/typescript-eip712-drop-authorization.md",
+      "sha256": "sha256:b2963c7cbbb98fae88e222b2294be63a2438814a076858ccbcba0d64e0c8b31e",
+      "size_bytes": 15427
+    },
+    {
+      "path": "docs/integrations/examples/typescript-event-decoding-and-indexer-ingestion.md",
+      "sha256": "sha256:6efed93c2407d313f5aa32119e0d69e05adf93b05847f8f011368046af21efe4",
+      "size_bytes": 19297
+    },
+    {
       "path": "docs/integrations/fixtures/integration-conformance-fixtures.json",
       "sha256": "sha256:a71b4a5e1d271b86ee625d6976674cab4832880bafc8876d7ba84b53671eb919",
       "size_bytes": 8798
+    },
+    {
+      "path": "docs/integrations/frontend-reference-architecture.md",
+      "sha256": "sha256:ac1fa8b9a94a651a80cae30935cc839725e4d742cb94cd66c6645ff1db826af5",
+      "size_bytes": 28167
+    },
+    {
+      "path": "docs/integrations/integration-conformance-fixtures.md",
+      "sha256": "sha256:95182a1bc11532ccc8efd96a70dc73167759b460e503b53f5e26d9b4f751ef22",
+      "size_bytes": 9063
+    },
+    {
+      "path": "docs/integrations/interface-versioning.md",
+      "sha256": "sha256:fee38014163f7c4d016f50e029504be5f46d8950378fd2f9152ec7f0f2a5a02f",
+      "size_bytes": 5057
+    },
+    {
+      "path": "docs/integrations/marketplace-indexer-evidence.md",
+      "sha256": "sha256:c094d4261f62a4d0287053790d2f531b5071555f1fa7e2ff9b452c54cb40c9a2",
+      "size_bytes": 10273
+    },
+    {
+      "path": "docs/integrations/metadata-rendering.md",
+      "sha256": "sha256:d877ee2ae1d8419da0f716c7636170d7cd6ce48fb1164d7d8eb4d222eec203be",
+      "size_bytes": 26548
+    },
+    {
+      "path": "docs/integrations/mobile-walletconnect.md",
+      "sha256": "sha256:90679ed3ff627fd5a27b8460fd693719f0fbd3d2606ec7d50f82febed8d01b45",
+      "size_bytes": 22381
+    },
+    {
+      "path": "docs/integrations/operator-admin-ui.md",
+      "sha256": "sha256:ed9bd9ee4f4340401662c34680755bf93ae88a441f94050269862ca50d691760",
+      "size_bytes": 25854
+    },
+    {
+      "path": "docs/integrations/wallets-and-signatures.md",
+      "sha256": "sha256:7ec3aa14809cfd3a97831d2ecc2cf02d5c5b98851104aa92e83b28d80d039826",
+      "size_bytes": 25247
+    },
+    {
+      "path": "docs/integrations/withdrawals-and-credits.md",
+      "sha256": "sha256:742ed9d7415170845265cec2c2d646d44d609b7b8593ca9b415abc0276f1276d",
+      "size_bytes": 16484
     },
     {
       "path": "docs/monitoring.md",
@@ -276,9 +460,89 @@
       "size_bytes": 20973
     },
     {
+      "path": "docs/natspec-coverage.md",
+      "sha256": "sha256:397265b2d4fe45061724e01efbd2fbd072bb05588cea36dbc0b76dd67d75e58c",
+      "size_bytes": 3822
+    },
+    {
+      "path": "docs/non-local-release-evidence.md",
+      "sha256": "sha256:57806f84ed2df8b49bcaeb563a492db4d30a9893a931b03a9a933b44b4fac076",
+      "size_bytes": 39136
+    },
+    {
       "path": "docs/operator-dashboard-query-model.md",
       "sha256": "sha256:200035c1f9ec122acc1ab828915d59d551ecea4a544340a7bff0dcccd62fffe1",
       "size_bytes": 25035
+    },
+    {
+      "path": "docs/permanence-packages.md",
+      "sha256": "sha256:9d1b600d3162e151558a64009dee3a7f25977b0fbe9fc07266379ca4ee27b8f6",
+      "size_bytes": 8337
+    },
+    {
+      "path": "docs/protocol-surface.md",
+      "sha256": "sha256:fba5d903ffeb330bb58144e1b99895004c548e30e3acfde9ffe07422198e3ebd",
+      "size_bytes": 4259
+    },
+    {
+      "path": "docs/provenance-manifests.md",
+      "sha256": "sha256:ec54197989419f54827409f81a4fb0ae82bab62749d839afd474019dd572865a",
+      "size_bytes": 6424
+    },
+    {
+      "path": "docs/public-beta-evidence.md",
+      "sha256": "sha256:259652da0285a0b996714939b672fabde2cdf9526ef8d80fca2512371ec8e9e1",
+      "size_bytes": 17889
+    },
+    {
+      "path": "docs/randomizer-operations.md",
+      "sha256": "sha256:c683ffb29f93a541e7e1650a29d078adc4fb6ff3db4df2e297e36e019f248018",
+      "size_bytes": 3825
+    },
+    {
+      "path": "docs/release-policy.md",
+      "sha256": "sha256:2a8b0c7346523ccb28cc0f118e5bb826898b28574af188809409a34bde2d33fe",
+      "size_bytes": 11558
+    },
+    {
+      "path": "docs/release-readiness.md",
+      "sha256": "sha256:65f3cf00c9251c677572ba6b245524a65a64986de582e4cc11434fb9a2bdc2df",
+      "size_bytes": 62369
+    },
+    {
+      "path": "docs/release-signatures.md",
+      "sha256": "sha256:3c04d64b2b476185903f92e0f052847a37cf58c97521aac0fc186be98006b703",
+      "size_bytes": 3639
+    },
+    {
+      "path": "docs/royalty-policy.md",
+      "sha256": "sha256:541441c734273a619cfbbd50b3f3357256d8ab03f9411bf0d989a7217f0cdefa",
+      "size_bytes": 14388
+    },
+    {
+      "path": "docs/signer-custody-readiness.md",
+      "sha256": "sha256:b8f6b6e01ccf445f52e4a95e09188bf79ed8b84000c4e796c7583012ced685b3",
+      "size_bytes": 4878
+    },
+    {
+      "path": "docs/status.md",
+      "sha256": "sha256:fa0e698be0e7f91303c1aebc2c52f2146d45e20baf22e8e5a86890a289d30666",
+      "size_bytes": 24661
+    },
+    {
+      "path": "docs/threat-model.md",
+      "sha256": "sha256:6ef796a4606aa14eaa4d8e6a043173ab80de124f63d1a33ee7bed2848da447e0",
+      "size_bytes": 12726
+    },
+    {
+      "path": "docs/tooling.md",
+      "sha256": "sha256:9168f89760f740a844995b429bd421d0a0f161912a1a64ad1790ea2cb4032e9e",
+      "size_bytes": 67017
+    },
+    {
+      "path": "docs/warning-dispositions.md",
+      "sha256": "sha256:b28b3bf8356bdb64b340ec037d9f0248fb26c4db86eb535be64faa5695ae64cd",
+      "size_bytes": 16044
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -762,7 +1026,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:d46d7c6a09a1ba9a8cddd117db8e5ac0d2fff5a28bda240efa0914263da5530c",
+      "sha256": "sha256:d826161e6c2032d6d75265fb1203510d5202eceb34cccc5942ac43d490c52834",
       "size_bytes": 79962
     },
     {
@@ -827,7 +1091,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:ff0379982df91461ba029e8da946e9e3a4a7f625140b8af9a556ba10934e2ce8",
+      "sha256": "sha256:1feb2691a77e838f4eda4103fe0d7ef9b0a47ad1ae4565ae677103bc3b31744f",
       "size_bytes": 8839
     },
     {
@@ -877,22 +1141,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:2933789201f4fc203663141d22fa3edd58fe61e52c46ecb9060d9da78fc5d53d",
-      "size_bytes": 130228
+      "sha256": "sha256:220a486512fd6d5879fbf4f47fcb5d73ba9af682aa7c0d72d4e0d91560041836",
+      "size_bytes": 130303
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:918e8a566c8ac3193e4b29f32590a9a699b14ea42552fccb2c700a8b5f82a270",
-      "size_bytes": 67839
+      "sha256": "sha256:883fd549781fbb7ea8229ebdc8c70a2b681d7d7aacacd5524ca79df3a64f42c5",
+      "size_bytes": 68135
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:d07670b86fa16b22287b32e0d44aceedb5011ca946b19cbc54fe92dadf85274a",
-      "size_bytes": 65018
+      "sha256": "sha256:ff60aadd732ba34f1548d9179049eec792fd42acd64b0ba43e7c1e567a02d477",
+      "size_bytes": 65307
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:49ca884f35e448382221f1a81f71245445d0f0f35cdba413df31d9f3763c3879",
+      "sha256": "sha256:09a2c75118f0f7ae9d795a879a3771850a40e9a4a2d1251118409dc0e8266d46",
       "size_bytes": 22929
     },
     {
@@ -1252,8 +1516,8 @@
     },
     {
       "path": "scripts/verify_release_artifacts.py",
-      "sha256": "sha256:f9dc57d3f975109dc843d64df3627a063b45fe30533d50d94e327341eb314b21",
-      "size_bytes": 17673
+      "sha256": "sha256:207ba2bb6194e2f2a710104afd6f617b4dee2acdf607fa68f58f5ae2ba1fc5cc",
+      "size_bytes": 18931
     },
     {
       "path": "test/fixtures/drop-authorization/auction-eoa.json",

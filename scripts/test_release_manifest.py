@@ -1297,6 +1297,12 @@ class ReleaseManifestTests(unittest.TestCase):
                 generator.file_sha256(paths["latest"] / "abi-checksums.json"),
             )
             self.assertEqual(
+                manifest["release_artifacts"]["artifact_manifest"]["artifacts"][
+                    "abi-checksums.json"
+                ]["path"],
+                "release-artifacts/latest/abi-checksums.json",
+            )
+            self.assertEqual(
                 manifest["release_artifacts"]["source_verification_inputs"]["schema_version"],
                 "6529stream.source-verification-inputs.v1",
             )

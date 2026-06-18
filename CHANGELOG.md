@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Strengthened release artifact verification so nested release manifest,
+  bytecode proof, and release-candidate lockfile file records must be covered
+  by `SHA256SUMS` with matching hashes, and expanded the checksum bundle to
+  include release-manifest source docs referenced by those records.
 - Added an exact linked-issue mode to the release-evidence issue snapshot
   exporter so retained live audit reports fetch the committed tracker issue
   map directly instead of relying on paginated `gh issue list` results, then

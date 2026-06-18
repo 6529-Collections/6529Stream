@@ -297,8 +297,15 @@ def iter_file_records(value: Any, source: str) -> Iterable[tuple[str, str, int |
                     raise ReleaseArtifactVerificationError(
                         f"{source}.sha256 has invalid sha256 marker for {path}"
                     )
-            elif isinstance(size_bytes, int) and not isinstance(size_bytes, bool):
-                yield path, sha256, size_bytes, source
+            else:
+                if size_bytes is None:
+                    yield path, sha256, None, source
+                elif isinstance(size_bytes, int) and not isinstance(size_bytes, bool):
+                    yield path, sha256, size_bytes, source
+                else:
+                    raise ReleaseArtifactVerificationError(
+                        f"{source}.size_bytes must be an integer when present"
+                    )
         for key, child in value.items():
             yield from iter_file_records(child, f"{source}.{key}")
     elif isinstance(value, list):
@@ -306,7 +313,33 @@ def iter_file_records(value: Any, source: str) -> Iterable[tuple[str, str, int |
             yield from iter_file_records(child, f"{source}[{index}]")
 
 
-def verify_nested_file_records(repo_root: Path, document: Any, source: str) -> int:
+def require_checksum_record(
+    checksum_entries: dict[str, str],
+    *,
+    path: str,
+    sha256: str,
+    source: str,
+) -> None:
+    """Require a nested file record to be present in SHA256SUMS."""
+    expected = sha256.removeprefix("sha256:")
+    actual = checksum_entries.get(path)
+    if actual is None:
+        raise ReleaseArtifactVerificationError(
+            f"{source} references file not covered by {CHECKSUM_FILE_NAME}: {path}"
+        )
+    if actual != expected:
+        raise ReleaseArtifactVerificationError(
+            f"{source} checksum hash mismatch for {path}: "
+            f"record has {sha256}, {CHECKSUM_FILE_NAME} has sha256:{actual}"
+        )
+
+
+def verify_nested_file_records(
+    repo_root: Path,
+    document: Any,
+    source: str,
+    checksum_entries: dict[str, str],
+) -> int:
     count = 0
     for path, sha256, size_bytes, field in iter_file_records(document, source):
         verify_file_record(
@@ -314,6 +347,12 @@ def verify_nested_file_records(repo_root: Path, document: Any, source: str) -> i
             path=path,
             sha256=sha256,
             size_bytes=size_bytes,
+            source=field,
+        )
+        require_checksum_record(
+            checksum_entries,
+            path=path,
+            sha256=sha256,
             source=field,
         )
         count += 1
@@ -402,16 +441,19 @@ def verify_release_artifacts(
         repo_root,
         release_manifest,
         RELEASE_MANIFEST_NAME,
+        checksum_entries,
     )
     bytecode_proof_records = verify_nested_file_records(
         repo_root,
         bytecode_proof,
         BYTECODE_PROOF_NAME,
+        checksum_entries,
     )
     release_candidate_lockfile_records = verify_nested_file_records(
         repo_root,
         release_candidate_lockfile,
         RELEASE_CANDIDATE_LOCKFILE_NAME,
+        checksum_entries,
     )
     verify_bytecode_proof_release_manifest_binding(
         repo_root,

@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Strengthened release artifact verification so nested release manifest, bytecode proof, and release-candidate lockfile file records must be covered by `SHA256SUMS` with matching hashes, and expanded the checksum bundle to include release-manifest source docs referenced by those records.
 - Added an exact linked-issue mode to the release-evidence issue snapshot exporter so retained live audit reports fetch the committed tracker issue map directly instead of relying on paginated `gh issue list` results, then retained and archived a fresh no-secret live audit report after PR #560 while keeping public beta blocked on the remaining missing evidence rows.
 - Added reviewed fork/testnet marketplace and indexer evidence for `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental reviewed artifact, equivalent collector/indexer tooling transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.
 - Added reviewed fork metadata browser evidence for `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser summary, generated `tokenURI`, redacted execution transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.
