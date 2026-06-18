@@ -8,7 +8,7 @@
   "block_or_reference": "template-only live ceremony transcript, multisig transaction set, or deployment version",
   "command_or_source_system": "template-only ceremony transcript, multisig UI export, explorer source, or reviewer source",
   "retained_path": "release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md",
-  "sha256": "sha256:115bb65c1ffefd69a763163d3f85f91fa1bb1e62ae74123df7d0f3238491b56b",
+  "sha256": "sha256:64e0d5ef461596e1ff80dc96ace349893146c49265a653ff088797cd668ed2a8",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

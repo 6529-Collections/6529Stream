@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:953b0e2a7e0cc31688d7b197f0ac0c93ad556579de11659066def7979350a49c",
-      "size_bytes": 60103
+      "sha256": "sha256:85d29b8597f05e8cac7bf47996689797eaaf13441a31c4a06c8870d16d8da393",
+      "size_bytes": 60391
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:2377d678316d435758e0340c5e475cb6222d816b06971ae10696f6ab2da6e34f",
+      "sha256": "sha256:c3cf76401de4578ae4ac07aa962d88929ad6551564582c50c7f1dd12c75a81db",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added stronger live ceremony retained-artifact validation so future pending or reviewed mainnet ceremony evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #228 can be considered for closure.",
       "Added stronger live metadata browser retained-artifact validation so future pending or reviewed mainnet evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #473 can be considered for closure.",
       "Added stronger testnet deployment rehearsal retained-artifact validation so future pending or reviewed Sepolia evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #217 can be considered for closure.",
       "Added a checked fork/testnet randomizer operations retained-artifact template and offline checker for future `fork_testnet_randomizer_operations_evidence`, covering fork/testnet environment and chain IDs, provider configuration, funding, reserve, request-health, lifecycle controls, retained-file and optional declared `sha256:` validation, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",

@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added stronger live ceremony retained-artifact validation so future pending
+  or reviewed mainnet ceremony evidence must reference existing repo-relative
+  retained files, remain no-secret, and match optional declared `sha256:`
+  hashes before issue #228 can be considered for closure.
 - Added stronger live metadata browser retained-artifact validation so future
   pending or reviewed mainnet evidence must reference existing repo-relative
   retained files, remain no-secret, and match optional declared `sha256:`
