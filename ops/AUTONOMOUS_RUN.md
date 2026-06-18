@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-deployment-evidence-hardening` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/531` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/532` |
-| Active PR | `TBD` |
-| Next issue | Commit, push, open the PR for issue #532, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, and merge only when clean. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/533` |
+| Next issue | Wait for PR #533 CI and CodeRabbit/bot feedback, resolve anything actionable, and merge only when clean. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 01:22 UTC` |
+| Last updated | `2026-06-18 01:24 UTC` |
 
 ## Packaging Notes
 
@@ -16213,6 +16213,7 @@ Outcome:
 | 2026-06-18 00:40 | Address PR #531 bot nice-to-haves | 6529bot security reported no findings and general review marked PR #531 good to merge with low-risk hardening suggestions. Accepted the useful items by making chain ID validation regex-explicit, expanding provider URL redaction coverage for additional common RPC providers, documenting standalone `--evidence` retained-path semantics, and adding focused regressions for leading-zero chain IDs plus parent-directory and absolute retained-artifact path escapes. Focused metadata-browser tests/checker, Python compile, `make fork-metadata-browser-evidence-check release-manifest-check release-checksums-check changelog-check`, release manifest/checksum tests, and `codex-diff-check` passed. Next action is to commit/push the review-response head and wait for latest CI/bot feedback. |
 | 2026-06-18 01:03 | Merge PR #531 and start EXT-017 | PR #531 merged as `11280e6adffc2ef537076edc205b88fcd25cee1b`, issue #530 closed completed, and local `main` was fast-forwarded. Issue #532 and branch `codex/fork-deployment-evidence-hardening` now track hardening for fork deployment rehearsal retained artifact validation: path-safe repo-relative references, missing file detection, no-secret scans on referenced artifacts, and declared `sha256:` drift checks. Initial focused validation surfaced stale reviewed fork broadcast, deployment manifest, and address-book hashes in the retained artifact; those hashes were corrected, the non-local evidence envelope and public-beta/release artifacts were regenerated, and `make release-checksums` passed. Next action is to run focused/full validation, commit, push, open the PR, request CodeRabbit, and merge only when clean. |
 | 2026-06-18 01:22 | Validate EXT-017 local draft | Added repo-relative retained-file validation for reviewed/pending fork deployment rehearsal evidence, including missing-file detection, referenced-artifact no-secret scans, optional declared `sha256:` verification, and redacted RPC placeholder handling. Refreshed stale reviewed fork broadcast, deployment manifest, address-book, non-local evidence, public-beta evidence, release packet, risk, notes, manifest, lockfile, bytecode proof, and checksum hashes. Local validation passed: focused fork rehearsal tests/checker, release packet/backlog/body-sync/notes/risk/manifest/checksum/changelog gates, Python compile, `codex-diff-check`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`. Known compiler/Foundry warning noise remains unchanged; current `StreamCore` runtime is `22,184` bytes with `2,392` bytes of EIP-170 margin. Next action is to commit, push, open PR for issue #532, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-18 01:24 | Open PR #533 for EXT-017 | PR #533 is open at `https://github.com/6529-Collections/6529Stream/pull/533`, closes issue #532, and packages fork deployment rehearsal retained-artifact validation hardening plus corrected reviewed fork evidence hashes, regenerated release artifacts, changelog, backlog, and run-state updates. CodeRabbit review was requested in comment `4736989801`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
