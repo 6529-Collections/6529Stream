@@ -46,11 +46,11 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:8001acc4c5c8e8cc73377aa23439875e44bc15aca745e8808e77d0f98d132c3c"
+      "sha256": "sha256:21cb3203a91e32bcbbaae26d1e801f56deb1d7068247598fca5949923fe4d79f"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
+      "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110"
     },
     {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -95,7 +95,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
+          "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -171,11 +171,11 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:8001acc4c5c8e8cc73377aa23439875e44bc15aca745e8808e77d0f98d132c3c"
+          "sha256": "sha256:21cb3203a91e32bcbbaae26d1e801f56deb1d7068247598fca5949923fe4d79f"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
+          "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110"
         }
       ],
       "risk_acceptance": null
@@ -256,7 +256,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
+          "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110"
         },
         {
           "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
@@ -346,7 +346,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
+          "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110"
         }
       ],
       "risk_acceptance": null

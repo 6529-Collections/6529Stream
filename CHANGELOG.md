@@ -837,6 +837,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Corrected reviewed fork metadata browser evidence so non-local retained
+  `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened
+  Forge broadcast return parsing to validate decoded field shapes and skip
+  malformed `returns` records before retaining evidence.
 - Reconciled stale autonomous backlog status rows for previously merged
   integration, 1/1 product-readiness, contract-size, and randomizer test work,
   and refreshed the dependent risk-register and release-artifact hashes.

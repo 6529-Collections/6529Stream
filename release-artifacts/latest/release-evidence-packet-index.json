@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:8001acc4c5c8e8cc73377aa23439875e44bc15aca745e8808e77d0f98d132c3c",
-      "size_bytes": 9629
+      "sha256": "sha256:21cb3203a91e32bcbbaae26d1e801f56deb1d7068247598fca5949923fe4d79f",
+      "size_bytes": 9663
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f",
-      "size_bytes": 11915
+      "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110",
+      "size_bytes": 11949
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -277,10 +277,10 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
-        "sha256": "sha256:e5043d89170e40841c19a237e4e3e625072505aca2f773aa5b80ead8ae50c096",
-        "block_or_reference": "fork block 25344439 / 0x8cd898e49e50cfcda9b4e0ca2ccba33043a2a8c4d23df486479acffb1130af2b",
-        "command_or_source_system": "local mainnet-fork metadata browser capture on 2026-06-18; PR latest-head CI required before merge",
-        "operator_notes": "Reviewed fork metadata browser evidence retained from source commit 2fb29578413541ecda5fe2732dad21ed06093366. The browser summary, tokenURI output, and transcript prove metadata fetched from fork-deployed StreamCore/StreamDrops contracts, executed in the sandbox, loaded the expected dependency, blocked parent-frame access, and produced no page, console, or unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows after this row completes."
+        "sha256": "sha256:c1c9f29dc7889912fee6c3f9be390d97d711002455e232c2fd12df67fa92827c",
+        "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4",
+        "command_or_source_system": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts",
+        "operator_notes": "Generated from release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json for fork_testnet_metadata_browser_evidence; replace with operator and reviewer notes before marking the requirement complete."
       },
       "validation_commands": [
         "python scripts/test_release_evidence_packet_index.py",
@@ -299,7 +299,7 @@
       ],
       "template_only_can_complete": false,
       "completion_policy": "reviewed retained evidence is recorded in the evidence manifest",
-      "notes": "Reviewed fork metadata browser evidence is retained: mainnet fork block 25344439, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows."
+      "notes": "Reviewed fork metadata browser evidence is retained: mainnet fork block 25344872, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output with fork/testnet metadata labels, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "phase": "public_beta",

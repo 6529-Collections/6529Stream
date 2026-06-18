@@ -52,11 +52,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json",
-          "sha256": "sha256:600d61cb7041525c9949e54477e9f75d8c31a29639382e840f9ad62093dca225"
+          "sha256": "sha256:3f9d306b5f014cf23fd14867440aa5e011af218f4f802abe6fced5d800101a18"
         }
       ],
       "risk_acceptance": null,
-      "notes": "Reviewed fork metadata browser evidence is retained: mainnet fork block 25344439, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows."
+      "notes": "Reviewed fork metadata browser evidence is retained: mainnet fork block 25344872, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output with fork/testnet metadata labels, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "id": "fork_testnet_marketplace_indexer_evidence",

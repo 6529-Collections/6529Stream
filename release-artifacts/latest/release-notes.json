@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:cbc56517e3ba8c4f555119a31c81a7f100ea1b1dfecf04cd30bc9fdfbd106570",
-      "size_bytes": 64540
+      "sha256": "sha256:c16ee60b2c70c298cda053681a7604f5995663a6d106831481eb5477335c8fb8",
+      "size_bytes": 64824
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:9fca2a9d07841f0f19fa0a1da97d29a03235520389bc10e175b4c6206e02ce95",
+      "sha256": "sha256:129eedfd4c1c75bb8b8ad1a2700e74d96f2ed43ff292f13095123090b5cf9d89",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -224,6 +224,7 @@
       "Added lifecycle-aware stale and failed randomness metadata states for minted tokens whose hash is still unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures, token state view coverage, fallback-to-pending coverage, and final-hash override coverage.",
       "Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.",
       "Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.",
+      "Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.",
       "Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.",
       "Retired provider and integration files from the prior Solidity formatting exception baseline, so arRNG, VRF, delegation, and randomizer integration interfaces are now enforced by `make fmt-check`.",
       "Retired first-party interface files from the prior Solidity formatting exception baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are now enforced by `make fmt-check`.",

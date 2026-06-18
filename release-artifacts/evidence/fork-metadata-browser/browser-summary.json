@@ -2,27 +2,27 @@
   "chain_id": 1,
   "contracts": {
     "DependencyRegistry": {
-      "address": "0x0040f056e64e8c21d97d6f28a850a1c636ac361f"
+      "address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015"
     },
     "MetadataRehearsalRandomizer": {
-      "address": "0xe3fb8dbbac8a84a97b6ebf9de19819c48b35efc9"
+      "address": "0x743679aa2bd7a994bb8b4ccb36eb9a28480b66f7"
     },
     "StreamContractMetadata": {
-      "address": "0x9a79881f8b168dbc02b2e720898031e3e78a0ffd"
+      "address": "0x00ea87e5acca4e9921b64bbb488fa5017a986301"
     },
     "StreamCore": {
-      "address": "0x03695c275fcfa9f6c95ad370edf9eaa7e480d902"
+      "address": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d"
     },
     "StreamDrops": {
-      "address": "0x1ec75e6f8d9dea73746285c49cdd091fd9733aa2"
+      "address": "0x9e3b3fd0017753ceb467036cf605a94660aae126"
     }
   },
   "environment": "fork",
   "no_secrets": true,
   "schema_version": "6529stream.fork-testnet-metadata-browser-evidence.v1",
   "source": {
-    "command_or_source_system": "local mainnet-fork metadata browser capture on 2026-06-18; PR latest-head CI required before merge",
-    "git_commit": "2fb29578413541ecda5fe2732dad21ed06093366"
+    "command_or_source_system": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts",
+    "git_commit": "c992105512b56d6619cfbf1684583f018a303bb1"
   },
   "token_results": [
     {
@@ -38,7 +38,7 @@
         "unexpected_requests": []
       },
       "token_id": 10000000000,
-      "token_uri_sha256": "sha256:9aef87db2ff46c6a575d84d456a7e095cfdbd1acbe547922678f134785a3be8f"
+      "token_uri_sha256": "sha256:ac0ebc8d2db64278045f0e6e4d9040e3bf4931fa91a555aa0c2c14051980b6d4"
     }
   ]
 }

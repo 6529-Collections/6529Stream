@@ -5,19 +5,19 @@
   "review_status": "reviewed",
   "environment": "fork",
   "chain_id": 1,
-  "block_or_reference": "fork block 25344439 / 0x8cd898e49e50cfcda9b4e0ca2ccba33043a2a8c4d23df486479acffb1130af2b",
-  "command_or_source_system": "local mainnet-fork metadata browser capture on 2026-06-18; PR latest-head CI required before merge",
+  "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4",
+  "command_or_source_system": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts",
   "retained_path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
-  "sha256": "sha256:e5043d89170e40841c19a237e4e3e625072505aca2f773aa5b80ead8ae50c096",
+  "sha256": "sha256:c1c9f29dc7889912fee6c3f9be390d97d711002455e232c2fd12df67fa92827c",
   "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
   "owner": "Codex autonomous implementer",
   "reviewer": "Codex autonomous maintainer second-pass review for branch codex/fork-metadata-browser-reviewed-evidence",
   "public_beta_requirement_id": "fork_testnet_metadata_browser_evidence",
   "source": {
     "repository": "https://github.com/6529-Collections/6529Stream",
-    "git_commit": "2fb29578413541ecda5fe2732dad21ed06093366",
+    "git_commit": "c992105512b56d6619cfbf1684583f018a303bb1",
     "source_dirty": false,
-    "ci_run": "local focused fork metadata browser capture; PR latest-head CI required before merge"
+    "ci_run": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts"
   },
   "redaction_policy": {
     "no_secrets": true,
@@ -31,5 +31,5 @@
     ]
   },
   "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-  "operator_notes": "Reviewed fork metadata browser evidence retained from source commit 2fb29578413541ecda5fe2732dad21ed06093366. The browser summary, tokenURI output, and transcript prove metadata fetched from fork-deployed StreamCore/StreamDrops contracts, executed in the sandbox, loaded the expected dependency, blocked parent-frame access, and produced no page, console, or unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows after this row completes."
+  "operator_notes": "Generated from release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json for fork_testnet_metadata_browser_evidence; replace with operator and reviewer notes before marking the requirement complete."
 }
