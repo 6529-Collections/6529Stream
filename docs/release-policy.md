@@ -81,6 +81,9 @@ home for future marketplace, provenance, permanence, royalty-policy, frontend,
 indexer, or collector-evidence features. The approved bytecode-spend ceiling
 remains 22,184 bytes with 2,392 bytes of baseline margin, so future Core growth
 above that ceiling still requires an accepted exception record.
+Accepted headroom-recovery records use `measured_delta_bytes` as
+`runtime_size_bytes - baseline_runtime_size_bytes`, so bytecode reductions are
+negative deltas and bytecode spend remains positive.
 
 ## Breaking Changes
 

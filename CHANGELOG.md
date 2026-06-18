@@ -888,7 +888,8 @@ the release policy in `docs/release-policy.md`.
   behavior-preserving storage caching and invariant-bounded unchecked counter
   arithmetic; the current production via-IR runtime is 21,780 bytes with 2,796
   bytes of EIP-170 margin while the approved bytecode-spend ceiling remains
-  22,184 bytes.
+  22,184 bytes. Added explicit mint/burn/final-supply counter regressions and
+  a checked negative-delta convention for accepted headroom-recovery records.
 
 ### Fixed
 

@@ -83,7 +83,65 @@ def core_policy(config: dict[str, Any]) -> dict[str, Any]:
         raise CoreBytecodePolicyError(
             "core_bytecode_spend_policy.rejected_experiments must be a list"
         )
+    reductions = policy.get("accepted_reductions", [])
+    if not isinstance(reductions, list):
+        raise CoreBytecodePolicyError(
+            "core_bytecode_spend_policy.accepted_reductions must be a list"
+        )
+    for index, reduction in enumerate(reductions):
+        validate_accepted_reduction(reduction, index)
     return policy
+
+
+def validate_accepted_reduction(reduction: Any, index: int) -> None:
+    record = require_dict(reduction, f"core_bytecode_spend_policy.accepted_reductions[{index}]")
+    for key in ("id", "issue", "summary", "decision"):
+        require_string(
+            record.get(key), f"core_bytecode_spend_policy.accepted_reductions[{index}].{key}"
+        )
+    baseline = require_int(
+        record.get("baseline_runtime_size_bytes"),
+        f"core_bytecode_spend_policy.accepted_reductions[{index}].baseline_runtime_size_bytes",
+    )
+    runtime_size = require_int(
+        record.get("runtime_size_bytes"),
+        f"core_bytecode_spend_policy.accepted_reductions[{index}].runtime_size_bytes",
+    )
+    measured_delta = require_int(
+        record.get("measured_delta_bytes"),
+        f"core_bytecode_spend_policy.accepted_reductions[{index}].measured_delta_bytes",
+    )
+    runtime_margin = require_int(
+        record.get("runtime_margin_bytes"),
+        f"core_bytecode_spend_policy.accepted_reductions[{index}].runtime_margin_bytes",
+    )
+    if baseline <= 0 or runtime_size <= 0:
+        raise CoreBytecodePolicyError(
+            f"core_bytecode_spend_policy.accepted_reductions[{index}] runtime sizes "
+            "must be positive"
+        )
+    if runtime_margin <= 0:
+        raise CoreBytecodePolicyError(
+            f"core_bytecode_spend_policy.accepted_reductions[{index}].runtime_margin_bytes "
+            "must be positive"
+        )
+    if runtime_size >= baseline:
+        raise CoreBytecodePolicyError(
+            f"core_bytecode_spend_policy.accepted_reductions[{index}].runtime_size_bytes "
+            "must be smaller than the reduction baseline"
+        )
+    expected_delta = runtime_size - baseline
+    if measured_delta != expected_delta:
+        raise CoreBytecodePolicyError(
+            f"core_bytecode_spend_policy.accepted_reductions[{index}].measured_delta_bytes "
+            f"must equal runtime_size_bytes minus baseline_runtime_size_bytes "
+            f"({expected_delta})"
+        )
+    if measured_delta >= 0:
+        raise CoreBytecodePolicyError(
+            f"core_bytecode_spend_policy.accepted_reductions[{index}].measured_delta_bytes "
+            "must be negative for accepted headroom recovery"
+        )
 
 
 def accepted_exception_maximum(exception: Any, index: int) -> int | None:
