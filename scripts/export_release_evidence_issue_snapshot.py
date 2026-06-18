@@ -242,15 +242,27 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "Fetch every linked tracker issue with gh issue view instead of "
-            "using a paginated gh issue list result."
+            "using a paginated gh issue list result. This mode intentionally "
+            "ignores --state and --limit."
         ),
     )
     parser.add_argument(
         "--state",
         choices=("open", "closed", "all"),
-        help="Override the profile's default issue state.",
+        help=(
+            "Override the profile's default issue state for list-based exports. "
+            "Ignored with --exact-linked-issues."
+        ),
     )
-    parser.add_argument("--limit", type=positive_int, default=100)
+    parser.add_argument(
+        "--limit",
+        type=positive_int,
+        default=100,
+        help=(
+            "Maximum issue list rows for list-based exports. Ignored with "
+            "--exact-linked-issues."
+        ),
+    )
     parser.add_argument(
         "--output",
         type=Path,

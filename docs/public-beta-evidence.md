@@ -275,6 +275,9 @@ To move a requirement to `complete`:
     python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
     ```
 
+    In exact linked-issue mode, `--state` and `--limit` are intentionally
+    ignored because the exporter fetches each committed tracker issue directly.
+
 17. Regenerate and check the release evidence issue body sync artifact with
     `python scripts/generate_release_evidence_issue_body_sync.py`,
     `python scripts/test_release_evidence_issue_body_sync.py`, and

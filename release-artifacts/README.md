@@ -363,7 +363,9 @@ or closure snapshots as UTF-8 JSON without relying on shell redirection. For
 retained live audit evidence, prefer `--exact-linked-issues --issue-links
 release-artifacts/latest/release-evidence-issue-links.json` so the export
 fetches every committed tracker issue directly instead of depending on issue
-list pagination.
+list pagination. In exact linked-issue mode, `--state` and `--limit` are
+ignored because each linked issue is fetched directly and the closure checker
+needs the returned live state for every linked issue.
 Use `scripts/audit_release_evidence_issue_snapshots.py` as the operator-only
 one-command live audit for label, body, and closure drift; CI runs only its
 mocked unit tests and never requires GitHub network access.
