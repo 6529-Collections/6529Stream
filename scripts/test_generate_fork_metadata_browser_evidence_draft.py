@@ -161,6 +161,21 @@ class ForkMetadataBrowserEvidenceDraftTests(unittest.TestCase):
             )
             self.assertEqual(converted["token_results"][0]["token_id"], 10_000_000_000)
 
+    def test_can_generate_checker_valid_reviewed_artifact(self) -> None:
+        """Reviewed fork captures can be generated without hand-editing fields."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            argv = valid_argv(root) + ["--review-status", "reviewed"]
+            with redirect_stdout(StringIO()):
+                result = generator.main(argv)
+
+            output = root / "retained" / "metadata-browser-evidence.md"
+            text = output.read_text(encoding="utf-8")
+            self.assertEqual(result, 0)
+            self.assertIn("- Review status: `reviewed`", text)
+            self.assertIn("- Review decision: `reviewed`", text)
+            checker.validate_artifact(output)
+
     def test_preserves_sha256_prefixed_token_uri_digest_input(self) -> None:
         """Digest-only tokenURI captures are retained and bound to the summary."""
         with tempfile.TemporaryDirectory() as temp_dir:

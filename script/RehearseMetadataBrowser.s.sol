@@ -41,7 +41,8 @@ contract RehearseMetadataBrowser {
         MetadataScriptVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     uint256 private constant SIGNER_KEY = 0xA11CE;
-    string private constant EVIDENCE_KIND = "local-anvil-deployment-rehearsal";
+    string private constant LOCAL_EVIDENCE_KIND = "local-anvil-deployment-rehearsal";
+    string private constant FORK_TESTNET_EVIDENCE_KIND = "fork-testnet-deployment-rehearsal";
     string private constant TOKEN_DATA = "1,2,3";
 
     struct MetadataBrowserResult {
@@ -83,7 +84,7 @@ contract RehearseMetadataBrowser {
         vm.stopBroadcast();
 
         result = MetadataBrowserResult({
-            evidenceKind: EVIDENCE_KIND,
+            evidenceKind: _evidenceKind(),
             chainId: deployed.chainId,
             deploymentManifestHash: deployed.manifestHash,
             collectionId: deployed.sampleCollectionId,
@@ -93,6 +94,10 @@ contract RehearseMetadataBrowser {
             externalScriptUrl: "https://cdn.6529.io/stream/rehearsal.js",
             tokenUri: tokenUri
         });
+    }
+
+    function _evidenceKind() private view returns (string memory) {
+        return block.chainid == 31337 ? LOCAL_EVIDENCE_KIND : FORK_TESTNET_EVIDENCE_KIND;
     }
 
     function _buildAuthorization(StreamDrops drops, uint256 collectionId)
