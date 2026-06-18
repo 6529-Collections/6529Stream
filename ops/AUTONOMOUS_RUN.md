@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-randomizer-operations-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/552` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/220` |
-| Active PR | `TBD` |
-| Next issue | Finish local validation for retained reviewed fork randomizer operations evidence, commit, push, open a PR closing issue #220, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/553` |
+| Next issue | PR #553 is open for reviewed fork randomizer operations evidence; request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 09:02 UTC` |
+| Last updated | `2026-06-18 09:12 UTC` |
 
 ## Packaging Notes
 
@@ -16255,6 +16255,7 @@ Outcome:
 | 2026-06-18 08:41 | Address PR #552 bot blockers locally | 6529bot flagged two important evidence-integrity issues and one nice-to-have: packet-index rows used template/TBD reviewer metadata for completed reviewed evidence, the fork ceremony reviewer field claimed a future CodeRabbit status, and the `sha256:` allow-case lacked an adjacent bare-64-hex negative test. Updated `generate_release_evidence_packet_index.py` to surface reviewed non-local evidence owner/reviewer/status/source for complete rows, replaced the future reviewer wording with a concrete autonomous maintainer second-pass review record, added packet-index and fork-ceremony regressions, regenerated evidence/packet/manifest/checksum/risk/release-note artifacts, and reran focused evidence, packet, issue, release-manifest, checksum, changelog, compile, and whitespace gates successfully. Next action is to commit/push this response head and wait for latest CI and bot feedback. |
 | 2026-06-18 08:58 | Merge PR #552 and start EXT-026 | PR #552 merged as `af2c394860c78ee7ced9ab4ace566f1e15ba5b78` after Foundry smoke, Windows wrapper, CodeRabbit status, and latest-head 6529bot review were clean; issue #219 closed completed. Branch `codex/fork-randomizer-operations-evidence` now targets issue #220 with reviewed retained fork randomizer operations evidence rather than another checker-only slice. |
 | 2026-06-18 09:02 | Start EXT-026 local draft | Promoted `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md` from template-only preparation to reviewed fork evidence, added redacted provider export, fork transaction bundle, post-state request views, generated `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json` and `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json`, marked `fork_testnet_randomizer_operations_evidence` complete in `public-beta-evidence.json`, removed #220 from the incomplete issue-link map, and regenerated blocker/packet/backlog/body-sync/risk/release artifact state. Focused fork randomizer evidence and randomizer operations checks pass. Next action is to finish changelog/release-note regeneration, run focused drift gates plus diff hygiene, commit, push, open PR closing #220, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-18 09:12 | Open PR #553 for EXT-026 | PR #553 is open at `https://github.com/6529-Collections/6529Stream/pull/553`, closes issue #220, and packages retained reviewed fork randomizer operations evidence, redacted provider export, fork transaction bundle, post-state request views, schema-checked randomizer operations JSON, public-beta evidence completion for `fork_testnet_randomizer_operations_evidence`, and regenerated release evidence while keeping public beta blocked on the remaining missing rows. Local focused evidence, generated-artifact, release-manifest, checksum, changelog, forge-size, and whitespace gates passed before opening. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
