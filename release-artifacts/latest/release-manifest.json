@@ -70,7 +70,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:305e63c939bf264b34ccad2382742637b5a5e19360d1762508dbfa94d639b334",
+        "sha256": "sha256:95169b5f42666cc6cf76cf0406b5274bc8e14748ac22df76adb7ad031d86b367",
         "size_bytes": 67463,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:45ac5666290f9145f7c954321d61472358d3a02b5f4a74feab9d149759dbf5a0",
+      "sha256": "sha256:4c717e7ec0f4855b159191c5d94af69d0c8e1d66b9b83d9571756522026ae312",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
