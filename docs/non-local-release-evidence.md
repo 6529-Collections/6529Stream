@@ -520,7 +520,15 @@ python scripts/check_randomizer_operations.py
 
 The checker validates retained no-secret operations proof only. It does not
 fetch provider dashboards, call private RPC endpoints, query billing systems,
-or execute randomizer migrations from CI.
+or execute randomizer migrations from CI. Future pending-review or reviewed
+retained randomizer operations references must be repo-relative files and may
+include one optional `sha256:<64 lowercase hex>` digest. The checker rejects
+missing files, absolute paths, path escapes, Windows backslashes, ambiguous
+whitespace, duplicate or malformed digests, stale declared hashes,
+credentialed/provider URLs, bearer tokens, bare 64-hex values, and
+secret-shaped content in referenced retained files. Symlinked retained files
+and non-UTF-8 retained files also fail closed so the reviewed evidence is the
+committed text file the path names.
 
 ### Gas And Invariant Evidence
 

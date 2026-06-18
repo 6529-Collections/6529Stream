@@ -94,6 +94,16 @@ python scripts/generate_release_checksums.py --check
 - Replace every `TBD` field before requesting review.
 - Keep issue #229 open until reviewed retained evidence is linked from the
   shared production-release evidence manifest.
+- For pending-review or reviewed evidence, provider evidence, monitoring
+  handoff, and required retained artifact fields must be repo-relative retained
+  files. Absolute paths, `..` escapes, Windows backslashes, ambiguous
+  whitespace in paths, placeholders, missing files, stale hashes, duplicate
+  hashes, provider/API-token-shaped URLs, credentialed URLs, bearer tokens,
+  bare 64-hex strings, symlinked files, and non-UTF-8 files fail validation.
+- Retained file references may append one declared digest as
+  `path/to/file sha256:<64 lowercase hex>` or
+  `path/to/file / sha256:<64 lowercase hex>`. Normalize `sha256sum`-style
+  retained digest output to the explicit `sha256:<hex>` form before review.
 - The referenced randomizer operations JSON should also pass
   `python scripts/check_randomizer_operations.py` against retained live
   deployment manifests, address books, provider funding evidence, request

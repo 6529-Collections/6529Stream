@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added stronger live randomizer operations retained-artifact validation so
+  future pending or reviewed mainnet provider operations evidence must
+  reference existing repo-relative retained UTF-8 files, avoid symlinked
+  evidence, remain no-secret, and match optional declared `sha256:` hashes
+  before issue #229 can be considered for closure.
 - Added stronger live ceremony retained-artifact validation so future pending
   or reviewed mainnet ceremony evidence must reference existing repo-relative
   retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match
