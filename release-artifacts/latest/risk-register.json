@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:9ffc731dcd38f3c9dfce8950b8d34d90ffd0c828be5d810b2f3a9588fa2ae3dc"
+      "sha256": "sha256:bbfc79dab9ffc22b04e54a66be4fbe65e8c56ae7e70bf5027d7e58b27e1b3640"
     },
     {
       "path": "docs/audit-package.md",
@@ -46,7 +46,7 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:5ab08cbc2cf8a68312ff31ea939d22e6dbf65a0ca5ee53cafebfa4399c226020"
+      "sha256": "sha256:eea5322cb800f07d5936e2c03eb2e6c8688980d04cec5f57859936fd89383c15"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:9ffc731dcd38f3c9dfce8950b8d34d90ffd0c828be5d810b2f3a9588fa2ae3dc"
+          "sha256": "sha256:bbfc79dab9ffc22b04e54a66be4fbe65e8c56ae7e70bf5027d7e58b27e1b3640"
         }
       ],
       "risk_acceptance": null
@@ -171,7 +171,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:5ab08cbc2cf8a68312ff31ea939d22e6dbf65a0ca5ee53cafebfa4399c226020"
+          "sha256": "sha256:eea5322cb800f07d5936e2c03eb2e6c8688980d04cec5f57859936fd89383c15"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:9ffc731dcd38f3c9dfce8950b8d34d90ffd0c828be5d810b2f3a9588fa2ae3dc"
+          "sha256": "sha256:bbfc79dab9ffc22b04e54a66be4fbe65e8c56ae7e70bf5027d7e58b27e1b3640"
         },
         {
           "path": "docs/metadata.md",
@@ -483,7 +483,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:9ffc731dcd38f3c9dfce8950b8d34d90ffd0c828be5d810b2f3a9588fa2ae3dc"
+          "sha256": "sha256:bbfc79dab9ffc22b04e54a66be4fbe65e8c56ae7e70bf5027d7e58b27e1b3640"
         },
         {
           "path": "docs/tooling.md",

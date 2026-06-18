@@ -3364,7 +3364,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `EXT-009` | Add fork/testnet metadata browser evidence checker and retained-artifact template | E/G | In progress on issue #530; future reviewed evidence still required |
+| `EXT-009` | Add fork/testnet metadata browser evidence checker and retained-artifact template | E/G | Merged in PR #531; issue #530 closed completed; future reviewed evidence still required |
 | `EXT-010` | Retain fork ceremony evidence for admin/signer/randomizer/auction operations | E/F | ceremony checker |
 | `EXT-011` | Retain fork randomizer operations evidence | E/F | randomizer operations checker |
 | `EXT-012` | Add production broadcast retention checker | F/G | Merged in PR #469; issue #468 closed completed |
@@ -3372,6 +3372,7 @@ unless an external dependency changes.
 | `EXT-014` | Add live metadata browser evidence checker | F/G | Merged in PR #474; issue #472 closed completed; tracker issue #473 remains open for future reviewed live evidence |
 | `EXT-015` | Add live ceremony evidence checker | F/G | Merged in PR #476; issue #228 remains open for future reviewed live ceremony evidence |
 | `EXT-016` | Add live randomizer operations evidence checker | F/G | Merged in PR #477; issue #229 remains open for future reviewed live randomizer operations evidence |
+| `EXT-017` | Harden fork deployment rehearsal retained artifact validation | E/G | In progress on issue #532; validates repo-relative retained paths, missing files, no-secret scans, and declared `sha256:` drift for reviewed fork rehearsal evidence |
 
 ### Adversarial Testing
 

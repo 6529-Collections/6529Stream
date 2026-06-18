@@ -9,7 +9,7 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:5ab08cbc2cf8a68312ff31ea939d22e6dbf65a0ca5ee53cafebfa4399c226020",
+      "sha256": "sha256:eea5322cb800f07d5936e2c03eb2e6c8688980d04cec5f57859936fd89383c15",
       "size_bytes": 7945
     },
     "public_beta_blocker_report": {
@@ -165,7 +165,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:4bb92e1979a4b77c19085606efee7717c9f45dfac6f59ec2333bf4ee3c3c6b48",
+        "sha256": "sha256:c18ff211593f7164fdc82572393ed7bea636e0702853c137825e0a18bee61935",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
