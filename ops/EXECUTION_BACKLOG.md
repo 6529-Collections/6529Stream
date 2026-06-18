@@ -3477,7 +3477,7 @@ unless an external dependency changes.
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
-| `OSS-006` | Add autonomous run-state consistency checker | G | Active issue #569 on branch `codex/autonomous-state-consistency-checker`; add a local no-network checker/tests for `ops/AUTONOMOUS_RUN.md` and `ops/EXECUTION_BACKLOG.md`, wire it into local/CI gates, and prevent stale active PR/issue/branch markers from surviving future autonomous resumes |
+| `OSS-006` | Add autonomous run-state consistency checker | G | Active PR #570 / issue #569 on branch `codex/autonomous-state-consistency-checker`; add a local no-network checker/tests for `ops/AUTONOMOUS_RUN.md` and `ops/EXECUTION_BACKLOG.md`, wire it into local/CI gates, and prevent stale active PR/issue/branch markers from surviving future autonomous resumes |
 
 ## 6. Dependency Map
 
