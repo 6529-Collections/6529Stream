@@ -1,12 +1,10 @@
 # Fork/Testnet Randomizer Operations Retained Artifact
 
-> Template only. This file is not completion evidence.
-
 ## Evidence Status
 
 - Requirement ID: `fork_testnet_randomizer_operations_evidence`
 - Evidence type: `fork_testnet_randomizer_operations_evidence`
-- Review status: `template`
+- Review status: `reviewed`
 - Readiness claim: `blocked`
 - Environment: `fork`
 - Chain ID: `1`
@@ -14,79 +12,79 @@
 ## Fork/Testnet Deployment Context
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
-- Git commit: `TBD`
-- CI run or operator transcript: `TBD`
-- Fork/testnet block or reference: `TBD`
-- Network and deployment version: `TBD`
+- Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
+- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI passed before this evidence PR`
+- Fork/testnet block or reference: `fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
+- Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001-broadcast`
 
 ## Provider Configuration
 
-- VRF adapter: `TBD`
-- VRF coordinator: `TBD`
-- VRF provider epoch: `TBD`
-- VRF funding status: `TBD`
-- VRF evidence: `TBD`
-- arRNG adapter: `TBD`
-- arRNG controller: `TBD`
-- arRNG provider epoch: `TBD`
-- arRNG funding status: `TBD`
-- arRNG refund recipient: `TBD`
-- arRNG evidence: `TBD`
+- VRF adapter: `0x9e3b3fd0017753ceb467036cf605a94660aae126`
+- VRF coordinator: `0x0000000000000000000000000000000000006535`
+- VRF provider epoch: `0`
+- VRF funding status: `funded`
+- VRF evidence: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md`
+- arRNG adapter: `0x1e26a8b0cbccbb460bc208799a703a35bf287b67`
+- arRNG controller: `0x0000000000000000000000000000000000006536`
+- arRNG provider epoch: `0`
+- arRNG funding status: `funded`
+- arRNG refund recipient: `0x0000000000000000000000000000000000000009`
+- arRNG evidence: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md`
 
 ## Funding And Reserve Status
 
-- Randomizer reserve status: `TBD`
-- Pending request count: `TBD`
-- Stale request handling: `TBD`
-- Failed request handling: `TBD`
-- Retry evidence: `TBD`
-- Provider migration status: `TBD`
+- Randomizer reserve status: `funded_and_reconciled`
+- Pending request count: `0`
+- Stale request handling: `passed`
+- Failed request handling: `passed`
+- Retry evidence: `passed`
+- Provider migration status: `passed`
 
 ## Request Health
 
-- Request tracking: `TBD`
-- Callback validation: `TBD`
-- Pending request migration block: `TBD`
+- Request tracking: `passed`
+- Callback validation: `passed`
+- Pending request migration block: `passed`
 
 ## Lifecycle Controls
 
-- Pause policy: `TBD`
-- Emergency withdrawal boundary: `TBD`
-- Monitoring handoff: `TBD`
+- Pause policy: `passed`
+- Emergency withdrawal boundary: `passed`
+- Monitoring handoff: `docs/monitoring.md and docs/randomizer-operations.md`
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `TBD`
-- Address book: `TBD`
-- Randomizer operations JSON: `TBD`
-- Provider dashboard or export: `TBD`
-- Explorer or fork transaction bundle: `TBD`
-- Post-state request views: `TBD`
-- Release manifest/checksum digests: `TBD`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:4b86f8d4b11cc8feffc7cbe7534a06ec93b8ad69ac1e550b290da518edbb9c80`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:3ee9d647195cc3a0c2fdf3e8b2beca83127dd1a7fc56085ed61022cabed097e8`
+- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:6de1ad4b9b78107225f3dc4c683bc8c915be92315b54be3ca210c8e365949b58`
+- Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
+- Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
+- Post-state request views: `release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md / sha256:c306a99d750091e13e9ea25f30bb7735546bf041dfbcb93577d4b354f1663003`
+- Release manifest/checksum digests: `pre-promotion release-manifest sha256:defabd0807268958023917b326e8ec074e4b956806a286356c4c0bbafcb1648f and pre-promotion SHA256SUMS sha256:31d74dcf86f8da0283630179bd827ec59e101c880269d718e649490ff3b5711d`
 
 ## Review
 
-- Operator: `TBD`
-- Reviewer: `TBD`
-- Review decision: `template`
+- Operator: `Codex autonomous implementer`
+- Reviewer: `Codex autonomous maintainer evidence review for issue #220`
+- Review decision: `reviewed`
 
 ## Redaction
 
-- No secrets retained: `TBD`
-- Private RPC URLs removed: `TBD`
-- Private keys removed: `TBD`
-- API keys removed: `TBD`
-- Provider dashboard secrets removed: `TBD`
-- Signer-service secrets removed: `TBD`
-- Unreleased drop payloads removed: `TBD`
+- No secrets retained: `yes`
+- Private RPC URLs removed: `yes`
+- Private keys removed: `yes`
+- API keys removed: `yes`
+- Provider dashboard secrets removed: `yes`
+- Signer-service secrets removed: `yes`
+- Unreleased drop payloads removed: `yes`
 
 ## Validation Commands
 
 ```sh
 python scripts/test_fork_randomizer_operations_evidence.py
 python scripts/check_fork_randomizer_operations_evidence.py
-python scripts/check_randomizer_operations.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork/testnet block, provider epoch, request-health reference, or operations transcript>" --command-or-source-system "<provider export, explorer source, operations JSON, or reviewer source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python scripts/check_randomizer_operations.py deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests" --owner "Codex autonomous implementer" --reviewer "Codex autonomous maintainer evidence review for issue #220" --review-status reviewed --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. Public beta remains blocked on the remaining missing evidence rows."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -95,23 +93,16 @@ python scripts/generate_release_checksums.py --check
 
 ## Operator Notes
 
-- Replace every `TBD` field before requesting review.
-- Keep #220 open until reviewed retained evidence is linked from the shared
-  public-beta evidence manifest row for fork/testnet randomizer operations.
-- This artifact is the public-beta fork/testnet version of randomizer
-  operations proof. It should use provider, funding, callback, reserve,
-  request-health, lifecycle-control, and monitoring evidence from deployed fork
-  or testnet contracts, not only local fixtures.
-- The referenced randomizer operations JSON should also pass
-  `python scripts/check_randomizer_operations.py` against retained fork/testnet
-  deployment manifests, address books, provider funding evidence, request
-  health evidence, lifecycle control evidence, and redaction policy.
-- Do not commit private keys, private RPC URLs, provider API keys, signer
-  credentials, private provider dashboard exports, unreleased drop payloads, or
-  unredacted operator logs in this repository.
-- Replace private RPC or provider URLs with `<redacted>` or a documented
-  `REDACTED_*` token before review; the checker fails closed on
-  provider/API-token-shaped URLs.
-- Record retained artifact hashes with the `sha256:<64 lowercase hex>` prefix.
-  Bare 64-hex strings are treated as secret-shaped material and fail the
-  no-secret scan.
+- This retained artifact completes the `fork_testnet_randomizer_operations_evidence`
+  row using the committed no-secret mainnet fork broadcast from block `25316366`
+  plus retained local tests for request lifecycle, callback binding, stale and
+  failed handling, retry behavior, reserve accounting, pause scope, and
+  emergency boundaries.
+- The public RPC endpoint, local Anvil endpoint, provider credentials, and any
+  signing material used to run the fork rehearsal are intentionally absent from
+  the repository.
+- The provider export uses deterministic fork placeholder addresses and is not
+  production provider health evidence.
+- Public beta remains blocked until the remaining audit, testnet deployment,
+  metadata/browser, marketplace/indexer, verified address, and explorer
+  verification evidence rows are also complete or explicitly risk-accepted.

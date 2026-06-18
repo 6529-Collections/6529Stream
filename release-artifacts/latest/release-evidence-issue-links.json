@@ -105,28 +105,6 @@
       ]
     },
     {
-      "entry_id": "public-beta-fork-testnet-randomizer-operations-evidence",
-      "phase": "public_beta",
-      "phase_label": "Public Beta",
-      "requirement_id": "fork_testnet_randomizer_operations_evidence",
-      "status": "missing",
-      "title": "Retain public beta evidence: fork_testnet_randomizer_operations_evidence",
-      "issue_number": 220,
-      "issue_url": "https://github.com/6529-Collections/6529Stream/issues/220",
-      "suggested_labels": [
-        "release",
-        "evidence",
-        "roadmap",
-        "public-beta"
-      ],
-      "applied_labels": [
-        "release",
-        "roadmap",
-        "evidence",
-        "public-beta"
-      ]
-    },
-    {
       "entry_id": "public-beta-verified-deployed-addresses",
       "phase": "public_beta",
       "phase_label": "Public Beta",
