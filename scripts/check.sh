@@ -178,6 +178,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_issue_templates.py
 "$python_bin" scripts/test_pr_template.py
 "$python_bin" scripts/check_pr_template.py
+"$python_bin" scripts/test_autonomous_state.py
+"$python_bin" scripts/check_autonomous_state.py
 "$python_bin" scripts/test_markdown_links.py
 "$python_bin" scripts/check_markdown_links.py
 "$python_bin" scripts/test_integrations_readme.py
