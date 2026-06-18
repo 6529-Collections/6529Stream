@@ -431,6 +431,26 @@ class ReleaseEvidenceLiveAuditReportTests(unittest.TestCase):
 
             self.assert_checker_fails(report, root, "checker_command")
 
+    def test_rejects_local_absolute_command_provenance(self) -> None:
+        """Retained reports must not embed operator-specific absolute paths."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            first_profile = report["profiles"][0]
+            first_profile["export_command"] = (
+                "C:\\Users\\Administrator\\Python312\\python.exe "
+                "D:\\repos\\6529Stream\\scripts\\export_release_evidence_issue_snapshot.py "
+                f"--profile {first_profile['profile']} "
+                f"--repo {checker.REPO_FULL_NAME} "
+                f"--output {first_profile['snapshot_path']}"
+            )
+
+            self.assert_checker_fails(
+                report,
+                root,
+                "repo-relative command provenance",
+            )
+
     def test_accepts_exact_linked_issue_export_command(self) -> None:
         """New live-audit reports may use exact linked-issue snapshots."""
         with tempfile.TemporaryDirectory() as temp_dir:

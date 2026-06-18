@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a retained exact-linked live release-evidence issue audit after the
+  live deployment manifest checker merge, syncing issue #227 to the dedicated
+  retained-artifact body, proving it remains open, and refreshing archive,
+  release-manifest, and checksum coverage while keeping production release
+  blocked on real reviewed live evidence.
+- Added portable command-provenance normalization and checker coverage for
+  retained live-audit reports so release evidence does not embed
+  operator-specific absolute Windows paths.
 - Extended ABI compatibility checks and the committed baseline to cover
   published interface ABIs from `release-artifacts/contracts.json` in addition
   to production contracts, failing removed or changed interface entries while

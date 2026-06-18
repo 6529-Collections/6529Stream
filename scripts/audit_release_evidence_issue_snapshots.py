@@ -75,6 +75,30 @@ def command_text(command: list[str]) -> str:
     return shlex.join(command)
 
 
+def repo_root() -> Path:
+    """Return the repository root for provenance normalization."""
+    return Path(__file__).resolve().parent.parent
+
+
+def provenance_token(token: str) -> str:
+    """Return a portable token for retained command provenance."""
+    token_path = Path(token)
+    token_name = token_path.name.lower()
+    if token_name in {"python", "python.exe", "python3", "python3.exe"}:
+        return "python"
+    if token_path.is_absolute():
+        try:
+            return token_path.resolve().relative_to(repo_root()).as_posix()
+        except ValueError:
+            return token
+    return token_path.as_posix() if "\\" in token else token
+
+
+def command_provenance(command: list[str]) -> str:
+    """Return a portable shell-readable command for retained reports."""
+    return shlex.join([provenance_token(token) for token in command])
+
+
 def run_checked(command: list[str], label: str) -> None:
     """Run one audit command and fail with context on non-zero exit."""
     result = subprocess.run(command, check=False)
@@ -165,8 +189,8 @@ def audit_profile(
         "profile": profile,
         "snapshot_path": output.as_posix(),
         "snapshot_sha256": sha256_file(output),
-        "export_command": command_text(export_command),
-        "checker_command": command_text(check_command),
+        "export_command": command_provenance(export_command),
+        "checker_command": command_provenance(check_command),
         "export_status": "passed",
         "checker_status": "passed",
     }

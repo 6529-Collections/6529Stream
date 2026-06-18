@@ -7,6 +7,7 @@ import importlib.util
 import hashlib
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -184,6 +185,22 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         self.assertNotIn("17", export_command)
         self.assertNotIn("custom-gh", check_command)
         self.assertNotIn("custom/links.json", check_command)
+
+    def test_command_provenance_normalizes_python_and_repo_scripts(self) -> None:
+        """Retained command provenance uses portable repo-relative script paths."""
+        command = [
+            sys.executable,
+            str(auditor.script_path("export_release_evidence_issue_snapshot.py")),
+            "--output",
+            "release-artifacts/evidence/live-audit-reports/example.json",
+        ]
+
+        provenance = auditor.command_provenance(command)
+
+        self.assertIn(
+            "python scripts/export_release_evidence_issue_snapshot.py", provenance
+        )
+        self.assertNotIn(str(auditor.repo_root()), provenance)
 
     def test_report_json_and_markdown_are_deterministic(self) -> None:
         """Report mode writes deterministic no-secret JSON and Markdown."""

@@ -24,7 +24,7 @@
     "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.",
     "stale_snapshot_policy": "Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current."
   },
-  "report_count": 5,
+  "report_count": 6,
   "rows": [
     {
       "archive_id": "20260614T015000Z-release-evidence-live-audit-dry-run",
@@ -116,13 +116,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json",
-        "sha256": "a602c108dae6ba9c3ba206be441fb01e87482732a5dc8453ba830709880eb7f1",
-        "size_bytes": 4652
+        "sha256": "9a08bf8d590cef17f96e21806f18f7eab62b3328ba08e9074741880d125a8c71",
+        "size_bytes": 3938
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.md",
-        "sha256": "886a6dcbfe437c5a8935133e12572a4a265f7aa21d84677c7a1d38b7a26b3dcc",
-        "size_bytes": 4037
+        "sha256": "27771f1af5989e3b783661c25077a20af631bcd256fa22d58aa649b4dd14a6d7",
+        "size_bytes": 3395
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json",
@@ -168,13 +168,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
-        "sha256": "e29065d73a6e4099f4ce647ca87724812537bb8d640ffe085b480525aef85bd8",
-        "size_bytes": 4652
+        "sha256": "1d1a4a9b78aaad3ba46605020756bfb89df3b10837b3592a1a1c39a8f7830b09",
+        "size_bytes": 3938
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md",
-        "sha256": "43ea52160080b9f23f11db29ea96aeb5d17472efa6259ba3e79565380d406426",
-        "size_bytes": 4037
+        "sha256": "b4092177bc0d841fd483d955d4602bd7aac6340ea4a5895ef4eadaf278f6da1b",
+        "size_bytes": 3395
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
@@ -220,17 +220,69 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json",
-        "sha256": "d41a3964022e37a515d8378332d573e1e0d4a97433ef7cc53d5e0faaa3ea544f",
-        "size_bytes": 4997
+        "sha256": "18c615a961dba9ce5da213a97777223eb78eccfaec40bb7e737d70319e03b8f0",
+        "size_bytes": 4187
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.md",
-        "sha256": "3cde41e0502cfb87a59c0e5b407e0eb6973bff4e83cadd4c94923239427b9f6c",
-        "size_bytes": 4370
+        "sha256": "b1d0b971d4d60fa7c65d035d556e65b9fef1c7d9f8b57f305472f676e3c80947",
+        "size_bytes": 3644
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json",
         "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.md",
+        "python scripts/generate_release_evidence_live_audit_archive.py --check"
+      ]
+    },
+    {
+      "archive_id": "20260618T200458Z-release-evidence-live-audit-report",
+      "record_type": "retained_operator_report",
+      "repo": "6529-Collections/6529Stream",
+      "generated_at": "20260618T200458Z",
+      "readiness_claim": "blocked",
+      "snapshot_freshness": {
+        "status": "live_export_at_generation",
+        "generated_from_live_export": true,
+        "currentness_claim": "current_at_generation_only"
+      },
+      "validation_status": "passed",
+      "profile_count": 3,
+      "profiles": [
+        {
+          "profile": "labels",
+          "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
+          "snapshot_sha256": "a6e179b1685013ea86bfe76d3ed9fb6239d6e417c932b80910434b3ec7848959",
+          "export_status": "passed",
+          "checker_status": "passed"
+        },
+        {
+          "profile": "bodies",
+          "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
+          "snapshot_sha256": "d1a15f9b65566b801cac41a8dad8082cfef93a1d8d41c858eed60390f4c6ff8e",
+          "export_status": "passed",
+          "checker_status": "passed"
+        },
+        {
+          "profile": "closure",
+          "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
+          "snapshot_sha256": "774696d4197aa99b741bdd486a96d1f0ff761f1f529a57b2bdb357a05bf39099",
+          "export_status": "passed",
+          "checker_status": "passed"
+        }
+      ],
+      "report_json": {
+        "path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json",
+        "sha256": "8f3f9ad59b3af0922f61f22339f6315948eb3304bdbef4f55d5c5957bbb4c5b8",
+        "size_bytes": 4187
+      },
+      "report_markdown": {
+        "path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.md",
+        "sha256": "b384a3addf9e3a4cf26cd1bdaac4212db37dcfb815162c441e5604ce0a3a9cc7",
+        "size_bytes": 3644
+      },
+      "validation_commands": [
+        "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json",
+        "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.md",
         "python scripts/generate_release_evidence_live_audit_archive.py --check"
       ]
     },
@@ -292,11 +344,13 @@
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.md",
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md",
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.md",
+    "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.md",
     "python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json --report-md release-artifacts/evidence/release-evidence-live-audit-report-template.md",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T015000Z-release-evidence-live-audit-dry-run.json",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json",
+    "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json",
     "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/release-evidence-live-audit-report-template.json",
     "python scripts/generate_release_evidence_live_audit_archive.py --check",
     "python scripts/test_release_evidence_live_audit_archive.py"

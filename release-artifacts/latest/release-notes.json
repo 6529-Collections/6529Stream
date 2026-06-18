@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:4ba6e2769a8f7fd5ddc00b7b37ea2fd013bf608ec3f9e5f051fc317f7a9e25d3",
-      "size_bytes": 67521
+      "sha256": "sha256:45f702cf31f03155a9ed11e44854634070e456ebfb38813c9926deba88243f71",
+      "size_bytes": 68051
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:157dbbc4cc0d18abee8c228725a261a513789558cbb230a9d8548e6f9808e730",
+      "sha256": "sha256:ca622f9fb14f5d87188c7dd407a846ea0fdbeb90071a3f818596b664f9032f08",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,8 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a retained exact-linked live release-evidence issue audit after the live deployment manifest checker merge, syncing issue #227 to the dedicated retained-artifact body, proving it remains open, and refreshing archive, release-manifest, and checksum coverage while keeping production release blocked on real reviewed live evidence.",
+      "Added portable command-provenance normalization and checker coverage for retained live-audit reports so release evidence does not embed operator-specific absolute Windows paths.",
       "Extended ABI compatibility checks and the committed baseline to cover published interface ABIs from `release-artifacts/contracts.json` in addition to production contracts, failing removed or changed interface entries while continuing to report additive entries as compatible.",
       "Documented ABI compatibility diagnostics so `subject` is the canonical production contract or published interface identifier while `contract` remains a deprecated compatibility alias for existing consumers.",
       "Added a no-network autonomous run-state consistency checker so stale active PR, issue, or branch markers in `ops/AUTONOMOUS_RUN.md` and `ops/EXECUTION_BACKLOG.md` fail local and CI gates.",

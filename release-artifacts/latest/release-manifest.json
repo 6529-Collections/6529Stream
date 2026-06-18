@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:b9bc30064f90a49ab11443304c20b795aa5c66dc63cdd1c55a7b00343bbb490a",
-        "size_bytes": 69763,
+        "sha256": "sha256:3fab233a591afcd295b23853a08ffdd463d7c195f08375f04aa41dfa61a41261",
+        "size_bytes": 70295,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:a6ce844e6e0c63b03aca9041d6db088ed66b72538f8117ae9ad48908144454d7",
-        "size_bytes": 66900
+        "sha256": "sha256:6408b8cce12e079f9f5a606dc315c44497faf0be01b0ee064d3b119d7ab947a4",
+        "size_bytes": 67418
       }
     },
     "release_candidate_lockfile": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:157dbbc4cc0d18abee8c228725a261a513789558cbb230a9d8548e6f9808e730",
+      "sha256": "sha256:ca622f9fb14f5d87188c7dd407a846ea0fdbeb90071a3f818596b664f9032f08",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -202,14 +202,14 @@
     "release_evidence_live_audit_report_archive": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-live-audit-report-archive.json",
-        "sha256": "sha256:3e04ea9e7d0999720ca9165a978c105f7ba56c24a87cdeac619f08917ba63eae",
-        "size_bytes": 18016,
+        "sha256": "sha256:8b5751a863c75f97ebf3f7fc17576b5e9918b2034427725d4c4fd7bf95f402c0",
+        "size_bytes": 21371,
         "schema_version": "6529stream.release-evidence-live-audit-report-archive.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-live-audit-report-archive.md",
-        "sha256": "sha256:16bf776fb4336cb8abc239924651eb9be20cbd26ae9833994a92c2daad1ba887",
-        "size_bytes": 8528
+        "sha256": "sha256:cd7e660dbc34c214641b2feb64d0b1fa53eccfa1737b5c59c3238d7c0a82b81b",
+        "size_bytes": 9979
       }
     },
     "release_evidence_issue_backlog": {
@@ -2233,8 +2233,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:4ba6e2769a8f7fd5ddc00b7b37ea2fd013bf608ec3f9e5f051fc317f7a9e25d3",
-      "size_bytes": 67521
+      "sha256": "sha256:45f702cf31f03155a9ed11e44854634070e456ebfb38813c9926deba88243f71",
+      "size_bytes": 68051
     },
     "governance_docs": [
       {
