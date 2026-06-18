@@ -116,13 +116,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json",
-        "sha256": "a602c108dae6ba9c3ba206be441fb01e87482732a5dc8453ba830709880eb7f1",
-        "size_bytes": 4652
+        "sha256": "9a08bf8d590cef17f96e21806f18f7eab62b3328ba08e9074741880d125a8c71",
+        "size_bytes": 3938
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.md",
-        "sha256": "886a6dcbfe437c5a8935133e12572a4a265f7aa21d84677c7a1d38b7a26b3dcc",
-        "size_bytes": 4037
+        "sha256": "27771f1af5989e3b783661c25077a20af631bcd256fa22d58aa649b4dd14a6d7",
+        "size_bytes": 3395
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T121009Z-release-evidence-live-audit-report.json",
@@ -168,13 +168,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
-        "sha256": "e29065d73a6e4099f4ce647ca87724812537bb8d640ffe085b480525aef85bd8",
-        "size_bytes": 4652
+        "sha256": "1d1a4a9b78aaad3ba46605020756bfb89df3b10837b3592a1a1c39a8f7830b09",
+        "size_bytes": 3938
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.md",
-        "sha256": "43ea52160080b9f23f11db29ea96aeb5d17472efa6259ba3e79565380d406426",
-        "size_bytes": 4037
+        "sha256": "b4092177bc0d841fd483d955d4602bd7aac6340ea4a5895ef4eadaf278f6da1b",
+        "size_bytes": 3395
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report.json",
@@ -220,13 +220,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json",
-        "sha256": "d41a3964022e37a515d8378332d573e1e0d4a97433ef7cc53d5e0faaa3ea544f",
-        "size_bytes": 4997
+        "sha256": "18c615a961dba9ce5da213a97777223eb78eccfaec40bb7e737d70319e03b8f0",
+        "size_bytes": 4187
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.md",
-        "sha256": "3cde41e0502cfb87a59c0e5b407e0eb6973bff4e83cadd4c94923239427b9f6c",
-        "size_bytes": 4370
+        "sha256": "b1d0b971d4d60fa7c65d035d556e65b9fef1c7d9f8b57f305472f676e3c80947",
+        "size_bytes": 3644
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260618T154148Z-release-evidence-live-audit-report.json",
@@ -272,13 +272,13 @@
       ],
       "report_json": {
         "path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json",
-        "sha256": "454bcf85828ab048269544aa20a0e0303b74d3a414993a7482202e32d234afe1",
-        "size_bytes": 4997
+        "sha256": "8f3f9ad59b3af0922f61f22339f6315948eb3304bdbef4f55d5c5957bbb4c5b8",
+        "size_bytes": 4187
       },
       "report_markdown": {
         "path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.md",
-        "sha256": "3e1ccb3a3d34b7f7030dce02ef1b1922f94923fa7c203c0ac703aa4247d917fa",
-        "size_bytes": 4370
+        "sha256": "b384a3addf9e3a4cf26cd1bdaac4212db37dcfb815162c441e5604ce0a3a9cc7",
+        "size_bytes": 3644
       },
       "validation_commands": [
         "python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report.json",

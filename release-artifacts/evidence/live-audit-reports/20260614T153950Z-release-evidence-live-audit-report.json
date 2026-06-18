@@ -21,8 +21,8 @@
       "profile": "labels",
       "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
       "snapshot_sha256": "f54c0a6e641646b3446a4a68157eea4d9afcb4409937a4e476b91282dab0a0bb",
-      "export_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream-pr-ci-hardening\\scripts\\export_release_evidence_issue_snapshot.py' --profile labels --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json --gh gh",
-      "checker_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream-pr-ci-hardening\\scripts\\check_release_evidence_issue_labels.py' --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
+      "export_command": "python scripts/export_release_evidence_issue_snapshot.py --profile labels --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json --gh gh",
+      "checker_command": "python scripts/check_release_evidence_issue_labels.py --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
       "export_status": "passed",
       "checker_status": "passed"
     },
@@ -30,8 +30,8 @@
       "profile": "bodies",
       "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
       "snapshot_sha256": "86a27ca5c51e22656f313c5e579c7ddcd71d2eecafbdb907c1cda3d31c4ffdb5",
-      "export_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream-pr-ci-hardening\\scripts\\export_release_evidence_issue_snapshot.py' --profile bodies --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json --gh gh",
-      "checker_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream-pr-ci-hardening\\scripts\\check_release_evidence_issue_bodies.py' --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
+      "export_command": "python scripts/export_release_evidence_issue_snapshot.py --profile bodies --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json --gh gh",
+      "checker_command": "python scripts/check_release_evidence_issue_bodies.py --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
       "export_status": "passed",
       "checker_status": "passed"
     },
@@ -39,8 +39,8 @@
       "profile": "closure",
       "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
       "snapshot_sha256": "1fe388d46175b648d88bc3eaeaae06c9b42335f9b02f01d2c1352db3d3cee6ac",
-      "export_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream-pr-ci-hardening\\scripts\\export_release_evidence_issue_snapshot.py' --profile closure --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json --gh gh",
-      "checker_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream-pr-ci-hardening\\scripts\\check_release_evidence_issue_closure.py' --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
+      "export_command": "python scripts/export_release_evidence_issue_snapshot.py --profile closure --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json --gh gh",
+      "checker_command": "python scripts/check_release_evidence_issue_closure.py --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
       "export_status": "passed",
       "checker_status": "passed"
     }

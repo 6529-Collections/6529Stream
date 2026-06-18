@@ -69,6 +69,7 @@ SAFE_SECRET_KEYS = frozenset(
 )
 
 SHA256_HEX_RE = re.compile(r"^[0-9a-f]{64}$")
+LOCAL_ABSOLUTE_COMMAND_PATH_RE = re.compile(r"(?:^|[\s'\"`])(?:[A-Za-z]:[\\/]|\\\\)")
 SECRET_KEY_RE = re.compile(
     r"(^|[_\-\s])("
     r"private[_\-\s]?key|mnemonic|seed[_\-\s]?phrase|rpc[_\-\s]?url|"
@@ -358,6 +359,14 @@ def require_any_command_fragment_set(
     raise ReleaseEvidenceLiveAuditReportError(f"{path} must include {required}")
 
 
+def reject_local_absolute_command_paths(command: str, path: str) -> None:
+    """Reject operator-specific absolute paths in retained command provenance."""
+    if LOCAL_ABSOLUTE_COMMAND_PATH_RE.search(command):
+        raise ReleaseEvidenceLiveAuditReportError(
+            f"{path} must use portable repo-relative command provenance"
+        )
+
+
 def validate_profile_result(
     raw_profile: Any,
     index: int,
@@ -392,6 +401,8 @@ def validate_profile_result(
     checker_command = require_string(
         profile.get("checker_command"), f"{path}.checker_command"
     )
+    reject_local_absolute_command_paths(export_command, f"{path}.export_command")
+    reject_local_absolute_command_paths(checker_command, f"{path}.checker_command")
     require_any_command_fragment_set(
         export_command,
         expected_export_fragment_sets(profile_name, snapshot_path),

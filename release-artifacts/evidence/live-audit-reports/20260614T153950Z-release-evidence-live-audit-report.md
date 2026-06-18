@@ -22,20 +22,20 @@
 ### labels
 
 ```bash
-'C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe' 'D:\repos\6529Stream-pr-ci-hardening\scripts\export_release_evidence_issue_snapshot.py' --profile labels --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json --gh gh
-'C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe' 'D:\repos\6529Stream-pr-ci-hardening\scripts\check_release_evidence_issue_labels.py' --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json
+python scripts/export_release_evidence_issue_snapshot.py --profile labels --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json --gh gh
+python scripts/check_release_evidence_issue_labels.py --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json
 ```
 
 ### bodies
 
 ```bash
-'C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe' 'D:\repos\6529Stream-pr-ci-hardening\scripts\export_release_evidence_issue_snapshot.py' --profile bodies --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json --gh gh
-'C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe' 'D:\repos\6529Stream-pr-ci-hardening\scripts\check_release_evidence_issue_bodies.py' --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json
+python scripts/export_release_evidence_issue_snapshot.py --profile bodies --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json --gh gh
+python scripts/check_release_evidence_issue_bodies.py --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json
 ```
 
 ### closure
 
 ```bash
-'C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe' 'D:\repos\6529Stream-pr-ci-hardening\scripts\export_release_evidence_issue_snapshot.py' --profile closure --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json --gh gh
-'C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe' 'D:\repos\6529Stream-pr-ci-hardening\scripts\check_release_evidence_issue_closure.py' --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json
+python scripts/export_release_evidence_issue_snapshot.py --profile closure --repo 6529-Collections/6529Stream --limit 100 --output release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json --gh gh
+python scripts/check_release_evidence_issue_closure.py --live-json release-artifacts/evidence/live-audit-reports/20260614T153950Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json
 ```
