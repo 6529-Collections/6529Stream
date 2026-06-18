@@ -78,6 +78,8 @@ python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
 python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
+python scripts/test_production_release_signing_evidence.py
+python scripts/check_production_release_signing_evidence.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
@@ -305,6 +307,22 @@ outputs, and release-signature evidence into one deterministic review artifact.
 The committed local baseline explicitly keeps the final commit/tag/signature
 lock in `not_locked_until_signed_release_tag` status until a real release
 ceremony supplies production signatures and a signed tag.
+
+The production release-signing evidence step validates the dedicated no-secret
+retained artifact template at
+`release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`:
+
+```sh
+python scripts/test_production_release_signing_evidence.py
+python scripts/check_production_release_signing_evidence.py
+```
+
+It prepares future reviewed `production_signatures` and `signed_git_tag`
+evidence by checking retained file paths, optional declared `sha256:` hashes,
+signer fingerprint/custody/rotation fields, release-signature JSON alignment,
+signed-tag checker handoff, and no-secret redaction. It does not create
+production signatures, trust a local keyring, or close issues #223 and #224
+without real reviewed release ceremony evidence.
 
 The ceremony-evidence step validates retained no-secret deployment evidence
 bundles under `deployments/ceremony-evidence/`. The committed Anvil bundle ties
@@ -924,6 +942,8 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/test_production_release_signing_evidence.py
+python scripts/check_production_release_signing_evidence.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py
@@ -983,6 +1003,8 @@ python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/test_production_release_signing_evidence.py
+python scripts/check_production_release_signing_evidence.py
 python scripts/test_non_local_release_evidence_generator.py
 python scripts/test_non_local_release_evidence.py
 python scripts/check_non_local_release_evidence.py

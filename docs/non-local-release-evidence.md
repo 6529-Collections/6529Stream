@@ -645,6 +645,39 @@ Retain:
 Map detached signatures to `production_signatures` and signed tag evidence to
 `signed_git_tag`.
 
+Production release-signing evidence has a dedicated retained-artifact template
+at
+`release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`.
+Before generating non-local evidence envelopes for `production_signatures` or
+`signed_git_tag`, run:
+
+```sh
+python scripts/test_production_release_signing_evidence.py
+python scripts/check_production_release_signing_evidence.py
+python scripts/test_release_signatures.py
+python scripts/check_release_signatures.py
+python scripts/test_signed_release_tag.py
+python scripts/check_signed_release_tag.py
+```
+
+The production release-signing checker validates retained no-secret signing
+proof only. It does not create production signatures, trust a local GPG
+keyring, or mark issues #223 or #224 complete by itself. Future pending-review
+or reviewed retained signing references must be repo-relative UTF-8 files and
+may include one optional `sha256:<64 lowercase hex>` digest; missing files,
+absolute paths, path escapes, Windows backslashes, whitespace-ambiguous paths,
+symlinked retained files, non-UTF-8 content, duplicate or malformed digests,
+stale hashes, credentialed/provider URLs, bearer tokens or placeholders, CLI
+secret flags, bare 64-hex values, and secret-shaped retained content fail
+closed, except that the checksum bundle file itself may contain
+`sha256sum`-style bare digest lines because it is the exact file being signed.
+The referenced release-signature evidence JSON must also pass
+`scripts/check_release_signatures.py`, use a production or mainnet environment,
+and agree with the release version and commit recorded in the retained signing
+artifact. Strict signed-tag trust remains the responsibility of
+`scripts/check_signed_release_tag.py --mode release` during the actual release
+ceremony.
+
 ## No-Secret Checklist
 
 Before committing any non-local evidence, confirm that the retained files do

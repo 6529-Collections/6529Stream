@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked production release-signing retained-artifact template and
+  offline checker for future `production_signatures` and `signed_git_tag`
+  evidence, covering checksum bundle references, detached signature evidence,
+  signed-tag verification, signer fingerprint/custody/rotation notes, retained
+  file path and optional declared `sha256:` validation, no-secret redaction,
+  local/CI/Windows gate wiring, release-packet mapping, and checksum coverage
+  while keeping issues #223 and #224 open until real reviewed release ceremony
+  evidence is retained.
 - Added stronger production verified-addresses retained-artifact validation so
   future pending or reviewed production address-book and live explorer
   verification evidence must reference existing repo-relative retained UTF-8

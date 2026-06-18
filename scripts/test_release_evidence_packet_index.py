@@ -232,6 +232,10 @@ def seed_all_templates(root: Path) -> None:
         root / generator.PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
         "Production verified-addresses retained artifact template.\n",
     )
+    write_text(
+        root / generator.PRODUCTION_RELEASE_SIGNING_RETAINED_ARTIFACT_TEMPLATE,
+        "Production release-signing retained artifact template.\n",
+    )
     seed_templates(
         root,
         non_local_checker.PRODUCTION_RELEASE_TEMPLATE_DIR,
@@ -823,6 +827,67 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
                 )
                 self.assertIn(
                     "python scripts/check_production_verified_addresses.py",
+                    row["validation_commands"],
+                )
+
+    def test_production_release_signing_rows_use_canonical_retained_artifact(self) -> None:
+        """Production signing rows point at the dedicated release-signing template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            rows = {
+                row["requirement_id"]: row
+                for row in packet["rows"]
+                if row["requirement_id"]
+                in {
+                    generator.PRODUCTION_SIGNATURES_REQUIREMENT_ID,
+                    generator.SIGNED_GIT_TAG_REQUIREMENT_ID,
+                }
+            }
+
+            self.assertEqual(
+                set(rows),
+                {
+                    generator.PRODUCTION_SIGNATURES_REQUIREMENT_ID,
+                    generator.SIGNED_GIT_TAG_REQUIREMENT_ID,
+                },
+            )
+            for row in rows.values():
+                self.assertEqual(
+                    row["retained_artifact_expectation"]["path"],
+                    generator.PRODUCTION_RELEASE_SIGNING_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+                )
+                self.assertEqual(
+                    row["retained_artifact_expectation"]["sha256"],
+                    checker.file_sha256(
+                        root
+                        / generator.PRODUCTION_RELEASE_SIGNING_RETAINED_ARTIFACT_TEMPLATE
+                    ),
+                )
+                self.assertIn(
+                    "python scripts/test_production_release_signing_evidence.py",
+                    row["validation_commands"],
+                )
+                self.assertIn(
+                    "python scripts/check_production_release_signing_evidence.py",
+                    row["validation_commands"],
+                )
+                self.assertIn(
+                    "python scripts/check_release_signatures.py",
+                    row["validation_commands"],
+                )
+                self.assertIn(
+                    "python scripts/check_signed_release_tag.py",
                     row["validation_commands"],
                 )
 

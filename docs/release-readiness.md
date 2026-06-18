@@ -25,6 +25,10 @@ EIP-712 / ERC-1271 evidence they cover.
 Use [`docs/signer-custody-readiness.md`](signer-custody-readiness.md) for the
 no-secret production signer custody readiness evidence model that must
 accompany reviewed non-local signing evidence.
+Use [`docs/release-signatures.md`](release-signatures.md) for release signature
+evidence, signed release tag gate boundaries, and the production
+release-signing checker and retained artifact that future reviewed
+`production_signatures` and `signed_git_tag` evidence must satisfy.
 Use [`docs/provenance-manifests.md`](provenance-manifests.md) for the checked
 1/1 provenance manifest model, generated provenance artifact catalog, and
 frontend/indexer display boundaries for artist/story/authenticity context.
@@ -185,7 +189,7 @@ readiness, so a production run validates both phases.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet ceremony/randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
+| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, production release-signing checker and retained artifact, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
 | Static analysis and tests | Slither baseline, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Testnet/live invariant and gas evidence missing, and NatSpec baseline remains a burn-down queue | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -310,6 +314,15 @@ The current local baseline includes:
   runs in local and CI gates without claiming release status, while strict
   release mode requires a matching signed tag, current checksum bundle, and
   post-bundle release-signature evidence outside the `SHA256SUMS` coverage set;
+- production release-signing retained artifact coverage through
+  [`release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`](../release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md),
+  [`scripts/test_production_release_signing_evidence.py`](../scripts/test_production_release_signing_evidence.py),
+  and
+  [`scripts/check_production_release_signing_evidence.py`](../scripts/check_production_release_signing_evidence.py),
+  which validates future retained `production_signatures` and `signed_git_tag`
+  references, optional declared `sha256:` hashes, no-secret redaction, release
+  signature evidence JSON alignment, and signed-tag checker handoff without
+  claiming issues #223 or #224 are complete;
 - no-secret admin ceremony evidence schema, template, retained-artifact
   checklist, and checker under
   [`deployments/schema/admin-ceremony-evidence.schema.json`](../deployments/schema/admin-ceremony-evidence.schema.json),
@@ -648,6 +661,8 @@ python scripts/test_production_verified_addresses.py
 python scripts/check_production_verified_addresses.py
 python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
+python scripts/test_production_release_signing_evidence.py
+python scripts/check_production_release_signing_evidence.py
 python scripts/test_incident_response.py
 python scripts/check_incident_response.py
 python scripts/test_stuck_auction_drill_evidence.py
