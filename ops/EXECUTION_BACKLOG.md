@@ -3406,7 +3406,7 @@ unless an external dependency changes.
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | Merged in PR #447; issue #446 closed completed |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
 | `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Merged in PR #525; issue #524 closed completed |
-| `ADV-014` | Add bounded randomizer/admin stateful invariant tests | D/F | Active issue #571 on branch `codex/randomizer-admin-stateful-invariants`; add local stateful randomizer/admin invariant coverage for composed request, fulfillment, stale, retry, pause, provider/epoch, and reserve-accounting sequences without claiming live provider readiness |
+| `ADV-014` | Add bounded randomizer/admin stateful invariant tests | D/F | Active PR #572 / issue #571 on branch `codex/randomizer-admin-stateful-invariants`; adds local stateful randomizer/admin invariant coverage for composed request, fulfillment, stale, retry, pause, provider/epoch, and reserve-accounting sequences without claiming live provider readiness |
 
 ### Contract/API Hardening
 
