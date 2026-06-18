@@ -409,7 +409,11 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_repo(root)
             requirement_id = generator.PUBLIC_BETA_CEREMONY_REQUIREMENT_ID
-            retained_path = generator.PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE
+            retained_path = Path(
+                "release-artifacts/evidence/fork-ceremony/"
+                "fork-ceremony-reviewed-retained-artifact.md"
+            )
+            write_text(root / retained_path, "reviewed ceremony retained artifact\n")
             evidence_path = Path("release-artifacts/evidence/fork-ceremony/evidence.json")
             write_json(
                 root / evidence_path,
@@ -457,6 +461,14 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             self.assertEqual(row["review_source"], retained_path.as_posix())
             self.assertIn("evidence owner=Fork evidence owner", row["owner_reviewer_posture"])
             self.assertNotIn("reviewer=TBD", row["owner_reviewer_posture"])
+            self.assertEqual(
+                row["retained_artifact_expectation"]["path"],
+                retained_path.as_posix(),
+            )
+            self.assertEqual(
+                row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(root / retained_path),
+            )
             self.assertEqual(
                 row["retained_artifact_expectation"]["operator_notes"],
                 "Reviewed evidence operator notes.",

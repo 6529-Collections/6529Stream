@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added reviewed fork/testnet marketplace and indexer evidence for
+  `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental
+  reviewed artifact, equivalent collector/indexer tooling transcript,
+  non-local evidence envelope, and release artifact updates under the shared
+  public-beta evidence manifest while keeping public beta blocked on the
+  remaining missing evidence rows.
 - Added reviewed fork metadata browser evidence for
   `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser
   summary, generated `tokenURI`, redacted execution transcript, non-local
