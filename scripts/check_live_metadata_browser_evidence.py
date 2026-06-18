@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -14,11 +15,13 @@ from typing import Any
 REQUIREMENT_ID = "live_metadata_browser_evidence"
 EVIDENCE_TYPE = "live_metadata_browser_evidence"
 SUMMARY_SCHEMA = "6529stream.live-metadata-browser-evidence.v1"
+DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_EVIDENCE_RELATIVE = Path(
+    "release-artifacts/evidence/live-metadata-browser/"
+    "live-metadata-browser-retained-artifact-template.md"
+)
 DEFAULT_EVIDENCE = [
-    Path(
-        "release-artifacts/evidence/live-metadata-browser/"
-        "live-metadata-browser-retained-artifact-template.md"
-    )
+    DEFAULT_REPO_ROOT / DEFAULT_EVIDENCE_RELATIVE
 ]
 
 REQUIRED_HEADINGS = [
@@ -119,7 +122,8 @@ REQUIRED_TEMPLATE_ARGUMENT = (
 FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
-SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+SHA256_VALUE_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+SHA256_REF_RE = re.compile(r"sha256:[0-9a-f]{64}")
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
@@ -134,10 +138,18 @@ CLI_SECRET_RE = re.compile(
     r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
     r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+|"
     r"https?://[^\s`]*(?:alchemy|infura|quicknode)[^\s`]*|"
     r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
     r")",
     re.IGNORECASE,
+)
+# Retained artifact digests must use sha256:<64 lowercase hex>, and Ethereum
+# block/transaction hashes must keep their 0x prefix. Bare 64-hex strings are
+# treated as secret-shaped key material so future live evidence fails closed
+# instead of retaining private keys or unlabelled digests.
+BARE_HEX_KEY_RE = re.compile(
+    r"(?<![0-9a-fA-FxX:])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
 )
 
 
@@ -174,6 +186,18 @@ def load_json(path: Path) -> Any:
         raise LiveMetadataBrowserEvidenceError(f"invalid JSON in {path}: {exc}") from exc
 
 
+def file_sha256(path: Path) -> str:
+    """Return a sha256: digest for one file."""
+    hasher = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                hasher.update(chunk)
+    except FileNotFoundError as exc:
+        raise LiveMetadataBrowserEvidenceError(f"missing required file: {path}") from exc
+    return "sha256:" + hasher.hexdigest()
+
+
 def require_dict(value: Any, context: str) -> dict[str, Any]:
     """Require a JSON value to be an object."""
     if not isinstance(value, dict):
@@ -203,7 +227,7 @@ def require_array(value: Any, context: str) -> list[Any]:
 
 
 def validate_no_secret_values(path: Path, text: str) -> None:
-    """Reject secret-shaped key/value, CLI, and provider URL material."""
+    """Reject secret-shaped key/value, CLI, URL, token, and bare-key material."""
     match = SECRET_VALUE_RE.search(text)
     if match:
         raise LiveMetadataBrowserEvidenceError(
@@ -214,53 +238,114 @@ def validate_no_secret_values(path: Path, text: str) -> None:
         raise LiveMetadataBrowserEvidenceError(
             f"{path} contains secret-like CLI or URL text: {match.group(0)}"
         )
-
-
-def repo_root_for(path: Path) -> Path:
-    """Return the root used for repo-relative retained artifact paths."""
-    cwd = Path.cwd().resolve()
-    resolved = path.resolve()
-    try:
-        resolved.relative_to(cwd)
-    except ValueError:
-        return resolved.parent
-    return cwd
-
-
-def resolve_repo_relative_path(root: Path, value: str) -> Path:
-    """Resolve a retained artifact path while rejecting escapes."""
-    candidate = Path(value)
-    if candidate.is_absolute() or ".." in candidate.parts:
+    match = BARE_HEX_KEY_RE.search(text)
+    if match:
         raise LiveMetadataBrowserEvidenceError(
-            f"retained artifact path must be repo-relative: {value}"
+            f"{path} contains bare 64-hex secret-like text: {match.group(0)}"
         )
-    resolved = (root / candidate).resolve()
+
+
+def split_retained_file_reference(value: str) -> tuple[str, str | None]:
+    """Split a retained file reference into path text and optional digest."""
+    cleaned = value.strip().replace("`", "")
+    matches = list(SHA256_REF_RE.finditer(cleaned))
+    if len(matches) > 1:
+        raise LiveMetadataBrowserEvidenceError(
+            f"retained artifact reference has multiple sha256 digests: {value}"
+        )
+    if not matches and re.search(r"sha256:", cleaned, re.IGNORECASE):
+        raise LiveMetadataBrowserEvidenceError(
+            f"retained artifact reference has malformed sha256 digest: {value}"
+        )
+    match = matches[0] if matches else None
+    digest = match.group(0) if match else None
+    if match:
+        path_with_separator = cleaned[: match.start()]
+        if path_with_separator.endswith(" / "):
+            path_text = path_with_separator[:-3].strip()
+        elif path_with_separator.endswith(" "):
+            path_text = path_with_separator.rstrip()
+        else:
+            raise LiveMetadataBrowserEvidenceError(
+                "retained artifact reference must separate path and sha256 digest "
+                f"with whitespace or ' / ': {value}"
+            )
+        suffix = cleaned[match.end() :].strip()
+        if suffix:
+            raise LiveMetadataBrowserEvidenceError(
+                f"retained artifact reference has trailing text after sha256 digest: {value}"
+            )
+    else:
+        path_text = cleaned.strip()
+    if not path_text:
+        raise LiveMetadataBrowserEvidenceError(
+            f"retained artifact reference is missing a path: {value}"
+        )
+    return path_text, digest
+
+
+def resolve_retained_path(
+    artifact_path: Path, repo_root: Path, label: str, value: str
+) -> tuple[Path, str, str | None]:
+    """Resolve and constrain a retained artifact path."""
+    path_text, expected_digest = split_retained_file_reference(value)
+    if re.search(r"\s", path_text):
+        raise LiveMetadataBrowserEvidenceError(
+            f"{artifact_path} field {label!r} must be one repo-relative path"
+        )
+    retained_path = Path(path_text)
+    if retained_path.is_absolute() or retained_path.drive or retained_path.root:
+        raise LiveMetadataBrowserEvidenceError(
+            f"{artifact_path} field {label!r} must be repo-relative"
+        )
+    if "\\" in path_text or ".." in retained_path.parts:
+        raise LiveMetadataBrowserEvidenceError(
+            f"{artifact_path} field {label!r} must not escape the repository"
+        )
+    resolved = (repo_root / retained_path).resolve()
     try:
-        resolved.relative_to(root.resolve())
+        resolved.relative_to(repo_root)
     except ValueError as exc:
         raise LiveMetadataBrowserEvidenceError(
-            f"retained artifact path escapes repository: {value}"
+            f"{artifact_path} field {label!r} must stay inside the repository"
         ) from exc
-    return resolved
+    return resolved, path_text, expected_digest
 
 
-def referenced_artifact_paths(path: Path, fields: dict[str, str]) -> dict[str, Path]:
+def referenced_artifact_paths(
+    path: Path, fields: dict[str, str], repo_root: Path
+) -> dict[str, Path]:
     """Return resolved referenced retained artifact paths."""
-    root = repo_root_for(path)
     return {
-        label: resolve_repo_relative_path(root, fields[label])
+        label: resolve_retained_path(path, repo_root, label, fields[label])[0]
         for label in RETAINED_FILE_FIELDS
     }
 
 
-def validate_referenced_artifacts(path: Path, fields: dict[str, str]) -> None:
+def validate_referenced_artifacts(
+    path: Path, fields: dict[str, str], repo_root: Path
+) -> None:
     """Require reviewed retained artifact paths to exist and be no-secret."""
-    for label, target in referenced_artifact_paths(path, fields).items():
+    for label in RETAINED_FILE_FIELDS:
+        if is_placeholder(fields[label]):
+            raise LiveMetadataBrowserEvidenceError(
+                f"{path} field {label!r} must be replaced before non-template review"
+            )
+        target, path_text, expected_digest = resolve_retained_path(
+            path, repo_root, label, fields[label]
+        )
         if not target.is_file():
             raise LiveMetadataBrowserEvidenceError(
-                f"{path} field {label!r} points to missing retained file: {fields[label]}"
+                f"{path} field {label!r} points to missing retained file: {path_text}"
             )
         validate_no_secret_values(target, read_text(target))
+        if expected_digest is not None:
+            actual_digest = file_sha256(target)
+            if actual_digest != expected_digest:
+                raise LiveMetadataBrowserEvidenceError(
+                    f"{path} field {label!r} sha256 mismatch for {path_text}: "
+                    f"expected {expected_digest}, got {actual_digest}"
+                )
 
 
 def validate_headings(path: Path, text: str) -> None:
@@ -364,7 +449,7 @@ def validate_token_result(path: Path, index: int, value: Any) -> None:
         row.get("token_uri_sha256"),
         f"{path}.token_results[{index}].token_uri_sha256",
     )
-    if not SHA256_RE.fullmatch(digest):
+    if not SHA256_VALUE_RE.fullmatch(digest):
         raise LiveMetadataBrowserEvidenceError(
             f"{path}.token_results[{index}].token_uri_sha256 must be sha256:<hex>"
         )
@@ -429,13 +514,17 @@ def validate_browser_summary(path: Path) -> None:
         validate_token_result(path, index, value)
 
 
-def validate_payloads(path: Path, fields: dict[str, str]) -> None:
+def validate_payloads(path: Path, fields: dict[str, str], repo_root: Path) -> None:
     """Validate retained payload files for reviewed/pending evidence."""
-    validate_referenced_artifacts(path, fields)
-    validate_browser_summary(referenced_artifact_paths(path, fields)["Browser summary JSON"])
+    validate_referenced_artifacts(path, fields, repo_root)
+    validate_browser_summary(
+        referenced_artifact_paths(path, fields, repo_root)["Browser summary JSON"]
+    )
 
 
-def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None:
+def validate_review_state(
+    path: Path, text: str, fields: dict[str, str], repo_root: Path
+) -> None:
     """Validate template, pending-review, and reviewed state semantics."""
     review_status = fields["Review status"]
     if review_status not in REVIEW_STATUSES:
@@ -480,9 +569,7 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
         require_field_value(path, fields, "Review decision", "reviewed")
         for label in REVIEWED_YES_FIELDS:
             require_field_value(path, fields, label, "yes")
-        validate_payloads(path, fields)
-    elif review_status == "pending_review":
-        validate_payloads(path, fields)
+    validate_payloads(path, fields, repo_root)
 
 
 def validate_commands(path: Path, text: str) -> None:
@@ -498,8 +585,9 @@ def validate_commands(path: Path, text: str) -> None:
         )
 
 
-def validate_artifact(path: Path) -> None:
+def validate_artifact(path: Path, repo_root: Path | None = None) -> None:
     """Validate one retained live metadata browser artifact."""
+    repo_root = (repo_root or DEFAULT_REPO_ROOT).resolve()
     text = read_text(path)
     validate_no_secret_values(path, text)
     validate_headings(path, text)
@@ -510,7 +598,7 @@ def validate_artifact(path: Path) -> None:
     require_field_value(path, fields, "Readiness claim", "blocked")
     require_field_value(path, fields, "Environment", "live")
     require_field_value(path, fields, "Chain ID", "1")
-    validate_review_state(path, text, fields)
+    validate_review_state(path, text, fields, repo_root)
     validate_commands(path, text)
 
 
@@ -525,16 +613,23 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="append",
         help="Evidence Markdown path to validate; may be repeated.",
     )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=DEFAULT_REPO_ROOT,
+        help="Repository root used for default evidence and retained paths.",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run the checker."""
     args = parse_args(sys.argv[1:] if argv is None else argv)
-    paths = args.evidence or DEFAULT_EVIDENCE
+    repo_root = args.repo_root.resolve()
+    paths = args.evidence or [repo_root / DEFAULT_EVIDENCE_RELATIVE]
     try:
         for path in paths:
-            validate_artifact(path)
+            validate_artifact(path, repo_root=repo_root)
     except LiveMetadataBrowserEvidenceError as exc:
         print(f"live metadata browser evidence check failed: {exc}", file=sys.stderr)
         return 1

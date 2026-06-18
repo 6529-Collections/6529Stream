@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -257,6 +258,16 @@ def seed_reviewed_retained_files(
     write_text(root / BROWSER_TRANSCRIPT_PATH, transcript)
 
 
+def artifact_with_field(text: str, label: str, value: str) -> str:
+    """Replace one Markdown bullet field value."""
+    return re.sub(
+        rf"^- {re.escape(label)}: .*$",
+        lambda _match: f"- {label}: `{value}`",
+        text,
+        flags=re.MULTILINE,
+    )
+
+
 class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
     """Checker behavior for live metadata browser evidence."""
 
@@ -267,27 +278,52 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
 
+    def test_template_state_does_not_resolve_retained_files(self) -> None:
+        """Template artifacts can keep non-existent retained-file placeholders."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "template-missing-retained-files.md"
+            text = valid_template()
+            text = artifact_with_field(
+                text, "Browser summary JSON", "missing/live/browser-summary.json"
+            )
+            text = artifact_with_field(
+                text,
+                "Generated tokenURI or digest",
+                "missing/live/token-output.json",
+            )
+            text = artifact_with_field(
+                text,
+                "Browser transcript or screenshot",
+                "missing/live/transcript.md",
+            )
+            write_text(path, text)
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
     def test_reviewed_artifact_passes(self) -> None:
         """A filled reviewed artifact can pass before manifest linkage."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed.md"
-            seed_reviewed_retained_files(Path(temp_dir))
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed.md"
+            seed_reviewed_retained_files(repo_root)
             write_text(path, reviewed_artifact())
 
-            checker.validate_artifact(path)
+            checker.validate_artifact(path, repo_root=repo_root)
 
     def test_pending_review_validates_payloads(self) -> None:
         """Pending-review evidence validates retained payload shape early."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "pending-review.md"
-            seed_reviewed_retained_files(Path(temp_dir), page_errors=["boom"])
+            repo_root = Path(temp_dir)
+            path = repo_root / "pending-review.md"
+            seed_reviewed_retained_files(repo_root, page_errors=["boom"])
             write_text(path, pending_review_artifact())
 
             with self.assertRaisesRegex(
                 checker.LiveMetadataBrowserEvidenceError,
                 "page_errors must be empty",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=repo_root)
 
     def test_wrong_requirement_fails(self) -> None:
         """The artifact must map only to the live metadata-browser row."""
@@ -323,7 +359,8 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
     def test_reviewed_placeholders_fail(self) -> None:
         """Reviewed artifacts cannot retain template placeholders."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed-placeholder.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-placeholder.md"
             write_text(
                 path,
                 reviewed_artifact().replace("`mainnet block 12345678`", "`TBD`"),
@@ -333,12 +370,13 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "Production block or reference",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=repo_root)
 
     def test_reviewed_template_notice_fails(self) -> None:
         """Reviewed artifacts must remove the template-only notice."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed-template-notice.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-template-notice.md"
             write_text(
                 path,
                 reviewed_artifact().replace(
@@ -352,7 +390,7 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "non-template evidence",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=repo_root)
 
     def test_template_without_notice_fails(self) -> None:
         """Template-state artifacts must keep the template-only notice."""
@@ -375,14 +413,241 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
     def test_missing_retained_file_fails(self) -> None:
         """Reviewed retained artifact references must point to files."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed-missing-retained-file.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-missing-retained-file.md"
             write_text(path, reviewed_artifact())
 
             with self.assertRaisesRegex(
                 checker.LiveMetadataBrowserEvidenceError,
                 "missing retained file",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_artifact_with_declared_hashes_passes(self) -> None:
+        """Declared retained hashes are accepted when they match disk."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            summary_hash = checker.file_sha256(repo_root / BROWSER_SUMMARY_PATH)
+            path = repo_root / "reviewed-hashes.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    f"{BROWSER_SUMMARY_PATH} / {summary_hash}",
+                ),
+            )
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_placeholder_fails_clearly(self) -> None:
+        """Retained artifact placeholders fail before path resolution."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "placeholder-retained.md"
+            write_text(
+                path,
+                artifact_with_field(reviewed_artifact(), "Browser summary JSON", "TBD"),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "must be replaced before non-template review",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_parent_path_escape_fails(self) -> None:
+        """Retained artifact paths cannot escape through parent segments."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "escape-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    "../browser-summary.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "escape",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_absolute_path_fails(self) -> None:
+        """Retained artifact paths must be repo-relative."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "absolute-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    "/tmp/browser-summary.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "repo-relative",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_backslash_path_fails(self) -> None:
+        """Retained artifact paths cannot use Windows backslashes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "backslash-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    "release-artifacts\\evidence\\live-metadata-browser\\browser-summary.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "escape",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_whitespace_path_fails(self) -> None:
+        """Retained artifact references must be a single path."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "whitespace-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    "release-artifacts/evidence/live-metadata-browser/browser summary.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "one repo-relative path",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_multiple_hashes_fail(self) -> None:
+        """A retained reference cannot silently carry multiple digests."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "multi-hash-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    f"{BROWSER_SUMMARY_PATH} / sha256:{'a' * 64} / sha256:{'b' * 64}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "multiple sha256",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_drift_fails(self) -> None:
+        """Declared retained hashes must match disk contents."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "hash-drift-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    f"{BROWSER_SUMMARY_PATH} / sha256:{'f' * 64}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "sha256 mismatch",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_without_separator_fails(self) -> None:
+        """Declared retained hashes need an explicit path/hash separator."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            summary_hash = checker.file_sha256(repo_root / BROWSER_SUMMARY_PATH)
+            path = repo_root / "hash-no-separator-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    f"{BROWSER_SUMMARY_PATH}/{summary_hash}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "separate path and sha256 digest",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_malformed_hash_fails(self) -> None:
+        """Malformed retained hashes fail explicitly."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "malformed-hash-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    f"{BROWSER_SUMMARY_PATH} / sha256:{'A' * 64}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "malformed sha256",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_trailing_text_fails(self) -> None:
+        """Declared retained hashes cannot hide trailing field text."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            summary_hash = checker.file_sha256(repo_root / BROWSER_SUMMARY_PATH)
+            path = repo_root / "hash-trailing-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    f"{BROWSER_SUMMARY_PATH} / {summary_hash} unexpected",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "trailing text",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
 
     def test_summary_schema_mismatch_fails(self) -> None:
         """The retained browser summary must use the expected schema."""
@@ -400,7 +665,7 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "schema_version",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=root)
 
     def test_summary_unexpected_requests_fail(self) -> None:
         """The retained browser summary must reject unexpected network requests."""
@@ -420,7 +685,7 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "unexpected_requests must be empty",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=root)
 
     def test_missing_validation_command_fails(self) -> None:
         """The template must carry the full validation sequence."""
@@ -497,12 +762,40 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_credentialed_url_fails_secret_scan(self) -> None:
+        """Credentialed URLs are secret-shaped even outside explicit keys."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "credentialed-url.md"
+            write_text(
+                path,
+                valid_template() + "\nhttps://user:pass@example.invalid/path\n",
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "secret-like CLI",
+            ):
+                checker.validate_artifact(path)
+
+    def test_bare_hex_secret_like_text_fails(self) -> None:
+        """Unprefixed 64-hex strings are treated as secret-shaped material."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "bare-hex.md"
+            write_text(path, valid_template() + f"\n{'a' * 64}\n")
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "bare 64-hex",
+            ):
+                checker.validate_artifact(path)
+
     def test_referenced_artifact_secret_values_fail(self) -> None:
         """Reviewed retained transcript files are scanned too."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed-referenced-secret.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-referenced-secret.md"
             seed_reviewed_retained_files(
-                Path(temp_dir),
+                repo_root,
                 secret_text="--private-key 0xabc123\n",
             )
             write_text(path, reviewed_artifact())
@@ -511,7 +804,7 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "secret-like CLI",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=repo_root)
 
     def test_duplicate_summary_contract_address_fails(self) -> None:
         """Browser summaries must not duplicate contract addresses."""
@@ -537,12 +830,13 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "duplicates contract address",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=root)
 
     def test_angle_bracket_placeholder_fails_non_template_artifact(self) -> None:
         """Non-template artifacts cannot keep angle-bracket placeholders."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed-angle-placeholder.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-angle-placeholder.md"
             write_text(
                 path,
                 reviewed_artifact().replace(
@@ -555,7 +849,7 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
                 checker.LiveMetadataBrowserEvidenceError,
                 "Network and deployment version",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=repo_root)
 
 
 if __name__ == "__main__":
