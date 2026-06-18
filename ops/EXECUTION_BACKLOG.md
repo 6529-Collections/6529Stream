@@ -3392,7 +3392,7 @@ unless an external dependency changes.
 | `EXT-029` | Add live release-evidence issue sync guard | E/G | Merged in PR #558; issue #557 closed completed with an authenticated GitHub issue snapshot fetcher plus live body/closure sync gate for linked release-evidence tracker issues without adding network access to default CI or changing readiness claims |
 | `EXT-030` | Retain reviewed fork metadata browser evidence | E/F | Merged in PR #559; issue #218 closed completed with reviewed mainnet-fork metadata browser evidence generated from fork-deployed contracts, linked from `public-beta-evidence.json`, refreshed release artifacts, and public beta still blocked only on remaining missing evidence rows |
 | `EXT-031` | Retain reviewed fork marketplace/indexer evidence | E/F | Merged in PR #560; issue #423 closed completed with reviewed fork/testnet marketplace and indexer evidence, equivalent collector/indexer tooling transcript, reviewed non-local envelope, completed `fork_testnet_marketplace_indexer_evidence` public-beta row, refreshed release artifacts, and public beta still blocked only on remaining missing evidence rows |
-| `EXT-032` | Retain live release-evidence issue audit after marketplace/indexer evidence | E/G | Active PR #562 / issue #561 on branch `codex/live-issue-audit-post-560`; fix the live audit exporter to fetch exact linked tracker issues instead of relying on paginated `gh issue list` rows, retain a fresh no-secret live audit JSON/Markdown report after PR #560, archive it in release artifacts, refresh manifest/checksum coverage, and keep readiness blocked |
+| `EXT-032` | Retain live release-evidence issue audit after marketplace/indexer evidence | E/G | Merged in PR #562; issue #561 closed completed with exact linked-issue live audit retention after PR #560 |
 
 ### Adversarial Testing
 
@@ -3440,7 +3440,7 @@ unless an external dependency changes.
 | `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | Merged in PR #467; issue #466 closed completed |
 | `REL-009` | Strengthen release artifact verifier checksum coverage | G | Merged in PR #564; issue #563 closed completed |
 | `REL-010` | Extend ABI compatibility checks to published interfaces | G | Merged in PR #566; issue #565 closed completed |
-| `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Active PR #568 / issue #567 on branch `codex/abi-diagnostic-subject-alias`; centralize diagnostic creation, document `subject` as canonical and `contract` as a deprecated compatibility alias, add focused alias tests for contract and interface diagnostics, and preserve blocked readiness claims |
+| `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Merged in PR #568; issue #567 closed completed |
 
 ### Governance And Operations
 
@@ -3477,6 +3477,7 @@ unless an external dependency changes.
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
+| `OSS-006` | Add autonomous run-state consistency checker | G | Active issue #569 on branch `codex/autonomous-state-consistency-checker`; add a local no-network checker/tests for `ops/AUTONOMOUS_RUN.md` and `ops/EXECUTION_BACKLOG.md`, wire it into local/CI gates, and prevent stale active PR/issue/branch markers from surviving future autonomous resumes |
 
 ## 6. Dependency Map
 

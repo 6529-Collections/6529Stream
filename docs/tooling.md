@@ -131,6 +131,8 @@ python scripts/test_issue_templates.py
 python scripts/check_issue_templates.py
 python scripts/test_pr_template.py
 python scripts/check_pr_template.py
+python scripts/test_autonomous_state.py
+python scripts/check_autonomous_state.py
 python scripts/test_markdown_links.py
 python scripts/check_markdown_links.py
 python scripts/test_curator_rewards_flow.py
@@ -617,6 +619,12 @@ affected issue with the body-file command printed by the checker:
 python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/release-evidence-issue-bodies
 gh issue edit ISSUE_NUMBER --repo 6529-Collections/6529Stream --body-file tmp/release-evidence-issue-bodies/issue-ISSUE_NUMBER.md
 ```
+
+The autonomous state checker validates `ops/AUTONOMOUS_RUN.md` against
+`ops/EXECUTION_BACKLOG.md` without network access. It fails if more than one
+backlog row claims an active PR, if the active PR/issue/branch disagrees with
+the current-state table, or if the current-state table omits fields needed for
+thread resumes.
 
 Run `python scripts/check_release_evidence_issue_closure.py` to verify the
 committed tracker map, `release-evidence-issue-backlog.json` backlog artifact,

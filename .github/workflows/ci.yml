@@ -223,6 +223,8 @@ jobs:
             scripts/test_issue_templates.py \
             scripts/check_pr_template.py \
             scripts/test_pr_template.py \
+            scripts/check_autonomous_state.py \
+            scripts/test_autonomous_state.py \
             scripts/check_markdown_links.py \
             scripts/test_markdown_links.py \
             scripts/check_integrations_readme.py \
@@ -660,6 +662,8 @@ jobs:
           python3 scripts/check_issue_templates.py 2>&1 | tee ci-logs/issue-template-check.log
           python3 scripts/test_pr_template.py 2>&1 | tee ci-logs/pr-template-tests.log
           python3 scripts/check_pr_template.py 2>&1 | tee ci-logs/pr-template-check.log
+          python3 scripts/test_autonomous_state.py 2>&1 | tee ci-logs/autonomous-state-tests.log
+          python3 scripts/check_autonomous_state.py 2>&1 | tee ci-logs/autonomous-state-check.log
           python3 scripts/test_markdown_links.py 2>&1 | tee ci-logs/markdown-link-tests.log
           python3 scripts/check_markdown_links.py 2>&1 | tee ci-logs/markdown-link-check.log
 
