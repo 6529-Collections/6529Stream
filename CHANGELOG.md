@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added retained-output flags to the local metadata browser rehearsal checker
+  so operators can export deterministic browser summary JSON, generated
+  `tokenURI`, and redacted transcript artifacts before future fork/testnet
+  metadata browser evidence review.
 - Added reviewed fork randomizer operations evidence for
   `fork_testnet_randomizer_operations_evidence`, retaining the mainnet-fork
   deployment broadcast, fork deployment manifest, fork address book, redacted
