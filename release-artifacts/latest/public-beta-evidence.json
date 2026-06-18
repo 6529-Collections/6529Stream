@@ -52,7 +52,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json",
-          "sha256": "sha256:3f9d306b5f014cf23fd14867440aa5e011af218f4f802abe6fced5d800101a18"
+          "sha256": "sha256:1b74ef25cb3bf52a7dcc4bd91afee3ce559b3e044b0bfb0ca73eaeed286d6fb3"
         }
       ],
       "risk_acceptance": null,

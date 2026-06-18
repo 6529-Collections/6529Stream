@@ -9,8 +9,8 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:c8d179071cfd416795a2bdceb19da01109da0c5ba84995fabc2d942aaf018755",
-      "size_bytes": 74195
+      "sha256": "sha256:833294d575e9d26f3c8fc4b64a606096e044f10c0de45f2f567487e42b628866",
+      "size_bytes": 74451
     }
   },
   "release_version": "v0.1.0-local",

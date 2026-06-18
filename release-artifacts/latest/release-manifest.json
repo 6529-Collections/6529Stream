@@ -70,7 +70,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:a3d7f8978b31509c1274628adab4a9e9ad85ad548a2ee07f1f6ad24cd21bdf0d",
+        "sha256": "sha256:a9f6620d92ba5b04a29581507498634e28f9c55dc9e2c7f76c3c526b3d4a9193",
         "size_bytes": 67072,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -139,7 +139,7 @@
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:21cb3203a91e32bcbbaae26d1e801f56deb1d7068247598fca5949923fe4d79f",
+      "sha256": "sha256:75012119231977faf7f56956d0313d78992eefa6d2431cb8987ab215383c86c9",
       "size_bytes": 9663,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:129eedfd4c1c75bb8b8ad1a2700e74d96f2ed43ff292f13095123090b5cf9d89",
+      "sha256": "sha256:c87269355fd7745d6cd30fe1a18fbcb189b799d531c17bf44723ace14536e029",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -189,14 +189,14 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:c8d179071cfd416795a2bdceb19da01109da0c5ba84995fabc2d942aaf018755",
-        "size_bytes": 74195,
+        "sha256": "sha256:833294d575e9d26f3c8fc4b64a606096e044f10c0de45f2f567487e42b628866",
+        "size_bytes": 74451,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-packet-index.md",
-        "sha256": "sha256:4419f179a8da91173ca7f5c7777d0cb35b96a77baa26823fa83c8d5b5e458294",
-        "size_bytes": 34978
+        "sha256": "sha256:bcc802fe8adf1f2a1ddedd5568331d6fc4ef20760bbf0c95b6bd4fa4db384261",
+        "size_bytes": 35234
       }
     },
     "release_evidence_live_audit_report_archive": {
@@ -215,7 +215,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:02516d1d026d67466f7b7f841fddb763ca5c32bf01ebaa57a2e4ce60f0731910",
+        "sha256": "sha256:f4f01b343d689e754b76ee77b2aa784c7ab80f8b1f329d57de716a72cb0c9037",
         "size_bytes": 110974,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -234,13 +234,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:a34e7d3bf0db184b9a2aebf8f531478885c52936431584f677c5063e8c747413",
+        "sha256": "sha256:c23711ec0c6846a5a29f8993e8959c976f4b3cd519c323d588e74ef725ff9ea2",
         "size_bytes": 75641,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:f3609424bf5841cccf8b79fc5e1a0a56c3e2cb2d7708cbd7308bf1ecd6e81760",
+        "sha256": "sha256:b6699208838fc2ecb04355622dc99d7bfa14e4b0fa86061bd791f9f41f46a5eb",
         "size_bytes": 67094
       }
     },
@@ -438,8 +438,8 @@
       },
       {
         "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json",
-        "sha256": "sha256:3f9d306b5f014cf23fd14867440aa5e011af218f4f802abe6fced5d800101a18",
-        "size_bytes": 2198,
+        "sha256": "sha256:1b74ef25cb3bf52a7dcc4bd91afee3ce559b3e044b0bfb0ca73eaeed286d6fb3",
+        "size_bytes": 2454,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-testnet-metadata-browser-evidence-fork-evidence",
         "record_type": "evidence",
@@ -480,7 +480,7 @@
             ]
           },
           "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-          "operator_notes": "Generated from release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json for fork_testnet_metadata_browser_evidence; replace with operator and reviewer notes before marking the requirement complete."
+          "operator_notes": "Reviewed fork metadata browser evidence retained from source commit c992105512b56d6619cfbf1684583f018a303bb1. The Anvil mainnet-fork capture at block 25344872 retained deployed-contract tokenURI output, browser sandbox transcript, dependency request validation, parent-frame isolation proof, no console/page/unexpected-request errors, and no-secret redaction; PR CI and 6529bot latest-head review validate the artifact chain while public beta remains blocked on the remaining missing evidence rows."
         }
       },
       {

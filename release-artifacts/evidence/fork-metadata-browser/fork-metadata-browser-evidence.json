@@ -31,5 +31,5 @@
     ]
   },
   "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-  "operator_notes": "Generated from release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json for fork_testnet_metadata_browser_evidence; replace with operator and reviewer notes before marking the requirement complete."
+  "operator_notes": "Reviewed fork metadata browser evidence retained from source commit c992105512b56d6619cfbf1684583f018a303bb1. The Anvil mainnet-fork capture at block 25344872 retained deployed-contract tokenURI output, browser sandbox transcript, dependency request validation, parent-frame isolation proof, no console/page/unexpected-request errors, and no-secret redaction; PR CI and 6529bot latest-head review validate the artifact chain while public beta remains blocked on the remaining missing evidence rows."
 }
