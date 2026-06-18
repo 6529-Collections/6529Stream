@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +27,25 @@ SPEC.loader.exec_module(sandbox_checker)
 EXPECTED_EVIDENCE_KIND = "local-anvil-deployment-rehearsal"
 EXPECTED_EXTERNAL_SCRIPT_URL = "https://cdn.6529.io/stream/rehearsal.js"
 REHEARSAL_SCRIPT = "script/RehearseMetadataBrowser.s.sol:RehearseMetadataBrowser"
+SECRET_VALUE_RE = re.compile(
+    r"\b("
+    r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
+    r"api[_ -]?key|password|bearer[_ -]?token|"
+    r"unreleased[_ -]?drop[_ -]?payload"
+    r")\s*[:=]",
+    re.IGNORECASE,
+)
+CLI_SECRET_RE = re.compile(
+    r"("
+    r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
+    r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
+    r"\bAuthorization\s*:\s*Bearer\s+\S+|"
+    r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"https?://[^\s`]*(?:alchemy|ankr|blastapi|chainstack|infura|quicknode)[^\s`]*|"
+    r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
+    r")",
+    re.IGNORECASE,
+)
 RETURN_FIELDS = (
     "evidenceKind",
     "chainId",
@@ -39,6 +61,14 @@ RETURN_FIELDS = (
 
 class RehearsalMetadataBrowserError(ValueError):
     """Raised when the rehearsal metadata browser check fails."""
+
+
+@dataclass(frozen=True)
+class RehearsalBrowserCheckResult:
+    """Complete Forge-to-Chromium rehearsal evidence and browser result."""
+
+    evidence: dict[str, Any]
+    sandbox_result: sandbox_checker.SandboxResult
 
 
 def forge_environment() -> dict[str, str]:
@@ -281,7 +311,177 @@ def build_expected_bootstrap(evidence: dict[str, Any]) -> object:
     )
 
 
-def check_rehearsal_browser_sandbox(*, timeout_ms: int, headed: bool) -> dict[str, Any]:
+def token_uri_sha256(token_uri: str) -> str:
+    """Return the retained sha256 digest for a generated tokenURI string."""
+
+    return "sha256:" + hashlib.sha256(token_uri.encode("utf-8")).hexdigest()
+
+
+def build_capture_summary(result: RehearsalBrowserCheckResult) -> dict[str, Any]:
+    """Build a deterministic retained summary for the browser rehearsal run."""
+
+    evidence = result.evidence
+    sandbox_result = result.sandbox_result
+    return {
+        "schema_version": "6529stream.rehearsal-metadata-browser-capture.v1",
+        "evidence_kind": evidence["evidenceKind"],
+        "chain_id": as_int(evidence["chainId"], "chainId"),
+        "deployment_manifest_hash": as_bytes32(
+            evidence["deploymentManifestHash"],
+            "deploymentManifestHash",
+        ),
+        "collection_id": as_int(evidence["collectionId"], "collectionId"),
+        "token_id": as_int(evidence["tokenId"], "tokenId"),
+        "token_hash": as_bytes32(evidence["tokenHash"], "tokenHash"),
+        "token_data_raw": str(evidence["tokenDataRaw"]),
+        "token_uri_sha256": token_uri_sha256(str(evidence["tokenUri"])),
+        "external_script_url": str(evidence["externalScriptUrl"]),
+        "sandbox": {
+            "expected_script_requests": list(sandbox_result.expected_script_requests),
+            "unexpected_requests": list(sandbox_result.unexpected_requests),
+            "page_errors": list(sandbox_result.page_errors),
+            "console_errors": list(sandbox_result.console_errors),
+            "dependency_loaded": sandbox_result.dependency_loaded,
+            "dependency_url": sandbox_result.dependency_url,
+            "script_count": sandbox_result.script_count,
+            "hash_value": sandbox_result.hash_value,
+            "token_id": sandbox_result.token_id,
+            "token_data_raw": sandbox_result.token_data_raw,
+            "token_data_is_array": sandbox_result.token_data_is_array,
+            "token_data_values": list(sandbox_result.token_data_values),
+            "draw_is_function": sandbox_result.draw_is_function,
+            "parent_access_blocked": sandbox_result.parent_access_blocked,
+            "parent_access_error_name": sandbox_result.parent_access_error_name,
+        },
+    }
+
+
+def build_capture_transcript(result: RehearsalBrowserCheckResult) -> str:
+    """Render a redacted retained transcript for the browser rehearsal run."""
+
+    evidence = result.evidence
+    sandbox_result = result.sandbox_result
+    summary = build_capture_summary(result)
+    return "\n".join(
+        [
+            "# Rehearsal Metadata Browser Capture Transcript",
+            "",
+            "This retained transcript contains no RPC URLs, private keys, API keys, "
+            "signing material, or unreleased drop payloads.",
+            "",
+            "## Source",
+            "",
+            f"- Rehearsal script: `{REHEARSAL_SCRIPT}`",
+            f"- Evidence kind: `{evidence['evidenceKind']}`",
+            f"- Chain ID: `{summary['chain_id']}`",
+            f"- Deployment manifest hash: `{summary['deployment_manifest_hash']}`",
+            f"- Collection ID: `{summary['collection_id']}`",
+            f"- Token ID: `{summary['token_id']}`",
+            f"- Token hash: `{summary['token_hash']}`",
+            f"- Token data raw: `{summary['token_data_raw']}`",
+            f"- tokenURI digest: `{summary['token_uri_sha256']}`",
+            f"- External script URL: `{summary['external_script_url']}`",
+            "",
+            "## Browser Sandbox Result",
+            "",
+            "- Browser executed: `yes`",
+            f"- Expected script requests: `{', '.join(sandbox_result.expected_script_requests)}`",
+            f"- Unexpected requests: `{len(sandbox_result.unexpected_requests)}`",
+            f"- Page errors: `{len(sandbox_result.page_errors)}`",
+            f"- Console errors: `{len(sandbox_result.console_errors)}`",
+            f"- Dependency loaded: `{'yes' if sandbox_result.dependency_loaded else 'no'}`",
+            f"- Script count: `{sandbox_result.script_count}`",
+            f"- draw is function: `{'yes' if sandbox_result.draw_is_function else 'no'}`",
+            f"- Parent frame access blocked: `{'yes' if sandbox_result.parent_access_blocked else 'no'}`",
+            f"- Parent access error name: `{sandbox_result.parent_access_error_name}`",
+            "",
+        ]
+    )
+
+
+def write_text(path: Path, value: str) -> None:
+    """Write UTF-8 text while creating parent directories."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def write_json(path: Path, value: object) -> None:
+    """Write deterministic JSON while creating parent directories."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+
+def validate_no_secret_text(label: str, text: str) -> None:
+    """Reject secret-shaped capture output before it is retained."""
+
+    match = SECRET_VALUE_RE.search(text)
+    if match:
+        raise RehearsalMetadataBrowserError(
+            f"{label} contains secret-like key/value text: {match.group(0)}"
+        )
+    match = CLI_SECRET_RE.search(text)
+    if match:
+        raise RehearsalMetadataBrowserError(
+            f"{label} contains secret-like CLI or URL text: {match.group(0)}"
+        )
+
+
+def validate_distinct_output_paths(paths: list[Path]) -> None:
+    """Reject duplicate capture output paths before any file is written."""
+
+    seen: dict[str, Path] = {}
+    for path in paths:
+        key = str(path.resolve()).casefold()
+        if key in seen:
+            raise RehearsalMetadataBrowserError(
+                f"capture output paths must be distinct: {seen[key]} and {path}"
+            )
+        seen[key] = path
+
+
+def write_capture_outputs(
+    result: RehearsalBrowserCheckResult,
+    *,
+    summary_json: Path | None,
+    token_uri_output: Path | None,
+    transcript_output: Path | None,
+) -> list[Path]:
+    """Write requested retained capture artifacts and return their paths."""
+
+    validate_distinct_output_paths(
+        [path for path in (summary_json, token_uri_output, transcript_output) if path]
+    )
+    written: list[Path] = []
+    if summary_json is not None:
+        summary = build_capture_summary(result)
+        validate_no_secret_text(
+            str(summary_json),
+            json.dumps(summary, indent=2, sort_keys=True),
+        )
+        write_json(summary_json, summary)
+        written.append(summary_json)
+    if token_uri_output is not None:
+        token_uri = str(result.evidence["tokenUri"]) + "\n"
+        validate_no_secret_text(str(token_uri_output), token_uri)
+        write_text(token_uri_output, token_uri)
+        written.append(token_uri_output)
+    if transcript_output is not None:
+        transcript = build_capture_transcript(result)
+        validate_no_secret_text(str(transcript_output), transcript)
+        write_text(transcript_output, transcript)
+        written.append(transcript_output)
+    return written
+
+
+def check_rehearsal_browser_sandbox(
+    *,
+    timeout_ms: int,
+    headed: bool,
+) -> RehearsalBrowserCheckResult:
     """Run the full Forge-to-Chromium rehearsal metadata browser check."""
 
     forge_output = run_forge_rehearsal()
@@ -305,7 +505,7 @@ def check_rehearsal_browser_sandbox(*, timeout_ms: int, headed: bool) -> dict[st
         expected_external_script_url=fixture.external_script_url,
         expected_bootstrap=build_expected_bootstrap(evidence),
     )
-    return evidence
+    return RehearsalBrowserCheckResult(evidence=evidence, sandbox_result=result)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -325,6 +525,21 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run Chromium with a visible browser window for local debugging.",
     )
+    parser.add_argument(
+        "--summary-json",
+        type=Path,
+        help="Optional path for a deterministic retained browser summary JSON.",
+    )
+    parser.add_argument(
+        "--token-uri-output",
+        type=Path,
+        help="Optional path for the generated tokenURI snapshot.",
+    )
+    parser.add_argument(
+        "--transcript-output",
+        type=Path,
+        help="Optional path for a redacted retained browser transcript.",
+    )
     return parser
 
 
@@ -333,9 +548,15 @@ def main(argv: list[str] | None = None) -> int:
 
     args = build_parser().parse_args(argv)
     try:
-        evidence = check_rehearsal_browser_sandbox(
+        result = check_rehearsal_browser_sandbox(
             timeout_ms=args.timeout_ms,
             headed=args.headed,
+        )
+        written = write_capture_outputs(
+            result,
+            summary_json=args.summary_json,
+            token_uri_output=args.token_uri_output,
+            transcript_output=args.transcript_output,
         )
     except (
         RehearsalMetadataBrowserError,
@@ -347,11 +568,13 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         "Validated rehearsal metadata browser sandbox "
-        f"for chain {as_int(evidence['chainId'], 'chainId')} "
-        f"collection {as_int(evidence['collectionId'], 'collectionId')} "
-        f"token {as_int(evidence['tokenId'], 'tokenId')} "
-        f"with dependency {evidence['externalScriptUrl']}"
+        f"for chain {as_int(result.evidence['chainId'], 'chainId')} "
+        f"collection {as_int(result.evidence['collectionId'], 'collectionId')} "
+        f"token {as_int(result.evidence['tokenId'], 'tokenId')} "
+        f"with dependency {result.evidence['externalScriptUrl']}"
     )
+    if written:
+        print("Wrote retained capture artifact(s): " + ", ".join(str(path) for path in written))
     return 0
 
 

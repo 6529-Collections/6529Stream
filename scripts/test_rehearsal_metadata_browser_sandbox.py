@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -36,6 +37,48 @@ def valid_evidence() -> dict[str, object]:
         "externalScriptUrl": rehearsal_checker.EXPECTED_EXTERNAL_SCRIPT_URL,
         "tokenUri": "data:application/json;base64,e30=",
     }
+
+
+def valid_sandbox_result() -> object:
+    """Return a browser sandbox result matching valid_evidence()."""
+
+    return rehearsal_checker.sandbox_checker.SandboxResult(
+        expected_script_requests=(rehearsal_checker.EXPECTED_EXTERNAL_SCRIPT_URL,),
+        unexpected_requests=(),
+        page_errors=(),
+        console_errors=(),
+        dependency_loaded=True,
+        dependency_url=rehearsal_checker.EXPECTED_EXTERNAL_SCRIPT_URL,
+        script_count=2,
+        hash_value="0x" + "34" * 32,
+        token_id=10_000_000_000,
+        token_data_raw="1,2,3",
+        token_data_is_array=True,
+        token_data_values=(1, 2, 3),
+        draw_is_function=True,
+        parent_access_blocked=True,
+        parent_access_error_name="SecurityError",
+    )
+
+
+def valid_check_result() -> object:
+    """Return a complete rehearsal browser result fixture."""
+
+    return rehearsal_checker.RehearsalBrowserCheckResult(
+        evidence=valid_evidence(),
+        sandbox_result=valid_sandbox_result(),
+    )
+
+
+def valid_check_result_with_evidence(**updates: object) -> object:
+    """Return a complete rehearsal browser result with evidence overrides."""
+
+    evidence = valid_evidence()
+    evidence.update(updates)
+    return rehearsal_checker.RehearsalBrowserCheckResult(
+        evidence=evidence,
+        sandbox_result=valid_sandbox_result(),
+    )
 
 
 def word(value: int) -> bytes:
@@ -205,6 +248,102 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
         self.assertEqual(expected.token_id, 10_000_000_000)
         self.assertEqual(expected.token_data_raw, "1,2,3")
         self.assertEqual(expected.token_data, (1, 2, 3))
+
+    def test_builds_capture_summary_from_rehearsal_result(self) -> None:
+        """The retained capture summary records Forge and Chromium evidence."""
+
+        result = valid_check_result()
+
+        summary = rehearsal_checker.build_capture_summary(result)
+
+        self.assertEqual(
+            summary["schema_version"],
+            "6529stream.rehearsal-metadata-browser-capture.v1",
+        )
+        self.assertEqual(summary["chain_id"], 31337)
+        self.assertEqual(summary["collection_id"], 1)
+        self.assertEqual(summary["token_id"], 10_000_000_000)
+        self.assertEqual(summary["token_hash"], "0x" + "34" * 32)
+        self.assertRegex(str(summary["token_uri_sha256"]), r"^sha256:[0-9a-f]{64}$")
+        self.assertEqual(summary["sandbox"]["unexpected_requests"], [])
+        self.assertTrue(summary["sandbox"]["draw_is_function"])
+        self.assertEqual(summary["sandbox"]["parent_access_error_name"], "SecurityError")
+
+    def test_builds_capture_transcript_without_secret_shaped_fields(self) -> None:
+        """The transcript summarizes the run without credential-shaped keys."""
+
+        transcript = rehearsal_checker.build_capture_transcript(valid_check_result())
+
+        self.assertIn("Rehearsal Metadata Browser Capture Transcript", transcript)
+        self.assertIn("tokenURI digest", transcript)
+        self.assertIn("Parent frame access blocked: `yes`", transcript)
+        self.assertNotIn("api_key=", transcript)
+        self.assertNotIn("--private-key", transcript)
+
+    def test_writes_requested_capture_outputs(self) -> None:
+        """Optional capture output paths are written with parent directories."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            summary_path = root / "retained" / "summary.json"
+            token_uri_path = root / "retained" / "token-uri.txt"
+            transcript_path = root / "retained" / "transcript.md"
+
+            written = rehearsal_checker.write_capture_outputs(
+                valid_check_result(),
+                summary_json=summary_path,
+                token_uri_output=token_uri_path,
+                transcript_output=transcript_path,
+            )
+
+            self.assertEqual(written, [summary_path, token_uri_path, transcript_path])
+            self.assertTrue(summary_path.is_file())
+            self.assertTrue(token_uri_path.is_file())
+            self.assertTrue(transcript_path.is_file())
+            self.assertIn("schema_version", summary_path.read_text(encoding="utf-8"))
+            self.assertTrue(
+                token_uri_path.read_text(encoding="utf-8").startswith(
+                    "data:application/json;base64,"
+                )
+            )
+            self.assertIn(
+                "Browser Sandbox Result",
+                transcript_path.read_text(encoding="utf-8"),
+            )
+
+    def test_rejects_duplicate_capture_output_paths(self) -> None:
+        """Operators cannot accidentally point multiple outputs at one file."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "retained" / "capture.txt"
+
+            with self.assertRaisesRegex(
+                rehearsal_checker.RehearsalMetadataBrowserError,
+                "must be distinct",
+            ):
+                rehearsal_checker.write_capture_outputs(
+                    valid_check_result(),
+                    summary_json=output_path,
+                    token_uri_output=output_path,
+                    transcript_output=None,
+                )
+
+    def test_rejects_secret_shaped_capture_output(self) -> None:
+        """Generated capture outputs are scanned before they are retained."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            transcript_path = Path(temp_dir) / "retained" / "transcript.md"
+
+            with self.assertRaisesRegex(
+                rehearsal_checker.RehearsalMetadataBrowserError,
+                "secret-like",
+            ):
+                rehearsal_checker.write_capture_outputs(
+                    valid_check_result_with_evidence(tokenDataRaw="api_key=hidden"),
+                    summary_json=None,
+                    token_uri_output=None,
+                    transcript_output=transcript_path,
+                )
 
 
 if __name__ == "__main__":

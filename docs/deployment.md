@@ -64,15 +64,27 @@ python scripts/test_rehearsal_metadata_browser_sandbox.py
 python scripts/check_rehearsal_metadata_browser_sandbox.py
 ```
 
+To retain deterministic local capture artifacts for review, write the browser
+summary, generated `tokenURI`, and redacted transcript to an ignored or
+release-evidence staging directory:
+
+```sh
+python scripts/check_rehearsal_metadata_browser_sandbox.py \
+  --summary-json /tmp/metadata-browser-summary.json \
+  --token-uri-output /tmp/metadata-browser-token-uri.txt \
+  --transcript-output /tmp/metadata-browser-transcript.md
+```
+
 `script/RehearseMetadataBrowser.s.sol` builds on the deployment rehearsal by
 deploying the local stack, registering a deterministic metadata dependency,
 minting through the EIP-712 drop authorization path, finalizing token
 randomness/image/attribute inputs, and returning the generated on-chain
 `tokenURI`. The Python checker executes the generated final animation in the
 same Playwright/Chromium sandbox policy used for committed metadata fixtures.
-This is a local Anvil release gate and does not require RPC secrets; fork,
-testnet, and production broadcasts should still retain their own manifest and
-browser evidence during the release ceremony.
+The optional retained outputs make the local run reviewable without adding RPC
+secrets. This is a local Anvil release gate; fork, testnet, and production
+broadcasts should still retain their own manifest and browser evidence during
+the release ceremony.
 
 ## Sepolia Deployment Rehearsal Runbook
 

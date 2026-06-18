@@ -98,7 +98,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:b7003a69e2c28947a6350353d4fdeb0db3092e9716f45ebcdfcef75cb80f7a56"
+    "sha256": "sha256:196c023480d974a5ae96e27d644c27ca5680da0abf5d463e50783dc2cc68db17"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -702,7 +702,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:e5fc2036ea6ad031ee84e8f5a012d7afe4675defdf2ddd31f12f8358b2101ecf",
+      "sha256": "sha256:1c84864184c5963372cc8e1a957fed431dd348af85f9a2a1ea2fe6a3f2a43cb6",
       "size_bytes": 79962
     },
     {
@@ -767,7 +767,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:2b5db099426d646b01d832d259b439dcb3a8eac8eca5f41affedccfdb0a28f25",
+      "sha256": "sha256:abc32cc8d5b80a7f9e13bd7e10e90e7498ee4057ba24e6c9a8157741440a6647",
       "size_bytes": 8941
     },
     {
@@ -817,22 +817,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:28869894e6ac324b868cd3a69bfdc881ee3b22418cacb6ab395f5c3853fdedfe",
+      "sha256": "sha256:fa1b5ce0aa3a2881d8993c507902358e9373ba425f3370e01c7a9bf20908ec8b",
       "size_bytes": 123287
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:132d4bfc752431f4821a41da61864634e73a4d4b019ef4a12139ec191b9ee5bb",
-      "size_bytes": 65499
+      "sha256": "sha256:5e7a11be93bd9e6bb336fce28a28918e85cd7a4e66946e11f5f39e286fbb8527",
+      "size_bytes": 65761
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:dc916c508fc87ee6ebe7f77d88eaac83ec3df1b4ef7b8b94cd75f580ef92f5cd",
-      "size_bytes": 62727
+      "sha256": "sha256:ae3f486b6fbd4c1ee51a2a7560a4ab13ccf907cc99fc3cac9cb5a3ceda3d53f1",
+      "size_bytes": 62982
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:3c12d6d290900b3f76e5d8c0ab73e47333c235401373752e82549c8608f170f3",
+      "sha256": "sha256:1e6c47f60821ef16453bc8d1e3281774ad42068cbd0b69b07d16f3c48f3737a2",
       "size_bytes": 22929
     },
     {

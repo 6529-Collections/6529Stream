@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fork-randomizer-operations-evidence` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/552` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/220` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/553` |
-| Next issue | PR #553 is open for reviewed fork randomizer operations evidence; request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| Active PR branch | `codex/metadata-browser-evidence-capture` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/553` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/218` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/554` |
+| Next issue | PR #554 is open for EXT-027 metadata browser capture tooling; request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. Do not mark `fork_testnet_metadata_browser_evidence` complete without reviewed fork/testnet deployed-contract evidence. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 09:12 UTC` |
+| Last updated | `2026-06-18 09:24 UTC` |
 
 ## Packaging Notes
 
@@ -16256,6 +16256,8 @@ Outcome:
 | 2026-06-18 08:58 | Merge PR #552 and start EXT-026 | PR #552 merged as `af2c394860c78ee7ced9ab4ace566f1e15ba5b78` after Foundry smoke, Windows wrapper, CodeRabbit status, and latest-head 6529bot review were clean; issue #219 closed completed. Branch `codex/fork-randomizer-operations-evidence` now targets issue #220 with reviewed retained fork randomizer operations evidence rather than another checker-only slice. |
 | 2026-06-18 09:02 | Start EXT-026 local draft | Promoted `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md` from template-only preparation to reviewed fork evidence, added redacted provider export, fork transaction bundle, post-state request views, generated `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json` and `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json`, marked `fork_testnet_randomizer_operations_evidence` complete in `public-beta-evidence.json`, removed #220 from the incomplete issue-link map, and regenerated blocker/packet/backlog/body-sync/risk/release artifact state. Focused fork randomizer evidence and randomizer operations checks pass. Next action is to finish changelog/release-note regeneration, run focused drift gates plus diff hygiene, commit, push, open PR closing #220, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-18 09:12 | Open PR #553 for EXT-026 | PR #553 is open at `https://github.com/6529-Collections/6529Stream/pull/553`, closes issue #220, and packages retained reviewed fork randomizer operations evidence, redacted provider export, fork transaction bundle, post-state request views, schema-checked randomizer operations JSON, public-beta evidence completion for `fork_testnet_randomizer_operations_evidence`, and regenerated release evidence while keeping public beta blocked on the remaining missing rows. Local focused evidence, generated-artifact, release-manifest, checksum, changelog, forge-size, and whitespace gates passed before opening. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-18 09:22 | Merge PR #553 and start EXT-027 | PR #553 merged as `f0ad1af744943c65d0b1791ad561a322f5691a0c` and issue #220 closed completed. Three explorer subagents inspected the remaining public-beta blockers and agreed that #218, #221, #222, and #423 cannot honestly be completed from current local/fork artifacts alone; Sepolia/explorer rows need real Sepolia outputs, marketplace/indexer needs a retained transcript or equivalent collector/indexer replay, and metadata browser needs deployed fork/testnet tokenURI/browser evidence. Branch `codex/metadata-browser-evidence-capture` now adds retained-output flags to `scripts/check_rehearsal_metadata_browser_sandbox.py` so future metadata browser evidence can be captured reproducibly. This PR should reference but not close #218 and must not change public-beta readiness. |
+| 2026-06-18 09:24 | Open PR #554 for EXT-027 | PR #554 is open at `https://github.com/6529-Collections/6529Stream/pull/554` and references issue #218 without closing it. It adds deterministic `--summary-json`, `--token-uri-output`, and `--transcript-output` flags to the local metadata browser rehearsal checker, unit coverage for retained output generation, deployment runbook documentation, and run/backlog state. Local unit, compile, live rehearsal output, metadata fixtures, changelog, markdown-link, and whitespace gates passed before opening. Next action is to request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
