@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:a0462b412332c4c3c079eedaa5e4a7f02d78b101e8e29ecd27db22d89a7fd0c3` |
+| Backlog SHA-256 | `sha256:3473f727c2b36675e45ce72162808a276ec89fe67b287514cde1ad0a42d61f89` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50` |
 
@@ -33,8 +33,8 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | [#423](https://github.com/6529-Collections/6529Stream/issues/423) | `public-beta-fork-testnet-marketplace-indexer-evidence` | `missing` | `sha256:0166f05273548a9f61699b989303fd81aa415e296a598f6271a39a28c8de87f8` | 55 |
 | [#219](https://github.com/6529-Collections/6529Stream/issues/219) | `public-beta-fork-testnet-ceremony-evidence` | `missing` | `sha256:278903689bf1d5921fe5236e79de49389c41d8172e7bfb091d907e1282cb3be1` | 55 |
 | [#220](https://github.com/6529-Collections/6529Stream/issues/220) | `public-beta-fork-testnet-randomizer-operations-evidence` | `missing` | `sha256:0ae4dea39164ef5a20d09add007baafd323dd0e223450259692175740e7550ec` | 55 |
-| [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:6c35993390e7e2695d3ee32670ff1dc0d3071073650350a10e3e346f9b47465f` | 53 |
-| [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:0205d5a306cc3734bba26d8aa7e61a090756bd6b87d5504849f0f4adaf94b719` | 53 |
+| [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:9ba44c3d5e1dc8c486864f33c45190639ba0b1ed98626c69661fb17eb0df6f91` | 55 |
+| [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:f66604a772038efde47c0b2dad2ae025fd445df95af956909d39a274a18b6f6a` | 55 |
 | [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:6099d20d4d5336ba46264be96d58b58b643c87a2eea50dbefe126fddc6b75bb9` | 59 |
 | [#224](https://github.com/6529-Collections/6529Stream/issues/224) | `production-release-signed-git-tag` | `missing` | `sha256:ae61020e8e7f3c9e3a2f0bfdc3d5d053a997fbd328cba05ead33398bd67420bc` | 59 |
 | [#225](https://github.com/6529-Collections/6529Stream/issues/225) | `production-release-production-address-books` | `missing` | `sha256:64ace907f16d545eadd001e728b3f6670d60192dcd4dc5aba02bcb6f1ef2e652` | 55 |
@@ -434,8 +434,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #221 public-beta-verified-deployed-addresses
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/221
-- Body SHA-256: `sha256:6c35993390e7e2695d3ee32670ff1dc0d3071073650350a10e3e346f9b47465f`
-- Source body SHA-256: `sha256:0cf110e76b8e4eaa1cb695f7e069085e5f0de9f9ed987f1f8fff5e69b6fe25c2`
+- Body SHA-256: `sha256:9ba44c3d5e1dc8c486864f33c45190639ba0b1ed98626c69661fb17eb0df6f91`
+- Source body SHA-256: `sha256:857f3140b46fadc25d139081a6e2ee5d30177d31c16c36ff54b6b6d9e6e36faf`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-verified-deployed-addresses issue_number=221 -->
@@ -457,12 +457,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `verified_deployed_addresses`
 - Evidence template: `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
 
 ## Required Evidence
 
-- Retained artifact expectation: Replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Retained artifact expectation: Fill the public-beta verified-addresses retained artifact, validate it with scripts/check_public_beta_verified_addresses.py, then replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -470,6 +470,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_public_beta_verified_addresses.py`
+- `python scripts/check_public_beta_verified_addresses.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
@@ -496,8 +498,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #222 public-beta-explorer-verification-status
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/222
-- Body SHA-256: `sha256:0205d5a306cc3734bba26d8aa7e61a090756bd6b87d5504849f0f4adaf94b719`
-- Source body SHA-256: `sha256:304068c50b074fac0a43ab56dabbd454bbde84ebf3beba08ed3113785996b5b5`
+- Body SHA-256: `sha256:f66604a772038efde47c0b2dad2ae025fd445df95af956909d39a274a18b6f6a`
+- Source body SHA-256: `sha256:35af0247affb72edb4e0574470702c622a7bdf332d2066cb7e42947be582fe08`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-explorer-verification-status issue_number=222 -->
@@ -519,12 +521,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `explorer_verification_status`
 - Evidence template: `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
 
 ## Required Evidence
 
-- Retained artifact expectation: Replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Retained artifact expectation: Fill the public-beta verified-addresses retained artifact, validate it with scripts/check_public_beta_verified_addresses.py, then replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -532,6 +534,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_public_beta_verified_addresses.py`
+- `python scripts/check_public_beta_verified_addresses.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`

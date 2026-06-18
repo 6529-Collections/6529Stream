@@ -310,6 +310,30 @@ Map fork evidence to `fork_deployment_rehearsal`, testnet evidence to
 `production_broadcast_retention`, `live_deployment_manifest`, and
 `production_address_books`.
 
+Public-beta verified-addresses evidence has a dedicated retained-artifact
+template at
+`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`.
+Before generating non-local envelopes for `verified_deployed_addresses` or
+`explorer_verification_status`, run:
+
+```sh
+python scripts/test_public_beta_verified_addresses.py
+python scripts/check_public_beta_verified_addresses.py
+```
+
+Future pending-review or reviewed public-beta verified-addresses references
+must be repo-relative UTF-8 files and may include one optional
+`sha256:<64 lowercase hex>` digest. The checker rejects missing files,
+absolute paths, path escapes, Windows backslashes, ambiguous whitespace,
+symlinked retained files, duplicate or malformed digests, stale declared
+hashes, credentialed/provider URLs, bearer tokens or placeholders, CLI secret
+flags, bare 64-hex values, and secret-shaped content in referenced retained
+files. It also preserves the cross-payload checks that Sepolia address books,
+deployment manifests, explorer verification JSON, and bytecode release proofs
+agree before future evidence can be reviewed. Issues #221 and #222 remain open
+until real reviewed evidence is linked from the shared public-beta evidence
+manifest.
+
 Production verified-addresses evidence has a dedicated retained-artifact
 template at
 `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`.

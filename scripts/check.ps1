@@ -150,6 +150,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_fork_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\test_testnet_deployment_rehearsal_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_testnet_deployment_rehearsal_evidence.py"
+& $pythonPath @pythonArgs "scripts\test_public_beta_verified_addresses.py"
+& $pythonPath @pythonArgs "scripts\check_public_beta_verified_addresses.py"
 & $pythonPath @pythonArgs "scripts\test_production_broadcast_retention.py"
 & $pythonPath @pythonArgs "scripts\check_production_broadcast_retention.py"
 & $pythonPath @pythonArgs "scripts\test_production_verified_addresses.py"

@@ -29,6 +29,12 @@ Use [`docs/release-signatures.md`](release-signatures.md) for release signature
 evidence, signed release tag gate boundaries, and the production
 release-signing checker and retained artifact that future reviewed
 `production_signatures` and `signed_git_tag` evidence must satisfy.
+Use the public-beta verified-addresses checker and public-beta
+verified-addresses retained artifact under
+[`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md)
+for future reviewed `verified_deployed_addresses` and
+`explorer_verification_status` evidence before those public-beta rows can move
+out of missing or blocked status.
 Use [`docs/provenance-manifests.md`](provenance-manifests.md) for the checked
 1/1 provenance manifest model, generated provenance artifact catalog, and
 frontend/indexer display boundaries for artist/story/authenticity context.
@@ -189,7 +195,7 @@ readiness, so a production run validates both phases.
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet ceremony/randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
-| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, production release-signing checker and retained artifact, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
+| Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, production release-signing checker and retained artifact, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, public-beta verified-addresses checker and retained artifact, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
 | Static analysis and tests | Slither baseline, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Testnet/live invariant and gas evidence missing, and NatSpec baseline remains a burn-down queue | External audit and production evidence missing |
 
 ## Local Evidence Already Passing
@@ -381,6 +387,13 @@ The current local baseline includes:
   [`release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`](../release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md),
   validated with `python scripts/test_production_broadcast_retention.py` and
   `python scripts/check_production_broadcast_retention.py`,
+  plus the public-beta verified-addresses checker and public-beta
+  verified-addresses retained artifact template under
+  [`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md),
+  validated with
+  [`scripts/test_public_beta_verified_addresses.py`](../scripts/test_public_beta_verified_addresses.py)
+  and
+  [`scripts/check_public_beta_verified_addresses.py`](../scripts/check_public_beta_verified_addresses.py),
   plus the production verified-addresses checker and production
   verified-addresses retained artifact template under
   [`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md),
@@ -636,6 +649,7 @@ Release artifacts:
 - [release-artifacts/evidence/non-local-release-evidence-template.json](../release-artifacts/evidence/non-local-release-evidence-template.json)
 - [release-artifacts/evidence/non-local-template-retained-artifact.txt](../release-artifacts/evidence/non-local-template-retained-artifact.txt)
 - [release-artifacts/evidence/public-beta-templates/](../release-artifacts/evidence/public-beta-templates/)
+- [release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md](../release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md)
 - [release-artifacts/evidence/production-release-templates/](../release-artifacts/evidence/production-release-templates/)
 - [release-artifacts/baselines/v0.1.0/abi-surface.json](../release-artifacts/baselines/v0.1.0/abi-surface.json)
 - [release-artifacts/baselines/v0.1.0/gas-snapshot.snap](../release-artifacts/baselines/v0.1.0/gas-snapshot.snap)
@@ -657,6 +671,8 @@ python scripts/check_release_mode.py --phase public-beta
 python scripts/check_release_mode.py --phase production-release
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
+python scripts/test_public_beta_verified_addresses.py
+python scripts/check_public_beta_verified_addresses.py
 python scripts/test_production_verified_addresses.py
 python scripts/check_production_verified_addresses.py
 python scripts/test_signed_release_tag.py

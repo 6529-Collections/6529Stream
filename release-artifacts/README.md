@@ -28,6 +28,7 @@ python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
 python scripts/check_signed_release_tag.py
+python scripts/check_public_beta_verified_addresses.py
 python scripts/check_production_release_signing_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
@@ -96,6 +97,8 @@ python scripts/test_release_signatures.py
 python scripts/check_release_signatures.py
 python scripts/test_signed_release_tag.py
 python scripts/check_signed_release_tag.py
+python scripts/test_public_beta_verified_addresses.py
+python scripts/check_public_beta_verified_addresses.py
 python scripts/test_production_release_signing_evidence.py
 python scripts/check_production_release_signing_evidence.py
 python scripts/test_non_local_release_evidence.py
@@ -167,6 +170,8 @@ python scripts/check_release_readiness.py
 python scripts/test_release_mode.py
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
+python scripts/test_public_beta_verified_addresses.py
+python scripts/check_public_beta_verified_addresses.py
 python scripts/test_production_verified_addresses.py
 python scripts/check_production_verified_addresses.py
 python scripts/test_release_notes.py
@@ -519,6 +524,15 @@ evidence and does not change public-beta readiness. Pending or reviewed
 retained references must stay repo-relative, point at committed UTF-8 text
 files, remain no-secret, and match optional declared `sha256:` hashes.
 
+`evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future public-beta
+address-book and explorer verification evidence. Validate it with
+`python scripts/test_public_beta_verified_addresses.py` and
+`python scripts/check_public_beta_verified_addresses.py` before generating
+non-local evidence envelopes for `verified_deployed_addresses` or
+`explorer_verification_status`. The committed template is not verified
+testnet address evidence and does not change public-beta readiness.
+
 `evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `production_broadcast_retention` evidence. Validate it with
@@ -673,6 +687,7 @@ python scripts/generate_dependency_provenance_attestation.py
 python scripts/check_ceremony_evidence.py
 python scripts/check_randomizer_operations.py
 python scripts/check_release_signatures.py
+python scripts/check_public_beta_verified_addresses.py
 python scripts/check_production_release_signing_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py

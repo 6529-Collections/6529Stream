@@ -193,6 +193,10 @@ def seed_all_templates(root: Path) -> None:
         "Testnet deployment rehearsal retained artifact template.\n",
     )
     write_text(
+        root / generator.PUBLIC_BETA_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
+        "Public beta verified-addresses retained artifact template.\n",
+    )
+    write_text(
         root / generator.PUBLIC_BETA_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
         "Fork/testnet marketplace and indexer retained artifact template.\n",
     )
@@ -530,6 +534,59 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
                 "python scripts/check_marketplace_indexer_evidence.py",
                 live_row["validation_commands"],
             )
+
+    def test_public_beta_verified_address_rows_use_canonical_retained_artifact(self) -> None:
+        """Public-beta address and explorer rows point at the dedicated template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            rows = {
+                row["requirement_id"]: row
+                for row in packet["rows"]
+                if row["requirement_id"]
+                in {
+                    generator.PUBLIC_BETA_VERIFIED_DEPLOYED_ADDRESSES_REQUIREMENT_ID,
+                    generator.PUBLIC_BETA_EXPLORER_VERIFICATION_STATUS_REQUIREMENT_ID,
+                }
+            }
+
+            self.assertEqual(
+                set(rows),
+                {
+                    generator.PUBLIC_BETA_VERIFIED_DEPLOYED_ADDRESSES_REQUIREMENT_ID,
+                    generator.PUBLIC_BETA_EXPLORER_VERIFICATION_STATUS_REQUIREMENT_ID,
+                },
+            )
+            for row in rows.values():
+                self.assertEqual(
+                    row["retained_artifact_expectation"]["path"],
+                    generator.PUBLIC_BETA_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+                )
+                self.assertEqual(
+                    row["retained_artifact_expectation"]["sha256"],
+                    checker.file_sha256(
+                        root
+                        / generator.PUBLIC_BETA_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE
+                    ),
+                )
+                self.assertIn(
+                    "python scripts/test_public_beta_verified_addresses.py",
+                    row["validation_commands"],
+                )
+                self.assertIn(
+                    "python scripts/check_public_beta_verified_addresses.py",
+                    row["validation_commands"],
+                )
 
     def test_fork_metadata_browser_row_uses_canonical_retained_artifact(self) -> None:
         """Fork/testnet metadata-browser rows point at the dedicated template."""

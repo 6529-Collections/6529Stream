@@ -96,6 +96,7 @@ release evidence packet index, drop authorization signing fixtures,
 release evidence issue backlog, release evidence issue links, release evidence issue body sync,
 release evidence issue closure readiness, release evidence live audit report bundle,
 production broadcast retention checker, production broadcast retention retained artifact,
+public-beta verified-addresses checker, public-beta verified-addresses retained artifact,
 production verified-addresses checker, production verified-addresses retained artifact,
 live metadata-browser evidence, live_metadata_browser_evidence, and
 check_live_metadata_browser_evidence.py
