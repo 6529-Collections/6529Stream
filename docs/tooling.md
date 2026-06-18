@@ -742,6 +742,20 @@ explicit redaction confirmations before a reviewed artifact can pass. The
 committed file is template-only and keeps production release blocked until a
 future reviewed production deployment retention record is accepted.
 
+Live deployment manifest evidence has a dedicated no-secret retained artifact
+template at
+`release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`.
+Run `python scripts/test_live_deployment_manifest_evidence.py` and
+`python scripts/check_live_deployment_manifest_evidence.py` before generating
+the metadata envelope for `live_deployment_manifest`. The checker requires live
+chain ID 1 manifest data, finalized contract addresses, bytecode hashes,
+constructor arguments, address-book agreement, release digest references,
+reviewer metadata, and explicit redaction confirmations before a pending-review
+or reviewed artifact can pass. Referenced retained files must be ordinary
+repo-relative UTF-8 files, not symlinks. The committed file is template-only and
+keeps production release blocked until future reviewed live manifest evidence is
+accepted.
+
 Production verified-addresses evidence has a dedicated no-secret retained
 artifact template at
 `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`.

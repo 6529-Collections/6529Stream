@@ -35,6 +35,12 @@ and run `python scripts/test_production_broadcast_retention.py` plus
 `python scripts/check_production_broadcast_retention.py` before generating the
 non-local evidence envelope for `production_broadcast_retention`.
 
+For live deployment manifest evidence, fill
+`release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`
+and run `python scripts/test_live_deployment_manifest_evidence.py` plus
+`python scripts/check_live_deployment_manifest_evidence.py` before generating
+the non-local evidence envelope for `live_deployment_manifest`.
+
 For production address-book and live explorer verification evidence, fill
 `release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
 and run `python scripts/test_production_verified_addresses.py` plus
