@@ -321,6 +321,12 @@ def require_checksum_record(
     source: str,
 ) -> None:
     """Require a nested file record to be present in SHA256SUMS."""
+    if not SHA256_PREFIX_RE.fullmatch(sha256):
+        raise ReleaseArtifactVerificationError(
+            f"{source}.sha256 has invalid sha256 marker for {path}"
+        )
+    # Nested file records are release inputs too; adding one requires matching
+    # coverage in SHA256SUMS so third-party verifiers have one canonical bundle.
     expected = sha256.removeprefix("sha256:")
     actual = checksum_entries.get(path)
     if actual is None:

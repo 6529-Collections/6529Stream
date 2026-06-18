@@ -142,7 +142,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:a3842fba8aae293a2952663a1377aaa79eb50f865a22acaccd654ddeb88fd82c"
+    "sha256": "sha256:c03a383fb061e32562ff54afc6e07f2e2a50ccc705eae1c83d5e29ba635597a2"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1516,8 +1516,8 @@
     },
     {
       "path": "scripts/verify_release_artifacts.py",
-      "sha256": "sha256:207ba2bb6194e2f2a710104afd6f617b4dee2acdf607fa68f58f5ae2ba1fc5cc",
-      "size_bytes": 18931
+      "sha256": "sha256:773d6586c43652eb2602bb456061327f1383790719637cf7dd679ae7cff96ae9",
+      "size_bytes": 19264
     },
     {
       "path": "test/fixtures/drop-authorization/auction-eoa.json",

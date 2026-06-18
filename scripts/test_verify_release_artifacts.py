@@ -308,6 +308,18 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 source="release-manifest.json.release_artifacts.a",
             )
 
+    def test_checksum_record_rejects_bad_sha_marker(self) -> None:
+        with self.assertRaisesRegex(
+            verifier.ReleaseArtifactVerificationError,
+            "sha256 has invalid sha256 marker for release-artifacts/latest/a.json",
+        ):
+            verifier.require_checksum_record(
+                {"release-artifacts/latest/a.json": "0" * 64},
+                path="release-artifacts/latest/a.json",
+                sha256="not-a-prefixed-sha",
+                source="release-manifest.json.release_artifacts.a",
+            )
+
     def test_verifier_rejects_malformed_manifest_sha_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
