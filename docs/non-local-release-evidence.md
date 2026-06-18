@@ -85,6 +85,21 @@ shape, replace every template value with reviewed no-secret metadata, point
 `retained_path` at the retained public artifact, and update `sha256` to match
 that file.
 
+Before closing or editing a linked public-beta or production tracker issue,
+compare live GitHub state with the committed evidence artifacts:
+
+```bash
+python scripts/fetch_release_evidence_issue_snapshot.py --output tmp/release-evidence-live-issues.json
+python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-live-issues.json
+python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-live-issues.json
+```
+
+The same live gate is available as `make release-evidence-live-issue-sync-check`.
+It requires authenticated GitHub CLI access and is intentionally separate from
+default CI. A passing offline closure check proves the committed manifests are
+internally consistent; the live sync gate proves the linked GitHub issue bodies
+and open/closed states still match those manifests.
+
 For public-beta blockers, start from the matching checked template under
 [`release-artifacts/evidence/public-beta-templates/`](../release-artifacts/evidence/public-beta-templates/).
 The checker requires one template for each public-beta requirement ID. These

@@ -447,7 +447,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "Optional GitHub issue JSON snapshot from "
-            "`gh issue list --state all --json number,title,state`."
+            "`python scripts/fetch_release_evidence_issue_snapshot.py --output <path>` "
+            "or `gh issue list --state all --json number,title,state`."
         ),
     )
     return parser

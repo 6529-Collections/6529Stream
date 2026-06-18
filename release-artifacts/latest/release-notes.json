@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:92715c6eb06030912a68345b1f2b7f193d140e7247204d2daf2c0938322cd69e",
-      "size_bytes": 63866
+      "sha256": "sha256:1be7bcb19aa28fbc233ab029b7478403ae504910cdc84ae044a1a74e7097bd2a",
+      "size_bytes": 64160
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:07f6af228d8f4383a06c3997727e6ca49cc92348c56328cdc8077a76c7a7a17f",
+      "sha256": "sha256:817b34abc6112757bad143fddf1da19cbeb66da56a392928be555bd1ed03722a",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added an authenticated live release-evidence issue sync gate that fetches the exact linked GitHub tracker issues, checks live body drift and premature closure against committed release artifacts, and tolerates Windows UTF-8 BOM snapshots while keeping the default CI gate network-free.",
       "Added a fork/testnet metadata-browser evidence draft generator that converts retained browser capture outputs into a checker-compatible pending-review evidence bundle, with no-secret validation, deployed-contract assertion, and local/CI/Windows gate coverage while keeping issue #218 blocked until real reviewed fork/testnet evidence is linked.",
       "Added retained-output flags to the local metadata browser rehearsal checker so operators can export deterministic browser summary JSON, generated `tokenURI`, and redacted transcript artifacts before future fork/testnet metadata browser evidence review.",
       "Added reviewed fork randomizer operations evidence for `fork_testnet_randomizer_operations_evidence`, retaining the mainnet-fork deployment broadcast, fork deployment manifest, fork address book, redacted provider export, fork transaction bundle, post-state request views, and local lifecycle/adversarial/retry/payment/pause/emergency test proof under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",

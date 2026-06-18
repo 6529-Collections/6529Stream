@@ -124,6 +124,27 @@ class ReleaseEvidenceIssueBodiesTests(unittest.TestCase):
             {"issues": [snapshot_issue(crlf_body)]},
         )
 
+    def test_accepts_fetcher_live_snapshot_shape(self) -> None:
+        """The authenticated live snapshot helper shape is checker-compatible."""
+        rows = checker.expected_issue_rows(body_sync_document())
+        issue = snapshot_issue(expected_body())
+        issue.update(
+            {
+                "state": "OPEN",
+                "url": "https://github.com/6529-Collections/6529Stream/issues/215",
+                "closed": False,
+                "closedAt": None,
+            }
+        )
+
+        checker.validate_snapshot_bodies(
+            rows,
+            {
+                "schema_version": "6529stream.release-evidence-live-issue-snapshot.v1",
+                "issues": [issue],
+            },
+        )
+
     def test_rejects_missing_issue_in_snapshot(self) -> None:
         """Every generated tracker issue must appear in the audit snapshot."""
         rows = checker.expected_issue_rows(body_sync_document())
@@ -196,6 +217,27 @@ class ReleaseEvidenceIssueBodiesTests(unittest.TestCase):
             write_json(root / checker.DEFAULT_BODY_SYNC, body_sync_document())
             snapshot_path = root / "issue-bodies.json"
             write_json(snapshot_path, [snapshot_issue(expected_body())])
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--live-json",
+                        str(snapshot_path),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+
+    def test_main_accepts_utf8_bom_snapshot_file(self) -> None:
+        """Windows-exported JSON snapshots with a UTF-8 BOM are accepted."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(root / checker.DEFAULT_BODY_SYNC, body_sync_document())
+            snapshot_path = root / "issue-bodies.json"
+            snapshot_text = json.dumps([snapshot_issue(expected_body())], indent=2) + "\n"
+            snapshot_path.write_text("\ufeff" + snapshot_text, encoding="utf-8")
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
                 result = checker.main(
