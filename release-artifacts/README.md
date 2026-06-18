@@ -547,6 +547,14 @@ is the checked no-secret retained-artifact template for future
 non-local evidence envelope. The committed template is not production broadcast
 evidence and does not change production-release readiness.
 
+`evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`
+is the checked no-secret retained-artifact template for future
+`live_deployment_manifest` evidence. Validate it with
+`python scripts/test_live_deployment_manifest_evidence.py` and
+`python scripts/check_live_deployment_manifest_evidence.py` before generating a
+non-local evidence envelope. The committed template is not a live deployment
+manifest and does not change production-release readiness.
+
 `evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future production
 address-book and live explorer verification evidence. Validate it with

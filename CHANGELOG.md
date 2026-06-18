@@ -80,6 +80,14 @@ the release policy in `docs/release-policy.md`.
   local/CI/Windows gate wiring, release-packet mapping, and checksum coverage
   while keeping issues #223 and #224 open until real reviewed release ceremony
   evidence is retained.
+- Added a checked live deployment-manifest retained-artifact template and
+  offline checker for future `live_deployment_manifest` evidence, covering
+  production chain ID, deployment version, finalized contract addresses,
+  bytecode hashes, constructor arguments, address-book agreement,
+  repo-relative retained files, optional declared `sha256:` validation,
+  no-secret redaction, local/CI/Windows gate wiring, release-packet mapping,
+  and checksum coverage while keeping issue #227 open until real reviewed live
+  manifest evidence is retained.
 - Added stronger production verified-addresses retained-artifact validation so
   future pending or reviewed production address-book and live explorer
   verification evidence must reference existing repo-relative retained UTF-8

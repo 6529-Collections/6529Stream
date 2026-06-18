@@ -325,6 +325,30 @@ Map fork evidence to `fork_deployment_rehearsal`, testnet evidence to
 `production_broadcast_retention`, `live_deployment_manifest`, and
 `production_address_books`.
 
+Live deployment manifest evidence has a dedicated retained-artifact template at
+`release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`.
+Before generating a non-local envelope for `live_deployment_manifest`, run:
+
+```sh
+python scripts/test_live_deployment_manifest_evidence.py
+python scripts/check_live_deployment_manifest_evidence.py
+```
+
+Future pending-review or reviewed live deployment-manifest references must be
+repo-relative UTF-8 files and may include one optional `sha256:<64 lowercase
+hex>` digest. The checker rejects missing files, absolute paths, path escapes,
+Windows backslashes, ambiguous whitespace, symlinked retained files, duplicate
+or malformed digests, stale declared hashes, credentialed/provider URLs, bearer
+tokens or placeholders, CLI secret flags, bare 64-hex values, and secret-shaped
+content in referenced retained files. It also checks the retained deployment
+manifest is mainnet chain ID 1, has nonzero finalized contract addresses,
+retains bytecode hashes and constructor arguments, and agrees with the retained
+live address book. Record transaction hashes with a `0x` prefix, content
+digests with a `sha256:` prefix, and explicitly label the release manifest plus
+SHA256SUMS or release-checksums digest lines. Issue #227 remains open until real
+reviewed evidence is linked from the shared production-release evidence
+manifest.
+
 Public-beta verified-addresses evidence has a dedicated retained-artifact
 template at
 `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`.

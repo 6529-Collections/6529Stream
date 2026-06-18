@@ -390,6 +390,11 @@ The current local baseline includes:
   [`release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`](../release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md),
   validated with `python scripts/test_production_broadcast_retention.py` and
   `python scripts/check_production_broadcast_retention.py`,
+  plus the live deployment manifest checker and retained artifact template
+  under
+  [`release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`](../release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md),
+  validated with `python scripts/test_live_deployment_manifest_evidence.py`
+  and `python scripts/check_live_deployment_manifest_evidence.py`,
   plus the public-beta verified-addresses checker and public-beta
   verified-addresses retained artifact template under
   [`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md),

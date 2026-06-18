@@ -3393,6 +3393,7 @@ unless an external dependency changes.
 | `EXT-030` | Retain reviewed fork metadata browser evidence | E/F | Merged in PR #559; issue #218 closed completed with reviewed mainnet-fork metadata browser evidence generated from fork-deployed contracts, linked from `public-beta-evidence.json`, refreshed release artifacts, and public beta still blocked only on remaining missing evidence rows |
 | `EXT-031` | Retain reviewed fork marketplace/indexer evidence | E/F | Merged in PR #560; issue #423 closed completed with reviewed fork/testnet marketplace and indexer evidence, equivalent collector/indexer tooling transcript, reviewed non-local envelope, completed `fork_testnet_marketplace_indexer_evidence` public-beta row, refreshed release artifacts, and public beta still blocked only on remaining missing evidence rows |
 | `EXT-032` | Retain live release-evidence issue audit after marketplace/indexer evidence | E/G | Merged in PR #562; issue #561 closed completed with exact linked-issue live audit retention after PR #560 |
+| `EXT-033` | Add live deployment manifest evidence validation | F/G | Active PR #574 / issue #573 on branch `codex/live-deployment-manifest-evidence-validation`; adds a dedicated retained-artifact template/checker for future reviewed `live_deployment_manifest` evidence without closing tracker issue #227 or changing production-release readiness claims |
 
 ### Adversarial Testing
 
@@ -3406,7 +3407,7 @@ unless an external dependency changes.
 | `ADV-011` | Add gas envelope tests for high-risk user flows | D/G | Merged in PR #447; issue #446 closed completed |
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
 | `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Merged in PR #525; issue #524 closed completed |
-| `ADV-014` | Add bounded randomizer/admin stateful invariant tests | D/F | Active PR #572 / issue #571 on branch `codex/randomizer-admin-stateful-invariants`; adds local stateful randomizer/admin invariant coverage for composed request, fulfillment, stale, retry, pause, provider/epoch, and reserve-accounting sequences without claiming live provider readiness |
+| `ADV-014` | Add bounded randomizer/admin stateful invariant tests | D/F | Merged in PR #572; issue #571 closed completed with local stateful randomizer/admin invariant coverage for composed request, fulfillment, stale, retry, pause, provider/epoch, token binding, forced-balance, emergency-withdrawal, and reserve-accounting sequences without claiming live provider readiness |
 
 ### Contract/API Hardening
 

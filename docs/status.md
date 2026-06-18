@@ -317,6 +317,15 @@ The current Gate A smoke baseline proves:
   references, reviewer metadata, retained artifact hashes, path boundaries, and
   no-secret policy, and keeps public-beta readiness blocked until reviewed
   non-local custody evidence exists.
+- `scripts/test_live_deployment_manifest_evidence.py` and
+  `scripts/check_live_deployment_manifest_evidence.py` prove the committed
+  template for future `live_deployment_manifest` evidence is public-safe and
+  fail future pending/reviewed evidence closed unless retained manifest files
+  are live mainnet chain ID 1, have finalized nonzero contract addresses,
+  retain bytecode hashes and constructor arguments, agree with the retained
+  address book, avoid symlinked retained files and secret-shaped content, and
+  match optional declared `sha256:` digests. Issue #227 remains open until real
+  reviewed live manifest evidence is retained.
 - `scripts/test_public_beta_evidence.py` and
   `scripts/check_public_beta_evidence.py` prove the committed no-secret
   public-beta evidence status follows
