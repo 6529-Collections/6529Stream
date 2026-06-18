@@ -331,8 +331,8 @@
         "review_status": "template"
       },
       "retained_artifact_expectation": {
-        "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
-        "sha256": "sha256:811c7131c7b999a6c1b8c23e369d6e0ab4048498789f54eba91c7b3aa9b4097e",
+        "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact.md",
+        "sha256": "sha256:d811350f6f3cd041a4bf6f6376bb0230d9f041523a5ffde745bad31a70bff1dc",
         "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4; token 10000000000; collection 1",
         "command_or_source_system": "mainnet-fork metadata browser capture, event-topic catalog review, integration documentation review, and equivalent collector/indexer tooling transcript retained at release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-query-transcript.md",
         "operator_notes": "Reviewed fork/testnet marketplace/indexer evidence retained for issue #423. The artifact uses committed fork metadata-browser capture outputs, the deployment rehearsal manifest/address book, event-topic catalog, integration docs, and equivalent collector/indexer tooling transcript to cover contract metadata, token refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, stale/failed/frozen/burned states, and no-secret redaction while public beta remains blocked on other missing evidence rows."

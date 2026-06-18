@@ -465,7 +465,10 @@ def retained_artifact_expectation(
     evidence_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return the retained artifact handoff record for one packet row."""
-    if phase == PUBLIC_BETA_PHASE and requirement_id == FORK_DEPLOYMENT_REQUIREMENT_ID:
+    if evidence_metadata is not None:
+        retained_path = str(evidence_metadata["retained_path"])
+        retained_sha256 = str(evidence_metadata["sha256"])
+    elif phase == PUBLIC_BETA_PHASE and requirement_id == FORK_DEPLOYMENT_REQUIREMENT_ID:
         record = file_record(
             resolve_repo_path(repo_root, FORK_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE),
             repo_root,
