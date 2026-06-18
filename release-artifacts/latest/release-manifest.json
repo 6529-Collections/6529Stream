@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:5fdb3c2c802add2d900ad13995f036d6153e7c54858e5fa146bdd6aea6fdc1ab",
-        "size_bytes": 63047,
+        "sha256": "sha256:6f8946570dfb47ec7e2b892e898ed3434c9eb0c668f34658bcf57e721a60fe7f",
+        "size_bytes": 63515,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:77ccb721061eae794e706c9a3c5f01fd13d31f8693a237eb7b843bbca1688977",
-        "size_bytes": 60310
+        "sha256": "sha256:dbf30442c911758392f9ab3d34354bd3caae90f87b541b298ffa5f813b0ae73f",
+        "size_bytes": 60771
       }
     },
     "release_candidate_lockfile": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:58c45357f78db4e28bfc6202fa7252bc0796232be973e65108805e4d52b7787d",
+      "sha256": "sha256:26ef78f6eb3ce3633cc92312eb1937bf0f51193609f542255476fc33886dc2b3",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -189,7 +189,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:15c10aaf00ebfe87ab39e8ccf852f944f8b6649484f5f335a80a6e9474739e7e",
+        "sha256": "sha256:1b7befc0c8f941e336c6261906c823576883995b9b18dc9b7153ebbb56f6fcc9",
         "size_bytes": 66335,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -215,7 +215,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:759bc139f1e0b1cfd1933ec4e3756029512b3f7052b25205d31868d37ba6fdab",
+        "sha256": "sha256:70e632a1bc83421f7ee09d3ee16acf81d13f5c16b05a34176f855fde84f565fe",
         "size_bytes": 127575,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -234,13 +234,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:dddd328486e978b28455a55e35ebe39ec513ebafb37f6ad38859713f6428e557",
+        "sha256": "sha256:a7f08a55e9ac343fb13cde6a9abf6d827a1a856bdc5640f71b32af73a1ba9dae",
         "size_bytes": 87774,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:7973e35122799ffe50dca38f0e80e89868fdecf605706f00f5b2f4512d30404d",
+        "sha256": "sha256:c5aee096656caf11981643af138667765790776bc76a2ad2eb3100e66fa2fcc7",
         "size_bytes": 77812
       }
     },
@@ -532,7 +532,7 @@
       },
       {
         "path": "release-artifacts/evidence/production-release-templates/live-explorer-verification-template.json",
-        "sha256": "sha256:106d2ebfbb5feeab0085ea25b854e2de1bf3824ef5c7c50fecfa4ed1a721e000",
+        "sha256": "sha256:9c99638ca6f9aa05e6ea041f670dcdb4815227a2bc393a609c114c6daf2c593c",
         "size_bytes": 1820,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "production-release-template-live-explorer-verification",
@@ -551,7 +551,7 @@
           "block_or_reference": "template-only verified contract address, explorer submission ID, or deployment version",
           "command_or_source_system": "template-only explorer verification output, source verification input, or reviewer source",
           "retained_path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-          "sha256": "sha256:bd5b845e22626504e7e4edf30788f193c67cf03061e11cf998037ac253d6de47",
+          "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",
@@ -767,7 +767,7 @@
       },
       {
         "path": "release-artifacts/evidence/production-release-templates/production-address-books-template.json",
-        "sha256": "sha256:1ab44765f8401c97d2f01c1b813c1dd4b1e4dc50462dcfdf962a4a8a126a48a6",
+        "sha256": "sha256:0a4bcfe6bf8dab65e49fdaa190108e8d4dd9f73264f47032d15eed528eb9fc4c",
         "size_bytes": 1783,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "production-release-template-production-address-books",
@@ -786,7 +786,7 @@
           "block_or_reference": "template-only live deployment version, chain ID, or address-book reference",
           "command_or_source_system": "template-only address-book generation command, manifest source, or reviewer source",
           "retained_path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-          "sha256": "sha256:bd5b845e22626504e7e4edf30788f193c67cf03061e11cf998037ac253d6de47",
+          "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",
@@ -2013,8 +2013,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:113ba6d1526e2a5c9c60ecd85b3b72c3d7822c099c931084e7585b0ddb289b2f",
-      "size_bytes": 60771
+      "sha256": "sha256:b516217346fdba0a6b554f5a07a89db83e090d3dd35d29eb693a56870a676a38",
+      "size_bytes": 61244
     },
     "governance_docs": [
       {
@@ -2094,8 +2094,8 @@
       },
       {
         "path": "docs/non-local-release-evidence.md",
-        "sha256": "sha256:59107fb9e03bad9e023543bfc6d85db4d807ae54b3913845d69b7e3bac0f204f",
-        "size_bytes": 33156
+        "sha256": "sha256:31bbe2833c8e7ad406ea8dfe27dd4cbf5f4eddd704ce69dc1b8496c9fffdbc18",
+        "size_bytes": 34292
       },
       {
         "path": "docs/architecture.md",
@@ -2285,8 +2285,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:46a2e4d646c7996abc1d9f1f028d18110c9835a1f1ee7cc67db6e325771ce09d",
-        "size_bytes": 62483
+        "sha256": "sha256:3b4000f4779fe121e5b5cf106f0b8823d60c8bd8549193845c96de8851465151",
+        "size_bytes": 62952
       },
       {
         "path": "docs/status.md",

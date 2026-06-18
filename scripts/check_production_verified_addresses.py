@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -12,12 +13,12 @@ from typing import Any
 
 
 REQUIREMENT_ID = "production_verified_addresses"
-DEFAULT_EVIDENCE = [
-    Path(
-        "release-artifacts/evidence/production-verified-addresses/"
-        "production-verified-addresses-retained-artifact-template.md"
-    )
-]
+DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_EVIDENCE_RELATIVE = Path(
+    "release-artifacts/evidence/production-verified-addresses/"
+    "production-verified-addresses-retained-artifact-template.md"
+)
+DEFAULT_EVIDENCE = [DEFAULT_REPO_ROOT / DEFAULT_EVIDENCE_RELATIVE]
 
 REQUIRED_HEADINGS = [
     "# Production Verified Addresses Retained Artifact",
@@ -94,9 +95,11 @@ RETAINED_FILE_FIELDS = [
     "Source verification inputs",
     "Explorer verification evidence",
     "Bytecode release proof",
+    "Release manifest/checksum digests",
 ]
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
+SHA256_REF_RE = re.compile(r"sha256:[0-9a-f]{64}")
 
 REQUIRED_COMMANDS = [
     "python scripts/test_production_verified_addresses.py",
@@ -122,10 +125,15 @@ CLI_SECRET_RE = re.compile(
     r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
     r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
-    r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
-    r"https?://[^\s`]*(?:alchemy|infura|quicknode|api[_-]?key|apikey|token|secret)[^\s`]*"
+    r"\bBearer\s+(?:<[^>\s]+>|[A-Za-z0-9._~+/=-]{12,})|"
+    r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+|"
+    r"https?://[^\s`]*(?:alchemy|infura|quicknode|api[_-]?key|apikey|token|secret)[^\s`]*|"
+    r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
     r")",
     re.IGNORECASE,
+)
+BARE_HEX_KEY_RE = re.compile(
+    r"(?<![0-9a-fA-FxX:])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
 )
 
 
@@ -169,6 +177,22 @@ def read_text(path: Path) -> str:
         raise ProductionVerifiedAddressesError(f"{path} must be valid UTF-8") from exc
 
 
+def file_sha256(path: Path) -> str:
+    """Return a sha256: digest for one file."""
+    hasher = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                hasher.update(chunk)
+    except FileNotFoundError as exc:
+        raise ProductionVerifiedAddressesError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise ProductionVerifiedAddressesError(
+            f"could not read retained file for sha256: {path}: {exc}"
+        ) from exc
+    return "sha256:" + hasher.hexdigest()
+
+
 def validate_no_secret_values(path: Path, text: str) -> None:
     """Reject secret-shaped key/value, CLI, and provider URL material."""
     match = SECRET_VALUE_RE.search(text)
@@ -180,6 +204,11 @@ def validate_no_secret_values(path: Path, text: str) -> None:
     if match:
         raise ProductionVerifiedAddressesError(
             f"{path} contains secret-like CLI or URL text: {match.group(0)}"
+        )
+    match = BARE_HEX_KEY_RE.search(text)
+    if match:
+        raise ProductionVerifiedAddressesError(
+            f"{path} contains bare 64-hex secret-like text: {match.group(0)}"
         )
 
 
@@ -196,40 +225,118 @@ def repo_root_for(path: Path) -> Path:
     return cwd
 
 
-def resolve_repo_relative_path(root: Path, value: str) -> Path:
-    """Resolve a retained artifact path while rejecting escapes."""
-    candidate = Path(value)
-    if candidate.is_absolute() or ".." in candidate.parts:
+def split_retained_file_reference(value: str) -> tuple[str, str | None]:
+    """Split a retained file reference into path text and optional digest."""
+    cleaned = value.strip()
+    if "`" in cleaned:
         raise ProductionVerifiedAddressesError(
-            f"retained artifact path must be repo-relative: {value}"
+            f"retained artifact reference must not contain backticks: {value}"
         )
-    resolved = (root / candidate).resolve()
+    matches = list(SHA256_REF_RE.finditer(cleaned))
+    if len(matches) > 1:
+        raise ProductionVerifiedAddressesError(
+            f"retained artifact reference has multiple sha256 digests: {value}"
+        )
+    if not matches and re.search(r"sha256:", cleaned, re.IGNORECASE):
+        raise ProductionVerifiedAddressesError(
+            f"retained artifact reference has malformed sha256 digest: {value}"
+        )
+    match = matches[0] if matches else None
+    digest = match.group(0) if match else None
+    if match:
+        path_with_separator = cleaned[: match.start()]
+        if path_with_separator.endswith(" / "):
+            path_text = path_with_separator[:-3].strip()
+        elif path_with_separator.endswith(" "):
+            path_text = path_with_separator.rstrip()
+        else:
+            raise ProductionVerifiedAddressesError(
+                "retained artifact reference must separate path and sha256 digest "
+                f"with whitespace or ' / ': {value}"
+            )
+        suffix = cleaned[match.end() :].strip()
+        if suffix:
+            raise ProductionVerifiedAddressesError(
+                f"retained artifact reference has trailing text after sha256 digest: {value}"
+            )
+    else:
+        path_text = cleaned.strip()
+    if not path_text:
+        raise ProductionVerifiedAddressesError(
+            f"retained artifact reference is missing a path: {value}"
+        )
+    return path_text, digest
+
+
+def resolve_retained_path(
+    artifact_path: Path, repo_root: Path, label: str, value: str
+) -> tuple[Path, str, str | None]:
+    """Resolve and constrain a retained artifact path."""
+    path_text, expected_digest = split_retained_file_reference(value)
+    if re.search(r"\s", path_text):
+        raise ProductionVerifiedAddressesError(
+            f"{artifact_path} field {label!r} must be one repo-relative path"
+        )
+    retained_path = Path(path_text)
+    if retained_path.is_absolute() or retained_path.drive or retained_path.root:
+        raise ProductionVerifiedAddressesError(
+            f"{artifact_path} field {label!r} must be repo-relative"
+        )
+    if "\\" in path_text:
+        raise ProductionVerifiedAddressesError(
+            f"{artifact_path} field {label!r} must use forward slashes"
+        )
+    if ".." in retained_path.parts:
+        raise ProductionVerifiedAddressesError(
+            f"{artifact_path} field {label!r} must not escape the repository"
+        )
+    root = repo_root.resolve()
+    candidate = root / retained_path
+    cursor = root
+    for part in retained_path.parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            raise ProductionVerifiedAddressesError(
+                f"{artifact_path} field {label!r} must not use symlinked retained files"
+            )
+    resolved = candidate.resolve()
     try:
-        resolved.relative_to(root.resolve())
+        resolved.relative_to(root)
     except ValueError as exc:
         raise ProductionVerifiedAddressesError(
-            f"retained artifact path escapes repository: {value}"
+            f"{artifact_path} field {label!r} must stay inside the repository"
         ) from exc
-    return resolved
+    return resolved, path_text, expected_digest
 
 
-def validate_referenced_artifacts(path: Path, fields: dict[str, str]) -> None:
+def validate_referenced_artifacts(
+    path: Path, fields: dict[str, str], repo_root: Path
+) -> None:
     """Require retained artifact paths to exist and be no-secret."""
-    root = repo_root_for(path)
     for label in RETAINED_FILE_FIELDS:
-        target = resolve_repo_relative_path(root, fields[label])
+        target, path_text, expected_digest = resolve_retained_path(
+            path, repo_root, label, fields[label]
+        )
         if not target.is_file():
             raise ProductionVerifiedAddressesError(
-                f"{path} field {label!r} points to missing retained file: {fields[label]}"
+                f"{path} field {label!r} points to missing retained file: {path_text}"
             )
         validate_no_secret_values(target, read_text(target))
+        if expected_digest is not None:
+            actual_digest = file_sha256(target)
+            if actual_digest != expected_digest:
+                raise ProductionVerifiedAddressesError(
+                    f"{path} field {label!r} sha256 mismatch for {path_text}: "
+                    f"expected {expected_digest}, got {actual_digest}"
+                )
 
 
-def referenced_artifact_paths(path: Path, fields: dict[str, str]) -> dict[str, Path]:
+def referenced_artifact_paths(
+    path: Path, fields: dict[str, str], repo_root: Path
+) -> dict[str, Path]:
     """Return resolved referenced retained artifact paths."""
-    root = repo_root_for(path)
     return {
-        label: resolve_repo_relative_path(root, fields[label])
+        label: resolve_retained_path(path, repo_root, label, fields[label])[0]
         for label in RETAINED_FILE_FIELDS
     }
 
@@ -392,9 +499,11 @@ def validate_bytecode_proof(
             )
 
 
-def validate_verified_address_payloads(path: Path, fields: dict[str, str]) -> None:
+def validate_verified_address_payloads(
+    path: Path, fields: dict[str, str], repo_root: Path
+) -> None:
     """Validate retained JSON evidence for reviewed/pending verified addresses."""
-    targets = referenced_artifact_paths(path, fields)
+    targets = referenced_artifact_paths(path, fields, repo_root)
     address_contracts, _ = validate_address_book_and_manifest(
         targets["Generated live address book"],
         targets["Generated live deployment manifest"],
@@ -469,7 +578,9 @@ def is_placeholder(value: str) -> bool:
     )
 
 
-def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None:
+def validate_review_state(
+    path: Path, text: str, fields: dict[str, str], repo_root: Path
+) -> None:
     """Validate template, pending-review, and reviewed state semantics."""
     review_status = fields["Review status"]
     if review_status not in REVIEW_STATUSES:
@@ -514,11 +625,11 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
         require_field_value(path, fields, "Review decision", "reviewed")
         for label in REVIEWED_YES_FIELDS:
             require_field_value(path, fields, label, "yes")
-        validate_referenced_artifacts(path, fields)
-        validate_verified_address_payloads(path, fields)
+        validate_referenced_artifacts(path, fields, repo_root)
+        validate_verified_address_payloads(path, fields, repo_root)
     elif review_status == "pending_review":
-        validate_referenced_artifacts(path, fields)
-        validate_verified_address_payloads(path, fields)
+        validate_referenced_artifacts(path, fields, repo_root)
+        validate_verified_address_payloads(path, fields, repo_root)
 
 
 def validate_commands(path: Path, text: str) -> None:
@@ -530,8 +641,11 @@ def validate_commands(path: Path, text: str) -> None:
             )
 
 
-def validate_artifact(path: Path) -> None:
+def validate_artifact(path: Path, repo_root: Path | None = None) -> None:
     """Validate one retained production verified-address artifact."""
+    if repo_root is None:
+        repo_root = repo_root_for(path)
+    repo_root = repo_root.resolve()
     text = read_text(path)
     validate_no_secret_values(path, text)
     validate_headings(path, text)
@@ -541,7 +655,7 @@ def validate_artifact(path: Path) -> None:
     require_field_value(path, fields, "Readiness claim", "blocked")
     require_field_value(path, fields, "Environment", "live")
     require_field_value(path, fields, "Chain ID", "1")
-    validate_review_state(path, text, fields)
+    validate_review_state(path, text, fields, repo_root)
     validate_commands(path, text)
 
 
@@ -556,6 +670,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="append",
         help="Evidence Markdown path to validate; may be repeated.",
     )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=DEFAULT_REPO_ROOT,
+        help="Repository root for retained artifact path resolution.",
+    )
     return parser.parse_args(argv)
 
 
@@ -565,7 +685,7 @@ def main(argv: list[str] | None = None) -> int:
     paths = args.evidence or DEFAULT_EVIDENCE
     try:
         for path in paths:
-            validate_artifact(path)
+            validate_artifact(path, repo_root=args.repo_root)
     except ProductionVerifiedAddressesError as exc:
         print(f"production verified-addresses check failed: {exc}", file=sys.stderr)
         return 1

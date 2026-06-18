@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -33,6 +34,17 @@ def write_json(path: Path, value: object) -> None:
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(value, handle, indent=2)
         handle.write("\n")
+
+
+def artifact_with_field(text: str, label: str, value: str) -> str:
+    """Replace one Markdown bullet field value."""
+    return re.sub(
+        rf"^- {re.escape(label)}: .*$",
+        lambda _match: f"- {label}: `{value}`",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
 
 
 def valid_template() -> str:
@@ -143,7 +155,7 @@ def reviewed_artifact() -> str:
 - Source verification inputs: `release-artifacts/latest/source-verification-inputs.json`
 - Explorer verification evidence: `release-artifacts/evidence/production-verified-addresses/explorer-verification.json`
 - Bytecode release proof: `release-artifacts/latest/bytecode-release-proof.json`
-- Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and SHA256SUMS`
+- Release manifest/checksum digests: `release-artifacts/evidence/production-verified-addresses/release-digests.md`
 
 ## Verified Address Results
 
@@ -205,6 +217,9 @@ EXPLORER_EVIDENCE_PATH = (
     "release-artifacts/evidence/production-verified-addresses/explorer-verification.json"
 )
 BYTECODE_PROOF_PATH = "release-artifacts/latest/bytecode-release-proof.json"
+RELEASE_DIGESTS_PATH = (
+    "release-artifacts/evidence/production-verified-addresses/release-digests.md"
+)
 
 
 def contract_records(*, address: str = "0x1111111111111111111111111111111111111111") -> dict[str, object]:
@@ -286,6 +301,7 @@ def seed_reviewed_retained_files(
             ],
         },
     )
+    write_text(root / RELEASE_DIGESTS_PATH, "release manifest and SHA256SUMS digests retained\n")
     if secret_text is not None:
         write_text(root / SOURCE_VERIFICATION_PATH, secret_text)
 
@@ -306,6 +322,33 @@ class ProductionVerifiedAddressesTests(unittest.TestCase):
             path = Path(temp_dir) / "reviewed.md"
             seed_reviewed_retained_files(Path(temp_dir))
             write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path)
+
+    def test_template_state_does_not_resolve_retained_files(self) -> None:
+        """Template evidence can keep placeholders without retained files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "template-missing-retained-files.md"
+            text = valid_template()
+            for label in checker.RETAINED_FILE_FIELDS:
+                text = artifact_with_field(text, label, f"missing/{label}.md")
+            write_text(path, text)
+
+            checker.validate_artifact(path)
+
+    def test_reviewed_declared_hash_passes(self) -> None:
+        """Reviewed retained file references may include a matching sha256."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-hash.md"
+            seed_reviewed_retained_files(repo_root)
+            digest = checker.file_sha256(repo_root / RELEASE_DIGESTS_PATH)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                f"{RELEASE_DIGESTS_PATH} {digest}",
+            )
+            write_text(path, text)
 
             checker.validate_artifact(path)
 
@@ -419,6 +462,211 @@ class ProductionVerifiedAddressesTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.ProductionVerifiedAddressesError,
                 "missing retained file",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_parent_path_escape_fails(self) -> None:
+        """Retained references cannot escape with parent path parts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "escape-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(), "Source verification inputs", "../source.json"
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "must not escape"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_absolute_path_fails(self) -> None:
+        """Retained references must remain repo-relative."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "absolute-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            absolute_path = str((repo_root / SOURCE_VERIFICATION_PATH).resolve()).replace("\\", "/")
+            text = artifact_with_field(
+                reviewed_artifact(), "Source verification inputs", absolute_path
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "repo-relative"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_backslash_path_fails(self) -> None:
+        """Retained references use portable forward slashes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "backslash-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Source verification inputs",
+                "release-artifacts\\latest\\source-verification-inputs.json",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "forward slashes"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_whitespace_path_fails(self) -> None:
+        """Ambiguous retained paths with whitespace are rejected."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "whitespace-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Source verification inputs",
+                "release-artifacts/latest/source verification inputs.json",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "one repo-relative path"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_backtick_path_fails(self) -> None:
+        """Internal backticks inside retained paths are rejected."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "backtick-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Source verification inputs",
+                "release-artifacts/latest/source`verification-inputs.json",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "must not contain backticks"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_symlink_file_fails(self) -> None:
+        """Retained evidence cannot be a symlink to another file."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "symlink-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            target = repo_root / "release-artifacts/latest/source-target.json"
+            symlink = repo_root / "release-artifacts/latest/source-symlink.json"
+            write_text(target, "{}\n")
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError):
+                self.skipTest("symlinks are not available in this environment")
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Source verification inputs",
+                "release-artifacts/latest/source-symlink.json",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "must not use symlinked"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_multiple_hashes_fail(self) -> None:
+        """A retained reference can declare only one digest."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "multiple-hashes.md"
+            seed_reviewed_retained_files(repo_root)
+            digest = checker.file_sha256(repo_root / RELEASE_DIGESTS_PATH)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                f"{RELEASE_DIGESTS_PATH} {digest} {digest}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "multiple sha256"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_stale_hash_fails(self) -> None:
+        """A stale declared retained-file digest fails closed."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "stale-hash.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                f"{RELEASE_DIGESTS_PATH} sha256:{'0' * 64}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "sha256 mismatch"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_missing_path_hash_separator_fails(self) -> None:
+        """Path and digest must be visibly separated."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "missing-separator.md"
+            seed_reviewed_retained_files(repo_root)
+            digest = checker.file_sha256(repo_root / RELEASE_DIGESTS_PATH)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                f"{RELEASE_DIGESTS_PATH}{digest}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "must separate path"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_malformed_hash_fails(self) -> None:
+        """Malformed retained-file digest syntax is rejected."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "malformed-hash.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                f"{RELEASE_DIGESTS_PATH} sha256:{'A' * 64}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "malformed sha256"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_trailing_hash_text_fails(self) -> None:
+        """A retained-file digest cannot hide trailing prose."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "trailing-hash-text.md"
+            seed_reviewed_retained_files(repo_root)
+            digest = checker.file_sha256(repo_root / RELEASE_DIGESTS_PATH)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                f"{RELEASE_DIGESTS_PATH} {digest} reviewed",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "trailing text"
             ):
                 checker.validate_artifact(path)
 
@@ -560,6 +808,50 @@ class ProductionVerifiedAddressesTests(unittest.TestCase):
                 "secret-like CLI",
             ):
                 checker.validate_artifact(path)
+
+    def test_referenced_artifact_bare_hex_fails(self) -> None:
+        """Bare 64-hex retained values fail closed as secret-shaped material."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-referenced-bare-hex.md"
+            seed_reviewed_retained_files(
+                Path(temp_dir),
+                secret_text=f"{'a' * 64}\n",
+            )
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError,
+                "bare 64-hex",
+            ):
+                checker.validate_artifact(path)
+
+    def test_referenced_artifact_bearer_placeholder_fails(self) -> None:
+        """Bearer placeholders in retained files fail closed."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-referenced-bearer-placeholder.md"
+            seed_reviewed_retained_files(
+                Path(temp_dir),
+                secret_text="Bearer <token>\n",
+            )
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError,
+                "secret-like CLI",
+            ):
+                checker.validate_artifact(path)
+
+    def test_referenced_artifact_redacted_rpc_flag_passes(self) -> None:
+        """Redacted RPC placeholders stay acceptable in retained transcripts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "reviewed-referenced-redacted-rpc.md"
+            seed_reviewed_retained_files(
+                Path(temp_dir),
+                secret_text="cast call --rpc-url <redacted>\n",
+            )
+            write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path)
 
 
 if __name__ == "__main__":

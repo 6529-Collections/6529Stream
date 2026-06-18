@@ -310,6 +310,28 @@ Map fork evidence to `fork_deployment_rehearsal`, testnet evidence to
 `production_broadcast_retention`, `live_deployment_manifest`, and
 `production_address_books`.
 
+Production verified-addresses evidence has a dedicated retained-artifact
+template at
+`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`.
+Before generating non-local envelopes for `production_address_books` or
+`live_explorer_verification`, run:
+
+```sh
+python scripts/test_production_verified_addresses.py
+python scripts/check_production_verified_addresses.py
+```
+
+Future pending-review or reviewed production verified-addresses references
+must be repo-relative UTF-8 files and may include one optional
+`sha256:<64 lowercase hex>` digest. The checker rejects missing files,
+absolute paths, path escapes, Windows backslashes, ambiguous whitespace,
+symlinked retained files, duplicate or malformed digests, stale declared
+hashes, credentialed/provider URLs, bearer tokens or placeholders, CLI secret
+flags, bare 64-hex values, and secret-shaped content in referenced retained
+files. It also preserves the existing payload checks that live address books,
+deployment manifests, explorer verification JSON, and bytecode release proofs
+agree before evidence can be reviewed.
+
 ### Metadata Browser Evidence
 
 Retain:

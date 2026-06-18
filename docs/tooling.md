@@ -689,7 +689,13 @@ deployment-manifest agreement, verified explorer rows, runtime bytecode,
 constructor-argument, linked-library, release manifest/checksum, reviewer
 metadata, and explicit redaction confirmations before a reviewed artifact can
 pass. The committed file is template-only and keeps production release blocked
-until future reviewed live address evidence is accepted.
+until future reviewed live address evidence is accepted. Pending-review or
+reviewed retained references must be repo-relative UTF-8 files and may include
+one optional `sha256:<64 lowercase hex>` digest. Path escapes, missing files,
+stale hashes, duplicate hashes, symlinked retained files, provider/API-token
+URLs, credentialed URLs, bearer tokens or placeholders, CLI secret flags, and
+bare 64-hex strings fail closed. Normalize any `sha256sum`-style retained
+digest output to the explicit `sha256:<hex>` form before review.
 
 Live metadata-browser evidence has a dedicated no-secret retained artifact
 template at
