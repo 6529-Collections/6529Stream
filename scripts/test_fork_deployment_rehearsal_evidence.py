@@ -350,6 +350,45 @@ class ForkDeploymentRehearsalEvidenceTests(unittest.TestCase):
 
             checker.validate_artifact(path)
 
+    def test_referenced_artifact_uppercase_redacted_rpc_token_passes(self) -> None:
+        """The committed REDACTED_LOCAL_ANVIL_FORK placeholder stays accepted."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-uppercase-redacted-rpc.md"
+            seed_reviewed_retained_files(
+                root,
+                secret_text=(
+                    "forge script Deploy --rpc-url REDACTED_LOCAL_ANVIL_FORK "
+                    "--broadcast\n"
+                ),
+            )
+            write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path)
+
+    def test_reviewed_retained_multiple_hashes_fail(self) -> None:
+        """A retained reference cannot silently carry multiple digests."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-duplicate-hash.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROADCAST_PATH}`",
+                    (
+                        f"`{BROADCAST_PATH} / sha256:{'a' * 64} "
+                        f"/ sha256:{'b' * 64}`"
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "multiple sha256",
+            ):
+                checker.validate_artifact(path)
+
     def test_reviewed_retained_hash_drift_fails(self) -> None:
         """Declared retained hashes must match disk contents."""
         with tempfile.TemporaryDirectory() as temp_dir:

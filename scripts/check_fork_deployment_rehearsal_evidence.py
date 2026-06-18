@@ -214,7 +214,12 @@ def resolve_repo_relative_path(root: Path, value: str) -> Path:
 def split_retained_file_reference(value: str) -> tuple[str, str | None]:
     """Split a retained file reference into path text and optional digest."""
     cleaned = value.strip().replace("`", "")
-    match = SHA256_RE.search(cleaned)
+    matches = list(SHA256_RE.finditer(cleaned))
+    if len(matches) > 1:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"retained artifact reference has multiple sha256 digests: {value}"
+        )
+    match = matches[0] if matches else None
     digest = match.group(0) if match else None
     path_text = cleaned[: match.start()] if match else cleaned
     path_text = path_text.strip().rstrip(" /,;")
@@ -259,6 +264,8 @@ def validate_retained_file_reference(
 
 def validate_referenced_artifacts(path: Path, fields: dict[str, str]) -> None:
     """Validate retained file references for non-template evidence."""
+    # Standalone --evidence files outside the repo resolve retained paths beside
+    # that artifact; committed repo-rooted evidence should be checked from repo root.
     root = repo_root_for(path)
     for label in RETAINED_FILE_FIELDS:
         validate_retained_file_reference(path, root, label, fields[label])
