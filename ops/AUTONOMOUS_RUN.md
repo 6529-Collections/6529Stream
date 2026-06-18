@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-ceremony-evidence` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/551` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/219` |
-| Active PR | `TBD` |
-| Next issue | Finish EXT-025 local validation, commit/push/open PR for issue #219, request CodeRabbit, wait for CI and bot feedback, resolve actionable comments, then merge only when clean. After merge, sync `main` and continue with the next real retained-evidence blocker rather than checker-only work. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/552` |
+| Next issue | Wait for PR #552 CI and bot feedback, resolve actionable comments, then merge only when clean. After merge, sync `main` and continue with the next real retained-evidence blocker rather than checker-only work. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 08:18 UTC` |
+| Last updated | `2026-06-18 08:28 UTC` |
 
 ## Packaging Notes
 
@@ -16251,6 +16251,7 @@ Outcome:
 | 2026-06-18 08:04 | Address PR #551 bot nice-to-have | 6529bot security reported no findings and general review marked PR #551 good to merge on the implementation commit, with a small test-coverage suggestion for the public-beta environment override. Added `test_reviewed_wrong_environment_fails` so a reviewed artifact with `Environment: live` is rejected under the public-beta checker, refreshed checksum artifacts that cover the test file, and reran `python scripts\test_public_beta_verified_addresses.py`, `python scripts\check_public_beta_verified_addresses.py`, Python compile for the changed public-beta checker/tests, `python scripts\test_release_checksums.py`, `python scripts\generate_release_checksums.py --check`, and `codex-diff-check`. Next action is to commit/push the response head, wait for latest CI/6529bot/CodeRabbit feedback, then merge only when clean. |
 | 2026-06-18 08:11 | Merge PR #551 and select EXT-025 | PR #551 merged as `04f8c0199b500fa1364993d09f7f0573a06cd0aa` after latest-head CI passed, CodeRabbit status was success, review threads were empty, and 6529bot reported no new findings. Issue #550 closed completed; tracker issues #221 and #222 remain open for real reviewed public-beta verified address and explorer evidence. Local `main` was fast-forwarded, and branch `codex/fork-ceremony-evidence` now targets issue #219 with retained reviewed fork ceremony evidence rather than another checker-only slice. |
 | 2026-06-18 08:18 | Start EXT-025 local draft | Promoted `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md` from template-only preparation to reviewed fork ceremony evidence, added Safe/admin placeholder export and post-state view retained artifacts, generated `release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json`, marked `fork_testnet_ceremony_evidence` complete in `public-beta-evidence.json`, removed #219 from the incomplete issue-link map, and regenerated blocker/packet/backlog/body-sync artifacts. Focused ceremony tests/checker and non-local/public-beta evidence checks pass. Next action is to finish release manifest/notes/checksum regeneration, run focused drift gates, commit/push/open PR closing #219, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-18 08:28 | Open PR #552 for EXT-025 | PR #552 is open at `https://github.com/6529-Collections/6529Stream/pull/552`, closes issue #219, and packages retained reviewed fork ceremony evidence, Safe/admin placeholder export, post-state views, public-beta evidence completion for `fork_testnet_ceremony_evidence`, regenerated release evidence packets/checksums/manifests, and a checker regression allowing explicit `sha256:` digests while continuing to reject bare secret-shaped hashes. CodeRabbit review was requested in comment `4739672513`. Local focused evidence, generated-artifact, release-manifest, checksum, changelog, compile, and whitespace gates passed before opening. Next action is to wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
