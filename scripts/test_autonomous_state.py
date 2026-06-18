@@ -77,6 +77,19 @@ def active_row(
     )
 
 
+def active_issue_row(
+    *,
+    item: str = "OSS-999",
+    title: str = "Example active issue",
+    issue: int = 123,
+    branch: str = "codex/example",
+) -> str:
+    return (
+        f"| `{item}` | {title} | G | Active issue #{issue} "
+        f"on branch `{branch}`; continue before opening a PR |"
+    )
+
+
 class AutonomousStateTests(unittest.TestCase):
     def write_case(self, root: Path, state_text: str, backlog_text: str) -> tuple[Path, Path]:
         run_state_path = root / checker.DEFAULT_RUN_STATE
@@ -111,6 +124,10 @@ class AutonomousStateTests(unittest.TestCase):
 
             checker.validate_state(run_state_path, backlog_path)
 
+    def test_strip_cell_only_unwraps_single_code_span(self) -> None:
+        self.assertEqual(checker.strip_cell("`TBD`"), "TBD")
+        self.assertEqual(checker.strip_cell("`a` and `b`"), "`a` and `b`")
+
     def test_rejects_multiple_active_pr_rows(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -122,6 +139,34 @@ class AutonomousStateTests(unittest.TestCase):
 
             with self.assertRaisesRegex(checker.AutonomousStateError, "multiple backlog rows"):
                 checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_multiple_active_issue_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog(
+                    active_issue_row()
+                    + "\n"
+                    + active_issue_row(item="OSS-998", issue=125)
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.AutonomousStateError, "multiple backlog rows"):
+                checker.validate_state(run_state_path, backlog_path)
+
+    def test_active_pr_issue_parser_ignores_unrelated_issue_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            row = (
+                "| `REL-999` | Example active item | G | See issue #999 for "
+                "historical context; Active PR #124 / issue #123 on branch "
+                "`codex/example`; continue the work |"
+            )
+            run_state_path, backlog_path = self.write_case(root, run_state(), backlog(row))
+
+            checker.validate_state(run_state_path, backlog_path)
 
     def test_rejects_mismatched_active_pr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -168,7 +213,18 @@ class AutonomousStateTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.AutonomousStateError, "missing required field"):
                 checker.validate_state(run_state_path, backlog_path)
 
-    def test_accepts_tbd_active_pr_when_backlog_has_no_active_pr(self) -> None:
+    def test_accepts_tbd_active_pr_with_matching_active_issue_row(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog(active_issue_row()),
+            )
+
+            checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_tbd_active_pr_without_active_issue_row(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             inactive_backlog = backlog(
@@ -180,7 +236,32 @@ class AutonomousStateTests(unittest.TestCase):
                 inactive_backlog,
             )
 
-            checker.validate_state(run_state_path, backlog_path)
+            with self.assertRaisesRegex(checker.AutonomousStateError, "no active backlog row"):
+                checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_tbd_active_pr_with_mismatched_active_issue(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog(active_issue_row(issue=999)),
+            )
+
+            with self.assertRaisesRegex(checker.AutonomousStateError, "active issue"):
+                checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_tbd_active_pr_with_mismatched_active_issue_branch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog(active_issue_row(branch="codex/other")),
+            )
+
+            with self.assertRaisesRegex(checker.AutonomousStateError, "active branch"):
+                checker.validate_state(run_state_path, backlog_path)
 
     def test_rejects_tbd_active_pr_when_backlog_claims_active_pr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

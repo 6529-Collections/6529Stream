@@ -28,8 +28,8 @@ REQUIRED_STATE_FIELDS = [
 
 PR_URL_RE = re.compile(r"github\.com/6529-Collections/6529Stream/pull/(\d+)")
 ISSUE_URL_RE = re.compile(r"github\.com/6529-Collections/6529Stream/issues/(\d+)")
-ACTIVE_PR_RE = re.compile(r"\bActive PR #(\d+)\b")
-ACTIVE_ISSUE_RE = re.compile(r"\b(?:Active PR #\d+\s*/\s*)?(?:Active issue #|issue #)(\d+)\b")
+ACTIVE_PR_WITH_ISSUE_RE = re.compile(r"\bActive PR #(?P<pr>\d+)\s*/\s*issue #(?P<issue>\d+)\b")
+ACTIVE_ISSUE_ONLY_RE = re.compile(r"\bActive issue #(?P<issue>\d+)\b")
 BRANCH_RE = re.compile(r"branch `([^`]+)`")
 
 
@@ -49,7 +49,7 @@ class ActiveBacklogRow:
 
 def strip_cell(value: str) -> str:
     value = value.strip()
-    if value.startswith("`") and value.endswith("`") and len(value) >= 2:
+    if value.startswith("`") and value.endswith("`") and value.count("`") == 2:
         return value[1:-1]
     return value
 
@@ -103,16 +103,20 @@ def parse_backlog_rows(backlog_text: str) -> list[ActiveBacklogRow]:
         title = cells[1]
         status = cells[-1]
 
-        pr_match = ACTIVE_PR_RE.search(status)
-        issue_match = ACTIVE_ISSUE_RE.search(status)
+        pr_issue_match = ACTIVE_PR_WITH_ISSUE_RE.search(status)
+        issue_only_match = ACTIVE_ISSUE_ONLY_RE.search(status)
         branch_match = BRANCH_RE.search(status)
-        if pr_match or "Active issue #" in status:
+        if pr_issue_match or issue_only_match:
             rows.append(
                 ActiveBacklogRow(
                     item_id=item_id,
                     title=title,
-                    pr_number=int(pr_match.group(1)) if pr_match else None,
-                    issue_number=int(issue_match.group(1)) if issue_match else None,
+                    pr_number=int(pr_issue_match.group("pr")) if pr_issue_match else None,
+                    issue_number=int(
+                        pr_issue_match.group("issue")
+                        if pr_issue_match
+                        else issue_only_match.group("issue")
+                    ),
                     branch=branch_match.group(1) if branch_match else None,
                     raw=line,
                 )
@@ -125,9 +129,13 @@ def validate_state(run_state_path: Path, backlog_path: Path) -> None:
     active_rows = parse_backlog_rows(backlog_path.read_text(encoding="utf-8"))
 
     active_pr_rows = [row for row in active_rows if row.pr_number is not None]
+    active_issue_rows = [row for row in active_rows if row.issue_number is not None]
     if len(active_pr_rows) > 1:
         rows = ", ".join(f"{row.item_id} PR #{row.pr_number}" for row in active_pr_rows)
         raise AutonomousStateError(f"multiple backlog rows claim active PRs: {rows}")
+    if len(active_issue_rows) > 1:
+        rows = ", ".join(f"{row.item_id} issue #{row.issue_number}" for row in active_issue_rows)
+        raise AutonomousStateError(f"multiple backlog rows claim active issues: {rows}")
 
     expected_pr = number_from_url(state["Active PR"], PR_URL_RE, "Active PR")
     expected_issue = number_from_url(state["Active issue"], ISSUE_URL_RE, "Active issue")
@@ -138,6 +146,21 @@ def validate_state(run_state_path: Path, backlog_path: Path) -> None:
             row = active_pr_rows[0]
             raise AutonomousStateError(
                 f"state Active PR is TBD but backlog still claims active PR #{row.pr_number}"
+            )
+        if expected_issue is None:
+            return
+        if not active_issue_rows:
+            raise AutonomousStateError(
+                f"state Active issue #{expected_issue} has no active backlog row"
+            )
+        active = active_issue_rows[0]
+        if active.issue_number != expected_issue:
+            raise AutonomousStateError(
+                f"backlog active issue #{active.issue_number} does not match state issue #{expected_issue}"
+            )
+        if active.branch != expected_branch:
+            raise AutonomousStateError(
+                f"backlog active branch {active.branch!r} does not match state branch {expected_branch!r}"
             )
         return
 
