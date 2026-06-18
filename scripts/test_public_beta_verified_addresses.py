@@ -256,6 +256,24 @@ class PublicBetaVerifiedAddressesTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_reviewed_wrong_environment_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_reviewed_files(root)
+            path = root / "wrong-environment.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "- Environment: `testnet`",
+                    "- Environment: `live`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.PublicBetaVerifiedAddressesError, "Environment"
+            ):
+                checker.validate_artifact(path)
+
     def test_reviewed_unverified_explorer_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
