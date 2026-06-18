@@ -198,7 +198,7 @@ CLI_SECRET_RE = re.compile(
     r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
     r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
-    r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"\bBearer\s+(?:<[^>\s]+>|[A-Za-z0-9._~+/=-]{12,})|"
     r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+|"
     r"https?://[^\s`]*(?:alchemy|infura|quicknode)[^\s`]*|"
     r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
@@ -239,6 +239,10 @@ def file_sha256(path: Path) -> str:
                 hasher.update(chunk)
     except FileNotFoundError as exc:
         raise LiveRandomizerOperationsEvidenceError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise LiveRandomizerOperationsEvidenceError(
+            f"could not read retained file for sha256: {path}: {exc}"
+        ) from exc
     return "sha256:" + hasher.hexdigest()
 
 

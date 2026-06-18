@@ -494,6 +494,31 @@ class LiveRandomizerOperationsEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, repo_root=repo_root)
 
+    def test_referenced_retained_file_bearer_placeholder_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "retained-bearer-placeholder.md"
+            retained_path = RETAINED_FILE_LABELS["Provider dashboard or export"]
+            seed_reviewed_retained_files(repo_root, {retained_path: "Bearer <token>\n"})
+            write_text(path, reviewed_text())
+
+            with self.assertRaisesRegex(
+                checker.LiveRandomizerOperationsEvidenceError, "secret-like CLI or URL"
+            ):
+                checker.validate_evidence(path, repo_root=repo_root)
+
+    def test_referenced_retained_file_redacted_rpc_flag_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "retained-redacted-rpc.md"
+            retained_path = RETAINED_FILE_LABELS["Provider dashboard or export"]
+            seed_reviewed_retained_files(
+                repo_root, {retained_path: "cast call --rpc-url <redacted>\n"}
+            )
+            write_text(path, reviewed_text())
+
+            checker.validate_evidence(path, repo_root=repo_root)
+
     def test_pending_review_template_decision_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "live-randomizer.md"
