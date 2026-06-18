@@ -10,9 +10,9 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:6ac724fe4215faa415ce95a5220a37aa992f0b637fdcb3679ce5bf4416627992` |
+| Backlog SHA-256 | `sha256:e03f3ec6977aed4e702541eaae7aac2c2a81f5145f75d4374e372b50da880939` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
-| Issue links SHA-256 | `sha256:6a9fb06bd4ff0ad823eeac1c443967e8691063af348a77430533943b4f127563` |
+| Issue links SHA-256 | `sha256:8c83e119fc57eae76a4a9200711055e3e1c1b327be80d3529571327ae085fece` |
 
 ## Policy
 
@@ -29,7 +29,6 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | --- | --- | --- | --- | --- |
 | [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:681dd09e156b8949ea33717554e80bb2c5518e9504f827bc5a8fe1b7b5551292` | 55 |
 | [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:fb44ad23ca2db58f098e47f38ce6e799375e7ede3e390942ba363fb89572baaf` | 55 |
-| [#218](https://github.com/6529-Collections/6529Stream/issues/218) | `public-beta-fork-testnet-metadata-browser-evidence` | `missing` | `sha256:afcfc50d45d25fd3240753310873c4d3a443e620ba5ca06ccbeb38e76ed0505d` | 55 |
 | [#423](https://github.com/6529-Collections/6529Stream/issues/423) | `public-beta-fork-testnet-marketplace-indexer-evidence` | `missing` | `sha256:0166f05273548a9f61699b989303fd81aa415e296a598f6271a39a28c8de87f8` | 55 |
 | [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:9ba44c3d5e1dc8c486864f33c45190639ba0b1ed98626c69661fb17eb0df6f91` | 55 |
 | [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:f66604a772038efde47c0b2dad2ae025fd445df95af956909d39a274a18b6f6a` | 55 |
@@ -150,70 +149,6 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_non_local_release_evidence.py`
 - `python scripts/test_testnet_deployment_rehearsal_evidence.py`
 - `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
-
-## Non-Goals
-
-- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
-- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
-- Do not use the checked template alone as completion evidence.
-
-## Acceptance Criteria
-
-- Reviewed retained evidence exists and is no-secret or properly redacted.
-- The evidence manifest references the retained evidence path and hash.
-- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
-- All validation commands above pass.
-```
-
-### #218 public-beta-fork-testnet-metadata-browser-evidence
-
-- Issue: https://github.com/6529-Collections/6529Stream/issues/218
-- Body SHA-256: `sha256:afcfc50d45d25fd3240753310873c4d3a443e620ba5ca06ccbeb38e76ed0505d`
-- Source body SHA-256: `sha256:559b992f2424f09885bd5fc19dc102815d00b8b47925ae08151c55f046862aa8`
-
-```markdown
-<!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-testnet-metadata-browser-evidence issue_number=218 -->
-
-Parent tracker: https://github.com/6529-Collections/6529Stream/issues/214
-Source backlog entry: `release-artifacts/latest/release-evidence-issue-backlog.json` / `public-beta-fork-testnet-metadata-browser-evidence`
-Issue-link artifact: `release-artifacts/latest/release-evidence-issue-links.json`
-Completion policy: this tracker issue can close only after reviewed retained evidence is referenced by the shared release evidence status manifest.
-
-## Evidence Requirement
-
-- Phase: `Public Beta`
-- Requirement ID: `fork_testnet_metadata_browser_evidence`
-- Current status: `missing`
-- Evidence posture: external/future
-- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
-
-## Source Links
-
-- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_metadata_browser_evidence`
-- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`
-
-## Required Evidence
-
-- Retained artifact expectation: Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`. Template-only evidence cannot complete the row.
-- Template-only can complete: `false`
-
-## Validation
-
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_metadata_browser_evidence.py`
-- `python scripts/check_fork_metadata_browser_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`

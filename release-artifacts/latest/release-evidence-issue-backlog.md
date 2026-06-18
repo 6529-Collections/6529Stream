@@ -23,7 +23,7 @@ The committed baseline remains blocked for public beta and production release.
 
 | Phase | Issue Entries | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | 6 | 6 | 0 | 0 | 0 | 0 | 0 |
+| Public Beta | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | Production Release | 11 | 11 | 0 | 0 | 0 | 0 | 0 |
 
 ## Issue Entries
@@ -143,75 +143,6 @@ Suggested issue body:
 - `python scripts/test_non_local_release_evidence.py`
 - `python scripts/test_testnet_deployment_rehearsal_evidence.py`
 - `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
-
-## Non-Goals
-
-- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
-- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
-- Do not use the checked template alone as completion evidence.
-
-## Acceptance Criteria
-
-- Reviewed retained evidence exists and is no-secret or properly redacted.
-- The evidence manifest references the retained evidence path and hash.
-- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
-- All validation commands above pass.
-```
-
-### Retain public beta evidence: fork_testnet_metadata_browser_evidence
-
-| Field | Value |
-| --- | --- |
-| Entry ID | `public-beta-fork-testnet-metadata-browser-evidence` |
-| Phase | `Public Beta` |
-| Requirement ID | `fork_testnet_metadata_browser_evidence` |
-| Status | `missing` |
-| Evidence posture | external/future |
-| Suggested labels | `release`, `evidence`, `roadmap`, `public-beta` |
-| Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
-| Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
-| Template | `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`; Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation. |
-| Template-only can complete | `false` |
-
-Suggested issue body:
-
-```md
-## Evidence Requirement
-
-- Phase: `Public Beta`
-- Requirement ID: `fork_testnet_metadata_browser_evidence`
-- Current status: `missing`
-- Evidence posture: external/future
-- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
-
-## Source Links
-
-- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_metadata_browser_evidence`
-- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`
-
-## Required Evidence
-
-- Retained artifact expectation: Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`. Template-only evidence cannot complete the row.
-- Template-only can complete: `false`
-
-## Validation
-
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_metadata_browser_evidence.py`
-- `python scripts/check_fork_metadata_browser_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
@@ -1210,7 +1141,6 @@ Suggested issue body:
 | Command |
 | --- |
 | `python scripts/check_external_audit_report_evidence.py` |
-| `python scripts/check_fork_metadata_browser_evidence.py` |
 | `python scripts/check_live_ceremony_evidence.py` |
 | `python scripts/check_live_metadata_browser_evidence.py` |
 | `python scripts/check_live_randomizer_operations_evidence.py` |
@@ -1231,7 +1161,6 @@ Suggested issue body:
 | `python scripts/generate_release_evidence_packet_index.py --check` |
 | `python scripts/generate_release_manifest.py --check` |
 | `python scripts/test_external_audit_report_evidence.py` |
-| `python scripts/test_fork_metadata_browser_evidence.py` |
 | `python scripts/test_live_ceremony_evidence.py` |
 | `python scripts/test_live_metadata_browser_evidence.py` |
 | `python scripts/test_live_randomizer_operations_evidence.py` |

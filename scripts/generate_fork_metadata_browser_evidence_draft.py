@@ -287,6 +287,9 @@ def render_artifact(
         else "- This file is pending review and is not completion evidence until the "
         "shared public-beta evidence manifest links reviewed retained evidence."
     )
+    review_status_argument = (
+        " --review-status reviewed" if review_status == "reviewed" else ""
+    )
     return "\n".join(
         [
             "# Fork/Testnet Metadata Browser Retained Artifact",
@@ -358,6 +361,7 @@ def render_artifact(
             f"--block-or-reference \"{block_or_reference}\" "
             f"--command-or-source-system \"{ci_run_or_transcript}\" "
             f"--owner \"{operator}\" --reviewer \"{reviewer}\" "
+            f"{review_status_argument} "
             f"--source-git-commit {git_commit} --source-ci-run \"{ci_run_or_transcript}\"",
             "python scripts/check_non_local_release_evidence.py",
             "python scripts/check_public_beta_evidence.py",

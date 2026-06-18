@@ -174,6 +174,7 @@ class ForkMetadataBrowserEvidenceDraftTests(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertIn("- Review status: `reviewed`", text)
             self.assertIn("- Review decision: `reviewed`", text)
+            self.assertIn("--review-status reviewed", text)
             checker.validate_artifact(output)
 
     def test_preserves_sha256_prefixed_token_uri_digest_input(self) -> None:

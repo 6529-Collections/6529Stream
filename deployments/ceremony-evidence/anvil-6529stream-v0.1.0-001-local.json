@@ -69,7 +69,7 @@
       "evidence": [
         {
           "path": "script/RehearseMetadataBrowser.s.sol",
-          "sha256": "sha256:6ad0d9cee364ddb57246bb7bf2a3057b2efa9fca4d0f4aec5ff1e044e14d999f"
+          "sha256": "sha256:791c705d40b12a3660e9c9411a0eddf78984c10ece63032336757e1c98ef5c72"
         }
       ],
       "notes": "Local deployment-rehearsal metadata executes inside the committed Chromium sandbox check."

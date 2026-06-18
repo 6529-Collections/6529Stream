@@ -1,0 +1,44 @@
+{
+  "chain_id": 1,
+  "contracts": {
+    "DependencyRegistry": {
+      "address": "0x0040f056e64e8c21d97d6f28a850a1c636ac361f"
+    },
+    "MetadataRehearsalRandomizer": {
+      "address": "0xe3fb8dbbac8a84a97b6ebf9de19819c48b35efc9"
+    },
+    "StreamContractMetadata": {
+      "address": "0x9a79881f8b168dbc02b2e720898031e3e78a0ffd"
+    },
+    "StreamCore": {
+      "address": "0x03695c275fcfa9f6c95ad370edf9eaa7e480d902"
+    },
+    "StreamDrops": {
+      "address": "0x1ec75e6f8d9dea73746285c49cdd091fd9733aa2"
+    }
+  },
+  "environment": "fork",
+  "no_secrets": true,
+  "schema_version": "6529stream.fork-testnet-metadata-browser-evidence.v1",
+  "source": {
+    "command_or_source_system": "local mainnet-fork metadata browser capture on 2026-06-18; PR latest-head CI required before merge",
+    "git_commit": "2fb29578413541ecda5fe2732dad21ed06093366"
+  },
+  "token_results": [
+    {
+      "collection_id": 1,
+      "sandbox": {
+        "browser_executed": true,
+        "console_errors": [],
+        "dependency_loaded": true,
+        "draw_is_function": true,
+        "metadata_fetched_from_deployed_contract": true,
+        "page_errors": [],
+        "parent_access_blocked": true,
+        "unexpected_requests": []
+      },
+      "token_id": 10000000000,
+      "token_uri_sha256": "sha256:9aef87db2ff46c6a575d84d456a7e095cfdbd1acbe547922678f134785a3be8f"
+    }
+  ]
+}

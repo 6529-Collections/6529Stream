@@ -47,11 +47,16 @@
     {
       "id": "fork_testnet_metadata_browser_evidence",
       "phase": "public_beta",
-      "status": "missing",
-      "owner": "TBD",
-      "evidence": [],
+      "status": "complete",
+      "owner": "Codex autonomous implementer",
+      "evidence": [
+        {
+          "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json",
+          "sha256": "sha256:600d61cb7041525c9949e54477e9f75d8c31a29639382e840f9ad62093dca225"
+        }
+      ],
       "risk_acceptance": null,
-      "notes": "Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained."
+      "notes": "Reviewed fork metadata browser evidence is retained: mainnet fork block 25344439, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "id": "fork_testnet_marketplace_indexer_evidence",

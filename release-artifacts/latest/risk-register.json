@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:d7ba2734fbe90075d9628b763a25ee0e1d5e2c60b0aa8d2af58b3d48a3bf1896"
+      "sha256": "sha256:e19f8bdd38027389b88154705f4710a0f3ac97e0244f04f496ef6c70eb412a34"
     },
     {
       "path": "docs/audit-package.md",
@@ -46,11 +46,11 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:608a00bd9959f8a2ce3f8607a7f3170b955fe0edf104ad4b2cf3d55e87ad3685"
+      "sha256": "sha256:8001acc4c5c8e8cc73377aa23439875e44bc15aca745e8808e77d0f98d132c3c"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:92359e28637525c5a5d1961238f6bf347f49d5cd04b2a68416bbe93c412e8136"
+      "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
     },
     {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -95,7 +95,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:92359e28637525c5a5d1961238f6bf347f49d5cd04b2a68416bbe93c412e8136"
+          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:d7ba2734fbe90075d9628b763a25ee0e1d5e2c60b0aa8d2af58b3d48a3bf1896"
+          "sha256": "sha256:e19f8bdd38027389b88154705f4710a0f3ac97e0244f04f496ef6c70eb412a34"
         }
       ],
       "risk_acceptance": null
@@ -171,11 +171,11 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:608a00bd9959f8a2ce3f8607a7f3170b955fe0edf104ad4b2cf3d55e87ad3685"
+          "sha256": "sha256:8001acc4c5c8e8cc73377aa23439875e44bc15aca745e8808e77d0f98d132c3c"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:92359e28637525c5a5d1961238f6bf347f49d5cd04b2a68416bbe93c412e8136"
+          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
         }
       ],
       "risk_acceptance": null
@@ -256,7 +256,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:92359e28637525c5a5d1961238f6bf347f49d5cd04b2a68416bbe93c412e8136"
+          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
         },
         {
           "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:d7ba2734fbe90075d9628b763a25ee0e1d5e2c60b0aa8d2af58b3d48a3bf1896"
+          "sha256": "sha256:e19f8bdd38027389b88154705f4710a0f3ac97e0244f04f496ef6c70eb412a34"
         },
         {
           "path": "docs/metadata.md",
@@ -346,7 +346,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:92359e28637525c5a5d1961238f6bf347f49d5cd04b2a68416bbe93c412e8136"
+          "sha256": "sha256:052904f67b3df72f712dc2e69badf7693b311fac03e8a902d0adba257c2f737f"
         }
       ],
       "risk_acceptance": null
@@ -483,7 +483,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:d7ba2734fbe90075d9628b763a25ee0e1d5e2c60b0aa8d2af58b3d48a3bf1896"
+          "sha256": "sha256:e19f8bdd38027389b88154705f4710a0f3ac97e0244f04f496ef6c70eb412a34"
         },
         {
           "path": "docs/tooling.md",
