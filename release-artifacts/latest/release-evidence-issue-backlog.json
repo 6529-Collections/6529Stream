@@ -9,7 +9,7 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:513349fb351083b11247de3353c156433f54097aadb75f6caab9ea1b47a172a0",
+      "sha256": "sha256:ea481cc0b34765372f350da6ff69966150126799acfd71cc8642700f46298e73",
       "size_bytes": 66335
     }
   },
@@ -149,7 +149,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:d33e7d8d32707c6ea91f8402080eda0e650a915b7987eb433ba1e4fcf09a4825",
+        "sha256": "sha256:22e7de0b2d787a838c63e8f1d5e531b3d1ab594709c1220f836003f8669a3770",
         "block_or_reference": "template-only testnet block, transaction hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only testnet deployment command, CI job, explorer, or operator transcript",
         "operator_notes": "Replace the dedicated retained artifact template with testnet deployment transcript, chain ID, transaction references, sanitized broadcast, generated manifest, address book, explorer verification status, and reviewer confirmation."

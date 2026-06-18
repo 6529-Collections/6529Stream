@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:689361af234731ef852798c49c1326f55cc254c11ce09e271b7e92e3056639ff",
-      "size_bytes": 31047
+      "sha256": "sha256:911394b7498cee9d5440ee82040d2be50c257d5c3d24b70f2c120c84da749ff2",
+      "size_bytes": 31609
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -216,7 +216,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:d33e7d8d32707c6ea91f8402080eda0e650a915b7987eb433ba1e4fcf09a4825",
+        "sha256": "sha256:22e7de0b2d787a838c63e8f1d5e531b3d1ab594709c1220f836003f8669a3770",
         "block_or_reference": "template-only testnet block, transaction hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only testnet deployment command, CI job, explorer, or operator transcript",
         "operator_notes": "Replace the dedicated retained artifact template with testnet deployment transcript, chain ID, transaction references, sanitized broadcast, generated manifest, address book, explorer verification status, and reviewer confirmation."

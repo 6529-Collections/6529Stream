@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -197,6 +198,16 @@ def seed_reviewed_retained_files(root: Path, *, secret_text: str | None = None) 
         write_text(root / relative_path, content)
 
 
+def artifact_with_field(text: str, label: str, value: str) -> str:
+    """Replace one Markdown bullet field value."""
+    return re.sub(
+        rf"^- {re.escape(label)}: `?[^\n`]*`?$",
+        lambda _match: f"- {label}: `{value}`",
+        text,
+        flags=re.MULTILINE,
+    )
+
+
 class TestnetDeploymentRehearsalEvidenceTests(unittest.TestCase):
     """Checker behavior for testnet deployment rehearsal evidence."""
 
@@ -214,7 +225,7 @@ class TestnetDeploymentRehearsalEvidenceTests(unittest.TestCase):
             seed_reviewed_retained_files(Path(temp_dir))
             write_text(path, reviewed_artifact())
 
-            checker.validate_artifact(path)
+            checker.validate_artifact(path, repo_root=Path(temp_dir))
 
     def test_reviewed_failed_result_fields_fail(self) -> None:
         """Reviewed rehearsal result fields must affirm successful checks."""
@@ -244,7 +255,247 @@ class TestnetDeploymentRehearsalEvidenceTests(unittest.TestCase):
                 checker.TestnetDeploymentRehearsalEvidenceError,
                 "missing retained file",
             ):
-                checker.validate_artifact(path)
+                checker.validate_artifact(path, repo_root=Path(temp_dir))
+
+    def test_pending_review_retained_files_are_validated(self) -> None:
+        """Pending review artifacts also validate retained file references."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "pending-missing-retained-file.md"
+            write_text(
+                path,
+                reviewed_artifact()
+                .replace("- Review status: `reviewed`", "- Review status: `pending_review`")
+                .replace("- Review decision: `reviewed`", "- Review decision: `pending_review`"),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "missing retained file",
+            ):
+                checker.validate_artifact(path, repo_root=Path(temp_dir))
+
+    def test_reviewed_artifact_with_declared_hashes_passes(self) -> None:
+        """Declared retained hashes are accepted when they match disk."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            transcript_hash = checker.file_sha256(
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md"
+            )
+            path = repo_root / "reviewed-hashes.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md "
+                    f"/ {transcript_hash}",
+                ),
+            )
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_placeholder_fails_clearly(self) -> None:
+        """Retained artifact placeholders fail before path resolution."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "placeholder-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "TBD",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "must be replaced before non-template review",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_parent_path_escape_fails(self) -> None:
+        """Retained artifact paths cannot escape through parent segments."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "escape-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "../transcript.md",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "escape",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_absolute_path_fails(self) -> None:
+        """Retained artifact paths must be repo-relative."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "absolute-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "/tmp/transcript.md",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "repo-relative",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_backslash_path_fails(self) -> None:
+        """Retained artifact paths cannot use Windows backslashes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "backslash-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts\\evidence\\testnet-deployment-rehearsal\\transcript.md",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "escape",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_whitespace_path_fails(self) -> None:
+        """Retained artifact references must be a single path."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "whitespace-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript copy.md",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "one repo-relative path",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_multiple_hashes_fail(self) -> None:
+        """A retained reference cannot silently carry multiple digests."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "multi-hash-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md "
+                    f"/ sha256:{'a' * 64} / sha256:{'b' * 64}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "multiple sha256",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_drift_fails(self) -> None:
+        """Declared retained hashes must match disk contents."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "hash-drift-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md "
+                    f"/ sha256:{'f' * 64}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "sha256 mismatch",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_without_separator_fails(self) -> None:
+        """Declared retained hashes need an explicit path/hash separator."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            transcript_hash = checker.file_sha256(
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md"
+            )
+            path = repo_root / "hash-no-separator-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md"
+                    f"/{transcript_hash}",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "separate path and sha256 digest",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_trailing_text_fails(self) -> None:
+        """Declared retained hashes cannot hide trailing field text."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            transcript_hash = checker.file_sha256(
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md"
+            )
+            path = repo_root / "hash-trailing-retained.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    "release-artifacts/evidence/testnet-deployment-rehearsal/transcript.md "
+                    f"/ {transcript_hash} unexpected",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "trailing text",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
 
     def test_missing_heading_fails(self) -> None:
         """Required sections cannot silently disappear."""
@@ -352,6 +603,33 @@ class TestnetDeploymentRehearsalEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.TestnetDeploymentRehearsalEvidenceError,
                 "secret-like CLI",
+            ):
+                checker.validate_artifact(path, repo_root=Path(temp_dir))
+
+    def test_credentialed_url_fails(self) -> None:
+        """Credentialed URLs are secret-shaped even outside explicit keys."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "credentialed-url.md"
+            write_text(
+                path,
+                valid_template() + "\nhttps://user:pass@example.invalid/path\n",
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "secret-like CLI",
+            ):
+                checker.validate_artifact(path)
+
+    def test_bare_hex_secret_like_text_fails(self) -> None:
+        """Unprefixed 64-hex strings are treated as secret-shaped material."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "bare-hex.md"
+            write_text(path, valid_template() + f"\n{'a' * 64}\n")
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "bare 64-hex",
             ):
                 checker.validate_artifact(path)
 

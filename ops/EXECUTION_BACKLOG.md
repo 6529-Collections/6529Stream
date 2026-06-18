@@ -282,7 +282,8 @@ Dependencies: None.
 
 ### EXT-001: Finish Testnet Deployment Rehearsal Retained Artifact Checker
 
-Status: In progress on `codex/testnet-deployment-rehearsal-evidence-checker`.
+Status: Merged in PR #359; issue #357 closed completed. Issue #217 remains
+open for future reviewed Sepolia deployment rehearsal evidence.
 
 Gate: E/G.
 
@@ -3366,13 +3367,14 @@ unless an external dependency changes.
 | --- | --- | --- | --- |
 | `EXT-009` | Add fork/testnet metadata browser evidence checker and retained-artifact template | E/G | Merged in PR #531; issue #530 closed completed; future reviewed evidence still required |
 | `EXT-010` | Retain fork ceremony evidence for admin/signer/randomizer/auction operations | E/F | Merged in PR #535; issue #534 closed completed with a dedicated fork/testnet ceremony retained-artifact template/checker, retained-path/no-secret enforcement for future reviewed evidence, release-packet mapping, and live issue #219 body sync; tracker issue #219 remains open until real reviewed evidence is retained |
-| `EXT-011` | Retain fork randomizer operations evidence | E/F | In progress on issue #536 and branch `codex/fork-randomizer-operations-evidence-checker`; add a dedicated fork/testnet randomizer operations retained-artifact template/checker and release-packet mapping without closing tracker issue #220 |
+| `EXT-011` | Retain fork randomizer operations evidence | E/F | Merged in PR #537; issue #536 closed completed with a dedicated fork/testnet randomizer operations retained-artifact template/checker, retained-path/no-secret enforcement for future reviewed evidence, release-packet mapping, and live issue #220 body sync; tracker issue #220 remains open until real reviewed evidence is retained |
 | `EXT-012` | Add production broadcast retention checker | F/G | Merged in PR #469; issue #468 closed completed |
 | `EXT-013` | Add production verified-addresses evidence checker | F/G | Merged in PR #471; issue #470 closed completed |
 | `EXT-014` | Add live metadata browser evidence checker | F/G | Merged in PR #474; issue #472 closed completed; tracker issue #473 remains open for future reviewed live evidence |
 | `EXT-015` | Add live ceremony evidence checker | F/G | Merged in PR #476; issue #228 remains open for future reviewed live ceremony evidence |
 | `EXT-016` | Add live randomizer operations evidence checker | F/G | Merged in PR #477; issue #229 remains open for future reviewed live randomizer operations evidence |
 | `EXT-017` | Harden fork deployment rehearsal retained artifact validation | E/G | Merged in PR #533; issue #532 closed completed; validates repo-relative retained paths, missing files, no-secret scans, and declared `sha256:` drift for reviewed fork rehearsal evidence |
+| `EXT-018` | Harden testnet deployment rehearsal retained artifact validation | E/G | In progress on issue #538 and branch `codex/testnet-rehearsal-evidence-hardening`; add stronger retained-path, missing-file, no-secret, and declared `sha256:` drift validation for future reviewed Sepolia deployment rehearsal evidence without closing tracker issue #217 |
 
 ### Adversarial Testing
 

@@ -656,7 +656,10 @@ transaction references, sanitized broadcast, generated manifest/address book,
 explorer status, and reviewer confirmation are retained. Operators must redact
 or omit private keys, tokens, private RPC URLs, bearer credentials, and other
 sensitive values before retaining any transcript, command line, broadcast, or
-linked artifact because the checker enforces the same no-secret policy.
+linked artifact because the checker enforces the same no-secret policy. Pending
+or reviewed retained references must be repo-relative files and may include one
+optional `sha256:<64 lowercase hex>` digest; path escapes, missing files, stale
+hashes, duplicate hashes, and bare 64-hex strings fail closed.
 The Sepolia setup template lives at
 `deployments/config/sepolia-6529stream-v0.1.0-001.template.json`; use it with
 `docs/deployment.md#sepolia-deployment-rehearsal-runbook` and

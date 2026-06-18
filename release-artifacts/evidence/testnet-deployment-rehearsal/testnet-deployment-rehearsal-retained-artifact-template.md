@@ -72,3 +72,8 @@ python scripts/generate_release_checksums.py --check
   public-beta evidence manifest.
 - Do not retain private RPC URLs, private keys, API keys, signer-service
   secrets, or unreleased drop payloads in this repository.
+- Retained artifact references must be repo-relative paths. Add one optional
+  `sha256:<64 lowercase hex>` digest after the path when review should prove
+  the referenced artifact bytes have not drifted.
+- Do not paste bare 64-hex strings; use the `sha256:` prefix for retained
+  artifact digests. Bare 64-hex strings fail the no-secret scan.
