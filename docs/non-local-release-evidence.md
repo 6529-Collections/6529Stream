@@ -418,7 +418,8 @@ optional `sha256:<64 lowercase hex>` digest. The checker rejects missing files,
 absolute paths, path escapes, Windows backslashes, ambiguous whitespace,
 duplicate or malformed digests, stale declared hashes, credentialed/provider
 URLs, bearer tokens, bare 64-hex values, and secret-shaped content in referenced
-retained files.
+retained files. Symlinked retained files and non-UTF-8 retained files also fail
+closed so the reviewed evidence is the committed text file the path names.
 
 ### Marketplace And Indexer Evidence
 

@@ -708,7 +708,8 @@ reviewed retained references must be repo-relative files and may include one
 optional `sha256:<64 lowercase hex>` digest; path escapes, missing files, stale
 hashes, duplicate hashes, provider/API-token-shaped URLs, credentialed URLs,
 and bare 64-hex strings fail closed. Normalize any `sha256sum`-style retained
-digest output to the explicit `sha256:<hex>` form before review.
+digest output to the explicit `sha256:<hex>` form before review. Retained
+evidence must be UTF-8 text and must not be symlinked.
 
 Live ceremony evidence has a dedicated no-secret retained artifact template at
 `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`.

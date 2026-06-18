@@ -87,8 +87,8 @@ python scripts/generate_release_checksums.py --check
   required retained artifact fields must be repo-relative retained files.
   Absolute paths, `..` escapes, Windows backslashes, ambiguous whitespace in
   paths, placeholders, missing files, stale hashes, duplicate hashes,
-  provider/API-token-shaped URLs, credentialed URLs, bearer tokens, and bare
-  64-hex strings fail validation.
+  provider/API-token-shaped URLs, credentialed URLs, bearer tokens, bare
+  64-hex strings, symlinked files, and non-UTF-8 files fail validation.
 - Retained file references may append one declared digest as
   `path/to/file sha256:<64 lowercase hex>` or
   `path/to/file / sha256:<64 lowercase hex>`. Normalize `sha256sum`-style

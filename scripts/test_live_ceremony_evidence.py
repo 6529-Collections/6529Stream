@@ -358,7 +358,31 @@ class LiveCeremonyEvidenceTests(unittest.TestCase):
             write_text(path, text)
 
             with self.assertRaisesRegex(
-                checker.LiveCeremonyEvidenceError, "must not escape"
+                checker.LiveCeremonyEvidenceError, "must use forward slashes"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_symlink_file_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "symlink-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            target = repo_root / "release-artifacts/evidence/live-ceremony/target.md"
+            symlink = repo_root / "release-artifacts/evidence/live-ceremony/symlink.md"
+            write_text(target, "retained symlink target\n")
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError):
+                self.skipTest("symlinks are not available in this environment")
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                "release-artifacts/evidence/live-ceremony/symlink.md",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "must not use symlinked"
             ):
                 checker.validate_artifact(path, repo_root=repo_root)
 

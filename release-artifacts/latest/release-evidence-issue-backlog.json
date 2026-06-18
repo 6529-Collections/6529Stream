@@ -9,7 +9,7 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:a9296ee00d7b8e4edf23117ee509846c9565eb81dd1596062ddd446aee65ac78",
+      "sha256": "sha256:e3f241bb8c984c7170110924719464870818cdb2bfb97af81728336985113e54",
       "size_bytes": 66335
     }
   },
@@ -821,7 +821,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md",
-        "sha256": "sha256:64e0d5ef461596e1ff80dc96ace349893146c49265a653ff088797cd668ed2a8",
+        "sha256": "sha256:fdde33a1fb1fb6948cbb4e7be5c6862110b80f96d040cdef49670e09dc719766",
         "block_or_reference": "template-only live ceremony transcript, multisig transaction set, or deployment version",
         "command_or_source_system": "template-only ceremony transcript, multisig UI export, explorer source, or reviewer source",
         "operator_notes": "Replace this template with admin, signer, metadata, auction, and emergency ceremony evidence, ownership transfers, role grants, Safe or multisig transaction IDs, dry-run outputs, and reviewer confirmation."
