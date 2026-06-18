@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:d2dc0acd201590fe0234064842b0da0d4b050f0f6cbf6ebca2f218014c66c9e7",
-      "size_bytes": 66581
+      "sha256": "sha256:4da20abc8a29f75e4ea8651f2dfba5f0c516d3d99f2001babcd288193c693fb2",
+      "size_bytes": 66972
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:976495d7a94b30faf5044bcf9e908f054fe3cffa64fc3ddaa798b42b05ec7ec3",
+      "sha256": "sha256:ac7c5ae9ca3b73c0595de2c1c023b58e827c0cfa5006e325bff85da7e0e35d61",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -69,6 +69,7 @@
       "Added a checked fork/testnet metadata-browser retained-artifact template and offline checker for future `fork_testnet_metadata_browser_evidence`, covering fork/testnet environment and chain IDs, deployed-contract metadata fetches, retained browser summary JSON, sandbox outcomes, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",
       "Added manifest-aware marketplace/indexer evidence validation so complete public-beta or production marketplace/indexer rows must reference reviewed non-local envelopes whose retained Markdown artifacts pass the detailed coverage, hash, environment, and no-secret checks while templates remain reusable preparation material.",
       "Added `ADV-013` randomizer request-binding parity tests covering VRF and arRNG wrong-collection pending-state preservation, plus nested stale-mark and retry reentry during the external core write without production bytecode changes.",
+      "Added `ADV-014` bounded randomizer/admin stateful invariant tests covering arRNG reserve funding, request-cost changes, unique token requests, fulfillment, stale marking, failed post-processing, retry success/failure, provider/epoch replacement attempts, randomness-request pauses, token-binding drift, and emergency-withdrawal reserve views without production bytecode changes.",
       "Added `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations, with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and release-artifact coverage.",
       "Added a checked `AUD-003` external audit finding workflow covering public-safe intake, severity/status triage, audited scope, remediation PRs, required tests, retest, accepted-risk decisions, closure gates, release evidence handoff, no-secret redaction, and local/CI/Windows gate wiring.",
       "Added a generated release-candidate lockfile that ties the release manifest, bytecode release proof, public-beta evidence, risk register, release notes, blocker reports, release evidence issue outputs, release-signature evidence, and non-release commit/tag/signature status into a checksum-covered local baseline, with focused tests and local/CI/Windows gate wiring.",
