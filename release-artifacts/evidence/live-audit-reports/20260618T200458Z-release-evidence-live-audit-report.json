@@ -1,0 +1,52 @@
+{
+  "schema_version": "6529stream.release-evidence-live-audit-report.v1",
+  "repo": "6529-Collections/6529Stream",
+  "generated_at": "20260618T200458Z",
+  "readiness_claim": "blocked",
+  "no_secret_notice": "This report records no-secret live issue audit evidence only. It must not include private keys, RPC credentials, access tokens, unreleased signer material, or secret operational metadata.",
+  "readiness_warning": "The report does not mark public-beta or production-release retained evidence complete and does not change the blocked readiness posture.",
+  "snapshot_freshness": {
+    "status": "live_export_at_generation",
+    "generated_from_live_export": true,
+    "currentness_claim": "current_at_generation_only",
+    "stale_snapshot_policy": "Retained reports are historical snapshots; reviewers must regenerate from live GitHub issue exports during the release ceremony before treating issue labels, bodies, or closure status as current.",
+    "profile_generated_at": {
+      "labels": "20260618T200458Z",
+      "bodies": "20260618T200458Z",
+      "closure": "20260618T200458Z"
+    }
+  },
+  "profiles": [
+    {
+      "profile": "labels",
+      "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
+      "snapshot_sha256": "a6e179b1685013ea86bfe76d3ed9fb6239d6e417c932b80910434b3ec7848959",
+      "export_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream\\.codex-active\\6529Stream-main\\scripts\\export_release_evidence_issue_snapshot.py' --profile labels --repo 6529-Collections/6529Stream --output release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json --gh gh --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json",
+      "checker_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream\\.codex-active\\6529Stream-main\\scripts\\check_release_evidence_issue_labels.py' --live-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-labels.json",
+      "export_status": "passed",
+      "checker_status": "passed"
+    },
+    {
+      "profile": "bodies",
+      "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
+      "snapshot_sha256": "d1a15f9b65566b801cac41a8dad8082cfef93a1d8d41c858eed60390f4c6ff8e",
+      "export_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream\\.codex-active\\6529Stream-main\\scripts\\export_release_evidence_issue_snapshot.py' --profile bodies --repo 6529-Collections/6529Stream --output release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json --gh gh --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json",
+      "checker_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream\\.codex-active\\6529Stream-main\\scripts\\check_release_evidence_issue_bodies.py' --live-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-bodies.json",
+      "export_status": "passed",
+      "checker_status": "passed"
+    },
+    {
+      "profile": "closure",
+      "snapshot_path": "release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
+      "snapshot_sha256": "774696d4197aa99b741bdd486a96d1f0ff761f1f529a57b2bdb357a05bf39099",
+      "export_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream\\.codex-active\\6529Stream-main\\scripts\\export_release_evidence_issue_snapshot.py' --profile closure --repo 6529-Collections/6529Stream --output release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json --gh gh --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json",
+      "checker_command": "'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' 'D:\\repos\\6529Stream\\.codex-active\\6529Stream-main\\scripts\\check_release_evidence_issue_closure.py' --live-json release-artifacts/evidence/live-audit-reports/20260618T200458Z-release-evidence-live-audit-report-snapshots/release-evidence-issue-closure.json",
+      "export_status": "passed",
+      "checker_status": "passed"
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "profile_count": 3
+  }
+}
