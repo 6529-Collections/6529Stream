@@ -193,6 +193,22 @@ class ForkMetadataBrowserEvidenceDraftTests(unittest.TestCase):
             ):
                 generator.generate_draft(generator.parse_args(argv))
 
+    def test_uses_capture_chain_id_when_argument_is_omitted(self) -> None:
+        """The optional chain-id argument defaults to the retained capture chain."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            argv = valid_argv(root)
+            chain_flag = argv.index("--chain-id")
+            del argv[chain_flag : chain_flag + 2]
+
+            with redirect_stdout(StringIO()):
+                result = generator.main(argv)
+
+            summary = root / "retained" / "browser-summary.json"
+            self.assertEqual(result, 0)
+            converted = json.loads(summary.read_text(encoding="utf-8"))
+            self.assertEqual(converted["chain_id"], 1)
+
     def test_rejects_missing_deployed_contract_assertion(self) -> None:
         """The helper cannot silently convert local-only capture into evidence."""
         with tempfile.TemporaryDirectory() as temp_dir:
