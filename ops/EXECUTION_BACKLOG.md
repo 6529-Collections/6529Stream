@@ -3440,7 +3440,7 @@ unless an external dependency changes.
 | `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | Merged in PR #467; issue #466 closed completed |
 | `REL-009` | Strengthen release artifact verifier checksum coverage | G | Merged in PR #564; issue #563 closed completed |
 | `REL-010` | Extend ABI compatibility checks to published interfaces | G | Merged in PR #566; issue #565 closed completed |
-| `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Active issue #567 on branch `codex/abi-diagnostic-subject-alias`; centralize diagnostic creation, document `subject` as canonical and `contract` as a deprecated compatibility alias, add focused alias tests for contract and interface diagnostics, and preserve blocked readiness claims |
+| `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Active PR #568 / issue #567 on branch `codex/abi-diagnostic-subject-alias`; centralize diagnostic creation, document `subject` as canonical and `contract` as a deprecated compatibility alias, add focused alias tests for contract and interface diagnostics, and preserve blocked readiness claims |
 
 ### Governance And Operations
 
