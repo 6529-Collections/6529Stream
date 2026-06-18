@@ -136,6 +136,12 @@ PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/production-verified-addresses/"
     "production-verified-addresses-retained-artifact-template.md"
 )
+PRODUCTION_SIGNATURES_REQUIREMENT_ID = "production_signatures"
+SIGNED_GIT_TAG_REQUIREMENT_ID = "signed_git_tag"
+PRODUCTION_RELEASE_SIGNING_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/production-release-signing/"
+    "production-release-signing-retained-artifact-template.md"
+)
 ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PUBLIC_BETA_PHASE, EXTERNAL_AUDIT_REQUIREMENT_ID): (
         "python scripts/test_external_audit_report_evidence.py",
@@ -192,6 +198,22 @@ ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PRODUCTION_PHASE, LIVE_EXPLORER_VERIFICATION_REQUIREMENT_ID): (
         "python scripts/test_production_verified_addresses.py",
         "python scripts/check_production_verified_addresses.py",
+    ),
+    (PRODUCTION_PHASE, PRODUCTION_SIGNATURES_REQUIREMENT_ID): (
+        "python scripts/test_production_release_signing_evidence.py",
+        "python scripts/check_production_release_signing_evidence.py",
+        "python scripts/test_release_signatures.py",
+        "python scripts/check_release_signatures.py",
+        "python scripts/test_signed_release_tag.py",
+        "python scripts/check_signed_release_tag.py",
+    ),
+    (PRODUCTION_PHASE, SIGNED_GIT_TAG_REQUIREMENT_ID): (
+        "python scripts/test_production_release_signing_evidence.py",
+        "python scripts/check_production_release_signing_evidence.py",
+        "python scripts/test_release_signatures.py",
+        "python scripts/check_release_signatures.py",
+        "python scripts/test_signed_release_tag.py",
+        "python scripts/check_signed_release_tag.py",
     ),
 }
 
@@ -493,6 +515,19 @@ def retained_artifact_expectation(
             resolve_repo_path(
                 repo_root,
                 PRODUCTION_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
+            ),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif phase == PRODUCTION_PHASE and requirement_id in {
+        PRODUCTION_SIGNATURES_REQUIREMENT_ID,
+        SIGNED_GIT_TAG_REQUIREMENT_ID,
+    }:
+        record = file_record(
+            resolve_repo_path(
+                repo_root,
+                PRODUCTION_RELEASE_SIGNING_RETAINED_ARTIFACT_TEMPLATE,
             ),
             repo_root,
         )

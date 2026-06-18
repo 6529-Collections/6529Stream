@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:360068d0cc9a3f1a354c57f500b65bb6c3e2fdbd3a7ecd2efe231e23220f01d0` |
+| Backlog SHA-256 | `sha256:a0462b412332c4c3c079eedaa5e4a7f02d78b101e8e29ecd27db22d89a7fd0c3` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50` |
 
@@ -35,8 +35,8 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | [#220](https://github.com/6529-Collections/6529Stream/issues/220) | `public-beta-fork-testnet-randomizer-operations-evidence` | `missing` | `sha256:0ae4dea39164ef5a20d09add007baafd323dd0e223450259692175740e7550ec` | 55 |
 | [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:6c35993390e7e2695d3ee32670ff1dc0d3071073650350a10e3e346f9b47465f` | 53 |
 | [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:0205d5a306cc3734bba26d8aa7e61a090756bd6b87d5504849f0f4adaf94b719` | 53 |
-| [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:4f0459bf397f4759dfced70caccfcf11f4ce35e1abc93064338e16c679842447` | 53 |
-| [#224](https://github.com/6529-Collections/6529Stream/issues/224) | `production-release-signed-git-tag` | `missing` | `sha256:257a6ed50cfb216a31169c5d53f89dcd8ce8b87830a6f90234fc8da165d4cef1` | 53 |
+| [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:6099d20d4d5336ba46264be96d58b58b643c87a2eea50dbefe126fddc6b75bb9` | 59 |
+| [#224](https://github.com/6529-Collections/6529Stream/issues/224) | `production-release-signed-git-tag` | `missing` | `sha256:ae61020e8e7f3c9e3a2f0bfdc3d5d053a997fbd328cba05ead33398bd67420bc` | 59 |
 | [#225](https://github.com/6529-Collections/6529Stream/issues/225) | `production-release-production-address-books` | `missing` | `sha256:64ace907f16d545eadd001e728b3f6670d60192dcd4dc5aba02bcb6f1ef2e652` | 55 |
 | [#226](https://github.com/6529-Collections/6529Stream/issues/226) | `production-release-production-broadcast-retention` | `missing` | `sha256:99e825429e152fa065b78eae8511755389d69f7bcfbd04d64932d1a72093ec9b` | 53 |
 | [#227](https://github.com/6529-Collections/6529Stream/issues/227) | `production-release-live-deployment-manifest` | `missing` | `sha256:4a82682d40aa8b498be8caa99ed69f7db4b19b518dbeeb500e63b29d5efd3c3b` | 53 |
@@ -558,8 +558,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #223 production-release-production-signatures
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/223
-- Body SHA-256: `sha256:4f0459bf397f4759dfced70caccfcf11f4ce35e1abc93064338e16c679842447`
-- Source body SHA-256: `sha256:8061907a2bd05b7b4e3ed5afd832647851b706f1d199cab1e0bc68beed02a576`
+- Body SHA-256: `sha256:6099d20d4d5336ba46264be96d58b58b643c87a2eea50dbefe126fddc6b75bb9`
+- Source body SHA-256: `sha256:d2893a5ea2e846aa66a0652aad0ba8bcc11280deea49757f5ca79607df6fb81d`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-production-signatures issue_number=223 -->
@@ -581,12 +581,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `production_signatures`
 - Evidence template: `release-artifacts/evidence/production-release-templates/production-signatures-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with detached checksum signature evidence, public key fingerprint, signing command, checksum bundle path and digest, custody summary, verification output, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-signatures-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/production-signatures-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -594,6 +594,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_production_release_signing_evidence.py`
+- `python scripts/check_production_release_signing_evidence.py`
+- `python scripts/test_release_signatures.py`
+- `python scripts/check_release_signatures.py`
+- `python scripts/test_signed_release_tag.py`
+- `python scripts/check_signed_release_tag.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`
@@ -620,8 +626,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #224 production-release-signed-git-tag
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/224
-- Body SHA-256: `sha256:257a6ed50cfb216a31169c5d53f89dcd8ce8b87830a6f90234fc8da165d4cef1`
-- Source body SHA-256: `sha256:dfd07730fb3fd45ece5dbb8229c62dcfa2c587a475b63126bbe56d95f9225c3c`
+- Body SHA-256: `sha256:ae61020e8e7f3c9e3a2f0bfdc3d5d053a997fbd328cba05ead33398bd67420bc`
+- Source body SHA-256: `sha256:dda5815db2cbac884090541863fdae26809020ddf4ec8ca5eaa21a8ebcb91cfc`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-signed-git-tag issue_number=224 -->
@@ -643,12 +649,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 - Blocker report: `release-artifacts/latest/production-release-blockers.md` / Incomplete Production Release Rows / `signed_git_tag`
 - Evidence template: `release-artifacts/evidence/production-release-templates/signed-git-tag-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with signed Git tag evidence, git verify-tag output, release commit hash, tag signer and custody summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/signed-git-tag-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/production-release-templates/signed-git-tag-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`, which currently tracks both public-beta and production-release requirement rows. The retained artifact expectation is `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -656,6 +662,12 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_production_release_signing_evidence.py`
+- `python scripts/check_production_release_signing_evidence.py`
+- `python scripts/test_release_signatures.py`
+- `python scripts/check_release_signatures.py`
+- `python scripts/test_signed_release_tag.py`
+- `python scripts/check_signed_release_tag.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_production_release_blocker_report.py --check`

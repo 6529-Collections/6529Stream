@@ -42,6 +42,16 @@ and run `python scripts/test_production_verified_addresses.py` plus
 separate non-local evidence envelopes for `production_address_books` and
 `live_explorer_verification`.
 
+For production checksum signatures and signed Git tag evidence, fill
+`release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`
+and run `python scripts/test_production_release_signing_evidence.py` plus
+`python scripts/check_production_release_signing_evidence.py` before generating
+separate non-local evidence envelopes for `production_signatures` and
+`signed_git_tag`. The dedicated retained artifact checker validates reviewed
+no-secret file references and hands off detached signature schema validation to
+`scripts/check_release_signatures.py` and strict release tag trust to
+`scripts/check_signed_release_tag.py --mode release`.
+
 For live metadata browser evidence, fill
 `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`
 and run `python scripts/test_live_metadata_browser_evidence.py` plus
