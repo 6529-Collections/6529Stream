@@ -408,6 +408,26 @@ class ForkRandomizerOperationsEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path, repo_root=repo_root)
 
+    def test_reviewed_retained_placeholder_fails_clearly(self) -> None:
+        """Reviewed retained artifact references cannot remain placeholders."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_retained_paths(repo_root)
+            path = repo_root / "placeholder-retained.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"Deployment manifest: `{DEPLOYMENT_MANIFEST_PATH}`",
+                    "Deployment manifest: `TBD`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkRandomizerOperationsEvidenceError,
+                "must be replaced before non-template review",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
     def test_reviewed_retained_parent_path_escape_fails(self) -> None:
         """Reviewed retained paths cannot escape through parent segments."""
         with tempfile.TemporaryDirectory() as temp_dir:

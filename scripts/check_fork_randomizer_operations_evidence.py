@@ -534,6 +534,10 @@ def validate_retained_paths(
 ) -> None:
     """Require non-template retained-artifact references to exist and be clean."""
     for label in RETAINED_PATH_FIELDS:
+        if is_placeholder(fields[label]):
+            raise ForkRandomizerOperationsEvidenceError(
+                f"{path} field {label!r} must be replaced before non-template review"
+            )
         retained_path, path_text, expected_digest = resolve_retained_path(
             path,
             repo_root,

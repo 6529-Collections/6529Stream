@@ -112,3 +112,6 @@ python scripts/generate_release_checksums.py --check
 - Replace private RPC or provider URLs with `<redacted>` or a documented
   `REDACTED_*` token before review; the checker fails closed on
   provider/API-token-shaped URLs.
+- Record retained artifact hashes with the `sha256:<64 lowercase hex>` prefix.
+  Bare 64-hex strings are treated as secret-shaped material and fail the
+  no-secret scan.

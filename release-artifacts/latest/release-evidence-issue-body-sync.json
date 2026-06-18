@@ -9,7 +9,7 @@
   "source": {
     "backlog": {
       "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-      "sha256": "sha256:1cc04fe1b5824a4f31792cc0ec2bbb83c7b5221e50352024235871fbc33cb0bb",
+      "sha256": "sha256:a568c23c160a72a9eac041fd03c1d60a120a10ca73a352089aa089e2139e2652",
       "size_bytes": 127575,
       "schema_version": "6529stream.release-evidence-issue-backlog.v1"
     },
