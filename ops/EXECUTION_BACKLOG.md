@@ -3374,7 +3374,8 @@ unless an external dependency changes.
 | `EXT-015` | Add live ceremony evidence checker | F/G | Merged in PR #476; issue #228 remains open for future reviewed live ceremony evidence |
 | `EXT-016` | Add live randomizer operations evidence checker | F/G | Merged in PR #477; issue #229 remains open for future reviewed live randomizer operations evidence |
 | `EXT-017` | Harden fork deployment rehearsal retained artifact validation | E/G | Merged in PR #533; issue #532 closed completed; validates repo-relative retained paths, missing files, no-secret scans, and declared `sha256:` drift for reviewed fork rehearsal evidence |
-| `EXT-018` | Harden testnet deployment rehearsal retained artifact validation | E/G | In progress on issue #538 and branch `codex/testnet-rehearsal-evidence-hardening`; add stronger retained-path, missing-file, no-secret, and declared `sha256:` drift validation for future reviewed Sepolia deployment rehearsal evidence without closing tracker issue #217 |
+| `EXT-018` | Harden testnet deployment rehearsal retained artifact validation | E/G | Merged in PR #539; issue #538 closed completed; validates repo-relative retained paths, missing files, no-secret scans, declared `sha256:` drift, duplicate/trailing hash rejection, credentialed URL rejection, and bare 64-hex rejection for future reviewed Sepolia deployment rehearsal evidence; tracker issue #217 remains open |
+| `EXT-019` | Harden live metadata browser retained artifact validation | F/G | In progress on issue #540 and branch `codex/live-metadata-browser-evidence-hardening`; add stronger retained-path, missing-file, no-secret, and declared `sha256:` drift validation for future reviewed live metadata browser evidence without closing tracker issue #473 |
 
 ### Adversarial Testing
 

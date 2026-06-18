@@ -347,7 +347,12 @@ python scripts/check_live_metadata_browser_evidence.py
 
 The checker validates retained no-secret browser proof only. It does not fetch
 live metadata, call a private RPC endpoint, or execute production browser work
-from CI.
+from CI. Pending-review or reviewed retained artifact fields must reference
+repo-relative files and may include one optional `sha256:<64 lowercase hex>`
+digest; absolute paths, parent escapes, Windows backslashes, whitespace in
+paths, missing files, stale hashes, duplicate hashes, credentialed URLs,
+provider/API-token-shaped URLs, bearer credentials, and bare 64-hex values fail
+closed.
 
 ### Ceremony Evidence
 

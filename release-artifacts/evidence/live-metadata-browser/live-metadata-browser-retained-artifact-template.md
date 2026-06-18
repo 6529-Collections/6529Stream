@@ -77,3 +77,12 @@ python scripts/generate_release_checksums.py --check
   unreleased drop payloads, or unredacted operator logs in this repository.
 - Replace private RPC or provider URLs with `<redacted>` before review; the
   checker fails closed on provider/API-token-shaped URLs.
+- For pending-review or reviewed evidence, `Browser summary JSON`, `Generated
+  tokenURI or digest`, and `Browser transcript or screenshot` must be
+  repo-relative retained files. Absolute paths, `..` escapes, Windows
+  backslashes, ambiguous whitespace in paths, placeholders, and missing files
+  fail validation.
+- Retained file references may append one declared digest as
+  `path/to/file sha256:<64 lowercase hex>` or
+  `path/to/file / sha256:<64 lowercase hex>`. Stale hashes, duplicate hashes,
+  trailing hash text, and bare 64-hex strings fail closed.

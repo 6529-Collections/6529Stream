@@ -703,7 +703,11 @@ addresses, token and collection IDs, empty unexpected-request/error arrays,
 animation bootstrap success, parent-frame isolation, reviewer metadata, and
 explicit redaction confirmations before a reviewed artifact can pass. The
 committed file is template-only and keeps production release blocked until
-future reviewed live metadata browser evidence is accepted.
+future reviewed live metadata browser evidence is accepted. Pending-review or
+reviewed retained references must be repo-relative files and may include one
+optional `sha256:<64 lowercase hex>` digest; path escapes, missing files, stale
+hashes, duplicate hashes, provider/API-token-shaped URLs, credentialed URLs,
+and bare 64-hex strings fail closed.
 
 Live ceremony evidence has a dedicated no-secret retained artifact template at
 `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`.
