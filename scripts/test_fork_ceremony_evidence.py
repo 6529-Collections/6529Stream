@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -228,6 +229,19 @@ class ForkCeremonyEvidenceTests(unittest.TestCase):
         """The committed template satisfies the checker."""
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
             result = checker.main([])
+
+        self.assertEqual(result, 0)
+
+    def test_default_cli_works_outside_repo_root(self) -> None:
+        """Default evidence paths resolve from the checker repo root."""
+        original_cwd = Path.cwd()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                    result = checker.main([])
+            finally:
+                os.chdir(original_cwd)
 
         self.assertEqual(result, 0)
 
@@ -464,6 +478,15 @@ class ForkCeremonyEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.ForkCeremonyEvidenceError, "--rpc-url"):
                 checker.validate_artifact(path)
 
+    def test_broad_redacted_rpc_token_fails(self) -> None:
+        """RPC placeholders are restricted to documented redaction tokens."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "broad-redacted-rpc.md"
+            write_text(path, valid_template() + "\nforge script Deploy --rpc-url REDACTEDsk_live_abc123\n")
+
+            with self.assertRaisesRegex(checker.ForkCeremonyEvidenceError, "--rpc-url"):
+                checker.validate_artifact(path)
+
     def test_redacted_rpc_placeholder_passes(self) -> None:
         """Redacted RPC placeholders are allowed in operator notes."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -471,6 +494,15 @@ class ForkCeremonyEvidenceTests(unittest.TestCase):
             write_text(path, valid_template() + "\nforge script Deploy --rpc-url REDACTED_LOCAL_ANVIL_FORK\n")
 
             checker.validate_artifact(path)
+
+    def test_bare_hex_secret_like_text_fails(self) -> None:
+        """Unprefixed 64-hex material is rejected as secret-shaped text."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "bare-hex.md"
+            write_text(path, valid_template() + "\n" + ("a" * 64) + "\n")
+
+            with self.assertRaisesRegex(checker.ForkCeremonyEvidenceError, "64-hex"):
+                checker.validate_artifact(path)
 
 
 if __name__ == "__main__":

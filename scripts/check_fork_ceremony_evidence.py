@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 
+DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
 REQUIREMENT_ID = "fork_testnet_ceremony_evidence"
 EVIDENCE_TYPE = "fork_testnet_ceremony_evidence"
 ALLOWED_ENVIRONMENTS = {"fork", "testnet"}
@@ -124,6 +125,9 @@ YES_FIELDS = [
     "Signer-service secrets removed",
     "Unreleased drop payloads removed",
 ]
+# File existence/no-secret scans apply only to the canonical retained artifact
+# rows. Ceremony reference fields may be tx hashes, Safe ids, transcript labels,
+# or repo paths; release manifest/checksum fields may be digest strings.
 RETAINED_PATH_FIELDS = [
     "Deployment manifest",
     "Address book",
@@ -163,7 +167,7 @@ CLI_SECRET_RE = re.compile(
     r"("
     r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
     r"--rpc-url\b(?:\s+|=)"
-    r"(?!(?:<redacted(?: [^>]*)?>|redacted[\w-]*|REDACTED[\w-]*)\b)\S+|"
+    r"(?!(?:<redacted(?: [^>]*)?>|REDACTED_(?:LOCAL_ANVIL_FORK|FORK_RPC|TESTNET_RPC|RPC_URL))(?=\s|$))\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
     r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
     r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+|"
@@ -171,6 +175,9 @@ CLI_SECRET_RE = re.compile(
     r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
     r")",
     re.IGNORECASE,
+)
+BARE_HEX_KEY_RE = re.compile(
+    r"(?<![0-9a-fA-FxX])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
 )
 
 
@@ -207,6 +214,11 @@ def validate_no_secret_values(path: Path, text: str) -> None:
     if match:
         raise ForkCeremonyEvidenceError(
             f"{path} contains secret-like CLI or URL text: {match.group(0)}"
+        )
+    match = BARE_HEX_KEY_RE.search(text)
+    if match:
+        raise ForkCeremonyEvidenceError(
+            f"{path} contains bare 64-hex secret-like text: {match.group(0)}"
         )
 
 
@@ -419,6 +431,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         description="Validate retained fork/testnet ceremony evidence artifacts"
     )
     parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=DEFAULT_REPO_ROOT,
+        help="Repository root used for default evidence and retained paths.",
+    )
+    parser.add_argument(
         "--evidence",
         type=Path,
         action="append",
@@ -430,10 +448,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     """Run the fork/testnet ceremony evidence checker."""
     args = parse_args(sys.argv[1:] if argv is None else argv)
-    paths = args.evidence or DEFAULT_EVIDENCE
+    repo_root = args.repo_root.resolve()
+    paths = args.evidence or [repo_root / path for path in DEFAULT_EVIDENCE]
     try:
         for path in paths:
-            validate_artifact(path)
+            validate_artifact(path, repo_root=repo_root)
     except ForkCeremonyEvidenceError as exc:
         print(f"fork ceremony evidence check failed: {exc}", file=sys.stderr)
         return 1
