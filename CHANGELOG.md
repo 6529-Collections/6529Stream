@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added reviewed fork randomizer operations evidence for
+  `fork_testnet_randomizer_operations_evidence`, retaining the mainnet-fork
+  deployment broadcast, fork deployment manifest, fork address book, redacted
+  provider export, fork transaction bundle, post-state request views, and local
+  lifecycle/adversarial/retry/payment/pause/emergency test proof under the
+  shared public-beta evidence manifest while keeping public beta blocked on the
+  remaining missing evidence rows.
 - Added reviewed fork ceremony evidence for `fork_testnet_ceremony_evidence`,
   retaining the mainnet-fork deployment broadcast, fork deployment manifest,
   fork address book, Safe/admin placeholder export, post-state views, and local

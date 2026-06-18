@@ -29,7 +29,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | `blocked` | 7 | 0 | 0 | 0 | 0 | 2 | 7 |
+| Public Beta | `blocked` | 6 | 0 | 0 | 0 | 0 | 3 | 6 |
 | Production Release | `blocked` | 11 | 0 | 0 | 0 | 0 | 0 | 11 |
 
 ## Incomplete Public Beta Rows
@@ -40,7 +40,6 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | `testnet_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | `fork_testnet_metadata_browser_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained. |
 | `fork_testnet_marketplace_indexer_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained. |
-| `fork_testnet_randomizer_operations_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet randomizer provider, funding, callback, reserve, and migration evidence is not yet retained. |
 | `verified_deployed_addresses` | `missing` | TBD | external/future | 0 | none | Verified deployed addresses for non-local environments are not yet retained. |
 | `explorer_verification_status` | `missing` | TBD | external/future | 0 | none | Explorer verification submissions or verified-source links for non-local deployments are not yet retained. |
 
@@ -66,6 +65,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | --- | --- | --- | --- | --- |
 | Public Beta | `fork_deployment_rehearsal` | reviewed-external | 1 | Reviewed mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, generated fork address book, and CodeRabbit/CI acceptance evidence from PR #347 and PR #349. Public beta remains blocked on the remaining missing evidence rows. |
 | Public Beta | `fork_testnet_ceremony_evidence` | reviewed-external | 1 | Reviewed fork ceremony evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and retained local dry-run ceremony proof for mint, auction, withdrawal, and emergency redeployment. Public beta remains blocked on the remaining missing evidence rows. |
+| Public Beta | `fork_testnet_randomizer_operations_evidence` | reviewed-external | 1 | Reviewed fork randomizer operations evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, redacted provider export, transaction bundle, post-state request views, and retained local lifecycle, adversarial, retry, payment, pause, and emergency-boundary test proof. Public beta remains blocked on the remaining missing evidence rows. |
 
 ## External Evidence Still Required
 
@@ -75,7 +75,6 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Public Beta | `testnet_deployment_rehearsal` | `missing` | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
 | Public Beta | `fork_testnet_metadata_browser_evidence` | `missing` | Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained. |
 | Public Beta | `fork_testnet_marketplace_indexer_evidence` | `missing` | Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained. |
-| Public Beta | `fork_testnet_randomizer_operations_evidence` | `missing` | Fork or testnet randomizer provider, funding, callback, reserve, and migration evidence is not yet retained. |
 | Public Beta | `verified_deployed_addresses` | `missing` | Verified deployed addresses for non-local environments are not yet retained. |
 | Public Beta | `explorer_verification_status` | `missing` | Explorer verification submissions or verified-source links for non-local deployments are not yet retained. |
 | Production Release | `production_signatures` | `missing` | Production detached signatures over the checksum bundle are not yet retained. |

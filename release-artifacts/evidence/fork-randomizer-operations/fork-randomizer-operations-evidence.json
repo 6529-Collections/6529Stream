@@ -1,0 +1,35 @@
+{
+  "schema_version": "6529stream.non-local-release-evidence.v1",
+  "evidence_id": "fork-testnet-randomizer-operations-evidence-fork-evidence",
+  "record_type": "evidence",
+  "review_status": "reviewed",
+  "environment": "fork",
+  "chain_id": 1,
+  "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
+  "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests",
+  "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
+  "sha256": "sha256:0cd32e5249c00ed17e21cda74f1b4144c38695d4c0087ed14d04560d76fc9857",
+  "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
+  "owner": "Codex autonomous implementer",
+  "reviewer": "Codex autonomous maintainer evidence review for issue #220",
+  "public_beta_requirement_id": "fork_testnet_randomizer_operations_evidence",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
+    "source_dirty": false,
+    "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR"
+  },
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
+  "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. Public beta remains blocked on the remaining missing evidence rows."
+}

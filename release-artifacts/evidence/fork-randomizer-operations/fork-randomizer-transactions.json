@@ -1,0 +1,50 @@
+{
+  "schema_version": "6529stream.fork-randomizer-transactions.v1",
+  "evidence_id": "fork-mainnet-6529stream-v0.1.0-001-randomizer-transactions",
+  "environment": "fork",
+  "chain_id": 1,
+  "fork_reference": {
+    "block_number": 25316366,
+    "block_hash": "0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7"
+  },
+  "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+  "source": {
+    "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+    "address_book": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+    "broadcast": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json"
+  },
+  "transactions": [
+    {
+      "label": "deploy_vrf_adapter",
+      "transaction_hash": "0xca6c7db50fc36fbe060855a593f4e2b093775f6dcfb532701dde8752d0721712",
+      "contract_name": "NextGenRandomizerVRF",
+      "contract_address": "0x9e3b3fd0017753ceb467036cf605a94660aae126",
+      "constructor_provider": "0x0000000000000000000000000000000000006535"
+    },
+    {
+      "label": "deploy_arrng_adapter",
+      "transaction_hash": "0xc1c9117d510a88a836569413472aa4a17236e77eb74b7050475663b57e8c45d7",
+      "contract_name": "NextGenRandomizerRNG",
+      "contract_address": "0x1e26a8b0cbccbb460bc208799a703a35bf287b67",
+      "constructor_provider": "0x0000000000000000000000000000000000006536"
+    },
+    {
+      "label": "assign_collection_randomizer",
+      "transaction_hash": "0xa50d5d3318a876fab84a2820e929dbc75248ba4cc25d131fbeb1a0a44674c416",
+      "contract_name": "StreamCore",
+      "contract_address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+      "function": "addRandomizer(uint256,address)",
+      "collection_id": 1,
+      "randomizer": "0x9e3b3fd0017753ceb467036cf605a94660aae126"
+    }
+  ],
+  "operational_checks": {
+    "provider_addresses_match_manifest": true,
+    "provider_addresses_match_address_book": true,
+    "collection_randomizer_assigned": true,
+    "local_request_lifecycle_tests_passed": true,
+    "local_reserve_accounting_tests_passed": true,
+    "local_emergency_boundary_tests_passed": true
+  },
+  "review_notes": "Fork broadcast retained the adapter deployments and collection randomizer assignment. Request, callback, stale, failed, retry, reserve, pause, and emergency-boundary behavior is covered by the retained local test evidence referenced by the operations JSON."
+}
