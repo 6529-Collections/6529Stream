@@ -36,7 +36,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/545` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/546` |
 | Active PR | `https://github.com/6529-Collections/6529Stream/pull/547` |
-| Next issue | PR #547 is open for EXT-022 production verified-addresses retained-artifact validation hardening at latest head `a4f1c88ad11a55eb4b4bd5028aa0399ecd0052af`. CodeRabbit is currently rate-limited; wait for CI and bot/reviewer feedback, resolve any actionable findings, merge only when clean, then continue the next substantive unblocked roadmap item. |
+| Next issue | PR #547 is open for EXT-022 production verified-addresses retained-artifact validation hardening; response commit `a4f1c88ad11a55eb4b4bd5028aa0399ecd0052af` addressed the first 6529bot nice-to-haves. CodeRabbit is currently rate-limited; wait for CI and bot/reviewer feedback, resolve any actionable findings, merge only when clean, then continue the next substantive unblocked roadmap item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
