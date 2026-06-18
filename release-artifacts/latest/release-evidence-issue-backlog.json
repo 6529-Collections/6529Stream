@@ -9,7 +9,7 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:1b7befc0c8f941e336c6261906c823576883995b9b18dc9b7153ebbb56f6fcc9",
+      "sha256": "sha256:18e73d2e8733f61016b6caaade56828b92a0efd79b943610287a1d7c3461e573",
       "size_bytes": 66335
     }
   },
@@ -654,7 +654,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-        "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
+        "sha256": "sha256:7734205b027c544edbb34507de8e0d45935cff14617e88c51a10ffa888d73061",
         "block_or_reference": "template-only live deployment version, chain ID, or address-book reference",
         "command_or_source_system": "template-only address-book generation command, manifest source, or reviewer source",
         "operator_notes": "Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation."
@@ -1049,7 +1049,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-        "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
+        "sha256": "sha256:7734205b027c544edbb34507de8e0d45935cff14617e88c51a10ffa888d73061",
         "block_or_reference": "template-only verified contract address, explorer submission ID, or deployment version",
         "command_or_source_system": "template-only explorer verification output, source verification input, or reviewer source",
         "operator_notes": "Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation."

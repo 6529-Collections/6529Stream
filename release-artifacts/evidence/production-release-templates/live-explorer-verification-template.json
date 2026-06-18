@@ -8,7 +8,7 @@
   "block_or_reference": "template-only verified contract address, explorer submission ID, or deployment version",
   "command_or_source_system": "template-only explorer verification output, source verification input, or reviewer source",
   "retained_path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-  "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
+  "sha256": "sha256:7734205b027c544edbb34507de8e0d45935cff14617e88c51a10ffa888d73061",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

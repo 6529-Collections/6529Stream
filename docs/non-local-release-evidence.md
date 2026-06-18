@@ -328,9 +328,11 @@ absolute paths, path escapes, Windows backslashes, ambiguous whitespace,
 symlinked retained files, duplicate or malformed digests, stale declared
 hashes, credentialed/provider URLs, bearer tokens or placeholders, CLI secret
 flags, bare 64-hex values, and secret-shaped content in referenced retained
-files. It also preserves the existing payload checks that live address books,
-deployment manifests, explorer verification JSON, and bytecode release proofs
-agree before evidence can be reviewed.
+files. Retained release digest files should normalize `sha256sum`-style output
+to explicit `sha256:<hex>` entries before review. It also preserves the
+existing payload checks that live address books, deployment manifests, explorer
+verification JSON, and bytecode release proofs agree before evidence can be
+reviewed.
 
 ### Metadata Browser Evidence
 

@@ -695,7 +695,8 @@ one optional `sha256:<64 lowercase hex>` digest. Path escapes, missing files,
 stale hashes, duplicate hashes, symlinked retained files, provider/API-token
 URLs, credentialed URLs, bearer tokens or placeholders, CLI secret flags, and
 bare 64-hex strings fail closed. Normalize any `sha256sum`-style retained
-digest output to the explicit `sha256:<hex>` form before review.
+digest output, including the contents of retained release digest files, to the
+explicit `sha256:<hex>` form before review.
 
 Live metadata-browser evidence has a dedicated no-secret retained artifact
 template at

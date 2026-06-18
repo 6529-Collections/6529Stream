@@ -651,6 +651,25 @@ class ProductionVerifiedAddressesTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_reviewed_retained_literal_sha256_path_is_not_digest(self) -> None:
+        """Literal sha256: text in a path is not parsed as a digest."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "literal-sha256-path.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Release manifest/checksum digests",
+                "release-artifacts/evidence/production-verified-addresses/"
+                "foo-sha256:bar.json",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionVerifiedAddressesError, "missing retained file"
+            ):
+                checker.validate_artifact(path)
+
     def test_reviewed_retained_trailing_hash_text_fails(self) -> None:
         """A retained-file digest cannot hide trailing prose."""
         with tempfile.TemporaryDirectory() as temp_dir:

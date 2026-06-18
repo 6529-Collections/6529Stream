@@ -100,6 +100,7 @@ RETAINED_FILE_FIELDS = [
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
 SHA256_REF_RE = re.compile(r"sha256:[0-9a-f]{64}")
+SHA256_PREFIX_RE = re.compile(r"sha256:", re.IGNORECASE)
 
 REQUIRED_COMMANDS = [
     "python scripts/test_production_verified_addresses.py",
@@ -232,35 +233,52 @@ def split_retained_file_reference(value: str) -> tuple[str, str | None]:
         raise ProductionVerifiedAddressesError(
             f"retained artifact reference must not contain backticks: {value}"
         )
-    matches = list(SHA256_REF_RE.finditer(cleaned))
-    if len(matches) > 1:
+    digest_prefixes = [
+        match
+        for match in SHA256_PREFIX_RE.finditer(cleaned)
+        if cleaned[: match.start()].endswith(" / ")
+        or (match.start() > 0 and cleaned[match.start() - 1].isspace())
+    ]
+    if len(digest_prefixes) > 1:
         raise ProductionVerifiedAddressesError(
             f"retained artifact reference has multiple sha256 digests: {value}"
         )
-    if not matches and re.search(r"sha256:", cleaned, re.IGNORECASE):
-        raise ProductionVerifiedAddressesError(
-            f"retained artifact reference has malformed sha256 digest: {value}"
-        )
-    match = matches[0] if matches else None
-    digest = match.group(0) if match else None
-    if match:
-        path_with_separator = cleaned[: match.start()]
-        if path_with_separator.endswith(" / "):
-            path_text = path_with_separator[:-3].strip()
-        elif path_with_separator.endswith(" "):
-            path_text = path_with_separator.rstrip()
-        else:
+    if not digest_prefixes:
+        strict_matches = list(SHA256_REF_RE.finditer(cleaned))
+        if strict_matches:
             raise ProductionVerifiedAddressesError(
                 "retained artifact reference must separate path and sha256 digest "
                 f"with whitespace or ' / ': {value}"
             )
-        suffix = cleaned[match.end() :].strip()
-        if suffix:
-            raise ProductionVerifiedAddressesError(
-                f"retained artifact reference has trailing text after sha256 digest: {value}"
-            )
-    else:
         path_text = cleaned.strip()
+        if not path_text:
+            raise ProductionVerifiedAddressesError(
+                f"retained artifact reference is missing a path: {value}"
+            )
+        return path_text, None
+    digest_start = digest_prefixes[0].start()
+    match = SHA256_REF_RE.match(cleaned[digest_start:])
+    if not match:
+        raise ProductionVerifiedAddressesError(
+            f"retained artifact reference has malformed sha256 digest: {value}"
+        )
+    digest = match.group(0)
+    digest_end = digest_start + match.end()
+    path_with_separator = cleaned[:digest_start]
+    if path_with_separator.endswith(" / "):
+        path_text = path_with_separator[:-3].strip()
+    elif path_with_separator.endswith(" "):
+        path_text = path_with_separator.rstrip()
+    else:
+        raise ProductionVerifiedAddressesError(
+            "retained artifact reference must separate path and sha256 digest "
+            f"with whitespace or ' / ': {value}"
+        )
+    suffix = cleaned[digest_end:].strip()
+    if suffix:
+        raise ProductionVerifiedAddressesError(
+            f"retained artifact reference has trailing text after sha256 digest: {value}"
+        )
     if not path_text:
         raise ProductionVerifiedAddressesError(
             f"retained artifact reference is missing a path: {value}"
@@ -674,7 +692,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--repo-root",
         type=Path,
         default=DEFAULT_REPO_ROOT,
-        help="Repository root for retained artifact path resolution.",
+        help=(
+            "Repository root for retained artifact path resolution. Defaults to "
+            "this checkout; tests or external artifact audits may override it "
+            "when validating evidence outside the current working tree."
+        ),
     )
     return parser.parse_args(argv)
 

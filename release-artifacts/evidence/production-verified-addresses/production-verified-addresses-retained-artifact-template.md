@@ -83,4 +83,5 @@ python scripts/generate_release_checksums.py --check
 - Retained file references may append one declared digest as
   `path/to/file sha256:<64 lowercase hex>` or
   `path/to/file / sha256:<64 lowercase hex>`. Normalize `sha256sum`-style
-  retained digest output to the explicit `sha256:<hex>` form before review.
+  retained digest output, including the contents of retained release digest
+  files, to the explicit `sha256:<hex>` form before review.

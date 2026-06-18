@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:31bbe2833c8e7ad406ea8dfe27dd4cbf5f4eddd704ce69dc1b8496c9fffdbc18",
-      "size_bytes": 34292
+      "sha256": "sha256:183c15e73941a2b8dc5ad2a6ce6275b0db9ba03441e4f9411a0bbb9a4d357668",
+      "size_bytes": 34414
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -667,7 +667,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-        "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
+        "sha256": "sha256:7734205b027c544edbb34507de8e0d45935cff14617e88c51a10ffa888d73061",
         "block_or_reference": "template-only live deployment version, chain ID, or address-book reference",
         "command_or_source_system": "template-only address-book generation command, manifest source, or reviewer source",
         "operator_notes": "Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with production address books generated from live deployment manifests, chain IDs, release version, address checksum, and reviewer confirmation."
@@ -1020,7 +1020,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md",
-        "sha256": "sha256:c8ef2fba9044eba600de23b69a4d0132e50f120d074e49316fe9e7ec81fdac1f",
+        "sha256": "sha256:7734205b027c544edbb34507de8e0d45935cff14617e88c51a10ffa888d73061",
         "block_or_reference": "template-only verified contract address, explorer submission ID, or deployment version",
         "command_or_source_system": "template-only explorer verification output, source verification input, or reviewer source",
         "operator_notes": "Fill the production verified-addresses retained artifact, validate it with scripts/check_production_verified_addresses.py, then replace this template with explorer verification outputs and verified-source links for live contracts, compiler settings, source verification references, and reviewer confirmation."
