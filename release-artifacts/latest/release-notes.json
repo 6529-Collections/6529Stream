@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:ac1065edddb4641e49ab9046d6a4a54554598c2e1bdaba1985cbc1883c612131",
-      "size_bytes": 58975
+      "sha256": "sha256:c9f45e98e842b1c967cc2734b858df978927925b52963c265116cc887d878b34",
+      "size_bytes": 59522
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:ab43bae57df852a850ad068e4b10653ca195869cf83b463f2cbd5856a512c334",
+      "sha256": "sha256:e7577702d6871a644b22ca00e42c2e83944a9f89fe016c92d294bafd11f523c4",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked fork/testnet randomizer operations retained-artifact template and offline checker for future `fork_testnet_randomizer_operations_evidence`, covering fork/testnet environment and chain IDs, provider configuration, funding, reserve, request-health, lifecycle controls, retained-file and optional declared `sha256:` validation, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",
       "Added a checked fork/testnet ceremony retained-artifact template and offline checker for future `fork_testnet_ceremony_evidence`, covering fork/testnet environment and chain IDs, deployer/admin Safe or multisig/signer/emergency participants, ownership and role ceremonies, metadata/freeze, auction, emergency controls, dry-run and monitoring handoff evidence, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",
       "Added fork deployment rehearsal retained-artifact reference validation so reviewed and pending fork rehearsal evidence now proves retained files stay inside the repository, exist on disk, remain no-secret, and match declared `sha256:` hashes; refreshed the reviewed fork broadcast, deployment manifest, address-book, public-beta evidence, release packet, manifest, lockfile, and checksum hashes that the stricter checker surfaced as stale.",
       "Added a checked fork/testnet metadata-browser retained-artifact template and offline checker for future `fork_testnet_metadata_browser_evidence`, covering fork/testnet environment and chain IDs, deployed-contract metadata fetches, retained browser summary JSON, sandbox outcomes, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",

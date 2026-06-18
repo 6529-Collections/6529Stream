@@ -383,6 +383,12 @@ The current local baseline includes:
   [`release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`](../release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md),
   validated offline with `python scripts/test_fork_ceremony_evidence.py` and
   `python scripts/check_fork_ceremony_evidence.py`,
+  plus fork/testnet randomizer operations evidence for
+  `fork_testnet_randomizer_operations_evidence` under
+  [`release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`](../release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md),
+  validated offline with
+  `python scripts/test_fork_randomizer_operations_evidence.py` and
+  `python scripts/check_fork_randomizer_operations_evidence.py`,
   plus live metadata-browser evidence for `live_metadata_browser_evidence`
   under
   [`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md),

@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked fork/testnet randomizer operations retained-artifact template
+  and offline checker for future
+  `fork_testnet_randomizer_operations_evidence`, covering fork/testnet
+  environment and chain IDs, provider configuration, funding, reserve,
+  request-health, lifecycle controls, retained-file and optional declared
+  `sha256:` validation, no-secret redaction, local, Windows, and CI gate
+  wiring, release-packet mapping, and checksum coverage while preserving the
+  blocked public-beta baseline until reviewed evidence is retained.
 - Added a checked fork/testnet ceremony retained-artifact template and offline
   checker for future `fork_testnet_ceremony_evidence`, covering fork/testnet
   environment and chain IDs, deployer/admin Safe or multisig/signer/emergency

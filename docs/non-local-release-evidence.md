@@ -468,6 +468,25 @@ Retain:
 Map fork/testnet evidence to `fork_testnet_randomizer_operations_evidence` and
 live evidence to `live_randomizer_operations_evidence`.
 
+The fork/testnet randomizer operations row has a dedicated retained-artifact
+template at
+`release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`.
+Before generating the non-local metadata envelope, run:
+
+```sh
+python scripts/test_fork_randomizer_operations_evidence.py
+python scripts/check_fork_randomizer_operations_evidence.py
+python scripts/check_randomizer_operations.py
+```
+
+The fork/testnet checker validates fork or testnet environments, positive
+chain IDs, provider configuration, funding, reserve, request-health,
+lifecycle-control, monitoring, retained file references, optional declared
+`sha256:` hashes, reviewer state, and no-secret redaction before any
+pending-review or reviewed artifact can pass. The committed file is
+template-only and keeps public beta blocked until future reviewed evidence is
+accepted and linked from the shared evidence manifest.
+
 The live randomizer operations row has a dedicated retained-artifact template at
 `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`.
 Before generating the non-local metadata envelope, run:
