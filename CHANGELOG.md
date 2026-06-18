@@ -11,6 +11,9 @@ the release policy in `docs/release-policy.md`.
   published interface ABIs from `release-artifacts/contracts.json` in addition
   to production contracts, failing removed or changed interface entries while
   continuing to report additive entries as compatible.
+- Documented ABI compatibility diagnostics so `subject` is the canonical
+  production contract or published interface identifier while `contract`
+  remains a deprecated compatibility alias for existing consumers.
 - Strengthened release artifact verification so nested release manifest,
   bytecode proof, and release-candidate lockfile file records must be covered
   by `SHA256SUMS` with matching hashes, and expanded the checksum bundle to

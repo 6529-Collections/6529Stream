@@ -136,6 +136,10 @@ class AbiCompatibilityTests(unittest.TestCase):
         checker.write_baseline(root, config_path, root / "out", baseline_path)
         return baseline_path
 
+    def assert_subject_contract_alias(self, change: dict[str, Any], subject: str) -> None:
+        self.assertEqual(change["subject"], subject)
+        self.assertEqual(change["contract"], subject)
+
     def test_identical_surface_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -210,6 +214,22 @@ class AbiCompatibilityTests(unittest.TestCase):
                 },
                 report["incompatible_changes"],
             )
+
+    def test_contract_diagnostics_keep_deprecated_contract_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root, "Example")
+            self.write_contract(root, "Other")
+            baseline_config = self.write_config(root, ["Example", "Other"])
+            baseline_path = self.write_baseline(root, baseline_config)
+            current_config = self.write_config(root, ["Example"])
+
+            baseline = checker.load_baseline(baseline_path)
+            current = checker.build_abi_surface(root, current_config, root / "out")
+            report = checker.compare_abi_surfaces(baseline, current)
+
+            self.assertFalse(report["compatible"])
+            self.assert_subject_contract_alias(report["incompatible_changes"][0], "Other")
 
     def test_changed_entry_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -443,6 +463,22 @@ class AbiCompatibilityTests(unittest.TestCase):
             self.assertEqual(interface_additions[0]["contract"], "IExample")
             self.assertEqual(interface_additions[0]["subject"], "IExample")
             self.assertEqual(interface_additions[0]["key"], "totalSupply()")
+
+    def test_interface_diagnostics_keep_deprecated_contract_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            self.write_contract(root, "IExample")
+            baseline_config = self.write_config(root, interface_names=["IExample"])
+            baseline_path = self.write_baseline(root, baseline_config)
+            current_config = self.write_config(root, interface_names=[])
+
+            baseline = checker.load_baseline(baseline_path)
+            current = checker.build_abi_surface(root, current_config, root / "out")
+            report = checker.compare_abi_surfaces(baseline, current)
+
+            self.assertFalse(report["compatible"])
+            self.assert_subject_contract_alias(report["incompatible_changes"][0], "IExample")
 
     def test_malformed_contract_config_entry_reports_abi_error(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

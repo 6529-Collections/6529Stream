@@ -658,6 +658,11 @@ event, custom error, constructor, fallback, and receive surfaces. The check
 fails on removed or changed entries and reports additive entries as compatible
 for this first release baseline.
 
+ABI compatibility diagnostics use `subject` as the canonical production
+contract or published interface identifier. The older `contract` field is kept
+as a deprecated compatibility alias with the same value for downstream tools
+that have not migrated yet.
+
 `contracts.json` also carries the production runtime size budget. The local and
 CI size-budget checker reads the production Foundry artifacts, computes linked
 runtime size even when Solidity library placeholders are still unlinked, checks

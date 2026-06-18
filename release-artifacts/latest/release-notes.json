@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:402c968a49244d31084b8124160d0a84296c715c38bc4fcbbc94f2a6c017623a",
-      "size_bytes": 66174
+      "sha256": "sha256:f953d096b91f37b975607e62fe47a7e6e3704541d30228c23591a2d9c98a6fd1",
+      "size_bytes": 66387
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:ad4acae6fabc81248be32b2d683b31525f99b2d345799f428fd1f60d12ae1e37",
+      "sha256": "sha256:58ed1a36b349607e9882030669595b6b4e6679e00dc00602bc6f1eb64d383daf",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
     "section": "Unreleased",
     "entries": [
       "Extended ABI compatibility checks and the committed baseline to cover published interface ABIs from `release-artifacts/contracts.json` in addition to production contracts, failing removed or changed interface entries while continuing to report additive entries as compatible.",
+      "Documented ABI compatibility diagnostics so `subject` is the canonical production contract or published interface identifier while `contract` remains a deprecated compatibility alias for existing consumers.",
       "Strengthened release artifact verification so nested release manifest, bytecode proof, and release-candidate lockfile file records must be covered by `SHA256SUMS` with matching hashes, and expanded the checksum bundle to include release-manifest source docs referenced by those records.",
       "Added an exact linked-issue mode to the release-evidence issue snapshot exporter so retained live audit reports fetch the committed tracker issue map directly instead of relying on paginated `gh issue list` results, then retained and archived a fresh no-secret live audit report after PR #560 while keeping public beta blocked on the remaining missing evidence rows.",
       "Added reviewed fork/testnet marketplace and indexer evidence for `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental reviewed artifact, equivalent collector/indexer tooling transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",
