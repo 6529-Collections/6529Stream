@@ -582,7 +582,7 @@ To audit live GitHub label drift manually, export a snapshot and pass it to the
 checker:
 
 ```bash
-python scripts/export_release_evidence_issue_snapshot.py --profile labels
+python scripts/export_release_evidence_issue_snapshot.py --profile labels --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
 python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
 ```
 

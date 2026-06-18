@@ -431,6 +431,23 @@ class ReleaseEvidenceLiveAuditReportTests(unittest.TestCase):
 
             self.assert_checker_fails(report, root, "checker_command")
 
+    def test_accepts_exact_linked_issue_export_command(self) -> None:
+        """New live-audit reports may use exact linked-issue snapshots."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            first_profile = report["profiles"][0]
+            first_profile["export_command"] = (
+                "python scripts/export_release_evidence_issue_snapshot.py "
+                f"--profile {first_profile['profile']} "
+                f"--repo {checker.REPO_FULL_NAME} "
+                f"--output {first_profile['snapshot_path']} "
+                "--gh gh --exact-linked-issues "
+                "--issue-links release-artifacts/latest/release-evidence-issue-links.json"
+            )
+
+            checker.validate_report_document(report, root)
+
     def test_rejects_validation_count_mismatch(self) -> None:
         """Validation metadata must agree with profile rows."""
         with tempfile.TemporaryDirectory() as temp_dir:

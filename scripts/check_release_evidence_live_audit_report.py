@@ -313,6 +313,20 @@ def expected_export_fragments(profile: str, snapshot_path: str) -> list[str]:
     ]
 
 
+def expected_export_fragment_sets(profile: str, snapshot_path: str) -> list[list[str]]:
+    """Return accepted command-fragment sets for historical and exact exports."""
+    common = expected_export_fragments(profile, snapshot_path)
+    return [
+        common,
+        [
+            *common,
+            "--exact-linked-issues",
+            "--issue-links",
+            "release-artifacts/latest/release-evidence-issue-links.json",
+        ],
+    ]
+
+
 def expected_checker_fragments(profile: str, snapshot_path: str) -> list[str]:
     """Return command fragments expected in the checker command."""
     checker = auditor.PROFILE_CONFIG[profile]["checker"]
@@ -326,6 +340,22 @@ def require_command_fragments(command: str, fragments: list[str], path: str) -> 
             raise ReleaseEvidenceLiveAuditReportError(
                 f"{path} must include `{fragment}`"
             )
+
+
+def require_any_command_fragment_set(
+    command: str,
+    alternatives: list[list[str]],
+    path: str,
+) -> None:
+    """Require command provenance to match at least one fragment set."""
+    for fragments in alternatives:
+        if all(fragment in command for fragment in fragments):
+            return
+    required = " or ".join(
+        "[" + ", ".join(f"`{fragment}`" for fragment in fragments) + "]"
+        for fragments in alternatives
+    )
+    raise ReleaseEvidenceLiveAuditReportError(f"{path} must include {required}")
 
 
 def validate_profile_result(
@@ -362,9 +392,9 @@ def validate_profile_result(
     checker_command = require_string(
         profile.get("checker_command"), f"{path}.checker_command"
     )
-    require_command_fragments(
+    require_any_command_fragment_set(
         export_command,
-        expected_export_fragments(profile_name, snapshot_path),
+        expected_export_fragment_sets(profile_name, snapshot_path),
         f"{path}.export_command",
     )
     require_command_fragments(

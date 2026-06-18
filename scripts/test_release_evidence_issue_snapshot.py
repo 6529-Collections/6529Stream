@@ -185,6 +185,63 @@ class ReleaseEvidenceIssueSnapshotTests(unittest.TestCase):
             self.assertIn(output.as_posix(), stdout.getvalue())
             self.assertEqual(json.loads(output.read_text(encoding="utf-8")), rows)
 
+    def test_exact_linked_issues_fetches_each_tracker_issue(self) -> None:
+        """Exact mode fetches linked tracker issues instead of a paginated list."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            issue_links = root / exporter.DEFAULT_ISSUE_LINKS
+            output = root / "labels.json"
+            issue_links.parent.mkdir(parents=True, exist_ok=True)
+            issue_links.write_text(
+                json.dumps(
+                    {
+                        "links": [
+                            {"issue_number": 215},
+                            {"issue_number": 217},
+                        ]
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            commands: list[list[str]] = []
+
+            def run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess:
+                commands.append(command)
+                issue_number = int(command[command.index("view") + 1])
+                return completed(
+                    {
+                        "number": issue_number,
+                        "title": f"Issue {issue_number}",
+                        "labels": [],
+                    }
+                )
+
+            with patch.object(exporter.subprocess, "run", side_effect=run):
+                result = exporter.main(
+                    [
+                        "--profile",
+                        "labels",
+                        "--repo-root",
+                        str(root),
+                        "--issue-links",
+                        exporter.DEFAULT_ISSUE_LINKS.as_posix(),
+                        "--exact-linked-issues",
+                        "--output",
+                        str(output),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+            self.assertEqual(
+                [command[command.index("view") + 1] for command in commands],
+                ["215", "217"],
+            )
+            self.assertEqual(
+                [row["number"] for row in json.loads(output.read_text(encoding="utf-8"))],
+                [215, 217],
+            )
+
     def test_main_reports_errors(self) -> None:
         """CLI mode reports failures without a traceback."""
         with patch.object(

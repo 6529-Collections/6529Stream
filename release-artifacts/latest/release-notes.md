@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added an exact linked-issue mode to the release-evidence issue snapshot exporter so retained live audit reports fetch the committed tracker issue map directly instead of relying on paginated `gh issue list` results, then retained and archived a fresh no-secret live audit report after PR #560 while keeping public beta blocked on the remaining missing evidence rows.
 - Added reviewed fork/testnet marketplace and indexer evidence for `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental reviewed artifact, equivalent collector/indexer tooling transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.
 - Added reviewed fork metadata browser evidence for `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser summary, generated `tokenURI`, redacted execution transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.
 - Added an authenticated live release-evidence issue sync gate that fetches the exact linked GitHub tracker issues, checks live body drift and premature closure against committed release artifacts, and tolerates Windows UTF-8 BOM snapshots while keeping the default CI gate network-free.

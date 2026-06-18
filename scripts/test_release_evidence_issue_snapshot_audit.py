@@ -119,6 +119,8 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         self.assertEqual(len(commands), 2)
         self.assertIn("--output", commands[0])
         self.assertIn("tmp/live/release-evidence-issue-bodies.json", commands[0])
+        self.assertIn("--exact-linked-issues", commands[0])
+        self.assertIn("--issue-links", commands[0])
         self.assertIn("--live-json", commands[1])
         self.assertIn("tmp/live/release-evidence-issue-bodies.json", commands[1])
 
@@ -152,7 +154,7 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         self.assertEqual(run.call_count, 2)
         self.assertIn("labels snapshot check failed", stderr.getvalue())
 
-    def test_repo_limit_and_gh_are_passed_to_exporter_only(self) -> None:
+    def test_repo_gh_and_issue_links_are_passed_to_exporter_only(self) -> None:
         """The orchestrator passes live GitHub options through to the exporter."""
         with patch.object(auditor.subprocess, "run", return_value=completed()) as run:
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
@@ -168,6 +170,8 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
                         "17",
                         "--gh",
                         "custom-gh",
+                        "--issue-links",
+                        "custom/links.json",
                     ]
                 )
 
@@ -175,9 +179,11 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         export_command = run.call_args_list[0].args[0]
         check_command = run.call_args_list[1].args[0]
         self.assertIn("owner/repo", export_command)
-        self.assertIn("17", export_command)
         self.assertIn("custom-gh", export_command)
+        self.assertIn("custom/links.json", export_command)
+        self.assertNotIn("17", export_command)
         self.assertNotIn("custom-gh", check_command)
+        self.assertNotIn("custom/links.json", check_command)
 
     def test_report_json_and_markdown_are_deterministic(self) -> None:
         """Report mode writes deterministic no-secret JSON and Markdown."""

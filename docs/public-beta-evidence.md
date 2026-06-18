@@ -271,7 +271,7 @@ To move a requirement to `complete`:
     with `--live-json`:
 
     ```bash
-    python scripts/export_release_evidence_issue_snapshot.py --profile labels
+    python scripts/export_release_evidence_issue_snapshot.py --profile labels --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
     python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
     ```
 
@@ -285,7 +285,7 @@ To move a requirement to `complete`:
     GitHub body drift, export a local snapshot and pass it with `--live-json`:
 
     ```bash
-    python scripts/export_release_evidence_issue_snapshot.py --profile bodies
+    python scripts/export_release_evidence_issue_snapshot.py --profile bodies --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
     python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
     ```
 
@@ -300,7 +300,7 @@ To move a requirement to `complete`:
     `--live-json`:
 
     ```bash
-    python scripts/export_release_evidence_issue_snapshot.py --profile closure
+    python scripts/export_release_evidence_issue_snapshot.py --profile closure --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
     python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
     ```
 

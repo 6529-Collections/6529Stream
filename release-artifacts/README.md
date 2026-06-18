@@ -359,7 +359,11 @@ All retained-evidence tracker issues should carry `release`, `roadmap`, and
 `evidence`; public-beta rows also carry `public-beta`, and production-release
 rows also carry `production-release`.
 Use `scripts/export_release_evidence_issue_snapshot.py` to write label, body,
-or closure snapshots as UTF-8 JSON without relying on shell redirection.
+or closure snapshots as UTF-8 JSON without relying on shell redirection. For
+retained live audit evidence, prefer `--exact-linked-issues --issue-links
+release-artifacts/latest/release-evidence-issue-links.json` so the export
+fetches every committed tracker issue directly instead of depending on issue
+list pagination.
 Use `scripts/audit_release_evidence_issue_snapshots.py` as the operator-only
 one-command live audit for label, body, and closure drift; CI runs only its
 mocked unit tests and never requires GitHub network access.

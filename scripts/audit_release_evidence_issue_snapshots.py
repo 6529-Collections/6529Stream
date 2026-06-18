@@ -16,6 +16,7 @@ from argparse_helpers import positive_int
 
 
 REPO_FULL_NAME = "6529-Collections/6529Stream"
+DEFAULT_ISSUE_LINKS = Path("release-artifacts/latest/release-evidence-issue-links.json")
 DEFAULT_PROFILES = ("labels", "bodies", "closure")
 REPORT_SCHEMA_VERSION = "6529stream.release-evidence-live-audit-report.v1"
 NO_SECRET_NOTICE = (
@@ -110,9 +111,9 @@ def exporter_command(
     python: str,
     profile: str,
     repo: str,
-    limit: int,
     gh: str,
     output: Path,
+    issue_links: Path,
 ) -> list[str]:
     """Build the exporter command for one profile."""
     return [
@@ -122,12 +123,13 @@ def exporter_command(
         profile,
         "--repo",
         repo,
-        "--limit",
-        str(limit),
         "--output",
         output.as_posix(),
         "--gh",
         gh,
+        "--exact-linked-issues",
+        "--issue-links",
+        issue_links.as_posix(),
     ]
 
 
@@ -145,14 +147,14 @@ def audit_profile(
     python: str,
     profile: str,
     repo: str,
-    limit: int,
     gh: str,
     tmp_dir: Path,
+    issue_links: Path,
     collect_report: bool = False,
 ) -> dict[str, object] | None:
     """Export and check one live issue snapshot profile."""
     output = snapshot_path(tmp_dir, profile)
-    export_command = exporter_command(python, profile, repo, limit, gh, output)
+    export_command = exporter_command(python, profile, repo, gh, output, issue_links)
     check_command = checker_command(python, profile, output)
     run_checked(export_command, f"{profile} snapshot export")
     run_checked(check_command, f"{profile} snapshot check")
@@ -303,7 +305,24 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument("--repo", default=REPO_FULL_NAME)
-    parser.add_argument("--limit", type=positive_int, default=100)
+    parser.add_argument(
+        "--limit",
+        type=positive_int,
+        default=100,
+        help=(
+            "Retained for compatibility with older list-based audits. Current "
+            "audits fetch exact linked issues and do not page through issue lists."
+        ),
+    )
+    parser.add_argument(
+        "--issue-links",
+        type=Path,
+        default=DEFAULT_ISSUE_LINKS,
+        help=(
+            "Release-evidence issue-link artifact. Live audits fetch these "
+            "exact tracker issues instead of relying on gh issue list paging."
+        ),
+    )
     parser.add_argument("--tmp-dir", type=Path, default=Path("tmp"))
     parser.add_argument(
         "--python",
@@ -349,9 +368,9 @@ def main(argv: list[str] | None = None) -> int:
                 args.python,
                 profile,
                 args.repo,
-                args.limit,
                 args.gh,
                 args.tmp_dir,
+                args.issue_links,
                 collect_report=collect_report,
             )
             if profile_result is not None:
