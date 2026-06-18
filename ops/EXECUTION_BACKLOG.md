@@ -174,7 +174,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has finite EIP-170 headroom despite the current 2,796-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has finite EIP-170 headroom despite the current 2,784-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -3185,7 +3185,7 @@ Status: Merged in PR #427; issue #426 closed completed.
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom even after
-the 21,780-byte / 2,796-byte-margin CON-008 measurement, and the approved
+the 21,792-byte / 2,784-byte-margin CON-008 measurement, and the approved
 spend ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. Adding
 world-class 1/1 product surfaces directly to Core risks breaking deployment or
 forcing rushed size recovery after feature work is already written.
@@ -3420,7 +3420,7 @@ unless an external dependency changes.
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
 | `CON-007` | Add interface/version views for frontend compatibility | G | Merged in PR #459; issue #458 closed completed |
-| `CON-008` | Recover measured `StreamCore` bytecode headroom with bounded micro-optimizations | D/G | Active PR #578 / issue #577 on branch `codex/streamcore-measured-micro-headroom`; local draft reduces production via-IR `StreamCore` runtime to 21,780 bytes with 2,796 bytes of EIP-170 margin, recovering 404 bytes below the approved 22,184-byte baseline while preserving ABI and release-readiness claims |
+| `CON-008` | Recover measured `StreamCore` bytecode headroom with bounded micro-optimizations | D/G | Active PR #578 / issue #577 on branch `codex/streamcore-measured-micro-headroom`; local draft reduces production via-IR `StreamCore` runtime to 21,792 bytes with 2,784 bytes of EIP-170 margin, recovering 392 bytes below the approved 22,184-byte baseline while preserving ABI and release-readiness claims |
 
 ### 1/1 Product Excellence
 

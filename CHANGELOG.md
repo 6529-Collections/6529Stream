@@ -884,9 +884,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
-- Recovered 404 bytes of measured `StreamCore` runtime headroom with
+- Recovered 392 bytes of measured `StreamCore` runtime headroom with
   behavior-preserving storage caching and invariant-bounded unchecked counter
-  arithmetic; the current production via-IR runtime is 21,780 bytes with 2,796
+  arithmetic; the current production via-IR runtime is 21,792 bytes with 2,784
   bytes of EIP-170 margin while the approved bytecode-spend ceiling remains
   22,184 bytes. Added explicit mint/burn/final-supply counter regressions and
   a checked negative-delta convention for accepted headroom-recovery records.

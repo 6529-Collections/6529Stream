@@ -424,8 +424,8 @@
     },
     "smart-contracts/StreamCore.sol": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:6ee51237ca7f94b0f3eeaf259adac8e990a497dbc43302e8faf0e90690febf3c",
-      "solc_keccak256": "0x06528faca5fc706f33b19f9e5685752fcb71ad60a3c8ac652e124c1badb1f328",
+      "sha256": "sha256:bbe5c16fb0b77a3a6275560753b32a9233dbd52b3351a5b0d79209d87d79b4ec",
+      "solc_keccak256": "0x92893bca94ca45e5b1eb3aeaf02811091471e2f2628bdd51962a61533f7e6d6e",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -1031,10 +1031,10 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "source_sha256": "sha256:6ee51237ca7f94b0f3eeaf259adac8e990a497dbc43302e8faf0e90690febf3c",
-      "source_solc_keccak256": "0x06528faca5fc706f33b19f9e5685752fcb71ad60a3c8ac652e124c1badb1f328",
+      "source_sha256": "sha256:bbe5c16fb0b77a3a6275560753b32a9233dbd52b3351a5b0d79209d87d79b4ec",
+      "source_solc_keccak256": "0x92893bca94ca45e5b1eb3aeaf02811091471e2f2628bdd51962a61533f7e6d6e",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:4522b3b1577df458b371e631d79efc15f7b23f4e1b0c708c214c2fa25b5bedd2",
+      "artifact_sha256": "sha256:37cdace969faf0dfd59999ce252904e7a49485d7b2e6e253d554975ba7985628",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1051,16 +1051,16 @@
       "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:c2fda134327f01620b4c290d1427589c0d753c0f47b1fe8bbbd1c6444862316c",
+          "sha256": "sha256:d020270c0bb9686006b041866c44d2b41df9cafcc4ddfe18d813aeab3556097f",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:c2fda134327f01620b4c290d1427589c0d753c0f47b1fe8bbbd1c6444862316c"
+          "release_artifact_sha256": "sha256:d020270c0bb9686006b041866c44d2b41df9cafcc4ddfe18d813aeab3556097f"
         },
         "runtime": {
-          "sha256": "sha256:255ad29359bb031ebbe8717af39b7dbd1c5071df76ea17cb776e077074cd0279",
+          "sha256": "sha256:0967b1698b4ed113e58b9dbd566c2cde28d002107da8da48cc260800d9b96fcc",
           "linked": false,
           "hash_mode": "unlinked_artifact_object",
-          "release_artifact_sha256": "sha256:255ad29359bb031ebbe8717af39b7dbd1c5071df76ea17cb776e077074cd0279"
+          "release_artifact_sha256": "sha256:0967b1698b4ed113e58b9dbd566c2cde28d002107da8da48cc260800d9b96fcc"
         }
       },
       "constructor": {

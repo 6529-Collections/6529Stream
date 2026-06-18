@@ -23,8 +23,8 @@ The current Gate A smoke baseline proves:
   production contract against EIP-170 and enforces the configured `StreamCore`
   release floor from `release-artifacts/contracts.json`. The committed
   `release-artifacts/latest/bytecode-release-proof.json` records the current
-  measured `StreamCore` production runtime size as 21,780 bytes, leaving
-  2,796 bytes of EIP-170
+  measured `StreamCore` production runtime size as 21,792 bytes, leaving
+  2,784 bytes of EIP-170
   headroom under the IR-optimized deployment profile. This passes the EIP-170
   deployability gate, the current 384-byte minimum release floor, and the
   512-byte warning threshold; large non-trivial `StreamCore` feature work should

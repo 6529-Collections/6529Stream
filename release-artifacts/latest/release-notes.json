@@ -4,7 +4,7 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:79c417a34f3212b13da727200773a90b68d453cc46de14ad842d3fd283de0f7b",
+      "sha256": "sha256:40dad41fb20de7c152adc79de65b172e4f75cb190e6222fd6bfe07530b5c67f0",
       "size_bytes": 68498
     },
     "release_manifest": {
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f0d1430d8f435985be8db80a8eb8d98006d88ba192657d6b7f4f9e9e121acf75",
+      "sha256": "sha256:87d0553b7b85ade062cc3c458a75ce486ac172a875eb176c926a6968fda2a52b",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -234,7 +234,7 @@
       "Added lifecycle-aware stale and failed randomness metadata states for minted tokens whose hash is still unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures, token state view coverage, fallback-to-pending coverage, and final-hash override coverage.",
       "Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.",
       "Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.",
-      "Recovered 404 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; the current production via-IR runtime is 21,780 bytes with 2,796 bytes of EIP-170 margin while the approved bytecode-spend ceiling remains 22,184 bytes. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.",
+      "Recovered 392 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; the current production via-IR runtime is 21,792 bytes with 2,784 bytes of EIP-170 margin while the approved bytecode-spend ceiling remains 22,184 bytes. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.",
       "Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.",
       "Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.",
       "Retired provider and integration files from the prior Solidity formatting exception baseline, so arRNG, VRF, delegation, and randomizer integration interfaces are now enforced by `make fmt-check`.",
