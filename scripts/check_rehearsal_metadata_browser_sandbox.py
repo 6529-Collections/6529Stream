@@ -175,7 +175,7 @@ def redacted_forge_command(options: ForgeRehearsalOptions) -> str:
         "--json",
     ]
     if options.rpc_url:
-        command.extend(["--rpc-url", "REDACTED_LOCAL_OR_OPERATOR_RPC"])
+        command.extend(["--rpc-url", "<redacted>"])
     if options.broadcast:
         command.append("--broadcast")
     if options.unlocked:

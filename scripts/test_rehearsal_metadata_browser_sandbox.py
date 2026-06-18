@@ -255,7 +255,7 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
             )
         )
 
-        self.assertIn("REDACTED_LOCAL_OR_OPERATOR_RPC", command)
+        self.assertIn("<redacted>", command)
         self.assertNotIn("private-token", command)
 
     def test_parses_noisy_forge_stdout_records(self) -> None:
