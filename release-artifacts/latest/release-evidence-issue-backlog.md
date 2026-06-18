@@ -179,7 +179,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
 | Template | `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`; Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`; Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -197,12 +197,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_metadata_browser_evidence`
 - Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`
 
 ## Required Evidence
 
 - Retained artifact expectation: Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -210,6 +210,8 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_fork_metadata_browser_evidence.py`
+- `python scripts/check_fork_metadata_browser_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
@@ -1326,6 +1328,7 @@ Suggested issue body:
 | Command |
 | --- |
 | `python scripts/check_external_audit_report_evidence.py` |
+| `python scripts/check_fork_metadata_browser_evidence.py` |
 | `python scripts/check_live_ceremony_evidence.py` |
 | `python scripts/check_live_metadata_browser_evidence.py` |
 | `python scripts/check_live_randomizer_operations_evidence.py` |
@@ -1342,6 +1345,7 @@ Suggested issue body:
 | `python scripts/generate_release_evidence_packet_index.py --check` |
 | `python scripts/generate_release_manifest.py --check` |
 | `python scripts/test_external_audit_report_evidence.py` |
+| `python scripts/test_fork_metadata_browser_evidence.py` |
 | `python scripts/test_live_ceremony_evidence.py` |
 | `python scripts/test_live_metadata_browser_evidence.py` |
 | `python scripts/test_live_randomizer_operations_evidence.py` |

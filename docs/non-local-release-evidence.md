@@ -317,6 +317,16 @@ Retain:
 Map fork/testnet evidence to `fork_testnet_metadata_browser_evidence` and live
 evidence to `live_metadata_browser_evidence`.
 
+The fork/testnet metadata-browser row has a dedicated retained-artifact template
+at
+`release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`.
+Before generating the non-local metadata envelope, run:
+
+```sh
+python scripts/test_fork_metadata_browser_evidence.py
+python scripts/check_fork_metadata_browser_evidence.py
+```
+
 The live metadata-browser row has a dedicated retained-artifact template at
 `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`.
 Before generating the non-local metadata envelope, run:
