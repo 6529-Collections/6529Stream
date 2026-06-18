@@ -269,6 +269,7 @@ production-release-signing-evidence-check:
 	$(PYTHON) scripts/check_production_release_signing_evidence.py
 
 fork-metadata-browser-evidence-check:
+	$(PYTHON) scripts/test_generate_fork_metadata_browser_evidence_draft.py
 	$(PYTHON) scripts/test_fork_metadata_browser_evidence.py
 	$(PYTHON) scripts/check_fork_metadata_browser_evidence.py
 

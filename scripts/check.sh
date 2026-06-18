@@ -110,6 +110,7 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_production_verified_addresses.py
 "$python_bin" scripts/test_production_release_signing_evidence.py
 "$python_bin" scripts/check_production_release_signing_evidence.py
+"$python_bin" scripts/test_generate_fork_metadata_browser_evidence_draft.py
 "$python_bin" scripts/test_fork_metadata_browser_evidence.py
 "$python_bin" scripts/check_fork_metadata_browser_evidence.py
 "$python_bin" scripts/test_fork_ceremony_evidence.py

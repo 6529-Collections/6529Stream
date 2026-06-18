@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:394fee87eddb342527d4bcff8e6625abb27bbf044879a83852aa3d5acfa602b3",
-      "size_bytes": 63511
+      "sha256": "sha256:92715c6eb06030912a68345b1f2b7f193d140e7247204d2daf2c0938322cd69e",
+      "size_bytes": 63866
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:1e6c47f60821ef16453bc8d1e3281774ad42068cbd0b69b07d16f3c48f3737a2",
+      "sha256": "sha256:0e25af333ef801ba8d5a533f283674f41181a3eb6b995241dd5bbfc3550b00d2",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a fork/testnet metadata-browser evidence draft generator that converts retained browser capture outputs into a checker-compatible pending-review evidence bundle, with no-secret validation, deployed-contract assertion, and local/CI/Windows gate coverage while keeping issue #218 blocked until real reviewed fork/testnet evidence is linked.",
       "Added retained-output flags to the local metadata browser rehearsal checker so operators can export deterministic browser summary JSON, generated `tokenURI`, and redacted transcript artifacts before future fork/testnet metadata browser evidence review.",
       "Added reviewed fork randomizer operations evidence for `fork_testnet_randomizer_operations_evidence`, retaining the mainnet-fork deployment broadcast, fork deployment manifest, fork address book, redacted provider export, fork transaction bundle, post-state request views, and local lifecycle/adversarial/retry/payment/pause/emergency test proof under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",
       "Added reviewed fork ceremony evidence for `fork_testnet_ceremony_evidence`, retaining the mainnet-fork deployment broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and local mint/auction/emergency dry-run ceremony evidence under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",
