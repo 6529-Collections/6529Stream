@@ -3386,7 +3386,7 @@ unless an external dependency changes.
 | `EXT-027` | Add metadata browser evidence capture outputs | E/F | Merged in PR #554; issue #218 remains open for real reviewed deployed-contract fork/testnet metadata browser evidence |
 | `EXT-028` | Add metadata browser evidence draft generator | E/F | Merged in PR #556; issue #555 closed completed with a pending-review fork/testnet metadata-browser evidence draft generator, explicit deployed-contract assertion, retained output validation, and local/CI/Windows coverage while #218 remains open until reviewed deployed-contract evidence exists |
 | `EXT-029` | Add live release-evidence issue sync guard | E/G | Merged in PR #558; issue #557 closed completed with an authenticated GitHub issue snapshot fetcher plus live body/closure sync gate for linked release-evidence tracker issues without adding network access to default CI or changing readiness claims |
-| `EXT-030` | Retain reviewed fork metadata browser evidence | E/F | Active issue #218 on branch `codex/fork-metadata-browser-reviewed-evidence`; retain reviewed mainnet-fork metadata browser evidence generated from fork-deployed contracts, link it from `public-beta-evidence.json`, refresh release artifacts, and keep public beta blocked only on remaining missing evidence rows |
+| `EXT-030` | Retain reviewed fork metadata browser evidence | E/F | Active PR #559 / issue #218 on branch `codex/fork-metadata-browser-reviewed-evidence`; retain reviewed mainnet-fork metadata browser evidence generated from fork-deployed contracts, link it from `public-beta-evidence.json`, refresh release artifacts, and keep public beta blocked only on remaining missing evidence rows |
 
 ### Adversarial Testing
 
