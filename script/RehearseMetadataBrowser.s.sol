@@ -44,6 +44,9 @@ contract RehearseMetadataBrowser {
     string private constant LOCAL_EVIDENCE_KIND = "local-anvil-deployment-rehearsal";
     string private constant FORK_TESTNET_EVIDENCE_KIND = "fork-testnet-deployment-rehearsal";
     string private constant TOKEN_DATA = "1,2,3";
+    bytes32 private constant LOCAL_DEPENDENCY_KEY =
+        keccak256("6529Stream.local.rehearsal.dependency.v1");
+    uint256 private constant FULL_COLLECTION_UPDATE_INDEX = 10 ** 6;
 
     struct MetadataBrowserResult {
         string evidenceKind;
@@ -70,7 +73,7 @@ contract RehearseMetadataBrowser {
         MetadataRehearsalRandomizer randomizer = new MetadataRehearsalRandomizer(address(core));
         core.addRandomizer(deployed.sampleCollectionId, address(randomizer));
         core.changeMetadataView(deployed.sampleCollectionId, true);
-        _setCollectionDrawScript(core, deployed.sampleCollectionId);
+        _setCollectionBrowserMetadata(core, deployed.sampleCollectionId);
 
         StreamDrops.DropAuthorization memory authorization =
             _buildAuthorization(drops, deployed.sampleCollectionId);
@@ -98,6 +101,23 @@ contract RehearseMetadataBrowser {
 
     function _evidenceKind() private view returns (string memory) {
         return block.chainid == 31337 ? LOCAL_EVIDENCE_KIND : FORK_TESTNET_EVIDENCE_KIND;
+    }
+
+    function _collectionDescription() private view returns (string memory) {
+        return block.chainid == 31337
+            ? "Local deployment rehearsal collection"
+            : "Fork/testnet deployment rehearsal collection";
+    }
+
+    function _rehearsalTraitValue() private view returns (string memory) {
+        return block.chainid == 31337 ? "Local Anvil" : "Fork/Testnet";
+    }
+
+    function _drawScriptLabel() private view returns (string memory) {
+        return
+            block.chainid == 31337
+                ? "6529Stream local rehearsal"
+                : "6529Stream fork/testnet rehearsal";
     }
 
     function _buildAuthorization(StreamDrops drops, uint256 collectionId)
@@ -144,14 +164,28 @@ contract RehearseMetadataBrowser {
 
         tokenIds[0] = tokenId;
         images[0] = "ipfs://6529stream-rehearsal/final.png";
-        attributes[0] = "{\"trait_type\":\"Rehearsal\",\"value\":\"Local Anvil\"}";
+        attributes[0] = string.concat(
+            "{\"trait_type\":\"Rehearsal\",\"value\":\"", _rehearsalTraitValue(), "\"}"
+        );
 
         core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
 
-    function _setCollectionDrawScript(StreamCore core, uint256 collectionId) private {
+    function _setCollectionBrowserMetadata(StreamCore core, uint256 collectionId) private {
         string[] memory scripts = new string[](1);
-        scripts[0] = "function draw(){return '6529Stream local rehearsal';}";
-        core.updateCollectionInfo(collectionId, "", "", "", "", "", "", "", bytes32(0), 0, scripts);
+        scripts[0] = string.concat("function draw(){return '", _drawScriptLabel(), "';}");
+        core.updateCollectionInfo(
+            collectionId,
+            "6529 Stream Rehearsal",
+            "6529",
+            _collectionDescription(),
+            "https://6529.io",
+            "CC0",
+            "ipfs://6529stream-rehearsal/",
+            "https://cdn.6529.io/stream/rehearsal.js",
+            LOCAL_DEPENDENCY_KEY,
+            FULL_COLLECTION_UPDATE_INDEX,
+            scripts
+        );
     }
 }

@@ -60,6 +60,19 @@ RETURN_FIELDS = (
     "externalScriptUrl",
     "tokenUri",
 )
+DECODED_RETURN_RE = re.compile(
+    r"^\("
+    r"(?P<evidenceKind>[^,\n()]+),\s*"
+    r"(?P<chainId>[0-9]+),\s*"
+    r"(?P<deploymentManifestHash>0x[0-9a-fA-F]{64}),\s*"
+    r"(?P<collectionId>[0-9]+),\s*"
+    r"(?P<tokenId>[0-9]+),\s*"
+    r"(?P<tokenHash>0x[0-9a-fA-F]{64}),\s*"
+    r"(?P<tokenDataRaw>.*),\s*"
+    rf"(?P<externalScriptUrl>{re.escape(EXPECTED_EXTERNAL_SCRIPT_URL)}),\s*"
+    r"(?P<tokenUri>data:application/json;base64,[A-Za-z0-9+/=]+)"
+    r"\)$"
+)
 
 
 class RehearsalMetadataBrowserError(ValueError):
@@ -205,13 +218,7 @@ def run_forge_rehearsal(options: ForgeRehearsalOptions | None = None) -> dict[st
             f"stdout:\n{completed.stdout[-4000:]}\n"
             f"stderr:\n{completed.stderr[-4000:]}"
         )
-    records = parse_forge_json_records(completed.stdout)
-    for record in reversed(records):
-        if "returned" in record or "returns" in record:
-            return record
-    raise RehearsalMetadataBrowserError(
-        "forge metadata rehearsal did not include returned ABI data or decoded returns"
-    )
+    return select_rehearsal_output_record(parse_forge_json_records(completed.stdout))
 
 
 def read_word(data: bytes, index: int, *, base: int = 0) -> bytes:
@@ -262,23 +269,27 @@ def decode_rehearsal_return(returned: Any) -> dict[str, Any]:
     if word_to_int(read_word(data, 0)) == 32 and len(data) >= 32 + len(RETURN_FIELDS) * 32:
         base = 32
 
-    return {
-        "evidenceKind": decode_string(
-            data, read_word(data, 0, base=base), "evidenceKind", base=base
-        ),
-        "chainId": str(word_to_int(read_word(data, 1, base=base))),
-        "deploymentManifestHash": "0x" + read_word(data, 2, base=base).hex(),
-        "collectionId": str(word_to_int(read_word(data, 3, base=base))),
-        "tokenId": str(word_to_int(read_word(data, 4, base=base))),
-        "tokenHash": "0x" + read_word(data, 5, base=base).hex(),
-        "tokenDataRaw": decode_string(
-            data, read_word(data, 6, base=base), "tokenDataRaw", base=base
-        ),
-        "externalScriptUrl": decode_string(
-            data, read_word(data, 7, base=base), "externalScriptUrl", base=base
-        ),
-        "tokenUri": decode_string(data, read_word(data, 8, base=base), "tokenUri", base=base),
-    }
+    return normalize_rehearsal_evidence(
+        {
+            "evidenceKind": decode_string(
+                data, read_word(data, 0, base=base), "evidenceKind", base=base
+            ),
+            "chainId": str(word_to_int(read_word(data, 1, base=base))),
+            "deploymentManifestHash": "0x" + read_word(data, 2, base=base).hex(),
+            "collectionId": str(word_to_int(read_word(data, 3, base=base))),
+            "tokenId": str(word_to_int(read_word(data, 4, base=base))),
+            "tokenHash": "0x" + read_word(data, 5, base=base).hex(),
+            "tokenDataRaw": decode_string(
+                data, read_word(data, 6, base=base), "tokenDataRaw", base=base
+            ),
+            "externalScriptUrl": decode_string(
+                data, read_word(data, 7, base=base), "externalScriptUrl", base=base
+            ),
+            "tokenUri": decode_string(
+                data, read_word(data, 8, base=base), "tokenUri", base=base
+            ),
+        }
+    )
 
 
 def extract_decoded_rehearsal_value(forge_output: dict[str, Any]) -> str:
@@ -300,38 +311,10 @@ def decode_rehearsal_value_string(value: str) -> dict[str, Any]:
     """Decode Forge's human-readable tuple string for broadcast-mode returns."""
 
     body = value.strip()
-    if not body.startswith("(") or not body.endswith(")"):
+    match = DECODED_RETURN_RE.fullmatch(body)
+    if match is None:
         raise RehearsalMetadataBrowserError("forge decoded result is not a tuple string")
-    body = body[1:-1]
-    head = body.split(", ", 6)
-    if len(head) != 7:
-        raise RehearsalMetadataBrowserError("forge decoded result has wrong field count")
-    (
-        evidence_kind,
-        chain_id,
-        deployment_manifest_hash,
-        collection_id,
-        token_id,
-        token_hash,
-        rest,
-    ) = head
-    external_marker = f", {EXPECTED_EXTERNAL_SCRIPT_URL}, "
-    if external_marker not in rest:
-        raise RehearsalMetadataBrowserError(
-            "forge decoded result is missing the expected external script URL"
-        )
-    token_data_raw, token_uri = rest.split(external_marker, 1)
-    return {
-        "evidenceKind": evidence_kind,
-        "chainId": chain_id,
-        "deploymentManifestHash": deployment_manifest_hash,
-        "collectionId": collection_id,
-        "tokenId": token_id,
-        "tokenHash": token_hash,
-        "tokenDataRaw": token_data_raw,
-        "externalScriptUrl": EXPECTED_EXTERNAL_SCRIPT_URL,
-        "tokenUri": token_uri,
-    }
+    return normalize_rehearsal_evidence(match.groupdict())
 
 
 def extract_rehearsal_evidence(forge_output: dict[str, Any]) -> dict[str, Any]:
@@ -341,6 +324,26 @@ def extract_rehearsal_evidence(forge_output: dict[str, Any]) -> dict[str, Any]:
     if returned is not None:
         return decode_rehearsal_return(returned)
     return decode_rehearsal_value_string(extract_decoded_rehearsal_value(forge_output))
+
+
+def select_rehearsal_output_record(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return the latest Forge JSON record that actually decodes as rehearsal output."""
+
+    decode_errors: list[str] = []
+    for record in reversed(records):
+        if "returned" not in record and "returns" not in record:
+            continue
+        try:
+            extract_rehearsal_evidence(record)
+        except RehearsalMetadataBrowserError as exc:
+            decode_errors.append(str(exc))
+            continue
+        return record
+    detail = f"; last decode error: {decode_errors[-1]}" if decode_errors else ""
+    raise RehearsalMetadataBrowserError(
+        "forge metadata rehearsal did not include decodable returned ABI data "
+        f"or decoded returns{detail}"
+    )
 
 
 def as_int(value: Any, field: str) -> int:
@@ -380,6 +383,42 @@ def parse_token_data(raw: Any) -> tuple[int, ...]:
                 f"tokenDataRaw contains a non-integer value: {raw!r}"
             ) from exc
     return tuple(values)
+
+
+def require_evidence_string(evidence: dict[str, Any], field: str) -> str:
+    """Require a decoded evidence field to be a string."""
+
+    value = evidence.get(field)
+    if not isinstance(value, str):
+        raise RehearsalMetadataBrowserError(f"{field} is not a string: {value!r}")
+    return value
+
+
+def normalize_rehearsal_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
+    """Validate decoded Forge fields and normalize them into the evidence shape."""
+
+    normalized = {
+        "evidenceKind": require_evidence_string(evidence, "evidenceKind"),
+        "chainId": str(as_int(evidence.get("chainId"), "chainId")),
+        "deploymentManifestHash": as_bytes32(
+            evidence.get("deploymentManifestHash"),
+            "deploymentManifestHash",
+        ),
+        "collectionId": str(as_int(evidence.get("collectionId"), "collectionId")),
+        "tokenId": str(as_int(evidence.get("tokenId"), "tokenId")),
+        "tokenHash": as_bytes32(evidence.get("tokenHash"), "tokenHash"),
+        "tokenDataRaw": require_evidence_string(evidence, "tokenDataRaw"),
+        "externalScriptUrl": require_evidence_string(evidence, "externalScriptUrl"),
+        "tokenUri": require_evidence_string(evidence, "tokenUri"),
+    }
+    parse_token_data(normalized["tokenDataRaw"])
+    if normalized["externalScriptUrl"] != EXPECTED_EXTERNAL_SCRIPT_URL:
+        raise RehearsalMetadataBrowserError(
+            f"unexpected external script URL: {normalized['externalScriptUrl']!r}"
+        )
+    if not normalized["tokenUri"].startswith(sandbox_checker.fixture_checker.JSON_DATA_URI_PREFIX):
+        raise RehearsalMetadataBrowserError("tokenUri is not an on-chain metadata data URI")
+    return normalized
 
 
 def validate_rehearsal_evidence(evidence: dict[str, Any]) -> None:

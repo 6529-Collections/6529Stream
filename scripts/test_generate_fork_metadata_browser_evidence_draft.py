@@ -175,7 +175,41 @@ class ForkMetadataBrowserEvidenceDraftTests(unittest.TestCase):
             self.assertIn("- Review status: `reviewed`", text)
             self.assertIn("- Review decision: `reviewed`", text)
             self.assertIn("--review-status reviewed", text)
+            self.assertNotIn("  --review-status reviewed", text)
             checker.validate_artifact(output)
+
+    def test_render_artifact_rejects_invalid_direct_review_status(self) -> None:
+        """Direct render_artifact callers still get review-status validation."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            with self.assertRaisesRegex(
+                generator.ForkMetadataBrowserEvidenceDraftError,
+                "review-status",
+            ):
+                generator.render_artifact(
+                    output_path=root / "retained" / "metadata-browser-evidence.md",
+                    environment="fork",
+                    chain_id=1,
+                    git_commit="1234567890abcdef1234567890abcdef12345678",
+                    ci_run_or_transcript="ci-run-123",
+                    block_or_reference="fork block 25316366",
+                    deployment_version="fork-mainnet-6529stream-v0.1.0-001",
+                    contracts={
+                        "StreamCore": {
+                            "address": "0x1111111111111111111111111111111111111111"
+                        }
+                    },
+                    token_id=10_000_000_000,
+                    collection_id=1,
+                    summary_output=root / "retained" / "browser-summary.json",
+                    token_uri_output=root / "retained" / "token-uri.txt",
+                    transcript_output=root / "retained" / "browser-transcript.md",
+                    release_digests="release-artifacts/latest/release-manifest.json",
+                    operator="release-operator",
+                    reviewer="release-reviewer",
+                    review_status="invalid",
+                )
 
     def test_preserves_sha256_prefixed_token_uri_digest_input(self) -> None:
         """Digest-only tokenURI captures are retained and bound to the summary."""

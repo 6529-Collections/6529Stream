@@ -287,8 +287,24 @@ def render_artifact(
         else "- This file is pending review and is not completion evidence until the "
         "shared public-beta evidence manifest links reviewed retained evidence."
     )
-    review_status_argument = (
-        " --review-status reviewed" if review_status == "reviewed" else ""
+    validation_command = " ".join(
+        [
+            "python scripts/generate_non_local_release_evidence.py",
+            "--template release-artifacts/evidence/public-beta-templates/"
+            "fork-testnet-metadata-browser-evidence-template.json",
+            f"--retained-artifact {evidence_path_value(output_path, output_path)}",
+            "--output release-artifacts/evidence/fork-metadata-browser/"
+            "fork-metadata-browser-evidence.json",
+            f"--environment {environment}",
+            f"--chain-id {chain_id}",
+            f'--block-or-reference "{block_or_reference}"',
+            f'--command-or-source-system "{ci_run_or_transcript}"',
+            f'--owner "{operator}"',
+            f'--reviewer "{reviewer}"',
+            *(["--review-status reviewed"] if review_status == "reviewed" else []),
+            f"--source-git-commit {git_commit}",
+            f'--source-ci-run "{ci_run_or_transcript}"',
+        ]
     )
     return "\n".join(
         [
@@ -351,18 +367,7 @@ def render_artifact(
             "python scripts/test_generate_fork_metadata_browser_evidence_draft.py",
             "python scripts/test_fork_metadata_browser_evidence.py",
             "python scripts/check_fork_metadata_browser_evidence.py",
-            "python scripts/generate_non_local_release_evidence.py --template "
-            "release-artifacts/evidence/public-beta-templates/"
-            "fork-testnet-metadata-browser-evidence-template.json --retained-artifact "
-            f"{evidence_path_value(output_path, output_path)} --output "
-            "release-artifacts/evidence/fork-metadata-browser/"
-            "fork-metadata-browser-evidence.json "
-            f"--environment {environment} --chain-id {chain_id} "
-            f"--block-or-reference \"{block_or_reference}\" "
-            f"--command-or-source-system \"{ci_run_or_transcript}\" "
-            f"--owner \"{operator}\" --reviewer \"{reviewer}\" "
-            f"{review_status_argument} "
-            f"--source-git-commit {git_commit} --source-ci-run \"{ci_run_or_transcript}\"",
+            validation_command,
             "python scripts/check_non_local_release_evidence.py",
             "python scripts/check_public_beta_evidence.py",
             "python scripts/generate_release_manifest.py --check",
