@@ -161,6 +161,38 @@ class ForkMetadataBrowserEvidenceDraftTests(unittest.TestCase):
             )
             self.assertEqual(converted["token_results"][0]["token_id"], 10_000_000_000)
 
+    def test_preserves_sha256_prefixed_token_uri_digest_input(self) -> None:
+        """Digest-only tokenURI captures are retained and bound to the summary."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            with redirect_stdout(StringIO()):
+                result = generator.main(valid_argv(root))
+
+            token = root / "retained" / "token-uri.txt"
+            summary = root / "retained" / "browser-summary.json"
+            self.assertEqual(result, 0)
+            self.assertEqual(
+                token.read_text(encoding="utf-8").strip(),
+                "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            )
+            converted = json.loads(summary.read_text(encoding="utf-8"))
+            self.assertEqual(
+                converted["token_results"][0]["token_uri_sha256"],
+                "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            )
+
+    def test_rejects_requested_chain_id_mismatch(self) -> None:
+        """Operators cannot relabel capture output onto a different chain."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            argv = valid_argv(Path(temp_dir))
+            argv[argv.index("--chain-id") + 1] = "2"
+
+            with self.assertRaisesRegex(
+                generator.ForkMetadataBrowserEvidenceDraftError,
+                "requested chain ID",
+            ):
+                generator.generate_draft(generator.parse_args(argv))
+
     def test_rejects_missing_deployed_contract_assertion(self) -> None:
         """The helper cannot silently convert local-only capture into evidence."""
         with tempfile.TemporaryDirectory() as temp_dir:

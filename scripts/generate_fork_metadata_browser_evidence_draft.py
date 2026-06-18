@@ -101,6 +101,9 @@ def token_uri_digest(token_uri_text: str) -> str:
     """Return a sha256 digest for raw tokenURI text, or preserve digest text."""
     value = token_uri_text.strip()
     if evidence_checker.SHA256_RE.fullmatch(value):
+        # Digest-only retained captures are allowed when operators cannot retain
+        # the full tokenURI text; the retained tokenURI file will contain this
+        # digest rather than reconstructed metadata.
         return value
     return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
 
@@ -185,7 +188,11 @@ def validate_capture_summary(path: Path, data: dict[str, Any]) -> None:
 
 
 def evidence_path_value(artifact_path: Path, target_path: Path) -> str:
-    """Return the path string the checker will resolve for a retained file."""
+    """Return the checker path for cwd-relative or artifact-beside outputs.
+
+    Example: repo-local outputs resolve as `release-artifacts/.../file.json`;
+    temp bundles outside the repo resolve relative to the retained artifact.
+    """
     cwd = Path.cwd().resolve()
     artifact_resolved = artifact_path.resolve()
     target_resolved = target_path.resolve()
@@ -392,12 +399,12 @@ def generate_draft(args: argparse.Namespace) -> list[Path]:
 
     capture = require_dict(load_json(capture_summary_path), str(capture_summary_path))
     validate_capture_summary(capture_summary_path, capture)
-    token_digest = token_uri_digest(read_text(token_uri_path))
+    token_uri_text = read_text(token_uri_path)
+    token_digest = token_uri_digest(token_uri_text)
     if token_digest != capture["token_uri_sha256"]:
         raise ForkMetadataBrowserEvidenceDraftError(
             "tokenURI output digest does not match capture summary token_uri_sha256"
         )
-    token_uri_text = read_text(token_uri_path)
     transcript_text = read_text(transcript_path)
 
     environment = evidence_checker.require_environment(output_path, args.environment)

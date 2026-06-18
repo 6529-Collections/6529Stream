@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 10:43 UTC` |
+| Last updated | `2026-06-18 10:58 UTC` |
 
 ## Packaging Notes
 
@@ -16263,6 +16263,7 @@ Outcome:
 | 2026-06-18 10:31 | Validate EXT-028 locally | Refreshed release-evidence issue backlog/body-sync and release manifest/proof/lockfile/notes/checksum artifacts after the new validation command changed retained evidence inventory. Focused generator, fork metadata evidence, issue backlog/body-sync, release manifest/proof/lockfile/notes/checksum, release verifier, changelog, markdown link, and `codex-diff-check` gates pass. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally with only existing Solidity/Foundry warnings and the expected Windows LF-to-CRLF notice on `scripts/check.ps1`. Next action is to commit, push, open PR closing #555 and supporting #218 without closing it, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-18 10:32 | Open PR #556 | Pushed commit `4c68dd6406e594502818cc87c1457a49ff866e43` and opened PR #556, `https://github.com/6529-Collections/6529Stream/pull/556`, closing #555 and supporting #218 without closing it. Requested CodeRabbit with `@coderabbitai review`. Next action is to wait for CI and CodeRabbit, fix actionable feedback, and merge only when clean. |
 | 2026-06-18 10:43 | Fix PR #556 CI drift | CodeRabbit completed successfully and Windows wrapper passed, but Foundry smoke failed in the `Public beta evidence` step because `release-artifacts/latest/risk-register.json` still carried the pre-final `ops/EXECUTION_BACKLOG.md` hash. Regenerated the risk register and dependent release manifest/proof/lockfile/checksum artifacts. Local failing segment now passes: `python scripts\test_risk_register.py`, `python scripts\check_risk_register.py`, `python scripts\generate_risk_register.py --check`, public-beta evidence tests/checker, release manifest/proof/lockfile/checksum checks, and release artifact verifier. Next action is to commit/push the CI-fix artifacts and wait for the refreshed checks. |
+| 2026-06-18 10:58 | Address PR #556 bot nice-to-haves | CI and CodeRabbit were green on `598c2f1b32189a2186127916787d5a1e74e1d812`; 6529bot reported good-to-merge/no-security-findings plus non-blocking cleanup suggestions. Accepted them by reading the tokenURI file once, documenting the digest-only retained tokenURI behavior, clarifying `evidence_path_value` resolution modes, and adding positive `sha256:` tokenURI and chain-ID mismatch tests. Focused generator/fork-evidence gates, changelog/docs gates, release manifest/checksum checks, and full `make check` pass locally. Next action is to commit/push the review-response commit and wait for final CI/bot status. |
 
 ## Resume Instructions
 
