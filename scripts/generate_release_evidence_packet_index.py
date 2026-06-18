@@ -386,11 +386,83 @@ def row_validation_commands(
     ]
 
 
+def reviewed_evidence_metadata(
+    repo_root: Path,
+    requirement: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Return reviewed non-local evidence metadata linked from a requirement."""
+    if requirement["status"] != "complete":
+        return None
+    for reference in requirement["evidence"]:
+        path_text = str(reference.get("path", ""))
+        if Path(path_text).suffix.lower() != ".json":
+            continue
+        resolved = resolve_repo_path(repo_root, Path(path_text))
+        try:
+            data = load_json(resolved)
+        except ReleaseEvidencePacketIndexError:
+            continue
+        if not isinstance(data, dict):
+            continue
+        if data.get("schema_version") != non_local_checker.EVIDENCE_SCHEMA:
+            continue
+        try:
+            non_local_checker.validate_evidence_document(data, repo_root, path_text)
+        except non_local_checker.NonLocalReleaseEvidenceError as exc:
+            raise ReleaseEvidencePacketIndexError(
+                f"invalid reviewed evidence metadata for "
+                f"{requirement['phase']}:{requirement['id']}: {exc}"
+            ) from exc
+        if (
+            data.get("record_type") == "evidence"
+            and data.get("review_status") == "reviewed"
+            and data.get("public_beta_requirement_id") == requirement["id"]
+        ):
+            return data
+    return None
+
+
+def review_record(
+    requirement: dict[str, Any],
+    template_path_text: str,
+    template: dict[str, Any],
+    evidence_metadata: dict[str, Any] | None,
+) -> dict[str, str]:
+    """Return owner/reviewer metadata for the row's current review posture."""
+    if evidence_metadata is None:
+        return {
+            "owner": str(template["owner"]),
+            "reviewer": str(template["reviewer"]),
+            "review_status": str(template["review_status"]),
+            "source": template_path_text,
+            "posture": (
+                f"requirement owner={requirement['owner']}; "
+                f"template owner={template['owner']}; "
+                f"reviewer={template['reviewer']}; "
+                f"review_status={template['review_status']}"
+            ),
+        }
+    return {
+        "owner": str(evidence_metadata["owner"]),
+        "reviewer": str(evidence_metadata["reviewer"]),
+        "review_status": str(evidence_metadata["review_status"]),
+        "source": str(evidence_metadata["retained_path"]),
+        "posture": (
+            f"requirement owner={requirement['owner']}; "
+            f"template owner={template['owner']}; "
+            f"evidence owner={evidence_metadata['owner']}; "
+            f"reviewer={evidence_metadata['reviewer']}; "
+            f"review_status={evidence_metadata['review_status']}"
+        ),
+    }
+
+
 def retained_artifact_expectation(
     repo_root: Path,
     phase: str,
     requirement_id: str,
     template: dict[str, Any],
+    evidence_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return the retained artifact handoff record for one packet row."""
     if phase == PUBLIC_BETA_PHASE and requirement_id == FORK_DEPLOYMENT_REQUIREMENT_ID:
@@ -568,12 +640,13 @@ def retained_artifact_expectation(
         retained_path = template["retained_path"]
         retained_sha256 = template["sha256"]
 
+    metadata = template if evidence_metadata is None else evidence_metadata
     return {
         "path": retained_path,
         "sha256": retained_sha256,
-        "block_or_reference": template["block_or_reference"],
-        "command_or_source_system": template["command_or_source_system"],
-        "operator_notes": template["operator_notes"],
+        "block_or_reference": metadata["block_or_reference"],
+        "command_or_source_system": metadata["command_or_source_system"],
+        "operator_notes": metadata["operator_notes"],
     }
 
 
@@ -641,11 +714,19 @@ def packet_rows(
             validate_template_only_completion(requirement)
             template_path, template = templates[requirement_id]
             template_path_text = normalize_path(template_path, repo_root)
+            evidence_metadata = reviewed_evidence_metadata(repo_root, requirement)
+            review = review_record(
+                requirement,
+                template_path_text,
+                template,
+                evidence_metadata,
+            )
             retained = retained_artifact_expectation(
                 repo_root,
                 phase,
                 requirement_id,
                 template,
+                evidence_metadata,
             )
             commands = row_validation_commands(phase_config, requirement_id)
             validate_blocker_reference(
@@ -666,14 +747,11 @@ def packet_rows(
                     "evidence_paths": evidence_paths(requirement),
                     "owner": requirement["owner"],
                     "template_owner": template["owner"],
-                    "reviewer": template["reviewer"],
-                    "review_status": template["review_status"],
-                    "owner_reviewer_posture": (
-                        f"requirement owner={requirement['owner']}; "
-                        f"template owner={template['owner']}; "
-                        f"reviewer={template['reviewer']}; "
-                        f"review_status={template['review_status']}"
-                    ),
+                    "review_owner": review["owner"],
+                    "reviewer": review["reviewer"],
+                    "review_status": review["review_status"],
+                    "review_source": review["source"],
+                    "owner_reviewer_posture": review["posture"],
                     "blocker_report": {
                         "path": normalize_path(
                             resolve_repo_path(repo_root, phase_config["blocker_report_path"]),

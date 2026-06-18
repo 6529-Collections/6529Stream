@@ -177,7 +177,7 @@ CLI_SECRET_RE = re.compile(
     re.IGNORECASE,
 )
 BARE_HEX_KEY_RE = re.compile(
-    r"(?<![0-9a-fA-FxX])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
+    r"(?<!sha256:)(?<![0-9a-fA-FxX])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
 )
 
 

@@ -1,0 +1,81 @@
+{
+  "schema_version": "6529stream.fork-ceremony-safe-export.v1",
+  "evidence_id": "fork-mainnet-6529stream-v0.1.0-001-safe-export",
+  "environment": "fork",
+  "chain_id": 1,
+  "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+  "source": {
+    "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+    "address_book": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+    "broadcast": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
+    "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59"
+  },
+  "safe_or_multisig": {
+    "address": "0x0000000000000000000000000000000000006529",
+    "role": "admin_safe_placeholder_for_fork_rehearsal",
+    "custody_boundary": "placeholder_address_only_not_live_custody",
+    "owns": [
+      "StreamAdmins",
+      "StreamCore"
+    ],
+    "unpause_admin": true,
+    "signer_manager": true
+  },
+  "operators": {
+    "deployer": "0x0000000000000000000000000000000000006537",
+    "pause_guardian": "0x0000000000000000000000000000000000006530",
+    "emergency_recipient": "0x0000000000000000000000000000000000006531",
+    "drop_signer": "0x0000000000000000000000000000000000006532"
+  },
+  "role_changes": [
+    {
+      "function": "registerAdmin(address,bool)",
+      "transaction_hash": "0x775a35fc939361eb2f7dbd6435986e6157efa60a00b1d076a4acf9e8fe1f80be",
+      "purpose": "grant initial global admin during rehearsal"
+    },
+    {
+      "function": "registerAdmin(address,bool)",
+      "transaction_hash": "0xacb997069c8f45637fbc67e4df966d430696f8474a3cd91ee35925518e9feae2",
+      "purpose": "grant Safe placeholder global admin"
+    },
+    {
+      "function": "registerPauseGuardian(address,bool)",
+      "transaction_hash": "0x8fa139d8d8ff478388b1787c3a4065d3c3eaed259ac7a491f3d4041a78ab0718",
+      "purpose": "grant pause guardian placeholder"
+    },
+    {
+      "function": "registerUnpauseAdmin(address,bool)",
+      "transaction_hash": "0xf466ee7b1b6980f79ec5773225370ad0bbd6e41b07a820529379e7ae469db7af",
+      "purpose": "grant Safe placeholder unpause authority"
+    },
+    {
+      "function": "registerSignerManager(address,bool)",
+      "transaction_hash": "0x8063c98b9464ae251345b10ecab3ba5a76ecab69e6d0678cbccd5948a5747dcf",
+      "purpose": "grant Safe placeholder signer manager authority"
+    },
+    {
+      "function": "registerAdmin(address,bool)",
+      "transaction_hash": "0xcac002f3758289a9b818ccfa6a0a1a9d34db9ae175639b24bc3ed9869150d008",
+      "purpose": "revoke temporary deployer global admin"
+    }
+  ],
+  "ownership_transfers": [
+    {
+      "contract": "StreamCore",
+      "new_owner": "0x0000000000000000000000000000000000006529",
+      "transaction_hash": "0xf9df14e08ffb72236b75cd10ba6a2c6603c06720523c9c2b20686aedf514e9ed"
+    },
+    {
+      "contract": "StreamAdmins",
+      "new_owner": "0x0000000000000000000000000000000000006529",
+      "transaction_hash": "0xcf88e8d2ef55c6b4fa3c1cd60ec23bef6c4ca3df03039673f85d5fa35bdde89e"
+    }
+  ],
+  "redaction": {
+    "no_secrets": true,
+    "private_signing_material_retained": false,
+    "private_rpc_urls_retained": false,
+    "operator_session_material_retained": false
+  },
+  "operator_notes": "This export is derived from the committed fork deployment manifest and broadcast. It records placeholder rehearsal roles only and is not production Safe custody evidence."
+}

@@ -419,9 +419,12 @@ Retain:
 Map fork/testnet evidence to `fork_testnet_ceremony_evidence` and live evidence
 to `live_ceremony_evidence`.
 
-The fork/testnet ceremony row has a dedicated retained-artifact template at
+The fork/testnet ceremony row has reviewed fork evidence retained at
 `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`.
-Before generating the non-local ceremony envelope, run:
+The file name is retained for compatibility with the packet-index expectation,
+but the current content is reviewed fork ceremony evidence rather than
+template-only material. Before regenerating or replacing the non-local ceremony
+envelope, run:
 
 ```sh
 python scripts/test_fork_ceremony_evidence.py
