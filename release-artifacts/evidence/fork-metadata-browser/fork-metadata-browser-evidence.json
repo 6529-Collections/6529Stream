@@ -1,0 +1,35 @@
+{
+  "schema_version": "6529stream.non-local-release-evidence.v1",
+  "evidence_id": "fork-testnet-metadata-browser-evidence-fork-evidence",
+  "record_type": "evidence",
+  "review_status": "reviewed",
+  "environment": "fork",
+  "chain_id": 1,
+  "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4",
+  "command_or_source_system": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts",
+  "retained_path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
+  "sha256": "sha256:c1c9f29dc7889912fee6c3f9be390d97d711002455e232c2fd12df67fa92827c",
+  "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
+  "owner": "Codex autonomous implementer",
+  "reviewer": "Codex autonomous maintainer second-pass review for branch codex/fork-metadata-browser-reviewed-evidence",
+  "public_beta_requirement_id": "fork_testnet_metadata_browser_evidence",
+  "source": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "git_commit": "c992105512b56d6619cfbf1684583f018a303bb1",
+    "source_dirty": false,
+    "ci_run": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts"
+  },
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url",
+      "unreleased_drop_payload"
+    ]
+  },
+  "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
+  "operator_notes": "Reviewed fork metadata browser evidence retained from source commit c992105512b56d6619cfbf1684583f018a303bb1. The Anvil mainnet-fork capture at block 25344872 retained deployed-contract tokenURI output, browser sandbox transcript, dependency request validation, parent-frame isolation proof, no console/page/unexpected-request errors, and no-secret redaction; PR CI and 6529bot latest-head review validate the artifact chain while public beta remains blocked on the remaining missing evidence rows."
+}

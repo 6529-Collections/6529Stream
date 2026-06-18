@@ -267,14 +267,45 @@ def render_artifact(
     release_digests: str,
     operator: str,
     reviewer: str,
+    review_status: str,
 ) -> str:
-    """Render the pending-review retained artifact Markdown."""
+    """Render the retained artifact Markdown."""
     contract_field = ", ".join(
         f"{name}={record['address']}" for name, record in sorted(contracts.items())
     )
     summary_field = evidence_path_value(output_path, summary_output)
     token_field = evidence_path_value(output_path, token_uri_output)
     transcript_field = evidence_path_value(output_path, transcript_output)
+    if review_status not in {"pending_review", "reviewed"}:
+        raise ForkMetadataBrowserEvidenceDraftError(
+            "--review-status must be pending_review or reviewed"
+        )
+    review_note = (
+        "- This reviewed file is completion evidence only when the shared "
+        "public-beta evidence manifest links the reviewed retained evidence."
+        if review_status == "reviewed"
+        else "- This file is pending review and is not completion evidence until the "
+        "shared public-beta evidence manifest links reviewed retained evidence."
+    )
+    validation_command = " ".join(
+        [
+            "python scripts/generate_non_local_release_evidence.py",
+            "--template release-artifacts/evidence/public-beta-templates/"
+            "fork-testnet-metadata-browser-evidence-template.json",
+            f"--retained-artifact {evidence_path_value(output_path, output_path)}",
+            "--output release-artifacts/evidence/fork-metadata-browser/"
+            "fork-metadata-browser-evidence.json",
+            f"--environment {environment}",
+            f"--chain-id {chain_id}",
+            f'--block-or-reference "{block_or_reference}"',
+            f'--command-or-source-system "{ci_run_or_transcript}"',
+            f'--owner "{operator}"',
+            f'--reviewer "{reviewer}"',
+            *(["--review-status reviewed"] if review_status == "reviewed" else []),
+            f"--source-git-commit {git_commit}",
+            f'--source-ci-run "{ci_run_or_transcript}"',
+        ]
+    )
     return "\n".join(
         [
             "# Fork/Testnet Metadata Browser Retained Artifact",
@@ -283,7 +314,7 @@ def render_artifact(
             "",
             "- Requirement ID: `fork_testnet_metadata_browser_evidence`",
             "- Evidence type: `fork_testnet_metadata_browser_evidence`",
-            "- Review status: `pending_review`",
+            f"- Review status: `{review_status}`",
             "- Readiness claim: `blocked`",
             f"- Environment: `{environment}`",
             f"- Chain ID: `{chain_id}`",
@@ -320,7 +351,7 @@ def render_artifact(
             "",
             f"- Operator: `{operator}`",
             f"- Reviewer: `{reviewer}`",
-            "- Review decision: `pending_review`",
+            f"- Review decision: `{review_status}`",
             "",
             "## Redaction",
             "",
@@ -336,17 +367,7 @@ def render_artifact(
             "python scripts/test_generate_fork_metadata_browser_evidence_draft.py",
             "python scripts/test_fork_metadata_browser_evidence.py",
             "python scripts/check_fork_metadata_browser_evidence.py",
-            "python scripts/generate_non_local_release_evidence.py --template "
-            "release-artifacts/evidence/public-beta-templates/"
-            "fork-testnet-metadata-browser-evidence-template.json --retained-artifact "
-            f"{evidence_path_value(output_path, output_path)} --output "
-            "release-artifacts/evidence/fork-metadata-browser/"
-            "fork-metadata-browser-evidence.json "
-            f"--environment {environment} --chain-id {chain_id} "
-            f"--block-or-reference \"{block_or_reference}\" "
-            f"--command-or-source-system \"{ci_run_or_transcript}\" "
-            f"--owner \"{operator}\" --reviewer \"{reviewer}\" "
-            f"--source-git-commit {git_commit} --source-ci-run \"{ci_run_or_transcript}\"",
+            validation_command,
             "python scripts/check_non_local_release_evidence.py",
             "python scripts/check_public_beta_evidence.py",
             "python scripts/generate_release_manifest.py --check",
@@ -356,8 +377,7 @@ def render_artifact(
             "## Operator Notes",
             "",
             "- Generated from retained metadata-browser capture outputs for issue #218.",
-            "- This file is pending review and is not completion evidence until the "
-            "shared public-beta evidence manifest links reviewed retained evidence.",
+            review_note,
             "- This generator requires an explicit deployed-contract assertion; do not "
             "use local-only capture outputs for public-beta readiness claims.",
             "",
@@ -439,6 +459,7 @@ def generate_draft(args: argparse.Namespace) -> list[Path]:
         release_digests=args.release_digests,
         operator=args.operator,
         reviewer=args.reviewer,
+        review_status=args.review_status,
     )
     evidence_checker.validate_no_secret_values(output_path, json.dumps(summary, sort_keys=True))
     evidence_checker.validate_no_secret_values(retained_token_uri_output, token_uri_text)
@@ -477,6 +498,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--contract", action="append", default=[], help="Contract NAME=0x...; may be repeated")
     parser.add_argument("--operator", required=True)
     parser.add_argument("--reviewer", required=True)
+    parser.add_argument(
+        "--review-status",
+        choices=("pending_review", "reviewed"),
+        default="pending_review",
+        help="Review state to write into the retained artifact.",
+    )
     parser.add_argument("--release-digests", default=DEFAULT_RELEASE_DIGESTS)
     parser.add_argument(
         "--metadata-fetched-from-deployed-contract",

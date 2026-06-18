@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:608a00bd9959f8a2ce3f8607a7f3170b955fe0edf104ad4b2cf3d55e87ad3685",
-      "size_bytes": 9035
+      "sha256": "sha256:75012119231977faf7f56956d0313d78992eefa6d2431cb8987ab215383c86c9",
+      "size_bytes": 9663
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:92359e28637525c5a5d1961238f6bf347f49d5cd04b2a68416bbe93c412e8136",
-      "size_bytes": 11761
+      "sha256": "sha256:0d41c0f14231f5b0787f8847d8337cdcf587b8830b37e56e752dc271ba9b2110",
+      "size_bytes": 11949
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -47,14 +47,14 @@
       "label": "Public Beta",
       "overall_status": "blocked",
       "counts": {
-        "missing": 6,
+        "missing": 5,
         "pending": 0,
         "blocked": 0,
         "accepted_risk": 0,
         "not_applicable": 0,
-        "complete": 3
+        "complete": 4
       },
-      "incomplete": 6
+      "incomplete": 5
     },
     {
       "phase": "production_release",
@@ -250,17 +250,19 @@
       "phase": "public_beta",
       "phase_label": "Public Beta",
       "requirement_id": "fork_testnet_metadata_browser_evidence",
-      "status": "missing",
-      "evidence_posture": "external/future",
-      "evidence_count": 0,
-      "evidence_paths": [],
-      "owner": "TBD",
+      "status": "complete",
+      "evidence_posture": "reviewed-external",
+      "evidence_count": 1,
+      "evidence_paths": [
+        "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json"
+      ],
+      "owner": "Codex autonomous implementer",
       "template_owner": "TBD",
-      "review_owner": "TBD",
-      "reviewer": "TBD",
-      "review_status": "template",
-      "review_source": "release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json",
-      "owner_reviewer_posture": "requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template",
+      "review_owner": "Codex autonomous implementer",
+      "reviewer": "Codex autonomous maintainer second-pass review for branch codex/fork-metadata-browser-reviewed-evidence",
+      "review_status": "reviewed",
+      "review_source": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous implementer; template owner=TBD; evidence owner=Codex autonomous implementer; reviewer=Codex autonomous maintainer second-pass review for branch codex/fork-metadata-browser-reviewed-evidence; review_status=reviewed",
       "blocker_report": {
         "path": "release-artifacts/latest/public-beta-blockers.md",
         "section": "Incomplete Public Beta Rows",
@@ -275,10 +277,10 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
-        "sha256": "sha256:f8b862cb7d2e5a2d0264f9dab9a9aa9156a35fea6bf7d389e1ca950b401605cc",
-        "block_or_reference": "template-only fork or testnet block, token ID, collection ID, CI run, or browser transcript reference",
-        "command_or_source_system": "template-only browser-sandbox command, CI job, deployed contract call, or operator transcript",
-        "operator_notes": "Replace this template with browser execution evidence for metadata generated from deployed fork or testnet contracts, including contract addresses, token or collection IDs, command, output digest, console summary, and reviewer confirmation."
+        "sha256": "sha256:c1c9f29dc7889912fee6c3f9be390d97d711002455e232c2fd12df67fa92827c",
+        "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4",
+        "command_or_source_system": "mainnet-fork metadata browser capture on 2026-06-18 from committed source c992105512b56d6619cfbf1684583f018a303bb1; retained browser transcript validates execution; PR CI validates artifacts",
+        "operator_notes": "Reviewed fork metadata browser evidence retained from source commit c992105512b56d6619cfbf1684583f018a303bb1. The Anvil mainnet-fork capture at block 25344872 retained deployed-contract tokenURI output, browser sandbox transcript, dependency request validation, parent-frame isolation proof, no console/page/unexpected-request errors, and no-secret redaction; PR CI and 6529bot latest-head review validate the artifact chain while public beta remains blocked on the remaining missing evidence rows."
       },
       "validation_commands": [
         "python scripts/test_release_evidence_packet_index.py",
@@ -296,8 +298,8 @@
         "python scripts/generate_release_checksums.py --check"
       ],
       "template_only_can_complete": false,
-      "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "Fork or testnet metadata browser-sandbox evidence generated from deployed contracts is not yet retained."
+      "completion_policy": "reviewed retained evidence is recorded in the evidence manifest",
+      "notes": "Reviewed fork metadata browser evidence is retained: mainnet fork block 25344872, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output with fork/testnet metadata labels, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "phase": "public_beta",

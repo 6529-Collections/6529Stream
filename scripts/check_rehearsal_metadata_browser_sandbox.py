@@ -25,8 +25,11 @@ sys.modules[SPEC.name] = sandbox_checker
 SPEC.loader.exec_module(sandbox_checker)
 
 EXPECTED_EVIDENCE_KIND = "local-anvil-deployment-rehearsal"
+FORK_TESTNET_EVIDENCE_KIND = "fork-testnet-deployment-rehearsal"
+EXPECTED_EVIDENCE_KINDS = {EXPECTED_EVIDENCE_KIND, FORK_TESTNET_EVIDENCE_KIND}
 EXPECTED_EXTERNAL_SCRIPT_URL = "https://cdn.6529.io/stream/rehearsal.js"
 REHEARSAL_SCRIPT = "script/RehearseMetadataBrowser.s.sol:RehearseMetadataBrowser"
+DEFAULT_FORK_SENDER = "0x0000000000000000000000000000000000006537"
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
@@ -57,6 +60,19 @@ RETURN_FIELDS = (
     "externalScriptUrl",
     "tokenUri",
 )
+DECODED_RETURN_RE = re.compile(
+    r"^\("
+    r"(?P<evidenceKind>[^,\n()]+),\s*"
+    r"(?P<chainId>[0-9]+),\s*"
+    r"(?P<deploymentManifestHash>0x[0-9a-fA-F]{64}),\s*"
+    r"(?P<collectionId>[0-9]+),\s*"
+    r"(?P<tokenId>[0-9]+),\s*"
+    r"(?P<tokenHash>0x[0-9a-fA-F]{64}),\s*"
+    r"(?P<tokenDataRaw>.*),\s*"
+    rf"(?P<externalScriptUrl>{re.escape(EXPECTED_EXTERNAL_SCRIPT_URL)}),\s*"
+    r"(?P<tokenUri>data:application/json;base64,[A-Za-z0-9+/=]+)"
+    r"\)$"
+)
 
 
 class RehearsalMetadataBrowserError(ValueError):
@@ -69,6 +85,17 @@ class RehearsalBrowserCheckResult:
 
     evidence: dict[str, Any]
     sandbox_result: sandbox_checker.SandboxResult
+    forge_command: str | None = None
+
+
+@dataclass(frozen=True)
+class ForgeRehearsalOptions:
+    """Operator-selected Forge execution mode for the metadata rehearsal."""
+
+    rpc_url: str | None = None
+    broadcast: bool = False
+    unlocked: bool = False
+    sender: str | None = None
 
 
 def forge_environment() -> dict[str, str]:
@@ -125,11 +152,9 @@ def parse_forge_json_records(stdout: str) -> list[dict[str, Any]]:
     return records
 
 
-def run_forge_rehearsal() -> dict[str, Any]:
-    """Run the local metadata rehearsal script and return Forge's JSON output."""
+def build_forge_command(forge: str, options: ForgeRehearsalOptions) -> list[str]:
+    """Build the Forge command without retaining secret-bearing operator inputs."""
 
-    env = forge_environment()
-    forge = resolve_forge(env)
     command = [
         forge,
         "script",
@@ -139,6 +164,47 @@ def run_forge_rehearsal() -> dict[str, Any]:
         "--via-ir",
         "--json",
     ]
+    if options.rpc_url:
+        command.extend(["--rpc-url", options.rpc_url])
+    if options.broadcast:
+        command.append("--broadcast")
+    if options.unlocked:
+        command.append("--unlocked")
+    if options.sender:
+        command.extend(["--sender", options.sender])
+    return command
+
+
+def redacted_forge_command(options: ForgeRehearsalOptions) -> str:
+    """Return a no-secret command summary suitable for retained evidence notes."""
+
+    command = [
+        "forge",
+        "script",
+        REHEARSAL_SCRIPT,
+        "--sig",
+        '"run()"',
+        "--via-ir",
+        "--json",
+    ]
+    if options.rpc_url:
+        command.extend(["--rpc-url", "<redacted>"])
+    if options.broadcast:
+        command.append("--broadcast")
+    if options.unlocked:
+        command.append("--unlocked")
+    if options.sender:
+        command.extend(["--sender", options.sender])
+    return " ".join(command)
+
+
+def run_forge_rehearsal(options: ForgeRehearsalOptions | None = None) -> dict[str, Any]:
+    """Run the local metadata rehearsal script and return Forge's JSON output."""
+
+    options = options or ForgeRehearsalOptions()
+    env = forge_environment()
+    forge = resolve_forge(env)
+    command = build_forge_command(forge, options)
     completed = subprocess.run(
         command,
         check=False,
@@ -152,13 +218,7 @@ def run_forge_rehearsal() -> dict[str, Any]:
             f"stdout:\n{completed.stdout[-4000:]}\n"
             f"stderr:\n{completed.stderr[-4000:]}"
         )
-    records = parse_forge_json_records(completed.stdout)
-    for record in reversed(records):
-        if "returned" in record:
-            return record
-    raise RehearsalMetadataBrowserError(
-        "forge metadata rehearsal did not include returned ABI data"
-    )
+    return select_rehearsal_output_record(parse_forge_json_records(completed.stdout))
 
 
 def read_word(data: bytes, index: int, *, base: int = 0) -> bytes:
@@ -209,32 +269,81 @@ def decode_rehearsal_return(returned: Any) -> dict[str, Any]:
     if word_to_int(read_word(data, 0)) == 32 and len(data) >= 32 + len(RETURN_FIELDS) * 32:
         base = 32
 
-    return {
-        "evidenceKind": decode_string(
-            data, read_word(data, 0, base=base), "evidenceKind", base=base
-        ),
-        "chainId": str(word_to_int(read_word(data, 1, base=base))),
-        "deploymentManifestHash": "0x" + read_word(data, 2, base=base).hex(),
-        "collectionId": str(word_to_int(read_word(data, 3, base=base))),
-        "tokenId": str(word_to_int(read_word(data, 4, base=base))),
-        "tokenHash": "0x" + read_word(data, 5, base=base).hex(),
-        "tokenDataRaw": decode_string(
-            data, read_word(data, 6, base=base), "tokenDataRaw", base=base
-        ),
-        "externalScriptUrl": decode_string(
-            data, read_word(data, 7, base=base), "externalScriptUrl", base=base
-        ),
-        "tokenUri": decode_string(data, read_word(data, 8, base=base), "tokenUri", base=base),
-    }
+    return normalize_rehearsal_evidence(
+        {
+            "evidenceKind": decode_string(
+                data, read_word(data, 0, base=base), "evidenceKind", base=base
+            ),
+            "chainId": str(word_to_int(read_word(data, 1, base=base))),
+            "deploymentManifestHash": "0x" + read_word(data, 2, base=base).hex(),
+            "collectionId": str(word_to_int(read_word(data, 3, base=base))),
+            "tokenId": str(word_to_int(read_word(data, 4, base=base))),
+            "tokenHash": "0x" + read_word(data, 5, base=base).hex(),
+            "tokenDataRaw": decode_string(
+                data, read_word(data, 6, base=base), "tokenDataRaw", base=base
+            ),
+            "externalScriptUrl": decode_string(
+                data, read_word(data, 7, base=base), "externalScriptUrl", base=base
+            ),
+            "tokenUri": decode_string(
+                data, read_word(data, 8, base=base), "tokenUri", base=base
+            ),
+        }
+    )
+
+
+def extract_decoded_rehearsal_value(forge_output: dict[str, Any]) -> str:
+    """Extract Forge's decoded return value string from broadcast JSON output."""
+
+    returns = forge_output.get("returns")
+    if not isinstance(returns, dict):
+        raise RehearsalMetadataBrowserError("forge output is missing returned ABI data")
+    result = returns.get("result")
+    if not isinstance(result, dict):
+        raise RehearsalMetadataBrowserError("forge output is missing decoded result")
+    value = result.get("value")
+    if not isinstance(value, str) or not value:
+        raise RehearsalMetadataBrowserError("forge decoded result value is missing")
+    return value
+
+
+def decode_rehearsal_value_string(value: str) -> dict[str, Any]:
+    """Decode Forge's human-readable tuple string for broadcast-mode returns."""
+
+    body = value.strip()
+    match = DECODED_RETURN_RE.fullmatch(body)
+    if match is None:
+        raise RehearsalMetadataBrowserError("forge decoded result is not a tuple string")
+    return normalize_rehearsal_evidence(match.groupdict())
 
 
 def extract_rehearsal_evidence(forge_output: dict[str, Any]) -> dict[str, Any]:
     """Extract rehearsal evidence from the Forge ABI return payload."""
 
     returned = forge_output.get("returned")
-    if returned is None:
-        raise RehearsalMetadataBrowserError("forge output is missing returned ABI data")
-    return decode_rehearsal_return(returned)
+    if returned is not None:
+        return decode_rehearsal_return(returned)
+    return decode_rehearsal_value_string(extract_decoded_rehearsal_value(forge_output))
+
+
+def select_rehearsal_output_record(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return the latest Forge JSON record that actually decodes as rehearsal output."""
+
+    decode_errors: list[str] = []
+    for record in reversed(records):
+        if "returned" not in record and "returns" not in record:
+            continue
+        try:
+            extract_rehearsal_evidence(record)
+        except RehearsalMetadataBrowserError as exc:
+            decode_errors.append(str(exc))
+            continue
+        return record
+    detail = f"; last decode error: {decode_errors[-1]}" if decode_errors else ""
+    raise RehearsalMetadataBrowserError(
+        "forge metadata rehearsal did not include decodable returned ABI data "
+        f"or decoded returns{detail}"
+    )
 
 
 def as_int(value: Any, field: str) -> int:
@@ -276,10 +385,46 @@ def parse_token_data(raw: Any) -> tuple[int, ...]:
     return tuple(values)
 
 
+def require_evidence_string(evidence: dict[str, Any], field: str) -> str:
+    """Require a decoded evidence field to be a string."""
+
+    value = evidence.get(field)
+    if not isinstance(value, str):
+        raise RehearsalMetadataBrowserError(f"{field} is not a string: {value!r}")
+    return value
+
+
+def normalize_rehearsal_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
+    """Validate decoded Forge fields and normalize them into the evidence shape."""
+
+    normalized = {
+        "evidenceKind": require_evidence_string(evidence, "evidenceKind"),
+        "chainId": str(as_int(evidence.get("chainId"), "chainId")),
+        "deploymentManifestHash": as_bytes32(
+            evidence.get("deploymentManifestHash"),
+            "deploymentManifestHash",
+        ),
+        "collectionId": str(as_int(evidence.get("collectionId"), "collectionId")),
+        "tokenId": str(as_int(evidence.get("tokenId"), "tokenId")),
+        "tokenHash": as_bytes32(evidence.get("tokenHash"), "tokenHash"),
+        "tokenDataRaw": require_evidence_string(evidence, "tokenDataRaw"),
+        "externalScriptUrl": require_evidence_string(evidence, "externalScriptUrl"),
+        "tokenUri": require_evidence_string(evidence, "tokenUri"),
+    }
+    parse_token_data(normalized["tokenDataRaw"])
+    if normalized["externalScriptUrl"] != EXPECTED_EXTERNAL_SCRIPT_URL:
+        raise RehearsalMetadataBrowserError(
+            f"unexpected external script URL: {normalized['externalScriptUrl']!r}"
+        )
+    if not normalized["tokenUri"].startswith(sandbox_checker.fixture_checker.JSON_DATA_URI_PREFIX):
+        raise RehearsalMetadataBrowserError("tokenUri is not an on-chain metadata data URI")
+    return normalized
+
+
 def validate_rehearsal_evidence(evidence: dict[str, Any]) -> None:
     """Validate the evidence envelope before launching Chromium."""
 
-    if evidence.get("evidenceKind") != EXPECTED_EVIDENCE_KIND:
+    if evidence.get("evidenceKind") not in EXPECTED_EVIDENCE_KINDS:
         raise RehearsalMetadataBrowserError(
             f"unexpected evidence kind: {evidence.get('evidenceKind')!r}"
         )
@@ -325,6 +470,7 @@ def build_capture_summary(result: RehearsalBrowserCheckResult) -> dict[str, Any]
     return {
         "schema_version": "6529stream.rehearsal-metadata-browser-capture.v1",
         "evidence_kind": evidence["evidenceKind"],
+        "forge_command": result.forge_command,
         "chain_id": as_int(evidence["chainId"], "chainId"),
         "deployment_manifest_hash": as_bytes32(
             evidence["deploymentManifestHash"],
@@ -372,6 +518,7 @@ def build_capture_transcript(result: RehearsalBrowserCheckResult) -> str:
             "## Source",
             "",
             f"- Rehearsal script: `{REHEARSAL_SCRIPT}`",
+            f"- Forge command: `{summary['forge_command'] or 'default local command'}`",
             f"- Evidence kind: `{evidence['evidenceKind']}`",
             f"- Chain ID: `{summary['chain_id']}`",
             f"- Deployment manifest hash: `{summary['deployment_manifest_hash']}`",
@@ -481,10 +628,12 @@ def check_rehearsal_browser_sandbox(
     *,
     timeout_ms: int,
     headed: bool,
+    forge_options: ForgeRehearsalOptions | None = None,
 ) -> RehearsalBrowserCheckResult:
     """Run the full Forge-to-Chromium rehearsal metadata browser check."""
 
-    forge_output = run_forge_rehearsal()
+    forge_options = forge_options or ForgeRehearsalOptions()
+    forge_output = run_forge_rehearsal(forge_options)
     evidence = extract_rehearsal_evidence(forge_output)
     validate_rehearsal_evidence(evidence)
     fixture = sandbox_checker.load_animation_from_token_uri(
@@ -505,7 +654,11 @@ def check_rehearsal_browser_sandbox(
         expected_external_script_url=fixture.external_script_url,
         expected_bootstrap=build_expected_bootstrap(evidence),
     )
-    return RehearsalBrowserCheckResult(evidence=evidence, sandbox_result=result)
+    return RehearsalBrowserCheckResult(
+        evidence=evidence,
+        sandbox_result=result,
+        forge_command=redacted_forge_command(forge_options),
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -540,6 +693,30 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Optional path for a redacted retained browser transcript.",
     )
+    parser.add_argument(
+        "--forge-rpc-url",
+        help=(
+            "Optional Forge RPC URL for fork/testnet capture. This value is used "
+            "only for command execution and is never written to retained outputs."
+        ),
+    )
+    parser.add_argument(
+        "--forge-broadcast",
+        action="store_true",
+        help="Pass --broadcast to Forge for fork/testnet deployed-contract capture.",
+    )
+    parser.add_argument(
+        "--forge-unlocked",
+        action="store_true",
+        help="Pass --unlocked to Forge for an Anvil fork with impersonated senders.",
+    )
+    parser.add_argument(
+        "--forge-sender",
+        help=(
+            "Optional Forge --sender address. For the default rehearsal config on "
+            f"Anvil forks, use {DEFAULT_FORK_SENDER}."
+        ),
+    )
     return parser
 
 
@@ -548,9 +725,16 @@ def main(argv: list[str] | None = None) -> int:
 
     args = build_parser().parse_args(argv)
     try:
+        forge_options = ForgeRehearsalOptions(
+            rpc_url=args.forge_rpc_url,
+            broadcast=args.forge_broadcast,
+            unlocked=args.forge_unlocked,
+            sender=args.forge_sender,
+        )
         result = check_rehearsal_browser_sandbox(
             timeout_ms=args.timeout_ms,
             headed=args.headed,
+            forge_options=forge_options,
         )
         written = write_capture_outputs(
             result,

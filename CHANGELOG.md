@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added reviewed fork metadata browser evidence for
+  `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser
+  summary, generated `tokenURI`, redacted execution transcript, non-local
+  evidence envelope, and release artifact updates under the shared public-beta
+  evidence manifest while keeping public beta blocked on the remaining missing
+  evidence rows.
 - Added an authenticated live release-evidence issue sync gate that fetches the
   exact linked GitHub tracker issues, checks live body drift and premature
   closure against committed release artifacts, and tolerates Windows UTF-8 BOM
@@ -831,6 +837,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Corrected reviewed fork metadata browser evidence so non-local retained
+  `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened
+  Forge broadcast return parsing to validate decoded field shapes and skip
+  malformed `returns` records before retaining evidence.
 - Reconciled stale autonomous backlog status rows for previously merged
   integration, 1/1 product-readiness, contract-size, and randomizer test work,
   and refreshed the dependent risk-register and release-artifact hashes.

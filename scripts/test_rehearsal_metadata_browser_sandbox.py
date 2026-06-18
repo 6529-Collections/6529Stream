@@ -141,6 +141,28 @@ def forge_output_with_return(
     return {"returned": "0x" + payload.hex()}
 
 
+def forge_output_with_decoded_return(evidence: dict[str, object]) -> dict[str, object]:
+    """Wrap decoded evidence in Forge's broadcast-mode return shape."""
+
+    value = (
+        f"({evidence['evidenceKind']}, {evidence['chainId']}, "
+        f"{evidence['deploymentManifestHash']}, {evidence['collectionId']}, "
+        f"{evidence['tokenId']}, {evidence['tokenHash']}, "
+        f"{evidence['tokenDataRaw']}, {evidence['externalScriptUrl']}, "
+        f"{evidence['tokenUri']})"
+    )
+    return {
+        "returns": {
+            "result": {
+                "internal_type": (
+                    "struct RehearseMetadataBrowser.MetadataBrowserResult"
+                ),
+                "value": value,
+            }
+        }
+    }
+
+
 class RehearsalMetadataBrowserTests(unittest.TestCase):
     """Unit tests for the rehearsal metadata browser checker."""
 
@@ -165,6 +187,130 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
 
         self.assertEqual(evidence["evidenceKind"], rehearsal_checker.EXPECTED_EVIDENCE_KIND)
         self.assertEqual(evidence["tokenHash"], "0x" + "34" * 32)
+
+    def test_decodes_forge_broadcast_return_shape(self) -> None:
+        """Fork broadcast JSON returns a decoded tuple string instead of raw ABI."""
+
+        source = valid_evidence()
+        source["evidenceKind"] = rehearsal_checker.FORK_TESTNET_EVIDENCE_KIND
+        evidence = rehearsal_checker.extract_rehearsal_evidence(
+            forge_output_with_decoded_return(source)
+        )
+
+        self.assertEqual(evidence["evidenceKind"], rehearsal_checker.FORK_TESTNET_EVIDENCE_KIND)
+        self.assertEqual(evidence["chainId"], "31337")
+        self.assertEqual(evidence["tokenDataRaw"], "1,2,3")
+        self.assertEqual(evidence["tokenUri"], "data:application/json;base64,e30=")
+
+    def test_decodes_broadcast_return_without_space_after_commas(self) -> None:
+        """Tuple-string decoding tolerates Forge spacing changes between fields."""
+
+        forge_output = forge_output_with_decoded_return(valid_evidence())
+        value = forge_output["returns"]["result"]["value"]
+        forge_output["returns"]["result"]["value"] = value.replace(", ", ",")
+
+        evidence = rehearsal_checker.extract_rehearsal_evidence(forge_output)
+
+        self.assertEqual(evidence["chainId"], "31337")
+        self.assertEqual(evidence["tokenDataRaw"], "1,2,3")
+
+    def test_decoded_broadcast_return_rejects_delimiter_in_evidence_kind(self) -> None:
+        """Tuple-string decoding rejects evidence kinds that would shift fields."""
+
+        source = valid_evidence()
+        source["evidenceKind"] = "fork, testnet"
+
+        with self.assertRaisesRegex(
+            rehearsal_checker.RehearsalMetadataBrowserError,
+            "tuple string",
+        ):
+            rehearsal_checker.extract_rehearsal_evidence(
+                forge_output_with_decoded_return(source)
+            )
+
+    def test_decoded_broadcast_return_rejects_bad_bytes32_field(self) -> None:
+        """Tuple-string decoding validates bytes32-shaped fields before evidence use."""
+
+        source = valid_evidence()
+        source["tokenHash"] = "0x1234"
+
+        with self.assertRaisesRegex(
+            rehearsal_checker.RehearsalMetadataBrowserError,
+            "tuple string",
+        ):
+            rehearsal_checker.extract_rehearsal_evidence(
+                forge_output_with_decoded_return(source)
+            )
+
+    def test_select_rehearsal_record_skips_malformed_latest_returns(self) -> None:
+        """Record selection finds the latest actually decodable rehearsal return."""
+
+        valid_record = forge_output_with_return(valid_evidence())
+        malformed_latest = {
+            "returns": {"result": {"value": "(not a rehearsal return)"}}
+        }
+
+        selected = rehearsal_checker.select_rehearsal_output_record(
+            [{"status": "ok"}, valid_record, malformed_latest]
+        )
+
+        self.assertIs(selected, valid_record)
+
+    def test_builds_default_forge_command(self) -> None:
+        """The default command keeps the existing local simulation path."""
+
+        command = rehearsal_checker.build_forge_command(
+            "forge",
+            rehearsal_checker.ForgeRehearsalOptions(),
+        )
+
+        self.assertEqual(
+            command,
+            [
+                "forge",
+                "script",
+                rehearsal_checker.REHEARSAL_SCRIPT,
+                "--sig",
+                "run()",
+                "--via-ir",
+                "--json",
+            ],
+        )
+
+    def test_builds_fork_forge_command(self) -> None:
+        """Fork capture can opt into RPC, broadcast, unlocked, and sender flags."""
+
+        command = rehearsal_checker.build_forge_command(
+            "forge",
+            rehearsal_checker.ForgeRehearsalOptions(
+                rpc_url="http://127.0.0.1:8547",
+                broadcast=True,
+                unlocked=True,
+                sender=rehearsal_checker.DEFAULT_FORK_SENDER,
+            ),
+        )
+
+        self.assertIn("--rpc-url", command)
+        self.assertIn("http://127.0.0.1:8547", command)
+        self.assertIn("--broadcast", command)
+        self.assertIn("--unlocked", command)
+        self.assertIn("--sender", command)
+        self.assertIn(rehearsal_checker.DEFAULT_FORK_SENDER, command)
+
+    def test_redacted_forge_command_omits_rpc_url(self) -> None:
+        """Retained command summaries must not include operator RPC URLs."""
+
+        command = rehearsal_checker.redacted_forge_command(
+            rehearsal_checker.ForgeRehearsalOptions(
+                rpc_url="https://example.invalid/private-token",
+                broadcast=True,
+                unlocked=True,
+                sender=rehearsal_checker.DEFAULT_FORK_SENDER,
+            )
+        )
+
+        self.assertIn("<redacted>", command)
+        self.assertNotIn("private-token", command)
 
     def test_parses_noisy_forge_stdout_records(self) -> None:
         """Forge stdout can include non-JSON text around JSON records."""

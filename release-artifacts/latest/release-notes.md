@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added reviewed fork metadata browser evidence for `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser summary, generated `tokenURI`, redacted execution transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.
 - Added an authenticated live release-evidence issue sync gate that fetches the exact linked GitHub tracker issues, checks live body drift and premature closure against committed release artifacts, and tolerates Windows UTF-8 BOM snapshots while keeping the default CI gate network-free.
 - Added a fork/testnet metadata-browser evidence draft generator that converts retained browser capture outputs into a checker-compatible pending-review evidence bundle, with no-secret validation, deployed-contract assertion, and local/CI/Windows gate coverage while keeping issue #218 blocked until real reviewed fork/testnet evidence is linked.
 - Added retained-output flags to the local metadata browser rehearsal checker so operators can export deterministic browser summary JSON, generated `tokenURI`, and redacted transcript artifacts before future fork/testnet metadata browser evidence review.
@@ -201,6 +202,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Added lifecycle-aware stale and failed randomness metadata states for minted tokens whose hash is still unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures, token state view coverage, fallback-to-pending coverage, and final-hash override coverage.
 - Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.
+- Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.
 - Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.
 - Retired provider and integration files from the prior Solidity formatting exception baseline, so arRNG, VRF, delegation, and randomizer integration interfaces are now enforced by `make fmt-check`.
 - Retired first-party interface files from the prior Solidity formatting exception baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and `IStreamMinter.sol` are now enforced by `make fmt-check`.
