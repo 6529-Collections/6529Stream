@@ -241,11 +241,12 @@ retains source hashes, constructor ABI, bytecode/linking status, and
 `forge verify-contract` command templates without claiming live explorer
 verification before a broadcast deployment exists.
 
-The ABI compatibility step compares the current production contract ABI surface
-against `release-artifacts/baselines/v0.1.0/abi-surface.json`. It fails on
-removed or changed functions, events, custom errors, constructors, fallback, or
-receive entries. Additive entries are reported as compatible for this first
-baseline so maintainers can pair them with release notes and version policy.
+The ABI compatibility step compares the current production contract and
+published interface ABI surfaces against
+`release-artifacts/baselines/v0.1.0/abi-surface.json`. It fails on removed or
+changed functions, events, custom errors, constructors, fallback, or receive
+entries. Additive entries are reported as compatible for this first baseline so
+maintainers can pair them with release notes and version policy.
 
 The broadcast manifest input step parses the sanitized Foundry fixtures under
 `deployments/broadcasts/`, rejects wrong-chain, failed-receipt,
@@ -1107,10 +1108,10 @@ The generator uses `release-artifacts/contracts.json` to define the production
 contract and interface surface. Standard ERC interface IDs are pinned there when
 the advertised ERC ID differs from a raw XOR over the artifact ABI.
 
-The ABI compatibility baseline uses the production contract set from the same
-config file. Refresh it only when maintainers intentionally accept a release
-surface change; removed or changed entries should also update the breaking
-change documentation and release notes.
+The ABI compatibility baseline uses the production contract and published
+interface sets from the same config file. Refresh it only when maintainers
+intentionally accept a release surface change; removed or changed entries
+should also update the breaking change documentation and release notes.
 
 The gas snapshot baseline lives at
 `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`. Refresh it only when

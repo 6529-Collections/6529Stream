@@ -3438,7 +3438,8 @@ unless an external dependency changes.
 | `REL-006` | Add release notes generator from changelog and artifact diff | G | Merged in PR #463; issue #462 closed completed |
 | `REL-007` | Add dependency provenance attestation bundle | F/G | Merged in PR #465; issue #464 closed completed |
 | `REL-008` | Add release-mode CI profile that fails on missing live evidence | F/G | Merged in PR #467; issue #466 closed completed |
-| `REL-009` | Strengthen release artifact verifier checksum coverage | G | Active PR #564 / issue #563 on branch `codex/release-artifact-verifier-checksum-coverage`; require nested `{path, sha256}` records from release manifest, bytecode proof, and release-candidate lockfile artifacts to be represented in `SHA256SUMS` with matching hashes, add focused regressions, and preserve blocked readiness claims |
+| `REL-009` | Strengthen release artifact verifier checksum coverage | G | Merged in PR #564; issue #563 closed completed |
+| `REL-010` | Extend ABI compatibility checks to published interfaces | G | Active issue #565 on branch `codex/interface-abi-compatibility`; include `release-artifacts/contracts.json` `interfaces` in the committed ABI compatibility baseline, fail on removed or changed interface entries, report additive interface entries as compatible, refresh release artifacts, and preserve blocked readiness claims |
 
 ### Governance And Operations
 

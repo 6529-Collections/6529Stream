@@ -121,7 +121,8 @@ Breaking changes require:
 
 ## ABI And Artifact Approval
 
-The ABI compatibility gate compares the current production ABI surface against
+The ABI compatibility gate compares the current production contract and
+published interface ABI surfaces against
 `release-artifacts/baselines/v0.1.0/abi-surface.json`.
 
 - Removed or changed entries are blocking until the change is approved and the

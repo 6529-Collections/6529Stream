@@ -236,11 +236,11 @@ The current Gate A smoke baseline proves:
   collection immutability, and source-retention evidence.
 - `scripts/test_abi_compatibility.py` and
   `scripts/check_abi_compatibility.py --check` prove the current production
-  contract ABI surface remains compatible with the committed
-  `release-artifacts/baselines/v0.1.0/abi-surface.json` baseline. The first
-  baseline fails on removed or changed functions, events, custom errors,
-  constructors, fallback, or receive entries and reports additive entries as
-  compatible.
+  contract and published interface ABI surfaces remain compatible with the
+  committed `release-artifacts/baselines/v0.1.0/abi-surface.json` baseline.
+  The first baseline fails on removed or changed functions, events, custom
+  errors, constructors, fallback, or receive entries and reports additive
+  entries as compatible.
 - `scripts/test_broadcast_manifest_input.py` and
   `scripts/generate_broadcast_manifest_input.py --check` prove the sanitized
   Foundry broadcast fixture maps exactly to the expected Anvil deployment

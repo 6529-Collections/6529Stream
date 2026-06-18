@@ -12,7 +12,7 @@ import generate_release_artifacts as release_artifacts
 
 
 ABI_SURFACE_SCHEMA = "6529stream.abi-surface-baseline.v1"
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "2"
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out")
@@ -188,12 +188,21 @@ def build_abi_surface(
     configured_contracts = config.get("production_contracts", [])
     if not configured_contracts:
         raise AbiCompatibilityError("config production_contracts list is empty")
+    configured_interfaces = config.get("interfaces", [])
+    if not isinstance(configured_interfaces, list):
+        raise AbiCompatibilityError("config interfaces must be a list")
 
     contracts: dict[str, Any] = {}
     for config_entry in sorted(configured_contracts, key=lambda item: item["name"]):
         summary = release_artifacts.artifact_summary(config_entry, foundry_out, repo_root)
         name = summary["name"]
         contracts[name] = build_contract_surface(summary)
+
+    interfaces: dict[str, Any] = {}
+    for config_entry in sorted(configured_interfaces, key=lambda item: item["name"]):
+        summary = release_artifacts.artifact_summary(config_entry, foundry_out, repo_root)
+        name = summary["name"]
+        interfaces[name] = build_contract_surface(summary)
 
     return {
         "schema_version": ABI_SURFACE_SCHEMA,
@@ -208,8 +217,11 @@ def build_abi_surface(
             "added_entries": "report-compatible",
             "contract_removed_from_production_surface": "fail",
             "contract_added_to_production_surface": "report-compatible",
+            "interface_removed_from_published_surface": "fail",
+            "interface_added_to_published_surface": "report-compatible",
         },
         "contracts": contracts,
+        "interfaces": interfaces,
     }
 
 
@@ -223,6 +235,9 @@ def load_baseline(path: Path) -> dict[str, Any]:
     contracts = baseline.get("contracts")
     if not isinstance(contracts, dict):
         raise AbiCompatibilityError(f"{path} does not contain a contracts object")
+    interfaces = baseline.get("interfaces")
+    if not isinstance(interfaces, dict):
+        raise AbiCompatibilityError(f"{path} does not contain an interfaces object")
     return baseline
 
 
@@ -238,45 +253,52 @@ def entries_by_key(entries: list[dict[str, Any]], contract: str, category: str) 
     return mapped
 
 
-def compare_abi_surfaces(baseline: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
-    baseline_contracts = baseline["contracts"]
-    current_contracts = current["contracts"]
-    incompatible: list[dict[str, Any]] = []
-    additive: list[dict[str, Any]] = []
+def compare_surface_entries(
+    *,
+    baseline_entries_by_name: dict[str, Any],
+    current_entries_by_name: dict[str, Any],
+    surface: str,
+    subject_kind: str,
+    removed_subject_type: str,
+    added_subject_type: str,
+    incompatible: list[dict[str, Any]],
+    additive: list[dict[str, Any]],
+) -> None:
+    baseline_names = set(baseline_entries_by_name)
+    current_names = set(current_entries_by_name)
 
-    baseline_names = set(baseline_contracts)
-    current_names = set(current_contracts)
-
-    for contract in sorted(baseline_names - current_names):
+    for subject in sorted(baseline_names - current_names):
         incompatible.append(
             {
-                "type": "removed_contract",
-                "contract": contract,
-                "message": f"production contract {contract} is missing from current surface",
+                "type": removed_subject_type,
+                "surface": surface,
+                "contract": subject,
+                "message": f"{subject_kind} {subject} is missing from current surface",
             }
         )
 
-    for contract in sorted(current_names - baseline_names):
+    for subject in sorted(current_names - baseline_names):
         additive.append(
             {
-                "type": "added_contract",
-                "contract": contract,
-                "message": f"production contract {contract} was added to current surface",
+                "type": added_subject_type,
+                "surface": surface,
+                "contract": subject,
+                "message": f"{subject_kind} {subject} was added to current surface",
             }
         )
 
-    for contract in sorted(baseline_names & current_names):
-        baseline_entries = baseline_contracts[contract].get("entries", {})
-        current_entries = current_contracts[contract].get("entries", {})
+    for subject in sorted(baseline_names & current_names):
+        baseline_entries = baseline_entries_by_name[subject].get("entries", {})
+        current_entries = current_entries_by_name[subject].get("entries", {})
         for category in ENTRY_CATEGORIES:
             baseline_map = entries_by_key(
                 baseline_entries.get(category, []),
-                contract,
+                subject,
                 category,
             )
             current_map = entries_by_key(
                 current_entries.get(category, []),
-                contract,
+                subject,
                 category,
             )
             baseline_keys = set(baseline_map)
@@ -286,10 +308,11 @@ def compare_abi_surfaces(baseline: dict[str, Any], current: dict[str, Any]) -> d
                 incompatible.append(
                     {
                         "type": "removed_entry",
-                        "contract": contract,
+                        "surface": surface,
+                        "contract": subject,
                         "category": category,
                         "key": key,
-                        "message": f"{contract} removed {category} entry {key}",
+                        "message": f"{subject} removed {category} entry {key}",
                     }
                 )
 
@@ -297,10 +320,11 @@ def compare_abi_surfaces(baseline: dict[str, Any], current: dict[str, Any]) -> d
                 additive.append(
                     {
                         "type": "added_entry",
-                        "contract": contract,
+                        "surface": surface,
+                        "contract": subject,
                         "category": category,
                         "key": key,
-                        "message": f"{contract} added {category} entry {key}",
+                        "message": f"{subject} added {category} entry {key}",
                     }
                 )
 
@@ -309,14 +333,41 @@ def compare_abi_surfaces(baseline: dict[str, Any], current: dict[str, Any]) -> d
                     incompatible.append(
                         {
                             "type": "changed_entry",
-                            "contract": contract,
+                            "surface": surface,
+                            "contract": subject,
                             "category": category,
                             "key": key,
-                            "message": f"{contract} changed {category} entry {key}",
+                            "message": f"{subject} changed {category} entry {key}",
                             "baseline": baseline_map[key],
                             "current": current_map[key],
                         }
                     )
+
+
+def compare_abi_surfaces(baseline: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
+    incompatible: list[dict[str, Any]] = []
+    additive: list[dict[str, Any]] = []
+
+    compare_surface_entries(
+        baseline_entries_by_name=baseline["contracts"],
+        current_entries_by_name=current["contracts"],
+        surface="contracts",
+        subject_kind="production contract",
+        removed_subject_type="removed_contract",
+        added_subject_type="added_contract",
+        incompatible=incompatible,
+        additive=additive,
+    )
+    compare_surface_entries(
+        baseline_entries_by_name=baseline["interfaces"],
+        current_entries_by_name=current["interfaces"],
+        surface="interfaces",
+        subject_kind="published interface",
+        removed_subject_type="removed_interface",
+        added_subject_type="added_interface",
+        incompatible=incompatible,
+        additive=additive,
+    )
 
     return {
         "compatible": len(incompatible) == 0,

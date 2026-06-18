@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.abi-surface-baseline.v1",
-  "generated_by": "scripts/check_abi_compatibility.py:1",
+  "generated_by": "scripts/check_abi_compatibility.py:2",
   "source": {
     "config": "release-artifacts/contracts.json",
     "foundry_out": "out"
@@ -10,7 +10,9 @@
     "changed_entries": "fail",
     "added_entries": "report-compatible",
     "contract_removed_from_production_surface": "fail",
-    "contract_added_to_production_surface": "report-compatible"
+    "contract_added_to_production_surface": "report-compatible",
+    "interface_removed_from_published_surface": "fail",
+    "interface_added_to_published_surface": "report-compatible"
   },
   "contracts": {
     "DependencyRegistry": {
@@ -4448,11 +4450,11 @@
     "StreamAuctions": {
       "source": "smart-contracts/AuctionContract.sol",
       "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
-      "abi_sha256": "sha256:8fca4fb9860c9dd5fcbe7287dcd3cc86c69ae5d28488302602e27f0dfc3685d6",
-      "abi_entries": 66,
+      "abi_sha256": "sha256:7658f974c7d38a46d38cbcceea08ae37cba811fd7a98846ac2c9162ad82b3dd4",
+      "abi_entries": 68,
       "entry_counts": {
         "constructors": 1,
-        "functions": 49,
+        "functions": 51,
         "events": 15,
         "errors": 1,
         "fallbacks": 0,
@@ -4893,6 +4895,27 @@
             "state_mutability": "pure"
           },
           {
+            "key": "minimumNextBid(uint256)",
+            "kind": "function",
+            "name": "minimumNextBid",
+            "signature": "minimumNextBid(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "minterContract()",
             "kind": "function",
             "name": "minterContract",
@@ -5072,6 +5095,27 @@
                 "name": "",
                 "type": "uint8",
                 "internal_type": "enum StreamAuctions.AuctionStatus"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveNoBidAuctionClaimant(uint256)",
+            "kind": "function",
+            "name": "retrieveNoBidAuctionClaimant",
+            "signature": "retrieveNoBidAuctionClaimant(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
               }
             ],
             "state_mutability": "view"
@@ -5820,11 +5864,11 @@
     "StreamContractMetadata": {
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
-      "abi_sha256": "sha256:275095e64f01e8253fe282340e7d2221b14e8d1334b697b71ce8adc945457049",
-      "abi_entries": 16,
+      "abi_sha256": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
+      "abi_entries": 23,
       "entry_counts": {
         "constructors": 1,
-        "functions": 9,
+        "functions": 16,
         "events": 1,
         "errors": 5,
         "fallbacks": 0,
@@ -5918,6 +5962,21 @@
             "state_mutability": "view"
           },
           {
+            "key": "isStreamCompatibility()",
+            "kind": "function",
+            "name": "isStreamCompatibility",
+            "signature": "isStreamCompatibility()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
             "key": "isStreamContractMetadata()",
             "kind": "function",
             "name": "isStreamContractMetadata",
@@ -5948,10 +6007,106 @@
             "state_mutability": "view"
           },
           {
+            "key": "streamMetadataSchemaVersion()",
+            "kind": "function",
+            "name": "streamMetadataSchemaVersion",
+            "signature": "streamMetadataSchemaVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamProtocolName()",
+            "kind": "function",
+            "name": "streamProtocolName",
+            "signature": "streamProtocolName()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamProtocolVersion()",
+            "kind": "function",
+            "name": "streamProtocolVersion",
+            "signature": "streamProtocolVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamReleaseHash()",
+            "kind": "function",
+            "name": "streamReleaseHash",
+            "signature": "streamReleaseHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamReleaseTag()",
+            "kind": "function",
+            "name": "streamReleaseTag",
+            "signature": "streamReleaseTag()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
             "key": "supportsInterface(bytes4)",
             "kind": "function",
             "name": "supportsInterface",
             "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsStreamInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsStreamInterface",
+            "signature": "supportsStreamInterface(bytes4)",
             "inputs": [
               {
                 "name": "interfaceId",
@@ -6053,11 +6208,11 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:84b7d5b8ed5073cbbbdffd396cbf57f21bd02760f745a389e18df1716faa781a",
-      "abi_entries": 120,
+      "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
+      "abi_entries": 122,
       "entry_counts": {
         "constructors": 1,
-        "functions": 74,
+        "functions": 76,
         "events": 11,
         "errors": 34,
         "fallbacks": 0,
@@ -6271,6 +6426,27 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "artistApprovalHashes(uint256)",
+            "kind": "function",
+            "name": "artistApprovalHashes",
+            "signature": "artistApprovalHashes(uint256)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "artistSignature(uint256,string)",
             "kind": "function",
             "name": "artistSignature",
@@ -6285,6 +6461,31 @@
                 "name": "_signature",
                 "type": "string",
                 "internal_type": "string"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "artistSignature(uint256,string,bytes)",
+            "kind": "function",
+            "name": "artistSignature",
+            "signature": "artistSignature(uint256,string,bytes)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_signature",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "_artistSignature",
+                "type": "bytes",
+                "internal_type": "bytes"
               }
             ],
             "outputs": [],
@@ -11186,6 +11387,3508 @@
             ]
           }
         ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    }
+  },
+  "interfaces": {
+    "IDependencyRegistry": {
+      "source": "smart-contracts/IDependencyRegistry.sol",
+      "artifact_path": "out/IDependencyRegistry.sol/IDependencyRegistry.json",
+      "abi_sha256": "sha256:0a37dc008896b8c45bd91ec3d6475c13312bd94f1f260f2845eeb8c78d9e418f",
+      "abi_entries": 15,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 15,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "getDependencyScript(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyScript",
+            "signature": "getDependencyScript(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptAtVersion(bytes32,uint256,uint256)",
+            "kind": "function",
+            "name": "getDependencyScriptAtVersion",
+            "signature": "getDependencyScriptAtVersion(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptChunkHash(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyScriptChunkHash",
+            "signature": "getDependencyScriptChunkHash(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)",
+            "kind": "function",
+            "name": "getDependencyScriptChunkHashAtVersion",
+            "signature": "getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptContentHash(bytes32)",
+            "kind": "function",
+            "name": "getDependencyScriptContentHash",
+            "signature": "getDependencyScriptContentHash(bytes32)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyScriptContentHashAtVersion",
+            "signature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptCount(bytes32)",
+            "kind": "function",
+            "name": "getDependencyScriptCount",
+            "signature": "getDependencyScriptCount(bytes32)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyScriptCountAtVersion(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyScriptCountAtVersion",
+            "signature": "getDependencyScriptCountAtVersion(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyVersionCreatedBlock(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyVersionCreatedBlock",
+            "signature": "getDependencyVersionCreatedBlock(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyVersionCreatedTimestamp(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyVersionCreatedTimestamp",
+            "signature": "getDependencyVersionCreatedTimestamp(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyVersionCreator(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyVersionCreator",
+            "signature": "getDependencyVersionCreator(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyVersionProvenance(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyVersionProvenance",
+            "signature": "getDependencyVersionProvenance(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getDependencyVersionRecord(bytes32,uint256)",
+            "kind": "function",
+            "name": "getDependencyVersionRecord",
+            "signature": "getDependencyVersionRecord(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isDependencyVersionDeprecated(bytes32,uint256)",
+            "kind": "function",
+            "name": "isDependencyVersionDeprecated",
+            "signature": "isDependencyVersionDeprecated(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "version",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestDependencyVersion(bytes32)",
+            "kind": "function",
+            "name": "latestDependencyVersion",
+            "signature": "latestDependencyVersion(bytes32)",
+            "inputs": [
+              {
+                "name": "dependencyNameAndVersion",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC165": {
+      "source": "smart-contracts/IERC165.sol",
+      "artifact_path": "out/IERC165.sol/IERC165.json",
+      "abi_sha256": "sha256:fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+      "abi_entries": 1,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 1,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC2981": {
+      "source": "smart-contracts/IERC2981.sol",
+      "artifact_path": "out/IERC2981.sol/IERC2981.json",
+      "abi_sha256": "sha256:aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 2,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "royaltyInfo(uint256,uint256)",
+            "kind": "function",
+            "name": "royaltyInfo",
+            "signature": "royaltyInfo(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "salePrice",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "receiver",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "royaltyAmount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC4906": {
+      "source": "smart-contracts/IERC4906.sol",
+      "artifact_path": "out/IERC4906.sol/IERC4906.json",
+      "abi_sha256": "sha256:1a0ec850075a0dda86b33880a319e649251d516cbfcd35d60675a909eeb10006",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 0,
+        "events": 2,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [],
+        "events": [
+          {
+            "key": "BatchMetadataUpdate(uint256,uint256)",
+            "kind": "event",
+            "name": "BatchMetadataUpdate",
+            "signature": "BatchMetadataUpdate(uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "_fromTokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "_toTokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MetadataUpdate(uint256)",
+            "kind": "event",
+            "name": "MetadataUpdate",
+            "signature": "MetadataUpdate(uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC721": {
+      "source": "smart-contracts/IERC721.sol",
+      "artifact_path": "out/IERC721.sol/IERC721.json",
+      "abi_sha256": "sha256:c6cb2310d6dc4368f45ae89b64a55369785d8196967a6146d663964661a97662",
+      "abi_entries": 13,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 10,
+        "events": 3,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "approve(address,uint256)",
+            "kind": "function",
+            "name": "approve",
+            "signature": "approve(address,uint256)",
+            "inputs": [
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "balanceOf(address)",
+            "kind": "function",
+            "name": "balanceOf",
+            "signature": "balanceOf(address)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "balance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getApproved(uint256)",
+            "kind": "function",
+            "name": "getApproved",
+            "signature": "getApproved(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isApprovedForAll(address,address)",
+            "kind": "function",
+            "name": "isApprovedForAll",
+            "signature": "isApprovedForAll(address,address)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ownerOf(uint256)",
+            "kind": "function",
+            "name": "ownerOf",
+            "signature": "ownerOf(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "safeTransferFrom(address,address,uint256)",
+            "kind": "function",
+            "name": "safeTransferFrom",
+            "signature": "safeTransferFrom(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "safeTransferFrom(address,address,uint256,bytes)",
+            "kind": "function",
+            "name": "safeTransferFrom",
+            "signature": "safeTransferFrom(address,address,uint256,bytes)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "data",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setApprovalForAll(address,bool)",
+            "kind": "function",
+            "name": "setApprovalForAll",
+            "signature": "setApprovalForAll(address,bool)",
+            "inputs": [
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "transferFrom(address,address,uint256)",
+            "kind": "function",
+            "name": "transferFrom",
+            "signature": "transferFrom(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "Approval(address,address,uint256)",
+            "kind": "event",
+            "name": "Approval",
+            "signature": "Approval(address,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ApprovalForAll(address,address,bool)",
+            "kind": "event",
+            "name": "ApprovalForAll",
+            "signature": "ApprovalForAll(address,address,bool)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "Transfer(address,address,uint256)",
+            "kind": "event",
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC721Enumerable": {
+      "source": "smart-contracts/IERC721Enumerable.sol",
+      "artifact_path": "out/IERC721Enumerable.sol/IERC721Enumerable.json",
+      "abi_sha256": "sha256:29401ee0adf93b0723768caad48fdbd58bf96db33ea1759e4390e7dc53850944",
+      "abi_entries": 16,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 13,
+        "events": 3,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "approve(address,uint256)",
+            "kind": "function",
+            "name": "approve",
+            "signature": "approve(address,uint256)",
+            "inputs": [
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "balanceOf(address)",
+            "kind": "function",
+            "name": "balanceOf",
+            "signature": "balanceOf(address)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "balance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getApproved(uint256)",
+            "kind": "function",
+            "name": "getApproved",
+            "signature": "getApproved(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isApprovedForAll(address,address)",
+            "kind": "function",
+            "name": "isApprovedForAll",
+            "signature": "isApprovedForAll(address,address)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ownerOf(uint256)",
+            "kind": "function",
+            "name": "ownerOf",
+            "signature": "ownerOf(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "safeTransferFrom(address,address,uint256)",
+            "kind": "function",
+            "name": "safeTransferFrom",
+            "signature": "safeTransferFrom(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "safeTransferFrom(address,address,uint256,bytes)",
+            "kind": "function",
+            "name": "safeTransferFrom",
+            "signature": "safeTransferFrom(address,address,uint256,bytes)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "data",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setApprovalForAll(address,bool)",
+            "kind": "function",
+            "name": "setApprovalForAll",
+            "signature": "setApprovalForAll(address,bool)",
+            "inputs": [
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenByIndex(uint256)",
+            "kind": "function",
+            "name": "tokenByIndex",
+            "signature": "tokenByIndex(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenOfOwnerByIndex(address,uint256)",
+            "kind": "function",
+            "name": "tokenOfOwnerByIndex",
+            "signature": "tokenOfOwnerByIndex(address,uint256)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "totalSupply()",
+            "kind": "function",
+            "name": "totalSupply",
+            "signature": "totalSupply()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "transferFrom(address,address,uint256)",
+            "kind": "function",
+            "name": "transferFrom",
+            "signature": "transferFrom(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "Approval(address,address,uint256)",
+            "kind": "event",
+            "name": "Approval",
+            "signature": "Approval(address,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ApprovalForAll(address,address,bool)",
+            "kind": "event",
+            "name": "ApprovalForAll",
+            "signature": "ApprovalForAll(address,address,bool)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "Transfer(address,address,uint256)",
+            "kind": "event",
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC721Metadata": {
+      "source": "smart-contracts/IERC721Metadata.sol",
+      "artifact_path": "out/IERC721Metadata.sol/IERC721Metadata.json",
+      "abi_sha256": "sha256:5ed9f3277e136284e3f9e8701131fd0fe76312b0dfa33cdb2664f571498b3f3e",
+      "abi_entries": 16,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 13,
+        "events": 3,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "approve(address,uint256)",
+            "kind": "function",
+            "name": "approve",
+            "signature": "approve(address,uint256)",
+            "inputs": [
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "balanceOf(address)",
+            "kind": "function",
+            "name": "balanceOf",
+            "signature": "balanceOf(address)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "balance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getApproved(uint256)",
+            "kind": "function",
+            "name": "getApproved",
+            "signature": "getApproved(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isApprovedForAll(address,address)",
+            "kind": "function",
+            "name": "isApprovedForAll",
+            "signature": "isApprovedForAll(address,address)",
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "name()",
+            "kind": "function",
+            "name": "name",
+            "signature": "name()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ownerOf(uint256)",
+            "kind": "function",
+            "name": "ownerOf",
+            "signature": "ownerOf(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "safeTransferFrom(address,address,uint256)",
+            "kind": "function",
+            "name": "safeTransferFrom",
+            "signature": "safeTransferFrom(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "safeTransferFrom(address,address,uint256,bytes)",
+            "kind": "function",
+            "name": "safeTransferFrom",
+            "signature": "safeTransferFrom(address,address,uint256,bytes)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "data",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setApprovalForAll(address,bool)",
+            "kind": "function",
+            "name": "setApprovalForAll",
+            "signature": "setApprovalForAll(address,bool)",
+            "inputs": [
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "symbol()",
+            "kind": "function",
+            "name": "symbol",
+            "signature": "symbol()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenURI(uint256)",
+            "kind": "function",
+            "name": "tokenURI",
+            "signature": "tokenURI(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "transferFrom(address,address,uint256)",
+            "kind": "function",
+            "name": "transferFrom",
+            "signature": "transferFrom(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "Approval(address,address,uint256)",
+            "kind": "event",
+            "name": "Approval",
+            "signature": "Approval(address,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ApprovalForAll(address,address,bool)",
+            "kind": "event",
+            "name": "ApprovalForAll",
+            "signature": "ApprovalForAll(address,address,bool)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "operator",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "Transfer(address,address,uint256)",
+            "kind": "event",
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IERC7572": {
+      "source": "smart-contracts/IERC7572.sol",
+      "artifact_path": "out/IERC7572.sol/IERC7572.json",
+      "abi_sha256": "sha256:fdc27ee0b903d51effbc5868dfe10f7cf9bf0233900772ced428ce4ac5d27ab6",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 1,
+        "events": 1,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "contractURI()",
+            "kind": "function",
+            "name": "contractURI",
+            "signature": "contractURI()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "ContractURIUpdated()",
+            "kind": "event",
+            "name": "ContractURIUpdated",
+            "signature": "ContractURIUpdated()",
+            "anonymous": false,
+            "inputs": []
+          }
+        ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IRandomizer": {
+      "source": "smart-contracts/IRandomizer.sol",
+      "artifact_path": "out/IRandomizer.sol/IRandomizer.json",
+      "abi_sha256": "sha256:69476ee0c7139c273afae875e9349fbeb34e9ae9fd314d45c888450b762ab7a4",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 2,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "calculateTokenHash(uint256,uint256,uint256)",
+            "kind": "function",
+            "name": "calculateTokenHash",
+            "signature": "calculateTokenHash(uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_mintIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "isRandomizerContract()",
+            "kind": "function",
+            "name": "isRandomizerContract",
+            "signature": "isRandomizerContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IRandomizerLifecycle": {
+      "source": "smart-contracts/IRandomizerLifecycle.sol",
+      "artifact_path": "out/IRandomizerLifecycle.sol/IRandomizerLifecycle.json",
+      "abi_sha256": "sha256:b061cd96b3d60300538484f68c97409c99b953440495001f8d5f142e38e1710a",
+      "abi_entries": 10,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 10,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "pendingRandomnessRequests(uint256)",
+            "kind": "function",
+            "name": "pendingRandomnessRequests",
+            "signature": "pendingRandomnessRequests(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "randomnessRequestState(uint256)",
+            "kind": "function",
+            "name": "randomnessRequestState",
+            "signature": "randomnessRequestState(uint256)",
+            "inputs": [
+              {
+                "name": "_requestId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "enum IRandomizerLifecycle.RandomnessRequestState"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "randomnessRequestStateForToken(uint256)",
+            "kind": "function",
+            "name": "randomnessRequestStateForToken",
+            "signature": "randomnessRequestStateForToken(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "enum IRandomizerLifecycle.RandomnessRequestState"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "requestToToken(uint256)",
+            "kind": "function",
+            "name": "requestToToken",
+            "signature": "requestToToken(uint256)",
+            "inputs": [
+              {
+                "name": "requestId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveRandomnessRequest(uint256)",
+            "kind": "function",
+            "name": "retrieveRandomnessRequest",
+            "signature": "retrieveRandomnessRequest(uint256)",
+            "inputs": [
+              {
+                "name": "_requestId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)",
+                "internal_type": "struct IRandomizerLifecycle.RandomnessRequest",
+                "components": [
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "provider",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "providerRequestId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "randomizerEpoch",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "state",
+                    "type": "uint8",
+                    "internal_type": "enum IRandomizerLifecycle.RandomnessRequestState"
+                  },
+                  {
+                    "name": "requestedBlock",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "requestedTimestamp",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "fulfilledBlock",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "fulfilledTimestamp",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "derivedSeed",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "rawOutputHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "failureDataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "postProcessingRetryCount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveRandomnessRequestForToken(uint256)",
+            "kind": "function",
+            "name": "retrieveRandomnessRequestForToken",
+            "signature": "retrieveRandomnessRequestForToken(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)",
+                "internal_type": "struct IRandomizerLifecycle.RandomnessRequest",
+                "components": [
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "provider",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "providerRequestId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "randomizerEpoch",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "state",
+                    "type": "uint8",
+                    "internal_type": "enum IRandomizerLifecycle.RandomnessRequestState"
+                  },
+                  {
+                    "name": "requestedBlock",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "requestedTimestamp",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "fulfilledBlock",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "fulfilledTimestamp",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "derivedSeed",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "rawOutputHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "failureDataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "postProcessingRetryCount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsRandomizerLifecycle()",
+            "kind": "function",
+            "name": "supportsRandomizerLifecycle",
+            "signature": "supportsRandomizerLifecycle()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenIdToCollection(uint256)",
+            "kind": "function",
+            "name": "tokenIdToCollection",
+            "signature": "tokenIdToCollection(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenToRequest(uint256)",
+            "kind": "function",
+            "name": "tokenToRequest",
+            "signature": "tokenToRequest(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "totalPendingRandomnessRequests()",
+            "kind": "function",
+            "name": "totalPendingRandomnessRequests",
+            "signature": "totalPendingRandomnessRequests()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamAdmins": {
+      "source": "smart-contracts/IStreamAdmins.sol",
+      "artifact_path": "out/IStreamAdmins.sol/IStreamAdmins.json",
+      "abi_sha256": "sha256:b94c95898b38bda7deaf60046c0261a53659aee577e5bae4046088feeeb873c6",
+      "abi_entries": 7,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 7,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "emergencyRecipient()",
+            "kind": "function",
+            "name": "emergencyRecipient",
+            "signature": "emergencyRecipient()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isAdminContract()",
+            "kind": "function",
+            "name": "isAdminContract",
+            "signature": "isAdminContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isPaused(bytes32)",
+            "kind": "function",
+            "name": "isPaused",
+            "signature": "isPaused(bytes32)",
+            "inputs": [
+              {
+                "name": "_domain",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveCollectionAdmin(address,uint256)",
+            "kind": "function",
+            "name": "retrieveCollectionAdmin",
+            "signature": "retrieveCollectionAdmin(address,uint256)",
+            "inputs": [
+              {
+                "name": "_address",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveFunctionAdmin(address,address,bytes4)",
+            "kind": "function",
+            "name": "retrieveFunctionAdmin",
+            "signature": "retrieveFunctionAdmin(address,address,bytes4)",
+            "inputs": [
+              {
+                "name": "_address",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveGlobalAdmin(address)",
+            "kind": "function",
+            "name": "retrieveGlobalAdmin",
+            "signature": "retrieveGlobalAdmin(address)",
+            "inputs": [
+              {
+                "name": "_address",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamAuctions": {
+      "source": "smart-contracts/IStreamAuctions.sol",
+      "artifact_path": "out/IStreamAuctions.sol/IStreamAuctions.json",
+      "abi_sha256": "sha256:449284cbe3ae9f0744769204c9157e74bf0d9f89868dae34073586a51cf8f400",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 2,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "isStreamAuctionsContract()",
+            "kind": "function",
+            "name": "isStreamAuctionsContract",
+            "signature": "isStreamAuctionsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+            "kind": "function",
+            "name": "registerAuction",
+            "signature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_dropId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_poster",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_reservePrice",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_auctionEndTime",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamCompatibility": {
+      "source": "smart-contracts/IStreamCompatibility.sol",
+      "artifact_path": "out/IStreamCompatibility.sol/IStreamCompatibility.json",
+      "abi_sha256": "sha256:6bd73e252a944619732c85628400e6718bf263c6e98effffa45900a6279c636d",
+      "abi_entries": 7,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 7,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "isStreamCompatibility()",
+            "kind": "function",
+            "name": "isStreamCompatibility",
+            "signature": "isStreamCompatibility()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamMetadataSchemaVersion()",
+            "kind": "function",
+            "name": "streamMetadataSchemaVersion",
+            "signature": "streamMetadataSchemaVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamProtocolName()",
+            "kind": "function",
+            "name": "streamProtocolName",
+            "signature": "streamProtocolName()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamProtocolVersion()",
+            "kind": "function",
+            "name": "streamProtocolVersion",
+            "signature": "streamProtocolVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamReleaseHash()",
+            "kind": "function",
+            "name": "streamReleaseHash",
+            "signature": "streamReleaseHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamReleaseTag()",
+            "kind": "function",
+            "name": "streamReleaseTag",
+            "signature": "streamReleaseTag()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "supportsStreamInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsStreamInterface",
+            "signature": "supportsStreamInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamContractMetadata": {
+      "source": "smart-contracts/IStreamContractMetadata.sol",
+      "artifact_path": "out/IStreamContractMetadata.sol/IStreamContractMetadata.json",
+      "abi_sha256": "sha256:ce8a86739d4d47eb40058bd5df61667adf2a97fe77179e6424a552d8264bc797",
+      "abi_entries": 8,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 7,
+        "events": 1,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contractURI()",
+            "kind": "function",
+            "name": "contractURI",
+            "signature": "contractURI()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contractURIHash()",
+            "kind": "function",
+            "name": "contractURIHash",
+            "signature": "contractURIHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamContractMetadata()",
+            "kind": "function",
+            "name": "isStreamContractMetadata",
+            "signature": "isStreamContractMetadata()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamCore()",
+            "kind": "function",
+            "name": "streamCore",
+            "signature": "streamCore()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "updateAdminContract(address)",
+            "kind": "function",
+            "name": "updateAdminContract",
+            "signature": "updateAdminContract(address)",
+            "inputs": [
+              {
+                "name": "newAdminsContract",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateContractURI(string)",
+            "kind": "function",
+            "name": "updateContractURI",
+            "signature": "updateContractURI(string)",
+            "inputs": [
+              {
+                "name": "newContractURI",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "ContractURIUpdated()",
+            "kind": "event",
+            "name": "ContractURIUpdated",
+            "signature": "ContractURIUpdated()",
+            "anonymous": false,
+            "inputs": []
+          }
+        ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamCore": {
+      "source": "smart-contracts/IStreamCore.sol",
+      "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
+      "abi_sha256": "sha256:68fec6cff089c778bc15931ed8ef5d0576f1137e6c059827b71b0cb786055067",
+      "abi_entries": 18,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 18,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "artistApprovalHashes(uint256)",
+            "kind": "function",
+            "name": "artistApprovalHashes",
+            "signature": "artistApprovalHashes(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionDependencyVersionState(uint256)",
+            "kind": "function",
+            "name": "collectionDependencyVersionState",
+            "signature": "collectionDependencyVersionState(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionFreezeManifestHash(uint256)",
+            "kind": "function",
+            "name": "collectionFreezeManifestHash",
+            "signature": "collectionFreezeManifestHash(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionFreezeStatus(uint256)",
+            "kind": "function",
+            "name": "collectionFreezeStatus",
+            "signature": "collectionFreezeStatus(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isTokenBurned(uint256)",
+            "kind": "function",
+            "name": "isTokenBurned",
+            "signature": "isTokenBurned(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "mint(uint256,address,string,uint256,uint256)",
+            "kind": "function",
+            "name": "mint",
+            "signature": "mint(uint256,address,string,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "mintIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "previewCollectionFreezeManifestHash(uint256)",
+            "kind": "function",
+            "name": "previewCollectionFreezeManifestHash",
+            "signature": "previewCollectionFreezeManifestHash(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveArtistAddress(uint256)",
+            "kind": "function",
+            "name": "retrieveArtistAddress",
+            "signature": "retrieveArtistAddress(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveTokenHash(uint256)",
+            "kind": "function",
+            "name": "retrieveTokenHash",
+            "signature": "retrieveTokenHash(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrievewereDataAdded(uint256)",
+            "kind": "function",
+            "name": "retrievewereDataAdded",
+            "signature": "retrievewereDataAdded(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setTokenHash(uint256,uint256,bytes32)",
+            "kind": "function",
+            "name": "setTokenHash",
+            "signature": "setTokenHash(uint256,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_mintIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_hash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "viewCirSupply(uint256)",
+            "kind": "function",
+            "name": "viewCirSupply",
+            "signature": "viewCirSupply(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "viewColIDforTokenID(uint256)",
+            "kind": "function",
+            "name": "viewColIDforTokenID",
+            "signature": "viewColIDforTokenID(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "viewCollectionRandomizerContract(uint256)",
+            "kind": "function",
+            "name": "viewCollectionRandomizerContract",
+            "signature": "viewCollectionRandomizerContract(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "viewMaxAllowance(uint256)",
+            "kind": "function",
+            "name": "viewMaxAllowance",
+            "signature": "viewMaxAllowance(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "viewRandomizerEpoch(uint256)",
+            "kind": "function",
+            "name": "viewRandomizerEpoch",
+            "signature": "viewRandomizerEpoch(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "viewTokensIndexMax(uint256)",
+            "kind": "function",
+            "name": "viewTokensIndexMax",
+            "signature": "viewTokensIndexMax(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "viewTokensIndexMin(uint256)",
+            "kind": "function",
+            "name": "viewTokensIndexMin",
+            "signature": "viewTokensIndexMin(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamDrops": {
+      "source": "smart-contracts/IStreamDrops.sol",
+      "artifact_path": "out/IStreamDrops.sol/IStreamDrops.json",
+      "abi_sha256": "sha256:5a087ae1f095ff8c9d66babd2aaa2b76453f03c5a7c8791da13c9d33d4e8a416",
+      "abi_entries": 5,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 5,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "retrieveAuctionPoster(uint256)",
+            "kind": "function",
+            "name": "retrieveAuctionPoster",
+            "signature": "retrieveAuctionPoster(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveAuctionPrice(uint256)",
+            "kind": "function",
+            "name": "retrieveAuctionPrice",
+            "signature": "retrieveAuctionPrice(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveDropID(uint256)",
+            "kind": "function",
+            "name": "retrieveDropID",
+            "signature": "retrieveDropID(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveExecutionAddress(uint256)",
+            "kind": "function",
+            "name": "retrieveExecutionAddress",
+            "signature": "retrieveExecutionAddress(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenid",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "retrieveTokenID(bytes32)",
+            "kind": "function",
+            "name": "retrieveTokenID",
+            "signature": "retrieveTokenID(bytes32)",
+            "inputs": [
+              {
+                "name": "_dropID",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamMinter": {
+      "source": "smart-contracts/IStreamMinter.sol",
+      "artifact_path": "out/IStreamMinter.sol/IStreamMinter.json",
+      "abi_sha256": "sha256:649d9216a2db37e90086197519c338afd3344a311d86336726fce30694ad851c",
+      "abi_entries": 7,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 7,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "getAuctionEndTime(uint256)",
+            "kind": "function",
+            "name": "getAuctionEndTime",
+            "signature": "getAuctionEndTime(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getAuctionStatus(uint256)",
+            "kind": "function",
+            "name": "getAuctionStatus",
+            "signature": "getAuctionStatus(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "getEndTime(uint256)",
+            "kind": "function",
+            "name": "getEndTime",
+            "signature": "getEndTime(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isMinterContract()",
+            "kind": "function",
+            "name": "isMinterContract",
+            "signature": "isMinterContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "mint(address[],string[],uint256[],uint256,uint256[])",
+            "kind": "function",
+            "name": "mint",
+            "signature": "mint(address[],string[],uint256[],uint256,uint256[])",
+            "inputs": [
+              {
+                "name": "_recipients",
+                "type": "address[]",
+                "internal_type": "address[]"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string[]",
+                "internal_type": "string[]"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256[]",
+                "internal_type": "uint256[]"
+              },
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_numberOfTokens",
+                "type": "uint256[]",
+                "internal_type": "uint256[]"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "mintAndAuction(address,string,uint256,uint256,uint256)",
+            "kind": "function",
+            "name": "mintAndAuction",
+            "signature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_collectionID",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_auctionEndTime",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateAuctionEndTime(uint256,uint256)",
+            "kind": "function",
+            "name": "updateAuctionEndTime",
+            "signature": "updateAuctionEndTime(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_auctionEndTime",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [],
         "errors": [],
         "fallbacks": [],
         "receives": []
