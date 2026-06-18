@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added stronger production verified-addresses retained-artifact validation so future pending or reviewed production address-book and live explorer verification evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, preserve address-book, deployment-manifest, explorer, and bytecode proof agreement, and match optional declared `sha256:` hashes before issues #225 or #230 can be considered for closure.
 - Added stronger live randomizer operations retained-artifact validation so future pending or reviewed mainnet provider operations evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match optional declared `sha256:` hashes before issue #229 can be considered for closure.
 - Added stronger live ceremony retained-artifact validation so future pending or reviewed mainnet ceremony evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match optional declared `sha256:` hashes before issue #228 can be considered for closure.
 - Added stronger live metadata browser retained-artifact validation so future pending or reviewed mainnet evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #473 can be considered for closure.

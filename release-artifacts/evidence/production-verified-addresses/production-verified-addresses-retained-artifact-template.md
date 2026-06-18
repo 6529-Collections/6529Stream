@@ -65,7 +65,7 @@ python scripts/generate_release_checksums.py --check
 ## Operator Notes
 
 - Replace every `TBD` field before requesting review.
-- Keep #227 and #228 open until reviewed retained evidence is linked from the
+- Keep #225 and #230 open until reviewed retained evidence is linked from the
   shared production-release evidence manifest rows for production address books
   and live explorer verification.
 - Generate separate non-local evidence envelopes for each production
@@ -74,3 +74,14 @@ python scripts/generate_release_checksums.py --check
   unreleased drop payloads, or unredacted operator logs in this repository.
 - Replace private RPC or provider URLs with `<redacted>` before review; the
   checker fails closed on provider/API-token-shaped URLs.
+- For pending-review or reviewed evidence, required retained artifact fields
+  must be repo-relative UTF-8 files. Absolute paths, `..` escapes, Windows
+  backslashes, ambiguous whitespace in paths, placeholders, missing files,
+  stale hashes, duplicate hashes, provider/API-token-shaped URLs, credentialed
+  URLs, bearer tokens, CLI secret flags, bare 64-hex strings, symlinked files,
+  and non-UTF-8 files fail validation.
+- Retained file references may append one declared digest as
+  `path/to/file sha256:<64 lowercase hex>` or
+  `path/to/file / sha256:<64 lowercase hex>`. Normalize `sha256sum`-style
+  retained digest output, including the contents of retained release digest
+  files, to the explicit `sha256:<hex>` form before review.

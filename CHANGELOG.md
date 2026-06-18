@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added stronger production verified-addresses retained-artifact validation so
+  future pending or reviewed production address-book and live explorer
+  verification evidence must reference existing repo-relative retained UTF-8
+  files, avoid symlinked evidence, remain no-secret, preserve address-book,
+  deployment-manifest, explorer, and bytecode proof agreement, and match
+  optional declared `sha256:` hashes before issues #225 or #230 can be
+  considered for closure.
 - Added stronger live randomizer operations retained-artifact validation so
   future pending or reviewed mainnet provider operations evidence must
   reference existing repo-relative retained UTF-8 files, avoid symlinked
