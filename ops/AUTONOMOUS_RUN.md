@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fork-ceremony-evidence-checker` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/533` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/534` |
-| Active PR | `TBD` |
-| Next issue | Commit, push, and open the EXT-010 fork/testnet ceremony evidence checker PR for issue #534; request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, and merge only when clean. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/535` |
+| Next issue | Wait for CI and CodeRabbit/bot feedback on PR #535, resolve anything actionable, and merge only when clean; then sync `main` and start the next substantive backlog item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 02:16 UTC` |
+| Last updated | `2026-06-18 02:22 UTC` |
 
 ## Packaging Notes
 
@@ -16217,6 +16217,7 @@ Outcome:
 | 2026-06-18 01:27 | Address PR #533 bot nice-to-haves | CodeRabbit was rate-limited but reported a passing status check; 6529bot security reported no findings and general review marked PR #533 good to merge with non-blocking hardening suggestions. Accepted the useful items by documenting standalone retained-path semantics at the reference-validation call site, rejecting retained references with multiple `sha256:` digests, and adding regressions for duplicate digests plus the committed `REDACTED_LOCAL_ANVIL_FORK` RPC placeholder. Focused fork rehearsal tests/checker, Python compile, and `make release-checksums-check changelog-check` passed. Next action is to commit/push the review-response head, wait for latest CI/bot feedback, and merge only when clean. |
 | 2026-06-18 01:44 | Merge PR #533 and start EXT-010 | PR #533 merged as `46d22ec430a29152606614c98021ea4793c0a092`, issue #532 closed completed, and local `main` was fast-forwarded. Issue #534 and branch `codex/fork-ceremony-evidence-checker` now track the next substantive external-evidence item: a dedicated fork/testnet ceremony retained-artifact template/checker for future `fork_testnet_ceremony_evidence`, supporting tracker issue #219 without closing it. Initial focused validation passed for the new checker/template, and release-evidence packet/backlog/body-sync, manifest, risk, lockfile, bytecode proof, and checksum artifacts were regenerated. Next action is to finish changelog/run-state validation, update generated release notes/checksums after the changelog entry, run focused and aggregate gates, then open PR for issue #534. |
 | 2026-06-18 02:16 | Validate EXT-010 local draft | Added `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`, `scripts/check_fork_ceremony_evidence.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, non-local evidence/release-readiness docs, packet-index command coverage, release-manifest/checksum coverage, changelog, backlog/run-state traceability, and regenerated release evidence. Synced live issue #219 to the generated body without closing it. A review-agent pass found useful pre-PR hardening, so the checker now requires non-template ceremony evidence to reference existing repo-relative retained files, rejects absolute/escaping paths, scans referenced files for secret-shaped material, and the docs now have one canonical ceremony section with metadata-browser language restored to the metadata-browser section. Local validation passed: focused fork ceremony tests/checker, packet-index/backlog/body-sync/release-notes/release-manifest/release-checksums/changelog gate, Python compile, `codex-diff-check`, and full Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` with known compiler/Foundry warning noise only. Next action is to commit, push, open PR for issue #534, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-18 02:22 | Open PR #535 for EXT-010 | PR #535 is open at `https://github.com/6529-Collections/6529Stream/pull/535`, closes issue #534, and packages the fork/testnet ceremony retained-artifact template, checker/tests, retained-path/no-secret hardening, local/CI/Windows gate wiring, docs, #219 body sync, changelog, backlog/run-state updates, and regenerated release evidence. CodeRabbit review was requested in comment `4737256390`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
