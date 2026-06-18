@@ -4,14 +4,17 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from pathlib import Path
 
 
 REQUIREMENT_ID = "testnet_deployment_rehearsal"
+DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVIDENCE = [
-    Path(
+    DEFAULT_REPO_ROOT
+    / (
         "release-artifacts/evidence/testnet-deployment-rehearsal/"
         "testnet-deployment-rehearsal-retained-artifact-template.md"
     )
@@ -116,6 +119,7 @@ REQUIRED_COMMANDS = [
 ]
 
 FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
+SHA256_RE = re.compile(r"sha256:[0-9a-f]{64}")
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
@@ -127,12 +131,17 @@ SECRET_VALUE_RE = re.compile(
 CLI_SECRET_RE = re.compile(
     r"("
     r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
-    r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
+    r"--rpc-url\b(?:\s+|=)"
+    r"(?!(?:<redacted(?: [^>]*)?>|REDACTED_(?:SEPOLIA_RPC|TESTNET_RPC|RPC_URL))(?=\s|$))\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
     r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"https?://[^\s`/@:]+:[^\s`/@]+@[^\s`]+|"
     r"https?://[^\s`]*(?:alchemy|infura|quicknode|api[_-]?key|apikey|token|secret)[^\s`]*"
     r")",
     re.IGNORECASE,
+)
+BARE_HEX_KEY_RE = re.compile(
+    r"(?<![0-9a-fA-FxX:])(?:[0-9a-fA-F]{64})(?![0-9a-fA-F])"
 )
 
 
@@ -162,8 +171,22 @@ def read_text(path: Path) -> str:
         ) from exc
 
 
+def file_sha256(path: Path) -> str:
+    """Return a sha256: digest for one file."""
+    hasher = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                hasher.update(chunk)
+    except FileNotFoundError as exc:
+        raise TestnetDeploymentRehearsalEvidenceError(
+            f"missing required file: {path}"
+        ) from exc
+    return "sha256:" + hasher.hexdigest()
+
+
 def validate_no_secret_values(path: Path, text: str) -> None:
-    """Reject secret-shaped key/value material."""
+    """Reject secret-shaped key/value, CLI, URL, token, and bare-key material."""
     match = SECRET_VALUE_RE.search(text)
     if match:
         raise TestnetDeploymentRehearsalEvidenceError(
@@ -174,46 +197,93 @@ def validate_no_secret_values(path: Path, text: str) -> None:
         raise TestnetDeploymentRehearsalEvidenceError(
             f"{path} contains secret-like CLI or URL text: {match.group(0)}"
         )
-
-
-def repo_root_for(path: Path) -> Path:
-    """Return the root used for repo-relative retained artifact paths."""
-    cwd = Path.cwd().resolve()
-    resolved = path.resolve()
-    try:
-        resolved.relative_to(cwd)
-    except ValueError:
-        return resolved.parent
-    return cwd
-
-
-def resolve_repo_relative_path(root: Path, value: str) -> Path:
-    """Resolve a retained artifact path while rejecting escapes."""
-    candidate = Path(value)
-    if candidate.is_absolute() or ".." in candidate.parts:
+    match = BARE_HEX_KEY_RE.search(text)
+    if match:
         raise TestnetDeploymentRehearsalEvidenceError(
-            f"retained artifact path must be repo-relative: {value}"
+            f"{path} contains bare 64-hex secret-like text: {match.group(0)}"
         )
-    resolved = (root / candidate).resolve()
+
+
+def split_retained_file_reference(value: str) -> tuple[str, str | None]:
+    """Split a retained file reference into path text and optional digest."""
+    cleaned = value.strip().replace("`", "")
+    matches = list(SHA256_RE.finditer(cleaned))
+    if len(matches) > 1:
+        raise TestnetDeploymentRehearsalEvidenceError(
+            f"retained artifact reference has multiple sha256 digests: {value}"
+        )
+    match = matches[0] if matches else None
+    digest = match.group(0) if match else None
+    path_text = cleaned[: match.start()] if match else cleaned
+    path_text = path_text.strip().rstrip(" /,;")
+    if match:
+        suffix = cleaned[match.end() :].strip()
+        if suffix.strip(" /,;"):
+            raise TestnetDeploymentRehearsalEvidenceError(
+                f"retained artifact reference has trailing text after sha256 digest: {value}"
+            )
+    if not path_text:
+        raise TestnetDeploymentRehearsalEvidenceError(
+            f"retained artifact reference is missing a path: {value}"
+        )
+    return path_text, digest
+
+
+def resolve_retained_path(
+    artifact_path: Path, repo_root: Path, label: str, value: str
+) -> tuple[Path, str, str | None]:
+    """Resolve and constrain a retained artifact path."""
+    path_text, expected_digest = split_retained_file_reference(value)
+    if re.search(r"\s", path_text):
+        raise TestnetDeploymentRehearsalEvidenceError(
+            f"{artifact_path} field {label!r} must be one repo-relative path"
+        )
+    retained_path = Path(path_text)
+    if retained_path.is_absolute() or retained_path.drive or retained_path.root:
+        raise TestnetDeploymentRehearsalEvidenceError(
+            f"{artifact_path} field {label!r} must be repo-relative"
+        )
+    if "\\" in path_text or ".." in retained_path.parts:
+        raise TestnetDeploymentRehearsalEvidenceError(
+            f"{artifact_path} field {label!r} must not escape the repository"
+        )
+    resolved = (repo_root / retained_path).resolve()
     try:
-        resolved.relative_to(root.resolve())
+        resolved.relative_to(repo_root)
     except ValueError as exc:
         raise TestnetDeploymentRehearsalEvidenceError(
-            f"retained artifact path escapes repository: {value}"
+            f"{artifact_path} field {label!r} must stay inside the repository"
         ) from exc
-    return resolved
+    return resolved, path_text, expected_digest
 
 
-def validate_referenced_artifacts(path: Path, fields: dict[str, str]) -> None:
+def validate_referenced_artifacts(
+    path: Path, fields: dict[str, str], repo_root: Path
+) -> None:
     """Require reviewed retained artifact paths to exist and be no-secret."""
-    root = repo_root_for(path)
     for label in RETAINED_FILE_FIELDS:
-        target = resolve_repo_relative_path(root, fields[label])
+        if is_placeholder(fields[label]):
+            raise TestnetDeploymentRehearsalEvidenceError(
+                f"{path} field {label!r} must be replaced before non-template review"
+            )
+        target, path_text, expected_digest = resolve_retained_path(
+            path,
+            repo_root,
+            label,
+            fields[label],
+        )
         if not target.is_file():
             raise TestnetDeploymentRehearsalEvidenceError(
-                f"{path} field {label!r} points to missing retained file: {fields[label]}"
+                f"{path} field {label!r} points to missing retained file: {path_text}"
             )
         validate_no_secret_values(target, read_text(target))
+        if expected_digest is not None:
+            actual_digest = file_sha256(target)
+            if actual_digest != expected_digest:
+                raise TestnetDeploymentRehearsalEvidenceError(
+                    f"{path} field {label!r} sha256 mismatch for {path_text}: "
+                    f"expected {expected_digest}, got {actual_digest}"
+                )
 
 
 def validate_headings(path: Path, text: str) -> None:
@@ -269,7 +339,9 @@ def is_placeholder(value: str) -> bool:
     return lowered in {"tbd", "template", "template-only"} or "<" in value
 
 
-def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None:
+def validate_review_state(
+    path: Path, text: str, fields: dict[str, str], repo_root: Path
+) -> None:
     """Validate template, pending-review, and reviewed state semantics."""
     review_status = fields["Review status"]
     if review_status not in REVIEW_STATUSES:
@@ -314,7 +386,7 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
         require_field_value(path, fields, "Review decision", "reviewed")
         for label in REVIEWED_YES_FIELDS:
             require_field_value(path, fields, label, "yes")
-        validate_referenced_artifacts(path, fields)
+    validate_referenced_artifacts(path, fields, repo_root)
 
 
 def validate_commands(path: Path, text: str) -> None:
@@ -326,8 +398,9 @@ def validate_commands(path: Path, text: str) -> None:
             )
 
 
-def validate_artifact(path: Path) -> None:
+def validate_artifact(path: Path, repo_root: Path | None = None) -> None:
     """Validate one retained testnet deployment rehearsal artifact."""
+    repo_root = (repo_root or DEFAULT_REPO_ROOT).resolve()
     text = read_text(path)
     validate_no_secret_values(path, text)
     validate_headings(path, text)
@@ -338,7 +411,7 @@ def validate_artifact(path: Path) -> None:
     require_field_value(path, fields, "Environment", "testnet")
     require_field_value(path, fields, "Testnet name", "sepolia")
     require_field_value(path, fields, "Chain ID", "11155111")
-    validate_review_state(path, text, fields)
+    validate_review_state(path, text, fields, repo_root)
     validate_commands(path, text)
 
 
@@ -353,6 +426,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="append",
         help="Evidence Markdown path to validate; may be repeated.",
     )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=DEFAULT_REPO_ROOT,
+        help="Repository root used for default evidence and retained paths.",
+    )
     return parser.parse_args(argv)
 
 
@@ -360,9 +439,10 @@ def main(argv: list[str] | None = None) -> int:
     """Run the checker."""
     args = parse_args(sys.argv[1:] if argv is None else argv)
     paths = args.evidence or DEFAULT_EVIDENCE
+    repo_root = args.repo_root.resolve()
     try:
         for path in paths:
-            validate_artifact(path)
+            validate_artifact(path, repo_root=repo_root)
     except TestnetDeploymentRehearsalEvidenceError as exc:
         print(
             f"testnet deployment rehearsal evidence check failed: {exc}",

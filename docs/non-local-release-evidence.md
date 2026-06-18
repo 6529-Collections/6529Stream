@@ -211,6 +211,15 @@ python scripts/test_testnet_deployment_rehearsal_evidence.py
 python scripts/check_testnet_deployment_rehearsal_evidence.py
 ```
 
+For pending or reviewed testnet deployment evidence, retained transcript,
+broadcast, manifest, address-book, and gas/invariant references must be
+repo-relative files. Each reference may include one optional
+`sha256:<64 lowercase hex>` digest, which the checker verifies against the
+committed file bytes. Absolute paths, parent-directory escapes, Windows
+backslashes, whitespace-ambiguous paths, stale hashes, duplicate hashes,
+bare 64-hex strings, private RPC URLs, private keys, API keys, bearer tokens,
+credentialed URLs, and provider-token URLs fail closed.
+
 ## Public-Beta Requirement Mapping
 
 When evidence is retained, update the matching requirement row in

@@ -512,7 +512,9 @@ is the checked no-secret retained-artifact template for future
 `python scripts/test_testnet_deployment_rehearsal_evidence.py` and
 `python scripts/check_testnet_deployment_rehearsal_evidence.py` before
 generating a non-local evidence envelope. The committed template is not testnet
-evidence and does not change public-beta readiness.
+evidence and does not change public-beta readiness. Pending or reviewed
+retained references must stay repo-relative, point at committed UTF-8 text
+files, remain no-secret, and match optional declared `sha256:` hashes.
 
 `evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future

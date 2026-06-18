@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added stronger testnet deployment rehearsal retained-artifact validation so
+  future pending or reviewed Sepolia evidence must reference existing
+  repo-relative retained files, remain no-secret, and match optional declared
+  `sha256:` hashes before issue #217 can be considered for closure.
 - Added a checked fork/testnet randomizer operations retained-artifact template
   and offline checker for future
   `fork_testnet_randomizer_operations_evidence`, covering fork/testnet

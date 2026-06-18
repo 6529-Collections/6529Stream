@@ -8,7 +8,7 @@
   "block_or_reference": "template-only testnet block, transaction hash, CI run, or deployment transcript reference",
   "command_or_source_system": "template-only testnet deployment command, CI job, explorer, or operator transcript",
   "retained_path": "release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md",
-  "sha256": "sha256:d33e7d8d32707c6ea91f8402080eda0e650a915b7987eb433ba1e4fcf09a4825",
+  "sha256": "sha256:22e7de0b2d787a838c63e8f1d5e531b3d1ab594709c1220f836003f8669a3770",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",
