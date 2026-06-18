@@ -395,14 +395,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
                 tokensAirdropPerAddress[_collectionID][_recipient] =
                     tokensAirdropPerAddress[_collectionID][_recipient] + 1;
             }
-            _mintProcessing(
-                mintIndex,
-                _recipient,
-                _tokenData,
-                _collectionID,
-                _saltfun_o,
-                collectionData.randomizer
-            );
+            _mintProcessing(mintIndex, _recipient, _tokenData, _collectionID, _saltfun_o);
         } else {
             revert CollectionSupplyReached();
         }
@@ -450,8 +443,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         address _recipient,
         string memory _tokenData,
         uint256 _collectionID,
-        uint256 _saltfun_o,
-        IRandomizer randomizer
+        uint256 _saltfun_o
     ) internal {
         if (burnedTokenAuditRecords[_mintIndex].burned) {
             revert BurnedTokenRemintNotAllowed(_mintIndex);
@@ -463,7 +455,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             _liveTokenSupply = _liveTokenSupply + 1;
         }
         _safeMint(_recipient, _mintIndex);
-        randomizer.calculateTokenHash(_collectionID, _mintIndex, _saltfun_o);
+        collectionAdditionalData[_collectionID].randomizer
+            .calculateTokenHash(_collectionID, _mintIndex, _saltfun_o);
     }
 
     // Additional setter functions

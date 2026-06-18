@@ -3481,7 +3481,7 @@
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamCore:function:burn(uint256,uint256)",
       "kind": "function",
-      "line": 412,
+      "line": 411,
       "reason": "Current first-party release surface lacks nearby NatSpec; keep explicit until the Solidity declaration receives NatSpec.",
       "signature": "burn(uint256,uint256)",
       "source": "smart-contracts/StreamCore.sol",

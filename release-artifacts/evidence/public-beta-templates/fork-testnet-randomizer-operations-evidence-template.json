@@ -8,7 +8,7 @@
   "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
   "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
   "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-  "sha256": "sha256:eb1a542c82d0a2ed757515b9cdbacd6ae3611ccb06895e14fe6d349ddfe2acf8",
+  "sha256": "sha256:62a0b4cdd57786c41093f9f4ca1dbcebaf6c8e2342ffeef365a74210437ed821",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",
