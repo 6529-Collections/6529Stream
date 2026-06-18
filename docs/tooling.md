@@ -563,6 +563,21 @@ python scripts/generate_release_evidence_live_audit_archive.py --archive-dir rel
 python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check
 ```
 
+For a direct live sync gate against the exact tracker issues linked in
+`release-artifacts/latest/release-evidence-issue-links.json`, run:
+
+```bash
+python scripts/fetch_release_evidence_issue_snapshot.py --output tmp/release-evidence-live-issues.json
+python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-live-issues.json
+python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-live-issues.json
+```
+
+The equivalent Make target is `make release-evidence-live-issue-sync-check`.
+This target is intentionally not part of default CI because it requires
+authenticated GitHub access. It fetches each linked issue with `gh issue view`
+instead of relying on a paginated `gh issue list` export, so stale tracker
+bodies and premature closures cannot hide behind missing list rows.
+
 To audit live GitHub label drift manually, export a snapshot and pass it to the
 checker:
 
@@ -581,11 +596,12 @@ they still match the current backlog and issue-link map. It remains tracker-only
 and does not mark retained evidence complete.
 Run `python scripts/check_release_evidence_issue_bodies.py` to validate the
 committed body-sync payloads. To audit live GitHub body drift without adding
-network access to CI, export a snapshot and pass it to the checker:
+network access to CI, fetch the exact linked issues and pass the snapshot to
+the checker:
 
 ```bash
-python scripts/export_release_evidence_issue_snapshot.py --profile bodies
-python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
+python scripts/fetch_release_evidence_issue_snapshot.py --output tmp/release-evidence-live-issues.json
+python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-live-issues.json
 ```
 
 If drift is reported, generate deterministic remediation files and update the
@@ -600,12 +616,11 @@ Run `python scripts/check_release_evidence_issue_closure.py` to verify the
 committed tracker map, `release-evidence-issue-backlog.json` backlog artifact,
 body-sync artifact, packet index, and shared release evidence status manifest
 agree on which tracker issues may close. To audit live GitHub closure state
-without adding network access to CI, export all linked issue states and pass
-the snapshot to the checker:
+without adding network access to CI, reuse the exact linked-issue snapshot:
 
 ```bash
-python scripts/export_release_evidence_issue_snapshot.py --profile closure
-python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
+python scripts/fetch_release_evidence_issue_snapshot.py --output tmp/release-evidence-live-issues.json
+python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-live-issues.json
 ```
 
 If premature closure is reported, reopen the issue with the remediation command

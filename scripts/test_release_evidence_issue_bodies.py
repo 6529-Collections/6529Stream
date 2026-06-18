@@ -209,6 +209,27 @@ class ReleaseEvidenceIssueBodiesTests(unittest.TestCase):
 
             self.assertEqual(result, 0)
 
+    def test_main_accepts_utf8_bom_snapshot_file(self) -> None:
+        """Windows-exported JSON snapshots with a UTF-8 BOM are accepted."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(root / checker.DEFAULT_BODY_SYNC, body_sync_document())
+            snapshot_path = root / "issue-bodies.json"
+            snapshot_text = json.dumps([snapshot_issue(expected_body())], indent=2) + "\n"
+            snapshot_path.write_text("\ufeff" + snapshot_text, encoding="utf-8")
+
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--live-json",
+                        str(snapshot_path),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+
     def test_main_reports_snapshot_drift(self) -> None:
         """CLI mode reports live/snapshot audit failures without a traceback."""
         with tempfile.TemporaryDirectory() as temp_dir:

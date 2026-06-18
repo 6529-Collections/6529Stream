@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/metadata-browser-evidence-draft-generator` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/554` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/555` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/556` |
-| Next issue | Monitor PR #556, wait for CI and CodeRabbit feedback, fix actionable comments, and merge only when clean. Do not mark `fork_testnet_metadata_browser_evidence` complete without reviewed deployed-contract fork/testnet evidence. |
+| Active PR branch | `codex/release-issue-live-sync-guard` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/556` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/557` |
+| Active PR | `TBD` |
+| Next issue | Add an authenticated live release-evidence tracker sync guard, validate live issue bodies/closure state against committed artifacts, update stale linked tracker bodies if the live gate reports drift, and keep `fork_testnet_metadata_browser_evidence` open until reviewed deployed-contract fork/testnet evidence exists. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 11:06 UTC` |
+| Last updated | `2026-06-18 11:47 UTC` |
 
 ## Packaging Notes
 
@@ -276,6 +276,8 @@ The queue will evolve as PRs merge and bot feedback arrives.
 
 ## Current PR Worklog
 
+| 2026-06-18 11:26 | Start live release-evidence issue sync guard | PR #556 merged as `48bebf720cebb8c738132f86f864b4496f55e060` after latest-head CI and bot feedback were clean; issue #555 closed completed while #218 remains open for real reviewed deployed-contract fork/testnet metadata browser evidence. Live tracker issues #215, #217, #218, and #423 were reopened after their committed evidence rows still showed `missing`. Issue #557 and branch `codex/release-issue-live-sync-guard` now add an authenticated GitHub issue snapshot fetcher plus live body/closure sync gate so future stale tracker bodies or premature closures are caught against the committed release evidence artifacts. |
+| 2026-06-18 11:47 | Validate live release-evidence issue sync guard | Added `scripts/fetch_release_evidence_issue_snapshot.py`, focused tests, BOM-tolerant live body snapshots, `make release-evidence-live-issue-sync-check`, docs, changelog, backlog state, and regenerated release artifacts. The first live run caught stale issue bodies for #218, #423, #221, #222, #223, #224, #225, #226, #228, #229, #473, #424, #230, and #231; updated those live GitHub bodies from deterministic checker output, then reran the authenticated live gate successfully. Local validation passed: focused issue live snapshot/body/closure tests, release issue body/closure checks, Python compile, docs/changelog/release-readiness checks, release artifact verifier, `make release-evidence-live-issue-sync-check`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `codex-diff-check`. |
 | 2026-06-17 00:09 | Start EXT-016 live randomizer operations evidence checker | PR #476 merged as `34ad041344b473fd8328f4b00edb2f83f4c47a39` after CI, CodeRabbit status, and 6529bot follow-up were clean; issue #228 remains open for future reviewed live ceremony evidence. Branch `codex/live-randomizer-operations-evidence-checker` adds a no-secret retained-artifact template and checker for future `live_randomizer_operations_evidence` on issue #229 without changing production-release readiness claims. Next action is to refresh generated release artifacts, run focused and full gates, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 00:30 | Validate EXT-016 local draft | Added `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`, `scripts/check_live_randomizer_operations_evidence.py`, focused checker tests, Makefile/Bash/PowerShell/CI wiring, non-local evidence/tooling/release-readiness/release-artifact docs, packet-index command coverage, release-manifest/checksum coverage, and backlog/run-state traceability. Focused live-randomizer, packet-index, issue-body, release-notes, release-manifest, bytecode-proof, checksum, and whitespace checks passed; full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1` both passed with existing compiler/Foundry warning noise only. Next action is to commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 00:31 | Open PR #477 for EXT-016 | PR #477 is open at `https://github.com/6529-Collections/6529Stream/pull/477`, tracks issue #229 without closing it, and packages the live randomizer operations evidence checker, dedicated retained-artifact template, local/CI/Windows gate wiring, docs, regenerated release evidence, and state updates. CodeRabbit review was requested in comment `4724819738`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |

@@ -25,7 +25,7 @@ class ReleaseEvidenceIssueBodiesError(RuntimeError):
 def load_json(path: Path) -> Any:
     """Load JSON with body-checker-specific errors."""
     try:
-        with path.open("r", encoding="utf-8") as handle:
+        with path.open("r", encoding="utf-8-sig") as handle:
             return json.load(handle)
     except FileNotFoundError as exc:
         raise ReleaseEvidenceIssueBodiesError(f"missing required file: {path}") from exc
@@ -242,7 +242,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "Optional GitHub issue JSON snapshot from "
-            "`gh issue list --json number,title,body,state`."
+            "`python scripts/fetch_release_evidence_issue_snapshot.py --output <path>` "
+            "or `gh issue list --json number,title,body,state`."
         ),
     )
     parser.add_argument(

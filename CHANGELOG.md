@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added an authenticated live release-evidence issue sync gate that fetches the
+  exact linked GitHub tracker issues, checks live body drift and premature
+  closure against committed release artifacts, and tolerates Windows UTF-8 BOM
+  snapshots while keeping the default CI gate network-free.
 - Added a fork/testnet metadata-browser evidence draft generator that converts
   retained browser capture outputs into a checker-compatible pending-review
   evidence bundle, with no-secret validation, deployed-contract assertion, and

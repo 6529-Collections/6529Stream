@@ -159,7 +159,10 @@ Run
 linked tracker issue; that release evidence issue closure readiness check loads
 the tracker map, `release-evidence-issue-backlog.json` backlog artifact,
 body-sync artifact, packet index, and evidence manifest, then keeps issues open
-until committed evidence is `complete` or `accepted_risk`.
+until committed evidence is `complete` or `accepted_risk`. For live GitHub
+state, run `make release-evidence-live-issue-sync-check` with authenticated
+`gh` access; it fetches each linked tracker issue, then validates live issue
+bodies and closure state against the committed release evidence artifacts.
 
 ## Maturity And Scope
 
@@ -474,7 +477,10 @@ The current local baseline includes:
   `python scripts/check_release_evidence_issue_bodies.py`, plus release
   evidence issue closure readiness checks with
   `python scripts/test_release_evidence_issue_closure.py` and
-  `python scripts/check_release_evidence_issue_closure.py`;
+  `python scripts/check_release_evidence_issue_closure.py`, plus an
+  authenticated live tracker sync gate with
+  `python scripts/fetch_release_evidence_issue_snapshot.py` and
+  `make release-evidence-live-issue-sync-check`;
 - non-local release evidence intake requirements, schema, checked template, and
   checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
   [`release-artifacts/schema/non-local-release-evidence.schema.json`](../release-artifacts/schema/non-local-release-evidence.schema.json),

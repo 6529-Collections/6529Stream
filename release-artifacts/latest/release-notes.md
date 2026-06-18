@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added an authenticated live release-evidence issue sync gate that fetches the exact linked GitHub tracker issues, checks live body drift and premature closure against committed release artifacts, and tolerates Windows UTF-8 BOM snapshots while keeping the default CI gate network-free.
 - Added a fork/testnet metadata-browser evidence draft generator that converts retained browser capture outputs into a checker-compatible pending-review evidence bundle, with no-secret validation, deployed-contract assertion, and local/CI/Windows gate coverage while keeping issue #218 blocked until real reviewed fork/testnet evidence is linked.
 - Added retained-output flags to the local metadata browser rehearsal checker so operators can export deterministic browser summary JSON, generated `tokenURI`, and redacted transcript artifacts before future fork/testnet metadata browser evidence review.
 - Added reviewed fork randomizer operations evidence for `fork_testnet_randomizer_operations_evidence`, retaining the mainnet-fork deployment broadcast, fork deployment manifest, fork address book, redacted provider export, fork transaction bundle, post-state request views, and local lifecycle/adversarial/retry/payment/pause/emergency test proof under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.
