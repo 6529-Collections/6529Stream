@@ -232,6 +232,10 @@ contract RandomizerStatefulInvariantHandler is CharacterizationTestBase {
         restoreProvider();
         updateCost(0.01 ether);
         _fundReserve(1 ether);
+        if (requestCount == 0) {
+            (bool initialCreated,) = _requestNext(1000);
+            initialCreated.assertTrue("stateful request coverage");
+        }
 
         (bool fulfilledCreated, uint256 fulfilledRequestId) = _requestNext(1001);
         if (fulfilledCreated) {
@@ -288,6 +292,8 @@ contract RandomizerStatefulInvariantHandler is CharacterizationTestBase {
             request.providerRequestId.assertEq(requestId, "provider request");
             randomizer.requestToToken(requestId).assertEq(tokenId, "request token index");
             randomizer.tokenToRequest(tokenId).assertEq(requestId, "token request index");
+            // The adapter snapshots token collection at request time; later core
+            // drift must not rewrite the recorded request binding.
             randomizer.tokenIdToCollection(tokenId).assertEq(COLLECTION_ID, "token collection");
 
             if (request.state == StreamRandomizerLifecycle.RandomnessRequestState.Pending) {
