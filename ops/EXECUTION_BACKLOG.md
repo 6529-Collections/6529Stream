@@ -3420,7 +3420,7 @@ unless an external dependency changes.
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
 | `CON-007` | Add interface/version views for frontend compatibility | G | Merged in PR #459; issue #458 closed completed |
-| `CON-008` | Recover measured `StreamCore` bytecode headroom with bounded micro-optimizations | D/G | Active issue #577 on branch `codex/streamcore-measured-micro-headroom`; local draft reduces production via-IR `StreamCore` runtime to 21,780 bytes with 2,796 bytes of EIP-170 margin, recovering 404 bytes below the approved 22,184-byte baseline while preserving ABI and release-readiness claims |
+| `CON-008` | Recover measured `StreamCore` bytecode headroom with bounded micro-optimizations | D/G | Active PR #578 / issue #577 on branch `codex/streamcore-measured-micro-headroom`; local draft reduces production via-IR `StreamCore` runtime to 21,780 bytes with 2,796 bytes of EIP-170 margin, recovering 404 bytes below the approved 22,184-byte baseline while preserving ABI and release-readiness claims |
 
 ### 1/1 Product Excellence
 
