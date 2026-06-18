@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:569b113093537ece49c1d31ae41493be451cad5f52e7c90b5e957520dbb43d17",
-      "size_bytes": 65218
+      "sha256": "sha256:e580c0afd066afca6aea9f8b9612170cf559d82f94d343abd50181dc042e1753",
+      "size_bytes": 65595
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:4c717e7ec0f4855b159191c5d94af69d0c8e1d66b9b83d9571756522026ae312",
+      "sha256": "sha256:49ca884f35e448382221f1a81f71245445d0f0f35cdba413df31d9f3763c3879",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added an exact linked-issue mode to the release-evidence issue snapshot exporter so retained live audit reports fetch the committed tracker issue map directly instead of relying on paginated `gh issue list` results, then retained and archived a fresh no-secret live audit report after PR #560 while keeping public beta blocked on the remaining missing evidence rows.",
       "Added reviewed fork/testnet marketplace and indexer evidence for `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental reviewed artifact, equivalent collector/indexer tooling transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",
       "Added reviewed fork metadata browser evidence for `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser summary, generated `tokenURI`, redacted execution transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",
       "Added an authenticated live release-evidence issue sync gate that fetches the exact linked GitHub tracker issues, checks live body drift and premature closure against committed release artifacts, and tolerates Windows UTF-8 BOM snapshots while keeping the default CI gate network-free.",

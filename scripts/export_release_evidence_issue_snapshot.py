@@ -12,9 +12,11 @@ from pathlib import Path
 from typing import Any
 
 from argparse_helpers import positive_int
+import fetch_release_evidence_issue_snapshot as linked_issue_fetcher
 
 
 REPO_FULL_NAME = "6529-Collections/6529Stream"
+DEFAULT_ISSUE_LINKS = Path("release-artifacts/latest/release-evidence-issue-links.json")
 
 PROFILE_FIELDS = {
     "labels": ("number", "title", "labels"),
@@ -129,6 +131,82 @@ def run_gh_issue_list(
     return require_issue_list(parsed)
 
 
+def run_gh_issue_view(
+    gh: str,
+    repo: str,
+    issue_number: int,
+    fields: tuple[str, ...],
+) -> dict[str, Any]:
+    """Run gh issue view for one linked tracker issue."""
+    args = [
+        "issue",
+        "view",
+        str(issue_number),
+        "--repo",
+        repo,
+        "--json",
+        ",".join(fields),
+    ]
+    command = [*resolve_gh_command(gh), *args]
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            encoding="utf-8",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except FileNotFoundError as exc:
+        raise ReleaseEvidenceIssueSnapshotError(
+            f"GitHub CLI executable was not found: {gh}"
+        ) from exc
+
+    if result.returncode != 0:
+        message = result.stderr.strip() or result.stdout.strip() or "unknown error"
+        raise ReleaseEvidenceIssueSnapshotError(
+            f"gh {' '.join(args)} failed: {message}"
+        )
+
+    try:
+        parsed = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ReleaseEvidenceIssueSnapshotError(
+            f"gh issue view returned invalid JSON for #{issue_number}: {exc}"
+        ) from exc
+    if not isinstance(parsed, dict):
+        raise ReleaseEvidenceIssueSnapshotError(
+            f"gh issue view output for #{issue_number} must be a JSON object"
+        )
+    actual_number = parsed.get("number")
+    if actual_number != issue_number:
+        raise ReleaseEvidenceIssueSnapshotError(
+            f"gh returned issue #{actual_number} while fetching #{issue_number}"
+        )
+    return parsed
+
+
+def run_linked_issue_views(
+    *,
+    gh: str,
+    repo: str,
+    repo_root: Path,
+    issue_links: Path,
+    fields: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    """Fetch the exact linked tracker issues for one audit profile."""
+    issue_links_path = (
+        issue_links if issue_links.is_absolute() else repo_root / issue_links
+    )
+    try:
+        issue_numbers = linked_issue_fetcher.load_issue_numbers(issue_links_path)
+    except linked_issue_fetcher.ReleaseEvidenceIssueSnapshotError as exc:
+        raise ReleaseEvidenceIssueSnapshotError(str(exc)) from exc
+    return [
+        run_gh_issue_view(gh, repo, issue_number, fields)
+        for issue_number in issue_numbers
+    ]
+
+
 def write_snapshot(path: Path | None, rows: list[dict[str, Any]]) -> None:
     """Write a snapshot as UTF-8 without a BOM, or stdout when path is None."""
     text = snapshot_text(rows)
@@ -149,12 +227,42 @@ def build_parser() -> argparse.ArgumentParser:
         help="Snapshot profile matching the existing live audit checkers.",
     )
     parser.add_argument("--repo", default=REPO_FULL_NAME)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--issue-links",
+        type=Path,
+        default=DEFAULT_ISSUE_LINKS,
+        help=(
+            "Release-evidence issue-link artifact used with "
+            "--exact-linked-issues."
+        ),
+    )
+    parser.add_argument(
+        "--exact-linked-issues",
+        action="store_true",
+        help=(
+            "Fetch every linked tracker issue with gh issue view instead of "
+            "using a paginated gh issue list result. This mode intentionally "
+            "ignores --state and --limit."
+        ),
+    )
     parser.add_argument(
         "--state",
         choices=("open", "closed", "all"),
-        help="Override the profile's default issue state.",
+        help=(
+            "Override the profile's default issue state for list-based exports. "
+            "Ignored with --exact-linked-issues."
+        ),
     )
-    parser.add_argument("--limit", type=positive_int, default=100)
+    parser.add_argument(
+        "--limit",
+        type=positive_int,
+        default=100,
+        help=(
+            "Maximum issue list rows for list-based exports. Ignored with "
+            "--exact-linked-issues."
+        ),
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -183,7 +291,16 @@ def main(argv: list[str] | None = None) -> int:
     output = None if args.stdout else (args.output or PROFILE_OUTPUTS[args.profile])
 
     try:
-        rows = run_gh_issue_list(args.gh, args.repo, state, args.limit, fields)
+        if args.exact_linked_issues:
+            rows = run_linked_issue_views(
+                gh=args.gh,
+                repo=args.repo,
+                repo_root=args.repo_root.resolve(),
+                issue_links=args.issue_links,
+                fields=fields,
+            )
+        else:
+            rows = run_gh_issue_list(args.gh, args.repo, state, args.limit, fields)
         write_snapshot(output, rows)
     except ReleaseEvidenceIssueSnapshotError as exc:
         print(f"release evidence issue snapshot export failed: {exc}", file=sys.stderr)

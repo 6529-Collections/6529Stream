@@ -1,0 +1,77 @@
+[
+  {
+    "number": 215,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: external_audit_report"
+  },
+  {
+    "number": 217,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: testnet_deployment_rehearsal"
+  },
+  {
+    "number": 221,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: verified_deployed_addresses"
+  },
+  {
+    "number": 222,
+    "state": "OPEN",
+    "title": "Retain public beta evidence: explorer_verification_status"
+  },
+  {
+    "number": 223,
+    "state": "OPEN",
+    "title": "Retain production release evidence: production_signatures"
+  },
+  {
+    "number": 224,
+    "state": "OPEN",
+    "title": "Retain production release evidence: signed_git_tag"
+  },
+  {
+    "number": 225,
+    "state": "OPEN",
+    "title": "Retain production release evidence: production_address_books"
+  },
+  {
+    "number": 226,
+    "state": "OPEN",
+    "title": "Retain production release evidence: production_broadcast_retention"
+  },
+  {
+    "number": 227,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_deployment_manifest"
+  },
+  {
+    "number": 228,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_ceremony_evidence"
+  },
+  {
+    "number": 229,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_randomizer_operations_evidence"
+  },
+  {
+    "number": 473,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_metadata_browser_evidence"
+  },
+  {
+    "number": 424,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_marketplace_indexer_evidence"
+  },
+  {
+    "number": 230,
+    "state": "OPEN",
+    "title": "Retain production release evidence: live_explorer_verification"
+  },
+  {
+    "number": 231,
+    "state": "OPEN",
+    "title": "Retain production release evidence: post_audit_remediation"
+  }
+]

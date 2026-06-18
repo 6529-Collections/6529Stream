@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added an exact linked-issue mode to the release-evidence issue snapshot
+  exporter so retained live audit reports fetch the committed tracker issue
+  map directly instead of relying on paginated `gh issue list` results, then
+  retained and archived a fresh no-secret live audit report after PR #560 while
+  keeping public beta blocked on the remaining missing evidence rows.
 - Added reviewed fork/testnet marketplace and indexer evidence for
   `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental
   reviewed artifact, equivalent collector/indexer tooling transcript,
