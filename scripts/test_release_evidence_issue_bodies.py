@@ -124,6 +124,27 @@ class ReleaseEvidenceIssueBodiesTests(unittest.TestCase):
             {"issues": [snapshot_issue(crlf_body)]},
         )
 
+    def test_accepts_fetcher_live_snapshot_shape(self) -> None:
+        """The authenticated live snapshot helper shape is checker-compatible."""
+        rows = checker.expected_issue_rows(body_sync_document())
+        issue = snapshot_issue(expected_body())
+        issue.update(
+            {
+                "state": "OPEN",
+                "url": "https://github.com/6529-Collections/6529Stream/issues/215",
+                "closed": False,
+                "closedAt": None,
+            }
+        )
+
+        checker.validate_snapshot_bodies(
+            rows,
+            {
+                "schema_version": "6529stream.release-evidence-live-issue-snapshot.v1",
+                "issues": [issue],
+            },
+        )
+
     def test_rejects_missing_issue_in_snapshot(self) -> None:
         """Every generated tracker issue must appear in the audit snapshot."""
         rows = checker.expected_issue_rows(body_sync_document())

@@ -230,7 +230,11 @@ def write_snapshot(path: Path, snapshot: dict[str, Any]) -> None:
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
-        description="Fetch live GitHub release evidence tracker issue JSON"
+        description=(
+            "Fetch live GitHub release evidence tracker issue JSON. "
+            "--repo and --gh are trusted operator inputs, not values derived "
+            "from committed release artifacts."
+        )
     )
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--issue-links", type=Path, default=DEFAULT_ISSUE_LINKS)
@@ -241,7 +245,11 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None,
+    *,
+    run_command: RunCommand = default_run_command,
+) -> int:
     """Fetch and write a live release evidence issue snapshot."""
     args = build_parser().parse_args(argv)
     repo_root = args.repo_root.resolve()
@@ -258,7 +266,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.timeout_seconds,
                 "--timeout-seconds",
             ),
-            run_command=default_run_command,
+            run_command=run_command,
         )
         write_snapshot(output_path, snapshot)
     except ReleaseEvidenceIssueSnapshotError as exc:

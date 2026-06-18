@@ -204,27 +204,60 @@ class ReleaseEvidenceIssueLiveSnapshotTests(unittest.TestCase):
             output = root / "tmp" / "snapshot.json"
             write_json(links, issue_links([215]))
 
-            original = fetcher.default_run_command
-            fetcher.default_run_command = FakeGh({215: gh_issue(215)})
-            try:
-                with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
-                    result = fetcher.main(
-                        [
-                            "--repo-root",
-                            str(root),
-                            "--issue-links",
-                            str(links),
-                            "--output",
-                            str(output),
-                        ]
-                    )
-            finally:
-                fetcher.default_run_command = original
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                result = fetcher.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--issue-links",
+                        str(links),
+                        "--output",
+                        str(output),
+                    ],
+                    run_command=FakeGh({215: gh_issue(215)}),
+                )
 
             data = json.loads(output.read_text(encoding="utf-8"))
 
         self.assertEqual(result, 0)
         self.assertEqual(data["issues"][0]["number"], 215)
+
+    def test_default_run_command_reports_missing_gh(self) -> None:
+        """A missing GitHub CLI gets a user-facing setup error."""
+        original_run = fetcher.subprocess.run
+
+        def missing_gh(*_args: object, **_kwargs: object) -> object:
+            raise FileNotFoundError("gh")
+
+        fetcher.subprocess.run = missing_gh
+        try:
+            with self.assertRaisesRegex(
+                fetcher.ReleaseEvidenceIssueSnapshotError,
+                "install GitHub CLI or pass --gh",
+            ):
+                fetcher.default_run_command(["gh", "issue", "view", "215"], 10)
+        finally:
+            fetcher.subprocess.run = original_run
+
+    def test_default_run_command_reports_timeout(self) -> None:
+        """A timed-out GitHub CLI call fails closed with command context."""
+        original_run = fetcher.subprocess.run
+
+        def timeout(*args: object, **kwargs: object) -> object:
+            raise subprocess.TimeoutExpired(
+                cmd=args[0],
+                timeout=kwargs.get("timeout", 10),
+            )
+
+        fetcher.subprocess.run = timeout
+        try:
+            with self.assertRaisesRegex(
+                fetcher.ReleaseEvidenceIssueSnapshotError,
+                "timed out while fetching issue snapshot",
+            ):
+                fetcher.default_run_command(["gh", "issue", "view", "215"], 10)
+        finally:
+            fetcher.subprocess.run = original_run
 
 
 if __name__ == "__main__":

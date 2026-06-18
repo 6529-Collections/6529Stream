@@ -88,6 +88,26 @@ class ReleaseEvidenceIssueClosureTests(unittest.TestCase):
             {"issues": [snapshot_issue(state="opened")]},
         )
 
+    def test_accepts_fetcher_live_snapshot_shape(self) -> None:
+        """The authenticated live snapshot helper shape is checker-compatible."""
+        issue = snapshot_issue(state="OPEN")
+        issue.update(
+            {
+                "body": "Issue body\n",
+                "url": "https://github.com/6529-Collections/6529Stream/issues/215",
+                "closed": False,
+                "closedAt": None,
+            }
+        )
+
+        checker.validate_snapshot_closure(
+            [expected_row()],
+            {
+                "schema_version": "6529stream.release-evidence-live-issue-snapshot.v1",
+                "issues": [issue],
+            },
+        )
+
     def test_accepts_closed_complete_tracker(self) -> None:
         """Completed evidence rows may have closed tracker issues."""
         checker.validate_snapshot_closure(
