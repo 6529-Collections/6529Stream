@@ -70,6 +70,17 @@ def valid_check_result() -> object:
     )
 
 
+def valid_check_result_with_evidence(**updates: object) -> object:
+    """Return a complete rehearsal browser result with evidence overrides."""
+
+    evidence = valid_evidence()
+    evidence.update(updates)
+    return rehearsal_checker.RehearsalBrowserCheckResult(
+        evidence=evidence,
+        sandbox_result=valid_sandbox_result(),
+    )
+
+
 def word(value: int) -> bytes:
     """Encode an integer as one ABI word."""
 
@@ -299,6 +310,40 @@ class RehearsalMetadataBrowserTests(unittest.TestCase):
                 "Browser Sandbox Result",
                 transcript_path.read_text(encoding="utf-8"),
             )
+
+    def test_rejects_duplicate_capture_output_paths(self) -> None:
+        """Operators cannot accidentally point multiple outputs at one file."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "retained" / "capture.txt"
+
+            with self.assertRaisesRegex(
+                rehearsal_checker.RehearsalMetadataBrowserError,
+                "must be distinct",
+            ):
+                rehearsal_checker.write_capture_outputs(
+                    valid_check_result(),
+                    summary_json=output_path,
+                    token_uri_output=output_path,
+                    transcript_output=None,
+                )
+
+    def test_rejects_secret_shaped_capture_output(self) -> None:
+        """Generated capture outputs are scanned before they are retained."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            transcript_path = Path(temp_dir) / "retained" / "transcript.md"
+
+            with self.assertRaisesRegex(
+                rehearsal_checker.RehearsalMetadataBrowserError,
+                "secret-like",
+            ):
+                rehearsal_checker.write_capture_outputs(
+                    valid_check_result_with_evidence(tokenDataRaw="api_key=hidden"),
+                    summary_json=None,
+                    token_uri_output=None,
+                    transcript_output=transcript_path,
+                )
 
 
 if __name__ == "__main__":

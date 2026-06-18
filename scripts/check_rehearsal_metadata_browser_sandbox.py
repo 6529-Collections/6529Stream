@@ -8,6 +8,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -26,6 +27,25 @@ SPEC.loader.exec_module(sandbox_checker)
 EXPECTED_EVIDENCE_KIND = "local-anvil-deployment-rehearsal"
 EXPECTED_EXTERNAL_SCRIPT_URL = "https://cdn.6529.io/stream/rehearsal.js"
 REHEARSAL_SCRIPT = "script/RehearseMetadataBrowser.s.sol:RehearseMetadataBrowser"
+SECRET_VALUE_RE = re.compile(
+    r"\b("
+    r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
+    r"api[_ -]?key|password|bearer[_ -]?token|"
+    r"unreleased[_ -]?drop[_ -]?payload"
+    r")\s*[:=]",
+    re.IGNORECASE,
+)
+CLI_SECRET_RE = re.compile(
+    r"("
+    r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
+    r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
+    r"\bAuthorization\s*:\s*Bearer\s+\S+|"
+    r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"https?://[^\s`]*(?:alchemy|ankr|blastapi|chainstack|infura|quicknode)[^\s`]*|"
+    r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
+    r")",
+    re.IGNORECASE,
+)
 RETURN_FIELDS = (
     "evidenceKind",
     "chainId",
@@ -395,6 +415,34 @@ def write_json(path: Path, value: object) -> None:
         handle.write("\n")
 
 
+def validate_no_secret_text(label: str, text: str) -> None:
+    """Reject secret-shaped capture output before it is retained."""
+
+    match = SECRET_VALUE_RE.search(text)
+    if match:
+        raise RehearsalMetadataBrowserError(
+            f"{label} contains secret-like key/value text: {match.group(0)}"
+        )
+    match = CLI_SECRET_RE.search(text)
+    if match:
+        raise RehearsalMetadataBrowserError(
+            f"{label} contains secret-like CLI or URL text: {match.group(0)}"
+        )
+
+
+def validate_distinct_output_paths(paths: list[Path]) -> None:
+    """Reject duplicate capture output paths before any file is written."""
+
+    seen: dict[str, Path] = {}
+    for path in paths:
+        key = str(path.resolve()).casefold()
+        if key in seen:
+            raise RehearsalMetadataBrowserError(
+                f"capture output paths must be distinct: {seen[key]} and {path}"
+            )
+        seen[key] = path
+
+
 def write_capture_outputs(
     result: RehearsalBrowserCheckResult,
     *,
@@ -404,15 +452,27 @@ def write_capture_outputs(
 ) -> list[Path]:
     """Write requested retained capture artifacts and return their paths."""
 
+    validate_distinct_output_paths(
+        [path for path in (summary_json, token_uri_output, transcript_output) if path]
+    )
     written: list[Path] = []
     if summary_json is not None:
-        write_json(summary_json, build_capture_summary(result))
+        summary = build_capture_summary(result)
+        validate_no_secret_text(
+            str(summary_json),
+            json.dumps(summary, indent=2, sort_keys=True),
+        )
+        write_json(summary_json, summary)
         written.append(summary_json)
     if token_uri_output is not None:
-        write_text(token_uri_output, str(result.evidence["tokenUri"]) + "\n")
+        token_uri = str(result.evidence["tokenUri"]) + "\n"
+        validate_no_secret_text(str(token_uri_output), token_uri)
+        write_text(token_uri_output, token_uri)
         written.append(token_uri_output)
     if transcript_output is not None:
-        write_text(transcript_output, build_capture_transcript(result))
+        transcript = build_capture_transcript(result)
+        validate_no_secret_text(str(transcript_output), transcript)
+        write_text(transcript_output, transcript)
         written.append(transcript_output)
     return written
 
